@@ -1,0 +1,76 @@
+{
+  "name": "lynxjs-snippets",
+  "displayName": "Shuu",
+  "description": "Available now: VSCode, Cursor AI, Windsurf & Trae AI. + (Firebase Studio) & (+AI).",
+  "version": "0.3.2",
+  "publisher": "bastndev",
+  "license": "MIT",
+  "engines": {
+    "vscode": "^1.43.0"
+  },
+  "categories": [
+    "Snippets"
+  ],
+  "keywords": [
+    "test"
+  ],
+  "icon": "assets/icon.png",
+  "galleryBanner": {
+    "color": "#0a0a0a",
+    "theme": "dark"
+  },
+  "homepage": "https://github.com/bastndev/Shuu#readme",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/bastndev/Shuu"
+  },
+  "bugs": {
+    "url": "https://github.com/bastndev/Shuu/issues"
+  },
+  "author": {
+    "name": "Gohit Bastian",
+    "email": "gobasdev@gmail.com",
+    "url": "https://www.bastndev.com"
+  },
+  "activationEvents": [],
+  "main": "./dist/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "shuu.helloWorld",
+        "title": "Hello World"
+      },
+      {
+        "command": "shuu.toggleMarkdownWrap",
+        "title": "Toggle Markdown Word Wrap"
+      }
+    ],
+    "keybindings": [
+      {
+        "command": "shuu.toggleMarkdownWrap",
+        "key": "f1",
+        "when": "editorTextFocus"
+      }
+    ]
+  },
+  "scripts": {
+    "compile": "npm run check-types && npm run lint && node esbuild.js",
+    "watch": "npm-run-all -p watch:*",
+    "watch:esbuild": "node esbuild.js --watch",
+    "watch:tsc": "tsc --noEmit --watch --project tsconfig.json",
+    "check-types": "tsc --noEmit",
+    "lint": "eslint src"
+  },
+  "devDependencies": {
+    "@types/mocha": "^10.0.10",
+    "@types/node": "20.x",
+    "@types/vscode": "^1.43.0",
+    "@typescript-eslint/eslint-plugin": "^8.32.1",
+    "@typescript-eslint/parser": "^8.32.1",
+    "esbuild": "^0.25.0",
+    "eslint": "^9.21.0",
+    "mocha": "^11.3.0",
+    "npm-run-all": "^4.1.5",
+    "typescript": "^5.7.3"
+  }
+}
