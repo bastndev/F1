@@ -2,56 +2,47 @@
 
 A powerful VSCode extension that provides convenient markdown editing features with keyboard shortcuts.
 
-## Features
-
-- **Hello World Command**: Quick access to extension information
-- **Markdown Word Wrap Toggle**: Easily toggle word wrap for markdown files with a single key press
-
-## Installation
-
-1. Open VSCode
-2. Go to Extensions (Ctrl+Shift+X)
-3. Search for "Shuu"
-4. Click Install
-
-## Usage
-
-### Markdown Word Wrap Toggle
-
-Press `F1` while editing any file to toggle markdown word wrap on/off. This is especially useful when working with long lines in markdown documents.
-
-![Icon](./assets/icon.png)
-
 ## Commands
 
 | Command                   | Description               | Shortcut |
 | ------------------------- | ------------------------- | -------- |
-| `shuu.helloWorld`         | Display welcome message   | -        |
 | `shuu.toggleMarkdownWrap` | Toggle markdown word wrap | `F1`     |
 
-## Configuration
+## Installation
 
-The extension automatically configures markdown files with:
+Launch _Quick Open_
 
-- Format on save: disabled
-- Default formatter: none
-- Word wrap: toggleable
+- <img src="https://www.kernel.org/theme/images/logos/favicon.png" width=16 height=16/> Linux `Ctrl+P`
+- <img src="https://developer.apple.com/favicon.ico" width=16 height=16/> macOS `⌘P`
+- <img src="https://www.microsoft.com/favicon.ico" width=16 height=16/> Windows `Ctrl+P`
 
-## Requirements
+Paste the following command and press `Enter`:
 
-- VSCode version 1.43.0 or higher
-
-## Author
-
-**Gohit Bastian**
-
-- Website: [bastndev.com](https://www.bastndev.com)
-- Email: gobasdev@gmail.com
-
-## License
-
-MIT
+```
+ext install bastndev.shuu
+```
 
 ## Contributing
 
-Visit our [GitHub repository](https://github.com/bastndev/Shuu) to report issues or contribute to the project.
+Suggestions and contributions are welcome! Please refer to the project repository for guidelines: [[>\_ ] code](https://github.com/bastndev/LynxJs-Packge).
+
+| [![bastndev](https://github.com/bastndev.png?size=100)](https://bastndev.com) |
+| :---------------------------------------------------------------------------: |
+|               **[Gohit Bastian](https://github.com/bastndev)**                |
+
+## About Me
+
+- [🐦 X](https://twitter.com/bastndev) - For questions and discussions.
+- 🔴 [Youtube](https://www.youtube.com/@bastndev?sub_confirmation=1) - Code, Software and development insights.
+- 💼 [Linkedin](https://www.linkedin.com/in/bastndev) - Professional networking and career updates.
+
+</br>
+
+| Icon                                                                                                                                                                                                                | Name                                                                  | Description                                                                                                                                     |
+| ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
+| [![Lynx Theme](https://bastndev.gallerycdn.vsassets.io/extensions/bastndev/lynx-theme/0.1.2/1744898058774/Microsoft.VisualStudio.Services.Icons.Default)](https://marketplace.visualstudio.com/items?itemName=bastndev.lynx-theme)                   | [Lynx Theme](https://github.com/bastndev/Lynx-Theme)                  | A sleek, customizable VS Code theme with built‑in support for Cursor‑AI, Windsurf & Trae‑AI integrations.                                       |
+| [![Lynxjs Snippets](https://bastndev.gallerycdn.vsassets.io/extensions/bastndev/lynx-js-snippets/0.2.0/1745166683713/Microsoft.VisualStudio.Services.Icons.Default)](https://marketplace.visualstudio.com/items?itemName=bastndev.lynx-js-snippets) | [Lynxjs Snippets .tsx](https://github.com/bastndev/Lynx-js-Snippets) | A powerful collection of Lynx.js snippets (TypeScript & React) to boost your development workflow.                                              |
+| [![Lynx Keymap](https://raw.githubusercontent.com/bastndev/Lynx-Keymap/refs/heads/main/assets/images/logo.png)](https://marketplace.visualstudio.com/items?itemName=bastndev.lynx-keymap)                                                            | [Lynx Keymap](https://github.com/bastndev/Lynx-Keymap)                | An all‑in‑one toolkit for LynxJS mobile/web development—bundles keymap, snippets & AI tools like Cursor AI, Windsurf, Trae AI, Firebase Studio. |
+
+**Enjoy coding and building amazing projects! [suggestion issue](https://github.com/bastndev/LynxJs-Packge/issues) 🚀 In LynxJS.**
+[MORE](https://marketplace.visualstudio.com/publishers/bastndev)
