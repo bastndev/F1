@@ -1,12 +1,33 @@
 <div align="center">
 
-# 𝙲𝚘𝚖𝚖𝚊𝚗𝚍𝚜
+# F1 Extension - VSCode Productivity Toolkit
 
-</div>
+**Quick toggle commands for enhanced coding experience**
 
-| Command                   | Description               | Shortcut |
-| ------------------------- | ------------------------- | -------- |
-| `shuu.toggleMarkdownWrap` | Toggle markdown word wrap | `F1`     |
+> 🚀 **One-key shortcuts** to control your editor settings instantly
+
+## ⚡ Available Commands
+
+| Key       | Command                       | Description                                   | Status Indicators        |
+| --------- | ----------------------------- | --------------------------------------------- | ------------------------ |
+| `F1`      | **Toggle Word Wrap**          | Enable/disable text wrapping for all files    | 📖 On / 📏 Off           |
+| `Ctrl+F1` | **Toggle Markdown Word Wrap** | Specific word wrap control for markdown files | 📝 On / 🚫 Off           |
+| `F2`      | **Toggle Minimap**            | Show/hide the code minimap                    | 🗺️ On / 🚫 Off           |
+| `Ctrl+F2` | **Toggle Breadcrumbs**        | Show/hide navigation breadcrumbs              | 🍞 On / 🚫 Off           |
+| `F3`      | **Toggle Format on Save**     | Auto-format code when saving files            | ✨ On / 🚫 Off           |
+| `F4`      | **Toggle AI Suggestions**     | Enable/disable AI code completions            | 🤖 On / 🚫 Off           |
+| `F5`      | **Toggle Hover**              | Show/hide hover information                   | 👀 On / 🚫 Off           |
+| `F6`      | **Toggle Code Folding**       | Enable/disable code collapse functionality    | 📁 On / 🚫 Off           |
+| `F7`      | **Toggle Sticky Scroll**      | Keep function headers visible while scrolling | 📌 On / 🚫 Off           |
+| `F8`      | **Toggle Compact Folders**    | Switch between compact/expanded folder view   | 📂 Compact / 📁 Expanded |
+
+## 🎯 Key Features
+
+- **⚡ Instant Toggle**: One-key access to essential editor settings
+- **🎨 Visual Feedback**: Emoji indicators show current status
+- **🔧 Universal Compatibility**: Works across VSCode, Cursor AI, Windsurf & Trae AI
+- **💾 Persistent Settings**: All changes are saved globally
+- **🎪 Productivity Focused**: Streamline your development workflow
 
 ## Installation
 
