@@ -60,6 +60,10 @@
       {
         "command": "shuu.toggleMinimap",
         "title": "Toggle Minimap"
+      },
+      {
+        "command": "shuu.toggleBreadcrumbs",
+        "title": "Toggle Breadcrumbs"
       }
     ],
     "keybindings": [
@@ -76,6 +80,11 @@
       {
         "command": "shuu.toggleMinimap",
         "key": "f2",
+        "when": "editorTextFocus"
+      },
+      {
+        "command": "shuu.toggleBreadcrumbs",
+        "key": "ctrl+f2",
         "when": "editorTextFocus"
       }
     ]

@@ -99,7 +99,36 @@ export function activate(context: vscode.ExtensionContext) {
     }
   );
 
-  context.subscriptions.push(disposable, toggleMarkdownWrap, toggleCodeFormatting, toggleMinimap);
+  // Command to toggle breadcrumbs (Ctrl+F2 key)
+  const toggleBreadcrumbs = vscode.commands.registerCommand(
+    'shuu.toggleBreadcrumbs',
+    async () => {
+      const config = vscode.workspace.getConfiguration();
+      
+      // Get current breadcrumbs setting
+      const currentBreadcrumbs = config.get('breadcrumbs.enabled') as boolean;
+      
+      // Toggle the setting
+      const newBreadcrumbs = !currentBreadcrumbs;
+      
+      // Update configuration globally
+      await config.update(
+        'breadcrumbs.enabled',
+        newBreadcrumbs,
+        vscode.ConfigurationTarget.Global
+      );
+
+      // Show status message
+      const emoji = newBreadcrumbs ? '🍞' : '🚫';
+      const status = newBreadcrumbs ? 'enabled' : 'disabled';
+
+      vscode.window.showInformationMessage(
+        `${emoji} Breadcrumbs ${status}`
+      );
+    }
+  );
+
+  context.subscriptions.push(disposable, toggleMarkdownWrap, toggleCodeFormatting, toggleMinimap, toggleBreadcrumbs);
 }
 
 export function deactivate() {}
