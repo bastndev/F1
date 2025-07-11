@@ -1,29 +1,37 @@
 {
   "name": "f1",
   "displayName": "F1",
-  "description": "Available now: VSCode, Cursor AI, Windsurf & Trae AI. + (Firebase Studio) & (+AI).",
-  "version": "0.0.3",
+  "description": "Toggle essential VS Code features with F1-F12 keys: Word Wrap, Format on Save, Minimap, Breadcrumbs, AI Suggestions, Hover, Sticky Scroll, and Compact Folders. Boost your productivity with quick keyboard shortcuts.",
+  "version": "0.1.0",
   "publisher": "bastndev",
   "license": "MIT",
   "engines": {
     "vscode": "^1.43.0"
   },
   "categories": [
+    "Keymaps",
     "Other"
   ],
   "keywords": [
-    "extension",
     "toggle",
-    "enable",
-    "disable",
-    "formatter",
-    "markdown",
+    "function keys",
+    "f1-f12",
     "word wrap",
-    "productivity",
-    "control",
-    "switch",
+    "format on save",
+    "minimap",
+    "breadcrumbs",
+    "ai suggestions",
+    "hover",
+    "sticky scroll",
     "compact folders",
-    "explorer"
+    "productivity",
+    "keyboard shortcuts",
+    "quick toggle",
+    "editor settings",
+    "workspace",
+    "customization",
+    "efficiency",
+    "developer tools"
   ],
   "icon": "assets/icon.png",
   "galleryBanner": {
@@ -94,46 +102,39 @@
     ],
     "keybindings": [
       {
-        "command": "shuu.toggleMarkdownWrap",
+        "command": "shuu.toggleCodeFormatting",
         "key": "ctrl+f1",
         "when": "editorTextFocus"
       },
       {
-        "command": "shuu.toggleCodeFormatting",
+        "command": "shuu.toggleMarkdownWrap",
         "key": "f1",
         "when": "editorTextFocus"
-      },
-      {
+      },{
         "command": "shuu.toggleFormatOnSave",
         "key": "f2",
         "when": "editorTextFocus"
-      },
-      {
+      },{
         "command": "shuu.toggleStickyScroll",
         "key": "f3",
         "when": "editorTextFocus"
-      },
-      {
+      },{
         "command": "shuu.toggleAISuggestions",
         "key": "f4",
         "when": "editorTextFocus"
-      },
-      {
+      },{
         "command": "shuu.toggleBreadcrumbs",
         "key": "f5",
         "when": "editorTextFocus"
-      },
-      {
+      },{
         "command": "shuu.toggleMinimap",
         "key": "f6",
         "when": "editorTextFocus"
-      },
-      {
+      },{
         "command": "shuu.toggleCompactFolders",
         "key": "f7",
         "when": "editorTextFocus"
-      },
-      {
+      },{
         "command": "shuu.toggleHover",
         "key": "f8",
         "when": "editorTextFocus"
