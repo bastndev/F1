@@ -7,25 +7,20 @@
 > 🚀 **One-key shortcuts** to control your editor settings instantly
 
 ## ⚡ Available Commands
-| Key       | Command                       | Description                                   | Status Indicators        |
-| --------- | ----------------------------- | --------------------------------------------- | ------------------------ |
-| `Ctrl+F1` | **Toggle Markdown Word Wrap** | Specific word wrap control for markdown files | 📝 On / 🚫 Off           |
-| `F1`      | **Toggle Word Wrap**          | Enable/disable text wrapping for all files    | 📖 On / 📏 Off           |
-| `F2`      | **Toggle Format on Save**     | Auto-format code when saving files            | ✨ On / 🚫 Off           |
-| `F3`      | **Toggle Sticky Scroll**      | Keep function headers visible while scrolling | 📌 On / 🚫 Off           |
-| `F4`      | **Toggle AI Suggestions**     | Enable/disable AI code completions            | 🤖 On / 🚫 Off           |
-| `F5`      | **Toggle Breadcrumbs**        | Show/hide navigation breadcrumbs              | 🍞 On / 🚫 Off           |
-| `F6`      | **Toggle Minimap**            | Show/hide the code minimap                    | 🗺️ On / 🚫 Off           |
-| `F7`      | **Toggle Compact Folders**    | Switch between compact/expanded folder view   | 📂 Compact / 📁 Expanded |
-| `F8`      | **Toggle Hover**              | Show/hide hover information                   | 👀 On / 🚫 Off           |
 
-## 🎯 Key Features
+</div>
 
-- **⚡ Instant Toggle**: One-key access to essential editor settings
-- **🎨 Visual Feedback**: Emoji indicators show current status
-- **🔧 Universal Compatibility**: Works across VSCode, Cursor AI, Windsurf & Trae AI
-- **💾 Persistent Settings**: All changes are saved globally
-- **🎪 Productivity Focused**: Streamline your development workflow
+| Key       | Status Indicators        | Description                                   | Command                       |
+| --------- | ------------------------ | --------------------------------------------- | ----------------------------- |
+| `Ctrl+F1` | 📝 On / 🚫 Off           | Specific word wrap control for markdown files | **Toggle Markdown Word Wrap** |
+| `F1`      | 📖 On / 📏 Off           | Enable/disable text wrapping for all files    | **Toggle Word Wrap**          |
+| `F2`      | ✨ On / 🚫 Off           | Auto-format code when saving files            | **Toggle Format on Save**     |
+| `F3`      | 📌 On / 🚫 Off           | Keep function headers visible while scrolling | **Toggle Sticky Scroll**      |
+| `F4`      | 🤖 On / 🚫 Off           | Enable/disable AI code completions            | **Toggle AI Suggestions**     |
+| `F5`      | 🍞 On / 🚫 Off           | Show/hide navigation breadcrumbs              | **Toggle Breadcrumbs**        |
+| `F6`      | 🗺️ On / 🚫 Off           | Show/hide the code minimap                    | **Toggle Minimap**            |
+| `F7`      | 📂 Compact / 📁 Expanded | Switch between compact/expanded folder view   | **Toggle Compact Folders**    |
+| `F8`      | 👀 On / 🚫 Off           | Show/hide hover information                   | **Toggle Hover**              |
 
 ## Installation
 
