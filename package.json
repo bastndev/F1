@@ -2,7 +2,7 @@
   "name": "f1",
   "displayName": "F1",
   "description": "Toggle essential VS Code features with F1-F12 keys: Word Wrap, Format on Save, Minimap, Breadcrumbs, AI Suggestions, Hover, Sticky Scroll, and Compact Folders. Boost your productivity with quick keyboard shortcuts.",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "publisher": "bastndev",
   "license": "MIT",
   "engines": {
