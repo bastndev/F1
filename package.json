@@ -1,8 +1,8 @@
 {
-  "name": "lynxjs-snippets",
-  "displayName": "Shuu",
+  "name": "f1",
+  "displayName": "F1",
   "description": "Available now: VSCode, Cursor AI, Windsurf & Trae AI. + (Firebase Studio) & (+AI).",
-  "version": "0.3.3",
+  "version": "0.0.1",
   "publisher": "bastndev",
   "license": "MIT",
   "engines": {
@@ -28,13 +28,13 @@
     "color": "#0a0a0a",
     "theme": "dark"
   },
-  "homepage": "https://github.com/bastndev/Shuu#readme",
+  "homepage": "https://github.com/bastndev/F1#readme",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/bastndev/Shuu.git"
+    "url": "git+https://github.com/bastndev/F1.git"
   },
   "bugs": {
-    "url": "https://github.com/bastndev/Shuu/issues"
+    "url": "https://github.com/bastndev/F1/issues"
   },
   "author": {
     "name": "Gohit Bastian",
