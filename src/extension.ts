@@ -157,7 +157,75 @@ export function activate(context: vscode.ExtensionContext) {
     }
   );
 
-  context.subscriptions.push(disposable, toggleMarkdownWrap, toggleCodeFormatting, toggleMinimap, toggleBreadcrumbs, toggleFormatOnSave);
+  // Command to toggle AI suggestions (F4 key)
+  const toggleAISuggestions = vscode.commands.registerCommand(
+    'shuu.toggleAISuggestions',
+    async () => {
+      const config = vscode.workspace.getConfiguration();
+      
+      // Get current AI suggestions settings
+      const currentInlineSuggest = config.get('editor.inlineSuggest.enabled') as boolean;
+      const currentCopilotInline = config.get('github.copilot.enable') as any;
+      
+      // Toggle the settings
+      const newInlineSuggest = !currentInlineSuggest;
+      
+      try {
+        // Update inline suggestions (affects most AI assistants)
+        await config.update(
+          'editor.inlineSuggest.enabled',
+          newInlineSuggest,
+          vscode.ConfigurationTarget.Global
+        );
+
+        // Update GitHub Copilot specific settings if available
+        if (currentCopilotInline !== undefined) {
+          await config.update(
+            'github.copilot.enable',
+            {
+              "*": newInlineSuggest,
+              "plaintext": newInlineSuggest,
+              "markdown": newInlineSuggest,
+              "scminput": newInlineSuggest
+            },
+            vscode.ConfigurationTarget.Global
+          );
+        }
+
+        // Also toggle copilot inline suggestions if the setting exists
+        const copilotInlineSuggest = config.get('github.copilot.inlineSuggest.enable');
+        if (copilotInlineSuggest !== undefined) {
+          await config.update(
+            'github.copilot.inlineSuggest.enable',
+            newInlineSuggest,
+            vscode.ConfigurationTarget.Global
+          );
+        }
+
+        // Show status message
+        const emoji = newInlineSuggest ? '🤖' : '🚫';
+        const status = newInlineSuggest ? 'enabled' : 'disabled';
+
+        vscode.window.showInformationMessage(
+          `${emoji} AI suggestions ${status}`
+        );
+      } catch (error) {
+        vscode.window.showErrorMessage(
+          `Error toggling AI suggestions: ${error}`
+        );
+      }
+    }
+  );
+
+  context.subscriptions.push(
+    disposable, 
+    toggleMarkdownWrap, 
+    toggleCodeFormatting, 
+    toggleMinimap, 
+    toggleBreadcrumbs, 
+    toggleFormatOnSave, 
+    toggleAISuggestions
+  );
 }
 
 export function deactivate() {}

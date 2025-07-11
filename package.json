@@ -68,6 +68,10 @@
       {
         "command": "shuu.toggleFormatOnSave",
         "title": "Toggle Format On Save"
+      },
+      {
+        "command": "shuu.toggleAISuggestions",
+        "title": "Toggle AI Suggestions"
       }
     ],
     "keybindings": [
@@ -94,6 +98,11 @@
       {
         "command": "shuu.toggleFormatOnSave",
         "key": "f3",
+        "when": "editorTextFocus"
+      },
+      {
+        "command": "shuu.toggleAISuggestions",
+        "key": "f4",
         "when": "editorTextFocus"
       }
     ]
