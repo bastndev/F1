@@ -8,17 +8,17 @@
 
 </div>
 
-| Key       | Status Indicators        | Description                                                                    |
-| --------- | ------------------------ | ------------------------------------------------------------------------------ |
-| `Ctrl+F1` | 📝 On / 🚫 Off           | Enable/disable markdown word wrap                                             |
-| `F1`      | 📖 On / 📏 Off           | Enable/disable word wrap for all files                                        |
-| `F2`      | ✨ On / 🚫 Off           | Enable/disable automatic code formatting when saving files                    |
-| `F3`      | 📌 On / 🚫 Off           | Enable/disable keeping function headers visible while scrolling               |
-| `F4`      | 🤖 On / 🚫 Off           | Enable/disable AI code suggestions                                            |
-| `F5`      | 🍞 On / 🚫 Off           | Show/hide breadcrumb navigation                                               |
-| `F6`      | 🗺️ On / 🚫 Off           | Show/hide code minimap                                                        |
-| `F7`      | 📂 Compact / 📁 Expanded | Switch between compact/expanded folder view                                   |
-| `F8`      | 👀 On / 🚫 Off           | Show/hide floating information                                                |
+| Key         | Status Indicators        | Description                                                     |
+| ----------- | ------------------------ | --------------------------------------------------------------- |
+| `Ctrl + F1` | 📖 On / 📏 Off           | Enable/disable word wrap for all files                          |
+| `F1`        | 📝 On / 🚫 Off           | Enable/disable markdown word wrap                               |
+| `F2`        | ✨ On / 🚫 Off           | Enable/disable automatic code formatting when saving files      |
+| `F3`        | 📌 On / 🚫 Off           | Enable/disable keeping function headers visible while scrolling |
+| `F4`        | 🤖 On / 🚫 Off           | Enable/disable AI code suggestions                              |
+| `F5`        | 🍞 On / 🚫 Off           | Show/hide breadcrumb navigation                                 |
+| `F6`        | 🗺️ On / 🚫 Off           | Show/hide code minimap                                          |
+| `F7`        | 📂 Compact / 📁 Expanded | Switch between compact/expanded folder view                     |
+| `F8`        | 👀 On / 🚫 Off           | Show/hide floating information                                  |
 
 ## Installation
 

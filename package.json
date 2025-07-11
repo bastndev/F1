@@ -94,46 +94,39 @@
     ],
     "keybindings": [
       {
-        "command": "shuu.toggleMarkdownWrap",
+        "command": "shuu.toggleCodeFormatting",
         "key": "ctrl+f1",
         "when": "editorTextFocus"
       },
       {
-        "command": "shuu.toggleCodeFormatting",
+        "command": "shuu.toggleMarkdownWrap",
         "key": "f1",
         "when": "editorTextFocus"
-      },
-      {
+      },{
         "command": "shuu.toggleFormatOnSave",
         "key": "f2",
         "when": "editorTextFocus"
-      },
-      {
+      },{
         "command": "shuu.toggleStickyScroll",
         "key": "f3",
         "when": "editorTextFocus"
-      },
-      {
+      },{
         "command": "shuu.toggleAISuggestions",
         "key": "f4",
         "when": "editorTextFocus"
-      },
-      {
+      },{
         "command": "shuu.toggleBreadcrumbs",
         "key": "f5",
         "when": "editorTextFocus"
-      },
-      {
+      },{
         "command": "shuu.toggleMinimap",
         "key": "f6",
         "when": "editorTextFocus"
-      },
-      {
+      },{
         "command": "shuu.toggleCompactFolders",
         "key": "f7",
         "when": "editorTextFocus"
-      },
-      {
+      },{
         "command": "shuu.toggleHover",
         "key": "f8",
         "when": "editorTextFocus"
