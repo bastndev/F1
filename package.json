@@ -21,9 +21,11 @@
     "word wrap",
     "productivity",
     "control",
-    "switch"
+    "switch",
+    "compact folders",
+    "explorer"
   ],
-  "icon": "assets/icon.png",
+  "icon": "icon.png",
   "galleryBanner": {
     "color": "#0a0a0a",
     "theme": "dark"
@@ -46,18 +48,94 @@
   "contributes": {
     "commands": [
       {
+        "command": "shuu.toggleMarkdownWrap",
+        "title": "Toggle Markdown Word Wrap"
+      },
+      {
+        "command": "shuu.toggleCodeFormatting",
+        "title": "Toggle Word Wrap"
+      },
+      {
+        "command": "shuu.toggleFormatOnSave",
+        "title": "Toggle Format On Save"
+      },
+      {
+        "command": "shuu.toggleStickyScroll",
+        "title": "Toggle Sticky Scroll"
+      },
+      {
+        "command": "shuu.toggleAISuggestions",
+        "title": "Toggle AI Suggestions"
+      },
+      {
+        "command": "shuu.toggleBreadcrumbs",
+        "title": "Toggle Breadcrumbs"
+      },
+      {
+        "command": "shuu.toggleMinimap",
+        "title": "Toggle Minimap"
+      },
+      {
+        "command": "shuu.toggleCompactFolders",
+        "title": "Toggle Compact Folders"
+      },
+      {
+        "command": "shuu.toggleHover",
+        "title": "Toggle Hover"
+      },
+      {
         "command": "shuu.helloWorld",
         "title": "Hello World"
       },
       {
-        "command": "shuu.toggleMarkdownWrap",
-        "title": "Toggle Markdown Word Wrap"
+        "command": "shuu.toggleFolding",
+        "title": "Toggle Code Folding"
       }
     ],
     "keybindings": [
       {
         "command": "shuu.toggleMarkdownWrap",
+        "key": "ctrl+f1",
+        "when": "editorTextFocus"
+      },
+      {
+        "command": "shuu.toggleCodeFormatting",
         "key": "f1",
+        "when": "editorTextFocus"
+      },
+      {
+        "command": "shuu.toggleFormatOnSave",
+        "key": "f2",
+        "when": "editorTextFocus"
+      },
+      {
+        "command": "shuu.toggleStickyScroll",
+        "key": "f3",
+        "when": "editorTextFocus"
+      },
+      {
+        "command": "shuu.toggleAISuggestions",
+        "key": "f4",
+        "when": "editorTextFocus"
+      },
+      {
+        "command": "shuu.toggleBreadcrumbs",
+        "key": "f5",
+        "when": "editorTextFocus"
+      },
+      {
+        "command": "shuu.toggleMinimap",
+        "key": "f6",
+        "when": "editorTextFocus"
+      },
+      {
+        "command": "shuu.toggleCompactFolders",
+        "key": "f7",
+        "when": "editorTextFocus"
+      },
+      {
+        "command": "shuu.toggleHover",
+        "key": "f8",
         "when": "editorTextFocus"
       }
     ]
