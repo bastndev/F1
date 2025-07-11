@@ -217,6 +217,93 @@ export function activate(context: vscode.ExtensionContext) {
     }
   );
 
+  // Command to toggle hover (F5 key)
+  const toggleHover = vscode.commands.registerCommand(
+    'shuu.toggleHover',
+    async () => {
+      const config = vscode.workspace.getConfiguration();
+      
+      // Get current hover setting
+      const currentHover = config.get('editor.hover.enabled') as boolean;
+      
+      // Toggle the setting
+      const newHover = !currentHover;
+      
+      // Update configuration globally
+      await config.update(
+        'editor.hover.enabled',
+        newHover,
+        vscode.ConfigurationTarget.Global
+      );
+
+      // Show status message
+      const emoji = newHover ? '👀' : '🚫';
+      const status = newHover ? 'enabled' : 'disabled';
+
+      vscode.window.showInformationMessage(
+        `${emoji} Hover ${status}`
+      );
+    }
+  );
+
+  // Command to toggle folding (F6 key)
+  const toggleFolding = vscode.commands.registerCommand(
+    'shuu.toggleFolding',
+    async () => {
+      const config = vscode.workspace.getConfiguration();
+      
+      // Get current folding setting
+      const currentFolding = config.get('editor.folding') as boolean;
+      
+      // Toggle the setting
+      const newFolding = !currentFolding;
+      
+      // Update configuration globally
+      await config.update(
+        'editor.folding',
+        newFolding,
+        vscode.ConfigurationTarget.Global
+      );
+
+      // Show status message
+      const emoji = newFolding ? '📁' : '🚫';
+      const status = newFolding ? 'enabled' : 'disabled';
+
+      vscode.window.showInformationMessage(
+        `${emoji} Code folding ${status}`
+      );
+    }
+  );
+
+  // Command to toggle sticky scroll (F7 key)
+  const toggleStickyScroll = vscode.commands.registerCommand(
+    'shuu.toggleStickyScroll',
+    async () => {
+      const config = vscode.workspace.getConfiguration();
+      
+      // Get current sticky scroll setting
+      const currentStickyScroll = config.get('editor.stickyScroll.enabled') as boolean;
+      
+      // Toggle the setting
+      const newStickyScroll = !currentStickyScroll;
+      
+      // Update configuration globally
+      await config.update(
+        'editor.stickyScroll.enabled',
+        newStickyScroll,
+        vscode.ConfigurationTarget.Global
+      );
+
+      // Show status message
+      const emoji = newStickyScroll ? '📌' : '🚫';
+      const status = newStickyScroll ? 'enabled' : 'disabled';
+
+      vscode.window.showInformationMessage(
+        `${emoji} Sticky scroll ${status}`
+      );
+    }
+  );
+
   context.subscriptions.push(
     disposable, 
     toggleMarkdownWrap, 
@@ -224,7 +311,10 @@ export function activate(context: vscode.ExtensionContext) {
     toggleMinimap, 
     toggleBreadcrumbs, 
     toggleFormatOnSave, 
-    toggleAISuggestions
+    toggleAISuggestions,
+    toggleHover,
+    toggleFolding,
+    toggleStickyScroll
   );
 }
 

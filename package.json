@@ -46,64 +46,91 @@
   "contributes": {
     "commands": [
       {
-        "command": "shuu.helloWorld",
-        "title": "Hello World"
+      "command": "shuu.helloWorld",
+      "title": "Hello World"
       },
       {
-        "command": "shuu.toggleMarkdownWrap",
-        "title": "Toggle Markdown Word Wrap"
+      "command": "shuu.toggleMarkdownWrap",
+      "title": "Toggle Markdown Word Wrap"
       },
       {
-        "command": "shuu.toggleCodeFormatting",
-        "title": "Toggle Word Wrap"
+      "command": "shuu.toggleCodeFormatting",
+      "title": "Toggle Word Wrap"
       },
       {
-        "command": "shuu.toggleMinimap",
-        "title": "Toggle Minimap"
+      "command": "shuu.toggleMinimap",
+      "title": "Toggle Minimap"
       },
       {
-        "command": "shuu.toggleBreadcrumbs",
-        "title": "Toggle Breadcrumbs"
+      "command": "shuu.toggleBreadcrumbs",
+      "title": "Toggle Breadcrumbs"
       },
       {
-        "command": "shuu.toggleFormatOnSave",
-        "title": "Toggle Format On Save"
+      "command": "shuu.toggleFormatOnSave",
+      "title": "Toggle Format On Save"
       },
       {
-        "command": "shuu.toggleAISuggestions",
-        "title": "Toggle AI Suggestions"
+      "command": "shuu.toggleAISuggestions",
+      "title": "Toggle AI Suggestions"
+      },
+      {
+      "command": "shuu.toggleHover",
+      "title": "Toggle Hover"
+      },
+      {
+      "command": "shuu.toggleFolding",
+      "title": "Toggle Code Folding"
+      },
+      {
+      "command": "shuu.toggleStickyScroll",
+      "title": "Toggle Sticky Scroll"
       }
     ],
     "keybindings": [
       {
-        "command": "shuu.toggleMarkdownWrap",
-        "key": "ctrl+f1",
-        "when": "editorTextFocus"
+      "command": "shuu.toggleMarkdownWrap",
+      "key": "ctrl+f1",
+      "when": "editorTextFocus"
       },
       {
-        "command": "shuu.toggleCodeFormatting",
-        "key": "f1",
-        "when": "editorTextFocus"
+      "command": "shuu.toggleCodeFormatting",
+      "key": "f1",
+      "when": "editorTextFocus"
       },
       {
-        "command": "shuu.toggleMinimap",
-        "key": "f2",
-        "when": "editorTextFocus"
+      "command": "shuu.toggleMinimap",
+      "key": "f2",
+      "when": "editorTextFocus"
       },
       {
-        "command": "shuu.toggleBreadcrumbs",
-        "key": "ctrl+f2",
-        "when": "editorTextFocus"
+      "command": "shuu.toggleBreadcrumbs",
+      "key": "ctrl+f2",
+      "when": "editorTextFocus"
       },
       {
-        "command": "shuu.toggleFormatOnSave",
-        "key": "f3",
-        "when": "editorTextFocus"
+      "command": "shuu.toggleFormatOnSave",
+      "key": "f3",
+      "when": "editorTextFocus"
       },
       {
-        "command": "shuu.toggleAISuggestions",
-        "key": "f4",
-        "when": "editorTextFocus"
+      "command": "shuu.toggleAISuggestions",
+      "key": "f4",
+      "when": "editorTextFocus"
+      },
+      {
+      "command": "shuu.toggleHover",
+      "key": "f5",
+      "when": "editorTextFocus"
+      },
+      {
+      "command": "shuu.toggleFolding",
+      "key": "f6",
+      "when": "editorTextFocus"
+      },
+      {
+      "command": "shuu.toggleStickyScroll",
+      "key": "f7",
+      "when": "editorTextFocus"
       }
     ]
   },
