@@ -2,7 +2,7 @@
   "name": "f1",
   "displayName": "F1",
   "description": "Available now: VSCode, Cursor AI, Windsurf & Trae AI. + (Firebase Studio) & (+AI).",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "publisher": "bastndev",
   "license": "MIT",
   "engines": {
@@ -25,7 +25,7 @@
     "compact folders",
     "explorer"
   ],
-  "icon": "icon.png",
+  "icon": "assets/icon.png",
   "galleryBanner": {
     "color": "#0a0a0a",
     "theme": "dark"
