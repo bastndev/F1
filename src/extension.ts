@@ -304,6 +304,35 @@ export function activate(context: vscode.ExtensionContext) {
     }
   );
 
+  // Command to toggle compact folders (F8 key)
+  const toggleCompactFolders = vscode.commands.registerCommand(
+    'shuu.toggleCompactFolders',
+    async () => {
+      const config = vscode.workspace.getConfiguration();
+      
+      // Get current compact folders setting
+      const currentCompactFolders = config.get('explorer.compactFolders') as boolean;
+      
+      // Toggle the setting
+      const newCompactFolders = !currentCompactFolders;
+      
+      // Update configuration globally
+      await config.update(
+        'explorer.compactFolders',
+        newCompactFolders,
+        vscode.ConfigurationTarget.Global
+      );
+
+      // Show status message
+      const emoji = newCompactFolders ? '📂' : '📁';
+      const status = newCompactFolders ? 'enabled (compact)' : 'disabled (expanded)';
+
+      vscode.window.showInformationMessage(
+        `${emoji} Compact folders ${status}`
+      );
+    }
+  );
+
   context.subscriptions.push(
     disposable, 
     toggleMarkdownWrap, 
@@ -314,7 +343,8 @@ export function activate(context: vscode.ExtensionContext) {
     toggleAISuggestions,
     toggleHover,
     toggleFolding,
-    toggleStickyScroll
+    toggleStickyScroll,
+    toggleCompactFolders
   );
 }
 
