@@ -2,7 +2,7 @@
   "name": "f1",
   "displayName": "F1",
   "description": "Available now: VSCode, Cursor AI, Windsurf & Trae AI. + (Firebase Studio) & (+AI).",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "publisher": "bastndev",
   "license": "MIT",
   "engines": {
