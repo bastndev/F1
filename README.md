@@ -7,19 +7,17 @@
 > 🚀 **One-key shortcuts** to control your editor settings instantly
 
 ## ⚡ Available Commands
-
 | Key       | Command                       | Description                                   | Status Indicators        |
 | --------- | ----------------------------- | --------------------------------------------- | ------------------------ |
-| `F1`      | **Toggle Word Wrap**          | Enable/disable text wrapping for all files    | 📖 On / 📏 Off           |
 | `Ctrl+F1` | **Toggle Markdown Word Wrap** | Specific word wrap control for markdown files | 📝 On / 🚫 Off           |
-| `F2`      | **Toggle Minimap**            | Show/hide the code minimap                    | 🗺️ On / 🚫 Off           |
-| `Ctrl+F2` | **Toggle Breadcrumbs**        | Show/hide navigation breadcrumbs              | 🍞 On / 🚫 Off           |
-| `F3`      | **Toggle Format on Save**     | Auto-format code when saving files            | ✨ On / 🚫 Off           |
+| `F1`      | **Toggle Word Wrap**          | Enable/disable text wrapping for all files    | 📖 On / 📏 Off           |
+| `F2`      | **Toggle Format on Save**     | Auto-format code when saving files            | ✨ On / 🚫 Off           |
+| `F3`      | **Toggle Sticky Scroll**      | Keep function headers visible while scrolling | 📌 On / 🚫 Off           |
 | `F4`      | **Toggle AI Suggestions**     | Enable/disable AI code completions            | 🤖 On / 🚫 Off           |
-| `F5`      | **Toggle Hover**              | Show/hide hover information                   | 👀 On / 🚫 Off           |
-| `F6`      | **Toggle Code Folding**       | Enable/disable code collapse functionality    | 📁 On / 🚫 Off           |
-| `F7`      | **Toggle Sticky Scroll**      | Keep function headers visible while scrolling | 📌 On / 🚫 Off           |
-| `F8`      | **Toggle Compact Folders**    | Switch between compact/expanded folder view   | 📂 Compact / 📁 Expanded |
+| `F5`      | **Toggle Breadcrumbs**        | Show/hide navigation breadcrumbs              | 🍞 On / 🚫 Off           |
+| `F6`      | **Toggle Minimap**            | Show/hide the code minimap                    | 🗺️ On / 🚫 Off           |
+| `F7`      | **Toggle Compact Folders**    | Switch between compact/expanded folder view   | 📂 Compact / 📁 Expanded |
+| `F8`      | **Toggle Hover**              | Show/hide hover information                   | 👀 On / 🚫 Off           |
 
 ## 🎯 Key Features
 
