@@ -56,6 +56,10 @@
       {
         "command": "shuu.toggleCodeFormatting",
         "title": "Toggle Word Wrap"
+      },
+      {
+        "command": "shuu.toggleMinimap",
+        "title": "Toggle Minimap"
       }
     ],
     "keybindings": [
@@ -67,6 +71,11 @@
       {
         "command": "shuu.toggleCodeFormatting",
         "key": "f1",
+        "when": "editorTextFocus"
+      },
+      {
+        "command": "shuu.toggleMinimap",
+        "key": "f2",
         "when": "editorTextFocus"
       }
     ]

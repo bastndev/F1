@@ -70,7 +70,36 @@ export function activate(context: vscode.ExtensionContext) {
     }
   );
 
-  context.subscriptions.push(disposable, toggleMarkdownWrap, toggleCodeFormatting);
+  // Command to toggle minimap (F2 key)
+  const toggleMinimap = vscode.commands.registerCommand(
+    'shuu.toggleMinimap',
+    async () => {
+      const config = vscode.workspace.getConfiguration();
+      
+      // Get current minimap setting
+      const currentMinimap = config.get('editor.minimap.enabled') as boolean;
+      
+      // Toggle the setting
+      const newMinimap = !currentMinimap;
+      
+      // Update configuration globally
+      await config.update(
+        'editor.minimap.enabled',
+        newMinimap,
+        vscode.ConfigurationTarget.Global
+      );
+
+      // Show status message
+      const emoji = newMinimap ? '🗺️' : '🚫';
+      const status = newMinimap ? 'enabled' : 'disabled';
+
+      vscode.window.showInformationMessage(
+        `${emoji} Minimap ${status}`
+      );
+    }
+  );
+
+  context.subscriptions.push(disposable, toggleMarkdownWrap, toggleCodeFormatting, toggleMinimap);
 }
 
 export function deactivate() {}
