@@ -41,7 +41,36 @@ export function activate(context: vscode.ExtensionContext) {
     }
   );
 
-  context.subscriptions.push(disposable, toggleMarkdownWrap);
+  // Command to toggle word wrap for all files (F1 key)
+  const toggleCodeFormatting = vscode.commands.registerCommand(
+    'shuu.toggleCodeFormatting',
+    async () => {
+      const config = vscode.workspace.getConfiguration();
+      
+      // Get current wordWrap setting for all editors
+      const currentWordWrap = config.get('editor.wordWrap') as string;
+      
+      // Toggle between 'on' and 'off'
+      const newWordWrap = currentWordWrap === 'off' ? 'on' : 'off';
+      
+      // Update configuration globally
+      await config.update(
+        'editor.wordWrap',
+        newWordWrap,
+        vscode.ConfigurationTarget.Global
+      );
+
+      // Show status message
+      const emoji = newWordWrap === 'on' ? '📖' : '📏';
+      const status = newWordWrap === 'on' ? 'enabled' : 'disabled';
+
+      vscode.window.showInformationMessage(
+        `${emoji} Word wrap ${status}`
+      );
+    }
+  );
+
+  context.subscriptions.push(disposable, toggleMarkdownWrap, toggleCodeFormatting);
 }
 
 export function deactivate() {}

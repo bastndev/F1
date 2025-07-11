@@ -52,12 +52,21 @@
       {
         "command": "shuu.toggleMarkdownWrap",
         "title": "Toggle Markdown Word Wrap"
+      },
+      {
+        "command": "shuu.toggleCodeFormatting",
+        "title": "Toggle Word Wrap"
       }
     ],
     "keybindings": [
       {
         "command": "shuu.toggleMarkdownWrap",
         "key": "ctrl+f1",
+        "when": "editorTextFocus"
+      },
+      {
+        "command": "shuu.toggleCodeFormatting",
+        "key": "f1",
         "when": "editorTextFocus"
       }
     ]
