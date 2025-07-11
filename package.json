@@ -57,7 +57,7 @@
     "keybindings": [
       {
         "command": "shuu.toggleMarkdownWrap",
-        "key": "f1",
+        "key": "ctrl+f1",
         "when": "editorTextFocus"
       }
     ]
