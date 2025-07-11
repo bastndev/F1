@@ -4,9 +4,16 @@
 
 > 🚀 **One-key shortcuts** to control your editor settings instantly
 
-## ⚡ Available Commands
-
 </div>
+
+<p align="center">
+    <a href="https://marketplace.visualstudio.com/items?itemName=bastndev.f1"><img src="https://vsmarketplacebadges.dev/version-short/bastndev.f1.jpg?style=for-the-badge&colorA=ffdd00&colorB=00933b&label=VERSION" alt="Version"></a>&nbsp;
+    <a href="https://marketplace.visualstudio.com/items?itemName=bastndev.f1"><img src="https://vsmarketplacebadges.dev/rating-short/bastndev.f1.jpg?style=for-the-badge&colorA=ffdd00&colorB=00933b&label=RATING" alt="Rating"></a>&nbsp;
+    <a href="https://marketplace.visualstudio.com/items?itemName=bastndev.f1"><img src="https://vsmarketplacebadges.dev/installs-short/bastndev.f1.jpg?style=for-the-badge&colorA=ffdd00&colorB=00933b&label=INSTALLS" alt="Installs"></a>&nbsp;
+    <a href="https://github.com/sponsors/bastndev"><img src="https://raw.githubusercontent.com/bastndev/Lynx-Theme/main/assets/images/sponsor.png" width="30px" alt="Sponsor Github"></a>
+</p>
+
+## Available ⚡ Commands
 
 | Key         | Status Indicators        | Description                                                     |
 | ----------- | ------------------------ | --------------------------------------------------------------- |
