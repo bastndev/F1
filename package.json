@@ -64,6 +64,10 @@
       {
         "command": "shuu.toggleBreadcrumbs",
         "title": "Toggle Breadcrumbs"
+      },
+      {
+        "command": "shuu.toggleFormatOnSave",
+        "title": "Toggle Format On Save"
       }
     ],
     "keybindings": [
@@ -85,6 +89,11 @@
       {
         "command": "shuu.toggleBreadcrumbs",
         "key": "ctrl+f2",
+        "when": "editorTextFocus"
+      },
+      {
+        "command": "shuu.toggleFormatOnSave",
+        "key": "f3",
         "when": "editorTextFocus"
       }
     ]

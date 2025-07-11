@@ -128,7 +128,36 @@ export function activate(context: vscode.ExtensionContext) {
     }
   );
 
-  context.subscriptions.push(disposable, toggleMarkdownWrap, toggleCodeFormatting, toggleMinimap, toggleBreadcrumbs);
+  // Command to toggle format on save (F3 key)
+  const toggleFormatOnSave = vscode.commands.registerCommand(
+    'shuu.toggleFormatOnSave',
+    async () => {
+      const config = vscode.workspace.getConfiguration();
+      
+      // Get current formatOnSave setting
+      const currentFormatOnSave = config.get('editor.formatOnSave') as boolean;
+      
+      // Toggle the setting
+      const newFormatOnSave = !currentFormatOnSave;
+      
+      // Update configuration globally
+      await config.update(
+        'editor.formatOnSave',
+        newFormatOnSave,
+        vscode.ConfigurationTarget.Global
+      );
+
+      // Show status message
+      const emoji = newFormatOnSave ? '✨' : '🚫';
+      const status = newFormatOnSave ? 'enabled' : 'disabled';
+
+      vscode.window.showInformationMessage(
+        `${emoji} Format on save ${status}`
+      );
+    }
+  );
+
+  context.subscriptions.push(disposable, toggleMarkdownWrap, toggleCodeFormatting, toggleMinimap, toggleBreadcrumbs, toggleFormatOnSave);
 }
 
 export function deactivate() {}
