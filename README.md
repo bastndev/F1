@@ -4,12 +4,10 @@
 
 > 🚀 **One-key shortcuts** to control your editor settings instantly
 
-</div>
-
 <p align="center">
-    <a href="https://marketplace.visualstudio.com/items?itemName=bastndev.f1"><img src="https://vsmarketplacebadges.dev/version-short/bastndev.f1.jpg?style=for-the-badge&colorA=ffdd00&colorB=00933b&label=VERSION" alt="Version"></a>&nbsp;
-    <a href="https://marketplace.visualstudio.com/items?itemName=bastndev.f1"><img src="https://vsmarketplacebadges.dev/rating-short/bastndev.f1.jpg?style=for-the-badge&colorA=ffdd00&colorB=00933b&label=RATING" alt="Rating"></a>&nbsp;
-    <a href="https://marketplace.visualstudio.com/items?itemName=bastndev.f1"><img src="https://vsmarketplacebadges.dev/installs-short/bastndev.f1.jpg?style=for-the-badge&colorA=ffdd00&colorB=00933b&label=INSTALLS" alt="Installs"></a>&nbsp;
+    <a href="https://marketplace.visualstudio.com/items?itemName=bastndev.f1"><img src="https://vsmarketplacebadges.dev/version-short/bastndev.f1.jpg?style=for-the-badge&colorA=ffffff&colorB=000000&label=VERSION" alt="Version"></a>&nbsp;
+    <a href="https://marketplace.visualstudio.com/items?itemName=bastndev.f1"><img src="https://vsmarketplacebadges.dev/rating-short/bastndev.f1.jpg?style=for-the-badge&colorA=ffffff&colorB=000000&label=RATING" alt="Rating"></a>&nbsp;
+    <a href="https://marketplace.visualstudio.com/items?itemName=bastndev.f1"><img src="https://vsmarketplacebadges.dev/installs-short/bastndev.f1.jpg?style=for-the-badge&colorA=ffffff&colorB=000000&label=INSTALLS" alt="Installs"></a>&nbsp;
     <a href="https://github.com/sponsors/bastndev"><img src="https://raw.githubusercontent.com/bastndev/Lynx-Theme/main/assets/images/sponsor.png" width="30px" alt="Sponsor Github"></a>
 </p>
 
@@ -17,15 +15,16 @@
 
 | Key         | Status Indicators        | Description                                                     |
 | ----------- | ------------------------ | --------------------------------------------------------------- |
-| `Ctrl + F1` | 📖 On / 📏 Off           | Enable/disable word wrap for all files                          |
-| `F1`        | 📝 On / 🚫 Off           | Enable/disable markdown word wrap                               |
-| `F2`        | ✨ On / 🚫 Off           | Enable/disable automatic code formatting when saving files      |
-| `F3`        | 📌 On / 🚫 Off           | Enable/disable keeping function headers visible while scrolling |
+| `F1`        | 📖 On / 📏 Off           | Enable/disable word wrap for all files                          |
+| `F2`        | 🗺️ On / 🚫 Off           | Show/hide code minimap                                          |
+| `F3`        | ✨ On / 🚫 Off           | Enable/disable automatic code formatting when saving files      |
 | `F4`        | 🤖 On / 🚫 Off           | Enable/disable AI code suggestions                              |
-| `F5`        | 🍞 On / 🚫 Off           | Show/hide breadcrumb navigation                                 |
-| `F6`        | 🗺️ On / 🚫 Off           | Show/hide code minimap                                          |
-| `F7`        | 📂 Compact / 📁 Expanded | Switch between compact/expanded folder view                     |
-| `F8`        | 👀 On / 🚫 Off           | Show/hide floating information                                  |
+| `F5`        | 👀 On / 🚫 Off           | Show/hide floating information                                  |
+| `F6`        | 📁 On / 🚫 Off           | Enable/disable code folding                                     |
+| `F7`        | 📌 On / 🚫 Off           | Enable/disable keeping function headers visible while scrolling |
+| `F8`        | 📂 Compact / 📁 Expanded | Switch between compact/expanded folder view                     |
+| `Ctrl + F1` | 📝 On / 🚫 Off           | Enable/disable markdown word wrap                               |
+| `Ctrl + F2` | 🍞 On / 🚫 Off           | Show/hide breadcrumb navigation                                 |
 
 ## Installation
 
