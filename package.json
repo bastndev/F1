@@ -73,6 +73,15 @@
         }
       ]
     },
+    "menus": {
+      "view/title": [
+        {
+          "command": "f1.refreshStatus",
+          "when": "view == f1-toggles",
+          "group": "navigation"
+        }
+      ]
+    },
     "commands": [
       {
         "command": "shuu.toggleMarkdownWrap",
@@ -117,45 +126,62 @@
       {
         "command": "shuu.toggleFolding",
         "title": "Toggle Code Folding"
+      },
+      {
+        "command": "f1.refreshStatus",
+        "title": "Refresh Status",
+        "icon": "$(refresh)"
       }
     ],
     "keybindings": [
       {
         "command": "shuu.toggleCodeFormatting",
-        "key": "ctrl+f1",
+        "key": "f1",
+        "when": "editorTextFocus"
+      },
+      {
+        "command": "shuu.toggleMinimap",
+        "key": "f2",
+        "when": "editorTextFocus"
+      },
+      {
+        "command": "shuu.toggleFormatOnSave",
+        "key": "f3",
+        "when": "editorTextFocus"
+      },
+      {
+        "command": "shuu.toggleAISuggestions",
+        "key": "f4",
+        "when": "editorTextFocus"
+      },
+      {
+        "command": "shuu.toggleHover",
+        "key": "f5",
+        "when": "editorTextFocus"
+      },
+      {
+        "command": "shuu.toggleFolding",
+        "key": "f6",
+        "when": "editorTextFocus"
+      },
+      {
+        "command": "shuu.toggleStickyScroll",
+        "key": "f7",
+        "when": "editorTextFocus"
+      },
+      {
+        "command": "shuu.toggleCompactFolders",
+        "key": "f8",
+        "when": "editorTextFocus"
+      },
+      {
+        "command": "shuu.toggleBreadcrumbs",
+        "key": "ctrl+f2",
         "when": "editorTextFocus"
       },
       {
         "command": "shuu.toggleMarkdownWrap",
-        "key": "f1",
-        "when": "editorTextFocus"
-      },{
-        "command": "shuu.toggleFormatOnSave",
-        "key": "f2",
-        "when": "editorTextFocus"
-      },{
-        "command": "shuu.toggleStickyScroll",
-        "key": "f3",
-        "when": "editorTextFocus"
-      },{
-        "command": "shuu.toggleAISuggestions",
-        "key": "f4",
-        "when": "editorTextFocus"
-      },{
-        "command": "shuu.toggleBreadcrumbs",
-        "key": "f5",
-        "when": "editorTextFocus"
-      },{
-        "command": "shuu.toggleMinimap",
-        "key": "f6",
-        "when": "editorTextFocus"
-      },{
-        "command": "shuu.toggleCompactFolders",
-        "key": "f7",
-        "when": "editorTextFocus"
-      },{
-        "command": "shuu.toggleHover",
-        "key": "f8",
+        "key": "ctrl+f1",
         "when": "editorTextFocus"
       }
     ]
