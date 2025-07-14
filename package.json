@@ -54,6 +54,25 @@
   "activationEvents": [],
   "main": "./dist/extension.js",
   "contributes": {
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "f1-functions", 
+          "title": "F1",
+          "icon": "assets/images/logo/f1.svg"
+        }
+      ]
+    },
+    "views": {
+      "f1-functions": [
+        {
+          "id": "f1-toggles",
+          "name": "Function Keys",
+          "icon": "$(list-ordered)",
+          "when": "true"
+        }
+      ]
+    },
     "commands": [
       {
         "command": "shuu.toggleMarkdownWrap",
