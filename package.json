@@ -1,21 +1,20 @@
 {
   "name": "f1",
   "displayName": "F1",
-  "description": "Toggle essential VS Code features with F1-F12 keys: Word Wrap, Format on Save, Minimap, Breadcrumbs, AI Suggestions, Hover, Sticky Scroll, and Compact Folders. Boost your productivity with quick keyboard shortcuts.",
-  "version": "0.2.0",
+  "description": "Available now: VSCode, Cursor-AI, Windsurf, Trae-AI & (firebase.Studio) - 主题",
+  "version": "0.2.1",
   "publisher": "bastndev",
   "license": "MIT",
   "engines": {
     "vscode": "^1.43.0"
   },
   "categories": [
-    "Keymaps",
     "Other"
   ],
   "keywords": [
     "toggle",
     "function keys",
-    "f1-f12",
+    "f1",
     "word wrap",
     "format on save",
     "minimap",
