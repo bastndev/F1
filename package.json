@@ -5,6 +5,7 @@
   "version": "0.2.1",
   "publisher": "bastndev",
   "license": "MIT",
+  "preview": true,
   "engines": {
     "vscode": "^1.43.0"
   },
