@@ -15,10 +15,10 @@ export class FunctionKeyStatusProvider implements vscode.TreeDataProvider<Functi
   private functionKeys: FunctionKeyStatus[] = [
     {
       key: 'F1',
-      command: 'shuu.toggleCodeFormatting',
-      title: 'Word Wrap',
+      command: 'shuu.toggleMarkdownWrap',
+      title: 'Markdown Word Wrap',
       isActive: false,
-      configKey: 'editor.wordWrap'
+      configKey: '[markdown].editor.wordWrap'
     },
     {
       key: 'F2',
@@ -68,6 +68,20 @@ export class FunctionKeyStatusProvider implements vscode.TreeDataProvider<Functi
       title: 'Compact Folders',
       isActive: false,
       configKey: 'explorer.compactFolders'
+    },
+    {
+      key: 'Ctrl+F1',
+      command: 'shuu.toggleCodeFormatting',
+      title: 'Word Wrap',
+      isActive: false,
+      configKey: 'editor.wordWrap'
+    },
+    {
+      key: 'Ctrl+F2',
+      command: 'shuu.toggleBreadcrumbs',
+      title: 'Breadcrumbs',
+      isActive: false,
+      configKey: 'breadcrumbs.enabled'
     }
   ];
 
@@ -122,6 +136,10 @@ export class FunctionKeyStatusProvider implements vscode.TreeDataProvider<Functi
     for (const key of this.functionKeys) {
       try {
         switch (key.configKey) {
+          case '[markdown].editor.wordWrap':
+            const markdownConfig = config.get('[markdown]') as any;
+            key.isActive = markdownConfig?.['editor.wordWrap'] === 'on';
+            break;
           case 'editor.wordWrap':
             key.isActive = config.get('editor.wordWrap') === 'on';
             break;
@@ -145,6 +163,9 @@ export class FunctionKeyStatusProvider implements vscode.TreeDataProvider<Functi
             break;
           case 'explorer.compactFolders':
             key.isActive = config.get('explorer.compactFolders') as boolean || false;
+            break;
+          case 'breadcrumbs.enabled':
+            key.isActive = config.get('breadcrumbs.enabled') as boolean || false;
             break;
           default:
             key.isActive = false;

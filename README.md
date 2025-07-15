@@ -15,7 +15,7 @@
 
 | Key         | Status Indicators        | Description                                                     |
 | ----------- | ------------------------ | --------------------------------------------------------------- |
-| `F1`        | 📖 On / 📏 Off           | Enable/disable word wrap for all files                          |
+| `F1`        | � On / � Off           | Enable/disable markdown word wrap                               |
 | `F2`        | 🗺️ On / 🚫 Off           | Show/hide code minimap                                          |
 | `F3`        | ✨ On / 🚫 Off           | Enable/disable automatic code formatting when saving files      |
 | `F4`        | 🤖 On / 🚫 Off           | Enable/disable AI code suggestions                              |
@@ -23,7 +23,7 @@
 | `F6`        | 📁 On / 🚫 Off           | Enable/disable code folding                                     |
 | `F7`        | 📌 On / 🚫 Off           | Enable/disable keeping function headers visible while scrolling |
 | `F8`        | 📂 Compact / 📁 Expanded | Switch between compact/expanded folder view                     |
-| `Ctrl + F1` | 📝 On / 🚫 Off           | Enable/disable markdown word wrap                               |
+| `Ctrl + F1` | � On / � Off           | Enable/disable word wrap for all files                          |
 | `Ctrl + F2` | 🍞 On / 🚫 Off           | Show/hide breadcrumb navigation                                 |
 
 ## Installation

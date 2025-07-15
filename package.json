@@ -135,7 +135,7 @@
     ],
     "keybindings": [
       {
-        "command": "shuu.toggleCodeFormatting",
+        "command": "shuu.toggleMarkdownWrap",
         "key": "f1",
         "when": "editorTextFocus"
       },
@@ -180,7 +180,7 @@
         "when": "editorTextFocus"
       },
       {
-        "command": "shuu.toggleMarkdownWrap",
+        "command": "shuu.toggleCodeFormatting",
         "key": "ctrl+f1",
         "when": "editorTextFocus"
       }
