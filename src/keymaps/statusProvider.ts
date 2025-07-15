@@ -95,7 +95,7 @@ export class FunctionKeyStatusProvider implements vscode.TreeDataProvider<Functi
   }
 
   getTreeItem(element: FunctionKeyStatus): vscode.TreeItem {
-    const statusIcon = element.isActive ? '🟢' : '🔴';
+    const statusIcon = element.isActive ? '|' : '✗';
     const treeItem = new vscode.TreeItem(
       `${element.key} ${statusIcon} ${element.title}`,
       vscode.TreeItemCollapsibleState.None
