@@ -5,7 +5,7 @@ export function registerKeymapCommands(context: vscode.ExtensionContext) {
     vscode.window.showInformationMessage('Hello World from Shuu!');
   });
 
-  // Command to toggle markdown word wrap
+  // Command to toggle markdown word wrap (F1 key)
   const toggleMarkdownWrap = vscode.commands.registerCommand(
     'shuu.toggleMarkdownWrap',
     async () => {
@@ -39,7 +39,7 @@ export function registerKeymapCommands(context: vscode.ExtensionContext) {
     }
   );
 
-  // Command to toggle word wrap for all files (F1 key)
+  // Command to toggle word wrap for all files (Ctrl+F1 key)
   const toggleCodeFormatting = vscode.commands.registerCommand(
     'shuu.toggleCodeFormatting',
     async () => {
