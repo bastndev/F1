@@ -1,38 +1,23 @@
 {
   "name": "f1",
   "displayName": "F1",
-  "description": "Available now: VSCode, Cursor-AI, Windsurf, Trae-AI & (firebase.Studio) - 主题",
-  "version": "0.2.1",
+  "description": "Available now: VSCode • Cursor • Windsurf • Trae.ai • Kiro & (Firebase Studio)... 雨",
+  "version": "0.3.0",
   "publisher": "bastndev",
   "license": "MIT",
   "preview": true,
   "engines": {
-    "vscode": "^1.43.0"
+    "vscode": "^1.74.0"
   },
   "categories": [
     "Other"
   ],
   "keywords": [
+    "F1 Quick Switch",
     "toggle",
-    "function keys",
+    "keys maps",
     "f1",
-    "word wrap",
-    "format on save",
-    "minimap",
-    "breadcrumbs",
-    "ai suggestions",
-    "hover",
-    "sticky scroll",
-    "compact folders",
-    "productivity",
-    "keyboard shortcuts",
-    "quick toggle",
-    "editor settings",
-    "workspace",
-    "customization",
-    "efficiency",
-    "developer tools",
-    "shuu"
+    "productivity"
   ],
   "icon": "assets/icon.png",
   "galleryBanner": {
@@ -52,6 +37,10 @@
     "email": "gobasdev@gmail.com",
     "url": "https://www.bastndev.com"
   },
+  "sponsor": {
+    "url": "https://github.com/sponsors/bastndev"
+  },
+
   "activationEvents": [],
   "main": "./dist/extension.js",
   "contributes": {
