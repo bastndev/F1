@@ -44,138 +44,33 @@
   "activationEvents": [],
   "main": "./dist/extension.js",
   "contributes": {
+    "views": {
+      "f1-functions": [
+        {
+          "id": "f1-explorer",
+          "name": "",
+          "icon": "$(zap)"
+        }
+      ]
+    },
     "viewsContainers": {
       "activitybar": [
         {
-          "id": "f1-functions", 
+          "id": "f1-functions",
           "title": "F1",
           "icon": "$(zap)"
         }
       ]
     },
-    "views": {
-      "f1-functions": [
-        {
-          "id": "f1-toggles",
-          "name": "Function Keys",
-          "icon": "$(list-ordered)",
-          "when": "true"
-        }
-      ]
-    },
-    "menus": {
-      "view/title": [
-        {
-          "command": "f1.refreshStatus",
-          "when": "view == f1-toggles",
-          "group": "navigation"
-        }
-      ]
-    },
     "commands": [
       {
-        "command": "shuu.toggleMarkdownWrap",
-        "title": "Toggle Markdown Word Wrap"
-      },
-      {
-        "command": "shuu.toggleCodeFormatting",
-        "title": "Toggle Word Wrap"
-      },
-      {
-        "command": "shuu.toggleFormatOnSave",
-        "title": "Toggle Format On Save"
-      },
-      {
-        "command": "shuu.toggleStickyScroll",
-        "title": "Toggle Sticky Scroll"
-      },
-      {
-        "command": "shuu.toggleAISuggestions",
-        "title": "Toggle AI Suggestions"
-      },
-      {
-        "command": "shuu.toggleBreadcrumbs",
-        "title": "Toggle Breadcrumbs"
-      },
-      {
-        "command": "shuu.toggleMinimap",
-        "title": "Toggle Minimap"
-      },
-      {
-        "command": "shuu.toggleCompactFolders",
-        "title": "Toggle Compact Folders"
-      },
-      {
-        "command": "shuu.toggleHover",
-        "title": "Toggle Hover"
-      },
-      {
-        "command": "shuu.helloWorld",
-        "title": "Hello World"
-      },
-      {
-        "command": "shuu.toggleFolding",
-        "title": "Toggle Code Folding"
-      },
-      {
-        "command": "f1.refreshStatus",
-        "title": "Refresh Status",
-        "icon": "$(refresh)"
-      }
-    ],
-    "keybindings": [
-      {
-        "command": "shuu.toggleMarkdownWrap",
-        "key": "f1",
-        "when": "editorTextFocus"
-      },
-      {
-        "command": "shuu.toggleMinimap",
-        "key": "f2",
-        "when": "editorTextFocus"
-      },
-      {
-        "command": "shuu.toggleFormatOnSave",
-        "key": "f3",
-        "when": "editorTextFocus"
-      },
-      {
-        "command": "shuu.toggleAISuggestions",
-        "key": "f4",
-        "when": "editorTextFocus"
-      },
-      {
-        "command": "shuu.toggleHover",
-        "key": "f5",
-        "when": "editorTextFocus"
-      },
-      {
-        "command": "shuu.toggleFolding",
-        "key": "f6",
-        "when": "editorTextFocus"
-      },
-      {
-        "command": "shuu.toggleStickyScroll",
-        "key": "f7",
-        "when": "editorTextFocus"
-      },
-      {
-        "command": "shuu.toggleCompactFolders",
-        "key": "f8",
-        "when": "editorTextFocus"
-      },
-      {
-        "command": "shuu.toggleBreadcrumbs",
-        "key": "ctrl+f2",
-        "when": "editorTextFocus"
-      },
-      {
-        "command": "shuu.toggleCodeFormatting",
-        "key": "ctrl+f1",
-        "when": "editorTextFocus"
+        "command": "f1.openPanel",
+        "title": "Open F1 Panel",
+        "icon": "$(zap)"
       }
     ]
   },
+
   "scripts": {
     "compile": "npm run check-types && npm run lint && node esbuild.js",
     "watch": "npm-run-all -p watch:*",
