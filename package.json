@@ -40,17 +40,27 @@
   "sponsor": {
     "url": "https://github.com/sponsors/bastndev"
   },
-
   "activationEvents": [],
   "main": "./dist/extension.js",
-  
   "contributes": {
     "views": {
       "f1-functions": [
         {
           "id": "f1-explorer",
-          "name": "",
+          "name": "DISABLE/ENABLE",
           "icon": "$(zap)",
+          "when": "true"
+        },
+        {
+          "id": "f1-outline",
+          "name": "OUTLINE",
+          "icon": "symbol-structure",
+          "when": "true"
+        },
+        {
+          "id": "f1-timeline",
+          "name": "TIMELINE",
+          "icon": "history",
           "when": "true"
         }
       ]
@@ -82,7 +92,6 @@
       ]
     }
   },
-
   "scripts": {
     "compile": "npm run check-types && npm run lint && node esbuild.js",
     "watch": "npm-run-all -p watch:*",
