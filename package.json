@@ -48,20 +48,20 @@
     "views": {
       "f1-functions": [
         {
-          "id": "f1-quick-switch",
-          "name": "Quick SWITCH",
+          "id": "f1-shortcuts",
+          "name": "Shortcuts",
           "icon": "$(zap)",
           "when": "true"
         },
         {
           "id": "f1-editor-controls",
-          "name": "Editor CONTROLS",
+          "name": "Editor Controls",
           "icon": "symbol-structure",
           "when": "true"
         },
         {
           "id": "f1-extensions",
-          "name": "EXTENSIONS",
+          "name": "extension",
           "icon": "symbol-structure",
           "when": "true"
         }
@@ -88,7 +88,7 @@
       "view/title": [
         {
           "command": "f1.togglePanel",
-          "when": "view == f1-explorer",
+          "when": "view == f1-shortcuts",
           "group": "navigation"
         }
       ]

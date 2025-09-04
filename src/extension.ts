@@ -18,7 +18,7 @@ class F1TreeDataProvider implements vscode.TreeDataProvider<string> {
 export function activate(context: vscode.ExtensionContext) {
     // Registrar TreeDataProvider
     const treeDataProvider = new F1TreeDataProvider();
-    vscode.window.registerTreeDataProvider('f1-quick-switch', treeDataProvider);
+    vscode.window.registerTreeDataProvider('f1-shortcuts', treeDataProvider);
 
     // Command to open panel
     let openPanelCommand = vscode.commands.registerCommand('f1.openPanel', () => {
