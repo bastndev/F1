@@ -3,7 +3,7 @@ import * as vscode from 'vscode';
 interface EditorControl {
     name: string;
     category: 'editor' | 'ui' | 'formatting' | 'features' | 'debugging';
-    configKey?: string; // Para futura implementación
+    configKey?: string; // For future implementation
 }
 
 class EditorControlsProvider implements vscode.TreeDataProvider<EditorControl> {
@@ -67,7 +67,7 @@ class EditorControlsProvider implements vscode.TreeDataProvider<EditorControl> {
         return this.controls.sort((a, b) => a.name.localeCompare(b.name));
     }
 
-    // Métodos para futura implementación
+    // Methods for future implementation
     getControlsByCategory(category: string): EditorControl[] {
         return this.controls.filter(control => control.category === category);
     }
