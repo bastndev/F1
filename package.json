@@ -48,14 +48,14 @@
     "views": {
       "f1-functions": [
         {
-          "id": "f1-explorer",
-          "name": "ENABLE/DISABLE",
+          "id": "f1-quick-switch",
+          "name": "Quick SWITCH",
           "icon": "$(zap)",
           "when": "true"
         },
         {
-          "id": "f1-quick-switch",
-          "name": "Quick SWITCH",
+          "id": "f1-editor-controls",
+          "name": "Editor CONTROLS",
           "icon": "symbol-structure",
           "when": "true"
         },
