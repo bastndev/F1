@@ -43,6 +43,7 @@
 
   "activationEvents": [],
   "main": "./dist/extension.js",
+  
   "contributes": {
     "views": {
       "f1-functions": [
