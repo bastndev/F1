@@ -47,20 +47,20 @@
       "f1-functions": [
         {
           "id": "f1-explorer",
-          "name": "DISABLE/ENABLE",
+          "name": "ENABLE/DISABLE",
           "icon": "$(zap)",
           "when": "true"
         },
         {
-          "id": "f1-outline",
-          "name": "OUTLINE",
+          "id": "f1-quick-switch",
+          "name": "Quick SWITCH",
           "icon": "symbol-structure",
           "when": "true"
         },
         {
-          "id": "f1-timeline",
-          "name": "TIMELINE",
-          "icon": "history",
+          "id": "f1-extensions",
+          "name": "EXTENSIONS",
+          "icon": "symbol-structure",
           "when": "true"
         }
       ]
