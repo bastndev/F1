@@ -1,17 +1,11 @@
 import * as vscode from 'vscode';
-
-class F1TreeProvider implements vscode.TreeDataProvider<string> {
-    getTreeItem(element: string): vscode.TreeItem {
-        return new vscode.TreeItem(element);
-    }
-    
-    getChildren(): string[] {
-        return ['Hello Wold 🧪'];
-    }
-}
+import { activate as activateShortcuts } from './disable-enable/shortcuts/shortcuts';
+import { activate as activateEditorControls } from './disable-enable/editor-controls/editor-controls';
+import { activate as activateExtensions } from './disable-enable/extensions/extensions';
 
 export function activate(context: vscode.ExtensionContext) {
-    vscode.window.registerTreeDataProvider('f1-shortcuts', new F1TreeProvider());
+    // Activate each sub-module to register their tree data providers
+    activateShortcuts(context);
+    activateEditorControls(context);
+    activateExtensions(context);
 }
-
-export function deactivate() {}
