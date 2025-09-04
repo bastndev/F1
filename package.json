@@ -49,7 +49,8 @@
         {
           "id": "f1-explorer",
           "name": "",
-          "icon": "$(zap)"
+          "icon": "$(zap)",
+          "when": "true"
         }
       ]
     },
@@ -64,11 +65,21 @@
     },
     "commands": [
       {
-        "command": "f1.openPanel",
-        "title": "Open F1 Panel",
-        "icon": "$(zap)"
+        "command": "f1.togglePanel",
+        "title": "Toggle F1 Panel",
+        "category": "F1",
+        "icon": "$(ellipsis)"
       }
-    ]
+    ],
+    "menus": {
+      "view/title": [
+        {
+          "command": "f1.togglePanel",
+          "when": "view == f1-explorer",
+          "group": "navigation"
+        }
+      ]
+    }
   },
 
   "scripts": {
