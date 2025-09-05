@@ -128,8 +128,7 @@ export class F1WebviewProvider implements vscode.WebviewViewProvider {
         </head>
         <body>
             <button class="button" onclick="sendMessage('commit')">
-            <span>✓</span>
-            Combination
+            Combine
             </button>
 
             <div class="section-title">Shortcuts</div>
