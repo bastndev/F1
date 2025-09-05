@@ -48,6 +48,7 @@
     "views": {
       "f1-functions": [
         {
+          "type": "webview",
           "id": "f1-shortcuts",
           "name": "Shortcuts",
           "icon": "$(zap)",
@@ -56,13 +57,13 @@
         {
           "id": "f1-editor-controls",
           "name": "Editor Controls",
-          "icon": "symbol-structure",
+          "icon": "$(symbol-structure)",
           "when": "true"
         },
         {
           "id": "f1-extensions",
-          "name": "extension",
-          "icon": "symbol-structure",
+          "name": "Extensions",
+          "icon": "$(extensions)",
           "when": "true"
         }
       ]
@@ -78,23 +79,12 @@
     },
     "commands": [
       {
-        "command": "f1.togglePanel",
-        "title": "Toggle F1 Panel",
-        "category": "F1",
-        "icon": "$(ellipsis)"
+        "command": "f1.itemClicked",
+        "title": "Item Clicked"
       }
-    ],
-    "menus": {
-      "view/title": [
-        {
-          "command": "f1.togglePanel",
-          "when": "view == f1-shortcuts",
-          "group": "navigation"
-        }
-      ]
-    }
+    ]
   },
-
+  
   "scripts": {
     "compile": "npm run check-types && npm run lint && node esbuild.js",
     "watch": "npm-run-all -p watch:*",
