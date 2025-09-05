@@ -74,8 +74,8 @@ export class F1WebviewProvider implements vscode.WebviewViewProvider {
                 }
 
                 .button {
-                    background-color: #007acc;
-                    color: white;
+                    background-color: var(--vscode-button-background);
+                    color: var(--vscode-button-foreground);
                     border: none;
                     padding: 8px 12px;
                     border-radius: 4px;
@@ -83,13 +83,14 @@ export class F1WebviewProvider implements vscode.WebviewViewProvider {
                     font-size: 13px;
                     display: flex;
                     align-items: center;
+                    justify-content: center;
                     gap: 8px;
                     width: 100%;
                     margin-bottom: 15px;
                 }
 
                 .button:hover {
-                    background-color: #005a9e;
+                    background-color: var(--vscode-button-hoverBackground);
                 }
 
                 .section-title {
