@@ -1,6 +1,5 @@
 import * as vscode from 'vscode';
 
-// Provider para el webview con botones
 export class F1WebviewProvider implements vscode.WebviewViewProvider {
     public static readonly viewType = 'f1-shortcuts';
 
@@ -21,8 +20,7 @@ export class F1WebviewProvider implements vscode.WebviewViewProvider {
         };
 
         webviewView.webview.html = this._getHtmlForWebview(webviewView.webview);
-
-        // Escuchar mensajes desde el webview
+        // Listen for messages from the webview
         webviewView.webview.onDidReceiveMessage(data => {
             switch (data.type) {
                 case 'commit':
@@ -36,12 +34,12 @@ export class F1WebviewProvider implements vscode.WebviewViewProvider {
     }
 
     private handleCommit() {
-        // Ejecutar commit sin mostrar notificación
+        // Execute commit without showing notification
         vscode.commands.executeCommand('git.commit');
     }
 
     private handleExecute(command: string) {
-        // Ejecutar comando sin mostrar notificación
+        // Execute command without showing notification
         switch (command) {
             case 'Toggle Terminal':
                 vscode.commands.executeCommand('workbench.action.terminal.toggleTerminal');
