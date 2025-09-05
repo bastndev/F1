@@ -131,7 +131,7 @@ export class F1WebviewProvider implements vscode.WebviewViewProvider {
             Combine
             </button>
 
-            <div class="section-title">Shortcuts</div>
+            <div class="section-title">My List</div>
             <div class="shortcut-item" onclick="executeCommand('Toggle Terminal')">
             <span>Toggle Terminal</span>
             <span class="shortcut-key">Ctrl+\`</span>
