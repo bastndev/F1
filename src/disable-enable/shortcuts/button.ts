@@ -71,6 +71,10 @@ export class F1WebviewProvider implements vscode.WebviewViewProvider {
                 background-color: var(--vscode-editor-background);
                 margin: 0;
                 padding: 10px;
+                height: 100vh;
+                overflow: hidden;
+                display: flex;
+                flex-direction: column;
             }
 
             .button {
@@ -87,6 +91,7 @@ export class F1WebviewProvider implements vscode.WebviewViewProvider {
                 gap: 8px;
                 width: 100%;
                 margin-bottom: 15px;
+                flex-shrink: 0;
             }
 
             .button:hover {
@@ -99,6 +104,13 @@ export class F1WebviewProvider implements vscode.WebviewViewProvider {
                 color: var(--vscode-foreground);
                 font-size: 12px;
                 text-transform: uppercase;
+                flex-shrink: 0;
+            }
+
+            .shortcuts-container {
+                flex: 1;
+                overflow-y: auto;
+                overflow-x: hidden;
             }
 
             .shortcut-item {
@@ -132,24 +144,28 @@ export class F1WebviewProvider implements vscode.WebviewViewProvider {
             </button>
 
             <div class="section-title">My List</div>
-            <div class="shortcut-item" onclick="executeCommand('Toggle Terminal')">
-            <span>Toggle Terminal</span>
-            <span class="shortcut-key">Ctrl+\`</span>
-            </div>
             
-            <div class="shortcut-item" onclick="executeCommand('Command Palette')">
-            <span>Command Palette</span>
-            <span class="shortcut-key">Ctrl+Shift+P</span>
-            </div>
-            
-            <div class="shortcut-item" onclick="executeCommand('Quick Open')">
-            <span>Quick Open</span>
-            <span class="shortcut-key">Ctrl+P</span>
-            </div>
-            
-            <div class="shortcut-item" onclick="executeCommand('Toggle Sidebar')">
-            <span>Toggle Sidebar</span>
-            <span class="shortcut-key">Ctrl+B</span>
+            <div class="shortcuts-container">
+                <div class="shortcut-item" onclick="executeCommand('Toggle Terminal')">
+                <span>Toggle Terminal</span>
+                <span class="shortcut-key">Ctrl+\`</span>
+                </div>
+                
+                <div class="shortcut-item" onclick="executeCommand('Command Palette')">
+                <span>Command Palette</span>
+                <span class="shortcut-key">Ctrl+Shift+P</span>
+                </div>
+                
+                <div class="shortcut-item" onclick="executeCommand('Quick Open')">
+                <span>Quick Open</span>
+                <span class="shortcut-key">Ctrl+P</span>
+                </div>
+                
+                <div class="shortcut-item" onclick="executeCommand('Toggle Sidebar')">
+                <span>Toggle Sidebar</span>
+                <span class="shortcut-key">Ctrl+B</span>
+                </div>
+                </div>
             </div>
 
             <script>
