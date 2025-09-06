@@ -60,8 +60,8 @@ export function activate(context: vscode.ExtensionContext) {
         'github.copilot.toggleInlineSuggestion',          // 1: GitHub Copilot (VSCode)
         'cursor.toggleCursorTab',                         // 2: Cursor AI
         'icube.toggleAISuggestions',                      // 3: Trae AI
-        // ---- ---- ---- ---- --- -- -                  // 4: Firebase Studio
-        // ---- ---- ---- ---- --- -- -                  // 5: Kiro
+        // ---- ---- ---- ---- --- -- -                   // 4: Firebase Studio
+        // ---- ---- ---- ---- --- -- -                   // 5: Kiro
       ];
 
       const config = vscode.workspace.getConfiguration();
