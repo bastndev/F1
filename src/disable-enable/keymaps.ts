@@ -9,28 +9,27 @@ function showToggleNotification(feature: string, isEnabled: boolean): void {
 
 export function activate(context: vscode.ExtensionContext) {
   //================================================================
-  // Toggle Word Wrap for All Files (F1)
+  // Toggle Word Wrap for All Files (F1) - Synchronized with Markdown
   //================================================================
   const toggleMarkdownWrap = vscode.commands.registerCommand(
     'f1.toggleMarkdownWrap',
     async () => {
       const config = vscode.workspace.getConfiguration();
       
-      // Toggle general word wrap for all files
-      const currentGeneralWrap = config.get('editor.wordWrap') as string;
-      const newGeneralWrap = currentGeneralWrap === 'off' ? 'on' : 'off';
-      
-      await config.update(
-        'editor.wordWrap',
-        newGeneralWrap,
-        vscode.ConfigurationTarget.Global
-      );
-
-      // Toggle markdown specific word wrap
+      // Get current markdown word wrap state first (this will be our reference)
       const currentSetting = config.get('[markdown]') as any;
       const currentMarkdownWrap = currentSetting?.['editor.wordWrap'] || 'off';
       const newMarkdownWrap = currentMarkdownWrap === 'off' ? 'on' : 'off';
+      
+      // Synchronize general word wrap with markdown state
+      // Use the NEW markdown state to keep them in sync
+      await config.update(
+        'editor.wordWrap',
+        newMarkdownWrap,
+        vscode.ConfigurationTarget.Global
+      );
 
+      // Update markdown specific word wrap
       await config.update(
         '[markdown]',
         {
@@ -42,7 +41,7 @@ export function activate(context: vscode.ExtensionContext) {
       );
 
       // Show notification using helper function
-      showToggleNotification('Word Wrap', newGeneralWrap === 'on');
+      showToggleNotification('Word Wrap', newMarkdownWrap === 'on');
     }
   );
 
