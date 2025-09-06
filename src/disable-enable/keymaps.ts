@@ -22,7 +22,6 @@ export function activate(context: vscode.ExtensionContext) {
       const newMarkdownWrap = currentMarkdownWrap === 'off' ? 'on' : 'off';
       
       // Synchronize general word wrap with markdown state
-      // Use the NEW markdown state to keep them in sync
       await config.update(
         'editor.wordWrap',
         newMarkdownWrap,
