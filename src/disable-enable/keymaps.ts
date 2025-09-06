@@ -2,8 +2,8 @@ import * as vscode from 'vscode';
 
 // Helper function for consistent notifications
 function showToggleNotification(feature: string, isEnabled: boolean): void {
-  const emoji = isEnabled ? '❌' : '✅';
-  const status = isEnabled ? 'disabled' : 'enabled';
+  const emoji = isEnabled ? '✅' : '❌';
+  const status = isEnabled ? 'enabled' : 'disabled';
   vscode.window.showInformationMessage(`${feature} ${status} ${emoji}`);
 }
 
@@ -21,83 +21,94 @@ export function activate(context: vscode.ExtensionContext) {
       const currentMarkdownWrap = currentSetting?.['editor.wordWrap'] || 'off';
       const newMarkdownWrap = currentMarkdownWrap === 'off' ? 'on' : 'off';
       
-      // Synchronize general word wrap with markdown state
-      await config.update(
-        'editor.wordWrap',
-        newMarkdownWrap,
-        vscode.ConfigurationTarget.Global
-      );
+      try {
+        // Synchronize general word wrap with markdown state
+        await config.update(
+          'editor.wordWrap',
+          newMarkdownWrap,
+          vscode.ConfigurationTarget.Global
+        );
 
-      // Update markdown specific word wrap
-      await config.update(
-        '[markdown]',
-        {
-          'editor.formatOnSave': false,
-          'editor.defaultFormatter': null,
-          'editor.wordWrap': newMarkdownWrap,
-        },
-        vscode.ConfigurationTarget.Global
-      );
+        // Update markdown specific word wrap
+        await config.update(
+          '[markdown]',
+          {
+            'editor.formatOnSave': false,
+            'editor.defaultFormatter': null,
+            'editor.wordWrap': newMarkdownWrap,
+          },
+          vscode.ConfigurationTarget.Global
+        );
 
-      // Show notification using helper function
-      showToggleNotification('Word Wrap', newMarkdownWrap === 'on');
+        // Show notification using helper function
+        showToggleNotification('Word Wrap', newMarkdownWrap === 'on');
+      } catch (error) {
+        vscode.window.showErrorMessage(`Error toggling word wrap: ${error}`);
+      }
     }
   );
 
   //================================================================
-  // Toggle AI Suggestions for All Files (Shift+F1)
+  // Toggle AI Suggestions - Clean & Simple (Shift+F1)
   //================================================================
   const toggleAISuggestions = vscode.commands.registerCommand(
     'f1.toggleAISuggestions',
     async () => {
+      // AI TOGGLE COMMANDS MARK:[Shift+F1]
+      const aiToggleCommands = [
+        'windsurf.toggleAISuggestions',                   // 0: Windsurf
+        'github.copilot.toggleInlineSuggestion',          // 1: GitHub Copilot (VSCode)
+        'cursor.toggleCursorTab',                         // 2: Cursor AI
+        'icube.toggleAISuggestions',                      // 3: Trae AI
+        // ---- ---- ---- ---- --- -- -                  // 4: Firebase Studio
+        // ---- ---- ---- ---- --- -- -                  // 5: Kiro
+      ];
+
       const config = vscode.workspace.getConfiguration();
-
-      // Get current AI suggestions settings
-      const currentInlineSuggest = config.get('editor.inlineSuggest.enabled') as boolean;
-      const currentCopilotInline = config.get('github.copilot.enable') as any;
-
-      // Toggle the settings
-      const newInlineSuggest = !currentInlineSuggest;
+      let toggleExecuted = false;
 
       try {
-        // Update inline suggestions (affects most AI assistants)
-        await config.update(
-          'editor.inlineSuggest.enabled',
-          newInlineSuggest,
-          vscode.ConfigurationTarget.Global
-        );
-
-        // Update GitHub Copilot specific settings if available
-        if (currentCopilotInline !== undefined) {
-          await config.update(
-            'github.copilot.enable',
-            {
-              "*": newInlineSuggest,
-              "plaintext": newInlineSuggest,
-              "markdown": newInlineSuggest,
-              "scminput": newInlineSuggest
-            },
-            vscode.ConfigurationTarget.Global
-          );
+        // Try each AI command until one works
+        for (let i = 0; i < aiToggleCommands.length; i++) {
+          try {
+            await vscode.commands.executeCommand(aiToggleCommands[i]);
+            
+            // Show appropriate notification based on which command worked
+            switch (i) {
+              case 0: // GitHub Copilot
+                const copilotEnabled = config.get('github.copilot.inlineSuggest.enable', true);
+                showToggleNotification('GitHub Copilot', !copilotEnabled);
+                break;
+              case 1: // Cursor AI
+                // Cursor doesn't expose state, so we alternate the message
+                showToggleNotification('Cursor AI', true); // Generic toggle message
+                break;
+            }
+            
+            toggleExecuted = true;
+            break; // Exit loop once a command succeeds
+          } catch (error) {
+            // Command not available, try next one
+            continue;
+          }
         }
 
-        // Also toggle copilot inline suggestions if the setting exists
-        const copilotInlineSuggest = config.get('github.copilot.inlineSuggest.enable');
-        if (copilotInlineSuggest !== undefined) {
+        // Fallback: If no specific AI commands work, use general inline suggestions
+        if (!toggleExecuted) {
+          const currentInlineSuggest = config.get('editor.inlineSuggest.enabled', true) as boolean;
+          const newInlineSuggest = !currentInlineSuggest;
+          
           await config.update(
-            'github.copilot.inlineSuggest.enable',
+            'editor.inlineSuggest.enabled',
             newInlineSuggest,
             vscode.ConfigurationTarget.Global
           );
+          
+          showToggleNotification('AI Suggestions', newInlineSuggest);
         }
 
-        // Show notification using helper function
-        showToggleNotification('AI Suggestions', newInlineSuggest);
-
       } catch (error) {
-        vscode.window.showErrorMessage(
-          `Error toggling AI suggestions: ${error}`
-        );
+        vscode.window.showErrorMessage(`Error toggling AI suggestions: ${error}`);
       }
     }
   );
