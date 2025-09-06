@@ -8,7 +8,9 @@ function showToggleNotification(feature: string, isEnabled: boolean): void {
 }
 
 export function activate(context: vscode.ExtensionContext) {
+  //================================================================
   // Toggle Word Wrap for All Files (F1)
+  //================================================================
   const toggleMarkdownWrap = vscode.commands.registerCommand(
     'f1.toggleMarkdownWrap',
     async () => {
