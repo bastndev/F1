@@ -2,8 +2,8 @@ import * as vscode from 'vscode';
 
 // Helper function for consistent notifications
 function showToggleNotification(feature: string, isEnabled: boolean): void {
-  const emoji = isEnabled ? '✅' : '❌';
-  const status = isEnabled ? 'enabled' : 'disabled';
+  const emoji = isEnabled ? '❌' : '✅';
+  const status = isEnabled ? 'disabled' : 'enabled';
   vscode.window.showInformationMessage(`${feature} ${status} ${emoji}`);
 }
 
