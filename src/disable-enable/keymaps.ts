@@ -21,7 +21,7 @@ export function activate(context: vscode.ExtensionContext) {
       );
 
       // Show notification
-      const status = newWordWrap === 'on' ? 'enabled' : 'disabled';
+      const status = newWordWrap === 'on' ? 'enabled ✅' : 'disabled ❌';
       vscode.window.showInformationMessage(`Markdown Word Wrap ${status}`);
     }
   );
