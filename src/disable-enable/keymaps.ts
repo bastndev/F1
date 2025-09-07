@@ -104,7 +104,7 @@ export function activate(context: vscode.ExtensionContext) {
             vscode.ConfigurationTarget.Global
           );
           
-          showToggleNotification('AI Suggestions', newInlineSuggest);
+          showToggleNotification('💡 AI Suggestions', newInlineSuggest);
         }
 
       } catch (error) {
