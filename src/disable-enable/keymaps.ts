@@ -2,8 +2,8 @@ import * as vscode from 'vscode';
 
 // Helper function for consistent notifications
 function showToggleNotification(feature: string, isEnabled: boolean): void {
-  const emoji = isEnabled ? '✅' : '❌';
-  const status = isEnabled ? 'ENABLED' : 'DISABLED';
+  const emoji = isEnabled ? '❌' : '✅';
+  const status = isEnabled ? 'DISABLED ' : 'ENABLED';
   vscode.window.showInformationMessage(`${feature} ${status} ${emoji}`);
 }
 
@@ -40,8 +40,8 @@ export function activate(context: vscode.ExtensionContext) {
           vscode.ConfigurationTarget.Global
         );
 
-        // Show notification using helper function
-        showToggleNotification('Word Wrap', newMarkdownWrap === 'off');
+        // Show notification
+        showToggleNotification('Word Wrap', newMarkdownWrap === 'on');
       } catch (error) {
         vscode.window.showErrorMessage(`Error toggling word wrap: ${error}`);
       }
@@ -49,12 +49,11 @@ export function activate(context: vscode.ExtensionContext) {
   );
 
   //================================================================
-  // Toggle AI Suggestions - Clean & Simple (Shift+F1)
+  // Toggle AI Suggestions - Unified Notification (Shift+F1)
   //================================================================
   const toggleAISuggestions = vscode.commands.registerCommand(
     'f1.toggleAISuggestions',
     async () => {
-      // AI TOGGLE COMMANDS MARK:[Shift+F1]
       const aiToggleCommands = [
         'windsurf.prioritized.supercompleteEscape',       // 0: Windsurf
         'github.copilot.toggleInlineSuggestion',          // 1: GitHub Copilot (VSCode)
@@ -65,36 +64,22 @@ export function activate(context: vscode.ExtensionContext) {
       ];
 
       const config = vscode.workspace.getConfiguration();
-      let toggleExecuted = false;
+      let commandExecuted = false;
 
       try {
         // Try each AI command until one works
-        for (let i = 0; i < aiToggleCommands.length; i++) {
+        for (const command of aiToggleCommands) {
           try {
-            await vscode.commands.executeCommand(aiToggleCommands[i]);
-            
-            // Show appropriate notification based on which command worked
-            switch (i) {
-              case 0: // GitHub Copilot
-                const copilotEnabled = config.get('github.copilot.inlineSuggest.enable', true);
-                showToggleNotification('GitHub Copilot', !copilotEnabled);
-                break;
-              case 1: // Cursor AI
-                // Cursor doesn't expose state, so we alternate the message
-                showToggleNotification('Cursor AI', true); // Generic toggle message
-                break;
-            }
-            
-            toggleExecuted = true;
-            break; // Exit loop once a command succeeds
-          } catch (error) {
-            // Command not available, try next one
-            continue;
+            await vscode.commands.executeCommand(command);
+            commandExecuted = true;
+            break;
+          } catch {
+            continue; // Try next command
           }
         }
 
-        // Fallback: If no specific AI commands work, use general inline suggestions
-        if (!toggleExecuted) {
+        // Fallback to general inline suggestions if no AI command worked
+        if (!commandExecuted) {
           const currentInlineSuggest = config.get('editor.inlineSuggest.enabled', true) as boolean;
           const newInlineSuggest = !currentInlineSuggest;
           
@@ -103,9 +88,11 @@ export function activate(context: vscode.ExtensionContext) {
             newInlineSuggest,
             vscode.ConfigurationTarget.Global
           );
-          
-          showToggleNotification('💡 AI Suggestions', newInlineSuggest);
         }
+
+        // Get current state for notification (always check the general setting)
+        const currentState = config.get('editor.inlineSuggest.enabled', true) as boolean;
+        showToggleNotification('💡 AI Suggestions', currentState);
 
       } catch (error) {
         vscode.window.showErrorMessage(`Error toggling AI suggestions: ${error}`);
