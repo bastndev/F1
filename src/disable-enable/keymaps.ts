@@ -41,7 +41,7 @@ export function activate(context: vscode.ExtensionContext) {
         );
 
         // Show notification using helper function
-        showToggleNotification('Word Wrap', newMarkdownWrap === 'on');
+        showToggleNotification('Word Wrap', newMarkdownWrap === 'off');
       } catch (error) {
         vscode.window.showErrorMessage(`Error toggling word wrap: ${error}`);
       }
