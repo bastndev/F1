@@ -56,9 +56,9 @@ export function activate(context: vscode.ExtensionContext) {
     async () => {
       // AI TOGGLE COMMANDS MARK:[Shift+F1]
       const aiToggleCommands = [
-        'windsurf.toggleAISuggestions',                   // 0: Windsurf
+        'editor.cpp.disableAnnotated',                    // 2: Cursor AI
         'github.copilot.toggleInlineSuggestion',          // 1: GitHub Copilot (VSCode)
-        'cursor.toggleCursorTab',                         // 2: Cursor AI
+        'windsurf.toggleAISuggestions',                   // 0: Windsurf
         'icube.toggleAISuggestions',                      // 3: Trae AI
         // ---- ---- ---- ---- --- -- -                   // 4: Firebase Studio
         // ---- ---- ---- ---- --- -- -                   // 5: Kiro
