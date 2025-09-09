@@ -25,7 +25,7 @@ async function toggleAISuggestionsState(currentState: boolean): Promise<boolean>
   const aiToggleCommands = [
     'windsurf.prioritized.supercompleteEscape',       // 0: Windsurf
     'github.copilot.toggleInlineSuggestion',          // 1: GitHub Copilot (VSCode)
-    'editor.action.enableCppGlobally',                // 2: Cursor AI
+    'editor.cpp.disableenabled',                      // 2: Cursor AI
     'icube.toggleAISuggestions',                      // 3: Trae AI
     // ---- ---- --- --- -- -                         // 4: Firebase Studio
     // ---- ---- --- -- --                            // 5: Kiro
