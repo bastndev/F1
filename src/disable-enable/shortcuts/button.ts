@@ -170,17 +170,17 @@ export class F1WebviewProvider implements vscode.WebviewViewProvider {
                 
                 <div class="shortcut-item" onclick="executeCommand('Toggle Terminal')">
                 <span>Test 🧪</span>
-                <span class="shortcut-key">Ctrl+\`</span>
+                <span class="shortcut-key">Ctrl+B</span>
                 </div>
                 
                 <div class="shortcut-item" onclick="executeCommand('Command Palette')">
                 <span>Test 🧪</span>
-                <span class="shortcut-key">Ctrl+Shift+P</span>
+                <span class="shortcut-key">Ctrl+B</span>
                 </div>
                 
                 <div class="shortcut-item" onclick="executeCommand('Quick Open')">
                 <span>Test 🧪</span>
-                <span class="shortcut-key">Ctrl+P</span>
+                <span class="shortcut-key">Ctrl+B</span>
                 </div>
 
                 <div class="shortcut-item" onclick="executeCommand('Toggle Sidebar')">
