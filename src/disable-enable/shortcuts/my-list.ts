@@ -15,7 +15,7 @@ export class MyListUI {
         isDefault: true,
       },
       {
-        label: 'AI suggestions (disable/enable)',
+        label: 'AI suggestion (disable/enable)',
         key: 'Shift+F1',
         command: 'Toggle AI',
         isDefault: true,
