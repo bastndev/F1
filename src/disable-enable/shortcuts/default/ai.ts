@@ -39,7 +39,7 @@ async function toggleAISuggestionsState(currentState: boolean): Promise<boolean>
       commandExecuted = true;
       break;
     } catch {
-      continue; // Try next command
+      continue;
     }
   }
   
