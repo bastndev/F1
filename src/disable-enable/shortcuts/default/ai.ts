@@ -10,7 +10,7 @@ function showAIToggleNotification(isEnabled: boolean): void {
 async function getCurrentAISuggestionsState(): Promise<boolean> {
   const config = vscode.workspace.getConfiguration();
   
-  // Solo verificamos el estado de inlineSuggest ya que es universal
+  // We only check the state of inlineSuggest since it is universal
   const inlineSuggestEnabled = config.get('editor.inlineSuggest.enabled', true) as boolean;
   
   return inlineSuggestEnabled;
@@ -43,8 +43,6 @@ async function toggleAISuggestionsState(currentState: boolean): Promise<boolean>
     }
   }
   
-  // Si ningún comando específico funcionó, solo modificamos editor.inlineSuggest.enabled
-  // NO modificamos github.copilot.enable para mantener compatibilidad multi-editor
   if (!commandExecuted) {
     try {
       await config.update(
@@ -53,9 +51,7 @@ async function toggleAISuggestionsState(currentState: boolean): Promise<boolean>
         vscode.ConfigurationTarget.Global
       );
       
-      // NO modificamos github.copilot.enable
-      // Cada editor manejará su propia configuración específica
-      
+      // Helper function for AI notifications 
     } catch (error) {
       console.error('Error updating AI settings manually:', error);
       throw error;
@@ -115,7 +111,6 @@ export function activate(context: vscode.ExtensionContext) {
           'Overall State': currentState
         };
         
-        // Solo mostramos info de Copilot si existe, pero no lo modificamos
         if (config.has('github.copilot.enable')) {
           details['Copilot (read-only)'] = config.get('github.copilot.enable', 'not set');
         }
