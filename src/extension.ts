@@ -6,7 +6,7 @@ import { activate as activateAI } from './disable-enable/shortcuts/default/ai';
 import { activate as activateF1 } from './disable-enable/shortcuts/default/f1';
 
 export function activate(context: vscode.ExtensionContext) {
-    // Activate each sub-module to register their tree data providers
+    // Activate data providers
     activateShortcuts(context);
     activateEditorControls(context);
     activateExtensions(context);
