@@ -136,6 +136,11 @@ export class F1WebviewProvider implements vscode.WebviewViewProvider {
                 border-radius: 3px;
                 font-size: 11px;
             }
+            .user-line {
+                border-top: 0.5px solid #d1d1d11b;
+                width: 100%;
+                margin: 10px 0;
+            }
             </style>
         </head>
         <body>
@@ -147,24 +152,50 @@ export class F1WebviewProvider implements vscode.WebviewViewProvider {
             
             <div class="shortcuts-container">
                 <div class="shortcut-item" onclick="executeCommand('Toggle Terminal')">
-                <span>Toggle Terminal</span>
+                <span>Toggle word Wrap</span>
+                <span class="shortcut-key">F1</span>
+                </div>
+
+                <div class="shortcut-item" onclick="executeCommand('Toggle Terminal')">
+                <span>Toggle AI suggestions</span>
+                <span class="shortcut-key">Shift+F1</span>
+                </div>
+
+                <div class="user-line"></div>
+                
+                <div class="shortcut-item" onclick="executeCommand('Toggle Terminal')">
+                <span>Test 🧪</span>
                 <span class="shortcut-key">Ctrl+\`</span>
                 </div>
                 
                 <div class="shortcut-item" onclick="executeCommand('Command Palette')">
-                <span>Command Palette</span>
+                <span>Test 🧪</span>
                 <span class="shortcut-key">Ctrl+Shift+P</span>
                 </div>
                 
                 <div class="shortcut-item" onclick="executeCommand('Quick Open')">
-                <span>Quick Open</span>
+                <span>Test 🧪</span>
                 <span class="shortcut-key">Ctrl+P</span>
                 </div>
-                
+
                 <div class="shortcut-item" onclick="executeCommand('Toggle Sidebar')">
-                <span>Toggle Sidebar</span>
+                <span>Test 🧪</span>
                 <span class="shortcut-key">Ctrl+B</span>
                 </div>
+
+                <div class="shortcut-item" onclick="executeCommand('Toggle Sidebar')">
+                <span>Test 🧪</span>
+                <span class="shortcut-key">Ctrl+B</span>
+                </div>
+
+                <div class="shortcut-item" onclick="executeCommand('Toggle Sidebar')">
+                <span>Test 🧪</span>
+                <span class="shortcut-key">Ctrl+B</span>
+                </div>
+
+                <div class="shortcut-item" onclick="executeCommand('Toggle Sidebar')">
+                <span>Test 🧪</span>
+                <span class="shortcut-key">Ctrl+B</span>
                 </div>
             </div>
 
