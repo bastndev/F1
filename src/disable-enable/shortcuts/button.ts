@@ -162,7 +162,7 @@ export class F1WebviewProvider implements vscode.WebviewViewProvider {
                 </div>
 
                 <div class="shortcut-item default" onclick="executeCommand('Toggle Terminal')">
-                <span>Toggle AI suggestions</span>
+                <span>AI suggestions (disable/enable)</span>
                 <span class="shortcut-key">Shift+F1</span>
                 </div>
 
