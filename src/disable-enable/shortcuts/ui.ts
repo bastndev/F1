@@ -4,22 +4,21 @@ import { MyListUI } from './my-list';
  * ========================================
  * UI/UX Manager for F1 Shortcuts Extension
  * ========================================
- * 
+ *
  * This file contains all UI-related logic for the shortcuts webview.
  * Separated from business logic for better maintainability.
  */
 
 export class ShortcutsUIManager {
-    
-    // ==========================================
-    // CSS STYLES SECTION
-    // ==========================================
-    
-    /**
-     * Main container and layout styles
-     */
-    private static getLayoutStyles(): string {
-        return `
+  // ==========================================
+  // CSS STYLES SECTION
+  // ==========================================
+
+  /**
+   * Main container and layout styles
+   */
+  private static getLayoutStyles(): string {
+    return `
             body {
                 font-family: var(--vscode-font-family);
                 font-size: var(--vscode-font-size);
@@ -42,13 +41,13 @@ export class ShortcutsUIManager {
                 flex-shrink: 0;
             }
         `;
-    }
+  }
 
-    /**
-     * Button component styles (Combine button)
-     */
-    private static getButtonStyles(): string {
-        return `
+  /**
+   * Button component styles (Combine button)
+   */
+  private static getButtonStyles(): string {
+    return `
             .button {
                 background-color: var(--vscode-button-background);
                 color: var(--vscode-button-foreground);
@@ -70,13 +69,13 @@ export class ShortcutsUIManager {
                 background-color: var(--vscode-button-hoverBackground);
             }
         `;
-    }
+  }
 
-    /**
-     * Shortcuts list component styles (My List section)
-     */
-    private static getShortcutsListStyles(): string {
-        return `
+  /**
+   * Shortcuts list component styles (My List section)
+   */
+  private static getShortcutsListStyles(): string {
+    return `
             .shortcuts-container {
                 flex: 1;
                 overflow-y: auto;
@@ -117,13 +116,13 @@ export class ShortcutsUIManager {
                 margin: 10px 0;
             }
         `;
-    }
+  }
 
-    /**
-     * Combines all CSS styles into a single string
-     */
-    public static getAllStyles(): string {
-        return `
+  /**
+   * Combines all CSS styles into a single string
+   */
+  public static getAllStyles(): string {
+    return `
             /* ========== LAYOUT STYLES ========== */
             ${this.getLayoutStyles()}
 
@@ -133,17 +132,17 @@ export class ShortcutsUIManager {
             /* ========== SHORTCUTS LIST COMPONENT ========== */
             ${this.getShortcutsListStyles()}
         `;
-    }
+  }
 
-    // ==========================================
-    // JAVASCRIPT SECTION
-    // ==========================================
+  // ==========================================
+  // JAVASCRIPT SECTION
+  // ==========================================
 
-    /**
-     * Client-side JavaScript for webview interactions
-     */
-    public static getWebviewScript(): string {
-        return `
+  /**
+   * Client-side JavaScript for webview interactions
+   */
+  public static getWebviewScript(): string {
+    return `
             // VSCode API initialization
             const vscode = acquireVsCodeApi();
 
@@ -164,43 +163,43 @@ export class ShortcutsUIManager {
                 sendMessage('execute', command);
             }
         `;
-    }
+  }
 
-    // ==========================================
-    // HTML COMPONENTS SECTION
-    // ==========================================
+  // ==========================================
+  // HTML COMPONENTS SECTION
+  // ==========================================
 
-    /**
-     * Generate the Combine button HTML
-     */
-    private static getCombineButtonHTML(): string {
-        return `
+  /**
+   * Generate the Combine button HTML
+   */
+  private static getCombineButtonHTML(): string {
+    return `
             <button class="button" onclick="sendMessage('commit')">
                 Combine
             </button>
         `;
-    }
+  }
 
-    /**
-     * Generate the My List section HTML
-     */
-    private static getMyListSectionHTML(): string {
-        return `
+  /**
+   * Generate the My List section HTML
+   */
+  private static getMyListSectionHTML(): string {
+    return `
             <div class="section-title">My List</div>
             ${MyListUI.generateShortcutsHTML()}
         `;
-    }
+  }
 
-    // ==========================================
-    // MAIN HTML GENERATOR
-    // ==========================================
+  // ==========================================
+  // MAIN HTML GENERATOR
+  // ==========================================
 
-    /**
-     * Generate complete HTML for the webview
-     * This is the main entry point for UI generation
-     */
-    public static generateWebviewHTML(): string {
-        return `<!DOCTYPE html>
+  /**
+   * Generate complete HTML for the webview
+   * This is the main entry point for UI generation
+   */
+  public static generateWebviewHTML(): string {
+    return `<!DOCTYPE html>
         <html lang="en">
         <head>
             <meta charset="UTF-8">
@@ -223,26 +222,36 @@ export class ShortcutsUIManager {
             </script>
         </body>
         </html>`;
-    }
+  }
 }
 
 /**
  * ========================================
  * USAGE EXAMPLE:
  * ========================================
- * 
+ *
  * In your webview provider:
- * 
+ *
  * webviewView.webview.html = ShortcutsUIManager.generateWebviewHTML();
- * 
+ *
  * ========================================
  * EXTENDING THE UI:
  * ========================================
- * 
+ *
  * 1. Add new component styles in their own method
  * 2. Add the method to getAllStyles()
  * 3. Create HTML generator method for the component
  * 4. Add to generateWebviewHTML()
- * 
+ *
  * This keeps everything organized and easy to maintain!
  */
+
+// ==========================================
+// MODULE EXPORTS
+// ==========================================
+
+// Export the main webview provider
+export { F1WebviewProvider } from './button';
+
+// Export data types and utilities
+export { MyListUI, type ShortcutItem } from './my-list';
