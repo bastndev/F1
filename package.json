@@ -91,6 +91,12 @@
       {
         "command": "f1.toggleAISuggestions",
         "title"  : "Toggle AI Suggestions"
+      },
+
+      {
+        "command": "f1.toggleCppSuggestions",
+        "title": "Toggle Cursor Suggestions",
+        "category": "F1"
       }
     ],
 
@@ -109,13 +115,9 @@
       {
         "key": "ctrl+f1",
         "mac": "cmd+f1",
-        "command": "editor.cpp.disableenabled"
-      },{
-        "key": "alt+f1",
-        "mac": "alt+f1",
-        "command": "editor.action.enableCppGlobally"
+        "command": "f1.toggleCppSuggestions",
+        "when": "editorTextFocus"
       }
-
 
     ]
   },
