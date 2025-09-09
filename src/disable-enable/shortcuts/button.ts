@@ -136,6 +136,11 @@ export class F1WebviewProvider implements vscode.WebviewViewProvider {
                 border-radius: 3px;
                 font-size: 11px;
             }
+
+            .default {
+                border-left: 3px solid var(--vscode-button-background);
+            }
+
             .user-line {
                 border-top: 0.5px solid #d1d1d11b;
                 width: 100%;
@@ -151,12 +156,12 @@ export class F1WebviewProvider implements vscode.WebviewViewProvider {
             <div class="section-title">My List</div>
             
             <div class="shortcuts-container">
-                <div class="shortcut-item" onclick="executeCommand('Toggle Terminal')">
+                <div class="shortcut-item default" onclick="executeCommand('Toggle Terminal')">
                 <span>Toggle word Wrap</span>
                 <span class="shortcut-key">F1</span>
                 </div>
 
-                <div class="shortcut-item" onclick="executeCommand('Toggle Terminal')">
+                <div class="shortcut-item default" onclick="executeCommand('Toggle Terminal')">
                 <span>Toggle AI suggestions</span>
                 <span class="shortcut-key">Shift+F1</span>
                 </div>
