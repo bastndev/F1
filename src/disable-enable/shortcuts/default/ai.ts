@@ -10,11 +10,10 @@ function showAIToggleNotification(isEnabled: boolean): void {
 async function getCurrentAISuggestionsState(): Promise<boolean> {
   const config = vscode.workspace.getConfiguration();
   
+  // Solo verificamos el estado de inlineSuggest ya que es universal
   const inlineSuggestEnabled = config.get('editor.inlineSuggest.enabled', true) as boolean;
-  const copilotEnabled = config.get('github.copilot.enable', true) as boolean;
-  const tabCompletionEnabled = config.get('editor.tabCompletion', 'off') !== 'off';
   
-  return inlineSuggestEnabled || copilotEnabled || tabCompletionEnabled;
+  return inlineSuggestEnabled;
 }
 
 // Enhanced function to toggle AI suggestions
@@ -44,7 +43,8 @@ async function toggleAISuggestionsState(currentState: boolean): Promise<boolean>
     }
   }
   
-  // If no specific AI command worked, handle general settings manually
+  // Si ningún comando específico funcionó, solo modificamos editor.inlineSuggest.enabled
+  // NO modificamos github.copilot.enable para mantener compatibilidad multi-editor
   if (!commandExecuted) {
     try {
       await config.update(
@@ -53,15 +53,8 @@ async function toggleAISuggestionsState(currentState: boolean): Promise<boolean>
         vscode.ConfigurationTarget.Global
       );
       
-      // Also try to toggle Copilot if present
-      const hasCopilot = config.has('github.copilot.enable');
-      if (hasCopilot) {
-        await config.update(
-          'github.copilot.enable',
-          newState,
-          vscode.ConfigurationTarget.Global
-        );
-      }
+      // NO modificamos github.copilot.enable
+      // Cada editor manejará su propia configuración específica
       
     } catch (error) {
       console.error('Error updating AI settings manually:', error);
@@ -116,12 +109,16 @@ export function activate(context: vscode.ExtensionContext) {
         const currentState = await getCurrentAISuggestionsState();
         const config = vscode.workspace.getConfiguration();
         
-        const details = {
+        const details: { [key: string]: any } = {
           'Inline Suggest': config.get('editor.inlineSuggest.enabled', true),
-          'Copilot': config.get('github.copilot.enable', 'not set'),
           'Tab Completion': config.get('editor.tabCompletion', 'off'),
           'Overall State': currentState
         };
+        
+        // Solo mostramos info de Copilot si existe, pero no lo modificamos
+        if (config.has('github.copilot.enable')) {
+          details['Copilot (read-only)'] = config.get('github.copilot.enable', 'not set');
+        }
         
         vscode.window.showInformationMessage(
           `AI State: ${currentState ? 'ENABLED' : 'DISABLED'} | Details: ${JSON.stringify(details)}`
