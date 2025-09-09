@@ -7,42 +7,77 @@ function showAIToggleNotification(isEnabled: boolean): void {
   vscode.window.showInformationMessage(`💡 AI Suggestions ${status} ${emoji}`);
 }
 
+// Track Cursor AI state since it doesn't have a reliable way to check current state
+let cursorAIEnabled = true;
+
 async function getCurrentAISuggestionsState(): Promise<boolean> {
   const config = vscode.workspace.getConfiguration();
-  
-  // We only check the state of inlineSuggest since it is universal
-  const inlineSuggestEnabled = config.get('editor.inlineSuggest.enabled', true) as boolean;
-  
+
+  // For Cursor, we track the state manually since it doesn't expose it reliably
+  // We assume if Cursor commands exist, we're in Cursor
+  const availableCommands = await vscode.commands.getCommands();
+  const isCursor =
+    availableCommands.includes('editor.cpp.disableenabled') ||
+    availableCommands.includes('editor.action.enableCppGlobally');
+
+  if (isCursor) {
+    return cursorAIEnabled;
+  }
+
+  // For other editors, use the universal inlineSuggest setting
+  const inlineSuggestEnabled = config.get(
+    'editor.inlineSuggest.enabled',
+    true
+  ) as boolean;
   return inlineSuggestEnabled;
 }
 
 // Enhanced function to toggle AI suggestions
-async function toggleAISuggestionsState(currentState: boolean): Promise<boolean> {
+async function toggleAISuggestionsState(
+  currentState: boolean
+): Promise<boolean> {
   const config = vscode.workspace.getConfiguration();
   const newState = !currentState;
-  
+
+  // Commands that toggle AI suggestions (these work as toggles)
   const aiToggleCommands = [
-    'windsurf.prioritized.supercompleteEscape',       // 0: Windsurf
-    'github.copilot.toggleInlineSuggestion',          // 1: GitHub Copilot (VSCode)
-    // 'editor.cpp.disableenabled',                      // 2: Cursor AI
-    'icube.toggleAISuggestions',                      // 3: Trae AI
-    // ---- ---- --- --- -- -                         // 4: Firebase Studio
-    // ---- ---- --- -- --                            // 5: Kiro
+    'windsurf.prioritized.supercompleteEscape', // 0: Windsurf
+    'github.copilot.toggleInlineSuggestion', // 1: GitHub Copilot (VSCode)
+    'icube.toggleAISuggestions', // 3: Trae AI
   ];
 
+  // Cursor AI commands (separate enable/disable commands)
+  const cursorCommands = {
+    disable: 'editor.cpp.disableenabled',
+    enable: 'editor.action.enableCppGlobally',
+  };
+
   let commandExecuted = false;
-  
-  // Try specific AI commands first
-  for (const command of aiToggleCommands) {
-    try {
-      await vscode.commands.executeCommand(command);
-      commandExecuted = true;
-      break;
-    } catch {
-      continue;
+
+  // Try Cursor AI commands first (they have separate enable/disable)
+  try {
+    if (newState) {
+      await vscode.commands.executeCommand(cursorCommands.enable);
+      cursorAIEnabled = true;
+    } else {
+      await vscode.commands.executeCommand(cursorCommands.disable);
+      cursorAIEnabled = false;
+    }
+    commandExecuted = true;
+  } catch {
+    // If Cursor commands fail, try other AI toggle commands
+    for (const command of aiToggleCommands) {
+      try {
+        await vscode.commands.executeCommand(command);
+        commandExecuted = true;
+        break;
+      } catch {
+        continue;
+      }
     }
   }
-  
+
+  // Fallback to manual configuration update
   if (!commandExecuted) {
     try {
       await config.update(
@@ -50,16 +85,14 @@ async function toggleAISuggestionsState(currentState: boolean): Promise<boolean>
         newState,
         vscode.ConfigurationTarget.Global
       );
-      
-      // Helper function for AI notifications 
     } catch (error) {
       console.error('Error updating AI settings manually:', error);
       throw error;
     }
   }
-  
-  await new Promise(resolve => setTimeout(resolve, 100));
-  
+
+  await new Promise((resolve) => setTimeout(resolve, 100));
+
   return newState;
 }
 
@@ -73,23 +106,24 @@ export function activate(context: vscode.ExtensionContext) {
       try {
         // First, detect current state accurately
         const currentState = await getCurrentAISuggestionsState();
-        
+
         // Toggle the state
         const newState = await toggleAISuggestionsState(currentState);
-        
+
         // Verify the actual final state after toggle
         // Wait a bit more for all settings to propagate
-        await new Promise(resolve => setTimeout(resolve, 200));
+        await new Promise((resolve) => setTimeout(resolve, 200));
         const finalState = await getCurrentAISuggestionsState();
-        
+
         // Show notification with the actual final state
         showAIToggleNotification(finalState);
-        
+
         // Debug logging (remove in production)
         console.log(`AI Suggestions: ${currentState} → ${finalState}`);
-        
       } catch (error) {
-        vscode.window.showErrorMessage(`Error toggling AI suggestions: ${error}`);
+        vscode.window.showErrorMessage(
+          `Error toggling AI suggestions: ${error}`
+        );
         console.error('AI toggle error:', error);
       }
     }
@@ -104,19 +138,24 @@ export function activate(context: vscode.ExtensionContext) {
       try {
         const currentState = await getCurrentAISuggestionsState();
         const config = vscode.workspace.getConfiguration();
-        
+
         const details: { [key: string]: any } = {
           'Inline Suggest': config.get('editor.inlineSuggest.enabled', true),
           'Tab Completion': config.get('editor.tabCompletion', 'off'),
-          'Overall State': currentState
+          'Overall State': currentState,
         };
-        
+
         if (config.has('github.copilot.enable')) {
-          details['Copilot (read-only)'] = config.get('github.copilot.enable', 'not set');
+          details['Copilot (read-only)'] = config.get(
+            'github.copilot.enable',
+            'not set'
+          );
         }
-        
+
         vscode.window.showInformationMessage(
-          `AI State: ${currentState ? 'ENABLED' : 'DISABLED'} | Details: ${JSON.stringify(details)}`
+          `AI State: ${
+            currentState ? 'ENABLED' : 'DISABLED'
+          } | Details: ${JSON.stringify(details)}`
         );
       } catch (error) {
         vscode.window.showErrorMessage(`Error checking AI state: ${error}`);
