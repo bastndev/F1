@@ -1,14 +1,5 @@
 import { MyListUI } from './my-list';
 
-/**
- * ========================================
- * UI/UX Manager for F1 Shortcuts Extension
- * ========================================
- *
- * This file contains all UI-related logic for the shortcuts webview.
- * Separated from business logic for better maintainability.
- */
-
 export class ShortcutsUIManager {
   // ==========================================
   // CSS STYLES SECTION

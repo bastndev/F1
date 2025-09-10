@@ -1,15 +1,6 @@
 import * as vscode from 'vscode';
 import { ShortcutsUIManager } from './ui';
 
-/**
- * ========================================
- * F1 Webview Provider - Business Logic
- * ========================================
- *
- * This class handles the webview provider logic and command execution.
- * UI generation is delegated to ShortcutsUIManager for better separation.
- */
-
 export class F1WebviewProvider implements vscode.WebviewViewProvider {
   public static readonly viewType = 'f1-shortcuts';
   private _view?: vscode.WebviewView;
