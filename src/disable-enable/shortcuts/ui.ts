@@ -99,6 +99,14 @@ export class ShortcutsUIManager {
 
             .default {
                 border-left: 3px solid var(--vscode-button-background);
+                opacity: 0.7;
+                cursor: default;
+                background-color: var(--vscode-editor-background);
+            }
+
+            .default:hover {
+                background-color: var(--vscode-editor-background);
+                opacity: 0.8;
             }
 
             .user-line {

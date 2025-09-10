@@ -11,13 +11,13 @@ export class MyListUI {
       {
         label: 'Toggle word Wrap',
         key: 'F1',
-        command: 'Toggle Word Wrap',
+        command: '',
         isDefault: true,
       },
       {
         label: 'AI suggestion (disable/enable)',
         key: 'Shift+F1',
-        command: 'Toggle AI',
+        command: '',
         isDefault: true,
       },
     ];
@@ -37,7 +37,7 @@ export class MyListUI {
                 ${defaultShortcuts
                   .map(
                     (shortcut) => `
-                    <div class="shortcut-item default" onclick="executeCommand('${shortcut.command}')">
+                    <div class="shortcut-item default" title="DEFAULT">
                         <span>${shortcut.label}</span>
                         <span class="shortcut-key">${shortcut.key}</span>
                     </div>
