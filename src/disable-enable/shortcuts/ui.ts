@@ -114,11 +114,12 @@ export class ShortcutsUIManager {
                 width: 100%;
                 margin: 10px 0;
             }
-            .user-select:hover{
+            .user-delete:hover{
                 border-left: 3px solid #ff002b;
                 opacity: 0.7;
                 cursor: default;
                 background-color: var(--vscode-editor-background);
+                cursor:pointer
             }
         `;
   }
