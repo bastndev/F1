@@ -19,183 +19,64 @@ class EditorControlsProvider implements vscode.TreeDataProvider<EditorControl> {
 
   private controls: EditorControl[] = [
     // Editor Visual Features
-    {
-      name: 'Minimap',
-      category: 'editor',
-      configKey: 'editor.minimap.enabled',
-    },
-    {
-      name: 'Line Numbers',
-      category: 'editor',
-      configKey: 'editor.lineNumbers',
-    },
-    { name: 'Code Folding', category: 'editor', configKey: 'editor.folding' },
-    {
-      name: 'Sticky Scroll',
-      category: 'editor',
-      configKey: 'editor.stickyScroll.enabled',
-    },
-    {
-      name: 'Indent Guides',
-      category: 'editor',
-      configKey: 'editor.guides.indentation',
-    },
-    {
-      name: 'Bracket Pair Colorization',
-      category: 'editor',
-      configKey: 'editor.bracketPairColorization.enabled',
-    },
-    {
-      name: 'Color Decorators',
-      category: 'editor',
-      configKey: 'editor.colorDecorators',
-    },
-    {
-      name: 'Cursor Blinking',
-      category: 'editor',
-      configKey: 'editor.cursorBlinking',
-    },
-    {
-      name: 'Cursor Smooth Caret Animation',
-      category: 'editor',
-      configKey: 'editor.cursorSmoothCaretAnimation',
-    },
+
+    {name: 'Bracket Pair Colorization',category: 'editor',configKey: 'editor.bracketPairColorization.enabled',},
+    {name: 'Code Folding',category: 'editor',configKey: 'editor.folding',},
+    {name: 'Color Decorators',category: 'editor',configKey: 'editor.colorDecorators',},
+    {name: 'Cursor Blinking',category: 'editor',configKey: 'editor.cursorBlinking',},
+    {name: 'Cursor Smooth Caret Animation',category: 'editor',configKey: 'editor.cursorSmoothCaretAnimation',},
+    {name: 'Indent Guides',category: 'editor',configKey: 'editor.guides.indentation',},
+    {name: 'Line Numbers',category: 'editor',configKey: 'editor.lineNumbers',},
+    {name: 'Minimap',category: 'editor',configKey: 'editor.minimap.enabled',},
+    {name: 'Sticky Scroll',category: 'editor',configKey: 'editor.stickyScroll.enabled',},
 
     // Separator
-    { name: '', category: 'editor', isSeparator: true },
+    {name: '',category: 'editor',isSeparator: true,},
 
     // UI Features
-    { name: 'Breadcrumbs', category: 'ui', configKey: 'breadcrumbs.enabled' },
-    {
-      name: 'Activity Bar',
-      category: 'ui',
-      configKey: 'workbench.activityBar.visible',
-    },
-    {
-      name: 'Status Bar',
-      category: 'ui',
-      configKey: 'workbench.statusBar.visible',
-    },
-    {
-      name: 'Side Bar',
-      category: 'ui',
-      configKey: 'workbench.sideBar.location',
-    },
-    {
-      name: 'Panel',
-      category: 'ui',
-      configKey: 'workbench.panel.defaultLocation',
-    },
-    { name: 'Tabs', category: 'ui', configKey: 'workbench.editor.showTabs' },
-    {
-      name: 'Compact Folders',
-      category: 'ui',
-      configKey: 'explorer.compactFolders',
-    },
-    { name: 'Tree Indent', category: 'ui', configKey: 'workbench.tree.indent' },
+    {name: 'Activity Bar',category: 'ui',configKey: 'workbench.activityBar.visible',},
+    {name: 'Breadcrumbs',category: 'ui',configKey: 'breadcrumbs.enabled',},
+    {name: 'Compact Folders',category: 'ui',configKey: 'explorer.compactFolders',},
+    {name: 'Panel',category: 'ui',configKey: 'workbench.panel.defaultLocation',},
+    {name: 'Side Bar',category: 'ui',configKey: 'workbench.sideBar.location',},
+    {name: 'Status Bar',category: 'ui',configKey: 'workbench.statusBar.visible',},
+    {name: 'Tabs',category: 'ui',configKey: 'workbench.editor.showTabs',},
+    {name: 'Tree Indent',category: 'ui',configKey: 'workbench.tree.indent',},
 
     // Separator
-    { name: '', category: 'ui', isSeparator: true },
+    {name: '',category: 'ui',isSeparator: true,},
 
     // Formatting & Code Features
-    {
-      name: 'Format On Save',
-      category: 'formatting',
-      configKey: 'editor.formatOnSave',
-    },
-    {
-      name: 'Format On Type',
-      category: 'formatting',
-      configKey: 'editor.formatOnType',
-    },
-    {
-      name: 'Format On Paste',
-      category: 'formatting',
-      configKey: 'editor.formatOnPaste',
-    },
-    { name: 'Auto Save', category: 'formatting', configKey: 'files.autoSave' },
-    {
-      name: 'Trim Trailing Whitespace',
-      category: 'formatting',
-      configKey: 'files.trimTrailingWhitespace',
-    },
-    {
-      name: 'Insert Final Newline',
-      category: 'formatting',
-      configKey: 'files.insertFinalNewline',
-    },
+    {name: 'Auto Save',category: 'formatting',configKey: 'files.autoSave',},
+    {name: 'Format On Paste',category: 'formatting',configKey: 'editor.formatOnPaste',},
+    {name: 'Format On Save',category: 'formatting',configKey: 'editor.formatOnSave',},
+    {name: 'Format On Type',category: 'formatting',configKey: 'editor.formatOnType',},
+    {name: 'Insert Final Newline',category: 'formatting',configKey: 'files.insertFinalNewline',},
+    {name: 'Trim Trailing Whitespace',category: 'formatting',configKey: 'files.trimTrailingWhitespace',},
 
     // Separator
-    { name: '', category: 'formatting', isSeparator: true },
+    {name: '',category: 'formatting',isSeparator: true,},
 
     // IntelliSense & Features
-    {
-      name: 'IntelliSense',
-      category: 'features',
-      configKey: 'editor.quickSuggestions',
-    },
-    {
-      name: 'Parameter Hints',
-      category: 'features',
-      configKey: 'editor.parameterHints.enabled',
-    },
-    { name: 'Hover', category: 'features', configKey: 'editor.hover.enabled' },
-    { name: 'Code Lens', category: 'features', configKey: 'editor.codeLens' },
-    {
-      name: 'Auto Closing Brackets',
-      category: 'features',
-      configKey: 'editor.autoClosingBrackets',
-    },
-    {
-      name: 'Auto Closing Quotes',
-      category: 'features',
-      configKey: 'editor.autoClosingQuotes',
-    },
-    {
-      name: 'Auto Surround Selection',
-      category: 'features',
-      configKey: 'editor.autoSurround',
-    },
-    {
-      name: 'Suggest On Trigger Characters',
-      category: 'features',
-      configKey: 'editor.suggestOnTriggerCharacters',
-    },
-    {
-      name: 'Accept Suggestion On Enter',
-      category: 'features',
-      configKey: 'editor.acceptSuggestionOnEnter',
-    },
+    {name: 'Accept Suggestion On Enter',category: 'features',configKey: 'editor.acceptSuggestionOnEnter',},
+    {name: 'Auto Closing Brackets',category: 'features',configKey: 'editor.autoClosingBrackets',},
+    {name: 'Auto Closing Quotes',category: 'features',configKey: 'editor.autoClosingQuotes',},
+    {name: 'Auto Surround Selection',category: 'features',configKey: 'editor.autoSurround',},
+    {name: 'Code Lens',category: 'features',configKey: 'editor.codeLens',},
+    {name: 'Git Auto Fetch',category: 'features',configKey: 'git.autofetch',},
+    {name: 'Git Decorations',category: 'features',configKey: 'git.decorations.enabled',},
+    {name: 'Hover',category: 'features',configKey: 'editor.hover.enabled',},
+    {name: 'IntelliSense',category: 'features',configKey: 'editor.quickSuggestions',},
+    {name: 'Parameter Hints',category: 'features',configKey: 'editor.parameterHints.enabled',},
+    {name: 'Suggest On Trigger Characters',category: 'features',configKey: 'editor.suggestOnTriggerCharacters',},
 
     // Separator
-    { name: '', category: 'features', isSeparator: true },
+    {name: '',category: 'features',isSeparator: true,},
 
     // Debugging & Terminal
-    {
-      name: 'Debug Console',
-      category: 'debugging',
-      configKey: 'debug.console.fontSize',
-    },
-    {
-      name: 'Inline Values',
-      category: 'debugging',
-      configKey: 'debug.inlineValues',
-    },
-    {
-      name: 'Terminal Cursor Blinking',
-      category: 'debugging',
-      configKey: 'terminal.integrated.cursorBlinking',
-    },
-    {
-      name: 'Git Decorations',
-      category: 'features',
-      configKey: 'git.decorations.enabled',
-    },
-    {
-      name: 'Git Auto Fetch',
-      category: 'features',
-      configKey: 'git.autofetch',
-    },
+    {name: 'Debug Console',category: 'debugging',configKey: 'debug.console.fontSize',},
+    {name: 'Inline Values',category: 'debugging',configKey: 'debug.inlineValues',},
+    {name: 'Terminal Cursor Blinking',category: 'debugging',configKey: 'terminal.integrated.cursorBlinking',},
   ];
 
   getTreeItem(element: EditorControl): vscode.TreeItem {
