@@ -1,8 +1,8 @@
 import * as vscode from 'vscode';
 
-// Helper function for Word Wrap notifications
+// Notifications wrap
 function showWordWrapToggleNotification(isEnabled: boolean): void {
-  const emoji = isEnabled ? '❌' : '✅';  // Note: inverted because 'off' means enabled wrap
+  const emoji = isEnabled ? '❌' : '✅';
   const status = isEnabled ? 'DISABLED' : 'ENABLED';
   vscode.window.showInformationMessage(`📝 Word Wrap ${status} ${emoji}`);
 }
@@ -22,7 +22,7 @@ export function activate(context: vscode.ExtensionContext) {
       const newMarkdownWrap = currentMarkdownWrap === 'off' ? 'on' : 'off';
       
       try {
-        // Synchronize general word wrap with markdown state
+        // Synchronize general word wrap
         await config.update(
           'editor.wordWrap',
           newMarkdownWrap,
@@ -40,7 +40,6 @@ export function activate(context: vscode.ExtensionContext) {
           vscode.ConfigurationTarget.Global
         );
 
-        // Show notification with corrected logic
         showWordWrapToggleNotification(newMarkdownWrap === 'on');
       } catch (error) {
         vscode.window.showErrorMessage(`Error toggling word wrap: ${error}`);
@@ -48,6 +47,5 @@ export function activate(context: vscode.ExtensionContext) {
     }
   );
 
-  // Register command
   context.subscriptions.push(toggleMarkdownWrap);
 }

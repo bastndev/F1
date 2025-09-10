@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 
-// Notifications
+// Notifications AI
 function showAIToggleNotification(isEnabled: boolean): void {
   const emoji = isEnabled ? '✅' : '❌';
   const status = isEnabled ? 'ENABLED' : 'DISABLED';
