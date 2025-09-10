@@ -23,13 +23,13 @@ export class MyListUI {
     ];
 
     const userShortcuts: ShortcutItem[] = [
-      { label: 'Test 🧪', key: 'Ctrl+B', command: 'Toggle Terminal' },
-      { label: 'Test 🧪', key: 'Ctrl+B', command: 'Command Palette' },
-      { label: 'Test 🧪', key: 'Ctrl+B', command: 'Quick Open' },
-      { label: 'Test 🧪', key: 'Ctrl+B', command: 'Toggle Sidebar' },
-      { label: 'Test 🧪', key: 'Ctrl+B', command: 'Toggle Sidebar' },
-      { label: 'Test 🧪', key: 'Ctrl+B', command: 'Toggle Sidebar' },
-      { label: 'Test 🧪', key: 'Ctrl+B', command: 'Toggle Sidebar' },
+      { label: 'Test 1 🧪', key: 'Ctrl+B', command: 'Toggle Terminal' },
+      { label: 'Test 2 🧪', key: 'Ctrl+B', command: 'Command Palette' },
+      { label: 'Test 3 🧪', key: 'Ctrl+B', command: 'Quick Open' },
+      { label: 'Test 4 🧪', key: 'Ctrl+B', command: 'Toggle Sidebar' },
+      { label: 'Test 5 🧪', key: 'Ctrl+B', command: 'Toggle Sidebar' },
+      { label: 'Test 6 🧪', key: 'Ctrl+B', command: 'Toggle Sidebar' },
+      { label: 'Test 7 🧪', key: 'Ctrl+B', command: 'Toggle Sidebar' },
     ];
 
     return `
@@ -50,7 +50,7 @@ export class MyListUI {
                 ${userShortcuts
                   .map(
                     (shortcut) => `
-                    <div class="shortcut-item" onclick="executeCommand('${shortcut.command}')">
+                    <div class="shortcut-item user-select" onclick="executeCommand('${shortcut.command}')">
                         <span>${shortcut.label}</span>
                         <span class="shortcut-key">${shortcut.key}</span>
                     </div>
