@@ -6,6 +6,16 @@ export interface ShortcutItem {
 }
 
 export class MyListUI {
+  private static userShortcuts: ShortcutItem[] = [
+    { label: 'Test 1 🧪', key: 'Ctrl+B' },
+    { label: 'Test 2 🧪', key: 'Ctrl+B' },
+    { label: 'Test 3 🧪', key: 'Ctrl+B' },
+    { label: 'Test 4 🧪', key: 'Ctrl+B' },
+    { label: 'Test 5 🧪', key: 'Ctrl+B' },
+    { label: 'Test 6 🧪', key: 'Ctrl+B' },
+    { label: 'Test 7 🧪', key: 'Ctrl+B' },
+  ];
+
   static generateShortcutsHTML(): string {
     const defaultShortcuts: ShortcutItem[] = [
       {
@@ -20,16 +30,6 @@ export class MyListUI {
         // command: '',
         isDefault: true,
       },
-    ];
-
-    const userShortcuts: ShortcutItem[] = [
-      { label: 'Test 1 🧪', key: 'Ctrl+B' },
-      { label: 'Test 2 🧪', key: 'Ctrl+B' },
-      { label: 'Test 3 🧪', key: 'Ctrl+B' },
-      { label: 'Test 4 🧪', key: 'Ctrl+B' },
-      { label: 'Test 5 🧪', key: 'Ctrl+B' },
-      { label: 'Test 6 🧪', key: 'Ctrl+B' },
-      { label: 'Test 7 🧪', key: 'Ctrl+B' },
     ];
 
     return `
@@ -47,10 +47,10 @@ export class MyListUI {
                 
                 <div class="user-line"></div>
                 
-                ${userShortcuts
+                ${this.userShortcuts
                   .map(
-                    (shortcut) => `
-                    <div class="shortcut-item user-delete">
+                    (shortcut, index) => `
+                    <div class="shortcut-item user-delete" onclick="confirmDelete(${index}, '${shortcut.label}')">
                         <span>${shortcut.label}</span>
                         <span class="shortcut-key">${shortcut.key}</span>
                     </div>
@@ -59,5 +59,15 @@ export class MyListUI {
                   .join('')}
             </div>
         `;
+  }
+
+  static removeShortcut(index: number): void {
+    if (index >= 0 && index < this.userShortcuts.length) {
+      this.userShortcuts.splice(index, 1);
+    }
+  }
+
+  static getUserShortcuts(): ShortcutItem[] {
+    return this.userShortcuts;
   }
 }

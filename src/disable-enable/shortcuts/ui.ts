@@ -168,6 +168,15 @@ export class ShortcutsUIManager {
             function executeCommand(command) {
                 sendMessage('execute', command);
             }
+
+            /**
+             * Show confirmation dialog for deleting a shortcut
+             * @param {number} index - Index of the shortcut to delete
+             * @param {string} label - Label of the shortcut for confirmation message
+             */
+            function confirmDelete(index, label) {
+                sendMessage('confirmDelete', { index, label });
+            }
         `;
   }
 

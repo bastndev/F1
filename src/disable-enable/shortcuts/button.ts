@@ -1,5 +1,6 @@
 import * as vscode from 'vscode';
 import { ShortcutsUIManager } from './ui';
+import { MyListUI } from './my-list';
 
 export class F1WebviewProvider implements vscode.WebviewViewProvider {
   public static readonly viewType = 'f1-shortcuts';
@@ -47,6 +48,9 @@ export class F1WebviewProvider implements vscode.WebviewViewProvider {
         case 'execute':
           this._handleExecute(data.value);
           break;
+        case 'confirmDelete':
+          this._handleConfirmDelete(data.value);
+          break;
         default:
           console.warn(`Unknown message type: ${data.type}`);
       }
@@ -76,6 +80,32 @@ export class F1WebviewProvider implements vscode.WebviewViewProvider {
       vscode.commands.executeCommand(vscodeCommand);
     } else {
       console.warn(`Unknown command: ${command}`);
+    }
+  }
+
+  /**
+   * Handle delete confirmation for shortcuts
+   * @param data - Object containing index and label of the shortcut to delete
+   */
+  private async _handleConfirmDelete(data: {
+    index: number;
+    label: string;
+  }): Promise<void> {
+    const { index, label } = data;
+
+    // Show VSCode native confirmation dialog
+    const result = await vscode.window.showInformationMessage(
+      `Are you sure to DELETE (${label}) ?`,
+      { modal: true },
+      'Yes',
+    );
+
+    // If user clicked "Yes", remove the shortcut and refresh the webview
+    if (result === 'Yes') {
+      MyListUI.removeShortcut(index);
+
+      // Refresh the webview to show updated list
+      this.refresh();
     }
   }
 
