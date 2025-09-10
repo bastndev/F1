@@ -1,5 +1,4 @@
 import * as vscode from 'vscode';
-import { NotificationManager } from './ed-notifications';
 import { IconManager } from './ed-icons';
 
 interface EditorControl {
@@ -20,15 +19,15 @@ class EditorControlsProvider implements vscode.TreeDataProvider<EditorControl> {
   private controls: EditorControl[] = [
     // Editor Visual Features
 
-    {name: 'Bracket Pair Colorization',category: 'editor',configKey: 'editor.bracketPairColorization.enabled',},
-    {name: 'Code Folding',category: 'editor',configKey: 'editor.folding',},
-    {name: 'Color Decorators',category: 'editor',configKey: 'editor.colorDecorators',},
-    {name: 'Cursor Blinking',category: 'editor',configKey: 'editor.cursorBlinking',},
-    {name: 'Cursor Smooth Caret Animation',category: 'editor',configKey: 'editor.cursorSmoothCaretAnimation',},
-    {name: 'Indent Guides',category: 'editor',configKey: 'editor.guides.indentation',},
-    {name: 'Line Numbers',category: 'editor',configKey: 'editor.lineNumbers',},
     {name: 'Minimap',category: 'editor',configKey: 'editor.minimap.enabled',},
+    {name: 'Code Folding',category: 'editor',configKey: 'editor.folding',},
+    {name: 'Line Numbers',category: 'editor',configKey: 'editor.lineNumbers',},
+    {name: 'Cursor Blinking',category: 'editor',configKey: 'editor.cursorBlinking',},
+    {name: 'Color Decorators',category: 'editor',configKey: 'editor.colorDecorators',},
+    {name: 'Indent Guides',category: 'editor',configKey: 'editor.guides.indentation',},
     {name: 'Sticky Scroll',category: 'editor',configKey: 'editor.stickyScroll.enabled',},
+    {name: 'Cursor Smooth Caret Animation',category: 'editor',configKey: 'editor.cursorSmoothCaretAnimation',},
+    {name: 'Bracket Pair Colorization',category: 'editor',configKey: 'editor.bracketPairColorization.enabled',},
 
     // Separator
     {name: '',category: 'editor',isSeparator: true,},
@@ -126,10 +125,6 @@ class EditorControlsProvider implements vscode.TreeDataProvider<EditorControl> {
     const control = this.getControlByName(controlName);
 
     if (!control || !control.configKey) {
-      NotificationManager.showErrorNotification(
-        controlName,
-        'Configuration key not found'
-      );
       return;
     }
 
@@ -165,17 +160,11 @@ class EditorControlsProvider implements vscode.TreeDataProvider<EditorControl> {
         vscode.ConfigurationTarget.Global
       );
 
-      // Show notification
-      const isEnabled = this.isValueEnabled(newValue);
-      NotificationManager.showToggleNotification(controlName, isEnabled);
-
       // Refresh tree view
       this._onDidChangeTreeData.fire();
     } catch (error) {
-      NotificationManager.showErrorNotification(
-        controlName,
-        error instanceof Error ? error.message : 'Unknown error'
-      );
+      // Silent error handling - could log to console if needed
+      console.error(`Failed to toggle ${controlName}:`, error);
     }
   }
 
