@@ -1,20 +1,19 @@
 import * as vscode from 'vscode';
 
-// Helper function for AI notifications
+// Notifications
 function showAIToggleNotification(isEnabled: boolean): void {
   const emoji = isEnabled ? '✅' : '❌';
   const status = isEnabled ? 'ENABLED' : 'DISABLED';
   vscode.window.showInformationMessage(`💡 AI Suggestions ${status} ${emoji}`);
 }
 
-// Track Cursor AI state since it doesn't have a reliable way to check current state
+// Track Cursor AI state
 let cursorAIEnabled = true;
 
 async function getCurrentAISuggestionsState(): Promise<boolean> {
   const config = vscode.workspace.getConfiguration();
 
-  // For Cursor, we track the state manually since it doesn't expose it reliably
-  // We assume if Cursor commands exist, we're in Cursor
+  // For Cursor,
   const availableCommands = await vscode.commands.getCommands();
   const isCursor =
     availableCommands.includes('editor.cpp.disableenabled') ||
@@ -24,7 +23,6 @@ async function getCurrentAISuggestionsState(): Promise<boolean> {
     return cursorAIEnabled;
   }
 
-  // For other editors, use the universal inlineSuggest setting
   const inlineSuggestEnabled = config.get(
     'editor.inlineSuggest.enabled',
     true
@@ -32,14 +30,13 @@ async function getCurrentAISuggestionsState(): Promise<boolean> {
   return inlineSuggestEnabled;
 }
 
-// Enhanced function to toggle AI suggestions
 async function toggleAISuggestionsState(
   currentState: boolean
 ): Promise<boolean> {
   const config = vscode.workspace.getConfiguration();
   const newState = !currentState;
 
-  // Commands that toggle AI suggestions (these work as toggles)
+  // Others AI (suggestions)
   const aiToggleCommands = [
     'windsurf.prioritized.supercompleteEscape', // 0: Windsurf
     'github.copilot.toggleInlineSuggestion',    // 1: GitHub Copilot (VSCode)
@@ -106,21 +103,16 @@ export function activate(context: vscode.ExtensionContext) {
     'f1.toggleAISuggestions',
     async () => {
       try {
-        // First, detect current state accurately
         const currentState = await getCurrentAISuggestionsState();
 
-        // Toggle the state
         const newState = await toggleAISuggestionsState(currentState);
 
         // Verify the actual final state after toggle
-        // Wait a bit more for all settings to propagate
         await new Promise((resolve) => setTimeout(resolve, 200));
         const finalState = await getCurrentAISuggestionsState();
 
-        // Show notification with the actual final state
         showAIToggleNotification(finalState);
 
-        // Debug logging (remove in production)
         console.log(`AI Suggestions: ${currentState} → ${finalState}`);
       } catch (error) {
         vscode.window.showErrorMessage(
