@@ -11,7 +11,6 @@ class EditorControlsProvider implements vscode.TreeDataProvider<EditorControl> {
         // Editor Visual Features
         { name: 'Minimap', category: 'editor', configKey: 'editor.minimap.enabled' },
         { name: 'Line Numbers', category: 'editor', configKey: 'editor.lineNumbers' },
-        { name: 'Word Wrap', category: 'editor', configKey: 'editor.wordWrap' },
         { name: 'Code Folding', category: 'editor', configKey: 'editor.folding' },
         { name: 'Sticky Scroll', category: 'editor', configKey: 'editor.stickyScroll.enabled' },
         { name: 'Indent Guides', category: 'editor', configKey: 'editor.guides.indentation' },
