@@ -18,7 +18,6 @@ class EditorControlsProvider implements vscode.TreeDataProvider<EditorControl> {
 
   private controls: EditorControl[] = [
     // Editor Visual Features
-
     {name: 'Minimap',category: 'editor',configKey: 'editor.minimap.enabled',},
     {name: 'Code Folding',category: 'editor',configKey: 'editor.folding',},
     {name: 'Line Numbers',category: 'editor',configKey: 'editor.lineNumbers',},
