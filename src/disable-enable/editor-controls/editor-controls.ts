@@ -18,6 +18,9 @@ class EditorControlsProvider implements vscode.TreeDataProvider<EditorControl> {
 
   private controls: EditorControl[] = [
     // Editor Visual Features
+    // Separator
+    {name: 'Editor Features',category: 'editor',isSeparator: true,},
+
     {name: 'Minimap',category: 'editor',configKey: 'editor.minimap.enabled',},
     {name: 'Code Folding',category: 'editor',configKey: 'editor.folding',},
     {name: 'Line Numbers',category: 'editor',configKey: 'editor.lineNumbers',},
@@ -29,7 +32,7 @@ class EditorControlsProvider implements vscode.TreeDataProvider<EditorControl> {
     {name: 'Bracket Pair Colorization',category: 'editor',configKey: 'editor.bracketPairColorization.enabled',},
 
     // Separator
-    {name: 'Editor Features',category: 'editor',isSeparator: true,},
+    {name: 'Editor Features',category: 'ui',isSeparator: true,},
 
     // UI Features
     {name: 'Activity Bar',category: 'ui',configKey: 'workbench.activityBar.visible',},
@@ -42,7 +45,7 @@ class EditorControlsProvider implements vscode.TreeDataProvider<EditorControl> {
     {name: 'Tree Indent',category: 'ui',configKey: 'workbench.tree.indent',},
 
     // Separator
-    {name: 'UI Components',category: 'ui',isSeparator: true,},
+    {name: 'UI Components',category: 'formatting',isSeparator: true,},
 
     // Formatting & Code Features
     {name: 'Auto Save',category: 'formatting',configKey: 'files.autoSave',},
@@ -53,7 +56,7 @@ class EditorControlsProvider implements vscode.TreeDataProvider<EditorControl> {
     {name: 'Trim Trailing Whitespace',category: 'formatting',configKey: 'files.trimTrailingWhitespace',},
 
     // Separator
-    {name: 'Formatting Options',category: 'formatting',isSeparator: true,},
+    {name: 'Formatting Options',category: 'features',isSeparator: true,},
 
     // IntelliSense & Features
     {name: 'Accept Suggestion On Enter',category: 'features',configKey: 'editor.acceptSuggestionOnEnter',},
@@ -69,7 +72,7 @@ class EditorControlsProvider implements vscode.TreeDataProvider<EditorControl> {
     {name: 'Suggest On Trigger Characters',category: 'features',configKey: 'editor.suggestOnTriggerCharacters',},
 
     // Separator
-    {name: 'Advanced Features',category: 'features',isSeparator: true,},
+    {name: 'Advanced Features',category: 'debugging',isSeparator: true,},
 
     // Debugging & Terminal
     {name: 'Debug Console',category: 'debugging',configKey: 'debug.console.fontSize',},
@@ -110,7 +113,7 @@ class EditorControlsProvider implements vscode.TreeDataProvider<EditorControl> {
       
       // Enhanced separator display with only category icon
       const categoryIcon = this.categoryIcons[element.category] || 'symbol-misc';
-      item.description = '';
+      item.description = ':::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::';
       
       // Style separator differently
       item.contextValue = 'separator';
