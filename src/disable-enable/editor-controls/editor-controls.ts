@@ -30,14 +30,14 @@ class EditorControlsProvider implements vscode.TreeDataProvider<EditorControl> {
     {name: 'Indent Guides',category: 'editor',configKey: 'editor.guides.indentation',},
     {name: 'Sticky Scroll',category: 'editor',configKey: 'editor.stickyScroll.enabled',},
     {name: 'Cursor Smooth Caret Animation',category: 'editor',configKey: 'editor.cursorSmoothCaretAnimation',},
-    {name: 'Bracket Pair Colorization',category: 'editor',configKey: 'editor.bracketPairColorization.enabled',},
     {name: 'Terminal Suggest',category: 'editor',configKey: 'terminal.integrated.suggest.enabled', isNew: true}, // new
 
     // Separator
     {name: 'Editor Features',category: 'ui',isSeparator: true,},
 
     // UI Features
-    {name: 'Activity Bar',category: 'ui',configKey: 'workbench.activityBar.visible',},
+    {name: 'Bracket LINE Colorization',category: 'ui',configKey: 'editor.guides.bracketPairs',},
+    {name: 'Bracket PAIR Colorization',category: 'ui',configKey: 'editor.bracketPairColorization.enabled',},
     {name: 'Breadcrumbs',category: 'ui',configKey: 'breadcrumbs.enabled',},
     {name: 'Compact Folders',category: 'ui',configKey: 'explorer.compactFolders',},
     {name: 'Panel',category: 'ui',configKey: 'workbench.panel.defaultLocation',},
