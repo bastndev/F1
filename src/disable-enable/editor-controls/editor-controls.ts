@@ -4,8 +4,8 @@ import { IconManager } from './ed-icons';
 interface EditorControl {
   name: string;
   category: 'editor' | 'ui' | 'formatting' | 'features' | 'debugging';
-  configKey?: string; //TODO: future
-  isSeparator?: boolean; //TODO: future
+  configKey?: string;
+  isSeparator?: boolean;
 }
 
 class EditorControlsProvider implements vscode.TreeDataProvider<EditorControl> {
@@ -29,7 +29,7 @@ class EditorControlsProvider implements vscode.TreeDataProvider<EditorControl> {
     {name: 'Bracket Pair Colorization',category: 'editor',configKey: 'editor.bracketPairColorization.enabled',},
 
     // Separator
-    {name: '',category: 'editor',isSeparator: true,},
+    {name: 'Editor Features',category: 'editor',isSeparator: true,},
 
     // UI Features
     {name: 'Activity Bar',category: 'ui',configKey: 'workbench.activityBar.visible',},
@@ -42,7 +42,7 @@ class EditorControlsProvider implements vscode.TreeDataProvider<EditorControl> {
     {name: 'Tree Indent',category: 'ui',configKey: 'workbench.tree.indent',},
 
     // Separator
-    {name: '',category: 'ui',isSeparator: true,},
+    {name: 'UI Components',category: 'ui',isSeparator: true,},
 
     // Formatting & Code Features
     {name: 'Auto Save',category: 'formatting',configKey: 'files.autoSave',},
@@ -53,7 +53,7 @@ class EditorControlsProvider implements vscode.TreeDataProvider<EditorControl> {
     {name: 'Trim Trailing Whitespace',category: 'formatting',configKey: 'files.trimTrailingWhitespace',},
 
     // Separator
-    {name: '',category: 'formatting',isSeparator: true,},
+    {name: 'Formatting Options',category: 'formatting',isSeparator: true,},
 
     // IntelliSense & Features
     {name: 'Accept Suggestion On Enter',category: 'features',configKey: 'editor.acceptSuggestionOnEnter',},
@@ -69,7 +69,7 @@ class EditorControlsProvider implements vscode.TreeDataProvider<EditorControl> {
     {name: 'Suggest On Trigger Characters',category: 'features',configKey: 'editor.suggestOnTriggerCharacters',},
 
     // Separator
-    {name: '',category: 'features',isSeparator: true,},
+    {name: 'Advanced Features',category: 'features',isSeparator: true,},
 
     // Debugging & Terminal
     {name: 'Debug Console',category: 'debugging',configKey: 'debug.console.fontSize',},
@@ -107,8 +107,23 @@ class EditorControlsProvider implements vscode.TreeDataProvider<EditorControl> {
   getTreeItem(element: EditorControl): vscode.TreeItem {
     if (element.isSeparator) {
       const item = new vscode.TreeItem('');
-      item.description = '.'.repeat(0); //Separator
+      
+      // Enhanced separator display with only category icon
+      const categoryIcon = this.categoryIcons[element.category] || 'symbol-misc';
+      item.description = '';
+      
+      // Style separator differently
       item.contextValue = 'separator';
+      item.collapsibleState = vscode.TreeItemCollapsibleState.None;
+      
+      // Add tooltip for separator
+      const tooltip = new vscode.MarkdownString(`$(${categoryIcon}) **${element.category.toUpperCase()}**\n\n*Section separator*`);
+      tooltip.supportThemeIcons = true;
+      item.tooltip = tooltip;
+      
+      // Use category icon for separator
+      item.iconPath = new vscode.ThemeIcon(categoryIcon, new vscode.ThemeColor('editorInfo.foreground'));
+      
       return item;
     }
 
@@ -127,7 +142,7 @@ class EditorControlsProvider implements vscode.TreeDataProvider<EditorControl> {
       
       tooltipContent += `\n\nStatus: **${statusText}**`;
       tooltipContent += `\nCurrent value: \`${currentValue}\``;
-      tooltipContent += `\n\n$(mouse)💡 Click to toggle`;
+      tooltipContent += `\n\n$(mouse) 💡 Click to toggle`;
     }
     
     const tooltip = new vscode.MarkdownString(tooltipContent);
@@ -159,11 +174,18 @@ class EditorControlsProvider implements vscode.TreeDataProvider<EditorControl> {
 
   // Methods for future implementation
   getControlsByCategory(category: string): EditorControl[] {
-    return this.controls.filter((control) => control.category === category);
+    return this.controls.filter((control) => control.category === category && !control.isSeparator);
   }
 
   getControlByName(name: string): EditorControl | undefined {
     return this.controls.find((control) => control.name === name);
+  }
+
+  /**
+   * Gets all separators
+   */
+  getSeparators(): EditorControl[] {
+    return this.controls.filter((control) => control.isSeparator);
   }
 
   /**
@@ -172,7 +194,7 @@ class EditorControlsProvider implements vscode.TreeDataProvider<EditorControl> {
   async toggleControl(controlName: string): Promise<void> {
     const control = this.getControlByName(controlName);
 
-    if (!control || !control.configKey) {
+    if (!control || !control.configKey || control.isSeparator) {
       return;
     }
 
@@ -210,8 +232,13 @@ class EditorControlsProvider implements vscode.TreeDataProvider<EditorControl> {
 
       // Refresh tree view to update the status
       this._onDidChangeTreeData.fire();
+
+      // Show notification for successful toggle
+      vscode.window.showInformationMessage(`${control.name}: ${this.getStatusText(control.configKey!)}`);
+      
     } catch (error) {
-      // Silent error handling - could log to console if needed
+      // Show error notification
+      vscode.window.showErrorMessage(`Failed to toggle ${controlName}: ${error}`);
       console.error(`Failed to toggle ${controlName}:`, error);
     }
   }
@@ -247,6 +274,13 @@ class EditorControlsProvider implements vscode.TreeDataProvider<EditorControl> {
     // Default: treat truthy values as enabled
     return !!value;
   }
+
+  /**
+   * Refresh the tree view
+   */
+  refresh(): void {
+    this._onDidChangeTreeData.fire();
+  }
 }
 
 export function activate(context: vscode.ExtensionContext) {
@@ -261,7 +295,13 @@ export function activate(context: vscode.ExtensionContext) {
     (controlName: string) => provider.toggleControl(controlName)
   );
 
-  context.subscriptions.push(toggleCommand);
+  // Register refresh command
+  const refreshCommand = vscode.commands.registerCommand(
+    'f1-editor-controls.refresh',
+    () => provider.refresh()
+  );
+
+  context.subscriptions.push(toggleCommand, refreshCommand);
 }
 
 export function deactivate() {}
