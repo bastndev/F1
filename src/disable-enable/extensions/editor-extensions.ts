@@ -12,7 +12,7 @@ interface ExtensionItem {
 class ExtensionTreeProvider implements vscode.TreeDataProvider<ExtensionItem> {
     private _onDidChangeTreeData = new vscode.EventEmitter<ExtensionItem | undefined | null | void>();
     readonly onDidChangeTreeData = this._onDidChangeTreeData.event;
-    
+        
     private extensions: ExtensionItem[] = [];
 
     constructor() {
@@ -26,18 +26,42 @@ class ExtensionTreeProvider implements vscode.TreeDataProvider<ExtensionItem> {
 
     getTreeItem(element: ExtensionItem): vscode.TreeItem {
         const item = new vscode.TreeItem(element.name);
-        item.label = element.name.replace(/\s*\(v[^)]+\)$/, '');
-        item.description = element.name.match(/\(v[^)]+\)$/)?.[0] || '';
-        item.iconPath = element.iconPath;
         
+        const { displayName, version } = this.parseExtensionName(element.name);
+        
+        item.label = displayName;
+        item.description = version;
+        item.iconPath = element.iconPath;
+                
         // click
         item.command = {
             command: 'f1-extensions.selectExtension',
             title: 'Select Extension',
             arguments: [element]
         };
-        
+                
         return item;
+    }
+
+    private parseExtensionName(fullName: string): { displayName: string; version: string } {
+        const versionMatch = fullName.match(/\s*\((v?[\d]+\.[\d]+\.[\d]+(?:-[\w\d\.-]*)?)\)$/i);
+        
+        if (versionMatch) {
+            const version = versionMatch[1];
+            const displayName = fullName.substring(0, versionMatch.index).trim();
+            
+            const formattedVersion = version.startsWith('v') ? version : `v${version}`;
+            
+            return {
+                displayName,
+                version: `(${formattedVersion})`
+            };
+        }
+        
+        return {
+            displayName: fullName,
+            version: ''
+        };
     }
 
     getChildren(): ExtensionItem[] {
@@ -86,14 +110,14 @@ function registerSelectExtensionCommand(context: vscode.ExtensionContext): void 
             handleExtensionClick(extensionItem.name);
         }
     );
-    
+        
     context.subscriptions.push(selectExtensionCommand);
 }
 
 // Lifecycle functions
 export function activate(context: vscode.ExtensionContext): void {
     treeProvider = new ExtensionTreeProvider();
-    
+        
     treeView = vscode.window.createTreeView('f1-extensions', {
         treeDataProvider: treeProvider,
         showCollapseAll: true
