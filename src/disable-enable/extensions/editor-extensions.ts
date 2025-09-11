@@ -118,7 +118,7 @@ class ExtensionTreeProvider implements vscode.TreeDataProvider<ExtensionItem> {
         
         // Action hint
         tooltip.appendMarkdown(`<div style="margin-top: 8px; padding: 4px; background-color: rgba(255, 193, 7, 0.1); border-radius: 4px;">`);
-        tooltip.appendMarkdown(`💡 <em>Click to see available actions</em>`);
+        tooltip.appendMarkdown(`💡 <em>Click to see <strong>Github</strong> repository</em>`);
         tooltip.appendMarkdown(`</div>`);
         
         tooltip.appendMarkdown(`</div>`);
