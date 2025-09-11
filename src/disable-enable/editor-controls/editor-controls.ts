@@ -133,8 +133,8 @@ class EditorControlsProvider implements vscode.TreeDataProvider<EditorControl> {
       tooltip.supportThemeIcons = true;
       item.tooltip = tooltip;
       
-      // Use category icon for separator
-      item.iconPath = new vscode.ThemeIcon(categoryIcon, new vscode.ThemeColor('editorInfo.foreground'));
+      // Color ICON
+      item.iconPath = new vscode.ThemeIcon(categoryIcon, new vscode.ThemeColor('textLink.foreground'));
       
       return item;
     }
