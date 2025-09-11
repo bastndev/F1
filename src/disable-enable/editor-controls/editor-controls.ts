@@ -92,7 +92,7 @@ class EditorControlsProvider implements vscode.TreeDataProvider<EditorControl> {
   };
 
   /**
-   * Creates the NEW badge with modern styling
+   *  --- --- -- - NEW 
    */
   private createNewBadge(): string {
     return ' ⁿᵉʷ';
