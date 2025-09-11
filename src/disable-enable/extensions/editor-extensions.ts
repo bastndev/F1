@@ -1,24 +1,46 @@
 import * as vscode from 'vscode';
 import * as path from 'path';
 
+// Types
 interface ExtensionItem {
     name: string;
     iconPath?: string;
 }
 
+// Tree Data Provider
 class ExtensionTreeProvider implements vscode.TreeDataProvider<ExtensionItem> {
+    private _onDidChangeTreeData = new vscode.EventEmitter<ExtensionItem | undefined | null | void>();
+    readonly onDidChangeTreeData = this._onDidChangeTreeData.event;
+    
+    private extensions: ExtensionItem[] = [];
+
+    constructor() {
+        this.refreshExtensions();
+    }
+
+    refresh(): void {
+        this.refreshExtensions();
+        this._onDidChangeTreeData.fire();
+    }
+
     getTreeItem(element: ExtensionItem): vscode.TreeItem {
-        // ...existing code...
         const item = new vscode.TreeItem(element.name);
-        // Change to separate label and description for potential styling
-        item.label = element.name.replace(/\s*\(v[^)]+\)$/, ''); // Remove version from label
-        item.description = element.name.match(/\(v[^)]+\)$/)?.[0] || ''; // Extract version as description
+        item.label = element.name.replace(/\s*\(v[^)]+\)$/, '');
+        item.description = element.name.match(/\(v[^)]+\)$/)?.[0] || '';
         item.iconPath = element.iconPath;
         return item;
     }
 
     getChildren(): ExtensionItem[] {
-        return vscode.extensions.all
+        return this.extensions;
+    }
+
+    getExtensionCount(): number {
+        return this.extensions.length;
+    }
+
+    private refreshExtensions(): void {
+        this.extensions = vscode.extensions.all
             .filter(ext => !ext.packageJSON.isBuiltin)
             .map(ext => ({
                 name: `${ext.packageJSON.displayName || ext.packageJSON.name} (v${ext.packageJSON.version})`,
@@ -30,9 +52,38 @@ class ExtensionTreeProvider implements vscode.TreeDataProvider<ExtensionItem> {
     }
 }
 
+// Module-level variables
+let treeView: vscode.TreeView<ExtensionItem>;
+let treeProvider: ExtensionTreeProvider;
 
-export function activate(context: vscode.ExtensionContext) {
-    vscode.window.registerTreeDataProvider('f1-extensions', new ExtensionTreeProvider());
+// Helper functions
+function updateTreeViewTitle(): void {
+    const count = treeProvider.getExtensionCount();
+    treeView.title = `Extensions - (${count})`;
 }
 
-export function deactivate() {}
+function setupExtensionChangeListener(): vscode.Disposable {
+    return vscode.extensions.onDidChange(() => {
+        treeProvider.refresh();
+        updateTreeViewTitle();
+    });
+}
+
+// Lifecycle functions
+export function activate(context: vscode.ExtensionContext): void {
+    treeProvider = new ExtensionTreeProvider();
+    
+    treeView = vscode.window.createTreeView('f1-extensions', {
+        treeDataProvider: treeProvider,
+        showCollapseAll: true
+    });
+
+    updateTreeViewTitle();
+
+    context.subscriptions.push(
+        treeView,
+        setupExtensionChangeListener()
+    );
+}
+
+export function deactivate(): void {}
