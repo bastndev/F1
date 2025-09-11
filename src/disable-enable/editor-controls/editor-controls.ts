@@ -43,6 +43,7 @@ class EditorControlsProvider implements vscode.TreeDataProvider<EditorControl> {
     {name: 'Status Bar',category: 'ui',configKey: 'workbench.statusBar.visible',},
     {name: 'Tabs',category: 'ui',configKey: 'workbench.editor.showTabs',},
     {name: 'Tree Indent',category: 'ui',configKey: 'workbench.tree.indent',},
+    {name: 'Terminal Suggest',category: 'ui',configKey: 'terminal.integrated.suggest.enabled',},
 
     // Separator
     {name: 'UI Components',category: 'formatting',isSeparator: true,},
