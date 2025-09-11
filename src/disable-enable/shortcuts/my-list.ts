@@ -1,33 +1,136 @@
 export interface ShortcutItem {
   label: string;
   key: string;
-  // command: string;
+  actions: {
+    editorControls?: string[];  // Configuraciones de editor
+    extensionCommands?: string[]; // Comandos de extensiones
+  };
   isDefault?: boolean;
+  description?: string; // Descripción opcional del combo
+  id?: string; // Unique identifier for the shortcut
+  createdAt?: Date; // Creation timestamp
+  lastUsed?: Date; // Last usage timestamp
 }
 
 export class MyListUI {
   private static userShortcuts: ShortcutItem[] = [
-    { label: 'Test 1 🧪', key: 'Ctrl+B' },
-    { label: 'Test 2 🧪', key: 'Ctrl+B' },
-    { label: 'Test 3 🧪', key: 'Ctrl+B' },
-    { label: 'Test 4 🧪', key: 'Ctrl+B' },
-    { label: 'Test 5 🧪', key: 'Ctrl+B' },
-    { label: 'Test 6 🧪', key: 'Ctrl+B' },
-    { label: 'Test 7 🧪', key: 'Ctrl+B' },
+    // Ejemplos de combos que el usuario puede crear
+    {
+      id: 'focus-mode-001',
+      label: 'Focus Mode 🎯',
+      key: 'Ctrl+Shift+F',
+      description: 'Minimalist coding environment',
+      actions: {
+        editorControls: [
+          'editor.minimap.enabled',
+          'editor.folding',
+          'editor.lineNumbers',
+          'breadcrumbs.enabled'
+        ]
+      },
+      createdAt: new Date('2024-01-01'),
+      lastUsed: new Date('2024-01-15')
+    },
+    {
+      id: 'ai-dev-001',
+      label: 'AI Development 🤖',
+      key: 'Ctrl+Shift+A',
+      description: 'Enable AI tools and suggestions',
+      actions: {
+        extensionCommands: [
+          'github.copilot.toggleInlineSuggestion',
+          'eslint.executeAutofix',
+          'astro.build'
+        ]
+      },
+      createdAt: new Date('2024-01-02'),
+      lastUsed: new Date('2024-01-14')
+    },
+    {
+      id: 'full-combo-001',
+      label: 'Full Combo 🚀',
+      key: 'Ctrl+Shift+Q',
+      description: 'Complete development setup',
+      actions: {
+        editorControls: [
+          'editor.minimap.enabled',
+          'editor.folding',
+          'editor.lineNumbers'
+        ],
+        extensionCommands: [
+          'eslint.executeAutofix',
+          'github.copilot.toggleInlineSuggestion'
+        ]
+      },
+      createdAt: new Date('2024-01-03'),
+      lastUsed: new Date('2024-01-13')
+    }
   ];
+
+  /**
+   * Agregar un nuevo shortcut combo
+   */
+  static addShortcut(shortcut: ShortcutItem): void {
+    // Generate unique ID if not provided
+    if (!shortcut.id) {
+      shortcut.id = `combo-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+    }
+    
+    // Set creation timestamp
+    if (!shortcut.createdAt) {
+      shortcut.createdAt = new Date();
+    }
+    
+    this.userShortcuts.push(shortcut);
+  }
+
+  /**
+   * Obtener shortcuts por tipo de acción
+   */
+  static getShortcutsByType(type: 'editorControls' | 'extensionCommands'): ShortcutItem[] {
+    return this.userShortcuts.filter(shortcut => 
+      shortcut.actions[type] && shortcut.actions[type]!.length > 0
+    );
+  }
+
+  /**
+   * Validar si un shortcut ya existe
+   */
+  static shortcutExists(key: string): boolean {
+    return this.userShortcuts.some(shortcut => shortcut.key === key);
+  }
+
+  /**
+   * Obtener estadísticas de shortcuts
+   */
+  static getShortcutStats(): {
+    total: number;
+    editorControls: number;
+    extensionCommands: number;
+    combos: number;
+  } {
+    const total = this.userShortcuts.length;
+    const editorControls = this.userShortcuts.filter(s => s.actions.editorControls?.length).length;
+    const extensionCommands = this.userShortcuts.filter(s => s.actions.extensionCommands?.length).length;
+    const combos = this.userShortcuts.filter(s => 
+      s.actions.editorControls?.length && s.actions.extensionCommands?.length
+    ).length;
+
+    return { total, editorControls, extensionCommands, combos };
+  }
 
   static generateShortcutsHTML(): string {
     const defaultShortcuts: ShortcutItem[] = [
       {
         label: 'Toggle word Wrap',
         key: 'F1',
-        // command: '',
+        actions: { editorControls: ['editor.wordWrap'] },
         isDefault: true,
       },
       {
         label: 'AI suggestion (disable/enable)',
         key: 'Shift+F1',
-        // command: '',
+        actions: { extensionCommands: ['f1.toggleAISuggestions'] },
         isDefault: true,
       },
     ];
@@ -38,7 +141,10 @@ export class MyListUI {
                   .map(
                     (shortcut) => `
                     <div class="shortcut-item default" title="DEFAULT">
-                        <span>${shortcut.label}</span>
+                        <div class="shortcut-content">
+                            <span class="shortcut-label">${shortcut.label}</span>
+                            ${shortcut.description ? `<span class="shortcut-description">${shortcut.description}</span>` : ''}
+                        </div>
                         <span class="shortcut-key">${shortcut.key}</span>
                     </div>
                 `
@@ -51,7 +157,9 @@ export class MyListUI {
                   .map(
                     (shortcut, index) => `
                     <div class="shortcut-item user-delete" onclick="confirmDelete(${index}, '${shortcut.label}')">
-                        <span>${shortcut.label}</span>
+                        <div class="shortcut-content">
+                            <span class="shortcut-label">${shortcut.label}</span>
+                        </div>
                         <span class="shortcut-key">${shortcut.key}</span>
                     </div>
                 `
@@ -69,5 +177,88 @@ export class MyListUI {
 
   static getUserShortcuts(): ShortcutItem[] {
     return this.userShortcuts;
+  }
+
+  /**
+   * Get shortcut by ID
+   */
+  static getShortcutById(id: string): ShortcutItem | undefined {
+    return this.userShortcuts.find(shortcut => shortcut.id === id);
+  }
+
+  /**
+   * Update shortcut by ID
+   */
+  static updateShortcut(id: string, updates: Partial<ShortcutItem>): boolean {
+    const index = this.userShortcuts.findIndex(shortcut => shortcut.id === id);
+    if (index !== -1) {
+      this.userShortcuts[index] = { ...this.userShortcuts[index], ...updates };
+      return true;
+    }
+    return false;
+  }
+
+  /**
+   * Mark shortcut as used (update lastUsed timestamp)
+   */
+  static markAsUsed(id: string): void {
+    const shortcut = this.getShortcutById(id);
+    if (shortcut) {
+      shortcut.lastUsed = new Date();
+    }
+  }
+
+  /**
+   * Get recently used shortcuts (last 7 days)
+   */
+  static getRecentShortcuts(days: number = 7): ShortcutItem[] {
+    const cutoffDate = new Date();
+    cutoffDate.setDate(cutoffDate.getDate() - days);
+    
+    return this.userShortcuts
+      .filter(shortcut => shortcut.lastUsed && shortcut.lastUsed > cutoffDate)
+      .sort((a, b) => (b.lastUsed?.getTime() || 0) - (a.lastUsed?.getTime() || 0));
+  }
+
+  /**
+   * Get shortcuts by action count (for filtering)
+   */
+  static getShortcutsByActionCount(minActions: number = 1): ShortcutItem[] {
+    return this.userShortcuts.filter(shortcut => {
+      const totalActions = (shortcut.actions.editorControls?.length || 0) + 
+                          (shortcut.actions.extensionCommands?.length || 0);
+      return totalActions >= minActions;
+    });
+  }
+
+  /**
+   * Clear all user shortcuts (keep defaults)
+   */
+  static clearUserShortcuts(): void {
+    this.userShortcuts = [];
+  }
+
+  /**
+   * Export shortcuts to JSON
+   */
+  static exportShortcuts(): string {
+    return JSON.stringify(this.userShortcuts, null, 2);
+  }
+
+  /**
+   * Import shortcuts from JSON
+   */
+  static importShortcuts(jsonData: string): boolean {
+    try {
+      const imported = JSON.parse(jsonData);
+      if (Array.isArray(imported)) {
+        this.userShortcuts = imported;
+        return true;
+      }
+      return false;
+    } catch (error) {
+      console.error('Error importing shortcuts:', error);
+      return false;
+    }
   }
 }

@@ -1,12 +1,17 @@
 import * as vscode from 'vscode';
 import { ShortcutsUIManager } from './ui';
-import { MyListUI } from './my-list';
+import { MyListUI, ShortcutItem } from './my-list';
+import { ComboCreatorPanel } from './panel/web-view-panel';
 
 export class F1WebviewProvider implements vscode.WebviewViewProvider {
   public static readonly viewType = 'f1-shortcuts';
   private _view?: vscode.WebviewView;
+  private _comboCreatorPanel: ComboCreatorPanel;
 
-  constructor(private readonly _extensionUri: vscode.Uri) {}
+  constructor(private readonly _extensionUri: vscode.Uri) {
+    this._comboCreatorPanel = new ComboCreatorPanel(_extensionUri);
+    this._comboCreatorPanel.setOnComboCreated(() => this.refresh());
+  }
 
   // ==========================================
   // WEBVIEW LIFECYCLE METHODS
@@ -62,17 +67,26 @@ export class F1WebviewProvider implements vscode.WebviewViewProvider {
   // ==========================================
 
   /**
-   * Handle git commit command
+   * Handle combo creation command
    */
   private _handleCommit(): void {
-    vscode.commands.executeCommand('git.commit');
+    this._comboCreatorPanel.showComboCreator();
   }
+
 
   /**
    * Handle shortcut command execution
    * @param command - The command name to execute
    */
-  private _handleExecute(command: string): void {
+  private async _handleExecute(command: string): Promise<void> {
+    // Check if it's a combo shortcut ID
+    const shortcut = MyListUI.getShortcutById(command);
+    if (shortcut) {
+      await this._executeComboShortcut(shortcut);
+      return;
+    }
+
+    // Handle regular commands
     const commandMap = this._getCommandMap();
     const vscodeCommand = commandMap[command];
 
@@ -80,6 +94,82 @@ export class F1WebviewProvider implements vscode.WebviewViewProvider {
       vscode.commands.executeCommand(vscodeCommand);
     } else {
       console.warn(`Unknown command: ${command}`);
+    }
+  }
+
+  /**
+   * Execute a combo shortcut
+   * @param shortcut - The shortcut to execute
+   */
+  private async _executeComboShortcut(shortcut: ShortcutItem): Promise<void> {
+    try {
+      // Mark as used
+      MyListUI.markAsUsed(shortcut.id!);
+
+      // Execute editor controls
+      if (shortcut.actions.editorControls?.length) {
+        for (const configKey of shortcut.actions.editorControls) {
+          await this._toggleEditorControl(configKey);
+        }
+      }
+
+      // Execute extension commands
+      if (shortcut.actions.extensionCommands?.length) {
+        for (const command of shortcut.actions.extensionCommands) {
+          try {
+            await vscode.commands.executeCommand(command);
+          } catch (error) {
+            console.warn(`Failed to execute command ${command}:`, error);
+          }
+        }
+      }
+
+      // Show success message
+      const totalActions = (shortcut.actions.editorControls?.length || 0) + 
+                          (shortcut.actions.extensionCommands?.length || 0);
+      vscode.window.showInformationMessage(
+        `✅ Executed "${shortcut.label}" (${totalActions} actions)`
+      );
+
+    } catch (error) {
+      console.error('Error executing combo shortcut:', error);
+      vscode.window.showErrorMessage(`Error executing combo: ${error}`);
+    }
+  }
+
+  /**
+   * Toggle an editor control configuration
+   * @param configKey - The configuration key to toggle
+   */
+  private async _toggleEditorControl(configKey: string): Promise<void> {
+    try {
+      const config = vscode.workspace.getConfiguration();
+      const currentValue = config.get(configKey);
+
+      // Handle different types of configuration values
+      let newValue: any;
+
+      if (typeof currentValue === 'boolean') {
+        newValue = !currentValue;
+      } else if (configKey === 'editor.lineNumbers') {
+        newValue = currentValue === 'on' ? 'off' : 'on';
+      } else if (configKey === 'files.autoSave') {
+        newValue = currentValue === 'off' ? 'afterDelay' : 'off';
+      } else if (configKey === 'editor.cursorBlinking') {
+        newValue = currentValue === 'blink' ? 'solid' : 'blink';
+      } else if (configKey === 'editor.acceptSuggestionOnEnter') {
+        newValue = currentValue === 'on' ? 'off' : 'on';
+      } else {
+        newValue = !currentValue;
+      }
+
+      await config.update(
+        configKey,
+        newValue,
+        vscode.ConfigurationTarget.Global
+      );
+    } catch (error) {
+      console.warn(`Failed to toggle ${configKey}:`, error);
     }
   }
 

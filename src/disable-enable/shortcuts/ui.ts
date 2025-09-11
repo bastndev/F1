@@ -59,11 +59,12 @@ export class ShortcutsUIManager {
             .button:hover {
                 background-color: var(--vscode-button-hoverBackground);
             }
+
         `;
   }
 
   /**
-   * Shortcuts list component styles (My List section)
+   * Enhanced shortcuts list component styles
    */
   private static getShortcutsListStyles(): string {
     return `
@@ -77,50 +78,73 @@ export class ShortcutsUIManager {
                 display: flex;
                 justify-content: space-between;
                 align-items: center;
-                padding: 6px 8px;
-                border-radius: 3px;
-                margin-bottom: 4px;
+                padding: 8px 12px;
+                border-radius: 4px;
+                margin-bottom: 6px;
                 background-color: var(--vscode-list-hoverBackground);
                 cursor: pointer;
+                transition: all 0.2s ease;
             }
 
             .shortcut-item:hover {
                 background-color: var(--vscode-list-activeSelectionBackground);
+                transform: translateX(2px);
             }
+
+            .shortcut-content {
+                display: flex;
+                flex-direction: column;
+                gap: 4px;
+                flex: 1;
+            }
+
+            .shortcut-label {
+                font-weight: 500;
+                color: var(--vscode-foreground);
+            }
+
+            .shortcut-description {
+                font-size: 11px;
+                color: var(--vscode-descriptionForeground);
+                font-style: italic;
+            }
+
 
             .shortcut-key {
                 font-family: monospace;
                 background-color: var(--vscode-badge-background);
                 color: var(--vscode-badge-foreground);
-                padding: 2px 6px;
-                border-radius: 3px;
+                padding: 4px 8px;
+                border-radius: 4px;
                 font-size: 11px;
+                font-weight: 600;
             }
 
             .default {
                 border-left: 3px solid var(--vscode-button-background);
-                opacity: 0.7;
+                opacity: 0.8;
                 cursor: default;
                 background-color: var(--vscode-editor-background);
             }
 
             .default:hover {
                 background-color: var(--vscode-editor-background);
-                opacity: 0.8;
+                opacity: 0.9;
+                transform: none;
             }
 
             .user-line {
-                border-top: 0.5px solid #d1d1d11b;
+                border-top: 1px solid var(--vscode-widget-border);
                 width: 100%;
-                margin: 10px 0;
+                margin: 12px 0;
             }
-            .user-delete:hover{
+
+            .user-delete:hover {
                 border-left: 3px solid #ff002b;
-                opacity: 0.7;
-                cursor: default;
-                background-color: var(--vscode-editor-background);
-                cursor:pointer
+                background-color: var(--vscode-inputValidation-errorBackground);
             }
+
+
         `;
   }
 
@@ -177,6 +201,14 @@ export class ShortcutsUIManager {
             function confirmDelete(index, label) {
                 sendMessage('confirmDelete', { index, label });
             }
+
+            /**
+             * Execute a shortcut by ID
+             * @param {string} shortcutId - ID of the shortcut to execute
+             */
+            function executeShortcut(shortcutId) {
+                sendMessage('execute', shortcutId);
+            }
         `;
   }
 
@@ -185,12 +217,12 @@ export class ShortcutsUIManager {
   // ==========================================
 
   /**
-   * Generate the Combine button HTML
+   * Generate the action buttons HTML
    */
-  private static getCombineButtonHTML(): string {
+  private static getActionButtonsHTML(): string {
     return `
             <button class="button" onclick="sendMessage('commit')">
-                Combine
+                🎯 Create Shortcut
             </button>
         `;
   }
@@ -225,8 +257,8 @@ export class ShortcutsUIManager {
             </style>
         </head>
         <body>
-            <!-- ========== COMBINE BUTTON SECTION ========== -->
-            ${this.getCombineButtonHTML()}
+            <!-- ========== ACTION BUTTONS SECTION ========== -->
+            ${this.getActionButtonsHTML()}
 
             <!-- ========== MY LIST SECTION ========== -->
             ${this.getMyListSectionHTML()}
