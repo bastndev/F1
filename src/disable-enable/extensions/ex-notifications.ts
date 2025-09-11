@@ -1,32 +1,47 @@
 import * as vscode from 'vscode';
 
-export interface NotificationOptions {
-    message: string;
-    option1: string;
-    option2: string;
-}
-
 export async function showExtensionNotification(extensionName: string): Promise<void> {
     const cleanName = extensionName.replace(/\s*\(v[^)]+\)$/, '');
     
-    const options: NotificationOptions = {
-        message: `Selected extension: ${cleanName}`,
-        option1: 'Option 1',
-        option2: 'Option 2'
-    };
+    // Find the extension by name
+    const extension = vscode.extensions.all.find(ext => {
+        const extDisplayName = ext.packageJSON.displayName || ext.packageJSON.name;
+        return extDisplayName === cleanName;
+    });
 
-    const selectedOption = await vscode.window.showInformationMessage(
-        options.message,
-        options.option1,
-        options.option2
-    );
-
-    if (selectedOption === options.option1) {
-        vscode.window.showInformationMessage('You have selected Option 1');
-    } else if (selectedOption === options.option2) {
-        vscode.window.showInformationMessage('You have selected Option 2');
+    if (!extension) {
+        vscode.window.showErrorMessage(`Extension "${cleanName}" not found.`);
+        return;
     }
-    // If nothing is selected, do nothing
+
+    // Get repository URL from package.json
+    const repository = extension.packageJSON.repository;
+    let repoUrl: string | undefined;
+
+    if (repository) {
+        if (typeof repository === 'string') {
+            repoUrl = repository;
+        } else if (repository.url) {
+            repoUrl = repository.url;
+        }
+    }
+
+    // Clean up the URL if it exists
+    if (repoUrl) {
+        // Remove git+ prefix and .git suffix if present
+        repoUrl = repoUrl.replace(/^git\+/, '').replace(/\.git$/, '');
+        
+        const selectedOption = await vscode.window.showInformationMessage(
+            `Extension: ${cleanName}`,
+            '⭐️ GitHub'
+        );
+
+        if (selectedOption === '⭐️ GitHub') {
+            vscode.env.openExternal(vscode.Uri.parse(repoUrl));
+        }
+    } else {
+        vscode.window.showWarningMessage(`No GitHub repository found for "${cleanName}"`);
+    }
 }
 
 export function handleExtensionClick(extensionName: string): void {
