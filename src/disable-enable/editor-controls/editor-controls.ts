@@ -6,6 +6,7 @@ interface EditorControl {
   category: 'editor' | 'ui' | 'formatting' | 'features' | 'debugging';
   configKey?: string;
   isSeparator?: boolean;
+  isNew?: boolean; // Nueva propiedad para marcar items como nuevos
 }
 
 class EditorControlsProvider implements vscode.TreeDataProvider<EditorControl> {
@@ -30,7 +31,7 @@ class EditorControlsProvider implements vscode.TreeDataProvider<EditorControl> {
     {name: 'Sticky Scroll',category: 'editor',configKey: 'editor.stickyScroll.enabled',},
     {name: 'Cursor Smooth Caret Animation',category: 'editor',configKey: 'editor.cursorSmoothCaretAnimation',},
     {name: 'Bracket Pair Colorization',category: 'editor',configKey: 'editor.bracketPairColorization.enabled',},
-    {name: 'Terminal Suggest',category: 'editor',configKey: 'terminal.integrated.suggest.enabled',},
+    {name: 'Terminal Suggest',category: 'editor',configKey: 'terminal.integrated.suggest.enabled', isNew: true}, // Marcado como nuevo
 
     // Separator
     {name: 'Editor Features',category: 'ui',isSeparator: true,},
@@ -91,6 +92,13 @@ class EditorControlsProvider implements vscode.TreeDataProvider<EditorControl> {
   };
 
   /**
+   * Creates the NEW badge with modern styling
+   */
+  private createNewBadge(): string {
+    return ' ⁿᵉʷ';
+  }
+
+  /**
    * Gets the current configuration value for a control
    */
   private getCurrentConfigValue(configKey: string): any {
@@ -131,14 +139,19 @@ class EditorControlsProvider implements vscode.TreeDataProvider<EditorControl> {
       return item;
     }
 
-    // Use only the control name without status
-    const item = new vscode.TreeItem(element.name);
+    // Use control name with NEW badge if applicable
+    const itemLabel = element.isNew ? element.name + this.createNewBadge() : element.name;
+    const item = new vscode.TreeItem(itemLabel);
     
     // Get category icon
     const categoryIcon = this.categoryIcons[element.category] || 'gear';
     
     // Enhanced tooltip with category icon, name, status and click instruction
-    let tooltipContent = `$(${categoryIcon}) **${element.name}**\n\nCategory: ${element.category}`;
+    let tooltipContent = `$(${categoryIcon}) **${element.name}**`;
+    if (element.isNew) {
+      tooltipContent += ` $(star-full) **NEW**`;
+    }
+    tooltipContent += `\n\nCategory: ${element.category}`;
     
     if (element.configKey) {
       const currentValue = this.getCurrentConfigValue(element.configKey);
