@@ -4,8 +4,8 @@ import { IconManager } from './ed-icons';
 interface EditorControl {
   name: string;
   category: 'editor' | 'ui' | 'formatting' | 'features' | 'debugging';
-  configKey?: string; // For future implementation
-  isSeparator?: boolean; // For visual separation between categories
+  configKey?: string; //TODO: future
+  isSeparator?: boolean; //TODO: future
 }
 
 class EditorControlsProvider implements vscode.TreeDataProvider<EditorControl> {
@@ -86,6 +86,24 @@ class EditorControlsProvider implements vscode.TreeDataProvider<EditorControl> {
     debugging: 'debug-alt',
   };
 
+  /**
+   * Gets the current configuration value for a control
+   */
+  private getCurrentConfigValue(configKey: string): any {
+    const config = vscode.workspace.getConfiguration();
+    return config.get(configKey);
+  }
+
+  /**
+   * Gets a human-readable status for the current configuration value
+   */
+  private getStatusText(configKey: string): string {
+    const currentValue = this.getCurrentConfigValue(configKey);
+    const isEnabled = this.isValueEnabled(currentValue);
+    
+    return isEnabled ? 'Enabled' : 'Disabled';
+  }
+
   getTreeItem(element: EditorControl): vscode.TreeItem {
     if (element.isSeparator) {
       const item = new vscode.TreeItem('');
@@ -94,13 +112,25 @@ class EditorControlsProvider implements vscode.TreeDataProvider<EditorControl> {
       return item;
     }
 
+    // Use only the control name without status
     const item = new vscode.TreeItem(element.name);
     
     // Get category icon
     const categoryIcon = this.categoryIcons[element.category] || 'gear';
     
-    // Enhanced tooltip with category icon and name using MarkdownString for proper icon rendering
-    const tooltip = new vscode.MarkdownString(`$(${categoryIcon}) **${element.name}**\n\nCategory: ${element.category}`);
+    // Enhanced tooltip with category icon, name, status and click instruction
+    let tooltipContent = `$(${categoryIcon}) **${element.name}**\n\nCategory: ${element.category}`;
+    
+    if (element.configKey) {
+      const currentValue = this.getCurrentConfigValue(element.configKey);
+      const statusText = this.getStatusText(element.configKey);
+      
+      tooltipContent += `\n\nStatus: **${statusText}**`;
+      tooltipContent += `\nCurrent value: \`${currentValue}\``;
+      tooltipContent += `\n\n$(mouse) Click to toggle`;
+    }
+    
+    const tooltip = new vscode.MarkdownString(tooltipContent);
     tooltip.supportThemeIcons = true;
     item.tooltip = tooltip;
 
@@ -178,7 +208,7 @@ class EditorControlsProvider implements vscode.TreeDataProvider<EditorControl> {
         vscode.ConfigurationTarget.Global
       );
 
-      // Refresh tree view
+      // Refresh tree view to update the status
       this._onDidChangeTreeData.fire();
     } catch (error) {
       // Silent error handling - could log to console if needed
