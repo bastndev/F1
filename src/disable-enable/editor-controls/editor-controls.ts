@@ -120,7 +120,7 @@ class EditorControlsProvider implements vscode.TreeDataProvider<EditorControl> {
       item.collapsibleState = vscode.TreeItemCollapsibleState.None;
       
       // Add tooltip for separator
-      const tooltip = new vscode.MarkdownString(`$(${categoryIcon}) **${element.category.toUpperCase()}**\n\n*Section separator*`);
+      const tooltip = new vscode.MarkdownString(`$(${categoryIcon}) **${element.category.toUpperCase()}**`);
       tooltip.supportThemeIcons = true;
       item.tooltip = tooltip;
       
