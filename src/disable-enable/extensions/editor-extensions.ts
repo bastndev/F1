@@ -1,5 +1,6 @@
 import * as vscode from 'vscode';
 import * as path from 'path';
+import { handleExtensionClick } from './ex-notifications';
 
 // Types
 interface ExtensionItem {
@@ -28,6 +29,14 @@ class ExtensionTreeProvider implements vscode.TreeDataProvider<ExtensionItem> {
         item.label = element.name.replace(/\s*\(v[^)]+\)$/, '');
         item.description = element.name.match(/\(v[^)]+\)$/)?.[0] || '';
         item.iconPath = element.iconPath;
+        
+        // click
+        item.command = {
+            command: 'f1-extensions.selectExtension',
+            title: 'Select Extension',
+            arguments: [element]
+        };
+        
         return item;
     }
 
@@ -69,6 +78,18 @@ function setupExtensionChangeListener(): vscode.Disposable {
     });
 }
 
+// Command to handle extension selection
+function registerSelectExtensionCommand(context: vscode.ExtensionContext): void {
+    const selectExtensionCommand = vscode.commands.registerCommand(
+        'f1-extensions.selectExtension',
+        (extensionItem: ExtensionItem) => {
+            handleExtensionClick(extensionItem.name);
+        }
+    );
+    
+    context.subscriptions.push(selectExtensionCommand);
+}
+
 // Lifecycle functions
 export function activate(context: vscode.ExtensionContext): void {
     treeProvider = new ExtensionTreeProvider();
@@ -79,6 +100,9 @@ export function activate(context: vscode.ExtensionContext): void {
     });
 
     updateTreeViewTitle();
+
+    // Register command of extension
+    registerSelectExtensionCommand(context);
 
     context.subscriptions.push(
         treeView,
