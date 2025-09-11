@@ -127,7 +127,7 @@ class EditorControlsProvider implements vscode.TreeDataProvider<EditorControl> {
       
       tooltipContent += `\n\nStatus: **${statusText}**`;
       tooltipContent += `\nCurrent value: \`${currentValue}\``;
-      tooltipContent += `\n\n$(mouse) Click to toggle`;
+      tooltipContent += `\n\n$(mouse)💡 Click to toggle`;
     }
     
     const tooltip = new vscode.MarkdownString(tooltipContent);
