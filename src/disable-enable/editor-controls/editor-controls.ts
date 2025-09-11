@@ -145,7 +145,7 @@ class EditorControlsProvider implements vscode.TreeDataProvider<EditorControl> {
       
       tooltipContent += `\n\nStatus: **${statusText}**`;
       tooltipContent += `\nCurrent value: \`${currentValue}\``;
-      tooltipContent += `\n\n$(mouse) 💡 Click to toggle`;
+      tooltipContent += `\n\n$(mouse) 💡 Click to (**activate/deactivate**)`;
     }
     
     const tooltip = new vscode.MarkdownString(tooltipContent);
@@ -236,11 +236,8 @@ class EditorControlsProvider implements vscode.TreeDataProvider<EditorControl> {
       // Refresh tree view to update the status
       this._onDidChangeTreeData.fire();
 
-      // Show notification for successful toggle
-      vscode.window.showInformationMessage(`${control.name}: ${this.getStatusText(control.configKey!)}`);
-      
     } catch (error) {
-      // Show error notification
+      // Show error notification only for actual errors
       vscode.window.showErrorMessage(`Failed to toggle ${controlName}: ${error}`);
       console.error(`Failed to toggle ${controlName}:`, error);
     }
