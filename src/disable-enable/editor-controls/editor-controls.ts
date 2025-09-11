@@ -30,6 +30,7 @@ class EditorControlsProvider implements vscode.TreeDataProvider<EditorControl> {
     {name: 'Sticky Scroll',category: 'editor',configKey: 'editor.stickyScroll.enabled',},
     {name: 'Cursor Smooth Caret Animation',category: 'editor',configKey: 'editor.cursorSmoothCaretAnimation',},
     {name: 'Bracket Pair Colorization',category: 'editor',configKey: 'editor.bracketPairColorization.enabled',},
+    {name: 'Terminal Suggest',category: 'editor',configKey: 'terminal.integrated.suggest.enabled',},
 
     // Separator
     {name: 'Editor Features',category: 'ui',isSeparator: true,},
@@ -43,7 +44,6 @@ class EditorControlsProvider implements vscode.TreeDataProvider<EditorControl> {
     {name: 'Status Bar',category: 'ui',configKey: 'workbench.statusBar.visible',},
     {name: 'Tabs',category: 'ui',configKey: 'workbench.editor.showTabs',},
     {name: 'Tree Indent',category: 'ui',configKey: 'workbench.tree.indent',},
-    {name: 'Terminal Suggest',category: 'ui',configKey: 'terminal.integrated.suggest.enabled',},
 
     // Separator
     {name: 'UI Components',category: 'formatting',isSeparator: true,},
