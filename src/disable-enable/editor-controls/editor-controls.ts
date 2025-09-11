@@ -6,7 +6,7 @@ interface EditorControl {
   category: 'editor' | 'ui' | 'formatting' | 'features' | 'debugging';
   configKey?: string;
   isSeparator?: boolean;
-  isNew?: boolean; // Nueva propiedad para marcar items como nuevos
+  isNew?: boolean;
 }
 
 class EditorControlsProvider implements vscode.TreeDataProvider<EditorControl> {
@@ -31,7 +31,7 @@ class EditorControlsProvider implements vscode.TreeDataProvider<EditorControl> {
     {name: 'Sticky Scroll',category: 'editor',configKey: 'editor.stickyScroll.enabled',},
     {name: 'Cursor Smooth Caret Animation',category: 'editor',configKey: 'editor.cursorSmoothCaretAnimation',},
     {name: 'Bracket Pair Colorization',category: 'editor',configKey: 'editor.bracketPairColorization.enabled',},
-    {name: 'Terminal Suggest',category: 'editor',configKey: 'terminal.integrated.suggest.enabled', isNew: true}, // Marcado como nuevo
+    {name: 'Terminal Suggest',category: 'editor',configKey: 'terminal.integrated.suggest.enabled', isNew: true}, // new
 
     // Separator
     {name: 'Editor Features',category: 'ui',isSeparator: true,},
