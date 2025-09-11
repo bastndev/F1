@@ -77,6 +77,15 @@ class EditorControlsProvider implements vscode.TreeDataProvider<EditorControl> {
     {name: 'Terminal Cursor Blinking',category: 'debugging',configKey: 'terminal.integrated.cursorBlinking',},
   ];
 
+  // Category icons mapping
+  private categoryIcons = {
+    editor: 'edit',
+    ui: 'layout',
+    formatting: 'symbol-ruler',
+    features: 'zap',
+    debugging: 'debug-alt',
+  };
+
   getTreeItem(element: EditorControl): vscode.TreeItem {
     if (element.isSeparator) {
       const item = new vscode.TreeItem('');
@@ -86,11 +95,18 @@ class EditorControlsProvider implements vscode.TreeDataProvider<EditorControl> {
     }
 
     const item = new vscode.TreeItem(element.name);
-    item.tooltip = `Category: ${element.category}`;
+    
+    // Get category icon
+    const categoryIcon = this.categoryIcons[element.category] || 'gear';
+    
+    // Enhanced tooltip with category icon and name using MarkdownString for proper icon rendering
+    const tooltip = new vscode.MarkdownString(`$(${categoryIcon}) **${element.name}**\n\nCategory: ${element.category}`);
+    tooltip.supportThemeIcons = true;
+    item.tooltip = tooltip;
 
     // Add icon and make items clickable if they have a configKey
     if (element.configKey) {
-      // Set the icon based on current state
+      // Set the icon based on current state (from IconManager)
       item.iconPath = IconManager.getControlIcon(element.configKey);
 
       item.command = {
@@ -98,6 +114,9 @@ class EditorControlsProvider implements vscode.TreeDataProvider<EditorControl> {
         title: 'Toggle Control',
         arguments: [element.name],
       };
+    } else {
+      // For items without configKey, use the category icon
+      item.iconPath = new vscode.ThemeIcon(categoryIcon);
     }
 
     return item;
