@@ -203,7 +203,7 @@ export class F1WebviewProvider implements vscode.WebviewViewProvider {
 
     // Show VSCode native confirmation dialog
     const result = await vscode.window.showInformationMessage(
-      `Are you sure to DELETE (${label}) ?`,
+      `Are you sure to 𝗱𝗲𝗹𝗲𝘁𝗲 "${label}" ?`,
       { modal: true },
       'Yes',
     );
