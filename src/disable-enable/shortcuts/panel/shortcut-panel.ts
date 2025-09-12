@@ -363,6 +363,7 @@ private async _createCombo(comboData: any): Promise<void> {
                 font-weight: 500;
                 font-size: 13px;
                 text-transform: none;
+                color: var(--vscode-tab-inactiveForeground);
             }
 
             .tab.active {
@@ -376,6 +377,13 @@ private async _createCombo(comboData: any): Promise<void> {
 
             .tab:hover {
                 background-color: var(--vscode-tab-hoverBackground);
+                color: var(--vscode-tab-activeForeground);
+            }
+
+            /* Specific hover state for active tab */
+            .tab.active:hover {
+                background-color: var(--vscode-button-hoverBackground);
+                color: var(--vscode-button-foreground);
             }
 
             /* Modal Styles */
