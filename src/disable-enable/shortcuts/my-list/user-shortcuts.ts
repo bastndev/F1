@@ -89,7 +89,7 @@ export class MyListUI {
       <div class="shortcut-item ${isDefault ? 'default' : 'user-delete'}" ${isDefault ? 'title="DEFAULT"' : `onclick="confirmDelete(${index}, '${shortcut.label}')"`}>
         <div class="shortcut-content">
           <span class="shortcut-label">${shortcut.label}</span>
-          ${shortcut.description ? `<span class="shortcut-description">${shortcut.description}</span>` : ''}
+          ${isDefault && shortcut.description ? `<span class="shortcut-description">${shortcut.description}</span>` : ''}
         </div>
         <span class="shortcut-key">${shortcut.key}</span>
       </div>

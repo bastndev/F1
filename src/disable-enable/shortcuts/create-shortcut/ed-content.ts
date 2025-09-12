@@ -12,7 +12,7 @@ export const editorControls: EditorControl[] = [
   // Separator
   // {name: 'Editor Features',category: 'editor',isSeparator: true,},
 
-  {name: 'Minimap 22',category: 'editor',configKey: 'editor.minimap.enabled',},
+  {name: 'Minimap',category: 'editor',configKey: 'editor.minimap.enabled',},
   {name: 'Code Folding',category: 'editor',configKey: 'editor.folding',},
   {name: 'Line Numbers',category: 'editor',configKey: 'editor.lineNumbers',},
   {name: 'Cursor Blinking',category: 'editor',configKey: 'editor.cursorBlinking',},
