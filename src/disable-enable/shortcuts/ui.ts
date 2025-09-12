@@ -1,13 +1,6 @@
-import { MyListUI } from './my-list';
+import { MyListUI } from './my-list/user-shortcuts';
 
 export class ShortcutsUIManager {
-  // ==========================================
-  // CSS STYLES SECTION
-  // ==========================================
-
-  /**
-   * Main container and layout styles
-   */
   private static getLayoutStyles(): string {
     return `
             body {
@@ -34,9 +27,6 @@ export class ShortcutsUIManager {
         `;
   }
 
-  /**
-   * Button component styles (Combine button)
-   */
   private static getButtonStyles(): string {
     return `
             .button {
@@ -59,12 +49,19 @@ export class ShortcutsUIManager {
             .button:hover {
                 background-color: var(--vscode-button-hoverBackground);
             }
+
+            .beta-label {
+                font-size: 10px;
+                background-color: #cccccc;
+                color: #333333;
+                padding: 2px 4px;
+                border-radius: 4px;
+                margin-left: 4px;
+            }
+
         `;
   }
 
-  /**
-   * Shortcuts list component styles (My List section)
-   */
   private static getShortcutsListStyles(): string {
     return `
             .shortcuts-container {
@@ -77,127 +74,114 @@ export class ShortcutsUIManager {
                 display: flex;
                 justify-content: space-between;
                 align-items: center;
-                padding: 6px 8px;
-                border-radius: 3px;
-                margin-bottom: 4px;
+                padding: 8px 12px;
+                border-radius: 4px;
+                margin-bottom: 6px;
                 background-color: var(--vscode-list-hoverBackground);
                 cursor: pointer;
+                transition: all 0.2s ease;
             }
 
             .shortcut-item:hover {
                 background-color: var(--vscode-list-activeSelectionBackground);
+                transform: translateX(2px);
             }
+
+            .shortcut-content {
+                display: flex;
+                flex-direction: column;
+                gap: 4px;
+                flex: 1;
+            }
+
+            .shortcut-label {
+                font-weight: 500;
+                color: var(--vscode-foreground);
+            }
+
+            .shortcut-description {
+                font-size: 11px;
+                color: var(--vscode-descriptionForeground);
+                font-style: italic;
+            }
+
 
             .shortcut-key {
                 font-family: monospace;
                 background-color: var(--vscode-badge-background);
                 color: var(--vscode-badge-foreground);
-                padding: 2px 6px;
-                border-radius: 3px;
+                padding: 4px 8px;
+                border-radius: 4px;
                 font-size: 11px;
+                font-weight: 600;
             }
 
             .default {
                 border-left: 3px solid var(--vscode-button-background);
-                opacity: 0.7;
+                opacity: 0.8;
                 cursor: default;
                 background-color: var(--vscode-editor-background);
             }
 
             .default:hover {
                 background-color: var(--vscode-editor-background);
-                opacity: 0.8;
+                opacity: 0.9;
+                transform: none;
             }
 
             .user-line {
-                border-top: 0.5px solid #d1d1d11b;
+                border-top: 1px solid var(--vscode-widget-border);
                 width: 100%;
-                margin: 10px 0;
+                margin: 12px 0;
             }
-            .user-delete:hover{
+
+            .user-delete:hover {
                 border-left: 3px solid #ff002b;
-                opacity: 0.7;
-                cursor: default;
-                background-color: var(--vscode-editor-background);
-                cursor:pointer
+                background-color: var(--vscode-inputValidation-errorBackground);
             }
+
+
         `;
   }
 
-  /**
-   * Combines all CSS styles into a single string
-   */
   public static getAllStyles(): string {
     return `
-            /* ========== LAYOUT STYLES ========== */
             ${this.getLayoutStyles()}
-
-            /* ========== BUTTON COMPONENT ========== */
             ${this.getButtonStyles()}
-
-            /* ========== SHORTCUTS LIST COMPONENT ========== */
             ${this.getShortcutsListStyles()}
         `;
   }
 
-  // ==========================================
-  // JAVASCRIPT SECTION
-  // ==========================================
-
-  /**
-   * Client-side JavaScript for webview interactions
-   */
   public static getWebviewScript(): string {
     return `
-            // VSCode API initialization
             const vscode = acquireVsCodeApi();
 
-            /**
-             * Send message to extension host
-             * @param {string} type - Message type
-             * @param {any} value - Optional message payload
-             */
             function sendMessage(type, value = null) {
                 vscode.postMessage({ type, value });
             }
 
-            /**
-             * Execute a command by sending message to extension
-             * @param {string} command - Command name to execute
-             */
             function executeCommand(command) {
                 sendMessage('execute', command);
             }
 
-            /**
-             * Show confirmation dialog for deleting a shortcut
-             * @param {number} index - Index of the shortcut to delete
-             * @param {string} label - Label of the shortcut for confirmation message
-             */
             function confirmDelete(index, label) {
                 sendMessage('confirmDelete', { index, label });
+            }
+
+            function executeShortcut(shortcutId) {
+                sendMessage('execute', shortcutId);
             }
         `;
   }
 
-  // ==========================================
-  // HTML COMPONENTS SECTION
-  // ==========================================
-
-  /**
-   * Generate the Combine button HTML
-   */
-  private static getCombineButtonHTML(): string {
+  private static getActionButtonsHTML(): string {
     return `
             <button class="button" onclick="sendMessage('commit')">
-                Combine
+                Create Shortcut <span class="beta-label">beta</span>
             </button>
         `;
   }
 
-  /**
-   * Generate the My List section HTML
-   */
   private static getMyListSectionHTML(): string {
     return `
             <div class="section-title">My List</div>
@@ -205,14 +189,6 @@ export class ShortcutsUIManager {
         `;
   }
 
-  // ==========================================
-  // MAIN HTML GENERATOR
-  // ==========================================
-
-  /**
-   * Generate complete HTML for the webview
-   * This is the main entry point for UI generation
-   */
   public static generateWebviewHTML(): string {
     return `<!DOCTYPE html>
         <html lang="en">
@@ -225,13 +201,9 @@ export class ShortcutsUIManager {
             </style>
         </head>
         <body>
-            <!-- ========== COMBINE BUTTON SECTION ========== -->
-            ${this.getCombineButtonHTML()}
-
-            <!-- ========== MY LIST SECTION ========== -->
+            ${this.getActionButtonsHTML()}
             ${this.getMyListSectionHTML()}
 
-            <!-- ========== WEBVIEW SCRIPTS ========== -->
             <script>
                 ${this.getWebviewScript()}
             </script>
@@ -240,33 +212,5 @@ export class ShortcutsUIManager {
   }
 }
 
-/**
- * ========================================
- * USAGE EXAMPLE:
- * ========================================
- *
- * In your webview provider:
- *
- * webviewView.webview.html = ShortcutsUIManager.generateWebviewHTML();
- *
- * ========================================
- * EXTENDING THE UI:
- * ========================================
- *
- * 1. Add new component styles in their own method
- * 2. Add the method to getAllStyles()
- * 3. Create HTML generator method for the component
- * 4. Add to generateWebviewHTML()
- *
- * This keeps everything organized and easy to maintain!
- */
-
-// ==========================================
-// MODULE EXPORTS
-// ==========================================
-
-// Export the main webview provider
-export { F1WebviewProvider } from './button';
-
-// Export data types and utilities
-export { MyListUI, type ShortcutItem } from './my-list';
+export { F1WebviewProvider } from './create-shortcut/btn-shortcut';
+export { MyListUI, type ShortcutItem } from './my-list/user-shortcuts';
