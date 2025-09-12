@@ -353,11 +353,16 @@ private async _createCombo(comboData: any): Promise<void> {
                 transition: all 0.2s ease;
                 font-weight: 500;
                 font-size: 13px;
+                text-transform: none;
             }
 
             .tab.active {
-                background-color: var(--vscode-tab-activeBackground);
-                color: var(--vscode-tab-activeForeground);
+                /* Active tab: stronger background, uppercase and bold text */
+                background-color: var(--vscode-button-background);
+                color: var(--vscode-button-foreground);
+                text-transform: uppercase;
+                font-weight: 700;
+                letter-spacing: 0.6px;
             }
 
             .tab:hover {
