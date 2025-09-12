@@ -124,9 +124,27 @@ export class F1WebviewProvider implements vscode.WebviewViewProvider {
         }
       }
 
+      // Handle installed extensions (for future extension management)
+      if (shortcut.actions.installedExtensions?.length) {
+        for (const extensionId of shortcut.actions.installedExtensions) {
+          try {
+            // For now, just show extension info
+            const extension = vscode.extensions.getExtension(extensionId);
+            if (extension) {
+              vscode.window.showInformationMessage(
+                `Extension: ${extension.packageJSON.displayName || extension.packageJSON.name} - ${extension.isActive ? 'Active' : 'Inactive'}`
+              );
+            }
+          } catch (error) {
+            console.warn(`Failed to process extension ${extensionId}:`, error);
+          }
+        }
+      }
+
       // Show success message
       const totalActions = (shortcut.actions.editorControls?.length || 0) + 
-                          (shortcut.actions.extensionCommands?.length || 0);
+                          (shortcut.actions.extensionCommands?.length || 0) +
+                          (shortcut.actions.installedExtensions?.length || 0);
       vscode.window.showInformationMessage(
         `✅ Executed "${shortcut.label}" (${totalActions} actions)`
       );

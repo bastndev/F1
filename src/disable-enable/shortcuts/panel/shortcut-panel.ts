@@ -1,4 +1,5 @@
 import * as vscode from 'vscode';
+import * as path from 'path';
 import { MyListUI, ShortcutItem } from '../my-list';
 import { getAvailableEditorControls } from '../../editor-controls/editor-controls';
 
@@ -59,7 +60,8 @@ export class ComboCreatorPanel {
           panel.webview.postMessage({
             type: 'comboData',
             editorControls: this._getAvailableEditorControls(),
-            extensionCommands: this._getAvailableExtensionCommands()
+            extensionCommands: this._getAvailableExtensionCommands(),
+            installedExtensions: this._getAvailableExtensions()
           });
           break;
       }
@@ -71,7 +73,7 @@ export class ComboCreatorPanel {
  */
 private async _createCombo(comboData: any): Promise<void> {
     try {
-        const { label, key, description, editorControls, extensionCommands } = comboData;
+        const { label, key, description, editorControls, extensionCommands, installedExtensions } = comboData;
         
         // Validate required fields
         if (!label || !key) {
@@ -88,7 +90,8 @@ private async _createCombo(comboData: any): Promise<void> {
         // Validate that exactly one action is selected
         const hasEditorControls = editorControls && editorControls.length > 0;
         const hasExtensionCommands = extensionCommands && extensionCommands.length > 0;
-        const totalActions = (editorControls?.length || 0) + (extensionCommands?.length || 0);
+        const hasInstalledExtensions = installedExtensions && installedExtensions.length > 0;
+        const totalActions = (editorControls?.length || 0) + (extensionCommands?.length || 0) + (installedExtensions?.length || 0);
         
         if (totalActions === 0) {
             vscode.window.showErrorMessage('Please select one action for this shortcut');
@@ -107,7 +110,8 @@ private async _createCombo(comboData: any): Promise<void> {
             description: description?.trim() || '',
             actions: {
                 editorControls: editorControls || [],
-                extensionCommands: extensionCommands || []
+                extensionCommands: extensionCommands || [],
+                installedExtensions: installedExtensions || []
             }
         };
 
@@ -115,7 +119,14 @@ private async _createCombo(comboData: any): Promise<void> {
         MyListUI.addShortcut(newShortcut);
 
         // Show confirmation
-        const actionType = hasEditorControls ? 'Editor Control' : 'Extension Command';
+        let actionType = 'Extension';
+        if (hasEditorControls) {
+            actionType = 'Editor Control';
+        } else if (hasExtensionCommands) {
+            actionType = 'Extension Command';
+        } else if (hasInstalledExtensions) {
+            actionType = 'Installed Extension';
+        }
         
         vscode.window.showInformationMessage(
             `✅ Shortcut "${label}" created successfully! (${actionType})`
@@ -180,6 +191,41 @@ private async _createCombo(comboData: any): Promise<void> {
     ];
     
     return [...commonCommands, ...commands].slice(0, 50); // Limit to 50 commands for performance
+  }
+
+  /**
+   * Get available installed extensions for shortcut creator
+   */
+  private _getAvailableExtensions(): Array<{
+    name: string, 
+    extensionId: string, 
+    category: string, 
+    iconPath?: string,
+    displayName: string,
+    version: string,
+    description?: string
+  }> {
+    return vscode.extensions.all
+      .filter(ext => !ext.packageJSON.isBuiltin)
+      .map(ext => {
+        const packageJSON = ext.packageJSON;
+        const displayName = packageJSON.displayName || packageJSON.name;
+        const version = `v${packageJSON.version}`;
+        
+        return {
+          name: `${displayName} (${version})`,
+          extensionId: ext.id,
+          category: 'Installed Extensions',
+          iconPath: packageJSON.icon 
+            ? path.join(ext.extensionPath, packageJSON.icon)
+            : undefined,
+          displayName: displayName,
+          version: version,
+          description: packageJSON.description || ''
+        };
+      })
+      .sort((a, b) => a.displayName.localeCompare(b.displayName))
+      .slice(0, 30); // Limit to 30 extensions for performance
   }
 
   /**
@@ -271,8 +317,15 @@ private async _createCombo(comboData: any): Promise<void> {
                 color: var(--vscode-badge-foreground);
                 border-radius: 6px;
                 flex-shrink: 0;
-            }
                 transition: background-color 0.2s ease, color 0.2s ease;
+            }
+
+            .extension-icon {
+                width: 24px;
+                height: 24px;
+                border-radius: 4px;
+                object-fit: contain;
+            }
 
             .action-content {
                 flex: 1;
@@ -555,6 +608,7 @@ private async _createCombo(comboData: any): Promise<void> {
             let currentActionType = 'editor';
             let selectedAction = null;
             let availableActions = { editor: [], extensions: [] };
+            let installedExtensions = [];
             let capturedKeys = '';
             let isCapturing = false;
 
@@ -589,8 +643,9 @@ private async _createCombo(comboData: any): Promise<void> {
                 if (message.type === 'comboData') {
                     availableActions = {
                         editor: message.editorControls || [],
-                        extensions: message.extensionCommands || []
+                        extensions: message.installedExtensions || []
                     };
+                    installedExtensions = message.installedExtensions || [];
                     updateActionsGrid();
                 }
             });
@@ -611,11 +666,11 @@ private async _createCombo(comboData: any): Promise<void> {
                 }
 
                 container.innerHTML = actions.map(action => \`
-                    <div class="action-card" data-key="\${action.key}" data-name="\${action.name}" onclick="selectAction('\${action.key}', '\${action.name}', '\${currentActionType}')">
+                    <div class="action-card" data-key="\${action.extensionId || action.key}" data-name="\${action.displayName || action.name}" onclick="selectAction('\${action.extensionId || action.key}', '\${action.displayName || action.name}', '\${currentActionType}')">
                         <div class="action-icon">\${getActionIcon(action, currentActionType)}</div>
                         <div class="action-content">
-                            <div class="action-name">\${action.name}</div>
-                            <div class="action-category">\${action.category || currentActionType}</div>
+                            <div class="action-name">\${action.displayName || action.name}</div>
+                            <div class="action-category">\${action.version || action.category || currentActionType}</div>
                         </div>
                     </div>
                 \`).join('');
@@ -632,9 +687,11 @@ private async _createCombo(comboData: any): Promise<void> {
                     };
                     const icon = iconMap[action.category] || 'gear';
                     return \`<span class="codicon codicon-\${icon}"></span>\`;
-                } else {
+                } else if (type === 'extensions') {
+                    // For extensions, always use default icon for now (iconPath handling is complex in webviews)
                     return '<span class="codicon codicon-extensions"></span>';
                 }
+                return '<span class="codicon codicon-gear"></span>';
             }
 
             function selectAction(key, name, type) {
@@ -730,7 +787,8 @@ private async _createCombo(comboData: any): Promise<void> {
                     key: capturedKeys,
                     description: \`Toggle \${selectedAction.name}\`,
                     editorControls: selectedAction.type === 'editor' ? [selectedAction.key] : [],
-                    extensionCommands: selectedAction.type === 'extensions' ? [selectedAction.key] : []
+                    extensionCommands: selectedAction.type === 'extensions' ? [selectedAction.key] : [],
+                    installedExtensions: selectedAction.type === 'extensions' ? [selectedAction.key] : []
                 };
 
                 vscode.postMessage({

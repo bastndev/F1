@@ -4,6 +4,7 @@ export interface ShortcutItem {
   actions: {
     editorControls?: string[];  
     extensionCommands?: string[];
+    installedExtensions?: string[];
   };
   isDefault?: boolean;
   description?: string; 
@@ -37,7 +38,7 @@ export class MyListUI {
   /**
    * Get shortcuts by action type
    */
-  static getShortcutsByType(type: 'editorControls' | 'extensionCommands'): ShortcutItem[] {
+  static getShortcutsByType(type: 'editorControls' | 'extensionCommands' | 'installedExtensions'): ShortcutItem[] {
     return this.userShortcuts.filter(shortcut => 
       shortcut.actions[type] && shortcut.actions[type]!.length > 0
     );
@@ -57,16 +58,18 @@ export class MyListUI {
     total: number;
     editorControls: number;
     extensionCommands: number;
+    installedExtensions: number;
     combos: number;
   } {
     const total = this.userShortcuts.length;
     const editorControls = this.userShortcuts.filter(s => s.actions.editorControls?.length).length;
     const extensionCommands = this.userShortcuts.filter(s => s.actions.extensionCommands?.length).length;
+    const installedExtensions = this.userShortcuts.filter(s => s.actions.installedExtensions?.length).length;
     const combos = this.userShortcuts.filter(s => 
       s.actions.editorControls?.length && s.actions.extensionCommands?.length
     ).length;
 
-    return { total, editorControls, extensionCommands, combos };
+    return { total, editorControls, extensionCommands, installedExtensions, combos };
   }
 
   static generateShortcutsHTML(): string {
@@ -176,7 +179,8 @@ export class MyListUI {
   static getShortcutsByActionCount(minActions: number = 1): ShortcutItem[] {
     return this.userShortcuts.filter(shortcut => {
       const totalActions = (shortcut.actions.editorControls?.length || 0) + 
-                          (shortcut.actions.extensionCommands?.length || 0);
+                          (shortcut.actions.extensionCommands?.length || 0) +
+                          (shortcut.actions.installedExtensions?.length || 0);
       return totalActions >= minActions;
     });
   }
