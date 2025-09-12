@@ -3,15 +3,11 @@ interface EditorControl {
   category: 'editor' | 'ui' | 'formatting' | 'features' | 'debugging';
   configKey?: string;
   isSeparator?: boolean;
-  isNew?: boolean;
 }
 
 // Static controls array
 export const editorControls: EditorControl[] = [
   // Editor Visual Features
-  // Separator
-  // {name: 'Editor Features',category: 'editor',isSeparator: true,},
-
   {name: 'Minimap',category: 'editor',configKey: 'editor.minimap.enabled',},
   {name: 'Code Folding',category: 'editor',configKey: 'editor.folding',},
   {name: 'Line Numbers',category: 'editor',configKey: 'editor.lineNumbers',},
@@ -20,10 +16,7 @@ export const editorControls: EditorControl[] = [
   {name: 'Indent Guides',category: 'editor',configKey: 'editor.guides.indentation',},
   {name: 'Sticky Scroll',category: 'editor',configKey: 'editor.stickyScroll.enabled',},
   {name: 'Cursor Smooth Caret Animation',category: 'editor',configKey: 'editor.cursorSmoothCaretAnimation',},
-  {name: 'Terminal Suggest',category: 'editor',configKey: 'terminal.integrated.suggest.enabled', isNew: true}, // new
-
-  // Separator
-  {name: 'Editor Features',category: 'ui',isSeparator: true,},
+  {name: 'Terminal Suggest',category: 'editor',configKey: 'terminal.integrated.suggest.enabled'},
 
   // UI Features
   {name: 'Bracket LINE Colorization',category: 'ui',configKey: 'editor.guides.bracketPairs',},
@@ -36,9 +29,6 @@ export const editorControls: EditorControl[] = [
   {name: 'Tabs',category: 'ui',configKey: 'workbench.editor.showTabs',},
   {name: 'Tree Indent',category: 'ui',configKey: 'workbench.tree.indent',},
 
-  // Separator
-  {name: 'UI Components',category: 'formatting',isSeparator: true,},
-
   // Formatting & Code Features
   {name: 'Auto Save',category: 'formatting',configKey: 'files.autoSave',},
   {name: 'Format On Paste',category: 'formatting',configKey: 'editor.formatOnPaste',},
@@ -46,9 +36,6 @@ export const editorControls: EditorControl[] = [
   {name: 'Format On Type',category: 'formatting',configKey: 'editor.formatOnType',},
   {name: 'Insert Final Newline',category: 'formatting',configKey: 'files.insertFinalNewline',},
   {name: 'Trim Trailing Whitespace',category: 'formatting',configKey: 'files.trimTrailingWhitespace',},
-
-  // Separator
-  {name: 'Formatting Options',category: 'features',isSeparator: true,},
 
   // IntelliSense & Features
   {name: 'Accept Suggestion On Enter',category: 'features',configKey: 'editor.acceptSuggestionOnEnter',},
@@ -62,9 +49,6 @@ export const editorControls: EditorControl[] = [
   {name: 'IntelliSense',category: 'features',configKey: 'editor.quickSuggestions',},
   {name: 'Parameter Hints',category: 'features',configKey: 'editor.parameterHints.enabled',},
   {name: 'Suggest On Trigger Characters',category: 'features',configKey: 'editor.suggestOnTriggerCharacters',},
-
-  // Separator
-  {name: 'Advanced Features',category: 'debugging',isSeparator: true,},
 
   // Debugging & Terminal
   {name: 'Debug Console',category: 'debugging',configKey: 'debug.console.fontSize',},

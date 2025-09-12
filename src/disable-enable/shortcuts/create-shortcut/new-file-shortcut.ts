@@ -24,7 +24,7 @@ export class ComboCreatorPanel {
   public showComboCreator(): void {
     const panel = vscode.window.createWebviewPanel(
       'f1ShortcutCreator',
-      '⚡️ F1 Shortcut Creator',
+      'F1 Shortcut Creator',
       vscode.ViewColumn.One,
       {
         enableScripts: true,
@@ -32,10 +32,10 @@ export class ComboCreatorPanel {
       }
     );
 
-    // Set the panel icon to lightning bolt
+    // Set the panel icon to lightning bolt SVG
     panel.iconPath = {
-      light: vscode.Uri.joinPath(this._extensionUri, 'assets', 'images', 'light', 'f1.svg'),
-      dark: vscode.Uri.joinPath(this._extensionUri, 'assets', 'images', 'dark', 'f1.svg')
+      light: vscode.Uri.joinPath(this._extensionUri, 'assets', 'svg', 'f1.svg'),
+      dark: vscode.Uri.joinPath(this._extensionUri, 'assets', 'svg', 'f1.svg')
     };
 
     panel.webview.html = this._getComboCreatorHTML();
@@ -429,7 +429,7 @@ private async _createCombo(comboData: any): Promise<void> {
     <body>
         <div class="container">
             <div class="header">
-                <h1>F1</h1>
+                <h1>F1 Shortcut Creator</h1>
                 <p>Select an action to create a keyboard shortcut</p>
             </div>
 
