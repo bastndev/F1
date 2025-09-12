@@ -17,7 +17,8 @@ class EditorControlsProvider implements vscode.TreeDataProvider<EditorControl> {
     EditorControl | undefined | null | void
   > = this._onDidChangeTreeData.event;
 
-  private controls: EditorControl[] = [
+  // Static controls array to avoid duplication
+  public static readonly controls: EditorControl[] = [
     // Editor Visual Features
     // Separator
     {name: 'Editor Features',category: 'editor',isSeparator: true,},
@@ -81,6 +82,9 @@ class EditorControlsProvider implements vscode.TreeDataProvider<EditorControl> {
     {name: 'Inline Values',category: 'debugging',configKey: 'debug.inlineValues',},
     {name: 'Terminal Cursor Blinking',category: 'debugging',configKey: 'terminal.integrated.cursorBlinking',},
   ];
+
+  // Instance property that references the static array
+  public controls: EditorControl[] = EditorControlsProvider.controls;
 
   // Category icons mapping
   private categoryIcons = {
@@ -319,3 +323,16 @@ export function activate(context: vscode.ExtensionContext) {
 }
 
 export function deactivate() {}
+
+/**
+ * Get available editor controls for shortcut creator
+ */
+export function getAvailableEditorControls(): Array<{name: string, key: string, category: string}> {
+  return EditorControlsProvider.controls
+    .filter(control => control.configKey) // Only include controls with config keys
+    .map(control => ({
+      name: control.name,
+      key: control.configKey!,
+      category: control.category
+    }));
+}

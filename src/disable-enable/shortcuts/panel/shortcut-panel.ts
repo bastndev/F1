@@ -1,5 +1,6 @@
 import * as vscode from 'vscode';
 import { MyListUI, ShortcutItem } from '../my-list';
+import { getAvailableEditorControls } from '../../editor-controls/editor-controls';
 
 export class ComboCreatorPanel {
   private _extensionUri: vscode.Uri;
@@ -136,55 +137,7 @@ private async _createCombo(comboData: any): Promise<void> {
    * Get available editor controls for shortcut creator
    */
   private _getAvailableEditorControls(): Array<{name: string, key: string, category: string}> {
-    return [
-      // Editor Visual Features
-      { name: 'Minimap', key: 'editor.minimap.enabled', category: 'editor' },
-      { name: 'Code Folding', key: 'editor.folding', category: 'editor' },
-      { name: 'Line Numbers', key: 'editor.lineNumbers', category: 'editor' },
-      { name: 'Cursor Blinking', key: 'editor.cursorBlinking', category: 'editor' },
-      { name: 'Color Decorators', key: 'editor.colorDecorators', category: 'editor' },
-      { name: 'Indent Guides', key: 'editor.guides.indentation', category: 'editor' },
-      { name: 'Sticky Scroll', key: 'editor.stickyScroll.enabled', category: 'editor' },
-      { name: 'Cursor Smooth Caret Animation', key: 'editor.cursorSmoothCaretAnimation', category: 'editor' },
-      { name: 'Terminal Suggest', key: 'terminal.integrated.suggest.enabled', category: 'editor' },
-      
-      // UI Features
-      { name: 'Bracket LINE Colorization', key: 'editor.guides.bracketPairs', category: 'ui' },
-      { name: 'Bracket PAIR Colorization', key: 'editor.bracketPairColorization.enabled', category: 'ui' },
-      { name: 'Breadcrumbs', key: 'breadcrumbs.enabled', category: 'ui' },
-      { name: 'Compact Folders', key: 'explorer.compactFolders', category: 'ui' },
-      { name: 'Panel', key: 'workbench.panel.defaultLocation', category: 'ui' },
-      { name: 'Side Bar', key: 'workbench.sideBar.location', category: 'ui' },
-      { name: 'Status Bar', key: 'workbench.statusBar.visible', category: 'ui' },
-      { name: 'Tabs', key: 'workbench.editor.showTabs', category: 'ui' },
-      { name: 'Tree Indent', key: 'workbench.tree.indent', category: 'ui' },
-      
-      // Formatting & Code Features
-      { name: 'Auto Save', key: 'files.autoSave', category: 'formatting' },
-      { name: 'Format On Paste', key: 'editor.formatOnPaste', category: 'formatting' },
-      { name: 'Format On Save', key: 'editor.formatOnSave', category: 'formatting' },
-      { name: 'Format On Type', key: 'editor.formatOnType', category: 'formatting' },
-      { name: 'Insert Final Newline', key: 'files.insertFinalNewline', category: 'formatting' },
-      { name: 'Trim Trailing Whitespace', key: 'files.trimTrailingWhitespace', category: 'formatting' },
-      
-      // IntelliSense & Features
-      { name: 'Accept Suggestion On Enter', key: 'editor.acceptSuggestionOnEnter', category: 'features' },
-      { name: 'Auto Closing Brackets', key: 'editor.autoClosingBrackets', category: 'features' },
-      { name: 'Auto Closing Quotes', key: 'editor.autoClosingQuotes', category: 'features' },
-      { name: 'Auto Surround Selection', key: 'editor.autoSurround', category: 'features' },
-      { name: 'Code Lens', key: 'editor.codeLens', category: 'features' },
-      { name: 'Git Auto Fetch', key: 'git.autofetch', category: 'features' },
-      { name: 'Git Decorations', key: 'git.decorations.enabled', category: 'features' },
-      { name: 'Hover', key: 'editor.hover.enabled', category: 'features' },
-      { name: 'IntelliSense', key: 'editor.quickSuggestions', category: 'features' },
-      { name: 'Parameter Hints', key: 'editor.parameterHints.enabled', category: 'features' },
-      { name: 'Suggest On Trigger Characters', key: 'editor.suggestOnTriggerCharacters', category: 'features' },
-      
-      // Debugging & Terminal
-      { name: 'Debug Console', key: 'debug.console.fontSize', category: 'debugging' },
-      { name: 'Inline Values', key: 'debug.inlineValues', category: 'debugging' },
-      { name: 'Terminal Cursor Blinking', key: 'terminal.integrated.cursorBlinking', category: 'debugging' }
-    ];
+    return getAvailableEditorControls();
   }
 
   /**
