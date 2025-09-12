@@ -182,10 +182,10 @@ export class MyListUI {
     const result = await vscode.window.showInformationMessage(
       `Delete "${label}"?`,
       { modal: true },
-      'Delete'
+      'Yes'
     );
 
-    if (result === 'Delete') {
+    if (result === 'Yes') {
       this.removeShortcut(index);
       vscode.window.showInformationMessage(`🗑️ Deleted "${label}"`);
       return true;
