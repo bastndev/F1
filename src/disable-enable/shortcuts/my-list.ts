@@ -1,3 +1,5 @@
+import * as vscode from 'vscode';
+
 export interface ShortcutItem {
   label: string;
   key: string;
@@ -14,9 +16,25 @@ export interface ShortcutItem {
 }
 
 export class MyListUI {
+  private static _context: vscode.ExtensionContext;
   private static userShortcuts: ShortcutItem[] = [
     // Empty list - the user will create their own shortcuts
   ];
+
+  /**
+   * Initialize the shortcut list from global state
+   */
+  static initialize(context: vscode.ExtensionContext): void {
+    this._context = context;
+    this.userShortcuts = this._context.globalState.get<ShortcutItem[]>('userShortcuts') || [];
+  }
+
+  /**
+   * Save shortcuts to global state
+   */
+  private static _saveShortcuts(): void {
+    this._context.globalState.update('userShortcuts', this.userShortcuts);
+  }
 
   /**
    * Add a new shortcut combo
@@ -33,6 +51,7 @@ export class MyListUI {
     }
     
     this.userShortcuts.push(shortcut);
+    this._saveShortcuts();
   }
 
   /**
@@ -125,6 +144,7 @@ export class MyListUI {
   static removeShortcut(index: number): void {
     if (index >= 0 && index < this.userShortcuts.length) {
       this.userShortcuts.splice(index, 1);
+      this._saveShortcuts();
     }
   }
 
