@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 import { ShortcutsUIManager } from '../ui';
-import { MyListUI, ShortcutItem } from '../my-list';
+import { MyListUI, ShortcutItem } from '../my-list/my-list';
 import { ComboCreatorPanel } from './new-file-shortcut';
 
 export class F1WebviewProvider implements vscode.WebviewViewProvider {

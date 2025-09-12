@@ -1,10 +1,10 @@
 import * as vscode from 'vscode';
 import { F1WebviewProvider } from './disable-enable/shortcuts/ui';
-import { MyListUI } from './disable-enable/shortcuts/my-list';
+import { MyListUI } from './disable-enable/shortcuts/my-list/my-list';
 import { activate as activateEditorControls } from './disable-enable/editor-controls/ed-controls';
 import { activate as activateExtensions } from './disable-enable/extensions/editor-extensions';
-import { activate as activateAI } from './disable-enable/shortcuts/default/ai';
-import { activate as activateF1 } from './disable-enable/shortcuts/default/f1';
+import { activate as activateAI } from './disable-enable/shortcuts/my-list/default/ai';
+import { activate as activateF1 } from './disable-enable/shortcuts/my-list/default/f1';
 
 export function activate(context: vscode.ExtensionContext) {
   // Initialize the shortcut list

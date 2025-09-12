@@ -1,4 +1,4 @@
-import { MyListUI } from './my-list';
+import { MyListUI } from './my-list/my-list';
 
 export class ShortcutsUIManager {
   // ==========================================
@@ -301,4 +301,4 @@ export class ShortcutsUIManager {
 export { F1WebviewProvider } from './create-shortcut/btn-shortcut';
 
 // Export data types and utilities
-export { MyListUI, type ShortcutItem } from './my-list';
+export { MyListUI, type ShortcutItem } from './my-list/my-list';
