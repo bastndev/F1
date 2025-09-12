@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 import { F1WebviewProvider } from './disable-enable/shortcuts/ui';
-import { MyListUI } from './disable-enable/shortcuts/my-list/new-shortcuts-creates';
+import { MyListUI } from './disable-enable/shortcuts/my-list/user-shortcuts';
 import { activate as activateEditorControls } from './disable-enable/editor-controls/ed-controls';
 import { activate as activateExtensions } from './disable-enable/extensions/editor-extensions';
 import { activate as activateAI } from './disable-enable/shortcuts/my-list/default/ai';

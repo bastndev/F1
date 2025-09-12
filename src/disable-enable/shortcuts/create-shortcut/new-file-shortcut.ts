@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 import * as path from 'path';
-import { MyListUI, ShortcutItem } from '../my-list/new-shortcuts-creates';
+import { MyListUI, ShortcutItem } from '../my-list/user-shortcuts';
 import { getAvailableEditorControls } from './ed-content';
 
 export class ComboCreatorPanel {
