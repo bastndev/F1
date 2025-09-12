@@ -222,7 +222,7 @@ export class ShortcutsUIManager {
   private static getActionButtonsHTML(): string {
     return `
             <button class="button" onclick="sendMessage('commit')">
-                🎯 Create Shortcut
+                Create Shortcut
             </button>
         `;
   }

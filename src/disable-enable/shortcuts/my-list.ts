@@ -2,73 +2,23 @@ export interface ShortcutItem {
   label: string;
   key: string;
   actions: {
-    editorControls?: string[];  // Configuraciones de editor
-    extensionCommands?: string[]; // Comandos de extensiones
+    editorControls?: string[];  
+    extensionCommands?: string[];
   };
   isDefault?: boolean;
-  description?: string; // Descripción opcional del combo
-  id?: string; // Unique identifier for the shortcut
-  createdAt?: Date; // Creation timestamp
-  lastUsed?: Date; // Last usage timestamp
+  description?: string; 
+  id?: string; 
+  createdAt?: Date; 
+  lastUsed?: Date; 
 }
 
 export class MyListUI {
   private static userShortcuts: ShortcutItem[] = [
-    // Ejemplos de combos que el usuario puede crear
-    {
-      id: 'focus-mode-001',
-      label: 'Focus Mode 🎯',
-      key: 'Ctrl+Shift+F',
-      description: 'Minimalist coding environment',
-      actions: {
-        editorControls: [
-          'editor.minimap.enabled',
-          'editor.folding',
-          'editor.lineNumbers',
-          'breadcrumbs.enabled'
-        ]
-      },
-      createdAt: new Date('2024-01-01'),
-      lastUsed: new Date('2024-01-15')
-    },
-    {
-      id: 'ai-dev-001',
-      label: 'AI Development 🤖',
-      key: 'Ctrl+Shift+A',
-      description: 'Enable AI tools and suggestions',
-      actions: {
-        extensionCommands: [
-          'github.copilot.toggleInlineSuggestion',
-          'eslint.executeAutofix',
-          'astro.build'
-        ]
-      },
-      createdAt: new Date('2024-01-02'),
-      lastUsed: new Date('2024-01-14')
-    },
-    {
-      id: 'full-combo-001',
-      label: 'Full Combo 🚀',
-      key: 'Ctrl+Shift+Q',
-      description: 'Complete development setup',
-      actions: {
-        editorControls: [
-          'editor.minimap.enabled',
-          'editor.folding',
-          'editor.lineNumbers'
-        ],
-        extensionCommands: [
-          'eslint.executeAutofix',
-          'github.copilot.toggleInlineSuggestion'
-        ]
-      },
-      createdAt: new Date('2024-01-03'),
-      lastUsed: new Date('2024-01-13')
-    }
+    // Empty list - the user will create their own shortcuts
   ];
 
   /**
-   * Agregar un nuevo shortcut combo
+   * Add a new shortcut combo
    */
   static addShortcut(shortcut: ShortcutItem): void {
     // Generate unique ID if not provided
@@ -85,7 +35,7 @@ export class MyListUI {
   }
 
   /**
-   * Obtener shortcuts por tipo de acción
+   * Get shortcuts by action type
    */
   static getShortcutsByType(type: 'editorControls' | 'extensionCommands'): ShortcutItem[] {
     return this.userShortcuts.filter(shortcut => 
@@ -94,14 +44,14 @@ export class MyListUI {
   }
 
   /**
-   * Validar si un shortcut ya existe
+   * Validate if a shortcut already exists
    */
   static shortcutExists(key: string): boolean {
     return this.userShortcuts.some(shortcut => shortcut.key === key);
   }
 
   /**
-   * Obtener estadísticas de shortcuts
+   * Get shortcut statistics
    */
   static getShortcutStats(): {
     total: number;
