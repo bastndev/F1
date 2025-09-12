@@ -272,6 +272,7 @@ private async _createCombo(comboData: any): Promise<void> {
                 border-radius: 6px;
                 flex-shrink: 0;
             }
+                transition: background-color 0.2s ease, color 0.2s ease;
 
             .action-content {
                 flex: 1;
@@ -491,6 +492,11 @@ private async _createCombo(comboData: any): Promise<void> {
                 font-size: 13px;
                 opacity: 0.8;
             }
+            .action-card:hover .action-icon {
+                 background-color: var(--vscode-button-background);
+                 color: var(--vscode-button-foreground);
+            }
+
         </style>
     </head>
     <body>
