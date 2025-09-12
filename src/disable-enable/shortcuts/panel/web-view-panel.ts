@@ -22,7 +22,7 @@ export class ComboCreatorPanel {
   public showComboCreator(): void {
     const panel = vscode.window.createWebviewPanel(
       'f1ShortcutCreator',
-      'F1 Shortcut Creator',
+      '⚡️ F1 Shortcut Creator',
       vscode.ViewColumn.One,
       {
         enableScripts: true,
@@ -541,7 +541,7 @@ private async _createCombo(comboData: any): Promise<void> {
     <body>
         <div class="container">
             <div class="header">
-                <h1>⚡ F1 Shortcut Creator</h1>
+                <h1>F1</h1>
                 <p>Select an action to create a keyboard shortcut</p>
             </div>
 
