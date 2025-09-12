@@ -50,6 +50,15 @@ export class ShortcutsUIManager {
                 background-color: var(--vscode-button-hoverBackground);
             }
 
+            .beta-label {
+                font-size: 10px;
+                background-color: #cccccc;
+                color: #333333;
+                padding: 2px 4px;
+                border-radius: 4px;
+                margin-left: 4px;
+            }
+
         `;
   }
 
@@ -168,7 +177,7 @@ export class ShortcutsUIManager {
   private static getActionButtonsHTML(): string {
     return `
             <button class="button" onclick="sendMessage('commit')">
-                Create Shortcut
+                Create Shortcut <span class="beta-label">beta</span>
             </button>
         `;
   }
