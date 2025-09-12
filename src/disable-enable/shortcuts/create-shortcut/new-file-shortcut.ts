@@ -34,8 +34,8 @@ export class ComboCreatorPanel {
 
     // Set the panel icon to lightning bolt SVG
     panel.iconPath = {
-      light: vscode.Uri.joinPath(this._extensionUri, 'assets', 'svg', 'f1.svg'),
-      dark: vscode.Uri.joinPath(this._extensionUri, 'assets', 'svg', 'f1.svg')
+      light: vscode.Uri.joinPath(this._extensionUri, 'assets', 'svg', 'f2.svg'),
+      dark: vscode.Uri.joinPath(this._extensionUri, 'assets', 'svg', 'f2.svg')
     };
 
     panel.webview.html = this._getComboCreatorHTML();
