@@ -21,7 +21,7 @@ class EditorControlsProvider implements vscode.TreeDataProvider<EditorControl> {
   public static readonly controls: EditorControl[] = [
     // Editor Visual Features
     // Separator
-    {name: 'Editor Features',category: 'editor',isSeparator: true,},
+    // {name: 'Editor Features',category: 'editor',isSeparator: true,},
 
     {name: 'Minimap',category: 'editor',configKey: 'editor.minimap.enabled',},
     {name: 'Code Folding',category: 'editor',configKey: 'editor.folding',},

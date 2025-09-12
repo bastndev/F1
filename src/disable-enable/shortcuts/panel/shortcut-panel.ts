@@ -508,7 +508,7 @@ private async _createCombo(comboData: any): Promise<void> {
 
             <div class="tabs">
                 <div class="tab active" data-type="editor">Editor Controls</div>
-                <div class="tab" data-type="extensions">Extension Commands</div>
+                <div class="tab" data-type="extensions">Extensions</div>
             </div>
 
             <div class="actions-grid" id="actionsGrid">
