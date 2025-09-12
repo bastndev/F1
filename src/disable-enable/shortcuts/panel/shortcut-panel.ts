@@ -191,6 +191,8 @@ private async _createCombo(comboData: any): Promise<void> {
     <head>
         <meta charset="UTF-8">
         <title>F1 Shortcut Creator</title>
+        <!-- VS Code Codicons -->
+        <link rel="stylesheet" href="https://microsoft.github.io/vscode-codicons/dist/codicon.css">
         <style>
             * {
                 margin: 0;
@@ -615,16 +617,17 @@ private async _createCombo(comboData: any): Promise<void> {
 
             function getActionIcon(action, type) {
                 if (type === 'editor') {
-                    const categoryIcons = {
-                        'editor': '📝',
-                        'ui': '🎨',
-                        'formatting': '📏',
-                        'features': '⚡',
-                        'debugging': '🐛'
+                    const iconMap = {
+                        'editor': 'edit',
+                        'ui': 'layout',
+                        'formatting': 'symbol-ruler',
+                        'features': 'zap',
+                        'debugging': 'debug-alt'
                     };
-                    return categoryIcons[action.category] || '⚙️';
+                    const icon = iconMap[action.category] || 'gear';
+                    return \`<span class="codicon codicon-\${icon}"></span>\`;
                 } else {
-                    return '🔌';
+                    return '<span class="codicon codicon-extensions"></span>';
                 }
             }
 
