@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 import * as path from 'path';
 import { MyListUI, ShortcutItem } from '../my-list';
-import { getAvailableEditorControls } from './new-list-controls';
+import { getAvailableEditorControls } from './new-ed-controls';
 
 export class ComboCreatorPanel {
   private _extensionUri: vscode.Uri;
