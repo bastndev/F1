@@ -298,7 +298,7 @@ export class ShortcutsUIManager {
 // ==========================================
 
 // Export the main webview provider
-export { F1WebviewProvider } from './button';
+export { F1WebviewProvider } from './create-shortcut/btn-shortcut';
 
 // Export data types and utilities
 export { MyListUI, type ShortcutItem } from './my-list';
