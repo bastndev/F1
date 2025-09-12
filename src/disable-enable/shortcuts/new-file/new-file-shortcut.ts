@@ -59,9 +59,7 @@ export class ComboCreatorPanel {
           // Send available data to the combo creator
           panel.webview.postMessage({
             type: 'comboData',
-            editorControls: this._getAvailableEditorControls(),
-            extensionCommands: this._getAvailableExtensionCommands(),
-            installedExtensions: this._getAvailableExtensions()
+            editorControls: this._getAvailableEditorControls()
           });
           break;
       }
@@ -73,7 +71,7 @@ export class ComboCreatorPanel {
  */
 private async _createCombo(comboData: any): Promise<void> {
     try {
-        const { label, key, description, editorControls, extensionCommands, installedExtensions } = comboData;
+        const { label, key, description, editorControls } = comboData;
         
         // Validate required fields
         if (!label || !key) {
@@ -87,19 +85,14 @@ private async _createCombo(comboData: any): Promise<void> {
             return;
         }
 
-        // Validate that exactly one action is selected
-        const hasEditorControls = editorControls && editorControls.length > 0;
-        const hasExtensionCommands = extensionCommands && extensionCommands.length > 0;
-        const hasInstalledExtensions = installedExtensions && installedExtensions.length > 0;
-        const totalActions = (editorControls?.length || 0) + (extensionCommands?.length || 0) + (installedExtensions?.length || 0);
-        
-        if (totalActions === 0) {
-            vscode.window.showErrorMessage('Please select one action for this shortcut');
+        // Validate that exactly one editor control is selected
+        if (!editorControls || editorControls.length === 0) {
+            vscode.window.showErrorMessage('Please select one editor control for this shortcut');
             return;
         }
         
-        if (totalActions > 1) {
-            vscode.window.showErrorMessage('Please select only one action per shortcut');
+        if (editorControls.length > 1) {
+            vscode.window.showErrorMessage('Please select only one editor control per shortcut');
             return;
         }
 
@@ -109,9 +102,9 @@ private async _createCombo(comboData: any): Promise<void> {
             key: key.trim(),
             description: description?.trim() || '',
             actions: {
-                editorControls: editorControls || [],
-                extensionCommands: extensionCommands || [],
-                installedExtensions: installedExtensions || []
+                editorControls: editorControls,
+                extensionCommands: [],
+                installedExtensions: []
             }
         };
 
@@ -119,17 +112,8 @@ private async _createCombo(comboData: any): Promise<void> {
         MyListUI.addShortcut(newShortcut);
 
         // Show confirmation
-        let actionType = 'Extension';
-        if (hasEditorControls) {
-            actionType = 'Editor Control';
-        } else if (hasExtensionCommands) {
-            actionType = 'Extension Command';
-        } else if (hasInstalledExtensions) {
-            actionType = 'Installed Extension';
-        }
-        
         vscode.window.showInformationMessage(
-            `✅ Shortcut "${label}" created successfully! (${actionType})`
+            `✅ Shortcut "${label}" created successfully! (Editor Control)`
         );
 
         // Call the callback to refresh the main view
@@ -149,83 +133,6 @@ private async _createCombo(comboData: any): Promise<void> {
    */
   private _getAvailableEditorControls(): Array<{name: string, key: string, category: string}> {
     return getAvailableEditorControls();
-  }
-
-  /**
-   * Get available extension commands for shortcut creator
-   */
-  private _getAvailableExtensionCommands(): Array<{name: string, key: string, category: string}> {
-    // Get all installed extensions and their commands
-    const extensions = vscode.extensions.all.filter(ext => !ext.packageJSON.isBuiltin);
-    const commands: Array<{name: string, key: string, category: string}> = [];
-    
-    extensions.forEach(ext => {
-      const packageJSON = ext.packageJSON;
-      const extensionName = packageJSON.displayName || packageJSON.name;
-      
-      // Get commands from package.json
-      if (packageJSON.contributes && packageJSON.contributes.commands) {
-        packageJSON.contributes.commands.forEach((command: any) => {
-          if (command.command && command.title) {
-            commands.push({
-              name: command.title,
-              key: command.command,
-              category: extensionName
-            });
-          }
-        });
-      }
-    });
-    
-    // Add some common VS Code commands
-    const commonCommands = [
-      { name: 'Format Document', key: 'editor.action.formatDocument', category: 'VS Code' },
-      { name: 'Organize Imports', key: 'editor.action.organizeImports', category: 'VS Code' },
-      { name: 'Toggle Terminal', key: 'workbench.action.terminal.toggleTerminal', category: 'VS Code' },
-      { name: 'Command Palette', key: 'workbench.action.showCommands', category: 'VS Code' },
-      { name: 'Quick Open', key: 'workbench.action.quickOpen', category: 'VS Code' },
-      { name: 'Toggle Sidebar', key: 'workbench.action.toggleSidebarVisibility', category: 'VS Code' },
-      { name: 'Toggle Panel', key: 'workbench.action.togglePanel', category: 'VS Code' },
-      { name: 'Toggle Zen Mode', key: 'workbench.action.toggleZenMode', category: 'VS Code' },
-      { name: 'Toggle Full Screen', key: 'workbench.action.toggleFullScreen', category: 'VS Code' }
-    ];
-    
-    return [...commonCommands, ...commands].slice(0, 50); // Limit to 50 commands for performance
-  }
-
-  /**
-   * Get available installed extensions for shortcut creator
-   */
-  private _getAvailableExtensions(): Array<{
-    name: string, 
-    extensionId: string, 
-    category: string, 
-    iconPath?: string,
-    displayName: string,
-    version: string,
-    description?: string
-  }> {
-    return vscode.extensions.all
-      .filter(ext => !ext.packageJSON.isBuiltin)
-      .map(ext => {
-        const packageJSON = ext.packageJSON;
-        const displayName = packageJSON.displayName || packageJSON.name;
-        const version = `v${packageJSON.version}`;
-        
-        return {
-          name: `${displayName} (${version})`,
-          extensionId: ext.id,
-          category: 'Installed Extensions',
-          iconPath: packageJSON.icon 
-            ? path.join(ext.extensionPath, packageJSON.icon)
-            : undefined,
-          displayName: displayName,
-          version: version,
-          description: packageJSON.description || ''
-        };
-      })
-      .sort((a, b) => a.displayName.localeCompare(b.displayName))
-      .slice(0, 30); // Limit to 30 extensions for performance
   }
 
   /**
@@ -343,47 +250,6 @@ private async _createCombo(comboData: any): Promise<void> {
                 color: var(--vscode-descriptionForeground);
                 text-transform: uppercase;
                 letter-spacing: 0.5px;
-            }
-
-            .tabs {
-                display: flex;
-                margin-bottom: 20px;
-                background-color: var(--vscode-tab-inactiveBackground);
-                border-radius: 6px;
-                padding: 4px;
-            }
-
-            .tab {
-                flex: 1;
-                padding: 8px 16px;
-                text-align: center;
-                cursor: pointer;
-                border-radius: 4px;
-                transition: all 0.2s ease;
-                font-weight: 500;
-                font-size: 13px;
-                text-transform: none;
-                color: var(--vscode-tab-inactiveForeground);
-            }
-
-            .tab.active {
-                /* Active tab: stronger background, uppercase and bold text */
-                background-color: var(--vscode-button-background);
-                color: var(--vscode-button-foreground);
-                text-transform: uppercase;
-                font-weight: 700;
-                letter-spacing: 0.6px;
-            }
-
-            .tab:hover {
-                background-color: var(--vscode-tab-hoverBackground);
-                color: var(--vscode-tab-activeForeground);
-            }
-
-            /* Specific hover state for active tab */
-            .tab.active:hover {
-                background-color: var(--vscode-button-hoverBackground);
-                color: var(--vscode-button-foreground);
             }
 
             /* Modal Styles */
@@ -567,11 +433,6 @@ private async _createCombo(comboData: any): Promise<void> {
                 <p>Select an action to create a keyboard shortcut</p>
             </div>
 
-            <div class="tabs">
-                <div class="tab active" data-type="editor">Editor Controls</div>
-                <div class="tab" data-type="extensions">Extensions</div>
-            </div>
-
             <div class="actions-grid" id="actionsGrid">
                 <div class="empty-state">
                     <div class="icon">⚡</div>
@@ -613,10 +474,8 @@ private async _createCombo(comboData: any): Promise<void> {
 
         <script>
             const vscode = acquireVsCodeApi();
-            let currentActionType = 'editor';
             let selectedAction = null;
-            let availableActions = { editor: [], extensions: [] };
-            let installedExtensions = [];
+            let availableActions = [];
             let capturedKeys = '';
             let isCapturing = false;
 
@@ -627,16 +486,6 @@ private async _createCombo(comboData: any): Promise<void> {
             });
 
             function setupEventListeners() {
-                // Tab switching
-                document.querySelectorAll('.tab').forEach(tab => {
-                    tab.addEventListener('click', function() {
-                        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-                        this.classList.add('active');
-                        currentActionType = this.dataset.type;
-                        updateActionsGrid();
-                    });
-                });
-
                 // Key capture for modal
                 document.addEventListener('keydown', handleKeyCapture);
             }
@@ -649,57 +498,47 @@ private async _createCombo(comboData: any): Promise<void> {
             window.addEventListener('message', event => {
                 const message = event.data;
                 if (message.type === 'comboData') {
-                    availableActions = {
-                        editor: message.editorControls || [],
-                        extensions: message.installedExtensions || []
-                    };
-                    installedExtensions = message.installedExtensions || [];
+                    availableActions = message.editorControls || [];
                     updateActionsGrid();
                 }
             });
 
             function updateActionsGrid() {
                 const container = document.getElementById('actionsGrid');
-                const actions = availableActions[currentActionType] || [];
+                const actions = availableActions;
 
                 if (actions.length === 0) {
                     container.innerHTML = \`
                         <div class="empty-state">
                             <div class="icon">📝</div>
-                            <div class="message">No \${currentActionType} actions available</div>
-                            <div class="hint">Try switching to the other tab</div>
+                            <div class="message">No editor controls available</div>
+                            <div class="hint">Please check your configuration</div>
                         </div>
                     \`;
                     return;
                 }
 
                 container.innerHTML = actions.map(action => \`
-                    <div class="action-card" data-key="\${action.extensionId || action.key}" data-name="\${action.displayName || action.name}" onclick="selectAction('\${action.extensionId || action.key}', '\${action.displayName || action.name}', '\${currentActionType}')">
-                        <div class="action-icon">\${getActionIcon(action, currentActionType)}</div>
+                    <div class="action-card" data-key="\${action.key}" data-name="\${action.name}" onclick="selectAction('\${action.key}', '\${action.name}', 'editor')">
+                        <div class="action-icon">\${getActionIcon(action, 'editor')}</div>
                         <div class="action-content">
-                            <div class="action-name">\${action.displayName || action.name}</div>
-                            <div class="action-category">\${action.version || action.category || currentActionType}</div>
+                            <div class="action-name">\${action.name}</div>
+                            <div class="action-category">\${action.category}</div>
                         </div>
                     </div>
                 \`).join('');
             }
 
             function getActionIcon(action, type) {
-                if (type === 'editor') {
-                    const iconMap = {
-                        'editor': 'edit',
-                        'ui': 'layout',
-                        'formatting': 'symbol-ruler',
-                        'features': 'zap',
-                        'debugging': 'debug-alt'
-                    };
-                    const icon = iconMap[action.category] || 'gear';
-                    return \`<span class="codicon codicon-\${icon}"></span>\`;
-                } else if (type === 'extensions') {
-                    // For extensions, always use default icon for now (iconPath handling is complex in webviews)
-                    return '<span class="codicon codicon-extensions"></span>';
-                }
-                return '<span class="codicon codicon-gear"></span>';
+                const iconMap = {
+                    'editor': 'edit',
+                    'ui': 'layout',
+                    'formatting': 'symbol-ruler',
+                    'features': 'zap',
+                    'debugging': 'debug-alt'
+                };
+                const icon = iconMap[action.category] || 'gear';
+                return \`<span class="codicon codicon-\${icon}"></span>\`;
             }
 
             function selectAction(key, name, type) {
@@ -789,14 +628,14 @@ private async _createCombo(comboData: any): Promise<void> {
                 btn.classList.add('loading');
                 btn.disabled = true;
 
-                // Prepare data based on action type
+                // Prepare data for editor control
                 const shortcutData = {
                     label: selectedAction.name,
                     key: capturedKeys,
                     description: \`Toggle \${selectedAction.name}\`,
-                    editorControls: selectedAction.type === 'editor' ? [selectedAction.key] : [],
-                    extensionCommands: selectedAction.type === 'extensions' ? [selectedAction.key] : [],
-                    installedExtensions: selectedAction.type === 'extensions' ? [selectedAction.key] : []
+                    editorControls: [selectedAction.key],
+                    extensionCommands: [],
+                    installedExtensions: []
                 };
 
                 vscode.postMessage({
