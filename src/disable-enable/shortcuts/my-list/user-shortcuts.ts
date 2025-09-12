@@ -17,62 +17,40 @@ export interface ShortcutItem {
 
 export class MyListUI {
   private static _context: vscode.ExtensionContext;
-  private static userShortcuts: ShortcutItem[] = [
-    // Empty list - the user will create their own shortcuts
-  ];
+  private static userShortcuts: ShortcutItem[] = [];
 
-  /**
-   * Initialize the shortcut list from global state
-   */
   static initialize(context: vscode.ExtensionContext): void {
     this._context = context;
     this.userShortcuts = this._context.globalState.get<ShortcutItem[]>('userShortcuts') || [];
   }
 
-  /**
-   * Save shortcuts to global state
-   */
   private static _saveShortcuts(): void {
     this._context.globalState.update('userShortcuts', this.userShortcuts);
   }
 
-  /**
-   * Add a new shortcut combo
-   */
   static addShortcut(shortcut: ShortcutItem): void {
-    // Generate unique ID if not provided
     if (!shortcut.id) {
       shortcut.id = `combo-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
     }
-    
-    // Set creation timestamp
+
     if (!shortcut.createdAt) {
       shortcut.createdAt = new Date();
     }
-    
+
     this.userShortcuts.push(shortcut);
     this._saveShortcuts();
   }
 
-  /**
-   * Get shortcuts by action type
-   */
   static getShortcutsByType(type: 'editorControls' | 'extensionCommands' | 'installedExtensions'): ShortcutItem[] {
     return this.userShortcuts.filter(shortcut => 
       shortcut.actions[type] && shortcut.actions[type]!.length > 0
     );
   }
 
-  /**
-   * Validate if a shortcut already exists
-   */
   static shortcutExists(key: string): boolean {
     return this.userShortcuts.some(shortcut => shortcut.key === key);
   }
 
-  /**
-   * Get shortcut statistics
-   */
   static getShortcutStats(): {
     total: number;
     editorControls: number;
@@ -107,38 +85,23 @@ export class MyListUI {
       },
     ];
 
+    const generateShortcutItem = (shortcut: ShortcutItem, index?: number, isDefault = false) => `
+      <div class="shortcut-item ${isDefault ? 'default' : 'user-delete'}" ${isDefault ? 'title="DEFAULT"' : `onclick="confirmDelete(${index}, '${shortcut.label}')"`}>
+        <div class="shortcut-content">
+          <span class="shortcut-label">${shortcut.label}</span>
+          ${shortcut.description ? `<span class="shortcut-description">${shortcut.description}</span>` : ''}
+        </div>
+        <span class="shortcut-key">${shortcut.key}</span>
+      </div>
+    `;
+
     return `
-            <div class="shortcuts-container">
-                ${defaultShortcuts
-                  .map(
-                    (shortcut) => `
-                    <div class="shortcut-item default" title="DEFAULT">
-                        <div class="shortcut-content">
-                            <span class="shortcut-label">${shortcut.label}</span>
-                            ${shortcut.description ? `<span class="shortcut-description">${shortcut.description}</span>` : ''}
-                        </div>
-                        <span class="shortcut-key">${shortcut.key}</span>
-                    </div>
-                `
-                  )
-                  .join('')}
-                
-                <div class="user-line"></div>
-                
-                ${this.userShortcuts
-                  .map(
-                    (shortcut, index) => `
-                    <div class="shortcut-item user-delete" onclick="confirmDelete(${index}, '${shortcut.label}')">
-                        <div class="shortcut-content">
-                            <span class="shortcut-label">${shortcut.label}</span>
-                        </div>
-                        <span class="shortcut-key">${shortcut.key}</span>
-                    </div>
-                `
-                  )
-                  .join('')}
-            </div>
-        `;
+      <div class="shortcuts-container">
+        ${defaultShortcuts.map(shortcut => generateShortcutItem(shortcut, undefined, true)).join('')}
+        <div class="user-line"></div>
+        ${this.userShortcuts.map((shortcut, index) => generateShortcutItem(shortcut, index)).join('')}
+      </div>
+    `;
   }
 
   static removeShortcut(index: number): void {
@@ -152,16 +115,10 @@ export class MyListUI {
     return this.userShortcuts;
   }
 
-  /**
-   * Get shortcut by ID
-   */
   static getShortcutById(id: string): ShortcutItem | undefined {
     return this.userShortcuts.find(shortcut => shortcut.id === id);
   }
 
-  /**
-   * Update shortcut by ID
-   */
   static updateShortcut(id: string, updates: Partial<ShortcutItem>): boolean {
     const index = this.userShortcuts.findIndex(shortcut => shortcut.id === id);
     if (index !== -1) {
@@ -171,9 +128,6 @@ export class MyListUI {
     return false;
   }
 
-  /**
-   * Mark shortcut as used (update lastUsed timestamp)
-   */
   static markAsUsed(id: string): void {
     const shortcut = this.getShortcutById(id);
     if (shortcut) {
@@ -181,9 +135,6 @@ export class MyListUI {
     }
   }
 
-  /**
-   * Get recently used shortcuts (last 7 days)
-   */
   static getRecentShortcuts(days: number = 7): ShortcutItem[] {
     const cutoffDate = new Date();
     cutoffDate.setDate(cutoffDate.getDate() - days);
@@ -193,9 +144,6 @@ export class MyListUI {
       .sort((a, b) => (b.lastUsed?.getTime() || 0) - (a.lastUsed?.getTime() || 0));
   }
 
-  /**
-   * Get shortcuts by action count (for filtering)
-   */
   static getShortcutsByActionCount(minActions: number = 1): ShortcutItem[] {
     return this.userShortcuts.filter(shortcut => {
       const totalActions = (shortcut.actions.editorControls?.length || 0) + 
@@ -205,23 +153,14 @@ export class MyListUI {
     });
   }
 
-  /**
-   * Clear all user shortcuts (keep defaults)
-   */
   static clearUserShortcuts(): void {
     this.userShortcuts = [];
   }
 
-  /**
-   * Export shortcuts to JSON
-   */
   static exportShortcuts(): string {
     return JSON.stringify(this.userShortcuts, null, 2);
   }
 
-  /**
-   * Import shortcuts from JSON
-   */
   static importShortcuts(jsonData: string): boolean {
     try {
       const imported = JSON.parse(jsonData);
@@ -234,5 +173,23 @@ export class MyListUI {
       console.error('Error importing shortcuts:', error);
       return false;
     }
+  }
+
+  /**
+   * Handle delete confirmation for shortcuts
+   */
+  static async confirmAndDeleteShortcut(index: number, label: string): Promise<boolean> {
+    const result = await vscode.window.showInformationMessage(
+      `Delete "${label}"?`,
+      { modal: true },
+      'Delete'
+    );
+
+    if (result === 'Delete') {
+      this.removeShortcut(index);
+      vscode.window.showInformationMessage(`🗑️ Deleted "${label}"`);
+      return true;
+    }
+    return false;
   }
 }

@@ -1,13 +1,6 @@
 import { MyListUI } from './my-list/user-shortcuts';
 
 export class ShortcutsUIManager {
-  // ==========================================
-  // CSS STYLES SECTION
-  // ==========================================
-
-  /**
-   * Main container and layout styles
-   */
   private static getLayoutStyles(): string {
     return `
             body {
@@ -34,9 +27,6 @@ export class ShortcutsUIManager {
         `;
   }
 
-  /**
-   * Button component styles (Combine button)
-   */
   private static getButtonStyles(): string {
     return `
             .button {
@@ -63,9 +53,6 @@ export class ShortcutsUIManager {
         `;
   }
 
-  /**
-   * Enhanced shortcuts list component styles
-   */
   private static getShortcutsListStyles(): string {
     return `
             .shortcuts-container {
@@ -148,77 +135,36 @@ export class ShortcutsUIManager {
         `;
   }
 
-  /**
-   * Combines all CSS styles into a single string
-   */
   public static getAllStyles(): string {
     return `
-            /* ========== LAYOUT STYLES ========== */
             ${this.getLayoutStyles()}
-
-            /* ========== BUTTON COMPONENT ========== */
             ${this.getButtonStyles()}
-
-            /* ========== SHORTCUTS LIST COMPONENT ========== */
             ${this.getShortcutsListStyles()}
         `;
   }
 
-  // ==========================================
-  // JAVASCRIPT SECTION
-  // ==========================================
-
-  /**
-   * Client-side JavaScript for webview interactions
-   */
   public static getWebviewScript(): string {
     return `
-            // VSCode API initialization
             const vscode = acquireVsCodeApi();
 
-            /**
-             * Send message to extension host
-             * @param {string} type - Message type
-             * @param {any} value - Optional message payload
-             */
             function sendMessage(type, value = null) {
                 vscode.postMessage({ type, value });
             }
 
-            /**
-             * Execute a command by sending message to extension
-             * @param {string} command - Command name to execute
-             */
             function executeCommand(command) {
                 sendMessage('execute', command);
             }
 
-            /**
-             * Show confirmation dialog for deleting a shortcut
-             * @param {number} index - Index of the shortcut to delete
-             * @param {string} label - Label of the shortcut for confirmation message
-             */
             function confirmDelete(index, label) {
                 sendMessage('confirmDelete', { index, label });
             }
 
-            /**
-             * Execute a shortcut by ID
-             * @param {string} shortcutId - ID of the shortcut to execute
-             */
             function executeShortcut(shortcutId) {
                 sendMessage('execute', shortcutId);
             }
         `;
   }
 
-  // ==========================================
-  // HTML COMPONENTS SECTION
-  // ==========================================
-
-  /**
-   * Generate the action buttons HTML
-   */
   private static getActionButtonsHTML(): string {
     return `
             <button class="button" onclick="sendMessage('commit')">
@@ -227,9 +173,6 @@ export class ShortcutsUIManager {
         `;
   }
 
-  /**
-   * Generate the My List section HTML
-   */
   private static getMyListSectionHTML(): string {
     return `
             <div class="section-title">My List</div>
@@ -237,14 +180,6 @@ export class ShortcutsUIManager {
         `;
   }
 
-  // ==========================================
-  // MAIN HTML GENERATOR
-  // ==========================================
-
-  /**
-   * Generate complete HTML for the webview
-   * This is the main entry point for UI generation
-   */
   public static generateWebviewHTML(): string {
     return `<!DOCTYPE html>
         <html lang="en">
@@ -257,13 +192,9 @@ export class ShortcutsUIManager {
             </style>
         </head>
         <body>
-            <!-- ========== ACTION BUTTONS SECTION ========== -->
             ${this.getActionButtonsHTML()}
-
-            <!-- ========== MY LIST SECTION ========== -->
             ${this.getMyListSectionHTML()}
 
-            <!-- ========== WEBVIEW SCRIPTS ========== -->
             <script>
                 ${this.getWebviewScript()}
             </script>
@@ -272,33 +203,5 @@ export class ShortcutsUIManager {
   }
 }
 
-/**
- * ========================================
- * USAGE EXAMPLE:
- * ========================================
- *
- * In your webview provider:
- *
- * webviewView.webview.html = ShortcutsUIManager.generateWebviewHTML();
- *
- * ========================================
- * EXTENDING THE UI:
- * ========================================
- *
- * 1. Add new component styles in their own method
- * 2. Add the method to getAllStyles()
- * 3. Create HTML generator method for the component
- * 4. Add to generateWebviewHTML()
- *
- * This keeps everything organized and easy to maintain!
- */
-
-// ==========================================
-// MODULE EXPORTS
-// ==========================================
-
-// Export the main webview provider
 export { F1WebviewProvider } from './create-shortcut/btn-shortcut';
-
-// Export data types and utilities
 export { MyListUI, type ShortcutItem } from './my-list/user-shortcuts';
