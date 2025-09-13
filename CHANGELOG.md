@@ -20,7 +20,7 @@ Following VS Code best practices, F1 uses semantic versioning for all releases.
 
 <!-- --- -->
 
-## [0.3.0] - 2025-09-13
+## [0.3.1] - 2025-09-13
 
 ### Added
 - "Create Shortcut" (beta) integration and "My List" custom shortcuts UI.
