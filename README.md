@@ -1,11 +1,9 @@
 <p align="center">
     <img src="https://raw.githubusercontent.com/bastndev/F1/main/assets/gif/screenshot.gif" alt="F1 Extension Screenshot" width="100%">
-</p>
-
 <p align="center">
-    <a href="https://marketplace.visualstudio.com/items?itemName=bastndev.f1"><img src="https://vsmarketplacebadges.dev/version-short/bastndev.f1.jpg?style=for-the-badge&colorA=1f2d3a&colorB=ffffff&label=VERSION" alt="Version"></a>&nbsp;
-    <a href="https://marketplace.visualstudio.com/items?itemName=bastndev.f1"><img src="https://vsmarketplacebadges.dev/rating-short/bastndev.f1.jpg?style=for-the-badge&colorA=1f2d3a&colorB=ffffff&label=RATING" alt="Rating"></a>&nbsp;
-    <a href="https://marketplace.visualstudio.com/items?itemName=bastndev.f1"><img src="https://vsmarketplacebadges.dev/downloads-short/bastndev.f1.jpg?style=for-the-badge&colorA=1f2d3a&colorB=ffffff&label=DOWNLOADS" alt="Downloads"></a>&nbsp; 
+    <img src="https://vsmarketplacebadges.dev/version-short/bastndev.f1.jpg?style=for-the-badge&colorA=1f2d3a&colorB=ffffff&label=VERSION" alt="Version">&nbsp;
+    <img src="https://vsmarketplacebadges.dev/rating-short/bastndev.f1.jpg?style=for-the-badge&colorA=1f2d3a&colorB=ffffff&label=RATING" alt="Rating">&nbsp;
+    <img src="https://vsmarketplacebadges.dev/downloads-short/bastndev.f1.jpg?style=for-the-badge&colorA=1f2d3a&colorB=ffffff&label=DOWNLOADS" alt="Downloads">&nbsp; 
     <a href="https://github.com/bastndev/F1"><img src="https://raw.githubusercontent.com/bastndev/F1/refs/heads/main/assets/images/star.png" width="26.6px" alt="⭐️ Github start"></a>
 </p>
 
