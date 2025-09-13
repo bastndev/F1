@@ -123,7 +123,7 @@ private async _createCombo(comboData: any): Promise<void> {
             );
         } else {
             vscode.window.showErrorMessage(
-                `❌ Invalid key combination! Only F1.......F12`
+                `❌ Only, Ctrl/Shift or (Ctrl+Shift) + F2 ....... F12`
             );
             return;
         }
