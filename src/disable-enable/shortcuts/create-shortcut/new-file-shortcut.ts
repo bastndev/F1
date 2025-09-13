@@ -477,7 +477,7 @@ private async _createCombo(comboData: any): Promise<void> {
             <div class="modal-content">
                 <div class="modal-header">
                     <div class="modal-title" id="modalTitle">Create Shortcut</div>
-                    <div class="modal-subtitle" id="modalSubtitle">Press Ctrl/Alt/Shift + F1-F12 combination</div>
+                    <div class="modal-subtitle" id="modalSubtitle">Press Ctrl/Alt/Shift + F2-F12 combination</div>
                 </div>
 
                 <div class="key-input-container">
@@ -488,7 +488,7 @@ private async _createCombo(comboData: any): Promise<void> {
                         placeholder="e.g. ctrl+f1, alt+f5, shift+f12..."
                         readonly
                     >
-                    <div class="key-hint">Only F1-F12 combinations allowed (ctrl+f1-f12, alt+f1-f12, shift+f1-f12)</div>
+                    <div class="key-hint">Only support [ f2 ... to .. f12 ] keymaps</div>
                 </div>
 
                 <div class="modal-buttons">
