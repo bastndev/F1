@@ -1,9 +1,70 @@
-# Change Log
+# F1 
 
-All notable changes to the "shuu" extension will be documented in this file.
+A complete and versatile theme collection designed for optimal coding experience in both dark and bright environments. Lynx Theme Pro features carefully calibrated colors and contrast ratios to provide excellent visibility and comfort in any lighting condition.
 
-Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
+## Features
 
-## [Unreleased]
+- **5 Beautiful Theme Variants**: Dark Mode, Light Mode, Night Mode, Ghibli Mode, Coffee Mode, and ICONS
+- **Universal Compatibility**: Perfect for coding in any lighting environment
+- **Eye Comfort**: Warm and comfortable coding experience with optional Sun filter
+- **Professional Design**: Thoughtfully crafted for extended coding sessions
+- **One-time Registration**: Simple activation process
 
-- Initial release
+Discover more extensions at [bastndev.com/extensions](https://bastndev.com/extensions)
+
+
+
+## Changelog
+
+Following VS Code best practices, Lynx Theme Pro uses semantic versioning for all releases.
+
+</br>
+
+<!-- --- -->
+## [0.0.3] - 2025-09-13
+
+### Added
+- "Create Shortcut" (beta) integration and "My List" custom shortcuts UI.
+    - Included default quick bindings shown in UI: Toggle Word Wrap (F1), AI Suggestion (disable/enable) (Shift+F1).
+- Full Editor Controls panel with individual toggles:
+    - Minimap, Code Folding, Line Numbers, Cursor Blinking, Color Decorators, Indent Guides, Sticky Scroll.
+    - Cursor Smooth Caret Animation toggle.
+    - Terminal Suggest (new) entry and UX for enabling/disabling terminal suggestions.
+- Bracket colorization improvements:
+    - Bracket LINE Colorization and Bracket PAIR Colorization support.
+- Extension compatibility matrix and icons support:
+    - Tested/verified compatibility with common extensions visible in UI: GitHub Copilot, GitHub Copilot Chat, Error Lens, ESLint, Code Spell Checker, Live Server, Image Preview, Astro, Bracket Lynx, Lynx Keymap (75% Keyboard), F1 helper, esbuild Problem Matchers, Extension Test Runner.
+- Visual and UX polish:
+    - New sidebar compact lists, improved spacing, and explicit “new” badges where applicable.
+
+### Changed
+- Refactored theme internals and settings structure to support per-control toggles and extension-driven UI entries.
+- Consolidated keybinding visuals and documentation to match displayed in-app shortcuts.
+- Improved contrast and spacing for the editor controls panel to match screenshot layout and accessibility guidelines.
+
+### Fixed
+- Resolved inconsistent bracket coloring across scopes.
+- Fixed issues with cursor animation and sticky-scroll interaction.
+- Fixed edge cases where Terminal Suggest entries did not render when certain extensions are present.
+
+### Notes
+- One-time registration flow remains the same; extension compatibility was validated on VS Code builds concurrent with listed extension versions.
+- If you use custom keymaps, re-check bindings after update; use "Create Shortcut" (beta) to reassign quickly.
+- For feedback or to report regressions, open an issue on the repository with reproducible steps.
+
+## [0.0.2] - 2025-07-22
+
+### Added
+- **Editor Controls**: Enhanced editor features including:
+- (disable/enable)
+- Improved compatibility with VS Code extensions.
+- Enhanced UI for better coding experience.
+
+---
+
+## [0.0.1] - 2025-07-10
+
+### Initial Release
+- Initial release of F1
+- Basic F1 visual ad keymaps
+- Core theme infrastructure and settings
