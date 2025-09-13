@@ -9,7 +9,7 @@ import { activate as activateF1 } from './disable-enable/shortcuts/my-list/defau
 
 let dynamicShortcutManager: DynamicShortcutManager;
 
-async function toggleConfiguration(configKey: string): Promise<void> {
+async function toggleConfiguration(configKey: string): Promise<'enable' | 'disable'> {
   try {
     const config = vscode.workspace.getConfiguration();
     const currentValue = config.get(configKey);
@@ -36,12 +36,31 @@ async function toggleConfiguration(configKey: string): Promise<void> {
       vscode.ConfigurationTarget.Global
     );
 
+    // Determine action type
+    let actionType: 'enable' | 'disable';
+    if (typeof currentValue === 'boolean') {
+      actionType = newValue ? 'enable' : 'disable';
+    } else if (configKey === 'editor.lineNumbers') {
+      actionType = newValue === 'on' ? 'enable' : 'disable';
+    } else if (configKey === 'files.autoSave') {
+      actionType = newValue === 'afterDelay' ? 'enable' : 'disable';
+    } else if (configKey === 'editor.cursorBlinking') {
+      actionType = newValue === 'blink' ? 'enable' : 'disable';
+    } else if (configKey === 'editor.acceptSuggestionOnEnter') {
+      actionType = newValue === 'on' ? 'enable' : 'disable';
+    } else {
+      actionType = newValue ? 'enable' : 'disable';
+    }
+
     // Show feedback
     const readableName = getReadableConfigName(configKey);
     console.log(`${readableName}: ${formatConfigValue(newValue)}`);
 
+    return actionType;
+
   } catch (error) {
     console.warn(`Failed to toggle ${configKey}:`, error);
+    return 'disable'; // fallback
   }
 }
 
@@ -149,6 +168,7 @@ export async function activate(context: vscode.ExtensionContext) {
         MyListUI.markAsUsed(shortcut.id!);
 
         let actionsExecuted = 0;
+        let actionTypes: ('enable' | 'disable' | 'unknown')[] = [];
 
         // Execute editor controls
         if (shortcut.actions.editorControls?.length) {
@@ -156,9 +176,11 @@ export async function activate(context: vscode.ExtensionContext) {
             if (configKey.startsWith('workbench.') || configKey.startsWith('editor.action.')) {
               // Execute as command
               await vscode.commands.executeCommand(configKey);
+              actionTypes.push('unknown');
             } else {
               // Execute as configuration toggle
-              await toggleConfiguration(configKey);
+              const actionType = await toggleConfiguration(configKey);
+              actionTypes.push(actionType);
             }
             actionsExecuted++;
           }
@@ -169,6 +191,7 @@ export async function activate(context: vscode.ExtensionContext) {
           for (const command of shortcut.actions.extensionCommands) {
             try {
               await vscode.commands.executeCommand(command);
+              actionTypes.push('unknown');
               actionsExecuted++;
             } catch (error) {
               console.warn(`Failed to execute command ${command}:`, error);
@@ -176,8 +199,21 @@ export async function activate(context: vscode.ExtensionContext) {
           }
         }
 
+        // Determine message type
+        const enableCount = actionTypes.filter(t => t === 'enable').length;
+        const disableCount = actionTypes.filter(t => t === 'disable').length;
+
+        let messagePrefix: string;
+        if (enableCount > 0 && disableCount === 0) {
+          messagePrefix = '✅ Enable';
+        } else if (disableCount > 0 && enableCount === 0) {
+          messagePrefix = '❌ Disable';
+        } else {
+          messagePrefix = '⚡ Toggled';
+        }
+
         if (actionsExecuted > 0) {
-          vscode.window.showInformationMessage(`✅ ${shortcut.label}`, {modal: false});
+          vscode.window.showInformationMessage(`${messagePrefix} ${shortcut.label}`, {modal: false});
         }
 
       } catch (error) {
