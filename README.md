@@ -1,20 +1,18 @@
 <p align="center">
     <img src="https://raw.githubusercontent.com/bastndev/F1/main/assets/gif/screenshot.gif" alt="F1 Extension Screenshot" width="100%">
-</p>
-
 <p align="center">
-    <a href="https://marketplace.visualstudio.com/items?itemName=bastndev.f1"><img src="https://vsmarketplacebadges.dev/version-short/bastndev.f1.jpg?style=for-the-badge&colorA=1f2d3a&colorB=ffffff&label=VERSION" alt="Version"></a>&nbsp;
-    <a href="https://marketplace.visualstudio.com/items?itemName=bastndev.f1"><img src="https://vsmarketplacebadges.dev/rating-short/bastndev.f1.jpg?style=for-the-badge&colorA=1f2d3a&colorB=ffffff&label=RATING" alt="Rating"></a>&nbsp;
-    <a href="https://marketplace.visualstudio.com/items?itemName=bastndev.f1"><img src="https://vsmarketplacebadges.dev/downloads-short/bastndev.f1.jpg?style=for-the-badge&colorA=1f2d3a&colorB=ffffff&label=DOWNLOADS" alt="Downloads"></a>&nbsp; 
+    <img src="https://vsmarketplacebadges.dev/version-short/bastndev.f1.jpg?style=for-the-badge&colorA=1f2d3a&colorB=ffffff&label=VERSION" alt="Version">&nbsp;
+    <img src="https://vsmarketplacebadges.dev/rating-short/bastndev.f1.jpg?style=for-the-badge&colorA=1f2d3a&colorB=ffffff&label=RATING" alt="Rating">&nbsp;
+    <img src="https://vsmarketplacebadges.dev/downloads-short/bastndev.f1.jpg?style=for-the-badge&colorA=1f2d3a&colorB=ffffff&label=DOWNLOADS" alt="Downloads">&nbsp; 
     <a href="https://github.com/bastndev/F1"><img src="https://raw.githubusercontent.com/bastndev/F1/refs/heads/main/assets/images/star.png" width="26.6px" alt="⭐️ Github start"></a>
 </p>
 
-## Available ⚡ Commands
+## Defaults ⚡ Commands
 
-| Key        | Status Indicators | Description                       |
-| ---------- | ----------------- | --------------------------------- |
-| `F1`       | 🗺️ On / 🚫 Off    | Show/hide code minimap            |
-| `shift+F1` | ✅ On / ❌ Off    | Enable/disable markdown word wrap |
+| Key        | Status Indicators | Description           |
+| ---------- | ----------------- | --------------------- |
+| `F1`       | Enable/Disable    | 📄 : Global Word Wrap |
+| `shift+F1` | Enable/Disable    | ✨ : AI suggestions   |
 
 ## Installation
 
@@ -32,7 +30,7 @@ ext install bastndev.f1
 
 ## Contributing
 
-Suggestions and contributions are welcome! Please refer to the project repository for guidelines: [Code](https://github.com/bastndev/F1).
+If you want to contribute, check the guidelines: [[>_ᅠ]](https://github.com/bastndev/f1/blob/main/CONTRIBUTING.md) .
 
 | [![bastndev](https://github.com/bastndev.png?size=100)](https://bastndev.com) |
 | :---------------------------------------------------------------------------: |
@@ -46,12 +44,10 @@ Suggestions and contributions are welcome! Please refer to the project repositor
 
 ## Related Extensions
 
-| Icon                                                                                                                                                                                                                                                | Name                                                                 | Description                                                                                                                                     |
-| --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
-| [![Lynx Theme](https://bastndev.gallerycdn.vsassets.io/extensions/bastndev/lynx-theme/0.1.2/1744898058774/Microsoft.VisualStudio.Services.Icons.Default)](https://marketplace.visualstudio.com/items?itemName=bastndev.lynx-theme)                  | [Lynx Theme](https://github.com/bastndev/Lynx-Theme)                 | A sleek, customizable VS Code theme with built‑in support for Cursor‑AI, Windsurf & Trae‑AI integrations.                                       |
-| [![Lynxjs Snippets](https://bastndev.gallerycdn.vsassets.io/extensions/bastndev/lynx-js-snippets/0.2.0/1745166683713/Microsoft.VisualStudio.Services.Icons.Default)](https://marketplace.visualstudio.com/items?itemName=bastndev.lynx-js-snippets) | [Lynxjs Snippets .tsx](https://github.com/bastndev/Lynx-js-Snippets) | A powerful collection of Lynx.js snippets (TypeScript & React) to boost your development workflow.                                              |
-| [![Lynx Keymap](https://raw.githubusercontent.com/bastndev/Lynx-Keymap/refs/heads/main/assets/images/logo.png)](https://marketplace.visualstudio.com/items?itemName=bastndev.lynx-keymap)                                                           | [Lynx Keymap](https://github.com/bastndev/Lynx-Keymap)               | An all‑in‑one toolkit for LynxJS mobile/web development—bundles keymap, snippets & AI tools like Cursor AI, Windsurf, Trae AI, Firebase Studio. |
+| Icon                                                                                                                                                                                                                                              | Name                                                          | Description                                                                                                                                     |
+| ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
+| [![Lynx  Theme Pro](https://bastndev.gallerycdn.vsassets.io/extensions/bastndev/lynx-theme/0.1.2/1744898058774/Microsoft.VisualStudio.Services.Icons.Default)](https://marketplace.visualstudio.com/items?itemName=bastndev.lynx-theme)           | [Lynx Theme Pro](https://github.com/bastndev/Lynx-Theme)      | A professional extension with six available themes: Dark, Light, Night, Ghibli, Coffee, and Kiro—with integrated icons. Each theme is optimized to offer a more pleasant visual experience. |
+| [![Lynx Snippets](https://bastndev.gallerycdn.vsassets.io/extensions/bastndev/lynx-js-snippets/0.2.0/1745166683713/Microsoft.VisualStudio.Services.Icons.Default)](https://marketplace.visualstudio.com/items?itemName=bastndev.lynx-js-snippets) | [Lynx Snippets](https://github.com/bastndev/Lynx-js-Snippets) | A collection of optimized code snippets designed to accelerate web and mobile development in LynxJS projects. It automates the writing of common code structures. |
+| [![Lynx Keymap Pro](https://raw.githubusercontent.com/bastndev/Lynx-Keymap/refs/heads/main/assets/images/logo.png)](https://marketplace.visualstudio.com/items?itemName=bastndev.lynx-keymap)                                                     | [Lynx Keymap Pro](https://github.com/bastndev/Lynx-Keymap)    | Standardizes keyboard shortcuts across all code editors, allowing you to use key combinations to access any functionality. It improves workflow and development experience. |
 
-**Enjoy coding and building amazing projects! [Submit suggestions](https://github.com/bastndev/F1/issues) 🚀**
-
-[MORE EXTENSIONS](https://marketplace.visualstudio.com/publishers/bastndev)
+**Ready! 🚀 Your keybindings are configured. If you find any bugs or have feedback, you can [open an issue](https://github.com/bastndev/f1/issues).**
