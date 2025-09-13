@@ -134,11 +134,11 @@
         "f1.shortcuts": {
           "type": "object",
           "default": {},
-          "description": "Custom shortcuts defined by the user. Each key is the shortcut combination (e.g., 'ctrl+f1') and the value is the command to execute. Only F1-F12 combinations are supported: ctrl+f1-f12, alt+f1-f12, shift+f1-f12.",
+          "description": "Custom shortcuts defined by the user. Each key is the shortcut combination (e.g., 'ctrl+f2') and the value is the command to execute. Only F2-F12 combinations are supported: ctrl+f2-f12, shift+f2-f12, ctrl+shift+f2-f12. F1 is reserved for built-in functionality.",
           "patternProperties": {
-            "^(ctrl|alt|shift)\\+f([1-9]|1[0-2])$": {
+            "^(ctrl|shift|ctrl\\+shift)\\+f([2-9]|1[0-2])$": {
               "type": "string",
-              "description": "Command to execute when this F1-F12 key combination is pressed"
+              "description": "Command to execute when this F2-F12 key combination is pressed"
             }
           },
           "additionalProperties": false
