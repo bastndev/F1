@@ -2,7 +2,7 @@ interface EditorControl {
   name: string;
   category: 'editor' | 'ui' | 'formatting' | 'features' | 'debugging';
   configKey?: string;
-  commandId?: string; // Para comandos que no son configuraciones
+  commandId?: string;
   isSeparator?: boolean;
 }
 
@@ -16,25 +16,23 @@ export const editorControls: EditorControl[] = [
   {name: 'Indent Guides', category: 'editor', configKey: 'editor.guides.indentation'},
   {name: 'Sticky Scroll', category: 'editor', configKey: 'editor.stickyScroll.enabled'},
   {name: 'Cursor Smooth Caret Animation', category: 'editor', configKey: 'editor.cursorSmoothCaretAnimation'},
-  {name: 'Bracket Pair Colorization', category: 'editor', configKey: 'editor.bracketPairColorization.enabled'},
-  {name: 'Bracket Pair Guides', category: 'editor', configKey: 'editor.guides.bracketPairs'},
-  // NUEVOS que faltaban
-  {name: 'Word Wrap', category: 'editor', configKey: 'editor.wordWrap'},
   {name: 'Render Whitespace', category: 'editor', configKey: 'editor.renderWhitespace'},
   {name: 'Render Control Characters', category: 'editor', configKey: 'editor.renderControlCharacters'},
+  {name: 'Terminal Suggest',category: 'editor',configKey: 'terminal.integrated.suggest.enabled'},
 
   // UI Features  
+  {name: 'Bracket LINE Colorization',category: 'ui',configKey: 'editor.guides.bracketPairs',},
+  {name: 'Bracket PAIR Colorization',category: 'ui',configKey: 'editor.bracketPairColorization.enabled',},
   {name: 'Breadcrumbs', category: 'ui', configKey: 'breadcrumbs.enabled'},
   {name: 'Compact Folders', category: 'ui', configKey: 'explorer.compactFolders'},
   {name: 'Status Bar', category: 'ui', configKey: 'workbench.statusBar.visible'},
   {name: 'Tabs', category: 'ui', configKey: 'workbench.editor.showTabs'},
-  // Estos necesitan commandId en lugar de configKey
   {name: 'Panel', category: 'ui', commandId: 'workbench.action.togglePanel'},
   {name: 'Side Bar', category: 'ui', commandId: 'workbench.action.toggleSidebarVisibility'},
   {name: 'Activity Bar', category: 'ui', commandId: 'workbench.action.toggleActivityBarVisibility'},
-  // NUEVOS que faltaban
   {name: 'Menu Bar', category: 'ui', configKey: 'window.menuBarVisibility'},
   {name: 'Tab Size Badge', category: 'ui', configKey: 'workbench.editor.tabSizing'},
+
 
   // Formatting & Code Features
   {name: 'Auto Save', category: 'formatting', configKey: 'files.autoSave'},
@@ -44,7 +42,6 @@ export const editorControls: EditorControl[] = [
   {name: 'Insert Final Newline', category: 'formatting', configKey: 'files.insertFinalNewline'},
   {name: 'Trim Final Newlines', category: 'formatting', configKey: 'files.trimFinalNewlines'},
   {name: 'Trim Trailing Whitespace', category: 'formatting', configKey: 'files.trimTrailingWhitespace'},
-  // NUEVOS que faltaban
   {name: 'Auto Indent', category: 'formatting', configKey: 'editor.autoIndent'},
 
   // IntelliSense & Features
@@ -59,8 +56,6 @@ export const editorControls: EditorControl[] = [
   {name: 'IntelliSense', category: 'features', configKey: 'editor.quickSuggestions'},
   {name: 'Parameter Hints', category: 'features', configKey: 'editor.parameterHints.enabled'},
   {name: 'Suggest On Trigger Characters', category: 'features', configKey: 'editor.suggestOnTriggerCharacters'},
-  {name: 'Terminal Suggest', category: 'features', configKey: 'terminal.integrated.suggest.enabled'},
-  // NUEVOS que faltaban
   {name: 'Auto Closing Delete', category: 'features', configKey: 'editor.autoClosingDelete'},
   {name: 'Auto Closing Over Type', category: 'features', configKey: 'editor.autoClosingOvertype'},
   {name: 'Tab Completion', category: 'features', configKey: 'editor.tabCompletion'},
@@ -68,9 +63,7 @@ export const editorControls: EditorControl[] = [
   // Debugging & Terminal
   {name: 'Inline Values', category: 'debugging', configKey: 'debug.inlineValues'},
   {name: 'Terminal Cursor Blinking', category: 'debugging', configKey: 'terminal.integrated.cursorBlinking'},
-  // Corregido: Debug Console como comando
   {name: 'Debug Console', category: 'debugging', commandId: 'workbench.debug.action.toggleRepl'},
-  // NUEVOS que faltaban
   {name: 'Debug Toolbar', category: 'debugging', configKey: 'debug.toolBarLocation'},
   {name: 'Terminal Bell', category: 'debugging', configKey: 'terminal.integrated.enableBell'},
 ];
