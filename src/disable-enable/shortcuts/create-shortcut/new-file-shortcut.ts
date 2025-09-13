@@ -456,10 +456,8 @@ private async _createCombo(comboData: any): Promise<void> {
                     <div style="font-size: 13px; color: var(--vscode-foreground); margin-bottom: 4px;"><strong>You can also use:</strong></div>
                         <div style="font-size: 12px; color: var(--vscode-descriptionForeground);">
                             • <strong class="command">Ctrl</strong> 
-                            • <strong class="command">Alt</strong>
                             • <strong class="command">Shift</strong> 
                             • <strong class="command">Ctrl+Shift</strong> 
-                            • <strong class="command">Alt+Shift</strong> 
                             <strong >+ ( f2, f3, f3, f4, f6, f7, f8, f9, 10, f11, f12 ) •</strong> 
                         </div>
                     </div>
