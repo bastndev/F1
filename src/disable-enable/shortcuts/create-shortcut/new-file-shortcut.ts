@@ -452,20 +452,18 @@ private async _createCombo(comboData: any): Promise<void> {
         <div class="container">
             <div class="header">
                 <h1>F1</h1>
-                <p>Select an action and assign a f2 ........ f12 keyboard shortcut</p>
-
-                <div style="background: var(--vscode-textBlockQuote-background); padding: 12px; border-radius: 6px; margin: 8px 0; border-left: 3px solid var(--vscode-notificationCenterHeader-foreground);">
+                <div style="background: var(--vscode-textBlockQuote-background); padding: 12px; border-radius: 6px; margin: 8px 0;">
                     <div style="font-size: 13px; color: var(--vscode-foreground); margin-bottom: 4px;"><strong>You can also use:</strong></div>
-                    <div style="font-size: 12px; color: var(--vscode-descriptionForeground);">
-                        • <strong class="command">Ctrl</strong> 
-                        • <strong class="command">Alt</strong>
-                        • <strong class="command">Shift</strong> 
-                        • <strong class="command">Ctrl+Shift</strong> 
-                        • <strong class="command">Alt+Shift</strong> 
-                        <strong >+ ( f2, f3, f3, f4, f6, f7, f8, f9, 10, f11, f12 ) •</strong> 
+                        <div style="font-size: 12px; color: var(--vscode-descriptionForeground);">
+                            • <strong class="command">Ctrl</strong> 
+                            • <strong class="command">Alt</strong>
+                            • <strong class="command">Shift</strong> 
+                            • <strong class="command">Ctrl+Shift</strong> 
+                            • <strong class="command">Alt+Shift</strong> 
+                            <strong >+ ( f2, f3, f3, f4, f6, f7, f8, f9, 10, f11, f12 ) •</strong> 
+                        </div>
                     </div>
                 </div>
-            </div>
 
             <div class="actions-grid" id="actionsGrid">
                 <div class="empty-state">
