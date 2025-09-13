@@ -1,14 +1,17 @@
 import * as vscode from 'vscode';
 import * as path from 'path';
 import { MyListUI, ShortcutItem } from '../my-list/user-shortcuts';
+import { DynamicShortcutManager } from '../my-list/dynamic-shortcuts';
 import { getAvailableEditorControls } from './ed-content';
 
 export class ComboCreatorPanel {
   private _extensionUri: vscode.Uri;
   private _onComboCreated?: () => void;
+  private _context?: vscode.ExtensionContext;
 
-  constructor(extensionUri: vscode.Uri) {
+  constructor(extensionUri: vscode.Uri, context?: vscode.ExtensionContext) {
     this._extensionUri = extensionUri;
+    this._context = context;
   }
 
   /**
@@ -79,6 +82,16 @@ private async _createCombo(comboData: any): Promise<void> {
             return;
         }
 
+        // Check if the key combination is supported BEFORE anything else
+        const isValidFKey = this._isValidFKeyCombo(key.trim());
+        
+        if (!isValidFKey) {
+            vscode.window.showErrorMessage(
+                `❌ Only, Ctrl/Shift or (Ctrl+Shift) + F2 ....... F12`
+            );
+            return;
+        }
+
         // Validate that the shortcut does not exist
         if (MyListUI.shortcutExists(key)) {
             vscode.window.showErrorMessage(`Shortcut ${key} already exists! Please choose a different key combination.`);
@@ -108,12 +121,11 @@ private async _createCombo(comboData: any): Promise<void> {
             }
         };
 
-        // Add to the list
+        // Add to the list ONLY after all validations pass
         MyListUI.addShortcut(newShortcut);
 
-        // Show confirmation
         vscode.window.showInformationMessage(
-            `✅ Shortcut "${label}" created successfully! (Editor Control)`
+            `✅ Shortcut "${label}" created! Press ${key} to toggle ${label}.`
         );
 
         // Call the callback to refresh the main view
@@ -424,14 +436,32 @@ private async _createCombo(comboData: any): Promise<void> {
                  color: var(--vscode-button-foreground);
             }
 
+            .command{
+                            font-size: 10px;
+                background-color: #cccccc;
+                color: #333333;
+                padding: 2px 4px;
+                border-radius: 4px;
+                margin-left: 4px;
+            }
+
         </style>
+        
     </head>
     <body>
         <div class="container">
             <div class="header">
-                <h1>F1 Shortcut Creator</h1>
-                <p>Select an action to create a keyboard shortcut</p>
-            </div>
+                <h1>F1</h1>
+                <div style="background: var(--vscode-textBlockQuote-background); padding: 12px; border-radius: 6px; margin: 8px 0;">
+                    <div style="font-size: 13px; color: var(--vscode-foreground); margin-bottom: 4px;"><strong>You can also use:</strong></div>
+                        <div style="font-size: 12px; color: var(--vscode-descriptionForeground);">
+                            • <strong class="command">Ctrl</strong> 
+                            • <strong class="command">Shift</strong> 
+                            • <strong class="command">Ctrl+Shift</strong> 
+                            <strong >+ ( f2, f3, f3, f4, f6, f7, f8, f9, 10, f11, f12 ) •</strong> 
+                        </div>
+                    </div>
+                </div>
 
             <div class="actions-grid" id="actionsGrid">
                 <div class="empty-state">
@@ -447,7 +477,7 @@ private async _createCombo(comboData: any): Promise<void> {
             <div class="modal-content">
                 <div class="modal-header">
                     <div class="modal-title" id="modalTitle">Create Shortcut</div>
-                    <div class="modal-subtitle" id="modalSubtitle">Press your desired key combination</div>
+                    <div class="modal-subtitle" id="modalSubtitle">Press Ctrl/Alt/Shift + F2-F12 combination</div>
                 </div>
 
                 <div class="key-input-container">
@@ -455,10 +485,10 @@ private async _createCombo(comboData: any): Promise<void> {
                         type="text"
                         id="keyInput"
                         class="key-input"
-                        placeholder="Press keys..."
+                        placeholder="e.g. ctrl+f1, alt+f5, shift+f12..."
                         readonly
                     >
-                    <div class="key-hint">Press the key combination and then ENTER to confirm</div>
+                    <div class="key-hint">Only support [ f2 ... to .. f12 ] keymaps</div>
                 </div>
 
                 <div class="modal-buttons">
@@ -654,5 +684,23 @@ private async _createCombo(comboData: any): Promise<void> {
         </script>
     </body>
     </html>`;
+  }
+
+  /**
+   * Validate if the key combination is a valid F2-F12 combination
+   * Only allows F2-F12 with ctrl, shift, or ctrl+shift (F1 is reserved)
+   */
+  private _isValidFKeyCombo(key: string): boolean {
+    const normalizedKey = key.toLowerCase();
+    
+    // Valid patterns: ctrl+f2-f12, shift+f2-f12, ctrl+shift+f2-f12
+    // Note: F1 is excluded as it's reserved for built-in functionality
+    const validPatterns = [
+      /^ctrl\+f([2-9]|1[0-2])$/,           // ctrl+f2 to ctrl+f12
+      /^shift\+f([2-9]|1[0-2])$/,          // shift+f2 to shift+f12
+      /^ctrl\+shift\+f([2-9]|1[0-2])$/     // ctrl+shift+f2 to ctrl+shift+f12
+    ];
+    
+    return validPatterns.some(pattern => pattern.test(normalizedKey));
   }
 }

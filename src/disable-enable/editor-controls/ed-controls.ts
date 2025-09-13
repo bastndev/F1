@@ -7,6 +7,7 @@ interface EditorControl {
   configKey?: string;
   isSeparator?: boolean;
   isNew?: boolean;
+  description?: string;
 }
 
 class EditorControlsProvider implements vscode.TreeDataProvider<EditorControl> {
@@ -21,66 +22,66 @@ class EditorControlsProvider implements vscode.TreeDataProvider<EditorControl> {
   public static readonly controls: EditorControl[] = [
     // Editor Visual Features
     // Separator
-    // {name: 'Editor Features',category: 'editor',isSeparator: true,},
+    // {name: 'Editor Features',category: 'editor',isSeparator: true,description: 'Categorizes editor visual features',},
 
-    {name: 'Minimap',category: 'editor',configKey: 'editor.minimap.enabled',},
-    {name: 'Code Folding',category: 'editor',configKey: 'editor.folding',},
-    {name: 'Line Numbers',category: 'editor',configKey: 'editor.lineNumbers',},
-    {name: 'Cursor Blinking',category: 'editor',configKey: 'editor.cursorBlinking',},
-    {name: 'Color Decorators',category: 'editor',configKey: 'editor.colorDecorators',},
-    {name: 'Indent Guides',category: 'editor',configKey: 'editor.guides.indentation',},
-    {name: 'Sticky Scroll',category: 'editor',configKey: 'editor.stickyScroll.enabled',},
-    {name: 'Cursor Smooth Caret Animation',category: 'editor',configKey: 'editor.cursorSmoothCaretAnimation',},
-    {name: 'Terminal Suggest',category: 'editor',configKey: 'terminal.integrated.suggest.enabled', isNew: true}, // new
+    {name: 'Minimap',category: 'editor',configKey: 'editor.minimap.enabled',description: 'DESCRIPTION: Displays a miniature overview of the file on the right side of the editor for quick navigation.',},
+    {name: 'Code Folding',category: 'editor',configKey: 'editor.folding',description: 'DESCRIPTION: Enables collapsing and expanding sections of code to improve readability.',},
+    {name: 'Line Numbers',category: 'editor',configKey: 'editor.lineNumbers',description: 'DESCRIPTION: Shows line numbers in the editor gutter.',},
+    {name: 'Cursor Blinking',category: 'editor',configKey: 'editor.cursorBlinking',description: 'DESCRIPTION: Controls the blinking animation of the text cursor.',},
+    {name: 'Color Decorators',category: 'editor',configKey: 'editor.colorDecorators',description: 'DESCRIPTION: Displays color previews for color values in the code.',},
+    {name: 'Indent Guides',category: 'editor',configKey: 'editor.guides.indentation',description: 'DESCRIPTION: Shows vertical lines to indicate indentation levels.',},
+    {name: 'Sticky Scroll',category: 'editor',configKey: 'editor.stickyScroll.enabled',description: 'DESCRIPTION: Keeps the current code scope visible at the top of the editor.',},
+    {name: 'Cursor Smooth Caret Animation',category: 'editor',configKey: 'editor.cursorSmoothCaretAnimation',description: 'DESCRIPTION: Enables smooth animation for cursor movement.',},
+    {name: 'Terminal Suggest',category: 'editor',configKey: 'terminal.integrated.suggest.enabled',description: 'DESCRIPTION: Provides IntelliSense suggestions in the integrated terminal.', isNew: true}, // new
 
     // Separator
-    {name: 'Editor Features',category: 'ui',isSeparator: true,},
+    {name: 'Editor Features',category: 'ui',isSeparator: true,description: 'DESCRIPTION: Categorizes user interface features.',},
 
     // UI Features
-    {name: 'Bracket LINE Colorization',category: 'ui',configKey: 'editor.guides.bracketPairs',},
-    {name: 'Bracket PAIR Colorization',category: 'ui',configKey: 'editor.bracketPairColorization.enabled',},
-    {name: 'Breadcrumbs',category: 'ui',configKey: 'breadcrumbs.enabled',},
-    {name: 'Compact Folders',category: 'ui',configKey: 'explorer.compactFolders',},
-    {name: 'Panel',category: 'ui',configKey: 'workbench.panel.defaultLocation',},
-    {name: 'Side Bar',category: 'ui',configKey: 'workbench.sideBar.location',},
-    {name: 'Status Bar',category: 'ui',configKey: 'workbench.statusBar.visible',},
-    {name: 'Tabs',category: 'ui',configKey: 'workbench.editor.showTabs',},
-    {name: 'Tree Indent',category: 'ui',configKey: 'workbench.tree.indent',},
+    {name: 'Bracket LINE Colorization',category: 'ui',configKey: 'editor.guides.bracketPairs',description: 'DESCRIPTION: Colors the lines connecting matching brackets.',},
+    {name: 'Bracket PAIR Colorization',category: 'ui',configKey: 'editor.bracketPairColorization.enabled',description: 'DESCRIPTION: Colors matching bracket pairs for better visibility.',},
+    {name: 'Breadcrumbs',category: 'ui',configKey: 'breadcrumbs.enabled',description: 'DESCRIPTION: Shows the current file location in the navigation hierarchy.',},
+    {name: 'Compact Folders',category: 'ui',configKey: 'explorer.compactFolders',description: 'DESCRIPTION: Compacts single-child folders in the explorer view.',},
+    {name: 'Panel',category: 'ui',configKey: 'workbench.panel.defaultLocation',description: 'DESCRIPTION: Sets the default location of the panel (bottom or right).',},
+    {name: 'Side Bar',category: 'ui',configKey: 'workbench.sideBar.location',description: 'DESCRIPTION: Sets the location of the side bar (left or right).',},
+    {name: 'Status Bar',category: 'ui',configKey: 'workbench.statusBar.visible',description: 'DESCRIPTION: Shows or hides the status bar at the bottom.',},
+    {name: 'Tabs',category: 'ui',configKey: 'workbench.editor.showTabs',description: 'DESCRIPTION: Shows or hides editor tabs.',},
+    {name: 'Tree Indent',category: 'ui',configKey: 'workbench.tree.indent',description: 'DESCRIPTION: Sets the indentation level for tree views.',},
 
     // Separator
-    {name: 'UI Components',category: 'formatting',isSeparator: true,},
+    {name: 'UI Components',category: 'formatting',isSeparator: true,description: 'DESCRIPTION: Categorizes formatting and code features.',},
 
     // Formatting & Code Features
-    {name: 'Auto Save',category: 'formatting',configKey: 'files.autoSave',},
-    {name: 'Format On Paste',category: 'formatting',configKey: 'editor.formatOnPaste',},
-    {name: 'Format On Save',category: 'formatting',configKey: 'editor.formatOnSave',},
-    {name: 'Format On Type',category: 'formatting',configKey: 'editor.formatOnType',},
-    {name: 'Insert Final Newline',category: 'formatting',configKey: 'files.insertFinalNewline',},
-    {name: 'Trim Trailing Whitespace',category: 'formatting',configKey: 'files.trimTrailingWhitespace',},
+    {name: 'Auto Save',category: 'formatting',configKey: 'files.autoSave',description: 'DESCRIPTION: Automatically saves files after changes.',},
+    {name: 'Format On Paste',category: 'formatting',configKey: 'editor.formatOnPaste',description: 'DESCRIPTION: Formats code automatically when pasting.',},
+    {name: 'Format On Save',category: 'formatting',configKey: 'editor.formatOnSave',description: 'DESCRIPTION: Formats code automatically when saving files.',},
+    {name: 'Format On Type',category: 'formatting',configKey: 'editor.formatOnType',description: 'DESCRIPTION: Formats code as you type.',},
+    {name: 'Insert Final Newline',category: 'formatting',configKey: 'files.insertFinalNewline',description: 'DESCRIPTION: Adds a newline at the end of files.',},
+    {name: 'Trim Trailing Whitespace',category: 'formatting',configKey: 'files.trimTrailingWhitespace',description: 'DESCRIPTION: Removes trailing whitespace from lines.',},
 
     // Separator
-    {name: 'Formatting Options',category: 'features',isSeparator: true,},
+    {name: 'Formatting Options',category: 'features',isSeparator: true,description: 'DESCRIPTION: Categorizes IntelliSense and advanced features.',},
 
     // IntelliSense & Features
-    {name: 'Accept Suggestion On Enter',category: 'features',configKey: 'editor.acceptSuggestionOnEnter',},
-    {name: 'Auto Closing Brackets',category: 'features',configKey: 'editor.autoClosingBrackets',},
-    {name: 'Auto Closing Quotes',category: 'features',configKey: 'editor.autoClosingQuotes',},
-    {name: 'Auto Surround Selection',category: 'features',configKey: 'editor.autoSurround',},
-    {name: 'Code Lens',category: 'features',configKey: 'editor.codeLens',},
-    {name: 'Git Auto Fetch',category: 'features',configKey: 'git.autofetch',},
-    {name: 'Git Decorations',category: 'features',configKey: 'git.decorations.enabled',},
-    {name: 'Hover',category: 'features',configKey: 'editor.hover.enabled',},
-    {name: 'IntelliSense',category: 'features',configKey: 'editor.quickSuggestions',},
-    {name: 'Parameter Hints',category: 'features',configKey: 'editor.parameterHints.enabled',},
-    {name: 'Suggest On Trigger Characters',category: 'features',configKey: 'editor.suggestOnTriggerCharacters',},
+    {name: 'Accept Suggestion On Enter',category: 'features',configKey: 'editor.acceptSuggestionOnEnter',description: 'DESCRIPTION: Accepts IntelliSense suggestions when pressing Enter.',},
+    {name: 'Auto Closing Brackets',category: 'features',configKey: 'editor.autoClosingBrackets',description: 'DESCRIPTION: Automatically closes brackets when typing.',},
+    {name: 'Auto Closing Quotes',category: 'features',configKey: 'editor.autoClosingQuotes',description: 'DESCRIPTION: Automatically closes quotes when typing.',},
+    {name: 'Auto Surround Selection',category: 'features',configKey: 'editor.autoSurround',description: 'DESCRIPTION: Surrounds selected text with brackets or quotes.',},
+    {name: 'Code Lens',category: 'features',configKey: 'editor.codeLens',description: 'DESCRIPTION: Shows code lens information above code elements.',},
+    {name: 'Git Auto Fetch',category: 'features',configKey: 'git.autofetch',description: 'DESCRIPTION: Automatically fetches changes from Git repositories.',},
+    {name: 'Git Decorations',category: 'features',configKey: 'git.decorations.enabled',description: 'DESCRIPTION: Shows Git status indicators in the editor.',},
+    {name: 'Hover',category: 'features',configKey: 'editor.hover.enabled',description: 'DESCRIPTION: Shows hover information for code elements.',},
+    {name: 'IntelliSense',category: 'features',configKey: 'editor.quickSuggestions',description: 'DESCRIPTION: Provides quick code completion suggestions.',},
+    {name: 'Parameter Hints',category: 'features',configKey: 'editor.parameterHints.enabled',description: 'DESCRIPTION: Shows parameter information in function calls.',},
+    {name: 'Suggest On Trigger Characters',category: 'features',configKey: 'editor.suggestOnTriggerCharacters',description: 'DESCRIPTION: Triggers suggestions when typing special characters.',},
 
     // Separator
-    {name: 'Advanced Features',category: 'debugging',isSeparator: true,},
+    {name: 'Advanced Features',category: 'debugging',isSeparator: true,description: 'DESCRIPTION: Categorizes debugging and terminal features.',},
 
     // Debugging & Terminal
-    {name: 'Debug Console',category: 'debugging',configKey: 'debug.console.fontSize',},
-    {name: 'Inline Values',category: 'debugging',configKey: 'debug.inlineValues',},
-    {name: 'Terminal Cursor Blinking',category: 'debugging',configKey: 'terminal.integrated.cursorBlinking',},
+    {name: 'Debug Console',category: 'debugging',configKey: 'debug.console.fontSize',description: 'DESCRIPTION: Sets the font size for the debug console.',},
+    {name: 'Inline Values',category: 'debugging',configKey: 'debug.inlineValues',description: 'DESCRIPTION: Shows variable values inline during debugging.',},
+    {name: 'Terminal Cursor Blinking',category: 'debugging',configKey: 'terminal.integrated.cursorBlinking',description: 'DESCRIPTION: Controls cursor blinking in the integrated terminal.',},
   ];
 
   // Instance property that references the static array
@@ -133,7 +134,11 @@ class EditorControlsProvider implements vscode.TreeDataProvider<EditorControl> {
       item.collapsibleState = vscode.TreeItemCollapsibleState.None;
       
       // Add tooltip for separator
-      const tooltip = new vscode.MarkdownString(`$(${categoryIcon}) **${element.category.toUpperCase()}**`);
+      let tooltipContent = `$(${categoryIcon}) **${element.category.toUpperCase()}**`;
+      if (element.description) {
+        tooltipContent += `\n\n${element.description}`;
+      }
+      const tooltip = new vscode.MarkdownString(tooltipContent);
       tooltip.supportThemeIcons = true;
       item.tooltip = tooltip;
       
@@ -156,6 +161,9 @@ class EditorControlsProvider implements vscode.TreeDataProvider<EditorControl> {
       tooltipContent += ` $(star-full) **NEW**`;
     }
     tooltipContent += `\n\nCategory: ${element.category}`;
+    if (element.description) {
+      tooltipContent += `\n\n${element.description}`;
+    }
     
     if (element.configKey) {
       const currentValue = this.getCurrentConfigValue(element.configKey);

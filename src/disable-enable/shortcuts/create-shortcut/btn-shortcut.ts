@@ -1,15 +1,18 @@
 import * as vscode from 'vscode';
 import { ShortcutsUIManager } from '../ui';
 import { MyListUI, ShortcutItem } from '../my-list/user-shortcuts';
+import { DynamicShortcutManager } from '../my-list/dynamic-shortcuts';
 import { ComboCreatorPanel } from './new-file-shortcut';
 
 export class F1WebviewProvider implements vscode.WebviewViewProvider {
   public static readonly viewType = 'f1-shortcuts';
   private _view?: vscode.WebviewView;
   private _comboCreatorPanel: ComboCreatorPanel;
+  private _context: vscode.ExtensionContext;
 
-  constructor(private readonly _extensionUri: vscode.Uri) {
-    this._comboCreatorPanel = new ComboCreatorPanel(_extensionUri);
+  constructor(private readonly _extensionUri: vscode.Uri, context: vscode.ExtensionContext) {
+    this._context = context;
+    this._comboCreatorPanel = new ComboCreatorPanel(_extensionUri, context);
     this._comboCreatorPanel.setOnComboCreated(() => this.refresh());
   }
 
@@ -54,6 +57,9 @@ export class F1WebviewProvider implements vscode.WebviewViewProvider {
   private async _handleExecute(command: string): Promise<void> {
     const shortcut = MyListUI.getShortcutById(command);
     if (shortcut) {
+      // Use DynamicShortcutManager to execute the shortcut
+      const dynamicManager = DynamicShortcutManager.getInstance(this._context);
+      // For now, we'll execute it directly here since DynamicShortcutManager handles registered shortcuts
       await this._executeComboShortcut(shortcut);
       return;
     }
