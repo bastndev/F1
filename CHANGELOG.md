@@ -1,14 +1,12 @@
 # F1 
 
-A complete and versatile theme collection designed for optimal coding experience in both dark and bright environments. Lynx Theme Pro features carefully calibrated colors and contrast ratios to provide excellent visibility and comfort in any lighting condition.
+Allows you to control editor functions and manage extensions directly from the keyboard, streamlining your workflow with configurable shortcuts.
 
 ## Features
 
-- **5 Beautiful Theme Variants**: Dark Mode, Light Mode, Night Mode, Ghibli Mode, Coffee Mode, and ICONS
-- **Universal Compatibility**: Perfect for coding in any lighting environment
-- **Eye Comfort**: Warm and comfortable coding experience with optional Sun filter
-- **Professional Design**: Thoughtfully crafted for extended coding sessions
-- **One-time Registration**: Simple activation process
+- **Custom Shortcuts (Create Shortcut & My List)** — Create and assign quick bindings; includes defaults like Toggle Word Wrap (F1) and AI Suggestion (disable/enable) (Shift+F1).
+- **Editor Controls** — Per-control toggles for Minimap, Code Folding, Line Numbers, Cursor Blinking, Color Decorators, Indent Guides, Sticky Scroll, Cursor Smooth Caret Animation, and Terminal Suggest.
+- **Extension Compatibility** — Verified compatibility with popular extensions shown in the UI (GitHub Copilot, GitHub Copilot Chat, Error Lens, ESLint, Live Server, Image Preview, Bracket Lynx, etc.).
 
 Discover more extensions at [bastndev.com/extensions](https://bastndev.com/extensions)
 
@@ -16,7 +14,7 @@ Discover more extensions at [bastndev.com/extensions](https://bastndev.com/exten
 
 ## Changelog
 
-Following VS Code best practices, Lynx Theme Pro uses semantic versioning for all releases.
+Following VS Code best practices, F1 uses semantic versioning for all releases.
 
 </br>
 
