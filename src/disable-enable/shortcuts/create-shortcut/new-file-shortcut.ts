@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 import * as path from 'path';
 import { MyListUI, ShortcutItem } from '../my-list/user-shortcuts';
-import { DynamicShortcutManager } from '../my-list/dynamic';
+import { DynamicShortcutManager } from '../my-list/dynamic-shortcuts';
 import { getAvailableEditorControls } from './ed-content';
 
 export class ComboCreatorPanel {

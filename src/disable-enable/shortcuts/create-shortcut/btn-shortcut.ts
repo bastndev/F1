@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 import { ShortcutsUIManager } from '../ui';
 import { MyListUI, ShortcutItem } from '../my-list/user-shortcuts';
-import { DynamicShortcutManager } from '../my-list/dynamic';
+import { DynamicShortcutManager } from '../my-list/dynamic-shortcuts';
 import { ComboCreatorPanel } from './new-file-shortcut';
 
 export class F1WebviewProvider implements vscode.WebviewViewProvider {
