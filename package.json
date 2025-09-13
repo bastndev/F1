@@ -104,164 +104,124 @@
       {
         "command": "f1.toggleMinimap",
         "title": "F1: Toggle Minimap"
-      },
-      {
+      },{
         "command": "f1.toggleCodeFolding",
         "title": "F1: Toggle Code Folding"
-      },
-      {
+      },{
         "command": "f1.toggleLineNumbers",
         "title": "F1: Toggle Line Numbers"
-      },
-      {
+      },{
         "command": "f1.toggleCursorBlinking",
         "title": "F1: Toggle Cursor Blinking"
-      },
-      {
+      },{
         "command": "f1.toggleColorDecorators",
         "title": "F1: Toggle Color Decorators"
-      },
-      {
+      },{
         "command": "f1.toggleIndentGuides",
         "title": "F1: Toggle Indent Guides"
-      },
-      {
+      },{
         "command": "f1.toggleStickyScroll",
         "title": "F1: Toggle Sticky Scroll"
-      },
-      {
+      },{
         "command": "f1.toggleCursorSmoothCaretAnimation",
         "title": "F1: Toggle Cursor Smooth Caret Animation"
-      },
-      {
+      },{
         "command": "f1.toggleTerminalSuggest",
         "title": "F1: Toggle Terminal Suggest"
-      },
-      {
+      },{
         "command": "f1.toggleBracketLineColorization",
         "title": "F1: Toggle Bracket LINE Colorization"
-      },
-      {
+      },{
         "command": "f1.toggleBracketPairColorization",
         "title": "F1: Toggle Bracket PAIR Colorization"
-      },
-      {
+      },{
         "command": "f1.toggleBreadcrumbs",
         "title": "F1: Toggle Breadcrumbs"
-      },
-      {
+      },{
         "command": "f1.toggleCompactFolders",
         "title": "F1: Toggle Compact Folders"
-      },
-      {
+      },{
         "command": "f1.togglePanel",
         "title": "F1: Toggle Panel"
-      },
-      {
+      },{
         "command": "f1.toggleSideBar",
         "title": "F1: Toggle Side Bar"
-      },
-      {
+      },{
         "command": "f1.toggleStatusBar",
         "title": "F1: Toggle Status Bar"
-      },
-      {
+      },{
         "command": "f1.toggleTabs",
         "title": "F1: Toggle Tabs"
-      },
-      {
+      },{
         "command": "f1.toggleTreeIndent",
         "title": "F1: Toggle Tree Indent"
-      },
-      {
+      },{
         "command": "f1.toggleAutoSave",
         "title": "F1: Toggle Auto Save"
-      },
-      {
+      },{
         "command": "f1.toggleFormatOnPaste",
         "title": "F1: Toggle Format On Paste"
-      },
-      {
+      },{
         "command": "f1.toggleFormatOnSave",
         "title": "F1: Toggle Format On Save"
-      },
-      {
+      },{
         "command": "f1.toggleFormatOnType",
         "title": "F1: Toggle Format On Type"
-      },
-      {
+      },{
         "command": "f1.toggleInsertFinalNewline",
         "title": "F1: Toggle Insert Final Newline"
-      },
-      {
+      },{
         "command": "f1.toggleTrimTrailingWhitespace",
         "title": "F1: Toggle Trim Trailing Whitespace"
-      },
-      {
+      },{
         "command": "f1.toggleAcceptSuggestionOnEnter",
         "title": "F1: Toggle Accept Suggestion On Enter"
-      },
-      {
+      },{
         "command": "f1.toggleAutoClosingBrackets",
         "title": "F1: Toggle Auto Closing Brackets"
-      },
-      {
+      },{
         "command": "f1.toggleAutoClosingQuotes",
         "title": "F1: Toggle Auto Closing Quotes"
-      },
-      {
+      },{
         "command": "f1.toggleAutoSurroundSelection",
         "title": "F1: Toggle Auto Surround Selection"
-      },
-      {
+      },{
         "command": "f1.toggleCodeLens",
         "title": "F1: Toggle Code Lens"
-      },
-      {
+      },{
         "command": "f1.toggleGitAutoFetch",
         "title": "F1: Toggle Git Auto Fetch"
-      },
-      {
+      },{
         "command": "f1.toggleGitDecorations",
         "title": "F1: Toggle Git Decorations"
-      },
-      {
+      },{
         "command": "f1.toggleHover",
         "title": "F1: Toggle Hover"
-      },
-      {
+      },{
         "command": "f1.toggleIntelliSense",
         "title": "F1: Toggle IntelliSense"
-      },
-      {
+      },{
         "command": "f1.toggleParameterHints",
         "title": "F1: Toggle Parameter Hints"
-      },
-      {
+      },{
         "command": "f1.toggleSuggestOnTriggerCharacters",
         "title": "F1: Toggle Suggest On Trigger Characters"
-      },
-      {
+      },{
         "command": "f1.toggleDebugConsole",
         "title": "F1: Toggle Debug Console"
-      },
-      {
+      },{
         "command": "f1.toggleInlineValues",
         "title": "F1: Toggle Inline Values"
-      },
-      {
+      },{
         "command": "f1.toggleTerminalCursorBlinking",
         "title": "F1: Toggle Terminal Cursor Blinking"
-      },
-      {
+      },{
         "command": "f1.addDynamicShortcut",
         "title": "F1: Add Dynamic Shortcut"
-      },
-      {
+      },{
         "command": "f1.removeDynamicShortcut",
         "title": "F1: Remove Dynamic Shortcut"
-      },
-      {
+      },{
         "command": "f1.listDynamicShortcuts",
         "title": "F1: List Dynamic Shortcuts"
       }
