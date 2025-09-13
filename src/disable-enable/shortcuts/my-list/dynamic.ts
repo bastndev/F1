@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import { MyListUI, ShortcutItem } from './my-list/user-shortcuts';
+import { MyListUI, ShortcutItem } from './user-shortcuts';
 
 export interface DynamicShortcut {
   key: string;
