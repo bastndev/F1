@@ -82,19 +82,21 @@
         "command": "f1.itemClicked",
         "title": "Item Clicked"
       },
+
+
       {
         "command": "f1.toggleMarkdownWrap",
         "title": "Toggle Markdown Word Wrap"
-      },
-      {
+      },{
         "command": "f1.toggleAISuggestions",
         "title": "Toggle AI Suggestions"
       },
+
+
       {
         "command": "f1.executeShortcut",
         "title": "Execute F1 Shortcut"
-      },
-      {
+      },{
         "command": "f1.executeDynamicShortcut",
         "title": "Execute Dynamic Shortcut"
       },
