@@ -19,7 +19,8 @@ Following VS Code best practices, F1 uses semantic versioning for all releases.
 </br>
 
 <!-- --- -->
-## [0.0.3] - 2025-09-13
+
+## [0.3.0] - 2025-09-13
 
 ### Added
 - "Create Shortcut" (beta) integration and "My List" custom shortcuts UI.
@@ -50,7 +51,7 @@ Following VS Code best practices, F1 uses semantic versioning for all releases.
 - If you use custom keymaps, re-check bindings after update; use "Create Shortcut" (beta) to reassign quickly.
 - For feedback or to report regressions, open an issue on the repository with reproducible steps.
 
-## [0.0.2] - 2025-07-22
+## [0.2.1] - 2025-07-22
 
 ### Added
 - **Editor Controls**: Enhanced editor features including:
