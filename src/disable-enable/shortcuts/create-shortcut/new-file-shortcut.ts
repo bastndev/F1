@@ -82,6 +82,16 @@ private async _createCombo(comboData: any): Promise<void> {
             return;
         }
 
+        // Check if the key combination is supported BEFORE anything else
+        const isValidFKey = this._isValidFKeyCombo(key.trim());
+        
+        if (!isValidFKey) {
+            vscode.window.showErrorMessage(
+                `❌ Only, Ctrl/Shift or (Ctrl+Shift) + F2 ....... F12`
+            );
+            return;
+        }
+
         // Validate that the shortcut does not exist
         if (MyListUI.shortcutExists(key)) {
             vscode.window.showErrorMessage(`Shortcut ${key} already exists! Please choose a different key combination.`);
@@ -111,22 +121,12 @@ private async _createCombo(comboData: any): Promise<void> {
             }
         };
 
-        // Add to the list
+        // Add to the list ONLY after all validations pass
         MyListUI.addShortcut(newShortcut);
 
-        // Check if the key combination is supported
-        const isValidFKey = this._isValidFKeyCombo(key.trim());
-        
-        if (isValidFKey) {
-            vscode.window.showInformationMessage(
-                `✅ Shortcut "${label}" created! Press ${key} to toggle ${label}.`
-            );
-        } else {
-            vscode.window.showErrorMessage(
-                `❌ Only, Ctrl/Shift or (Ctrl+Shift) + F2 ....... F12`
-            );
-            return;
-        }
+        vscode.window.showInformationMessage(
+            `✅ Shortcut "${label}" created! Press ${key} to toggle ${label}.`
+        );
 
         // Call the callback to refresh the main view
         if (this._onComboCreated) {
@@ -687,16 +687,18 @@ private async _createCombo(comboData: any): Promise<void> {
   }
 
   /**
-   * Validate if the key combination is a valid F1-F12 combination
+   * Validate if the key combination is a valid F2-F12 combination
+   * Only allows F2-F12 with ctrl, shift, or ctrl+shift (F1 is reserved)
    */
   private _isValidFKeyCombo(key: string): boolean {
     const normalizedKey = key.toLowerCase();
     
-    // Valid patterns: ctrl+f1-f12, alt+f1-f12, shift+f1-f12
+    // Valid patterns: ctrl+f2-f12, shift+f2-f12, ctrl+shift+f2-f12
+    // Note: F1 is excluded as it's reserved for built-in functionality
     const validPatterns = [
-      /^ctrl\+f([1-9]|1[0-2])$/,
-      /^alt\+f([1-9]|1[0-2])$/,
-      /^shift\+f([1-9]|1[0-2])$/
+      /^ctrl\+f([2-9]|1[0-2])$/,           // ctrl+f2 to ctrl+f12
+      /^shift\+f([2-9]|1[0-2])$/,          // shift+f2 to shift+f12
+      /^ctrl\+shift\+f([2-9]|1[0-2])$/     // ctrl+shift+f2 to ctrl+shift+f12
     ];
     
     return validPatterns.some(pattern => pattern.test(normalizedKey));

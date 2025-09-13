@@ -23,6 +23,42 @@ export class MyListUI {
   static initialize(context: vscode.ExtensionContext): void {
     this._context = context;
     this.userShortcuts = this._context.globalState.get<ShortcutItem[]>('userShortcuts') || [];
+    
+    // Clean up invalid shortcuts on initialization
+    this._cleanInvalidShortcuts();
+  }
+
+  /**
+   * Validate if a shortcut key follows the allowed pattern (F2-F12 with ctrl/shift/ctrl+shift)
+   */
+  private static _isValidShortcutKey(key: string): boolean {
+    const normalizedKey = key.toLowerCase();
+    
+    // Valid patterns: ctrl+f2-f12, shift+f2-f12, ctrl+shift+f2-f12
+    // Note: F1 is excluded as it's reserved for built-in functionality
+    const validPatterns = [
+      /^ctrl\+f([2-9]|1[0-2])$/,           // ctrl+f2 to ctrl+f12
+      /^shift\+f([2-9]|1[0-2])$/,          // shift+f2 to shift+f12
+      /^ctrl\+shift\+f([2-9]|1[0-2])$/     // ctrl+shift+f2 to ctrl+shift+f12
+    ];
+    
+    return validPatterns.some(pattern => pattern.test(normalizedKey));
+  }
+
+  /**
+   * Clean up invalid shortcuts that may have been saved incorrectly
+   */
+  private static _cleanInvalidShortcuts(): void {
+    const initialCount = this.userShortcuts.length;
+    this.userShortcuts = this.userShortcuts.filter(shortcut => 
+      this._isValidShortcutKey(shortcut.key)
+    );
+    
+    const removedCount = initialCount - this.userShortcuts.length;
+    if (removedCount > 0) {
+      console.log(`F1 Extension: Cleaned up ${removedCount} invalid shortcut(s) on initialization`);
+      this._saveShortcuts();
+    }
   }
 
   static setOnShortcutDeleted(callback: (key: string) => Promise<void>): void {

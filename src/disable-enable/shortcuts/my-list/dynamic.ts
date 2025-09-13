@@ -29,6 +29,9 @@ export class DynamicShortcutManager {
    * Initialize the dynamic shortcut manager
    */
   public async initialize(): Promise<void> {
+    // Clean up invalid shortcuts from configuration first
+    await this.cleanInvalidConfigShortcuts();
+    
     // Register all user shortcuts
     await this.registerAllUserShortcuts();
 
@@ -43,6 +46,34 @@ export class DynamicShortcutManager {
         this.onConfigurationChanged();
       }
     });
+  }
+
+  /**
+   * Clean up invalid shortcuts from configuration
+   */
+  private async cleanInvalidConfigShortcuts(): Promise<void> {
+    try {
+      const config = vscode.workspace.getConfiguration('f1');
+      const configShortcuts = config.get<Record<string, string>>('shortcuts', {});
+      let hasInvalidShortcuts = false;
+      const cleanedShortcuts: Record<string, string> = {};
+
+      for (const [key, command] of Object.entries(configShortcuts)) {
+        if (this.isValidKeyBinding(key)) {
+          cleanedShortcuts[key] = command;
+        } else {
+          hasInvalidShortcuts = true;
+          console.log(`F1 Extension: Removing invalid shortcut from config: ${key}`);
+        }
+      }
+
+      if (hasInvalidShortcuts) {
+        await config.update('shortcuts', cleanedShortcuts, vscode.ConfigurationTarget.Global);
+        console.log('F1 Extension: Cleaned up invalid shortcuts from configuration');
+      }
+    } catch (error) {
+      console.error('Error cleaning invalid config shortcuts:', error);
+    }
   }
 
   /**
@@ -382,30 +413,20 @@ export class DynamicShortcutManager {
 
   /**
    * Validate key binding format
+   * Only allows F2-F12 with ctrl, shift, or ctrl+shift combinations (F1 is reserved)
    */
   private isValidKeyBinding(key: string): boolean {
-    // Basic validation for key combinations
-    const validModifiers = ['ctrl', 'cmd', 'shift', 'alt'];
-    const parts = key.toLowerCase().split('+');
+    const normalizedKey = key.toLowerCase();
     
-    if (parts.length === 1) {
-      // Single key like 'f1', 'a', etc.
-      return /^[a-z0-9]$|^f[0-9]+$/.test(parts[0]);
-    }
-
-    // Multi-part combinations
-    const modifiers = parts.slice(0, -1);
-    const finalKey = parts[parts.length - 1];
-
-    // Check if all modifiers are valid
-    for (const modifier of modifiers) {
-      if (!validModifiers.includes(modifier)) {
-        return false;
-      }
-    }
-
-    // Check if final key is valid
-    return /^[a-z0-9]$|^f[0-9]+$/.test(finalKey);
+    // Valid patterns: ctrl+f2-f12, shift+f2-f12, ctrl+shift+f2-f12
+    // Note: F1 is excluded as it's reserved for built-in functionality
+    const validPatterns = [
+      /^ctrl\+f([2-9]|1[0-2])$/,           // ctrl+f2 to ctrl+f12
+      /^shift\+f([2-9]|1[0-2])$/,          // shift+f2 to shift+f12
+      /^ctrl\+shift\+f([2-9]|1[0-2])$/     // ctrl+shift+f2 to ctrl+shift+f12
+    ];
+    
+    return validPatterns.some(pattern => pattern.test(normalizedKey));
   }
 
   /**
