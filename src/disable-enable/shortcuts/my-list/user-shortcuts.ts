@@ -18,10 +18,15 @@ export interface ShortcutItem {
 export class MyListUI {
   private static _context: vscode.ExtensionContext;
   private static userShortcuts: ShortcutItem[] = [];
+  private static onShortcutDeleted?: (key: string) => Promise<void>;
 
   static initialize(context: vscode.ExtensionContext): void {
     this._context = context;
     this.userShortcuts = this._context.globalState.get<ShortcutItem[]>('userShortcuts') || [];
+  }
+
+  static setOnShortcutDeleted(callback: (key: string) => Promise<void>): void {
+    this.onShortcutDeleted = callback;
   }
 
   private static _saveShortcuts(): void {
@@ -186,8 +191,22 @@ export class MyListUI {
     );
 
     if (result === 'Yes') {
+      // Get the shortcut before removing it to unregister the keybinding
+      const shortcutToDelete = this.userShortcuts[index];
+      
+      // Remove from the list
       this.removeShortcut(index);
-      vscode.window.showInformationMessage(`🗑️ Deleted "${label}"`);
+      
+      // Also notify the dynamic shortcut manager if callback is set
+      if (this.onShortcutDeleted && shortcutToDelete) {
+        try {
+          await this.onShortcutDeleted(shortcutToDelete.key);
+        } catch (error) {
+          console.warn('Could not remove from dynamic shortcut manager:', error);
+        }
+      }
+      
+      vscode.window.showInformationMessage(`🗑️ Deleted "${label}" shortcut`);
       return true;
     }
     return false;

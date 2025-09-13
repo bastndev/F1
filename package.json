@@ -89,6 +89,181 @@
       {
         "command": "f1.toggleAISuggestions",
         "title": "Toggle AI Suggestions"
+      },
+      {
+        "command": "f1.executeShortcut",
+        "title": "Execute F1 Shortcut"
+      },
+      {
+        "command": "f1.executeDynamicShortcut",
+        "title": "Execute Dynamic Shortcut"
+      },
+
+
+
+      {
+        "command": "f1.toggleMinimap",
+        "title": "F1: Toggle Minimap"
+      },
+      {
+        "command": "f1.toggleCodeFolding",
+        "title": "F1: Toggle Code Folding"
+      },
+      {
+        "command": "f1.toggleLineNumbers",
+        "title": "F1: Toggle Line Numbers"
+      },
+      {
+        "command": "f1.toggleCursorBlinking",
+        "title": "F1: Toggle Cursor Blinking"
+      },
+      {
+        "command": "f1.toggleColorDecorators",
+        "title": "F1: Toggle Color Decorators"
+      },
+      {
+        "command": "f1.toggleIndentGuides",
+        "title": "F1: Toggle Indent Guides"
+      },
+      {
+        "command": "f1.toggleStickyScroll",
+        "title": "F1: Toggle Sticky Scroll"
+      },
+      {
+        "command": "f1.toggleCursorSmoothCaretAnimation",
+        "title": "F1: Toggle Cursor Smooth Caret Animation"
+      },
+      {
+        "command": "f1.toggleTerminalSuggest",
+        "title": "F1: Toggle Terminal Suggest"
+      },
+      {
+        "command": "f1.toggleBracketLineColorization",
+        "title": "F1: Toggle Bracket LINE Colorization"
+      },
+      {
+        "command": "f1.toggleBracketPairColorization",
+        "title": "F1: Toggle Bracket PAIR Colorization"
+      },
+      {
+        "command": "f1.toggleBreadcrumbs",
+        "title": "F1: Toggle Breadcrumbs"
+      },
+      {
+        "command": "f1.toggleCompactFolders",
+        "title": "F1: Toggle Compact Folders"
+      },
+      {
+        "command": "f1.togglePanel",
+        "title": "F1: Toggle Panel"
+      },
+      {
+        "command": "f1.toggleSideBar",
+        "title": "F1: Toggle Side Bar"
+      },
+      {
+        "command": "f1.toggleStatusBar",
+        "title": "F1: Toggle Status Bar"
+      },
+      {
+        "command": "f1.toggleTabs",
+        "title": "F1: Toggle Tabs"
+      },
+      {
+        "command": "f1.toggleTreeIndent",
+        "title": "F1: Toggle Tree Indent"
+      },
+      {
+        "command": "f1.toggleAutoSave",
+        "title": "F1: Toggle Auto Save"
+      },
+      {
+        "command": "f1.toggleFormatOnPaste",
+        "title": "F1: Toggle Format On Paste"
+      },
+      {
+        "command": "f1.toggleFormatOnSave",
+        "title": "F1: Toggle Format On Save"
+      },
+      {
+        "command": "f1.toggleFormatOnType",
+        "title": "F1: Toggle Format On Type"
+      },
+      {
+        "command": "f1.toggleInsertFinalNewline",
+        "title": "F1: Toggle Insert Final Newline"
+      },
+      {
+        "command": "f1.toggleTrimTrailingWhitespace",
+        "title": "F1: Toggle Trim Trailing Whitespace"
+      },
+      {
+        "command": "f1.toggleAcceptSuggestionOnEnter",
+        "title": "F1: Toggle Accept Suggestion On Enter"
+      },
+      {
+        "command": "f1.toggleAutoClosingBrackets",
+        "title": "F1: Toggle Auto Closing Brackets"
+      },
+      {
+        "command": "f1.toggleAutoClosingQuotes",
+        "title": "F1: Toggle Auto Closing Quotes"
+      },
+      {
+        "command": "f1.toggleAutoSurroundSelection",
+        "title": "F1: Toggle Auto Surround Selection"
+      },
+      {
+        "command": "f1.toggleCodeLens",
+        "title": "F1: Toggle Code Lens"
+      },
+      {
+        "command": "f1.toggleGitAutoFetch",
+        "title": "F1: Toggle Git Auto Fetch"
+      },
+      {
+        "command": "f1.toggleGitDecorations",
+        "title": "F1: Toggle Git Decorations"
+      },
+      {
+        "command": "f1.toggleHover",
+        "title": "F1: Toggle Hover"
+      },
+      {
+        "command": "f1.toggleIntelliSense",
+        "title": "F1: Toggle IntelliSense"
+      },
+      {
+        "command": "f1.toggleParameterHints",
+        "title": "F1: Toggle Parameter Hints"
+      },
+      {
+        "command": "f1.toggleSuggestOnTriggerCharacters",
+        "title": "F1: Toggle Suggest On Trigger Characters"
+      },
+      {
+        "command": "f1.toggleDebugConsole",
+        "title": "F1: Toggle Debug Console"
+      },
+      {
+        "command": "f1.toggleInlineValues",
+        "title": "F1: Toggle Inline Values"
+      },
+      {
+        "command": "f1.toggleTerminalCursorBlinking",
+        "title": "F1: Toggle Terminal Cursor Blinking"
+      },
+      {
+        "command": "f1.addDynamicShortcut",
+        "title": "F1: Add Dynamic Shortcut"
+      },
+      {
+        "command": "f1.removeDynamicShortcut",
+        "title": "F1: Remove Dynamic Shortcut"
+      },
+      {
+        "command": "f1.listDynamicShortcuts",
+        "title": "F1: List Dynamic Shortcuts"
       }
     ],
 
@@ -103,8 +278,240 @@
         "key": "shift+f1",
         "mac": "shift+f1",
         "command": "f1.toggleAISuggestions"
+      },
+      {
+        "key": "ctrl+f1",
+        "mac": "cmd+f1",
+        "command": "f1.executeDynamicShortcut",
+        "args": "ctrl+f1"
+      },
+      {
+        "key": "ctrl+f2",
+        "mac": "cmd+f2",
+        "command": "f1.executeDynamicShortcut",
+        "args": "ctrl+f2"
+      },
+      {
+        "key": "ctrl+f3",
+        "mac": "cmd+f3",
+        "command": "f1.executeDynamicShortcut",
+        "args": "ctrl+f3"
+      },
+      {
+        "key": "ctrl+f4",
+        "mac": "cmd+f4",
+        "command": "f1.executeDynamicShortcut",
+        "args": "ctrl+f4"
+      },
+      {
+        "key": "ctrl+f5",
+        "mac": "cmd+f5",
+        "command": "f1.executeDynamicShortcut",
+        "args": "ctrl+f5"
+      },
+      {
+        "key": "ctrl+f6",
+        "mac": "cmd+f6",
+        "command": "f1.executeDynamicShortcut",
+        "args": "ctrl+f6"
+      },
+      {
+        "key": "ctrl+f7",
+        "mac": "cmd+f7",
+        "command": "f1.executeDynamicShortcut",
+        "args": "ctrl+f7"
+      },
+      {
+        "key": "ctrl+f8",
+        "mac": "cmd+f8",
+        "command": "f1.executeDynamicShortcut",
+        "args": "ctrl+f8"
+      },
+      {
+        "key": "ctrl+f9",
+        "mac": "cmd+f9",
+        "command": "f1.executeDynamicShortcut",
+        "args": "ctrl+f9"
+      },
+      {
+        "key": "ctrl+f10",
+        "mac": "cmd+f10",
+        "command": "f1.executeDynamicShortcut",
+        "args": "ctrl+f10"
+      },
+      {
+        "key": "ctrl+f11",
+        "mac": "cmd+f11",
+        "command": "f1.executeDynamicShortcut",
+        "args": "ctrl+f11"
+      },
+      {
+        "key": "ctrl+f12",
+        "mac": "cmd+f12",
+        "command": "f1.executeDynamicShortcut",
+        "args": "ctrl+f12"
+      },
+      {
+        "key": "alt+f1",
+        "mac": "alt+f1",
+        "command": "f1.executeDynamicShortcut",
+        "args": "alt+f1"
+      },
+      {
+        "key": "alt+f2",
+        "mac": "alt+f2",
+        "command": "f1.executeDynamicShortcut",
+        "args": "alt+f2"
+      },
+      {
+        "key": "alt+f3",
+        "mac": "alt+f3",
+        "command": "f1.executeDynamicShortcut",
+        "args": "alt+f3"
+      },
+      {
+        "key": "alt+f4",
+        "mac": "alt+f4",
+        "command": "f1.executeDynamicShortcut",
+        "args": "alt+f4"
+      },
+      {
+        "key": "alt+f5",
+        "mac": "alt+f5",
+        "command": "f1.executeDynamicShortcut",
+        "args": "alt+f5"
+      },
+      {
+        "key": "alt+f6",
+        "mac": "alt+f6",
+        "command": "f1.executeDynamicShortcut",
+        "args": "alt+f6"
+      },
+      {
+        "key": "alt+f7",
+        "mac": "alt+f7",
+        "command": "f1.executeDynamicShortcut",
+        "args": "alt+f7"
+      },
+      {
+        "key": "alt+f8",
+        "mac": "alt+f8",
+        "command": "f1.executeDynamicShortcut",
+        "args": "alt+f8"
+      },
+      {
+        "key": "alt+f9",
+        "mac": "alt+f9",
+        "command": "f1.executeDynamicShortcut",
+        "args": "alt+f9"
+      },
+      {
+        "key": "alt+f10",
+        "mac": "alt+f10",
+        "command": "f1.executeDynamicShortcut",
+        "args": "alt+f10"
+      },
+      {
+        "key": "alt+f11",
+        "mac": "alt+f11",
+        "command": "f1.executeDynamicShortcut",
+        "args": "alt+f11"
+      },
+      {
+        "key": "alt+f12",
+        "mac": "alt+f12",
+        "command": "f1.executeDynamicShortcut",
+        "args": "alt+f12"
+      },
+      {
+        "key": "shift+f2",
+        "mac": "shift+f2",
+        "command": "f1.executeDynamicShortcut",
+        "args": "shift+f2"
+      },
+      {
+        "key": "shift+f3",
+        "mac": "shift+f3",
+        "command": "f1.executeDynamicShortcut",
+        "args": "shift+f3"
+      },
+      {
+        "key": "shift+f4",
+        "mac": "shift+f4",
+        "command": "f1.executeDynamicShortcut",
+        "args": "shift+f4"
+      },
+      {
+        "key": "shift+f5",
+        "mac": "shift+f5",
+        "command": "f1.executeDynamicShortcut",
+        "args": "shift+f5"
+      },
+      {
+        "key": "shift+f6",
+        "mac": "shift+f6",
+        "command": "f1.executeDynamicShortcut",
+        "args": "shift+f6"
+      },
+      {
+        "key": "shift+f7",
+        "mac": "shift+f7",
+        "command": "f1.executeDynamicShortcut",
+        "args": "shift+f7"
+      },
+      {
+        "key": "shift+f8",
+        "mac": "shift+f8",
+        "command": "f1.executeDynamicShortcut",
+        "args": "shift+f8"
+      },
+      {
+        "key": "shift+f9",
+        "mac": "shift+f9",
+        "command": "f1.executeDynamicShortcut",
+        "args": "shift+f9"
+      },
+      {
+        "key": "shift+f10",
+        "mac": "shift+f10",
+        "command": "f1.executeDynamicShortcut",
+        "args": "shift+f10"
+      },
+      {
+        "key": "shift+f11",
+        "mac": "shift+f11",
+        "command": "f1.executeDynamicShortcut",
+        "args": "shift+f11"
+      },
+      {
+        "key": "shift+f12",
+        "mac": "shift+f12",
+        "command": "f1.executeDynamicShortcut",
+        "args": "shift+f12"
       }
-    ]
+    ],
+    "configuration": {
+      "title": "F1 Extension",
+      "properties": {
+        "f1.shortcuts": {
+          "type": "object",
+          "default": {},
+          "description": "Custom shortcuts defined by the user. Each key is the shortcut combination (e.g., 'ctrl+f1') and the value is the command to execute. Only F1-F12 combinations are supported: ctrl+f1-f12, alt+f1-f12, shift+f1-f12.",
+          "patternProperties": {
+            "^(ctrl|alt|shift)\\+f([1-9]|1[0-2])$": {
+              "type": "string",
+              "description": "Command to execute when this F1-F12 key combination is pressed"
+            }
+          },
+          "additionalProperties": false
+        },
+        "f1.shortcuts.autoRegister": {
+          "type": "boolean",
+          "default": true,
+          "description": "Automatically register user-defined shortcuts as keybindings"
+        }
+      }
+    }
   },
   
   "scripts": {

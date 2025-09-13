@@ -1,14 +1,17 @@
 import * as vscode from 'vscode';
 import * as path from 'path';
 import { MyListUI, ShortcutItem } from '../my-list/user-shortcuts';
+import { DynamicShortcutManager } from '../dynamic-shortcuts';
 import { getAvailableEditorControls } from './ed-content';
 
 export class ComboCreatorPanel {
   private _extensionUri: vscode.Uri;
   private _onComboCreated?: () => void;
+  private _context?: vscode.ExtensionContext;
 
-  constructor(extensionUri: vscode.Uri) {
+  constructor(extensionUri: vscode.Uri, context?: vscode.ExtensionContext) {
     this._extensionUri = extensionUri;
+    this._context = context;
   }
 
   /**
@@ -111,10 +114,19 @@ private async _createCombo(comboData: any): Promise<void> {
         // Add to the list
         MyListUI.addShortcut(newShortcut);
 
-        // Show confirmation
-        vscode.window.showInformationMessage(
-            `✅ Shortcut "${label}" created successfully! (Editor Control)`
-        );
+        // Check if the key combination is supported
+        const isValidFKey = this._isValidFKeyCombo(key.trim());
+        
+        if (isValidFKey) {
+            vscode.window.showInformationMessage(
+                `✅ Shortcut "${label}" created! Press ${key} to toggle ${label}.`
+            );
+        } else {
+            vscode.window.showErrorMessage(
+                `❌ Invalid key combination! Only F1-F12 combinations are allowed: ctrl+f1-f12, alt+f1-f12, shift+f1-f12`
+            );
+            return;
+        }
 
         // Call the callback to refresh the main view
         if (this._onComboCreated) {
@@ -430,7 +442,15 @@ private async _createCombo(comboData: any): Promise<void> {
         <div class="container">
             <div class="header">
                 <h1>F1 Shortcut Creator</h1>
-                <p>Select an action to create a keyboard shortcut</p>
+                <p>Select an action and assign a F1-F12 keyboard shortcut</p>
+                <div style="background: var(--vscode-textBlockQuote-background); padding: 12px; border-radius: 6px; margin: 8px 0; border-left: 3px solid var(--vscode-notificationCenterHeader-foreground);">
+                    <div style="font-size: 13px; color: var(--vscode-foreground); margin-bottom: 4px;"><strong>📝 Allowed combinations:</strong></div>
+                    <div style="font-size: 12px; color: var(--vscode-descriptionForeground);">
+                        • <strong>Ctrl + F1-F12</strong> (ctrl+f1, ctrl+f2, ..., ctrl+f12)<br>
+                        • <strong>Alt + F1-F12</strong> (alt+f1, alt+f2, ..., alt+f12)<br>
+                        • <strong>Shift + F1-F12</strong> (shift+f1, shift+f2, ..., shift+f12)
+                    </div>
+                </div>
             </div>
 
             <div class="actions-grid" id="actionsGrid">
@@ -447,7 +467,7 @@ private async _createCombo(comboData: any): Promise<void> {
             <div class="modal-content">
                 <div class="modal-header">
                     <div class="modal-title" id="modalTitle">Create Shortcut</div>
-                    <div class="modal-subtitle" id="modalSubtitle">Press your desired key combination</div>
+                    <div class="modal-subtitle" id="modalSubtitle">Press Ctrl/Alt/Shift + F1-F12 combination</div>
                 </div>
 
                 <div class="key-input-container">
@@ -455,10 +475,10 @@ private async _createCombo(comboData: any): Promise<void> {
                         type="text"
                         id="keyInput"
                         class="key-input"
-                        placeholder="Press keys..."
+                        placeholder="e.g. ctrl+f1, alt+f5, shift+f12..."
                         readonly
                     >
-                    <div class="key-hint">Press the key combination and then ENTER to confirm</div>
+                    <div class="key-hint">Only F1-F12 combinations allowed (ctrl+f1-f12, alt+f1-f12, shift+f1-f12)</div>
                 </div>
 
                 <div class="modal-buttons">
@@ -654,5 +674,21 @@ private async _createCombo(comboData: any): Promise<void> {
         </script>
     </body>
     </html>`;
+  }
+
+  /**
+   * Validate if the key combination is a valid F1-F12 combination
+   */
+  private _isValidFKeyCombo(key: string): boolean {
+    const normalizedKey = key.toLowerCase();
+    
+    // Valid patterns: ctrl+f1-f12, alt+f1-f12, shift+f1-f12
+    const validPatterns = [
+      /^ctrl\+f([1-9]|1[0-2])$/,
+      /^alt\+f([1-9]|1[0-2])$/,
+      /^shift\+f([1-9]|1[0-2])$/
+    ];
+    
+    return validPatterns.some(pattern => pattern.test(normalizedKey));
   }
 }
