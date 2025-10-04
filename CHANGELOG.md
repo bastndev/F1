@@ -16,9 +16,22 @@ Discover more extensions at [bastndev.com/extensions](https://bastndev.com/exten
 
 Following VS Code best practices, F1 uses semantic versioning for all releases.
 
-</br>
+<br>
 
 <!-- --- -->
+## [0.3.1] - 2025-10-04
+
+### Added
+- Code improvements and cleanup for better maintainability and performance.
+- Smooth color transition animations when toggling editor configurations, such as activating or deactivating the minimap, for enhanced user experience.
+
+### Changed
+- Updated internal code structure to support new animations and ensure cleaner, more efficient operations.
+
+### Fixed
+- Minor bugs related to configuration toggles and UI responsiveness.
+
+---
 
 ## [0.3.1] - 2025-09-13
 
