@@ -18,6 +18,9 @@ class EditorControlsProvider implements vscode.TreeDataProvider<EditorControl> {
     EditorControl | undefined | null | void
   > = this._onDidChangeTreeData.event;
 
+  // Track transitioning controls for visual feedback
+  private transitioningControls: Set<string> = new Set();
+
   // Static controls array to avoid duplication
   public static readonly controls: EditorControl[] = [
     // Editor Visual Features
@@ -97,7 +100,7 @@ class EditorControlsProvider implements vscode.TreeDataProvider<EditorControl> {
   };
 
   /**
-   *  --- --- -- - NEW 
+   * Creates a "NEW" badge for new features
    */
   private createNewBadge(): string {
     return ' ⁿᵉʷ';
@@ -107,44 +110,23 @@ class EditorControlsProvider implements vscode.TreeDataProvider<EditorControl> {
    * Gets the current configuration value for a control
    */
   private getCurrentConfigValue(configKey: string): any {
-    const config = vscode.workspace.getConfiguration();
-    return config.get(configKey);
-  }
-
-  /**
-   * Gets a human-readable status for the current configuration value
-   */
-  private getStatusText(configKey: string): string {
-    const currentValue = this.getCurrentConfigValue(configKey);
-    const isEnabled = this.isValueEnabled(currentValue);
-    
-    return isEnabled ? 'Enabled' : 'Disabled';
+    return vscode.workspace.getConfiguration().get(configKey);
   }
 
   getTreeItem(element: EditorControl): vscode.TreeItem {
     if (element.isSeparator) {
       const item = new vscode.TreeItem('');
-      
-      // Enhanced separator display with only category icon
       const categoryIcon = this.categoryIcons[element.category] || 'symbol-misc';
+
       item.description = ':::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::';
-      
-      // Style separator differently
       item.contextValue = 'separator';
       item.collapsibleState = vscode.TreeItemCollapsibleState.None;
-      
-      // Add tooltip for separator
-      let tooltipContent = `$(${categoryIcon}) **${element.category.toUpperCase()}**`;
-      if (element.description) {
-        tooltipContent += `\n\n${element.description}`;
-      }
-      const tooltip = new vscode.MarkdownString(tooltipContent);
+
+      const tooltip = new vscode.MarkdownString(`$(${categoryIcon}) **${element.category.toUpperCase()}**`);
       tooltip.supportThemeIcons = true;
       item.tooltip = tooltip;
-      
-      // Color ICON
       item.iconPath = new vscode.ThemeIcon(categoryIcon, new vscode.ThemeColor('textLink.foreground'));
-      
+
       return item;
     }
 
@@ -167,8 +149,9 @@ class EditorControlsProvider implements vscode.TreeDataProvider<EditorControl> {
     
     if (element.configKey) {
       const currentValue = this.getCurrentConfigValue(element.configKey);
-      const statusText = this.getStatusText(element.configKey);
-      
+      const isEnabled = IconManager.isValueEnabled(currentValue);
+      const statusText = isEnabled ? 'Enabled' : 'Disabled';
+
       tooltipContent += `\n\nStatus: **${statusText}**`;
       tooltipContent += `\nCurrent value: \`${currentValue}\``;
       tooltipContent += `\n\n$(mouse) 💡 Click to (**activate/deactivate**)`;
@@ -181,7 +164,8 @@ class EditorControlsProvider implements vscode.TreeDataProvider<EditorControl> {
     // Add icon and make items clickable if they have a configKey
     if (element.configKey) {
       // Set the icon based on current state (from IconManager)
-      item.iconPath = IconManager.getControlIcon(element.configKey);
+      const isTransitioning = this.isControlTransitioning(element.name);
+      item.iconPath = IconManager.getControlIcon(element.configKey, isTransitioning);
 
       item.command = {
         command: 'f1-editor-controls.toggleControl',
@@ -197,28 +181,23 @@ class EditorControlsProvider implements vscode.TreeDataProvider<EditorControl> {
   }
 
   getChildren(): EditorControl[] {
-    // Return without sorting alphabetically
     return this.controls;
   }
 
-  // Methods for future implementation
   getControlsByCategory(category: string): EditorControl[] {
-    return this.controls.filter((control) => control.category === category && !control.isSeparator);
+    return this.controls.filter(control => control.category === category && !control.isSeparator);
   }
 
   getControlByName(name: string): EditorControl | undefined {
-    return this.controls.find((control) => control.name === name);
+    return this.controls.find(control => control.name === name);
   }
 
-  /**
-   * Gets all separators
-   */
   getSeparators(): EditorControl[] {
-    return this.controls.filter((control) => control.isSeparator);
+    return this.controls.filter(control => control.isSeparator);
   }
 
   /**
-   * Toggles a control's configuration value
+   * Toggles a control's configuration value with visual feedback
    */
   async toggleControl(controlName: string): Promise<void> {
     const control = this.getControlByName(controlName);
@@ -228,77 +207,72 @@ class EditorControlsProvider implements vscode.TreeDataProvider<EditorControl> {
     }
 
     try {
-      const config = vscode.workspace.getConfiguration();
-      const currentValue = config.get(control.configKey);
+      // Get current state
+      const currentValue = this.getCurrentConfigValue(control.configKey);
+      const wasEnabled = IconManager.isValueEnabled(currentValue);
 
-      // Handle different types of configuration values
-      let newValue: any;
+      // Show transition state
+      this.setTransitionState(control, true);
+      await this.delay(100);
 
-      if (typeof currentValue === 'boolean') {
-        newValue = !currentValue;
-      } else if (control.configKey === 'editor.lineNumbers') {
-        // Special case for line numbers: 'on' | 'off' | 'relative' | 'interval'
-        newValue = currentValue === 'on' ? 'off' : 'on';
-      } else if (control.configKey === 'files.autoSave') {
-        // Special case for auto save: 'off' | 'afterDelay' | 'onFocusChange' | 'onWindowChange'
-        newValue = currentValue === 'off' ? 'afterDelay' : 'off';
-      } else if (control.configKey === 'editor.cursorBlinking') {
-        // Special case for cursor blinking: 'blink' | 'smooth' | 'phase' | 'expand' | 'solid'
-        newValue = currentValue === 'blink' ? 'solid' : 'blink';
-      } else if (control.configKey === 'editor.acceptSuggestionOnEnter') {
-        // Special case: 'on' | 'smart' | 'off'
-        newValue = currentValue === 'on' ? 'off' : 'on';
-      } else {
-        // For other non-boolean values, try to toggle between enabled/disabled states
-        newValue = !currentValue;
-      }
-
-      await config.update(
+      // Calculate and apply new value
+      const newValue = this.calculateNewValue(control.configKey, currentValue);
+      await vscode.workspace.getConfiguration().update(
         control.configKey,
         newValue,
         vscode.ConfigurationTarget.Global
       );
 
-      // Refresh tree view to update the status
+      // Clear transition state
+      await this.delay(150);
+      this.setTransitionState(control, false);
       this._onDidChangeTreeData.fire();
 
     } catch (error) {
-      // Show error notification only for actual errors
-      vscode.window.showErrorMessage(`Failed to toggle ${controlName}: ${error}`);
+      // Clear transition state on error
+      this.setTransitionState(control, false);
+      this._onDidChangeTreeData.fire();
       console.error(`Failed to toggle ${controlName}:`, error);
     }
   }
 
   /**
-   * Determines if a configuration value represents an "enabled" state
+   * Sets the transition state for a control
    */
-  private isValueEnabled(value: any): boolean {
-    if (typeof value === 'boolean') {
-      return value;
+  private setTransitionState(control: EditorControl, isTransitioning: boolean): void {
+    if (isTransitioning) {
+      this.transitioningControls.add(control.name);
+    } else {
+      this.transitioningControls.delete(control.name);
+    }
+    this._onDidChangeTreeData.fire();
+  }
+
+  private isControlTransitioning(controlName: string): boolean {
+    return this.transitioningControls.has(controlName);
+  }
+
+  private delay(ms: number): Promise<void> {
+    return new Promise(resolve => setTimeout(resolve, ms));
+  }
+
+  private calculateNewValue(configKey: string, currentValue: any): any {
+    if (typeof currentValue === 'boolean') {
+      return !currentValue;
     }
 
-    // Handle string values that represent enabled/disabled states
-    const enabledValues = [
-      'on',
-      'afterDelay',
-      'onFocusChange',
-      'onWindowChange',
-      'blink',
-      'smart',
-    ];
-    const disabledValues = ['off', 'solid'];
-
-    if (typeof value === 'string') {
-      if (enabledValues.includes(value)) {
-        return true;
-      }
-      if (disabledValues.includes(value)) {
-        return false;
-      }
+    switch (configKey) {
+      case 'editor.lineNumbers':
+        return currentValue === 'on' ? 'off' : 'on';
+      case 'files.autoSave':
+        return currentValue === 'off' ? 'afterDelay' : 'off';
+      case 'editor.cursorBlinking':
+        return currentValue === 'blink' ? 'solid' : 'blink';
+      case 'editor.acceptSuggestionOnEnter':
+        return currentValue === 'on' ? 'off' : 'on';
+      default:
+        return !currentValue;
     }
-
-    // Default: treat truthy values as enabled
-    return !!value;
   }
 
   /**
@@ -312,16 +286,13 @@ class EditorControlsProvider implements vscode.TreeDataProvider<EditorControl> {
 export function activate(context: vscode.ExtensionContext) {
   const provider = new EditorControlsProvider();
 
-  // Register tree data provider
   vscode.window.registerTreeDataProvider('f1-editor-controls', provider);
 
-  // Register toggle command
   const toggleCommand = vscode.commands.registerCommand(
     'f1-editor-controls.toggleControl',
     (controlName: string) => provider.toggleControl(controlName)
   );
 
-  // Register refresh command
   const refreshCommand = vscode.commands.registerCommand(
     'f1-editor-controls.refresh',
     () => provider.refresh()
@@ -332,12 +303,9 @@ export function activate(context: vscode.ExtensionContext) {
 
 export function deactivate() {}
 
-/**
- * Get available editor controls for shortcut creator
- */
 export function getAvailableEditorControls(): Array<{name: string, key: string, category: string}> {
   return EditorControlsProvider.controls
-    .filter(control => control.configKey) // Only include controls with config keys
+    .filter(control => control.configKey)
     .map(control => ({
       name: control.name,
       key: control.configKey!,

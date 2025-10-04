@@ -6,88 +6,13 @@ import { activate as activateEditorControls } from './disable-enable/editor-cont
 import { activate as activateExtensions } from './disable-enable/extensions/editor-extensions';
 import { activate as activateAI } from './disable-enable/shortcuts/my-list/default/ai';
 import { activate as activateF1 } from './disable-enable/shortcuts/my-list/default/f1';
+import { ConfigManager, type ToggleAction } from './core/config-manager';
 
 let dynamicShortcutManager: DynamicShortcutManager;
 
-async function toggleConfiguration(configKey: string): Promise<'enable' | 'disable'> {
-  try {
-    const config = vscode.workspace.getConfiguration();
-    const currentValue = config.get(configKey);
-
-    let newValue: any;
-
-    if (typeof currentValue === 'boolean') {
-      newValue = !currentValue;
-    } else if (configKey === 'editor.lineNumbers') {
-      newValue = currentValue === 'on' ? 'off' : 'on';
-    } else if (configKey === 'files.autoSave') {
-      newValue = currentValue === 'off' ? 'afterDelay' : 'off';
-    } else if (configKey === 'editor.cursorBlinking') {
-      newValue = currentValue === 'blink' ? 'solid' : 'blink';
-    } else if (configKey === 'editor.acceptSuggestionOnEnter') {
-      newValue = currentValue === 'on' ? 'off' : 'on';
-    } else {
-      newValue = !currentValue;
-    }
-
-    await config.update(
-      configKey,
-      newValue,
-      vscode.ConfigurationTarget.Global
-    );
-
-    // Determine action type
-    let actionType: 'enable' | 'disable';
-    if (typeof currentValue === 'boolean') {
-      actionType = newValue ? 'enable' : 'disable';
-    } else if (configKey === 'editor.lineNumbers') {
-      actionType = newValue === 'on' ? 'enable' : 'disable';
-    } else if (configKey === 'files.autoSave') {
-      actionType = newValue === 'afterDelay' ? 'enable' : 'disable';
-    } else if (configKey === 'editor.cursorBlinking') {
-      actionType = newValue === 'blink' ? 'enable' : 'disable';
-    } else if (configKey === 'editor.acceptSuggestionOnEnter') {
-      actionType = newValue === 'on' ? 'enable' : 'disable';
-    } else {
-      actionType = newValue ? 'enable' : 'disable';
-    }
-
-    // Show feedback
-    const readableName = getReadableConfigName(configKey);
-    console.log(`${readableName}: ${formatConfigValue(newValue)}`);
-
-    return actionType;
-
-  } catch (error) {
-    console.warn(`Failed to toggle ${configKey}:`, error);
-    return 'disable'; // fallback
-  }
-}
-
-function getReadableConfigName(configKey: string): string {
-  const nameMap: Record<string, string> = {
-    'editor.minimap.enabled': 'Minimap',
-    'editor.folding': 'Code Folding',
-    'editor.lineNumbers': 'Line Numbers',
-    'editor.cursorBlinking': 'Cursor Blinking',
-    'editor.colorDecorators': 'Color Decorators',
-    'editor.renderIndentGuides': 'Indent Guides',
-    'editor.stickyScroll.enabled': 'Sticky Scroll'
-  };
-  return nameMap[configKey] || configKey;
-}
-
-function formatConfigValue(value: any): string {
-  if (typeof value === 'boolean') {
-    return value ? 'Enabled' : 'Disabled';
-  }
-  if (value === 'on' || value === 'afterDelay') {
-    return 'Enabled';
-  }
-  if (value === 'off') {
-    return 'Disabled';
-  }
-  return String(value);
+async function toggleConfiguration(configKey: string): Promise<ToggleAction> {
+  const result = await ConfigManager.toggleConfiguration(configKey);
+  return result.actionType;
 }
 
 export async function activate(context: vscode.ExtensionContext) {
