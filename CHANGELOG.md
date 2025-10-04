@@ -19,7 +19,7 @@ Following VS Code best practices, F1 uses semantic versioning for all releases.
 <br>
 
 <!-- --- -->
-## [0.3.1] - 2025-10-04
+## [0.3.2] - 2025-10-04
 
 ### Added
 - Code improvements and cleanup for better maintainability and performance.
