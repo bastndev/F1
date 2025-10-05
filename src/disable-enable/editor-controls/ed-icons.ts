@@ -1,44 +1,65 @@
 import * as vscode from 'vscode';
 
 export class IconManager {
+  // Simple color palette using VS Code theme colors
+  private static readonly COLORS = {
+    enabled: 'notificationsInfoIcon.foreground',
+    disabled: 'notificationsErrorIcon.foreground',
+    transitioning: 'notificationsWarningIcon.foreground'
+  };
+
+  // Simple icon styles
+  private static readonly ICON_STYLES = {
+    enabled: 'circle-filled',
+    disabled: 'circle-outline',
+    transitioning: 'sync~spin'
+  };
+
   /**
    * Gets the appropriate icon based on the control's enabled state
-   * @param configKey - The VS Code configuration key
-   * @returns ThemeIcon for enabled/disabled state
    */
-  static getControlIcon(configKey: string): vscode.ThemeIcon {
+  static getControlIcon(configKey: string, isTransitioning = false): vscode.ThemeIcon {
+    if (isTransitioning) {
+      return new vscode.ThemeIcon(
+        this.ICON_STYLES.transitioning,
+        new vscode.ThemeColor(this.COLORS.transitioning)
+      );
+    }
+
     const config = vscode.workspace.getConfiguration();
     const currentValue = config.get(configKey);
+    const isEnabled = this.isValueEnabled(currentValue);
 
-    const isEnabled = IconManager.isValueEnabled(currentValue);
+    const color = isEnabled ? this.COLORS.enabled : this.COLORS.disabled;
+    const iconName = isEnabled ? this.ICON_STYLES.enabled : this.ICON_STYLES.disabled;
 
-    return isEnabled
-      ? new vscode.ThemeIcon(
-          'circle-filled',
-          new vscode.ThemeColor('charts.green')
-        ) // Enabled state - green filled circle
-      : new vscode.ThemeIcon('circle', new vscode.ThemeColor('charts.red')); // Disabled state - red empty circle
+    return new vscode.ThemeIcon(iconName, new vscode.ThemeColor(color));
+  }
+
+  /**
+   * Gets a text representation of the icon
+   */
+  static getControlIconText(configKey: string, isTransitioning = false): string {
+    if (isTransitioning) {
+      return '⟳';
+    }
+
+    const config = vscode.workspace.getConfiguration();
+    const currentValue = config.get(configKey);
+    const isEnabled = this.isValueEnabled(currentValue);
+
+    return isEnabled ? '●' : '○';
   }
 
   /**
    * Determines if a configuration value represents an "enabled" state
-   * @param value - The configuration value to check
-   * @returns boolean indicating if the value represents an enabled state
    */
-  private static isValueEnabled(value: any): boolean {
+  static isValueEnabled(value: any): boolean {
     if (typeof value === 'boolean') {
       return value;
     }
 
-    // Handle string values that represent enabled/disabled states
-    const enabledValues = [
-      'on',
-      'afterDelay',
-      'onFocusChange',
-      'onWindowChange',
-      'blink',
-      'smart',
-    ];
+    const enabledValues = ['on', 'afterDelay', 'onFocusChange', 'onWindowChange', 'blink', 'smart'];
     const disabledValues = ['off', 'solid'];
 
     if (typeof value === 'string') {
@@ -50,20 +71,6 @@ export class IconManager {
       }
     }
 
-    // Default: treat truthy values as enabled
     return !!value;
-  }
-
-  /**
-   * Gets a text representation of the icon for display purposes
-   * @param configKey - The VS Code configuration key
-   * @returns String representation of the icon
-   */
-  static getControlIconText(configKey: string): string {
-    const config = vscode.workspace.getConfiguration();
-    const currentValue = config.get(configKey);
-    const isEnabled = IconManager.isValueEnabled(currentValue);
-
-    return isEnabled ? '●' : '○';
   }
 }

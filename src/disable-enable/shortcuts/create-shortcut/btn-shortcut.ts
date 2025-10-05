@@ -3,6 +3,7 @@ import { ShortcutsUIManager } from '../ui';
 import { MyListUI, ShortcutItem } from '../my-list/user-shortcuts';
 import { DynamicShortcutManager } from '../my-list/dynamic-shortcuts';
 import { ComboCreatorPanel } from './new-file-shortcut';
+import { ConfigManager } from '../../../core/config-manager';
 
 export class F1WebviewProvider implements vscode.WebviewViewProvider {
   public static readonly viewType = 'f1-shortcuts';
@@ -121,34 +122,7 @@ export class F1WebviewProvider implements vscode.WebviewViewProvider {
       vscode.window.showErrorMessage(`Error executing combo: ${error}`);
     }
   }  private async _toggleEditorControl(configKey: string): Promise<void> {
-    try {
-      const config = vscode.workspace.getConfiguration();
-      const currentValue = config.get(configKey);
-
-      let newValue: any;
-
-      if (typeof currentValue === 'boolean') {
-        newValue = !currentValue;
-      } else if (configKey === 'editor.lineNumbers') {
-        newValue = currentValue === 'on' ? 'off' : 'on';
-      } else if (configKey === 'files.autoSave') {
-        newValue = currentValue === 'off' ? 'afterDelay' : 'off';
-      } else if (configKey === 'editor.cursorBlinking') {
-        newValue = currentValue === 'blink' ? 'solid' : 'blink';
-      } else if (configKey === 'editor.acceptSuggestionOnEnter') {
-        newValue = currentValue === 'on' ? 'off' : 'on';
-      } else {
-        newValue = !currentValue;
-      }
-
-      await config.update(
-        configKey,
-        newValue,
-        vscode.ConfigurationTarget.Global
-      );
-    } catch (error) {
-      console.warn(`Failed to toggle ${configKey}:`, error);
-    }
+    await ConfigManager.toggleConfiguration(configKey);
   }
 
   /**
