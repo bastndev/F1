@@ -2,7 +2,7 @@
   "name": "f1",
   "displayName": "F1",
   "description": "Available now: VSCode • Cursor • Windsurf • Trae.ai • Kiro & (Firebase Studio)... 雨",
-  "version": "0.3.2",
+  "version": "0.3.3",
   "publisher": "bastndev",
   "license": "MIT",
   "preview": true,
@@ -34,7 +34,7 @@
   },
   "author": {
     "name": "Gohit Bastian",
-    "email": "gobasdev@gmail.com",
+    "email": "dev@bstndev.com",
     "url": "https://www.bastndev.com"
   },
   "sponsor": {
