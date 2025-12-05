@@ -8,7 +8,7 @@ Allows you to control editor functions and manage extensions directly from the k
 - **Editor Controls** — Per-control toggles for Minimap, Code Folding, Line Numbers, Cursor Blinking, Color Decorators, Indent Guides, Sticky Scroll, Cursor Smooth Caret Animation, and Terminal Suggest.
 - **Extension Compatibility** — Verified compatibility with popular extensions shown in the UI (GitHub Copilot, GitHub Copilot Chat, Error Lens, ESLint, Live Server, Image Preview, Bracket Lynx, etc.).
 
-Discover more extensions at [bastndev.com/extensions](https://bastndev.com/extensions)
+  Discover more extensions [here](https://gohit.xyz/)
 
 
 
