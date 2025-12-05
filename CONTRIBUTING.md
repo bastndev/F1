@@ -332,4 +332,3 @@ Please read and follow our [Code of Conduct](https://github.com/bastndev/F1/blob
 ---
 
 **Thank you for contributing to F1!** Your work helps developers worldwide have a consistent, efficient development experience across all editors and platforms. 🚀</content>
-<parameter name="filePath">/home/bastndev/Documents/bastndev/VScode/F1/CONTRIBUTING.md
