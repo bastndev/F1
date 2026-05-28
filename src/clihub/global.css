@@ -6,7 +6,6 @@
 	--accent-color: var(--vscode-textLink-foreground, #4daafc); /* Color de acento dinámico del tema */
 	--input-border-left: var(--accent-color); /* Borde que sigue el tema */
 	--selection-color: var(--input-border-left);
-	--tip-color: var(--vscode-textLink-foreground, #d7ba7d);
 }
 
 body {
@@ -110,9 +109,9 @@ body {
 }
 
 .selected-model {
-	background-color: color-mix(in srgb, var(--vscode-testing-iconPassed, #73c991) 20%, transparent);
+	background-color: color-mix(in srgb, var(--selection-color) 20%, transparent);
 	border-radius: 3px;
-	color: var(--vscode-testing-iconPassed, #73c991);
+	color: var(--selection-color);
 	padding: 1px 4px;
 }
 
@@ -140,10 +139,6 @@ body {
 	padding: 0 20px;
 	box-sizing: border-box;
 	text-align: center;
-}
-
-.webview-panel[hidden] {
-	display: none;
 }
 
 .webview-message {

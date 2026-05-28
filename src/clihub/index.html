@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
 	<meta charset="UTF-8">
+	<meta http-equiv="Content-Security-Policy" content="${contentSecurityPolicy}">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<title>CLI Hub</title>
 	<link href="${styleUri}" rel="stylesheet">
@@ -32,12 +33,12 @@
 
 	<div class="workspace-path">${workspacePath}</div>
 
-	<script>
+	<script nonce="${nonce}">
 		const vscode = acquireVsCodeApi();
 		const models = [
   		  { label: "OpenCode", aliases: ["opencode", "open code"] },
   		  { label: "Claude Code", aliases: ["claude", "claude code"] },
-  		  { label: "Codex CLI", aliases: ["codex", "codex cli", "code", "co", "code"] },
+  		  { label: "Codex CLI", aliases: ["codex", "codex cli", "code", "co"] },
   		  { label: "Gemini CLI", aliases: ["gemini", "gemini cli"] },
   		  { label: "Aider", aliases: ["aider"] },
   		  { label: "GitHub Copilot CLI", aliases: ["github copilot", "copilot", "copilot cli"] },
@@ -81,10 +82,6 @@
 				.map((model) => ({ model, score: getMatchScore(model, query) }))
 				.filter((entry) => entry.score > 0)
 				.sort((first, second) => second.score - first.score);
-		};
-
-		const findBestModel = (query) => {
-			return findModelMatches(query)[0]?.model;
 		};
 
 		const renderSecondarySuggestions = (matches) => {
