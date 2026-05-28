@@ -29,12 +29,9 @@ export class CliHubViewProvider implements vscode.WebviewViewProvider {
 		html = html.replace('${styleUri}', styleUri.toString());
 
 		// Inject workspace path
-		let workspacePath = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath || '~/workspace/project';
-		
-		const homedir = require('os').homedir();
-		if (workspacePath.startsWith(homedir)) {
-			workspacePath = '~' + workspacePath.slice(homedir.length);
-		}
+		const fullPath = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath || '~/workspace/project';
+		const projectName = require('path').basename(fullPath);
+		const workspacePath = `~/${projectName}`;
 
 		html = html.replace('${workspacePath}', workspacePath);
 

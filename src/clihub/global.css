@@ -104,7 +104,7 @@ body {
 
 .workspace-path {
 	position: absolute;
-	top: 12px;
+	bottom: 12px;
 	left: 16px;
 	font-family: var(--vscode-editor-font-family, monospace);
 	font-size: 12px;
