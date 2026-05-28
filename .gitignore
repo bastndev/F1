@@ -19,3 +19,7 @@ dist/
 .DS_Store
 Thumbs.db
 
+# Go Git
+NOTES.md
+analiza/
+
