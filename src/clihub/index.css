@@ -1,0 +1,19 @@
+:root {
+	--bg-color: var(--vscode-editor-background);
+	--text-color: var(--vscode-editor-foreground);
+	--font-family: var(--vscode-font-family);
+	--button-bg: var(--vscode-button-background);
+	--button-fg: var(--vscode-button-foreground);
+	--button-hover: var(--vscode-button-hoverBackground);
+}
+
+body {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	height: 100vh;
+	margin: 0;
+	font-family: var(--font-family);
+	color: var(--text-color);
+	background-color: var(--bg-color);
+}

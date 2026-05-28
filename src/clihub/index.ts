@@ -1,4 +1,5 @@
 import * as vscode from 'vscode';
+import * as fs from 'fs';
 
 export class CliHubViewProvider implements vscode.WebviewViewProvider {
 	public static readonly viewType = 'f1.cliHub';
@@ -15,32 +16,18 @@ export class CliHubViewProvider implements vscode.WebviewViewProvider {
 			localResourceRoots: [this._extensionUri]
 		};
 
-		webviewView.webview.html = this._getHtmlForWebview();
+		webviewView.webview.html = this._getHtmlForWebview(webviewView.webview);
 	}
 
-	private _getHtmlForWebview() {
-		return `<!DOCTYPE html>
-			<html lang="en">
-			<head>
-				<meta charset="UTF-8">
-				<meta name="viewport" content="width=device-width, initial-scale=1.0">
-				<title>CLI Hub</title>
-				<style>
-					body {
-						display: flex;
-						justify-content: center;
-						align-items: center;
-						height: 100vh;
-						margin: 0;
-						font-family: var(--vscode-font-family);
-						color: var(--vscode-editor-foreground);
-						background-color: var(--vscode-editor-background);
-					}
-				</style>
-			</head>
-			<body>
-				<h1>hello CLI 3</h1>
-			</body>
-			</html>`;
+	private _getHtmlForWebview(webview: vscode.Webview) {
+		const htmlPath = vscode.Uri.joinPath(this._extensionUri, 'src', 'clihub', 'index.html');
+		const stylePath = vscode.Uri.joinPath(this._extensionUri, 'src', 'clihub', 'index.css');
+
+		const styleUri = webview.asWebviewUri(stylePath);
+
+		let html = fs.readFileSync(htmlPath.fsPath, 'utf8');
+		html = html.replace('${styleUri}', styleUri.toString());
+
+		return html;
 	}
 }
