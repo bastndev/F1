@@ -18,7 +18,7 @@
 		
 		<div class="input-container">
 			<div class="input-wrapper">
-				<input type="text" placeholder='Type or select one of the options...'>
+				<input id="cli-input" type="text" placeholder='Type or select one of the options...' autocomplete="off" spellcheck="false" autofocus>
 			</div>
 			<div class="input-footer">
 				<span class="highlight">Build</span> &middot; <span id="ai-model-name" class="animated-text">OpenCode</span>
@@ -52,6 +52,17 @@
 	
 		let currentIndex = 0;
 		const textElement = document.getElementById('ai-model-name');
+		const cliInput = document.getElementById('cli-input');
+
+		cliInput.focus();
+		cliInput.addEventListener('input', () => {
+			const lowerValue = cliInput.value.toLowerCase();
+			if (cliInput.value !== lowerValue) {
+				const cursorPosition = cliInput.selectionStart;
+				cliInput.value = lowerValue;
+				cliInput.setSelectionRange(cursorPosition, cursorPosition);
+			}
+		});
 	
 		// Change text every 3.8s with fade animation
 		setInterval(() => {
