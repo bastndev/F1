@@ -43,7 +43,7 @@ body {
 .hub-text {
 	color: var(--accent-color);
 	filter: drop-shadow(0 0 4px var(--accent-color));
-	animation: pulseGlow 1.3s ease-in-out;
+	animation: pulseGlow 2.5s ease-in-out;
 }
 
 .input-container {
