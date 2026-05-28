@@ -116,6 +116,16 @@ body {
 	padding: 1px 4px;
 }
 
+.secondary-suggestions {
+	color: var(--vscode-descriptionForeground, rgba(128, 128, 128, 0.8));
+	opacity: 0.62;
+}
+
+.secondary-model,
+.secondary-separator {
+	font-size: inherit;
+}
+
 .animated-text {
 	transition: opacity 0.4s ease-in-out;
 }

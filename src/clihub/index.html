@@ -21,7 +21,7 @@
 				<input id="cli-input" type="text" placeholder='Type or select one of the options...' autocomplete="off" spellcheck="false" autofocus>
 			</div>
 			<div id="selected-option" class="input-footer" role="button" tabindex="0">
-				<span class="highlight">Build</span> &middot; <span id="ai-model-name" class="animated-text">OpenCode</span>
+				<span class="highlight">Build</span> &middot; <span id="ai-model-name" class="animated-text">OpenCode</span><span id="secondary-suggestions" class="secondary-suggestions"></span>
 			</div>
 		</div>
 		
@@ -54,6 +54,7 @@
 		let currentIndex = 0;
 		let selectedModel = models[0];
 		const textElement = document.getElementById('ai-model-name');
+		const secondarySuggestions = document.getElementById('secondary-suggestions');
 		const cliInput = document.getElementById('cli-input');
 		const inputContainer = document.querySelector('.input-container');
 		const selectedOption = document.getElementById('selected-option');
@@ -75,18 +76,39 @@
 			return bestScore;
 		};
 
-		const findBestModel = (query) => {
+		const findModelMatches = (query) => {
 			return models
 				.map((model) => ({ model, score: getMatchScore(model, query) }))
 				.filter((entry) => entry.score > 0)
-				.sort((first, second) => second.score - first.score)[0]?.model;
+				.sort((first, second) => second.score - first.score);
 		};
 
-		const setSelectedModel = (model, isSearchResult) => {
+		const findBestModel = (query) => {
+			return findModelMatches(query)[0]?.model;
+		};
+
+		const renderSecondarySuggestions = (matches) => {
+			secondarySuggestions.replaceChildren();
+
+			for (const entry of matches.slice(1, 4)) {
+				const separator = document.createElement('span');
+				separator.className = 'secondary-separator';
+				separator.textContent = ' · ';
+
+				const option = document.createElement('span');
+				option.className = 'secondary-model';
+				option.textContent = entry.model.label;
+
+				secondarySuggestions.append(separator, option);
+			}
+		};
+
+		const setSelectedModel = (model, isSearchResult, matches = []) => {
 			selectedModel = model;
 			textElement.textContent = model.label;
 			inputContainer.classList.toggle('has-selection', isSearchResult);
 			textElement.classList.toggle('selected-model', isSearchResult);
+			renderSecondarySuggestions(isSearchResult ? matches : []);
 		};
 
 		const openSelectedModel = () => {
@@ -115,9 +137,10 @@
 				return;
 			}
 
-			const match = findBestModel(query);
+			const matches = findModelMatches(query);
+			const match = matches[0]?.model;
 			if (match) {
-				setSelectedModel(match, true);
+				setSelectedModel(match, true, matches);
 			}
 		});
 
