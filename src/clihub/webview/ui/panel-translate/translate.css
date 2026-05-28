@@ -1,0 +1,12 @@
+.layout-middle {
+	flex: 1;
+	border-right: 1px solid var(--vscode-editorGroup-border, rgba(128, 128, 128, 0.2));
+	overflow-y: auto;
+	position: relative;
+}
+
+.webview-panel {
+	height: 100%;
+	padding: 20px;
+	box-sizing: border-box;
+}

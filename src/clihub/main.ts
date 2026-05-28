@@ -71,6 +71,7 @@ export class CliHubViewProvider implements vscode.WebviewViewProvider {
 		const stylePath = vscode.Uri.joinPath(this._extensionUri, 'src', 'clihub', 'global.css');
 
 		return getCliHubWebviewHtml({
+			extensionUri: this._extensionUri,
 			cspSource: webview.cspSource,
 			styleUri: webview.asWebviewUri(stylePath).toString(),
 			selectedAgent,

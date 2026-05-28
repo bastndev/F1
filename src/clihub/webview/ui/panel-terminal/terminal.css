@@ -1,0 +1,5 @@
+.layout-right {
+	flex: 1;
+	overflow-y: auto;
+	position: relative;
+}

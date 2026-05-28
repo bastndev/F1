@@ -1,0 +1,5 @@
+.layout-left {
+	flex: 0 0 225px;
+	border-right: 1px solid var(--vscode-editorGroup-border, rgba(128, 128, 128, 0.2));
+	position: relative;
+}
