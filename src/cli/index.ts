@@ -39,7 +39,7 @@ export class CliHubViewProvider implements vscode.WebviewViewProvider {
 				</style>
 			</head>
 			<body>
-				<h1>hello CLI</h1>
+				<h1>hello CLI 2</h1>
 			</body>
 			</html>`;
 	}
