@@ -5,6 +5,7 @@
 	--input-bg: var(--vscode-input-background, rgba(128, 128, 128, 0.1)); /* Fondo que se adapta a ambos temas */
 	--accent-color: var(--vscode-textLink-foreground, #4daafc); /* Color de acento dinámico del tema */
 	--input-border-left: var(--accent-color); /* Borde que sigue el tema */
+	--selection-color: var(--input-border-left);
 	--tip-color: var(--vscode-textLink-foreground, #d7ba7d);
 }
 
@@ -59,7 +60,14 @@ body {
 }
 
 .input-container.has-selection {
-	background-color: color-mix(in srgb, var(--vscode-testing-iconPassed, #73c991) 10%, var(--input-bg));
+	background:
+		linear-gradient(
+			to right,
+			color-mix(in srgb, var(--selection-color) 14%, transparent) 0%,
+			color-mix(in srgb, var(--selection-color) 8%, transparent) 42%,
+			transparent 100%
+		),
+		var(--input-bg);
 }
 
 .input-wrapper {
