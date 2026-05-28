@@ -44,6 +44,13 @@
   "activationEvents": [],
   "main": "./dist/extension.js",
   "contributes": {
+    "keybindings": [
+      {
+        "command": "f1.cliHub.focus",
+        "key": "f1",
+        "mac": "f1"
+      }
+    ],
     "viewsContainers": {
       "panel": [
         {
