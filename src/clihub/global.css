@@ -41,8 +41,9 @@ body {
 
 /* --- --- TXT Hub -> */
 .hub-text {
-	color: var(--accent-color); /* Se adapta al color de énfasis del tema (ej. azul, morado, etc.) */
-	filter: drop-shadow(0 0 4px var(--accent-color)); /* Resplandor usando el mismo color del tema */
+	color: var(--accent-color);
+	filter: drop-shadow(0 0 4px var(--accent-color));
+	animation: pulseGlow 1.3s ease-in-out;
 }
 
 .input-container {
@@ -110,4 +111,9 @@ body {
 	font-size: 12px;
 	color: var(--vscode-descriptionForeground, rgba(128, 128, 128, 0.8));
 	opacity: 0.6;
+}
+
+@keyframes pulseGlow {
+	0%, 100% { filter: drop-shadow(0 0 3px var(--accent-color)); }
+	50% { filter: drop-shadow(0 0 8px var(--accent-color)) brightness(1.2); }
 }
