@@ -28,6 +28,16 @@ export class CliHubViewProvider implements vscode.WebviewViewProvider {
 		let html = fs.readFileSync(htmlPath.fsPath, 'utf8');
 		html = html.replace('${styleUri}', styleUri.toString());
 
+		// Inyectar ruta del proyecto actual o usar una por defecto si no hay workspace abierto
+		let workspacePath = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath || '~/Documents/ruta-del-proyecto/nombre-del-proyecto';
+		
+		const homedir = require('os').homedir();
+		if (workspacePath.startsWith(homedir)) {
+			workspacePath = '~' + workspacePath.slice(homedir.length);
+		}
+
+		html = html.replace('${workspacePath}', workspacePath);
+
 		return html;
 	}
 }
