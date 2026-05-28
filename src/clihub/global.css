@@ -82,7 +82,11 @@ body {
 }
 
 .input-footer .highlight {
-	color: var(--input-border-left);
+	color: var(--accent-color);
+}
+
+.animated-text {
+	transition: opacity 0.4s ease-in-out;
 }
 
 .shortcuts {
