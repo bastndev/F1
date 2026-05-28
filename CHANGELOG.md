@@ -17,8 +17,14 @@ Allows you to control editor functions and manage extensions directly from the k
 Following VS Code best practices, F1 uses semantic versioning for all releases.
 
 <br>
-
 <!-- --- -->
+
+---
+## [1.0.0] - 2026-05-27
+
+### new
+- **F1 CLI Hub**: Refactor focus project
+
 ## [0.3.2] - 2025-10-04
 
 ### Added
