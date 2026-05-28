@@ -41,7 +41,8 @@
     "url": "https://github.com/sponsors/bastndev"
   },
 
-
+  "activationEvents": [],
+  "main": "./dist/extension.js",
   "contributes": {
     "viewsContainers": {
       "panel": [
@@ -58,14 +59,11 @@
           "type": "webview",
           "id": "f1.cliHub",
           "name": "CLI Hub",
-          "icon": "icon.png"
+          "icon": "$(terminal)"
         }
       ]
     }
   },
-
-  "activationEvents": [],
-  "main": "./dist/extension.js",
 
   "scripts": {
     "compile": "npm run check-types && npm run lint && node esbuild.js",
