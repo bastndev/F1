@@ -21,7 +21,7 @@
 				<input type="text" placeholder='Type or select one of the options...'>
 			</div>
 			<div class="input-footer">
-				<span class="highlight">Build</span> &middot; <span id="ai-model-name" class="animated-text">Qwen3.7 Max OpenCode Go</span>
+				<span class="highlight">Build</span> &middot; <span id="ai-model-name" class="animated-text">OpenCode</span>
 			</div>
 		</div>
 		
@@ -32,10 +32,10 @@
 
 	<script>
 		const models = [
+  		  "OpenCode",
   		  "Claude Code",
   		  "Codex CLI",
   		  "Gemini CLI",
-  		  "OpenCode",
   		  "Aider",
   		  "GitHub Copilot CLI",
   		  "Cline",
@@ -51,7 +51,7 @@
 		let currentIndex = 0;
 		const textElement = document.getElementById('ai-model-name');
 	
-		// Change text every 2.5s with fade animation
+		// Change text every 3.8s with fade animation
 		setInterval(() => {
 			textElement.style.opacity = 0;
 		
@@ -60,7 +60,7 @@
 				textElement.textContent = models[currentIndex];
 				textElement.style.opacity = 1;
 			}, 400);
-		}, 2500);
+		}, 3800);
 	</script>
 </body>
 </html>
