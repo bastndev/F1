@@ -56,7 +56,7 @@
         {
           "id": "cliHubContainer",
           "title": "CLI Hub",
-          "icon": "$(terminal)"
+          "icon": "$(symbol-event)"
         }
       ]
     },
@@ -66,7 +66,7 @@
           "type": "webview",
           "id": "f1.cliHub",
           "name": "CLI Hub",
-          "icon": "$(terminal)"
+          "icon": "$(symbol-event)"
         }
       ]
     }

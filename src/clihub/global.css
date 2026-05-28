@@ -1,0 +1,182 @@
+:root {
+	--bg-color: var(--vscode-editor-background);
+	--text-color: var(--vscode-editor-foreground);
+	--font-family: var(--vscode-font-family);
+	--input-bg: var(--vscode-input-background, rgba(128, 128, 128, 0.1)); /* Fondo que se adapta a ambos temas */
+	--accent-color: var(--vscode-textLink-foreground, #4daafc); /* Color de acento dinámico del tema */
+	--input-border-left: var(--accent-color); /* Borde que sigue el tema */
+	--selection-color: var(--input-border-left);
+}
+
+body {
+	display: flex;
+	justify-content: center;
+	align-items: center; /* Centrado vertical y horizontal como en la imagen 2 */
+	height: 100vh;
+	margin: 0;
+	font-family: var(--font-family);
+	color: var(--text-color);
+	background-color: var(--bg-color);
+}
+
+/* CLI Hub */
+.container {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	width: 100%;
+	max-width: 650px; /* Ancho similar al de la imagen */
+	padding: 0 20px;
+}
+
+.logo {
+	font-family: monospace;
+	font-size: 12px;
+	line-height: 1.2;
+	color: var(--text-color); /* Se adapta al tema (negro en claro, blanco en oscuro) */
+	margin-bottom: 0.5rem; /* Margen reducido para acercarlo al chat */
+	white-space: pre;
+	text-align: center;
+	user-select: none;
+	-webkit-user-select: none;
+}
+
+/* --- --- TXT Hub -> */
+.hub-text {
+	color: var(--accent-color);
+	filter: drop-shadow(0 0 4px var(--accent-color));
+	animation: pulseGlow 2.5s ease-in-out;
+}
+
+.input-container {
+	width: 100%;
+	background-color: var(--input-bg);
+	border-left: 2px solid var(--input-border-left);
+	display: flex;
+	flex-direction: column;
+	padding: 14px 18px;
+	box-sizing: border-box;
+}
+
+.input-container.has-selection {
+	background:
+		linear-gradient(
+			to right,
+			color-mix(in srgb, var(--selection-color) 14%, transparent) 0%,
+			color-mix(in srgb, var(--selection-color) 8%, transparent) 42%,
+			transparent 100%
+		),
+		var(--input-bg);
+}
+
+.input-wrapper {
+	width: 100%;
+	display: flex;
+	align-items: center;
+}
+
+.input-wrapper input {
+	width: 100%;
+	background: transparent;
+	border: none;
+	color: var(--vscode-input-foreground, var(--text-color)); /* Texto del input adaptable */
+	font-size: 14px;
+	font-family: var(--font-family);
+	outline: none;
+}
+
+.input-wrapper input::placeholder {
+	color: var(--vscode-input-placeholderForeground, rgba(128, 128, 128, 0.8));
+}
+
+.input-footer {
+	margin-top: 14px;
+	font-size: 13px;
+	color: var(--vscode-descriptionForeground, rgba(128, 128, 128, 0.8)); /* Texto secundario adaptable */
+}
+
+.input-footer .highlight {
+	color: var(--accent-color);
+}
+
+.input-footer[role="button"] {
+	cursor: pointer;
+}
+
+.input-footer[role="button"]:focus-visible {
+	outline: 1px solid var(--accent-color);
+	outline-offset: 3px;
+}
+
+.selected-model {
+	background-color: color-mix(in srgb, var(--vscode-testing-iconPassed, #73c991) 20%, transparent);
+	border-radius: 5px;
+	color: var(--vscode-testing-iconPassed, #73c991);
+	padding: 1px 4px;
+}
+
+.secondary-suggestions {
+	color: var(--vscode-descriptionForeground, rgba(128, 128, 128, 0.8));
+	opacity: 0.62;
+}
+
+.secondary-model,
+.secondary-separator {
+	font-size: inherit;
+}
+
+.animated-text {
+	transition: opacity 0.4s ease-in-out;
+}
+
+.webview-panel {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	width: 100%;
+	height: 100vh;
+	padding: 0 20px;
+	box-sizing: border-box;
+	text-align: center;
+}
+
+.webview-message {
+	font-family: var(--vscode-editor-font-family, monospace);
+	font-size: 18px;
+	color: var(--text-color);
+}
+
+.webview-agent {
+	margin-top: 8px;
+	font-size: 13px;
+	color: var(--vscode-descriptionForeground, rgba(128, 128, 128, 0.8));
+}
+
+.shortcuts {
+	width: 100%;
+	text-align: right;
+	font-size: 12px;
+	color: var(--vscode-descriptionForeground, rgba(128, 128, 128, 0.8));
+	margin-top: 10px;
+}
+
+.shortcuts strong {
+	color: var(--text-color);
+	font-weight: normal;
+}
+
+.workspace-path {
+	position: absolute;
+	bottom: 12px;
+	left: 16px;
+	font-family: var(--vscode-editor-font-family, monospace);
+	font-size: 12px;
+	color: var(--vscode-descriptionForeground, rgba(128, 128, 128, 0.8));
+	opacity: 0.6;
+}
+
+@keyframes pulseGlow {
+	0%, 100% { filter: drop-shadow(0 0 3px var(--accent-color)); }
+	50% { filter: drop-shadow(0 0 8px var(--accent-color)) brightness(1.2); }
+}

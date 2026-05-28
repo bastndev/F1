@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta http-equiv="Content-Security-Policy" content="${contentSecurityPolicy}">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>CLI Hub</title>
+	<link href="${styleUri}" rel="stylesheet">
+</head>
+<body>
+	<div id="launcher-view" class="container">
+		<pre class="logo">
+  ____ _     ___   <span class="hub-text">  _   _       _     </span>
+ / ___| |   |_ _|  <span class="hub-text"> | | | |_   _| |__  </span>
+| |   | |    | |   <span class="hub-text"> | |_| | | | | '_ \ </span>
+| |___| |___ | |   <span class="hub-text"> |  _  | |_| | |_) |</span>
+ \____|_____|___|  <span class="hub-text"> |_| |_|\__,_|_.__/ </span>
+		</pre>
+		
+		<div class="input-container">
+			<div class="input-wrapper">
+				<input id="cli-input" type="text" placeholder='Type or select one of the options...' autocomplete="off" spellcheck="false" autofocus>
+			</div>
+			<div id="selected-option" class="input-footer" role="button" tabindex="0">
+				<span class="highlight">Build</span> &middot; <span id="ai-model-name" class="animated-text">OpenCode</span><span id="secondary-suggestions" class="secondary-suggestions"></span>
+			</div>
+		</div>
+		
+		<div class="shortcuts">
+			<strong>Tab</strong> agents &nbsp;&nbsp; <strong>Shift+F1</strong> right panel
+		</div>
+	</div>
+
+	<div class="workspace-path">${workspacePath}</div>
+
+	<!-- NOTE:--- --- --- --- --- --- -JS-   -->
+	<script nonce="${nonce}">
+		const vscode = acquireVsCodeApi();
+		const models = [
+  		  { label: "OpenCode", aliases: ["opencode", "open code", "op"] },
+  		  { label: "Claude Code", aliases: ["claude", "claude code"] },
+  		  { label: "Codex CLI", aliases: ["codex", "codex cli", "code", "co"] },
+  		  { label: "Gemini CLI", aliases: ["gemini", "gemini cli"] },
+  		  { label: "Aider", aliases: ["aider"] },
+  		  { label: "GitHub Copilot CLI", aliases: ["github copilot", "copilot", "copilot cli"] },
+  		  { label: "Cline", aliases: ["cline"] },
+  		  { label: "Kiro CLI", aliases: ["kiro", "kiro cli"] },
+  		  { label: "Goose", aliases: ["goose"] },
+  		  { label: "Amp", aliases: ["amp"] },
+  		  { label: "Continue CLI", aliases: ["continue", "continue cli"] },
+  		  { label: "Kilo Code", aliases: ["kilo", "kilo code", "code"] },
+  		  { label: "Tabnine CLI", aliases: ["tabnine", "tabnine cli"] },
+  		  { label: "Pi", aliases: ["pi"] }
+		];
+	
+		let currentIndex = 0;
+		let selectedModel = models[0];
+		const textElement = document.getElementById('ai-model-name');
+		const secondarySuggestions = document.getElementById('secondary-suggestions');
+		const cliInput = document.getElementById('cli-input');
+		const inputContainer = document.querySelector('.input-container');
+		const selectedOption = document.getElementById('selected-option');
+
+		const getMatchScore = (model, query) => {
+			const values = [model.label.toLowerCase(), ...model.aliases];
+			let bestScore = 0;
+
+			for (const value of values) {
+				if (value === query) {
+					bestScore = Math.max(bestScore, 100);
+				} else if (value.startsWith(query)) {
+					bestScore = Math.max(bestScore, 80);
+				} else if (value.includes(query)) {
+					bestScore = Math.max(bestScore, 50);
+				}
+			}
+
+			return bestScore;
+		};
+
+		const findModelMatches = (query) => {
+			return models
+				.map((model) => ({ model, score: getMatchScore(model, query) }))
+				.filter((entry) => entry.score > 0)
+				.sort((first, second) => second.score - first.score);
+		};
+
+		const renderSecondarySuggestions = (matches) => {
+			secondarySuggestions.replaceChildren();
+
+			for (const entry of matches.slice(1, 4)) {
+				const separator = document.createElement('span');
+				separator.className = 'secondary-separator';
+				separator.textContent = ' · ';
+
+				const option = document.createElement('span');
+				option.className = 'secondary-model';
+				option.textContent = entry.model.label;
+
+				secondarySuggestions.append(separator, option);
+			}
+		};
+
+		const setSelectedModel = (model, isSearchResult, matches = []) => {
+			selectedModel = model;
+			textElement.textContent = model.label;
+			inputContainer.classList.toggle('has-selection', isSearchResult);
+			textElement.classList.toggle('selected-model', isSearchResult);
+			renderSecondarySuggestions(isSearchResult ? matches : []);
+		};
+
+		const openSelectedModel = () => {
+			if (!selectedModel) {
+				return;
+			}
+
+			vscode.postMessage({
+				type: 'openAgent',
+				agent: selectedModel.label
+			});
+		};
+
+		cliInput.focus();
+		cliInput.addEventListener('input', () => {
+			const lowerValue = cliInput.value.toLowerCase();
+			if (cliInput.value !== lowerValue) {
+				const cursorPosition = cliInput.selectionStart;
+				cliInput.value = lowerValue;
+				cliInput.setSelectionRange(cursorPosition, cursorPosition);
+			}
+
+			const query = cliInput.value.trim();
+			if (!query) {
+				setSelectedModel(models[currentIndex], false);
+				return;
+			}
+
+			const matches = findModelMatches(query);
+			const match = matches[0]?.model;
+			if (match) {
+				setSelectedModel(match, true, matches);
+			}
+		});
+
+		cliInput.addEventListener('keydown', (event) => {
+			if (event.key === 'Enter') {
+				openSelectedModel();
+			}
+		});
+
+		selectedOption.addEventListener('click', openSelectedModel);
+		selectedOption.addEventListener('keydown', (event) => {
+			if (event.key === 'Enter' || event.key === ' ') {
+				event.preventDefault();
+				openSelectedModel();
+			}
+		});
+	
+		// Change text every 3.8s with fade animation
+		setInterval(() => {
+			if (cliInput.value.trim()) {
+				return;
+			}
+
+			textElement.style.opacity = 0;
+		
+			setTimeout(() => {
+				currentIndex = (currentIndex + 1) % models.length;
+				setSelectedModel(models[currentIndex], false);
+				textElement.style.opacity = 1;
+			}, 400);
+		}, 3800);
+	</script>
+</body>
+</html>

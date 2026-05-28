@@ -9,6 +9,7 @@
   },
   "typescript.tsc.autoDetect": "off",
   "atm.codeSpell.customWords": [
-    "clihub"
+    "clihub",
+    "middot"
   ]
 }
