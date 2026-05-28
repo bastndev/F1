@@ -38,6 +38,12 @@ body {
 	text-align: center;
 }
 
+/* --- --- TXT Hub -> */
+.hub-text {
+	color: #00ff41; /* Verde hacker de terminal */
+	text-shadow: 0 0 5px rgba(0, 255, 65, 0.5); /* Ligero resplandor */
+}
+
 .input-container {
 	width: 100%;
 	background-color: var(--input-bg);
