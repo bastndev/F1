@@ -41,6 +41,29 @@
     "url": "https://github.com/sponsors/bastndev"
   },
 
+
+  "contributes": {
+    "viewsContainers": {
+      "panel": [
+        {
+          "id": "cliHubContainer",
+          "title": "CLI Hub",
+          "icon": "$(terminal)"
+        }
+      ]
+    },
+    "views": {
+      "cliHubContainer": [
+        {
+          "type": "webview",
+          "id": "f1.cliHub",
+          "name": "CLI Hub",
+          "icon": "icon.png"
+        }
+      ]
+    }
+  },
+
   "activationEvents": [],
   "main": "./dist/extension.js",
 
