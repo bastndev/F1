@@ -1,7 +1,2 @@
-# ignore json files
 package.json
 tsconfig.json
-
-# src/extension.ts
-
-src/disable-enable/editor-controls/editor-controls.ts
