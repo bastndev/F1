@@ -37,6 +37,8 @@ body {
 	margin-bottom: 0.5rem; /* Margen reducido para acercarlo al chat */
 	white-space: pre;
 	text-align: center;
+	user-select: none;
+	-webkit-user-select: none;
 }
 
 /* --- --- TXT Hub -> */
