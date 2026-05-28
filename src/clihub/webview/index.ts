@@ -43,7 +43,7 @@ export function getCliHubWebviewHtml(options: CliHubWebviewOptions) {
 
 		/* Panels */
 		.layout-left {
-			flex: 0 0 220px; /* 10% larger than previous 200px */
+			flex: 0 0 225px; /* 5% larger than previous 220px */
 			border-right: 1px solid var(--vscode-editorGroup-border, rgba(128, 128, 128, 0.2));
 			position: relative;
 		}
