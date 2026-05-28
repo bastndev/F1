@@ -109,9 +109,9 @@ body {
 }
 
 .selected-model {
-	background-color: color-mix(in srgb, var(--selection-color) 20%, transparent);
-	border-radius: 3px;
-	color: var(--selection-color);
+	background-color: color-mix(in srgb, var(--vscode-testing-iconPassed, #73c991) 20%, transparent);
+	border-radius: 5px;
+	color: var(--vscode-testing-iconPassed, #73c991);
 	padding: 1px 4px;
 }
 
