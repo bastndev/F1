@@ -1,5 +1,6 @@
 import * as vscode from 'vscode';
 import * as fs from 'fs';
+import { getCliHubWebviewHtml } from './webview/index';
 
 export class CliHubViewProvider implements vscode.WebviewViewProvider {
 	public static readonly viewType = 'f1.cliHub';
@@ -17,6 +18,13 @@ export class CliHubViewProvider implements vscode.WebviewViewProvider {
 		};
 
 		webviewView.webview.html = this._getHtmlForWebview(webviewView.webview);
+		webviewView.webview.onDidReceiveMessage((message: { type?: string; agent?: string }) => {
+			if (message.type !== 'openAgent' || !message.agent) {
+				return;
+			}
+
+			webviewView.webview.html = this._getAgentHtmlForWebview(webviewView.webview, message.agent);
+		});
 	}
 
 	private _getHtmlForWebview(webview: vscode.Webview) {
@@ -28,13 +36,25 @@ export class CliHubViewProvider implements vscode.WebviewViewProvider {
 		let html = fs.readFileSync(htmlPath.fsPath, 'utf8');
 		html = html.replace('${styleUri}', styleUri.toString());
 
-		// Inject workspace path
-		const fullPath = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath || '~/workspace/project';
-		const projectName = require('path').basename(fullPath);
-		const workspacePath = `~/${projectName}`;
-
-		html = html.replace('${workspacePath}', workspacePath);
+		html = html.replace('${workspacePath}', this._getWorkspacePath());
 
 		return html;
+	}
+
+	private _getAgentHtmlForWebview(webview: vscode.Webview, selectedAgent: string) {
+		const stylePath = vscode.Uri.joinPath(this._extensionUri, 'src', 'clihub', 'global.css');
+
+		return getCliHubWebviewHtml({
+			styleUri: webview.asWebviewUri(stylePath).toString(),
+			selectedAgent,
+			workspacePath: this._getWorkspacePath()
+		});
+	}
+
+	private _getWorkspacePath() {
+		const fullPath = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath || '~/workspace/project';
+		const projectName = require('path').basename(fullPath);
+
+		return `~/${projectName}`;
 	}
 }
