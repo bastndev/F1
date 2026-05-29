@@ -16,16 +16,18 @@
 | |___| |___ | |   <span class="hub-text"> |  _  | |_| | |_) |</span>
  \____|_____|___|  <span class="hub-text"> |_| |_|\__,_|_.__/ </span>
 		</pre>
-		
+
 		<div class="input-container">
 			<div class="input-wrapper">
-				<input id="cli-input" type="text" placeholder='Type or select one of the options...' autocomplete="off" spellcheck="false" autofocus>
+				<input id="cli-input" type="text" placeholder="Type or select one of the options..." autocomplete="off" spellcheck="false" autofocus>
 			</div>
 			<div id="selected-option" class="input-footer" role="button" tabindex="0">
 				<span class="highlight">Build</span> &middot; <span id="ai-model-name" class="animated-text">OpenCode</span><span id="secondary-suggestions" class="secondary-suggestions"></span>
 			</div>
 		</div>
-		
+
+		<div id="agent-icon-palette" class="agent-icon-palette" aria-label="CLI agents" aria-hidden="true"></div>
+
 		<div class="shortcuts">
 			<strong>Tab</strong> agents &nbsp;&nbsp; <strong>Shift+F1</strong> side panel
 		</div>
@@ -34,30 +36,24 @@
 	<div class="workspace-path">${workspacePath}</div>
 
 	<!-- NOTE:--- --- --- --- --- --- -JS-   -->
+	<script id="cli-models" type="application/json">
+		${cliModels}
+	</script>
 	<script nonce="${nonce}">
 		const vscode = acquireVsCodeApi();
-		const models = [
-  		  { label: "OpenCode", aliases: ["opencode", "open code", "op"] },
-  		  { label: "Codex CLI", aliases: ["codex", "codex cli", "code", "co", "c"] },
-  		  { label: "Claude Code", aliases: ["claude", "claude code"] },
-  		  { label: "Antigravity CLI", aliases: ["antigravity", "antigravity cli", "agy", "an", "ant"] },
-  		  { label: "GitHub Copilot CLI", aliases: ["github copilot", "copilot", "copilot cli"] },
-  		  { label: "Codeep", aliases: ["codeep", "deep"] },
-  		  { label: "Amp", aliases: ["amp"] },
-  		  { label: "Kiro CLI", aliases: ["kiro", "kiro cli"] },
-  		  { label: "Kilo Code", aliases: ["kilo", "kilo code", "code","k"] },
-  		  { label: "Grok", aliases: ["grok"] }
-		];
-	
+		const models = JSON.parse(document.getElementById('cli-models').textContent);
+
 		let currentIndex = 0;
 		let selectedModel = models[0];
 		let canOpenSelectedModel = false;
+		let paletteOpen = false;
 		let invalidInputTimer;
 		const textElement = document.getElementById('ai-model-name');
 		const secondarySuggestions = document.getElementById('secondary-suggestions');
 		const cliInput = document.getElementById('cli-input');
 		const inputContainer = document.querySelector('.input-container');
 		const selectedOption = document.getElementById('selected-option');
+		const agentIconPalette = document.getElementById('agent-icon-palette');
 
 		const getMatchScore = (model, query) => {
 			const values = [model.label.toLowerCase(), ...model.aliases];
@@ -99,6 +95,12 @@
 			}
 		};
 
+		const syncPaletteSelection = () => {
+			for (const option of agentIconPalette.querySelectorAll('.agent-icon-option')) {
+				option.classList.toggle('is-selected', option.dataset.agent === selectedModel?.label);
+			}
+		};
+
 		const showInvalidInput = () => {
 			clearTimeout(invalidInputTimer);
 			inputContainer.classList.add('has-input-error');
@@ -114,6 +116,7 @@
 			inputContainer.classList.toggle('has-selection', isSearchResult);
 			textElement.classList.toggle('selected-model', isSearchResult);
 			renderSecondarySuggestions(isSearchResult ? matches : []);
+			syncPaletteSelection();
 		};
 
 		const setNoMatch = () => {
@@ -123,7 +126,20 @@
 			inputContainer.classList.remove('has-selection');
 			textElement.classList.remove('selected-model');
 			renderSecondarySuggestions([]);
+			syncPaletteSelection();
 			showInvalidInput();
+		};
+
+		const openModel = (model) => {
+			if (!model) {
+				showInvalidInput();
+				return;
+			}
+
+			vscode.postMessage({
+				type: 'openAgent',
+				agent: model.label
+			});
 		};
 
 		const openSelectedModel = () => {
@@ -132,13 +148,103 @@
 				return;
 			}
 
-			vscode.postMessage({
-				type: 'openAgent',
-				agent: selectedModel.label
-			});
+			openModel(selectedModel);
+		};
+
+		const setPaletteOpen = (isOpen, shouldFocus = false) => {
+			paletteOpen = isOpen;
+			agentIconPalette.classList.toggle('is-open', isOpen);
+			agentIconPalette.setAttribute('aria-hidden', isOpen ? 'false' : 'true');
+
+			for (const option of agentIconPalette.querySelectorAll('.agent-icon-option')) {
+				option.tabIndex = isOpen ? 0 : -1;
+			}
+
+			if (!isOpen) {
+				return;
+			}
+
+			syncPaletteSelection();
+			if (shouldFocus) {
+				const focusedOption = agentIconPalette.querySelector('.agent-icon-option.is-selected') || agentIconPalette.querySelector('.agent-icon-option');
+				focusedOption?.focus();
+			}
+		};
+
+		const renderIconPalette = () => {
+			agentIconPalette.replaceChildren();
+
+			for (const model of models) {
+				const option = document.createElement('button');
+				option.className = 'agent-icon-option';
+				option.classList.toggle('is-installed', model.installed);
+				option.classList.toggle('is-missing', !model.installed);
+				option.type = 'button';
+				option.tabIndex = -1;
+				option.dataset.agent = model.label;
+				option.title = model.installed ? model.label : `${model.label} is not installed`;
+				option.setAttribute('aria-label', option.title);
+
+				const image = document.createElement('img');
+				image.className = 'agent-icon-image';
+				image.src = model.icon;
+				image.alt = '';
+				image.draggable = false;
+
+				const status = document.createElement('span');
+				status.className = 'agent-icon-status';
+				status.textContent = model.installed ? 'Ready' : 'Missing';
+
+				option.append(image, status);
+				option.addEventListener('click', () => openModel(model));
+				option.addEventListener('focus', () => {
+					const matches = [{ model, score: 100 }];
+					setSelectedModel(model, true, matches);
+				});
+				option.addEventListener('keydown', (event) => {
+					const options = [...agentIconPalette.querySelectorAll('.agent-icon-option')];
+					const index = options.indexOf(option);
+
+					if (event.key === 'Tab' && !event.shiftKey) {
+						event.preventDefault();
+						setPaletteOpen(false);
+						cliInput.focus();
+						return;
+					}
+
+					if (event.key === 'Enter' || event.key === ' ') {
+						event.preventDefault();
+						openModel(model);
+						return;
+					}
+
+					if (event.key === 'Escape') {
+						event.preventDefault();
+						setPaletteOpen(false);
+						cliInput.focus();
+						return;
+					}
+
+					if (event.key === 'ArrowRight' || event.key === 'ArrowDown') {
+						event.preventDefault();
+						options[(index + 1) % options.length]?.focus();
+						return;
+					}
+
+					if (event.key === 'ArrowLeft' || event.key === 'ArrowUp') {
+						event.preventDefault();
+						options[(index - 1 + options.length) % options.length]?.focus();
+					}
+				});
+
+				agentIconPalette.append(option);
+			}
+
+			syncPaletteSelection();
 		};
 
 		cliInput.focus();
+		renderIconPalette();
 		cliInput.addEventListener('input', () => {
 			const lowerValue = cliInput.value.toLowerCase();
 			if (cliInput.value !== lowerValue) {
@@ -165,6 +271,18 @@
 		cliInput.addEventListener('keydown', (event) => {
 			if (event.key === 'Enter') {
 				openSelectedModel();
+				return;
+			}
+
+			if (event.key === 'Tab' && !event.shiftKey) {
+				event.preventDefault();
+				setPaletteOpen(!paletteOpen, true);
+				return;
+			}
+
+			if (event.key === 'Escape' && paletteOpen) {
+				event.preventDefault();
+				setPaletteOpen(false);
 			}
 		});
 
@@ -175,7 +293,7 @@
 				openSelectedModel();
 			}
 		});
-	
+
 		// Change text every 3.8s with fade animation
 		setInterval(() => {
 			if (cliInput.value.trim()) {
@@ -183,7 +301,7 @@
 			}
 
 			textElement.style.opacity = 0;
-		
+
 			setTimeout(() => {
 				currentIndex = (currentIndex + 1) % models.length;
 				setSelectedModel(models[currentIndex], false);

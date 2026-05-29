@@ -51,6 +51,7 @@ const copyCliHubAssets = () => {
 	fs.mkdirSync(outDir, { recursive: true });
 	fs.copyFileSync(path.join('src', 'clihub', 'index.html'), path.join(outDir, 'index.html'));
 	fs.copyFileSync(path.join('src', 'clihub', 'global.css'), path.join(outDir, 'global.css'));
+	copyDirectoryAssets(path.join('src', 'clihub', 'assets'), path.join(outDir, 'assets'));
 	copyDirectoryAssets(path.join('src', 'clihub', 'webview'), path.join(outDir, 'webview'));
 	copyXtermAssets(outDir);
 };
@@ -72,7 +73,7 @@ const watchCliHubAssets = () => {
 			}
 
 			const extension = path.extname(fileName.toString());
-			if (extension === '.html' || extension === '.css') {
+			if (extension === '.html' || extension === '.css' || extension === '.svg') {
 				scheduleCopy();
 			}
 		});
