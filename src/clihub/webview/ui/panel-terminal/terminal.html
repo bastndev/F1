@@ -1,4 +1,13 @@
 <div class="layout-right">
-  <!-- Right Panel -->
-  <h1 class="agent-panel-title">Terminal</h1>
+	<div class="cli-terminal-shell">
+		<div class="cli-terminal-header">
+			<div class="cli-terminal-heading">
+				<div id="cli-terminal-label" class="cli-terminal-label">${selectedAgent}</div>
+				<div id="cli-terminal-status" class="cli-terminal-status">${workspacePath}</div>
+			</div>
+			<div id="cli-terminal-badge" class="cli-terminal-badge">CLI</div>
+		</div>
+		<div id="cli-terminal-stack" class="cli-terminal-stack" aria-label="CLI session"></div>
+		<div id="cli-empty-state" class="cli-empty-state">No CLI session selected</div>
+	</div>
 </div>
