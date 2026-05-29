@@ -11,6 +11,7 @@ export const cliAgents: CliAgent[] = [
 	{ label: 'Antigravity CLI', command: 'agy', args: [] },
 	{ label: 'GitHub Copilot CLI', command: 'copilot', args: [] },
 	{ label: 'Amp', command: 'amp', args: [] },
+	{ label: 'Goose', command: 'goose', args: [] },
 	{ label: 'Kiro CLI', command: 'kiro-cli', args: [] },
 	{ label: 'Kilo Code', command: 'kilo', args: [] }
 ];

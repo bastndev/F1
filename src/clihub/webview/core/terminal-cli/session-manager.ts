@@ -3,6 +3,7 @@ import * as os from 'os';
 import * as path from 'path';
 import * as vscode from 'vscode';
 import { cliAgents, getCliAgent } from './agents';
+import { ensureCliInstalled } from './installation';
 
 type CliSessionStatus = 'running' | 'exited' | 'error';
 
@@ -94,10 +95,14 @@ export class CliSessionManager implements vscode.Disposable {
 		this.webview = undefined;
 	}
 
-	public createSession(agentLabel: string) {
+	public async createSession(agentLabel: string) {
 		const agent = getCliAgent(agentLabel);
 		if (!agent) {
 			this.postError(`Unknown CLI: ${agentLabel}`);
+			return;
+		}
+
+		if (!(await ensureCliInstalled(agent))) {
 			return;
 		}
 
@@ -227,7 +232,7 @@ export class CliSessionManager implements vscode.Disposable {
 		switch (message.type) {
 			case 'cli.create':
 				if (message.agent) {
-					this.createSession(message.agent);
+					void this.createSession(message.agent);
 				}
 				break;
 			case 'cli.input':
