@@ -1,13 +1,12 @@
 import { FitAddon } from '@xterm/addon-fit';
 import { Terminal } from '@xterm/xterm';
-import { createTabController, type CliAgentOption, type CliSessionSummary } from '../panel-tab/tab';
+import { createTabController, type CliAgentIcon, type CliAgentOption, type CliSessionSummary } from '../panel-tab/tab';
 
 type VsCodeApi = {
 	postMessage: (message: ClientMessage) => void;
 };
 
 type ClientMessage =
-	| { type: 'backToLauncher' }
 	| { type: 'cli.ready' }
 	| { type: 'cli.create'; agent: string }
 	| { type: 'cli.input'; sessionId: string; data: string }
@@ -16,6 +15,7 @@ type ClientMessage =
 	| { type: 'cli.close'; sessionId: string };
 
 type CliSession = CliSessionSummary & {
+	commandLine: string;
 	buffer: string;
 	createdAt: number;
 };
@@ -42,19 +42,44 @@ const vscode = acquireVsCodeApi();
 const sessions = new Map<string, CliSession>();
 const terminals = new Map<string, TerminalView>();
 let activeSessionId: string | undefined;
+let pendingTabSwitchSessionId: string | undefined;
 
+const isAgentIcon = (value: unknown): value is CliAgentIcon => {
+	if (!value || typeof value !== 'object') {
+		return false;
+	}
+
+	const icon = value as Record<string, unknown>;
+	return typeof icon.label === 'string'
+		&& typeof icon.icon === 'string'
+		&& typeof icon.darkIcon === 'boolean'
+		&& typeof icon.lightIcon === 'boolean';
+};
+
+const parseAgentIcons = () => {
+	const script = document.getElementById('cli-agent-icons');
+	if (!script?.textContent) {
+		return new Map<string, CliAgentIcon>();
+	}
+
+	try {
+		const icons = JSON.parse(script.textContent) as unknown;
+		if (!Array.isArray(icons)) {
+			return new Map<string, CliAgentIcon>();
+		}
+
+		return new Map(icons.filter(isAgentIcon).map((icon) => [icon.label, icon]));
+	} catch {
+		return new Map<string, CliAgentIcon>();
+	}
+};
+
+const agentIcons = parseAgentIcons();
 const layoutRight = document.querySelector<HTMLElement>('.layout-right');
 const terminalStack = document.getElementById('cli-terminal-stack') as HTMLDivElement;
 const terminalLabel = document.getElementById('cli-terminal-label') as HTMLDivElement;
 const terminalStatus = document.getElementById('cli-terminal-status') as HTMLDivElement;
 const terminalBadge = document.getElementById('cli-terminal-badge') as HTMLDivElement;
-
-const tabController = createTabController({
-	onBack: () => vscode.postMessage({ type: 'backToLauncher' }),
-	onCreate: (agent) => vscode.postMessage({ type: 'cli.create', agent }),
-	onSwitch: (sessionId) => vscode.postMessage({ type: 'cli.switch', sessionId }),
-	onClose: (sessionId) => vscode.postMessage({ type: 'cli.close', sessionId })
-});
 
 const cssValue = (name: string, fallback: string) => {
 	const value = getComputedStyle(document.documentElement).getPropertyValue(name).trim();
@@ -105,6 +130,54 @@ const fitTerminal = (sessionId: string | undefined = activeSessionId) => {
 	}
 };
 
+const switchSessionByOffset = (offset: 1 | -1) => {
+	if (pendingTabSwitchSessionId) {
+		return false;
+	}
+
+	const sessionIds = [...sessions.keys()];
+	if (sessionIds.length === 0) {
+		return false;
+	}
+
+	const activeIndex = activeSessionId ? sessionIds.indexOf(activeSessionId) : -1;
+	const currentIndex = activeIndex >= 0 ? activeIndex : 0;
+	const nextIndex = (currentIndex + offset + sessionIds.length) % sessionIds.length;
+	const nextSessionId = sessionIds[nextIndex];
+	if (!nextSessionId || nextSessionId === activeSessionId) {
+		return false;
+	}
+
+	pendingTabSwitchSessionId = nextSessionId;
+	vscode.postMessage({ type: 'cli.switch', sessionId: nextSessionId });
+	return true;
+};
+
+const handleTerminalKey = (event: KeyboardEvent) => {
+	if (event.key !== 'Tab' || event.altKey || event.ctrlKey || event.metaKey) {
+		return true;
+	}
+
+	event.preventDefault();
+	event.stopPropagation();
+
+	if (event.type === 'keydown' && !event.repeat) {
+		switchSessionByOffset(event.shiftKey ? -1 : 1);
+	}
+
+	return false;
+};
+
+const tabController = createTabController({
+	getAgentIcon: (label) => agentIcons.get(label),
+	onCreate: (agent) => vscode.postMessage({ type: 'cli.create', agent }),
+	onCycleSession: (offset) => {
+		switchSessionByOffset(offset);
+	},
+	onSwitch: (sessionId) => vscode.postMessage({ type: 'cli.switch', sessionId }),
+	onClose: (sessionId) => vscode.postMessage({ type: 'cli.close', sessionId })
+});
+
 const createTerminalView = (session: CliSession) => {
 	const pane = document.createElement('div');
 	pane.className = 'cli-terminal-pane';
@@ -120,6 +193,7 @@ const createTerminalView = (session: CliSession) => {
 		scrollback: 8000,
 		theme: getTerminalTheme()
 	});
+	terminal.attachCustomKeyEventHandler(handleTerminalKey);
 	const fitAddon = new FitAddon();
 	terminal.loadAddon(fitAddon);
 	terminal.open(pane);
@@ -186,6 +260,10 @@ const syncState = (message: Extract<ServerMessage, { type: 'cli.state' }>) => {
 		if (!terminals.has(session.id)) {
 			createTerminalView(session);
 		}
+	}
+
+	if (pendingTabSwitchSessionId && (!sessions.has(pendingTabSwitchSessionId) || pendingTabSwitchSessionId === activeSessionId)) {
+		pendingTabSwitchSessionId = undefined;
 	}
 
 	removeClosedTerminals(openSessionIds);

@@ -75,12 +75,6 @@ export class CliHubViewProvider implements vscode.WebviewViewProvider, vscode.Di
 				return;
 			}
 
-			if (message.type === 'backToLauncher') {
-				this.sessionManager.detach();
-				webviewView.webview.html = await this._getHtmlForWebview(webviewView.webview);
-				return;
-			}
-
 			if (message.type === 'cli.ready') {
 				this.sessionManager.attach(webviewView.webview);
 
@@ -153,6 +147,12 @@ export class CliHubViewProvider implements vscode.WebviewViewProvider, vscode.Di
 			this._getWebviewUri(webview, 'webview', 'ui', 'panel-terminal', 'terminal.css')
 		];
 		const scriptUri = this._getWebviewUri(webview, 'webview', 'webview.js');
+		const agentIcons = launcherAgents.map((agent) => ({
+			label: agent.label,
+			icon: this._getWebviewUri(webview, 'assets', 'icons-cli', agent.iconFile),
+			darkIcon: agent.darkIcon === true,
+			lightIcon: agent.lightIcon === true
+		}));
 
 		return getCliHubWebviewHtml({
 			extensionUri: this._extensionUri,
@@ -161,7 +161,8 @@ export class CliHubViewProvider implements vscode.WebviewViewProvider, vscode.Di
 			styleUris,
 			scriptUri,
 			selectedAgent,
-			workspacePath: this._getWorkspacePath()
+			workspacePath: this._getWorkspacePath(),
+			agentIcons: serializeJsonForHtmlScript(agentIcons)
 		});
 	}
 

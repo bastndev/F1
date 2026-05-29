@@ -16,7 +16,6 @@
 	display: flex;
 	flex-direction: column;
 	gap: 12px;
-	padding-left: 34px;
 	box-sizing: border-box;
 }
 
@@ -26,18 +25,6 @@
 	align-items: center;
 	justify-content: space-between;
 	gap: 10px;
-}
-
-.agent-tab-heading {
-	min-width: 0;
-}
-
-.agent-tab-kicker {
-	margin-bottom: 2px;
-	font-size: 10px;
-	line-height: 1.2;
-	text-transform: uppercase;
-	color: var(--vscode-descriptionForeground, rgba(128, 128, 128, 0.78));
 }
 
 .agent-new-button {
@@ -70,7 +57,8 @@
 }
 
 .agent-select {
-	width: 100%;
+	min-width: 0;
+	flex: 1 1 auto;
 	height: 28px;
 	border: 1px solid var(--vscode-dropdown-border, transparent);
 	border-radius: 4px;
@@ -101,29 +89,84 @@
 .agent-session-item {
 	width: 100%;
 	min-width: 0;
-	min-height: 46px;
+	min-height: 66px;
 	border: 1px solid transparent;
 	border-radius: 6px;
-	padding: 7px 7px 7px 9px;
+	padding: 8px 7px;
 	display: grid;
-	grid-template-columns: minmax(0, 1fr) 22px;
+	grid-template-columns: 32px minmax(0, 1fr) 22px;
 	align-items: center;
-	gap: 6px;
+	gap: 8px;
 	box-sizing: border-box;
-	background: transparent;
+	background: var(--vscode-list-hoverBackground, rgba(128, 128, 128, 0.12));
 	color: var(--vscode-foreground);
 	text-align: left;
 	cursor: pointer;
 }
 
 .agent-session-item:hover {
-	background: var(--vscode-list-hoverBackground, rgba(128, 128, 128, 0.12));
+	border-color: color-mix(in srgb, var(--vscode-focusBorder, var(--vscode-textLink-foreground)) 30%, transparent);
+	background: color-mix(in srgb, var(--vscode-list-hoverBackground, rgba(128, 128, 128, 0.12)) 82%, var(--vscode-focusBorder, var(--vscode-textLink-foreground)));
 }
 
 .agent-session-item.is-active {
 	border-color: color-mix(in srgb, var(--vscode-focusBorder, var(--vscode-textLink-foreground)) 52%, transparent);
 	background: var(--vscode-list-activeSelectionBackground, rgba(80, 120, 190, 0.22));
 	color: var(--vscode-list-activeSelectionForeground, var(--vscode-foreground));
+}
+
+.agent-session-icon-frame {
+	position: relative;
+	width: 30px;
+	height: 30px;
+	border-radius: 6px;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	overflow: hidden;
+	background:
+		linear-gradient(
+			90deg,
+			color-mix(in srgb, var(--vscode-focusBorder, var(--vscode-textLink-foreground)) 18%, transparent),
+			transparent 86%
+		),
+		color-mix(in srgb, var(--vscode-sideBar-background, var(--vscode-editor-background)) 82%, transparent);
+}
+
+.agent-session-icon-frame::after {
+	content: "";
+	position: absolute;
+	top: 4px;
+	right: -12px;
+	width: 20px;
+	height: 22px;
+	border-radius: 999px;
+	background: color-mix(in srgb, var(--vscode-focusBorder, var(--vscode-textLink-foreground)) 24%, transparent);
+	filter: blur(8px);
+	opacity: 0.65;
+	pointer-events: none;
+}
+
+.agent-session-icon-image {
+	position: relative;
+	z-index: 1;
+	width: 18px;
+	height: 18px;
+	display: block;
+	object-fit: contain;
+	pointer-events: none;
+}
+
+.vscode-dark .agent-session-item.has-dark-icon .agent-session-icon-image {
+	filter: invert(1) brightness(1.22) contrast(0.92);
+}
+
+.vscode-high-contrast .agent-session-item.has-dark-icon .agent-session-icon-image {
+	filter: invert(1) brightness(1.42) contrast(1.08);
+}
+
+.vscode-light .agent-session-item.has-light-icon .agent-session-icon-image {
+	filter: invert(1) brightness(0.42) contrast(1.45);
 }
 
 .agent-session-main {
@@ -147,6 +190,7 @@
 }
 
 .agent-session-dot {
+	display: none;
 	flex: 0 0 auto;
 	width: 7px;
 	height: 7px;
@@ -156,9 +200,11 @@
 }
 
 .agent-session-item.has-unread .agent-session-dot {
+	display: block;
 	opacity: 1;
 }
 
+.agent-session-project,
 .agent-session-meta {
 	margin-top: 3px;
 	overflow: hidden;
@@ -167,6 +213,10 @@
 	font-size: 11px;
 	line-height: 1.3;
 	color: var(--vscode-descriptionForeground, rgba(128, 128, 128, 0.78));
+}
+
+.agent-session-project {
+	opacity: 0.84;
 }
 
 .agent-session-status {
@@ -203,34 +253,6 @@
 	opacity: 1;
 }
 
-.agent-back-button {
-	position: absolute;
-	top: 14px;
-	left: 14px;
-	width: 26px;
-	height: 26px;
-	border: 1px solid transparent;
-	border-radius: 4px;
-	padding: 0;
-	display: inline-flex;
-	align-items: center;
-	justify-content: center;
-	background: transparent;
-	color: var(--vscode-icon-foreground, var(--vscode-foreground));
-	cursor: pointer;
-	font-size: 22px;
-	line-height: 1;
-}
-
-.agent-back-button:hover {
-	background: var(--vscode-toolbar-hoverBackground, rgba(128, 128, 128, 0.16));
-}
-
-.agent-back-button:focus-visible {
-	outline: 1px solid var(--vscode-focusBorder, var(--vscode-textLink-foreground));
-	outline-offset: 2px;
-}
-
 @media (max-width: 640px), (orientation: portrait) {
 	.layout-left {
 		grid-column: 1 / -1;
@@ -241,20 +263,13 @@
 		padding: 10px 14px;
 	}
 
-	.agent-back-button {
-		top: 24px;
-	}
-
 	.agent-tab-shell {
-		padding-left: 34px;
-		display: grid;
-		grid-template-columns: minmax(100px, 1fr) minmax(120px, 1fr);
-		grid-template-rows: auto;
-		align-items: center;
+		justify-content: center;
 	}
 
 	.agent-tab-header {
 		min-width: 0;
+		width: 100%;
 	}
 
 	.agent-session-list {
