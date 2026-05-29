@@ -33,12 +33,18 @@ export const cliInstallers: CliInstaller[] = [
 	{
 		label: 'Claude Code',
 		command: 'claude',
-		installCommand: 'curl -fsSL https://claude.ai/install.sh | bash'
+		install: {
+			unix: 'curl -fsSL https://claude.ai/install.sh | bash',
+			windows: 'curl -fsSL https://claude.ai/install.sh | bash'
+		}
 	},
 	{
 		label: 'Antigravity CLI',
 		command: 'agy',
-		installCommand: 'curl -fsSL https://antigravity.google/cli/install.sh | bash'
+		install: {
+			unix: 'curl -fsSL https://antigravity.google/cli/install.sh | bash',
+			windows: 'curl -fsSL https://antigravity.google/cli/install.cmd -o install.cmd && install.cmd && del install.cmd'
+		}
 	},
 	{
 		label: 'GitHub Copilot CLI',
