@@ -13,7 +13,8 @@ export const cliAgents: CliAgent[] = [
 	{ label: 'Codeep', command: 'codeep', args: [] },
 	{ label: 'Amp', command: 'amp', args: [] },
 	{ label: 'Kiro CLI', command: 'kiro-cli', args: [] },
-	{ label: 'Kilo Code', command: 'kilo', args: [] }
+	{ label: 'Kilo Code', command: 'kilo', args: [] },
+	{ label: 'Grok', command: 'grok', args: [] }
 ];
 
 export const allowedAgents = new Set(cliAgents.map((agent) => agent.label));

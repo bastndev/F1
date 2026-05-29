@@ -49,6 +49,11 @@ export const cliInstallers: CliInstaller[] = [
 		label: 'Kilo Code',
 		command: 'kilo',
 		installCommand: 'curl -fsSL https://kilo.ai/cli/install | bash'
+	},
+	{
+		label: 'Grok',
+		command: 'grok',
+		installCommand: 'curl -fsSL https://x.ai/cli/install.sh | bash'
 	}
 ];
 
