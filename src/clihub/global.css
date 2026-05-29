@@ -23,7 +23,7 @@ body {
 	margin: 0;
 	font-family: var(--font-family);
 	color: var(--text-color);
-	background-color: var(--bg-color);
+	background-color: color-mix(in srgb, var(--bg-color) 90%, black); /*Trukito*/
 }
 
 /* CLI Hub */
