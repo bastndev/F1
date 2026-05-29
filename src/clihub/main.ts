@@ -33,6 +33,15 @@ const launcherAgents: LauncherAgent[] = [
 	{ label: 'Grok', aliases: ['grok'], iconFile: 'grok.svg', darkIcon: true }
 ];
 
+const serializeJsonForHtmlScript = (value: unknown) => {
+	return JSON.stringify(value)
+		.replace(/</g, '\\u003c')
+		.replace(/>/g, '\\u003e')
+		.replace(/&/g, '\\u0026')
+		.replace(/\u2028/g, '\\u2028')
+		.replace(/\u2029/g, '\\u2029');
+};
+
 export class CliHubViewProvider implements vscode.WebviewViewProvider, vscode.Disposable {
 	public static readonly viewType = 'f1.cliHub';
 	private readonly sessionManager = new CliSessionManager();
@@ -126,7 +135,7 @@ export class CliHubViewProvider implements vscode.WebviewViewProvider, vscode.Di
 		html = html.replace('${styleUri}', styleUri.toString());
 		html = html.replace('${contentSecurityPolicy}', contentSecurityPolicy);
 		html = html.replace(/\$\{nonce\}/g, nonce);
-		html = html.replace('${cliModels}', JSON.stringify(launcherModels));
+		html = html.replace('${cliModels}', serializeJsonForHtmlScript(launcherModels));
 
 		html = html.replace('${workspacePath}', this._getWorkspacePath());
 

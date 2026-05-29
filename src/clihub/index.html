@@ -205,7 +205,7 @@
 					const options = [...agentIconPalette.querySelectorAll('.agent-icon-option')];
 					const index = options.indexOf(option);
 
-					if (event.key === 'Tab' && !event.shiftKey) {
+					if (event.key === 'Tab') {
 						event.preventDefault();
 						setPaletteOpen(false);
 						cliInput.focus();
@@ -272,11 +272,18 @@
 				return;
 			}
 
-				if (event.key === 'Tab' && !event.shiftKey) {
+			if (event.key === 'Tab') {
+				if (!event.shiftKey) {
 					event.preventDefault();
 					setPaletteOpen(!paletteOpen);
 					return;
 				}
+
+				if (paletteOpen) {
+					event.preventDefault();
+					setPaletteOpen(false);
+				}
+			}
 
 			if (event.key === 'Escape' && paletteOpen) {
 				event.preventDefault();
