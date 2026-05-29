@@ -10,7 +10,7 @@ body {
 
 .agent-shell {
 	display: grid;
-	grid-template-columns: 225px minmax(0, 1fr) minmax(0, 1fr);
+	grid-template-columns: 245px minmax(0, 1fr);
 	grid-template-rows: minmax(0, 1fr);
 	height: 100vh;
 	width: 100vw;
@@ -56,6 +56,6 @@ body {
 @media (max-width: 640px), (orientation: portrait) {
 	.agent-shell {
 		grid-template-columns: minmax(0, 1fr);
-		grid-template-rows: 60px minmax(0, 1fr) minmax(0, 1fr);
+		grid-template-rows: 74px minmax(0, 1fr);
 	}
 }

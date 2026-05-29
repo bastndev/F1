@@ -1,13 +1,29 @@
 <div class="layout-left">
-  <button
-    class="agent-back-button"
-    type="button"
-    data-action="back-to-launcher"
-    title="Back"
-  >
-    <span aria-hidden="true">&larr;</span>
-  </button>
-  <div class="agent-tab-content">
-    <h1 class="agent-panel-title">Tab</h1>
-  </div>
+	<button
+		class="agent-back-button"
+		type="button"
+		data-action="back-to-launcher"
+		title="Back"
+	>
+		<span aria-hidden="true">&larr;</span>
+	</button>
+	<div class="agent-tab-shell">
+		<div class="agent-tab-header">
+			<div class="agent-tab-heading">
+				<div class="agent-tab-kicker">CLI Hub</div>
+				<h1 class="agent-panel-title">Sessions</h1>
+			</div>
+			<button
+				id="cli-create-button"
+				class="agent-new-button"
+				type="button"
+				title="New CLI"
+				aria-label="New CLI"
+			>
+				<span aria-hidden="true">+</span>
+			</button>
+		</div>
+		<select id="cli-agent-select" class="agent-select" aria-label="CLI agent"></select>
+		<div id="cli-session-list" class="agent-session-list" role="listbox" aria-label="Open CLI sessions"></div>
+	</div>
 </div>

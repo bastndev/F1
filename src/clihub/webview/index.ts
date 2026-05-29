@@ -6,6 +6,7 @@ type CliHubWebviewOptions = {
 	cspSource: string;
 	nonce: string;
 	styleUris: string[];
+	scriptUri: string;
 	selectedAgent: string;
 	workspacePath: string;
 };
@@ -72,7 +73,7 @@ export function getCliHubWebviewHtml(options: CliHubWebviewOptions) {
 <html lang="en">
 	<head>
 		<meta charset="UTF-8">
-		<meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src ${options.cspSource}; script-src 'nonce-${options.nonce}';">
+		<meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src ${options.cspSource} 'unsafe-inline'; script-src 'nonce-${options.nonce}';">
 		<meta name="viewport" content="width=device-width, initial-scale=1.0">
 		<title>CLI Hub</title>
 		${styleLinks}
@@ -81,12 +82,7 @@ export function getCliHubWebviewHtml(options: CliHubWebviewOptions) {
 		<div class="agent-shell">
 			${panelHtml}
 		</div>
-		<script nonce="${options.nonce}">
-			const vscode = acquireVsCodeApi();
-			document.querySelector('[data-action="back-to-launcher"]')?.addEventListener('click', () => {
-				vscode.postMessage({ type: 'backToLauncher' });
-			});
-		</script>
+		<script nonce="${options.nonce}" src="${escapeHtml(options.scriptUri)}"></script>
 	</body>
 	</html>`;
 }

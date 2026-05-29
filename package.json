@@ -33,14 +33,13 @@
     "url": "https://github.com/bastndev/F1/issues/new"
   },
   "author": {
-    "name": "Gohit (X) Bastian", 
+    "name": "Gohit (X) Bastian",
     "email": "bastndev@gohit.xyz",
     "url": "https://www.gohit.xyz/me"
   },
   "sponsor": {
     "url": "https://github.com/sponsors/bastndev"
   },
-
   "activationEvents": [],
   "main": "./dist/extension.js",
   "contributes": {
@@ -71,7 +70,6 @@
       ]
     }
   },
-
   "scripts": {
     "vscode:prepublish": "npm run compile",
     "compile": "npm run check-types && npm run lint && node esbuild.js",
@@ -82,6 +80,8 @@
     "lint": "eslint src"
   },
   "devDependencies": {
+    "@xterm/addon-fit": "^0.11.0",
+    "@xterm/xterm": "^6.0.0",
     "@types/node": "25.9.1",
     "@types/vscode": "^1.43.0",
     "esbuild": "^0.25.0",
@@ -89,5 +89,8 @@
     "npm-run-all": "^4.1.5",
     "typescript": "^5.7.3",
     "typescript-eslint": "^8.32.1"
+  },
+  "dependencies": {
+    "node-pty": "1.1.0"
   }
 }

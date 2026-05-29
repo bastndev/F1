@@ -1,27 +1,20 @@
 import * as vscode from 'vscode';
 import * as fs from 'fs';
 import * as crypto from 'crypto';
+import * as path from 'path';
+import { allowedAgents } from './agents';
+import { CliSessionManager } from './session-manager';
 import { getCliHubWebviewHtml } from './webview/index';
 
-const allowedAgents = new Set([
-	'OpenCode',
-	'Claude Code',
-	'Codex CLI',
-	'Gemini CLI',
-	'Aider',
-	'GitHub Copilot CLI',
-	'Cline',
-	'Kiro CLI',
-	'Goose',
-	'Amp',
-	'Continue CLI',
-	'Kilo Code',
-	'Tabnine CLI',
-	'Pi'
-]);
+type CliHubMessage = {
+	type?: string;
+	agent?: string;
+};
 
-export class CliHubViewProvider implements vscode.WebviewViewProvider {
+export class CliHubViewProvider implements vscode.WebviewViewProvider, vscode.Disposable {
 	public static readonly viewType = 'f1.cliHub';
+	private readonly sessionManager = new CliSessionManager();
+	private pendingInitialAgent?: string;
 
 	constructor(private readonly _extensionUri: vscode.Uri) {}
 
@@ -36,16 +29,43 @@ export class CliHubViewProvider implements vscode.WebviewViewProvider {
 		};
 
 		webviewView.webview.html = this._getHtmlForWebview(webviewView.webview);
-		webviewView.webview.onDidReceiveMessage((message: { type?: string; agent?: string }) => {
+		webviewView.onDidDispose(() => {
+			this.sessionManager.detach();
+		});
+		webviewView.webview.onDidReceiveMessage((message: CliHubMessage) => {
 			if (message.type === 'openAgent' && message.agent && allowedAgents.has(message.agent)) {
+				this.pendingInitialAgent = message.agent;
 				webviewView.webview.html = this._getAgentHtmlForWebview(webviewView.webview, message.agent);
 				return;
 			}
 
 			if (message.type === 'backToLauncher') {
+				this.sessionManager.detach();
 				webviewView.webview.html = this._getHtmlForWebview(webviewView.webview);
+				return;
+			}
+
+			if (message.type === 'cli.ready') {
+				this.sessionManager.attach(webviewView.webview);
+
+				if (this.pendingInitialAgent) {
+					this.sessionManager.createSession(this.pendingInitialAgent);
+					this.pendingInitialAgent = undefined;
+				} else {
+					this.sessionManager.postState();
+				}
+
+				return;
+			}
+
+			if (message.type?.startsWith('cli.')) {
+				this.sessionManager.handleMessage(message);
 			}
 		});
+	}
+
+	public dispose() {
+		this.sessionManager.dispose();
 	}
 
 	private _getHtmlForWebview(webview: vscode.Webview) {
@@ -74,17 +94,20 @@ export class CliHubViewProvider implements vscode.WebviewViewProvider {
 		const nonce = this._getNonce();
 		const styleUris = [
 			this._getWebviewUri(webview, 'global.css'),
+			this._getWebviewUri(webview, 'vendor', 'xterm', 'xterm.css'),
 			this._getWebviewUri(webview, 'webview', 'ui', 'shared', 'styles', 'layout.css'),
 			this._getWebviewUri(webview, 'webview', 'ui', 'panel-tab', 'tab.css'),
 			this._getWebviewUri(webview, 'webview', 'ui', 'panel-translate', 'translate.css'),
 			this._getWebviewUri(webview, 'webview', 'ui', 'panel-terminal', 'terminal.css')
 		];
+		const scriptUri = this._getWebviewUri(webview, 'webview', 'webview.js');
 
 		return getCliHubWebviewHtml({
 			extensionUri: this._extensionUri,
 			cspSource: webview.cspSource,
 			nonce,
 			styleUris,
+			scriptUri,
 			selectedAgent,
 			workspacePath: this._getWorkspacePath()
 		});
@@ -100,7 +123,7 @@ export class CliHubViewProvider implements vscode.WebviewViewProvider {
 
 	private _getWorkspacePath() {
 		const fullPath = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath || '~/workspace/project';
-		const projectName = require('path').basename(fullPath);
+		const projectName = path.basename(fullPath);
 
 		return `~/${projectName}`;
 	}

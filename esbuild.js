@@ -25,6 +25,14 @@ const copyDirectoryAssets = (from, to) => {
 	}
 };
 
+const copyXtermAssets = (outDir) => {
+	const xtermCssPath = require.resolve("@xterm/xterm/css/xterm.css");
+	const vendorDir = path.join(outDir, "vendor", "xterm");
+
+	fs.mkdirSync(vendorDir, { recursive: true });
+	fs.copyFileSync(xtermCssPath, path.join(vendorDir, "xterm.css"));
+};
+
 const collectDirectories = (rootDir) => {
 	const directories = [rootDir];
 
@@ -40,11 +48,11 @@ const collectDirectories = (rootDir) => {
 const copyCliHubAssets = () => {
 	const outDir = path.join('dist', 'clihub');
 
-	fs.rmSync(outDir, { recursive: true, force: true });
 	fs.mkdirSync(outDir, { recursive: true });
 	fs.copyFileSync(path.join('src', 'clihub', 'index.html'), path.join(outDir, 'index.html'));
 	fs.copyFileSync(path.join('src', 'clihub', 'global.css'), path.join(outDir, 'global.css'));
 	copyDirectoryAssets(path.join('src', 'clihub', 'webview'), path.join(outDir, 'webview'));
+	copyXtermAssets(outDir);
 };
 
 const watchCliHubAssets = () => {
@@ -104,7 +112,7 @@ const cliHubAssetsPlugin = {
 };
 
 async function main() {
-	const ctx = await esbuild.context({
+	const extensionCtx = await esbuild.context({
 		entryPoints: [
 			'src/extension.ts'
 		],
@@ -115,19 +123,59 @@ async function main() {
 		sourcesContent: false,
 		platform: 'node',
 		outfile: 'dist/extension.js',
-		external: ['vscode'],
+		external: ['vscode', 'node-pty'],
 		logLevel: 'silent',
 		plugins: [
 			cliHubAssetsPlugin,
 			esbuildProblemMatcherPlugin,
 		],
 	});
+	const webviewCtx = await esbuild.context({
+		entryPoints: [
+			'src/clihub/webview/ui/panel-terminal/terminal.ts'
+		],
+		bundle: true,
+		format: 'iife',
+		minify: production,
+		sourcemap: !production,
+		sourcesContent: false,
+		platform: 'browser',
+		outfile: 'dist/clihub/webview/webview.js',
+		logLevel: 'silent',
+		plugins: [
+			esbuildProblemMatcherPlugin,
+		],
+	});
+	const ptyHostCtx = await esbuild.context({
+		entryPoints: [
+			'src/clihub/pty-host.ts'
+		],
+		bundle: true,
+		format: 'cjs',
+		minify: production,
+		sourcemap: !production,
+		sourcesContent: false,
+		platform: 'node',
+		outfile: 'dist/clihub/pty-host.js',
+		external: ['node-pty'],
+		logLevel: 'silent',
+		plugins: [
+			esbuildProblemMatcherPlugin,
+		],
+	});
+
 	if (watch) {
-		await ctx.watch();
+		await extensionCtx.watch();
+		await webviewCtx.watch();
+		await ptyHostCtx.watch();
 		watchCliHubAssets();
 	} else {
-		await ctx.rebuild();
-		await ctx.dispose();
+		await extensionCtx.rebuild();
+		await webviewCtx.rebuild();
+		await ptyHostCtx.rebuild();
+		await extensionCtx.dispose();
+		await webviewCtx.dispose();
+		await ptyHostCtx.dispose();
 	}
 }
 
