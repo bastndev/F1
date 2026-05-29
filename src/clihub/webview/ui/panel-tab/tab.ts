@@ -164,7 +164,7 @@ export const createTabController = (options: TabControllerOptions) => {
 				}
 			});
 
-			titleRow.append(dot, title);
+			titleRow.append(title, dot);
 			main.append(titleRow, project, meta);
 			item.append(iconFrame, main, closeButton);
 			sessionList.append(item);
