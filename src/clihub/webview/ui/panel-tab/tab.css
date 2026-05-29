@@ -27,11 +27,18 @@
 	gap: 10px;
 }
 
+.agent-header-actions {
+	flex: 0 0 auto;
+	display: inline-flex;
+	align-items: center;
+	gap: 5px;
+}
+
+.agent-tools-button,
 .agent-new-button {
 	flex: 0 0 auto;
 	width: 26px;
 	height: 26px;
-	border: 1px solid var(--vscode-button-border, transparent);
 	border-radius: 4px;
 	padding: 0;
 	display: inline-flex;
@@ -44,13 +51,48 @@
 	line-height: 1;
 }
 
+.agent-tools-button {
+	border: 1px solid var(--vscode-editorGroup-border, rgba(128, 128, 128, 0.28));
+	background: var(--vscode-toolbar-hoverBackground, rgba(128, 128, 128, 0.12));
+	color: var(--vscode-icon-foreground, var(--vscode-foreground));
+}
+
+.agent-tools-button:hover,
+.agent-tools-button.is-open {
+	border-color: color-mix(in srgb, var(--vscode-focusBorder, var(--vscode-textLink-foreground)) 42%, transparent);
+	background: color-mix(in srgb, var(--vscode-toolbar-hoverBackground, rgba(128, 128, 128, 0.16)) 78%, var(--vscode-focusBorder, var(--vscode-textLink-foreground)));
+}
+
+.agent-tools-icon {
+	width: 16px;
+	height: 16px;
+	display: block;
+	fill: none;
+	stroke: currentColor;
+	stroke-width: 1.35;
+	stroke-linecap: round;
+	stroke-linejoin: round;
+}
+
+.agent-tools-icon circle {
+	fill: var(--vscode-sideBar-background, var(--vscode-editor-background));
+}
+
+.agent-new-button {
+	border: 1px solid var(--vscode-button-border, transparent);
+	background: var(--vscode-button-background, var(--vscode-textLink-foreground));
+	color: var(--vscode-button-foreground, #ffffff);
+}
+
 .agent-new-button:hover {
 	background: var(--vscode-button-hoverBackground, var(--vscode-textLink-activeForeground));
 }
 
+.agent-tools-button:focus-visible,
 .agent-new-button:focus-visible,
 .agent-select:focus-visible,
 .agent-session-item:focus-visible,
+.agent-tools-item:focus-visible,
 .agent-session-close:focus-visible {
 	outline: 1px solid var(--vscode-focusBorder, var(--vscode-textLink-foreground));
 	outline-offset: 2px;
@@ -68,6 +110,91 @@
 	color: var(--vscode-dropdown-foreground, var(--vscode-input-foreground));
 	font-family: var(--vscode-font-family);
 	font-size: 12px;
+}
+
+.agent-tools-popover {
+	position: absolute;
+	top: 47px;
+	right: 14px;
+	z-index: 20;
+	width: min(194px, calc(100% - 28px));
+	border: 1px solid var(--vscode-editorGroup-border, rgba(128, 128, 128, 0.24));
+	border-radius: 6px;
+	padding: 5px 0;
+	box-sizing: border-box;
+	background: var(--vscode-menu-background, var(--vscode-sideBar-background, var(--vscode-editor-background)));
+	color: var(--vscode-menu-foreground, var(--vscode-foreground));
+	box-shadow: 0 10px 28px rgba(0, 0, 0, 0.32);
+}
+
+.agent-tools-popover[hidden] {
+	display: none;
+}
+
+.agent-tools-section + .agent-tools-section {
+	margin-top: 5px;
+	padding-top: 5px;
+	border-top: 1px solid var(--vscode-editorGroup-border, rgba(128, 128, 128, 0.18));
+}
+
+.agent-tools-label {
+	padding: 4px 14px 5px;
+	color: var(--vscode-descriptionForeground, rgba(128, 128, 128, 0.78));
+	font-size: 11px;
+	line-height: 1.2;
+}
+
+.agent-tools-item {
+	width: calc(100% - 10px);
+	min-width: 0;
+	height: 27px;
+	margin: 0 5px;
+	border: 1px solid transparent;
+	border-radius: 4px;
+	padding: 0 8px;
+	display: grid;
+	grid-template-columns: 18px minmax(0, 1fr);
+	align-items: center;
+	gap: 7px;
+	box-sizing: border-box;
+	background: transparent;
+	color: inherit;
+	font-family: var(--vscode-font-family);
+	font-size: 12px;
+	line-height: 1;
+	text-align: left;
+	cursor: pointer;
+}
+
+.agent-tools-item:hover,
+.agent-tools-item.is-primary {
+	background: var(--vscode-list-hoverBackground, rgba(128, 128, 128, 0.14));
+}
+
+.agent-tools-item.is-primary {
+	color: var(--vscode-foreground);
+}
+
+.agent-tools-item-icon {
+	width: 18px;
+	height: 18px;
+	border-radius: 4px;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	background: var(--vscode-toolbar-hoverBackground, rgba(128, 128, 128, 0.12));
+	color: var(--vscode-icon-foreground, var(--vscode-foreground));
+	font-size: 10px;
+	line-height: 1;
+	text-align: center;
+	opacity: 0.84;
+}
+
+.agent-tools-item-text {
+	min-width: 0;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
 }
 
 .agent-session-list {
@@ -270,6 +397,11 @@
 	.agent-tab-header {
 		min-width: 0;
 		width: 100%;
+	}
+
+	.agent-tools-popover {
+		top: 42px;
+		right: 14px;
 	}
 
 	.agent-session-list {

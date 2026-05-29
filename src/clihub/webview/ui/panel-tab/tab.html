@@ -2,15 +2,57 @@
 	<div class="agent-tab-shell">
 		<div class="agent-tab-header">
 			<select id="cli-agent-select" class="agent-select" aria-label="CLI agent"></select>
-			<button
-				id="cli-create-button"
-				class="agent-new-button"
-				type="button"
-				title="New CLI"
-				aria-label="New CLI"
-			>
-				<span aria-hidden="true">+</span>
-			</button>
+			<div class="agent-header-actions">
+				<button
+					id="cli-tools-button"
+					class="agent-tools-button"
+					type="button"
+					title="CLI tools"
+					aria-label="CLI tools"
+					aria-haspopup="menu"
+					aria-expanded="false"
+					aria-controls="cli-tools-popover"
+				>
+					<svg class="agent-tools-icon" viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+						<path d="M3 4.5h10M3 11.5h10M6 2.75v3.5M10 9.75v3.5" />
+						<circle cx="6" cy="4.5" r="1.35" />
+						<circle cx="10" cy="11.5" r="1.35" />
+					</svg>
+				</button>
+				<button
+					id="cli-create-button"
+					class="agent-new-button"
+					type="button"
+					title="New CLI"
+					aria-label="New CLI"
+				>
+					<span aria-hidden="true">+</span>
+				</button>
+			</div>
+		</div>
+		<div id="cli-tools-popover" class="agent-tools-popover" role="menu" aria-label="CLI tools" hidden>
+			<div class="agent-tools-section">
+				<div class="agent-tools-label">Terminal</div>
+				<button class="agent-tools-item is-primary" type="button" role="menuitem">
+					<span class="agent-tools-item-icon" aria-hidden="true">C</span>
+					<span class="agent-tools-item-text">Open chat modal</span>
+				</button>
+			</div>
+			<div class="agent-tools-section">
+				<div class="agent-tools-label">Actions</div>
+				<button class="agent-tools-item" type="button" role="menuitem">
+					<span class="agent-tools-item-icon" aria-hidden="true">R</span>
+					<span class="agent-tools-item-text">Read chat</span>
+				</button>
+				<button class="agent-tools-item" type="button" role="menuitem">
+					<span class="agent-tools-item-icon" aria-hidden="true">T</span>
+					<span class="agent-tools-item-text">Translate</span>
+				</button>
+				<button class="agent-tools-item" type="button" role="menuitem">
+					<span class="agent-tools-item-icon" aria-hidden="true">...</span>
+					<span class="agent-tools-item-text">More tools</span>
+				</button>
+			</div>
 		</div>
 		<div id="cli-session-list" class="agent-session-list" role="listbox" aria-label="Open CLI sessions"></div>
 	</div>

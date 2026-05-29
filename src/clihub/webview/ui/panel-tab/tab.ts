@@ -53,10 +53,20 @@ const getProjectLabel = (cwd: string) => {
 
 export const createTabController = (options: TabControllerOptions) => {
 	const createButton = getRequiredElement<HTMLButtonElement>('cli-create-button');
+	const toolsButton = getRequiredElement<HTMLButtonElement>('cli-tools-button');
+	const toolsPopover = getRequiredElement<HTMLDivElement>('cli-tools-popover');
 	const agentSelect = getRequiredElement<HTMLSelectElement>('cli-agent-select');
 	const sessionList = getRequiredElement<HTMLDivElement>('cli-session-list');
 	let currentAgents: CliAgentOption[] = [];
 	let currentAgentSignature = '';
+	let isToolsPopoverOpen = false;
+
+	const setToolsPopoverOpen = (isOpen: boolean) => {
+		isToolsPopoverOpen = isOpen;
+		toolsPopover.hidden = !isOpen;
+		toolsButton.classList.toggle('is-open', isOpen);
+		toolsButton.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+	};
 
 	createButton.addEventListener('click', () => {
 		if (agentSelect.value) {
@@ -64,7 +74,29 @@ export const createTabController = (options: TabControllerOptions) => {
 		}
 	});
 
+	toolsButton.addEventListener('click', (event) => {
+		event.stopPropagation();
+		setToolsPopoverOpen(!isToolsPopoverOpen);
+	});
+
+	toolsPopover.addEventListener('click', (event) => {
+		event.stopPropagation();
+	});
+
+	document.addEventListener('click', () => {
+		if (isToolsPopoverOpen) {
+			setToolsPopoverOpen(false);
+		}
+	});
+
 	document.addEventListener('keydown', (event) => {
+		if (event.key === 'Escape' && isToolsPopoverOpen) {
+			event.preventDefault();
+			setToolsPopoverOpen(false);
+			toolsButton.focus();
+			return;
+		}
+
 		if (event.key !== 'Tab' || event.altKey || event.ctrlKey || event.metaKey) {
 			return;
 		}
