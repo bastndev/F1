@@ -1,7 +1,23 @@
 <div class="layout-left">
 	<div class="agent-tab-shell">
 		<div class="agent-tab-header">
-			<select id="cli-agent-select" class="agent-select" aria-label="CLI agent"></select>
+			<div class="agent-picker">
+				<button
+					id="cli-agent-button"
+					class="agent-picker-button"
+					type="button"
+					aria-label="CLI agent"
+					aria-haspopup="listbox"
+					aria-expanded="false"
+					aria-controls="cli-agent-menu"
+				>
+					<span id="cli-agent-label" class="agent-picker-label">Loading CLI</span>
+					<svg class="agent-picker-chevron" viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+						<path d="M4.5 6.25 8 9.75l3.5-3.5" />
+					</svg>
+				</button>
+				<div id="cli-agent-menu" class="agent-picker-menu" role="listbox" aria-label="CLI agent" hidden></div>
+			</div>
 			<div class="agent-header-actions">
 				<button
 					id="cli-tools-button"

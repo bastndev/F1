@@ -55,11 +55,22 @@ export const createTabController = (options: TabControllerOptions) => {
 	const createButton = getRequiredElement<HTMLButtonElement>('cli-create-button');
 	const toolsButton = getRequiredElement<HTMLButtonElement>('cli-tools-button');
 	const toolsPopover = getRequiredElement<HTMLDivElement>('cli-tools-popover');
-	const agentSelect = getRequiredElement<HTMLSelectElement>('cli-agent-select');
+	const agentButton = getRequiredElement<HTMLButtonElement>('cli-agent-button');
+	const agentLabel = getRequiredElement<HTMLSpanElement>('cli-agent-label');
+	const agentMenu = getRequiredElement<HTMLDivElement>('cli-agent-menu');
 	const sessionList = getRequiredElement<HTMLDivElement>('cli-session-list');
 	let currentAgents: CliAgentOption[] = [];
 	let currentAgentSignature = '';
+	let currentAgentLabel = '';
+	let isAgentMenuOpen = false;
 	let isToolsPopoverOpen = false;
+
+	const setAgentMenuOpen = (isOpen: boolean) => {
+		isAgentMenuOpen = isOpen;
+		agentMenu.hidden = !isOpen;
+		agentButton.classList.toggle('is-open', isOpen);
+		agentButton.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+	};
 
 	const setToolsPopoverOpen = (isOpen: boolean) => {
 		isToolsPopoverOpen = isOpen;
@@ -68,14 +79,102 @@ export const createTabController = (options: TabControllerOptions) => {
 		toolsButton.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
 	};
 
+	const closeFloatingPanels = () => {
+		if (isAgentMenuOpen) {
+			setAgentMenuOpen(false);
+		}
+
+		if (isToolsPopoverOpen) {
+			setToolsPopoverOpen(false);
+		}
+	};
+
+	const syncAgentPicker = () => {
+		const hasAgents = currentAgents.length > 0;
+		agentButton.disabled = !hasAgents;
+		agentLabel.textContent = currentAgentLabel || (hasAgents ? currentAgents[0].label : 'Loading CLI');
+
+		for (const option of Array.from(agentMenu.querySelectorAll<HTMLButtonElement>('.agent-picker-option'))) {
+			const isSelected = option.dataset.agentLabel === currentAgentLabel;
+			option.classList.toggle('is-selected', isSelected);
+			option.setAttribute('aria-selected', isSelected ? 'true' : 'false');
+		}
+	};
+
+	const selectAgent = (label: string) => {
+		currentAgentLabel = label;
+		syncAgentPicker();
+		setAgentMenuOpen(false);
+		agentButton.focus();
+	};
+
+	const focusAgentOption = (offset: 1 | -1) => {
+		const optionButtons = Array.from(agentMenu.querySelectorAll<HTMLButtonElement>('.agent-picker-option'));
+		if (optionButtons.length === 0) {
+			return;
+		}
+
+		const activeIndex = optionButtons.findIndex((option) => option === document.activeElement);
+		const selectedIndex = optionButtons.findIndex((option) => option.dataset.agentLabel === currentAgentLabel);
+		const currentIndex = activeIndex >= 0 ? activeIndex : Math.max(selectedIndex, 0);
+		const nextIndex = (currentIndex + offset + optionButtons.length) % optionButtons.length;
+		optionButtons[nextIndex]?.focus();
+	};
+
 	createButton.addEventListener('click', () => {
-		if (agentSelect.value) {
-			options.onCreate(agentSelect.value);
+		if (currentAgentLabel) {
+			options.onCreate(currentAgentLabel);
+		}
+	});
+
+	agentButton.addEventListener('click', (event) => {
+		event.stopPropagation();
+		setToolsPopoverOpen(false);
+		setAgentMenuOpen(!isAgentMenuOpen);
+	});
+
+	agentButton.addEventListener('keydown', (event) => {
+		if (event.key !== 'ArrowDown' && event.key !== 'ArrowUp') {
+			return;
+		}
+
+		event.preventDefault();
+		setToolsPopoverOpen(false);
+		setAgentMenuOpen(true);
+		focusAgentOption(event.key === 'ArrowDown' ? 1 : -1);
+	});
+
+	agentMenu.addEventListener('click', (event) => {
+		event.stopPropagation();
+		const optionButton = event.target instanceof HTMLElement
+			? event.target.closest<HTMLButtonElement>('.agent-picker-option')
+			: undefined;
+		if (optionButton?.dataset.agentLabel) {
+			selectAgent(optionButton.dataset.agentLabel);
+		}
+	});
+
+	agentMenu.addEventListener('keydown', (event) => {
+		if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
+			event.preventDefault();
+			focusAgentOption(event.key === 'ArrowDown' ? 1 : -1);
+			return;
+		}
+
+		if (event.key === 'Enter' || event.key === ' ') {
+			const optionButton = event.target instanceof HTMLElement
+				? event.target.closest<HTMLButtonElement>('.agent-picker-option')
+				: undefined;
+			if (optionButton?.dataset.agentLabel) {
+				event.preventDefault();
+				selectAgent(optionButton.dataset.agentLabel);
+			}
 		}
 	});
 
 	toolsButton.addEventListener('click', (event) => {
 		event.stopPropagation();
+		setAgentMenuOpen(false);
 		setToolsPopoverOpen(!isToolsPopoverOpen);
 	});
 
@@ -84,16 +183,18 @@ export const createTabController = (options: TabControllerOptions) => {
 	});
 
 	document.addEventListener('click', () => {
-		if (isToolsPopoverOpen) {
-			setToolsPopoverOpen(false);
-		}
+		closeFloatingPanels();
 	});
 
 	document.addEventListener('keydown', (event) => {
-		if (event.key === 'Escape' && isToolsPopoverOpen) {
+		if (event.key === 'Escape' && (isAgentMenuOpen || isToolsPopoverOpen)) {
 			event.preventDefault();
-			setToolsPopoverOpen(false);
-			toolsButton.focus();
+			closeFloatingPanels();
+			if (document.activeElement instanceof HTMLElement && document.activeElement.closest('#cli-agent-menu')) {
+				agentButton.focus();
+			} else {
+				toolsButton.focus();
+			}
 			return;
 		}
 
@@ -121,21 +222,50 @@ export const createTabController = (options: TabControllerOptions) => {
 			return;
 		}
 
-		const previousValue = agentSelect.value;
+		const previousValue = currentAgentLabel;
 		currentAgentSignature = nextAgentSignature;
 		currentAgents = agents;
-		agentSelect.replaceChildren();
+		agentMenu.replaceChildren();
 
 		for (const agent of agents) {
-			const option = document.createElement('option');
-			option.value = agent.label;
-			option.textContent = agent.label;
-			agentSelect.append(option);
+			const option = document.createElement('button');
+			option.className = 'agent-picker-option';
+			option.type = 'button';
+			option.role = 'option';
+			option.dataset.agentLabel = agent.label;
+
+			const icon = options.getAgentIcon(agent.label);
+			if (icon) {
+				option.classList.toggle('has-dark-icon', icon.darkIcon);
+				option.classList.toggle('has-light-icon', icon.lightIcon);
+
+				const image = document.createElement('img');
+				image.className = 'agent-picker-option-icon';
+				image.src = icon.icon;
+				image.alt = '';
+				image.draggable = false;
+				option.append(image);
+			} else {
+				const fallbackIcon = document.createElement('span');
+				fallbackIcon.className = 'agent-picker-option-fallback';
+				fallbackIcon.textContent = agent.label.slice(0, 1);
+				option.append(fallbackIcon);
+			}
+
+			const text = document.createElement('span');
+			text.className = 'agent-picker-option-label';
+			text.textContent = agent.label;
+			option.append(text);
+			agentMenu.append(option);
 		}
 
 		if (agents.some((agent) => agent.label === previousValue)) {
-			agentSelect.value = previousValue;
+			currentAgentLabel = previousValue;
+		} else {
+			currentAgentLabel = agents[0]?.label || '';
 		}
+
+		syncAgentPicker();
 	};
 
 	const render = (sessions: CliSessionSummary[], activeSessionId: string | undefined) => {
