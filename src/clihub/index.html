@@ -160,12 +160,21 @@
 			openModel(selectedModel);
 		};
 
-		const setPaletteOpen = (isOpen, shouldFocus = false) => {
+		const setPaletteOpen = (isOpen, shouldFocus = false, shouldAnimate = true) => {
 			paletteOpen = isOpen;
+			if (!shouldAnimate) {
+				agentIconPalette.style.transition = 'none';
+			}
+
 			document.body.classList.toggle('has-agent-palette', isOpen);
 			agentIconPalette.classList.toggle('is-open', isOpen);
 			agentIconPalette.setAttribute('aria-hidden', isOpen ? 'false' : 'true');
 			saveLauncherState();
+
+			if (!shouldAnimate) {
+				agentIconPalette.offsetHeight;
+				agentIconPalette.style.transition = '';
+			}
 
 			for (const option of agentIconPalette.querySelectorAll('.agent-icon-option')) {
 				option.tabIndex = isOpen ? 0 : -1;
@@ -272,7 +281,7 @@
 		} else {
 			setSelectedModel(selectedModel, false);
 		}
-		setPaletteOpen(paletteOpen);
+		setPaletteOpen(paletteOpen, false, false);
 
 		cliInput.addEventListener('input', () => {
 			const lowerValue = cliInput.value.toLowerCase();
