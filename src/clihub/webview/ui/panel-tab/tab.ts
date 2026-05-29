@@ -13,7 +13,6 @@ export type CliSessionSummary = {
 };
 
 type TabControllerOptions = {
-	onBack: () => void;
 	onCreate: (agent: string) => void;
 	onSwitch: (sessionId: string) => void;
 	onClose: (sessionId: string) => void;
@@ -38,13 +37,11 @@ const getStatusLabel = (session: CliSessionSummary) => {
 };
 
 export const createTabController = (options: TabControllerOptions) => {
-	const backButton = document.querySelector<HTMLButtonElement>('[data-action="back-to-launcher"]');
 	const createButton = getRequiredElement<HTMLButtonElement>('cli-create-button');
 	const agentSelect = getRequiredElement<HTMLSelectElement>('cli-agent-select');
 	const sessionList = getRequiredElement<HTMLDivElement>('cli-session-list');
 	let currentAgents: CliAgentOption[] = [];
 
-	backButton?.addEventListener('click', options.onBack);
 	createButton.addEventListener('click', () => {
 		if (agentSelect.value) {
 			options.onCreate(agentSelect.value);

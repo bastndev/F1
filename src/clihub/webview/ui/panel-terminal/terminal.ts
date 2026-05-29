@@ -7,7 +7,6 @@ type VsCodeApi = {
 };
 
 type ClientMessage =
-	| { type: 'backToLauncher' }
 	| { type: 'cli.ready' }
 	| { type: 'cli.create'; agent: string }
 	| { type: 'cli.input'; sessionId: string; data: string }
@@ -50,7 +49,6 @@ const terminalStatus = document.getElementById('cli-terminal-status') as HTMLDiv
 const terminalBadge = document.getElementById('cli-terminal-badge') as HTMLDivElement;
 
 const tabController = createTabController({
-	onBack: () => vscode.postMessage({ type: 'backToLauncher' }),
 	onCreate: (agent) => vscode.postMessage({ type: 'cli.create', agent }),
 	onSwitch: (sessionId) => vscode.postMessage({ type: 'cli.switch', sessionId }),
 	onClose: (sessionId) => vscode.postMessage({ type: 'cli.close', sessionId })

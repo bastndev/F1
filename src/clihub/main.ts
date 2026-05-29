@@ -75,12 +75,6 @@ export class CliHubViewProvider implements vscode.WebviewViewProvider, vscode.Di
 				return;
 			}
 
-			if (message.type === 'backToLauncher') {
-				this.sessionManager.detach();
-				webviewView.webview.html = await this._getHtmlForWebview(webviewView.webview);
-				return;
-			}
-
 			if (message.type === 'cli.ready') {
 				this.sessionManager.attach(webviewView.webview);
 

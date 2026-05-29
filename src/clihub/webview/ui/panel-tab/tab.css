@@ -16,7 +16,6 @@
 	display: flex;
 	flex-direction: column;
 	gap: 12px;
-	padding-left: 34px;
 	box-sizing: border-box;
 }
 
@@ -203,34 +202,6 @@
 	opacity: 1;
 }
 
-.agent-back-button {
-	position: absolute;
-	top: 14px;
-	left: 14px;
-	width: 26px;
-	height: 26px;
-	border: 1px solid transparent;
-	border-radius: 4px;
-	padding: 0;
-	display: inline-flex;
-	align-items: center;
-	justify-content: center;
-	background: transparent;
-	color: var(--vscode-icon-foreground, var(--vscode-foreground));
-	cursor: pointer;
-	font-size: 22px;
-	line-height: 1;
-}
-
-.agent-back-button:hover {
-	background: var(--vscode-toolbar-hoverBackground, rgba(128, 128, 128, 0.16));
-}
-
-.agent-back-button:focus-visible {
-	outline: 1px solid var(--vscode-focusBorder, var(--vscode-textLink-foreground));
-	outline-offset: 2px;
-}
-
 @media (max-width: 640px), (orientation: portrait) {
 	.layout-left {
 		grid-column: 1 / -1;
@@ -241,12 +212,7 @@
 		padding: 10px 14px;
 	}
 
-	.agent-back-button {
-		top: 24px;
-	}
-
 	.agent-tab-shell {
-		padding-left: 34px;
 		display: grid;
 		grid-template-columns: minmax(100px, 1fr) minmax(120px, 1fr);
 		grid-template-rows: auto;
