@@ -394,32 +394,19 @@
 	position: relative;
 	width: 30px;
 	height: 30px;
-	border-radius: 6px;
+	border: 1px solid color-mix(in srgb, var(--vscode-foreground) 10%, transparent);
+	border-radius: 5px;
 	display: inline-flex;
 	align-items: center;
 	justify-content: center;
 	overflow: hidden;
-	background:
-		linear-gradient(
-			90deg,
-			color-mix(in srgb, var(--vscode-focusBorder, var(--vscode-textLink-foreground)) 18%, transparent),
-			transparent 86%
-		),
-		color-mix(in srgb, var(--vscode-sideBar-background, var(--vscode-editor-background)) 82%, transparent);
+	background: color-mix(in srgb, var(--vscode-sideBar-background, var(--vscode-editor-background)) 58%, transparent);
 }
 
-.agent-session-icon-frame::after {
-	content: "";
-	position: absolute;
-	top: 4px;
-	right: -12px;
-	width: 20px;
-	height: 22px;
-	border-radius: 999px;
-	background: color-mix(in srgb, var(--vscode-focusBorder, var(--vscode-textLink-foreground)) 24%, transparent);
-	filter: blur(8px);
-	opacity: 0.65;
-	pointer-events: none;
+.agent-session-item:hover .agent-session-icon-frame,
+.agent-session-item.is-active .agent-session-icon-frame {
+	border-color: color-mix(in srgb, var(--vscode-focusBorder, var(--vscode-textLink-foreground)) 38%, transparent);
+	background: color-mix(in srgb, var(--vscode-focusBorder, var(--vscode-textLink-foreground)) 9%, transparent);
 }
 
 .agent-session-icon-image {
