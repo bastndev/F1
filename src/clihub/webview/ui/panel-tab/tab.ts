@@ -44,6 +44,13 @@ const getStatusLabel = (session: CliSessionSummary) => {
 	return session.status;
 };
 
+const getProjectLabel = (cwd: string) => {
+	const normalizedPath = cwd.replace(/[\\/]+$/, '');
+	const projectName = normalizedPath.split(/[\\/]/).pop();
+
+	return projectName ? `~/${projectName}` : '~/workspace';
+};
+
 export const createTabController = (options: TabControllerOptions) => {
 	const createButton = getRequiredElement<HTMLButtonElement>('cli-create-button');
 	const agentSelect = getRequiredElement<HTMLSelectElement>('cli-agent-select');
@@ -125,6 +132,10 @@ export const createTabController = (options: TabControllerOptions) => {
 			title.className = 'agent-session-title';
 			title.textContent = session.label;
 
+			const project = document.createElement('div');
+			project.className = 'agent-session-project';
+			project.textContent = getProjectLabel(session.cwd);
+
 			const meta = document.createElement('div');
 			const statusClass = `agent-session-status--${session.status}`;
 			meta.className = 'agent-session-meta';
@@ -132,7 +143,6 @@ export const createTabController = (options: TabControllerOptions) => {
 			status.className = `agent-session-status ${statusClass}`;
 			status.textContent = getStatusLabel(session);
 			meta.append(status);
-			meta.append(` - ${session.commandLine}`);
 
 			const closeButton = document.createElement('button');
 			closeButton.className = 'agent-session-close';
@@ -155,7 +165,7 @@ export const createTabController = (options: TabControllerOptions) => {
 			});
 
 			titleRow.append(dot, title);
-			main.append(titleRow, meta);
+			main.append(titleRow, project, meta);
 			item.append(iconFrame, main, closeButton);
 			sessionList.append(item);
 		}
