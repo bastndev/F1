@@ -37,8 +37,12 @@ const getInstallCommand = (installer: CliInstaller) => {
 	return installer.installCommand;
 };
 
+export const isCliInstalled = (agent: CliAgent) => {
+	return commandExists(agent.command);
+};
+
 export const ensureCliInstalled = async (agent: CliAgent) => {
-	if (await commandExists(agent.command)) {
+	if (await isCliInstalled(agent)) {
 		return true;
 	}
 

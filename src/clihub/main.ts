@@ -2,14 +2,44 @@ import * as vscode from 'vscode';
 import * as fs from 'fs';
 import * as crypto from 'crypto';
 import * as path from 'path';
-import { allowedAgents, getCliAgent } from './webview/core/terminal-cli/agents';
-import { ensureCliInstalled } from './webview/core/terminal-cli/installation';
+import { allowedAgents, cliAgents, getCliAgent } from './webview/core/terminal-cli/agents';
+import { ensureCliInstalled, isCliInstalled } from './webview/core/terminal-cli/installation';
 import { CliSessionManager } from './webview/core/terminal-cli/session-manager';
 import { getCliHubWebviewHtml } from './webview/index';
 
 type CliHubMessage = {
 	type?: string;
 	agent?: string;
+};
+
+type LauncherAgent = {
+	label: string;
+	aliases: string[];
+	iconFile: string;
+	darkIcon?: boolean;
+	lightIcon?: boolean;
+};
+
+const launcherAgents: LauncherAgent[] = [
+	{ label: 'OpenCode', aliases: ['opencode', 'open code', 'op'], iconFile: 'opencode.svg', lightIcon: true },
+	{ label: 'Codex CLI', aliases: ['codex', 'codex cli', 'code', 'co', 'c'], iconFile: 'codex.svg' },
+	{ label: 'Claude Code', aliases: ['claude', 'claude code'], iconFile: 'claudecode.svg' },
+	{ label: 'Antigravity CLI', aliases: ['antigravity', 'antigravity cli', 'agy', 'an', 'ant'], iconFile: 'Antigravity_cli.svg' },
+	{ label: 'GitHub Copilot CLI', aliases: ['github copilot', 'copilot', 'copilot cli'], iconFile: 'github-copilot.svg', darkIcon: true },
+	{ label: 'Codeep', aliases: ['codeep', 'deep'], iconFile: 'Codeep.svg' },
+	{ label: 'Amp', aliases: ['amp'], iconFile: 'amp.svg' },
+	{ label: 'Kiro CLI', aliases: ['kiro', 'kiro cli'], iconFile: 'kiro.svg' },
+	{ label: 'Kilo Code', aliases: ['kilo', 'kilo code', 'code', 'k'], iconFile: 'kilocode.svg', darkIcon: true },
+	{ label: 'Grok', aliases: ['grok'], iconFile: 'grok.svg', darkIcon: true }
+];
+
+const serializeJsonForHtmlScript = (value: unknown) => {
+	return JSON.stringify(value)
+		.replace(/</g, '\\u003c')
+		.replace(/>/g, '\\u003e')
+		.replace(/&/g, '\\u0026')
+		.replace(/\u2028/g, '\\u2028')
+		.replace(/\u2029/g, '\\u2029');
 };
 
 export class CliHubViewProvider implements vscode.WebviewViewProvider, vscode.Disposable {
@@ -19,7 +49,7 @@ export class CliHubViewProvider implements vscode.WebviewViewProvider, vscode.Di
 
 	constructor(private readonly _extensionUri: vscode.Uri) {}
 
-	public resolveWebviewView(
+	public async resolveWebviewView(
 		webviewView: vscode.WebviewView,
 		context: vscode.WebviewViewResolveContext,
 		_token: vscode.CancellationToken,
@@ -29,7 +59,7 @@ export class CliHubViewProvider implements vscode.WebviewViewProvider, vscode.Di
 			localResourceRoots: [this._getCliHubAssetUri()]
 		};
 
-		webviewView.webview.html = this._getHtmlForWebview(webviewView.webview);
+		webviewView.webview.html = await this._getHtmlForWebview(webviewView.webview);
 		webviewView.onDidDispose(() => {
 			this.sessionManager.detach();
 		});
@@ -47,7 +77,7 @@ export class CliHubViewProvider implements vscode.WebviewViewProvider, vscode.Di
 
 			if (message.type === 'backToLauncher') {
 				this.sessionManager.detach();
-				webviewView.webview.html = this._getHtmlForWebview(webviewView.webview);
+				webviewView.webview.html = await this._getHtmlForWebview(webviewView.webview);
 				return;
 			}
 
@@ -74,7 +104,7 @@ export class CliHubViewProvider implements vscode.WebviewViewProvider, vscode.Di
 		this.sessionManager.dispose();
 	}
 
-	private _getHtmlForWebview(webview: vscode.Webview) {
+	private async _getHtmlForWebview(webview: vscode.Webview) {
 		const htmlPath = this._getCliHubAssetUri('index.html');
 		const stylePath = this._getCliHubAssetUri('global.css');
 
@@ -82,14 +112,30 @@ export class CliHubViewProvider implements vscode.WebviewViewProvider, vscode.Di
 		const nonce = this._getNonce();
 		const contentSecurityPolicy = [
 			"default-src 'none'",
+			`img-src ${webview.cspSource} data:`,
 			`style-src ${webview.cspSource}`,
 			`script-src 'nonce-${nonce}'`
 		].join('; ');
 
+		const installedByLabel = new Map(
+			await Promise.all(
+				cliAgents.map(async (agent) => [agent.label, await isCliInstalled(agent)] as const)
+			)
+		);
+		const launcherModels = launcherAgents.map((agent) => ({
+			label: agent.label,
+			aliases: agent.aliases,
+			icon: this._getWebviewUri(webview, 'assets', 'icons-cli', agent.iconFile),
+			darkIcon: agent.darkIcon === true,
+			lightIcon: agent.lightIcon === true,
+			installed: installedByLabel.get(agent.label) === true
+		}));
+
 		let html = fs.readFileSync(htmlPath.fsPath, 'utf8');
 		html = html.replace('${styleUri}', styleUri.toString());
 		html = html.replace('${contentSecurityPolicy}', contentSecurityPolicy);
-		html = html.replace('${nonce}', nonce);
+		html = html.replace(/\$\{nonce\}/g, nonce);
+		html = html.replace('${cliModels}', serializeJsonForHtmlScript(launcherModels));
 
 		html = html.replace('${workspacePath}', this._getWorkspacePath());
 

@@ -8,6 +8,13 @@
 	--selection-color: var(--input-border-left);
 }
 
+/* -- -- --  - Color Tab -> */
+body.has-agent-palette {
+	--accent-color: #e2b719;
+	--input-border-left: #e2b719;
+	--selection-color: #e2b719;
+}
+
 body {
 	display: flex;
 	justify-content: center;
@@ -114,6 +121,121 @@ body {
 	outline-offset: 3px;
 }
 
+.agent-icon-palette {
+	width: 100%;
+	max-height: 0;
+	margin-top: 0;
+	display: grid;
+	grid-template-columns: repeat(10, minmax(34px, 1fr));
+	gap: 6px;
+	overflow: hidden;
+	opacity: 0;
+	transform: translateY(-4px);
+	transition: max-height 180ms ease, margin-top 180ms ease, opacity 140ms ease, transform 180ms ease;
+}
+
+.agent-icon-palette.is-open {
+	max-height: 64px;
+	margin-top: 10px;
+	overflow: visible;
+	opacity: 1;
+	transform: translateY(0);
+}
+
+.agent-icon-option {
+	position: relative;
+	min-width: 0;
+	height: 42px;
+	border: 1px solid transparent;
+	border-radius: 6px;
+	padding: 7px;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	background: color-mix(in srgb, var(--vscode-input-background, rgba(128, 128, 128, 0.1)) 84%, transparent);
+	color: var(--text-color);
+	cursor: pointer;
+	transition: background-color 140ms ease, border-color 140ms ease, opacity 140ms ease, transform 140ms ease;
+}
+
+.agent-icon-option:hover {
+	z-index: 1;
+	border-color: color-mix(in srgb, var(--accent-color) 46%, transparent);
+	background: color-mix(in srgb, var(--accent-color) 12%, var(--vscode-input-background, rgba(128, 128, 128, 0.1)));
+	outline: none;
+	transform: translateY(-1px);
+}
+
+.agent-icon-option:focus-visible {
+	border-color: color-mix(in srgb, var(--accent-color) 54%, transparent);
+	outline: 1px solid var(--accent-color);
+	outline-offset: 1px;
+}
+
+.agent-icon-option.is-missing {
+	opacity: 0.52;
+}
+
+.agent-icon-option.is-missing .agent-icon-image {
+	filter: grayscale(1) saturate(0) opacity(0.72);
+}
+
+/*  Color icon dark and light */
+.vscode-dark .agent-icon-option.has-dark-icon:not(.is-missing) .agent-icon-image {
+	filter: invert(1) brightness(1.22) contrast(0.92);
+}
+
+.vscode-dark .agent-icon-option.has-dark-icon.is-missing .agent-icon-image {
+	filter: grayscale(1) invert(1) brightness(0.72) opacity(0.48);
+}
+
+.vscode-high-contrast .agent-icon-option.has-dark-icon:not(.is-missing) .agent-icon-image {
+	filter: invert(1) brightness(1.42) contrast(1.08);
+}
+
+.vscode-high-contrast .agent-icon-option.has-dark-icon.is-missing .agent-icon-image {
+	filter: grayscale(1) invert(1) brightness(0.86) opacity(0.62);
+}
+
+.vscode-light .agent-icon-option.has-light-icon:not(.is-missing) .agent-icon-image {
+	filter: invert(1) brightness(0.42) contrast(1.45);
+}
+
+.vscode-light .agent-icon-option.has-light-icon.is-missing .agent-icon-image {
+	filter: grayscale(1) invert(1) brightness(0.36) opacity(0.52);
+}
+
+.agent-icon-image {
+	width: 24px;
+	height: 24px;
+	display: block;
+	object-fit: contain;
+	pointer-events: none;
+}
+
+.agent-icon-status {
+	position: absolute;
+	right: 5px;
+	bottom: 5px;
+	width: 6px;
+	height: 6px;
+	border-radius: 999px;
+	background: #2fd67b;
+	font-size: 0;
+	box-shadow: 0 0 0 1px var(--bg-color);
+}
+
+.agent-icon-option.is-missing .agent-icon-status {
+	background: var(--vscode-descriptionForeground, rgba(128, 128, 128, 0.8));
+}
+
+.agent-icon-option.is-preview .agent-icon-status {
+	background: var(--accent-color);
+	box-shadow:
+		0 0 0 1px var(--bg-color),
+		0 0 8px color-mix(in srgb, var(--accent-color) 70%, transparent);
+}
+
 .selected-model {
 	background-color: color-mix(in srgb, var(--vscode-testing-iconPassed, #73c991) 20%, transparent);
 	border-radius: 5px;
@@ -162,4 +284,14 @@ body {
 @keyframes pulseGlow {
 	0%, 100% { filter: drop-shadow(0 0 3px var(--accent-color)); }
 	50% { filter: drop-shadow(0 0 8px var(--accent-color)) brightness(1.2); }
+}
+
+@media (max-width: 560px) {
+	.agent-icon-palette {
+		grid-template-columns: repeat(5, minmax(34px, 1fr));
+	}
+
+	.agent-icon-palette.is-open {
+		max-height: 116px;
+	}
 }
