@@ -190,6 +190,7 @@
 }
 
 .agent-session-dot {
+	display: none;
 	flex: 0 0 auto;
 	width: 7px;
 	height: 7px;
@@ -199,6 +200,7 @@
 }
 
 .agent-session-item.has-unread .agent-session-dot {
+	display: block;
 	opacity: 1;
 }
 

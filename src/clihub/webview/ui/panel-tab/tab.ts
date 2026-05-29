@@ -12,7 +12,6 @@ export type CliAgentIcon = {
 export type CliSessionSummary = {
 	id: string;
 	label: string;
-	commandLine: string;
 	cwd: string;
 	status: 'running' | 'exited' | 'error';
 	hasUnread: boolean;
@@ -56,6 +55,7 @@ export const createTabController = (options: TabControllerOptions) => {
 	const agentSelect = getRequiredElement<HTMLSelectElement>('cli-agent-select');
 	const sessionList = getRequiredElement<HTMLDivElement>('cli-session-list');
 	let currentAgents: CliAgentOption[] = [];
+	let currentAgentSignature = '';
 
 	createButton.addEventListener('click', () => {
 		if (agentSelect.value) {
@@ -64,7 +64,13 @@ export const createTabController = (options: TabControllerOptions) => {
 	});
 
 	const setAgents = (agents: CliAgentOption[]) => {
+		const nextAgentSignature = agents.map((agent) => agent.label).join('\u001f');
+		if (nextAgentSignature === currentAgentSignature) {
+			return;
+		}
+
 		const previousValue = agentSelect.value;
+		currentAgentSignature = nextAgentSignature;
 		currentAgents = agents;
 		agentSelect.replaceChildren();
 
@@ -81,15 +87,15 @@ export const createTabController = (options: TabControllerOptions) => {
 	};
 
 	const render = (sessions: CliSessionSummary[], activeSessionId: string | undefined) => {
-		sessionList.replaceChildren();
-
 		if (sessions.length === 0) {
 			const emptyState = document.createElement('div');
 			emptyState.className = 'agent-session-empty';
 			emptyState.textContent = currentAgents.length ? 'No open CLI sessions.' : 'Loading CLI sessions.';
-			sessionList.append(emptyState);
+			sessionList.replaceChildren(emptyState);
 			return;
 		}
+
+		const fragment = document.createDocumentFragment();
 
 		for (const session of sessions) {
 			const item = document.createElement('div');
@@ -154,6 +160,9 @@ export const createTabController = (options: TabControllerOptions) => {
 				event.stopPropagation();
 				options.onClose(session.id);
 			});
+			closeButton.addEventListener('keydown', (event) => {
+				event.stopPropagation();
+			});
 
 			const switchSession = () => options.onSwitch(session.id);
 			item.addEventListener('click', switchSession);
@@ -167,8 +176,10 @@ export const createTabController = (options: TabControllerOptions) => {
 			titleRow.append(title, dot);
 			main.append(titleRow, project, meta);
 			item.append(iconFrame, main, closeButton);
-			sessionList.append(item);
+			fragment.append(item);
 		}
+
+		sessionList.replaceChildren(fragment);
 	};
 
 	return {

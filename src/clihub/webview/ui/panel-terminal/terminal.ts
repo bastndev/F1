@@ -15,6 +15,7 @@ type ClientMessage =
 	| { type: 'cli.close'; sessionId: string };
 
 type CliSession = CliSessionSummary & {
+	commandLine: string;
 	buffer: string;
 	createdAt: number;
 };
@@ -42,6 +43,18 @@ const sessions = new Map<string, CliSession>();
 const terminals = new Map<string, TerminalView>();
 let activeSessionId: string | undefined;
 
+const isAgentIcon = (value: unknown): value is CliAgentIcon => {
+	if (!value || typeof value !== 'object') {
+		return false;
+	}
+
+	const icon = value as Record<string, unknown>;
+	return typeof icon.label === 'string'
+		&& typeof icon.icon === 'string'
+		&& typeof icon.darkIcon === 'boolean'
+		&& typeof icon.lightIcon === 'boolean';
+};
+
 const parseAgentIcons = () => {
 	const script = document.getElementById('cli-agent-icons');
 	if (!script?.textContent) {
@@ -49,8 +62,12 @@ const parseAgentIcons = () => {
 	}
 
 	try {
-		const icons = JSON.parse(script.textContent) as CliAgentIcon[];
-		return new Map(icons.map((icon) => [icon.label, icon]));
+		const icons = JSON.parse(script.textContent) as unknown;
+		if (!Array.isArray(icons)) {
+			return new Map<string, CliAgentIcon>();
+		}
+
+		return new Map(icons.filter(isAgentIcon).map((icon) => [icon.label, icon]));
 	} catch {
 		return new Map<string, CliAgentIcon>();
 	}
