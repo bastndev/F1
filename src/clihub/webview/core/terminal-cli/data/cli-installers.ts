@@ -11,9 +11,9 @@ export const cliInstallers: CliInstaller[] = [
 		installCommand: 'curl -fsSL https://kilo.ai/cli/install | bash'
 	},
 	{
-		label: 'Goose',
-		command: 'goose',
-		installCommand: 'curl -fsSL https://github.com/aaif-goose/goose/releases/download/stable/download_cli.sh | bash'
+		label: 'Codeep',
+		command: 'codeep',
+		installCommand: 'curl -fsSL https://raw.githubusercontent.com/VladoIvankovic/Codeep/main/install.sh | bash'
 	}
 ];
 
