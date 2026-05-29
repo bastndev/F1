@@ -108,4 +108,16 @@
 	.layout-right {
 		min-height: 0;
 	}
+
+	.cli-terminal-header {
+		display: none;
+	}
+
+	.cli-terminal-shell {
+		grid-template-rows: minmax(0, 1fr);
+	}
+
+	.cli-empty-state {
+		inset: 0;
+	}
 }
