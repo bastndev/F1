@@ -81,13 +81,6 @@ const terminalLabel = document.getElementById('cli-terminal-label') as HTMLDivEl
 const terminalStatus = document.getElementById('cli-terminal-status') as HTMLDivElement;
 const terminalBadge = document.getElementById('cli-terminal-badge') as HTMLDivElement;
 
-const tabController = createTabController({
-	getAgentIcon: (label) => agentIcons.get(label),
-	onCreate: (agent) => vscode.postMessage({ type: 'cli.create', agent }),
-	onSwitch: (sessionId) => vscode.postMessage({ type: 'cli.switch', sessionId }),
-	onClose: (sessionId) => vscode.postMessage({ type: 'cli.close', sessionId })
-});
-
 const cssValue = (name: string, fallback: string) => {
 	const value = getComputedStyle(document.documentElement).getPropertyValue(name).trim();
 	return value || fallback;
@@ -174,6 +167,16 @@ const handleTerminalKey = (event: KeyboardEvent) => {
 
 	return false;
 };
+
+const tabController = createTabController({
+	getAgentIcon: (label) => agentIcons.get(label),
+	onCreate: (agent) => vscode.postMessage({ type: 'cli.create', agent }),
+	onCycleSession: (offset) => {
+		switchSessionByOffset(offset);
+	},
+	onSwitch: (sessionId) => vscode.postMessage({ type: 'cli.switch', sessionId }),
+	onClose: (sessionId) => vscode.postMessage({ type: 'cli.close', sessionId })
+});
 
 const createTerminalView = (session: CliSession) => {
 	const pane = document.createElement('div');

@@ -21,6 +21,7 @@ export type CliSessionSummary = {
 type TabControllerOptions = {
 	getAgentIcon: (label: string) => CliAgentIcon | undefined;
 	onCreate: (agent: string) => void;
+	onCycleSession: (offset: 1 | -1) => void;
 	onSwitch: (sessionId: string) => void;
 	onClose: (sessionId: string) => void;
 };
@@ -54,6 +55,7 @@ export const createTabController = (options: TabControllerOptions) => {
 	const createButton = getRequiredElement<HTMLButtonElement>('cli-create-button');
 	const agentSelect = getRequiredElement<HTMLSelectElement>('cli-agent-select');
 	const sessionList = getRequiredElement<HTMLDivElement>('cli-session-list');
+	const layoutLeft = sessionList.closest<HTMLElement>('.layout-left');
 	let currentAgents: CliAgentOption[] = [];
 	let currentAgentSignature = '';
 
@@ -61,6 +63,15 @@ export const createTabController = (options: TabControllerOptions) => {
 		if (agentSelect.value) {
 			options.onCreate(agentSelect.value);
 		}
+	});
+
+	layoutLeft?.addEventListener('keydown', (event) => {
+		if (event.key !== 'Tab' || event.altKey || event.ctrlKey || event.metaKey) {
+			return;
+		}
+
+		event.preventDefault();
+		options.onCycleSession(event.shiftKey ? -1 : 1);
 	});
 
 	const setAgents = (agents: CliAgentOption[]) => {
