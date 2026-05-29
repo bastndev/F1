@@ -598,7 +598,8 @@
 		gap: 0;
 		overflow-x: auto;
 		overflow-y: hidden;
-		padding: 0 10px 0 1px;
+		padding: 4px 10px 4px 4px;
+		margin: -4px 0 -4px -3px;
 		scrollbar-width: none;
 	}
 
@@ -625,7 +626,7 @@
 		border-color: transparent;
 		opacity: 0.96;
 		transform: scale(1);
-		transition: opacity 120ms ease, transform 120ms ease;
+		transition: opacity 250ms ease, transform 250ms cubic-bezier(0.175, 0.885, 0.32, 1.275), margin 250ms ease;
 	}
 
 	.agent-session-item:nth-child(2) {
@@ -653,21 +654,31 @@
 		transform: scale(0.85);
 	}
 
-	.agent-session-item:hover,
+	.agent-session-item:hover {
+		z-index: 20;
+		opacity: 1;
+		transform: scale(1.1) translateY(-2px);
+		margin-right: -4px;
+		background: transparent;
+	}
+
 	.agent-session-item.is-active {
 		z-index: 20;
 		opacity: 1;
-		transform: scale(1);
+		transform: scale(1.05);
 		background: transparent;
 	}
 
 	.agent-session-icon-frame {
-		width: 31px;
-		height: 31px;
+		width: 33px;
+		height: 33px;
+		box-sizing: border-box;
+		flex-shrink: 0;
 		border: 2px solid var(--vscode-sideBar-background, var(--vscode-editor-background));
 		border-radius: 999px;
 		background: color-mix(in srgb, var(--vscode-input-background, rgba(128, 128, 128, 0.12)) 84%, transparent);
-		box-shadow: 0 0 0 1px color-mix(in srgb, var(--vscode-foreground) 10%, transparent);
+		box-shadow: 0 2px 5px rgba(0, 0, 0, 0.18), 0 0 0 1px color-mix(in srgb, var(--vscode-foreground) 10%, transparent);
+		transition: box-shadow 250ms ease, border-color 250ms ease, background 250ms ease;
 	}
 
 	.agent-session-item:hover .agent-session-icon-frame,
@@ -675,8 +686,9 @@
 		border-color: var(--vscode-sideBar-background, var(--vscode-editor-background));
 		background: color-mix(in srgb, var(--vscode-focusBorder, var(--vscode-textLink-foreground)) 12%, var(--vscode-input-background, rgba(128, 128, 128, 0.12)));
 		box-shadow:
+			0 4px 12px rgba(0, 0, 0, 0.28),
 			0 0 0 1px var(--vscode-focusBorder, var(--vscode-textLink-foreground)),
-			0 0 0 3px color-mix(in srgb, var(--vscode-focusBorder, var(--vscode-textLink-foreground)) 18%, transparent);
+			0 0 0 3px color-mix(in srgb, var(--vscode-focusBorder, var(--vscode-textLink-foreground)) 25%, transparent);
 	}
 
 	.agent-session-icon-image {
