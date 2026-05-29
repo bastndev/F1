@@ -25,6 +25,18 @@ const copyDirectoryAssets = (from, to) => {
 	}
 };
 
+const collectDirectories = (rootDir) => {
+	const directories = [rootDir];
+
+	for (const entry of fs.readdirSync(rootDir, { withFileTypes: true })) {
+		if (entry.isDirectory()) {
+			directories.push(...collectDirectories(path.join(rootDir, entry.name)));
+		}
+	}
+
+	return directories;
+};
+
 const copyCliHubAssets = () => {
 	const outDir = path.join('dist', 'clihub');
 
@@ -33,6 +45,30 @@ const copyCliHubAssets = () => {
 	fs.copyFileSync(path.join('src', 'clihub', 'index.html'), path.join(outDir, 'index.html'));
 	fs.copyFileSync(path.join('src', 'clihub', 'global.css'), path.join(outDir, 'global.css'));
 	copyDirectoryAssets(path.join('src', 'clihub', 'webview'), path.join(outDir, 'webview'));
+};
+
+const watchCliHubAssets = () => {
+	const assetRoot = path.join('src', 'clihub');
+	let copyTimer;
+
+	const scheduleCopy = () => {
+		clearTimeout(copyTimer);
+		copyTimer = setTimeout(copyCliHubAssets, 50);
+	};
+
+	for (const directory of collectDirectories(assetRoot)) {
+		fs.watch(directory, (eventType, fileName) => {
+			if (!fileName) {
+				scheduleCopy();
+				return;
+			}
+
+			const extension = path.extname(fileName.toString());
+			if (extension === '.html' || extension === '.css') {
+				scheduleCopy();
+			}
+		});
+	}
 };
 
 /**
@@ -88,6 +124,7 @@ async function main() {
 	});
 	if (watch) {
 		await ctx.watch();
+		watchCliHubAssets();
 	} else {
 		await ctx.rebuild();
 		await ctx.dispose();
