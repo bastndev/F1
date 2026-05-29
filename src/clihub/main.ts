@@ -45,6 +45,7 @@ const serializeJsonForHtmlScript = (value: unknown) => {
 export class CliHubViewProvider implements vscode.WebviewViewProvider, vscode.Disposable {
 	public static readonly viewType = 'f1.cliHub';
 	private readonly sessionManager = new CliSessionManager();
+	private readonly launcherStateSessionId = crypto.randomBytes(16).toString('hex');
 	private pendingInitialAgent?: string;
 
 	constructor(private readonly _extensionUri: vscode.Uri) {}
@@ -103,6 +104,7 @@ export class CliHubViewProvider implements vscode.WebviewViewProvider, vscode.Di
 		const stylePath = this._getCliHubAssetUri('global.css');
 
 		const styleUri = webview.asWebviewUri(stylePath);
+		const scriptUri = this._getWebviewUri(webview, 'index.js');
 		const nonce = this._getNonce();
 		const contentSecurityPolicy = [
 			"default-src 'none'",
@@ -127,10 +129,11 @@ export class CliHubViewProvider implements vscode.WebviewViewProvider, vscode.Di
 
 		let html = fs.readFileSync(htmlPath.fsPath, 'utf8');
 		html = html.replace('${styleUri}', styleUri.toString());
+		html = html.replace('${scriptUri}', scriptUri);
 		html = html.replace('${contentSecurityPolicy}', contentSecurityPolicy);
 		html = html.replace(/\$\{nonce\}/g, nonce);
 		html = html.replace('${cliModels}', serializeJsonForHtmlScript(launcherModels));
-
+		html = html.replace('${launcherStateSessionId}', serializeJsonForHtmlScript(this.launcherStateSessionId));
 		html = html.replace('${workspacePath}', this._getWorkspacePath());
 
 		return html;

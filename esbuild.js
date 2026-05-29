@@ -147,6 +147,22 @@ async function main() {
 			esbuildProblemMatcherPlugin,
 		],
 	});
+	const launcherCtx = await esbuild.context({
+		entryPoints: [
+			'src/clihub/index.ts'
+		],
+		bundle: true,
+		format: 'iife',
+		minify: production,
+		sourcemap: !production,
+		sourcesContent: false,
+		platform: 'browser',
+		outfile: 'dist/clihub/index.js',
+		logLevel: 'silent',
+		plugins: [
+			esbuildProblemMatcherPlugin,
+		],
+	});
 	const ptyHostCtx = await esbuild.context({
 		entryPoints: [
 			'src/clihub/webview/core/terminal-cli/pty-host.ts'
@@ -168,14 +184,17 @@ async function main() {
 	if (watch) {
 		await extensionCtx.watch();
 		await webviewCtx.watch();
+		await launcherCtx.watch();
 		await ptyHostCtx.watch();
 		watchCliHubAssets();
 	} else {
 		await extensionCtx.rebuild();
 		await webviewCtx.rebuild();
+		await launcherCtx.rebuild();
 		await ptyHostCtx.rebuild();
 		await extensionCtx.dispose();
 		await webviewCtx.dispose();
+		await launcherCtx.dispose();
 		await ptyHostCtx.dispose();
 	}
 }
