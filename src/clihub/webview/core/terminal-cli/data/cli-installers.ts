@@ -1,19 +1,34 @@
 export type CliInstaller = {
 	label: string;
 	command: string;
-	installCommand: string;
-};
+} & (
+	| {
+		install: {
+			unix: string;
+			windows: string;
+		};
+	}
+	| {
+		installCommand: string;
+	}
+);
 
 export const cliInstallers: CliInstaller[] = [
 	{
 		label: 'OpenCode',
 		command: 'opencode',
-		installCommand: 'curl -fsSL https://opencode.ai/install | bash'
+		install: {
+			unix: 'curl -fsSL https://opencode.ai/install | bash',
+			windows: 'curl -fsSL https://opencode.ai/install | bash'
+		}
 	},
 	{
 		label: 'Codex CLI',
 		command: 'codex',
-		installCommand: 'curl -fsSL https://chatgpt.com/codex/install.sh | sh'
+		install: {
+			unix: 'curl -fsSL https://chatgpt.com/codex/install.sh | sh',
+			windows: 'powershell -ExecutionPolicy ByPass -c "irm https://chatgpt.com/codex/install.ps1 | iex"'
+		}
 	},
 	{
 		label: 'Claude Code',

@@ -2,7 +2,7 @@ import * as childProcess from 'child_process';
 import * as os from 'os';
 import * as vscode from 'vscode';
 import type { CliAgent } from './agents';
-import { getCliInstaller } from './data/cli-installers';
+import { getCliInstaller, type CliInstaller } from './data/cli-installers';
 
 const installAction = 'Install';
 const cancelAction = 'Cancel';
@@ -29,6 +29,14 @@ const openInstallTerminal = (label: string, installCommand: string) => {
 	terminal.sendText(installCommand);
 };
 
+const getInstallCommand = (installer: CliInstaller) => {
+	if ('install' in installer) {
+		return os.platform() === 'win32' ? installer.install.windows : installer.install.unix;
+	}
+
+	return installer.installCommand;
+};
+
 export const ensureCliInstalled = async (agent: CliAgent) => {
 	if (await commandExists(agent.command)) {
 		return true;
@@ -51,7 +59,7 @@ export const ensureCliInstalled = async (agent: CliAgent) => {
 	);
 
 	if (choice === installAction) {
-		openInstallTerminal(installer.label, installer.installCommand);
+		openInstallTerminal(installer.label, getInstallCommand(installer));
 	}
 
 	return false;
