@@ -56,6 +56,6 @@ body {
 @media (max-width: 640px), (orientation: portrait) {
 	.agent-shell {
 		grid-template-columns: minmax(0, 1fr);
-		grid-template-rows: 74px minmax(0, 1fr);
+		grid-template-rows: 42px minmax(0, 1fr);
 	}
 }
