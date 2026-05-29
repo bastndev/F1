@@ -5,7 +5,7 @@ import * as path from 'path';
 import { allowedAgents, cliAgents, getCliAgent } from './webview/core/terminal-cli/agents';
 import { ensureCliInstalled, isCliInstalled } from './webview/core/terminal-cli/installation';
 import { CliSessionManager } from './webview/core/terminal-cli/session-manager';
-import { getCliHubWebviewHtml } from './webview/index';
+import { getCliHubWebviewHtml } from './webview/webview';
 
 type CliHubMessage = {
 	type?: string;
