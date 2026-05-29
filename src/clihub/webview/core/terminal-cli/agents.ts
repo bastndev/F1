@@ -6,6 +6,7 @@ export type CliAgent = {
 
 export const cliAgents: CliAgent[] = [
 	{ label: 'OpenCode', command: 'opencode', args: [] },
+	{ label: 'Antigravity CLI', command: 'agy', args: [] },
 	{ label: 'Claude Code', command: 'claude', args: [] },
 	{ label: 'Codex CLI', command: 'codex', args: [] },
 	{ label: 'Gemini CLI', command: 'gemini', args: [] },
