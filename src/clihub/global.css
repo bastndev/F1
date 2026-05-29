@@ -130,6 +130,7 @@ body {
 .agent-icon-palette.is-open {
 	max-height: 64px;
 	margin-top: 10px;
+	overflow: visible;
 	opacity: 1;
 	transform: translateY(0);
 }
@@ -151,6 +152,7 @@ body {
 }
 
 .agent-icon-option:hover {
+	z-index: 1;
 	border-color: color-mix(in srgb, var(--accent-color) 46%, transparent);
 	background: color-mix(in srgb, var(--accent-color) 12%, var(--vscode-input-background, rgba(128, 128, 128, 0.1)));
 	outline: none;
