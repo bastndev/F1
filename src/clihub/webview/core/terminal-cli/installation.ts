@@ -4,8 +4,8 @@ import * as vscode from 'vscode';
 import type { CliAgent } from './agents';
 import { getCliInstaller } from './data/cli-installers';
 
-const installAction = 'Instalar';
-const cancelAction = 'Cancelar';
+const installAction = 'Install';
+const cancelAction = 'Cancel';
 
 const commandExists = (command: string) => {
 	return new Promise<boolean>((resolve) => {
@@ -34,17 +34,18 @@ export const ensureCliInstalled = async (agent: CliAgent) => {
 		return true;
 	}
 
+	// TODO: future multi language nls.json.
 	const installer = getCliInstaller(agent.label);
 	if (!installer) {
 		void vscode.window.showWarningMessage(
-			`${agent.label} no esta instalado o no esta disponible en el PATH.`,
+			`${agent.label} is not installed or is not available in PATH.`,
 			cancelAction
 		);
 		return false;
 	}
 
 	const choice = await vscode.window.showWarningMessage(
-		`${agent.label} no esta instalado. Puedes instalarlo ahora en una terminal integrada.`,
+		`${agent.label} is not installed. You can install it now in an integrated terminal.`,
 		cancelAction,
 		installAction
 	);
