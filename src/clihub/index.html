@@ -36,7 +36,7 @@
 	<div class="workspace-path">${workspacePath}</div>
 
 	<!-- NOTE:--- --- --- --- --- --- -JS-   -->
-	<script id="cli-models" type="application/json">
+	<script id="cli-models" type="application/json" nonce="${nonce}">
 		${cliModels}
 	</script>
 	<script nonce="${nonce}">
@@ -45,7 +45,6 @@
 
 		let currentIndex = 0;
 		let selectedModel = models[0];
-		let canOpenSelectedModel = false;
 		let paletteOpen = false;
 		let invalidInputTimer;
 		const textElement = document.getElementById('ai-model-name');
@@ -95,6 +94,12 @@
 			}
 		};
 
+		const syncPreviewIndicator = () => {
+			for (const option of agentIconPalette.querySelectorAll('.agent-icon-option')) {
+				option.classList.toggle('is-preview', option.dataset.agent === selectedModel?.label);
+			}
+		};
+
 		const showInvalidInput = () => {
 			clearTimeout(invalidInputTimer);
 			inputContainer.classList.add('has-input-error');
@@ -105,20 +110,20 @@
 
 		const setSelectedModel = (model, isSearchResult, matches = []) => {
 			selectedModel = model;
-			canOpenSelectedModel = isSearchResult;
 			textElement.textContent = model.label;
 			inputContainer.classList.toggle('has-selection', isSearchResult);
 			textElement.classList.toggle('selected-model', isSearchResult);
 			renderSecondarySuggestions(isSearchResult ? matches : []);
+			syncPreviewIndicator();
 		};
 
 		const setNoMatch = () => {
 			selectedModel = undefined;
-			canOpenSelectedModel = false;
 			textElement.textContent = 'No matching CLI';
 			inputContainer.classList.remove('has-selection');
 			textElement.classList.remove('selected-model');
 			renderSecondarySuggestions([]);
+			syncPreviewIndicator();
 			showInvalidInput();
 		};
 
@@ -135,7 +140,7 @@
 		};
 
 		const openSelectedModel = () => {
-			if (!selectedModel || !canOpenSelectedModel) {
+			if (!selectedModel) {
 				showInvalidInput();
 				return;
 			}
@@ -159,6 +164,8 @@
 			if (shouldFocus) {
 				agentIconPalette.querySelector('.agent-icon-option')?.focus();
 			}
+
+			syncPreviewIndicator();
 		};
 
 		const renderIconPalette = () => {

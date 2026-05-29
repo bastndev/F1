@@ -205,13 +205,20 @@ body {
 	width: 6px;
 	height: 6px;
 	border-radius: 999px;
-	background: var(--vscode-testing-iconPassed, #73c991);
+	background: #2fd67b;
 	font-size: 0;
 	box-shadow: 0 0 0 1px var(--bg-color);
 }
 
 .agent-icon-option.is-missing .agent-icon-status {
 	background: var(--vscode-descriptionForeground, rgba(128, 128, 128, 0.8));
+}
+
+.agent-icon-option.is-preview .agent-icon-status {
+	background: var(--accent-color);
+	box-shadow:
+		0 0 0 1px var(--bg-color),
+		0 0 8px color-mix(in srgb, var(--accent-color) 70%, transparent);
 }
 
 .selected-model {

@@ -123,7 +123,7 @@ export class CliHubViewProvider implements vscode.WebviewViewProvider, vscode.Di
 		let html = fs.readFileSync(htmlPath.fsPath, 'utf8');
 		html = html.replace('${styleUri}', styleUri.toString());
 		html = html.replace('${contentSecurityPolicy}', contentSecurityPolicy);
-		html = html.replace('${nonce}', nonce);
+		html = html.replace(/\$\{nonce\}/g, nonce);
 		html = html.replace('${cliModels}', JSON.stringify(launcherModels));
 
 		html = html.replace('${workspacePath}', this._getWorkspacePath());
