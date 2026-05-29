@@ -106,6 +106,7 @@ export const createTabController = (options: TabControllerOptions) => {
 		syncAgentPicker();
 		setAgentMenuOpen(false);
 		agentButton.focus();
+		options.onCreate(label);
 	};
 
 	const focusAgentOption = (offset: 1 | -1) => {
