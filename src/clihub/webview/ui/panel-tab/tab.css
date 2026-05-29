@@ -89,14 +89,14 @@
 .agent-session-item {
 	width: 100%;
 	min-width: 0;
-	min-height: 46px;
+	min-height: 50px;
 	border: 1px solid transparent;
 	border-radius: 6px;
-	padding: 7px 7px 7px 9px;
+	padding: 7px;
 	display: grid;
-	grid-template-columns: minmax(0, 1fr) 22px;
+	grid-template-columns: 32px minmax(0, 1fr) 22px;
 	align-items: center;
-	gap: 6px;
+	gap: 8px;
 	box-sizing: border-box;
 	background: transparent;
 	color: var(--vscode-foreground);
@@ -112,6 +112,60 @@
 	border-color: color-mix(in srgb, var(--vscode-focusBorder, var(--vscode-textLink-foreground)) 52%, transparent);
 	background: var(--vscode-list-activeSelectionBackground, rgba(80, 120, 190, 0.22));
 	color: var(--vscode-list-activeSelectionForeground, var(--vscode-foreground));
+}
+
+.agent-session-icon-frame {
+	position: relative;
+	width: 30px;
+	height: 30px;
+	border-radius: 6px;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	overflow: hidden;
+	background:
+		linear-gradient(
+			90deg,
+			color-mix(in srgb, var(--vscode-focusBorder, var(--vscode-textLink-foreground)) 18%, transparent),
+			transparent 86%
+		),
+		color-mix(in srgb, var(--vscode-sideBar-background, var(--vscode-editor-background)) 82%, transparent);
+}
+
+.agent-session-icon-frame::after {
+	content: "";
+	position: absolute;
+	top: 4px;
+	right: -12px;
+	width: 20px;
+	height: 22px;
+	border-radius: 999px;
+	background: color-mix(in srgb, var(--vscode-focusBorder, var(--vscode-textLink-foreground)) 24%, transparent);
+	filter: blur(8px);
+	opacity: 0.65;
+	pointer-events: none;
+}
+
+.agent-session-icon-image {
+	position: relative;
+	z-index: 1;
+	width: 18px;
+	height: 18px;
+	display: block;
+	object-fit: contain;
+	pointer-events: none;
+}
+
+.vscode-dark .agent-session-item.has-dark-icon .agent-session-icon-image {
+	filter: invert(1) brightness(1.22) contrast(0.92);
+}
+
+.vscode-high-contrast .agent-session-item.has-dark-icon .agent-session-icon-image {
+	filter: invert(1) brightness(1.42) contrast(1.08);
+}
+
+.vscode-light .agent-session-item.has-light-icon .agent-session-icon-image {
+	filter: invert(1) brightness(0.42) contrast(1.45);
 }
 
 .agent-session-main {

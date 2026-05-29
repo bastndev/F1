@@ -2,6 +2,13 @@ export type CliAgentOption = {
 	label: string;
 };
 
+export type CliAgentIcon = {
+	label: string;
+	icon: string;
+	darkIcon: boolean;
+	lightIcon: boolean;
+};
+
 export type CliSessionSummary = {
 	id: string;
 	label: string;
@@ -13,6 +20,7 @@ export type CliSessionSummary = {
 };
 
 type TabControllerOptions = {
+	getAgentIcon: (label: string) => CliAgentIcon | undefined;
 	onCreate: (agent: string) => void;
 	onSwitch: (sessionId: string) => void;
 	onClose: (sessionId: string) => void;
@@ -85,6 +93,25 @@ export const createTabController = (options: TabControllerOptions) => {
 			item.setAttribute('role', 'option');
 			item.setAttribute('aria-selected', session.id === activeSessionId ? 'true' : 'false');
 
+			const icon = options.getAgentIcon(session.label);
+			if (icon) {
+				item.classList.toggle('has-dark-icon', icon.darkIcon);
+				item.classList.toggle('has-light-icon', icon.lightIcon);
+			}
+
+			const iconFrame = document.createElement('div');
+			iconFrame.className = 'agent-session-icon-frame';
+			iconFrame.setAttribute('aria-hidden', 'true');
+
+			if (icon) {
+				const image = document.createElement('img');
+				image.className = 'agent-session-icon-image';
+				image.src = icon.icon;
+				image.alt = '';
+				image.draggable = false;
+				iconFrame.append(image);
+			}
+
 			const main = document.createElement('div');
 			main.className = 'agent-session-main';
 
@@ -129,7 +156,7 @@ export const createTabController = (options: TabControllerOptions) => {
 
 			titleRow.append(dot, title);
 			main.append(titleRow, meta);
-			item.append(main, closeButton);
+			item.append(iconFrame, main, closeButton);
 			sessionList.append(item);
 		}
 	};

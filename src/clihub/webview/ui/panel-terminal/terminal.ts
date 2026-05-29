@@ -1,6 +1,6 @@
 import { FitAddon } from '@xterm/addon-fit';
 import { Terminal } from '@xterm/xterm';
-import { createTabController, type CliAgentOption, type CliSessionSummary } from '../panel-tab/tab';
+import { createTabController, type CliAgentIcon, type CliAgentOption, type CliSessionSummary } from '../panel-tab/tab';
 
 type VsCodeApi = {
 	postMessage: (message: ClientMessage) => void;
@@ -42,6 +42,21 @@ const sessions = new Map<string, CliSession>();
 const terminals = new Map<string, TerminalView>();
 let activeSessionId: string | undefined;
 
+const parseAgentIcons = () => {
+	const script = document.getElementById('cli-agent-icons');
+	if (!script?.textContent) {
+		return new Map<string, CliAgentIcon>();
+	}
+
+	try {
+		const icons = JSON.parse(script.textContent) as CliAgentIcon[];
+		return new Map(icons.map((icon) => [icon.label, icon]));
+	} catch {
+		return new Map<string, CliAgentIcon>();
+	}
+};
+
+const agentIcons = parseAgentIcons();
 const layoutRight = document.querySelector<HTMLElement>('.layout-right');
 const terminalStack = document.getElementById('cli-terminal-stack') as HTMLDivElement;
 const terminalLabel = document.getElementById('cli-terminal-label') as HTMLDivElement;
@@ -49,6 +64,7 @@ const terminalStatus = document.getElementById('cli-terminal-status') as HTMLDiv
 const terminalBadge = document.getElementById('cli-terminal-badge') as HTMLDivElement;
 
 const tabController = createTabController({
+	getAgentIcon: (label) => agentIcons.get(label),
 	onCreate: (agent) => vscode.postMessage({ type: 'cli.create', agent }),
 	onSwitch: (sessionId) => vscode.postMessage({ type: 'cli.switch', sessionId }),
 	onClose: (sessionId) => vscode.postMessage({ type: 'cli.close', sessionId })
