@@ -530,7 +530,7 @@
 		border-right: none;
 		border-bottom: 1px solid var(--vscode-editorGroup-border, rgba(128, 128, 128, 0.2));
 		align-items: stretch;
-		padding: 7px 10px 14px 10px;
+		padding: 7px 10px 1px 10px;
 		overflow: visible;
 		z-index: 40;
 	}

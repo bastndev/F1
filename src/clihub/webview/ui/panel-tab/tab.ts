@@ -68,6 +68,9 @@ export const createTabController = (options: TabControllerOptions) => {
 	let isToolsPopoverOpen = false;
 	let lastShortcutSignature = '';
 	let lastShortcutAt = 0;
+	let currentSessionCount = 0;
+	let isAltPressed = false;
+	let isCreateButtonHovered = false;
 
 	const setAgentMenuOpen = (isOpen: boolean) => {
 		isAgentMenuOpen = isOpen;
@@ -164,8 +167,17 @@ export const createTabController = (options: TabControllerOptions) => {
 		}
 	};
 
+	const updateCreateButtonVisuals = () => {
+		if (isAltPressed && isCreateButtonHovered) {
+			createButtonLabel.textContent = '-';
+		} else {
+			createButtonLabel.textContent = currentSessionCount >= 3 && currentSessionCount <= 9 ? String(currentSessionCount) : '+';
+		}
+	};
+
 	const updateCreateButtonLabel = (sessionCount: number) => {
-		createButtonLabel.textContent = sessionCount >= 3 && sessionCount <= 9 ? String(sessionCount) : '+';
+		currentSessionCount = sessionCount;
+		updateCreateButtonVisuals();
 	};
 
 	const handleKeyboardShortcut = (event: KeyboardEvent) => {
@@ -199,8 +211,23 @@ export const createTabController = (options: TabControllerOptions) => {
 		return true;
 	};
 
-	createButton.addEventListener('click', () => {
-		createCurrentAgentSession();
+	createButton.addEventListener('click', (event) => {
+		if (event.altKey) {
+			closeActiveSession();
+		} else {
+			createCurrentAgentSession();
+		}
+	});
+
+	createButton.addEventListener('mouseenter', (event) => {
+		isAltPressed = event.altKey;
+		isCreateButtonHovered = true;
+		updateCreateButtonVisuals();
+	});
+
+	createButton.addEventListener('mouseleave', () => {
+		isCreateButtonHovered = false;
+		updateCreateButtonVisuals();
 	});
 
 	agentButton.addEventListener('click', (event) => {
@@ -262,7 +289,19 @@ export const createTabController = (options: TabControllerOptions) => {
 		closeFloatingPanels();
 	});
 
+	document.addEventListener('keyup', (event) => {
+		if (event.key === 'Alt') {
+			isAltPressed = false;
+			updateCreateButtonVisuals();
+		}
+	});
+
 	document.addEventListener('keydown', (event) => {
+		if (event.key === 'Alt') {
+			isAltPressed = true;
+			updateCreateButtonVisuals();
+		}
+
 		if (handleKeyboardShortcut(event)) {
 			return;
 		}
