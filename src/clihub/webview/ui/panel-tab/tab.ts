@@ -153,6 +153,7 @@ export const createTabController = (options: TabControllerOptions) => {
 			const closeButton = document.createElement('button');
 			closeButton.className = 'agent-session-close';
 			closeButton.type = 'button';
+			closeButton.tabIndex = -1;
 			closeButton.title = 'Close CLI';
 			closeButton.setAttribute('aria-label', `Close ${session.label}`);
 			closeButton.textContent = 'x';
@@ -161,7 +162,9 @@ export const createTabController = (options: TabControllerOptions) => {
 				options.onClose(session.id);
 			});
 			closeButton.addEventListener('keydown', (event) => {
-				event.stopPropagation();
+				if (event.key !== 'Tab') {
+					event.stopPropagation();
+				}
 			});
 
 			const switchSession = () => options.onSwitch(session.id);

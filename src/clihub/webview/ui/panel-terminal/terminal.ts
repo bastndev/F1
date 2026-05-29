@@ -42,6 +42,7 @@ const vscode = acquireVsCodeApi();
 const sessions = new Map<string, CliSession>();
 const terminals = new Map<string, TerminalView>();
 let activeSessionId: string | undefined;
+let pendingTabSwitchSessionId: string | undefined;
 
 const isAgentIcon = (value: unknown): value is CliAgentIcon => {
 	if (!value || typeof value !== 'object') {
@@ -136,6 +137,44 @@ const fitTerminal = (sessionId: string | undefined = activeSessionId) => {
 	}
 };
 
+const switchSessionByOffset = (offset: 1 | -1) => {
+	if (pendingTabSwitchSessionId) {
+		return false;
+	}
+
+	const sessionIds = [...sessions.keys()];
+	if (sessionIds.length === 0) {
+		return false;
+	}
+
+	const activeIndex = activeSessionId ? sessionIds.indexOf(activeSessionId) : -1;
+	const currentIndex = activeIndex >= 0 ? activeIndex : 0;
+	const nextIndex = (currentIndex + offset + sessionIds.length) % sessionIds.length;
+	const nextSessionId = sessionIds[nextIndex];
+	if (!nextSessionId || nextSessionId === activeSessionId) {
+		return false;
+	}
+
+	pendingTabSwitchSessionId = nextSessionId;
+	vscode.postMessage({ type: 'cli.switch', sessionId: nextSessionId });
+	return true;
+};
+
+const handleTerminalKey = (event: KeyboardEvent) => {
+	if (event.key !== 'Tab' || event.altKey || event.ctrlKey || event.metaKey) {
+		return true;
+	}
+
+	event.preventDefault();
+	event.stopPropagation();
+
+	if (event.type === 'keydown' && !event.repeat) {
+		switchSessionByOffset(event.shiftKey ? -1 : 1);
+	}
+
+	return false;
+};
+
 const createTerminalView = (session: CliSession) => {
 	const pane = document.createElement('div');
 	pane.className = 'cli-terminal-pane';
@@ -151,6 +190,7 @@ const createTerminalView = (session: CliSession) => {
 		scrollback: 8000,
 		theme: getTerminalTheme()
 	});
+	terminal.attachCustomKeyEventHandler(handleTerminalKey);
 	const fitAddon = new FitAddon();
 	terminal.loadAddon(fitAddon);
 	terminal.open(pane);
@@ -217,6 +257,10 @@ const syncState = (message: Extract<ServerMessage, { type: 'cli.state' }>) => {
 		if (!terminals.has(session.id)) {
 			createTerminalView(session);
 		}
+	}
+
+	if (pendingTabSwitchSessionId && (!sessions.has(pendingTabSwitchSessionId) || pendingTabSwitchSessionId === activeSessionId)) {
+		pendingTabSwitchSessionId = undefined;
 	}
 
 	removeClosedTerminals(openSessionIds);
