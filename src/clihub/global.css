@@ -176,6 +176,7 @@ body {
 	opacity: 0.6;
 }
 
+/* --- --- -- Animation -> */
 @keyframes pulseGlow {
 	0%, 100% { filter: drop-shadow(0 0 3px var(--accent-color)); }
 	50% { filter: drop-shadow(0 0 8px var(--accent-color)) brightness(1.2); }
