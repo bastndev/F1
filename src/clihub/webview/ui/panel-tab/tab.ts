@@ -362,7 +362,7 @@ export const createTabController = (options: TabControllerOptions) => {
 
 		const fragment = document.createDocumentFragment();
 
-		for (const session of [...sessions].reverse()) {
+		for (const session of sessions) {
 			const item = document.createElement('div');
 			item.className = 'agent-session-item';
 			item.classList.toggle('is-active', session.id === activeSessionId);
