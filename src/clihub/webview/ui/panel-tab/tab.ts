@@ -53,18 +53,231 @@ const getProjectLabel = (cwd: string) => {
 
 export const createTabController = (options: TabControllerOptions) => {
 	const createButton = getRequiredElement<HTMLButtonElement>('cli-create-button');
-	const agentSelect = getRequiredElement<HTMLSelectElement>('cli-agent-select');
+	const createButtonLabel = getRequiredElement<HTMLSpanElement>('cli-create-button-label');
+	const toolsButton = getRequiredElement<HTMLButtonElement>('cli-tools-button');
+	const toolsPopover = getRequiredElement<HTMLDivElement>('cli-tools-popover');
+	const agentButton = getRequiredElement<HTMLButtonElement>('cli-agent-button');
+	const agentLabel = getRequiredElement<HTMLSpanElement>('cli-agent-label');
+	const agentMenu = getRequiredElement<HTMLDivElement>('cli-agent-menu');
 	const sessionList = getRequiredElement<HTMLDivElement>('cli-session-list');
 	let currentAgents: CliAgentOption[] = [];
 	let currentAgentSignature = '';
+	let currentAgentLabel = '';
+	let currentActiveSessionId: string | undefined;
+	let isAgentMenuOpen = false;
+	let isToolsPopoverOpen = false;
+	let lastShortcutSignature = '';
+	let lastShortcutAt = 0;
+
+	const setAgentMenuOpen = (isOpen: boolean) => {
+		isAgentMenuOpen = isOpen;
+		agentMenu.hidden = !isOpen;
+		agentButton.classList.toggle('is-open', isOpen);
+		agentButton.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+	};
+
+	const setToolsPopoverOpen = (isOpen: boolean) => {
+		isToolsPopoverOpen = isOpen;
+		toolsPopover.hidden = !isOpen;
+		toolsButton.classList.toggle('is-open', isOpen);
+		toolsButton.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+	};
+
+	const closeFloatingPanels = () => {
+		if (isAgentMenuOpen) {
+			setAgentMenuOpen(false);
+		}
+
+		if (isToolsPopoverOpen) {
+			setToolsPopoverOpen(false);
+		}
+	};
+
+	const syncAgentPicker = () => {
+		const hasAgents = currentAgents.length > 0;
+		agentButton.disabled = !hasAgents;
+		agentLabel.textContent = currentAgentLabel || (hasAgents ? currentAgents[0].label : 'Loading CLI');
+
+		for (const option of Array.from(agentMenu.querySelectorAll<HTMLButtonElement>('.agent-picker-option'))) {
+			const isSelected = option.dataset.agentLabel === currentAgentLabel;
+			option.classList.toggle('is-selected', isSelected);
+			option.setAttribute('aria-selected', isSelected ? 'true' : 'false');
+		}
+	};
+
+	const selectAgent = (label: string) => {
+		currentAgentLabel = label;
+		syncAgentPicker();
+		setAgentMenuOpen(false);
+		agentButton.focus();
+		options.onCreate(label);
+	};
+
+	const focusAgentOption = (offset: 1 | -1) => {
+		const optionButtons = Array.from(agentMenu.querySelectorAll<HTMLButtonElement>('.agent-picker-option'));
+		if (optionButtons.length === 0) {
+			return;
+		}
+
+		const activeIndex = optionButtons.findIndex((option) => option === document.activeElement);
+		const selectedIndex = optionButtons.findIndex((option) => option.dataset.agentLabel === currentAgentLabel);
+		const currentIndex = activeIndex >= 0 ? activeIndex : Math.max(selectedIndex, 0);
+		const nextIndex = (currentIndex + offset + optionButtons.length) % optionButtons.length;
+		optionButtons[nextIndex]?.focus();
+	};
+
+	const isCreateShortcut = (event: KeyboardEvent) => {
+		return event.altKey
+			&& !event.ctrlKey
+			&& !event.metaKey
+			&& (event.key === '+' || event.code === 'Equal' || event.code === 'NumpadAdd');
+	};
+
+	const isCloseShortcut = (event: KeyboardEvent) => {
+		return event.altKey
+			&& !event.ctrlKey
+			&& !event.metaKey
+			&& (event.key === '-' || event.code === 'Minus' || event.code === 'NumpadSubtract');
+	};
+
+	const getShortcutAction = (event: KeyboardEvent) => {
+		if (isCreateShortcut(event)) {
+			return 'create';
+		}
+
+		if (isCloseShortcut(event)) {
+			return 'close';
+		}
+
+		return undefined;
+	};
+
+	const createCurrentAgentSession = () => {
+		if (currentAgentLabel) {
+			options.onCreate(currentAgentLabel);
+		}
+	};
+
+	const closeActiveSession = () => {
+		if (currentActiveSessionId) {
+			options.onClose(currentActiveSessionId);
+		}
+	};
+
+	const updateCreateButtonLabel = (sessionCount: number) => {
+		createButtonLabel.textContent = sessionCount >= 3 && sessionCount <= 9 ? String(sessionCount) : '+';
+	};
+
+	const handleKeyboardShortcut = (event: KeyboardEvent) => {
+		if (event.type !== 'keydown' || event.repeat) {
+			return false;
+		}
+
+		const action = getShortcutAction(event);
+		if (!action) {
+			return false;
+		}
+
+		event.preventDefault();
+		event.stopPropagation();
+
+		const shortcutSignature = `${action}:${event.code}:${event.key}`;
+		const now = Date.now();
+		if (shortcutSignature === lastShortcutSignature && now - lastShortcutAt < 180) {
+			return true;
+		}
+
+		lastShortcutSignature = shortcutSignature;
+		lastShortcutAt = now;
+
+		if (action === 'create') {
+			createCurrentAgentSession();
+			return true;
+		}
+
+		closeActiveSession();
+		return true;
+	};
 
 	createButton.addEventListener('click', () => {
-		if (agentSelect.value) {
-			options.onCreate(agentSelect.value);
+		createCurrentAgentSession();
+	});
+
+	agentButton.addEventListener('click', (event) => {
+		event.stopPropagation();
+		setToolsPopoverOpen(false);
+		setAgentMenuOpen(!isAgentMenuOpen);
+	});
+
+	agentButton.addEventListener('keydown', (event) => {
+		if (event.key !== 'ArrowDown' && event.key !== 'ArrowUp') {
+			return;
+		}
+
+		event.preventDefault();
+		setToolsPopoverOpen(false);
+		setAgentMenuOpen(true);
+		focusAgentOption(event.key === 'ArrowDown' ? 1 : -1);
+	});
+
+	agentMenu.addEventListener('click', (event) => {
+		event.stopPropagation();
+		const optionButton = event.target instanceof HTMLElement
+			? event.target.closest<HTMLButtonElement>('.agent-picker-option')
+			: undefined;
+		if (optionButton?.dataset.agentLabel) {
+			selectAgent(optionButton.dataset.agentLabel);
 		}
 	});
 
+	agentMenu.addEventListener('keydown', (event) => {
+		if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
+			event.preventDefault();
+			focusAgentOption(event.key === 'ArrowDown' ? 1 : -1);
+			return;
+		}
+
+		if (event.key === 'Enter' || event.key === ' ') {
+			const optionButton = event.target instanceof HTMLElement
+				? event.target.closest<HTMLButtonElement>('.agent-picker-option')
+				: undefined;
+			if (optionButton?.dataset.agentLabel) {
+				event.preventDefault();
+				selectAgent(optionButton.dataset.agentLabel);
+			}
+		}
+	});
+
+	toolsButton.addEventListener('click', (event) => {
+		event.stopPropagation();
+		setAgentMenuOpen(false);
+		setToolsPopoverOpen(!isToolsPopoverOpen);
+	});
+
+	toolsPopover.addEventListener('click', (event) => {
+		event.stopPropagation();
+	});
+
+	document.addEventListener('click', () => {
+		closeFloatingPanels();
+	});
+
 	document.addEventListener('keydown', (event) => {
+		if (handleKeyboardShortcut(event)) {
+			return;
+		}
+
+		if (event.key === 'Escape' && (isAgentMenuOpen || isToolsPopoverOpen)) {
+			event.preventDefault();
+			closeFloatingPanels();
+			if (document.activeElement instanceof HTMLElement && document.activeElement.closest('#cli-agent-menu')) {
+				agentButton.focus();
+			} else {
+				toolsButton.focus();
+			}
+			return;
+		}
+
 		if (event.key !== 'Tab' || event.altKey || event.ctrlKey || event.metaKey) {
 			return;
 		}
@@ -89,24 +302,56 @@ export const createTabController = (options: TabControllerOptions) => {
 			return;
 		}
 
-		const previousValue = agentSelect.value;
+		const previousValue = currentAgentLabel;
 		currentAgentSignature = nextAgentSignature;
 		currentAgents = agents;
-		agentSelect.replaceChildren();
+		agentMenu.replaceChildren();
 
 		for (const agent of agents) {
-			const option = document.createElement('option');
-			option.value = agent.label;
-			option.textContent = agent.label;
-			agentSelect.append(option);
+			const option = document.createElement('button');
+			option.className = 'agent-picker-option';
+			option.type = 'button';
+			option.role = 'option';
+			option.dataset.agentLabel = agent.label;
+
+			const icon = options.getAgentIcon(agent.label);
+			if (icon) {
+				option.classList.toggle('has-dark-icon', icon.darkIcon);
+				option.classList.toggle('has-light-icon', icon.lightIcon);
+
+				const image = document.createElement('img');
+				image.className = 'agent-picker-option-icon';
+				image.src = icon.icon;
+				image.alt = '';
+				image.draggable = false;
+				option.append(image);
+			} else {
+				const fallbackIcon = document.createElement('span');
+				fallbackIcon.className = 'agent-picker-option-fallback';
+				fallbackIcon.textContent = agent.label.slice(0, 1);
+				option.append(fallbackIcon);
+			}
+
+			const text = document.createElement('span');
+			text.className = 'agent-picker-option-label';
+			text.textContent = agent.label;
+			option.append(text);
+			agentMenu.append(option);
 		}
 
 		if (agents.some((agent) => agent.label === previousValue)) {
-			agentSelect.value = previousValue;
+			currentAgentLabel = previousValue;
+		} else {
+			currentAgentLabel = agents[0]?.label || '';
 		}
+
+		syncAgentPicker();
 	};
 
 	const render = (sessions: CliSessionSummary[], activeSessionId: string | undefined) => {
+		currentActiveSessionId = activeSessionId;
+		updateCreateButtonLabel(sessions.length);
+
 		if (sessions.length === 0) {
 			const emptyState = document.createElement('div');
 			emptyState.className = 'agent-session-empty';
@@ -206,6 +451,7 @@ export const createTabController = (options: TabControllerOptions) => {
 	};
 
 	return {
+		handleKeyboardShortcut,
 		render,
 		setAgents
 	};

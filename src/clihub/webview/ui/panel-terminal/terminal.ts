@@ -153,7 +153,21 @@ const switchSessionByOffset = (offset: 1 | -1) => {
 	return true;
 };
 
+const tabController = createTabController({
+	getAgentIcon: (label) => agentIcons.get(label),
+	onCreate: (agent) => vscode.postMessage({ type: 'cli.create', agent }),
+	onCycleSession: (offset) => {
+		switchSessionByOffset(offset);
+	},
+	onSwitch: (sessionId) => vscode.postMessage({ type: 'cli.switch', sessionId }),
+	onClose: (sessionId) => vscode.postMessage({ type: 'cli.close', sessionId })
+});
+
 const handleTerminalKey = (event: KeyboardEvent) => {
+	if (tabController.handleKeyboardShortcut(event)) {
+		return false;
+	}
+
 	if (event.key !== 'Tab' || event.altKey || event.ctrlKey || event.metaKey) {
 		return true;
 	}
@@ -167,16 +181,6 @@ const handleTerminalKey = (event: KeyboardEvent) => {
 
 	return false;
 };
-
-const tabController = createTabController({
-	getAgentIcon: (label) => agentIcons.get(label),
-	onCreate: (agent) => vscode.postMessage({ type: 'cli.create', agent }),
-	onCycleSession: (offset) => {
-		switchSessionByOffset(offset);
-	},
-	onSwitch: (sessionId) => vscode.postMessage({ type: 'cli.switch', sessionId }),
-	onClose: (sessionId) => vscode.postMessage({ type: 'cli.close', sessionId })
-});
 
 const createTerminalView = (session: CliSession) => {
 	const pane = document.createElement('div');
