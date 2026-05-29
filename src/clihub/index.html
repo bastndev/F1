@@ -95,12 +95,6 @@
 			}
 		};
 
-		const syncPaletteSelection = () => {
-			for (const option of agentIconPalette.querySelectorAll('.agent-icon-option')) {
-				option.classList.toggle('is-selected', option.dataset.agent === selectedModel?.label);
-			}
-		};
-
 		const showInvalidInput = () => {
 			clearTimeout(invalidInputTimer);
 			inputContainer.classList.add('has-input-error');
@@ -116,7 +110,6 @@
 			inputContainer.classList.toggle('has-selection', isSearchResult);
 			textElement.classList.toggle('selected-model', isSearchResult);
 			renderSecondarySuggestions(isSearchResult ? matches : []);
-			syncPaletteSelection();
 		};
 
 		const setNoMatch = () => {
@@ -126,7 +119,6 @@
 			inputContainer.classList.remove('has-selection');
 			textElement.classList.remove('selected-model');
 			renderSecondarySuggestions([]);
-			syncPaletteSelection();
 			showInvalidInput();
 		};
 
@@ -164,10 +156,8 @@
 				return;
 			}
 
-			syncPaletteSelection();
 			if (shouldFocus) {
-				const focusedOption = agentIconPalette.querySelector('.agent-icon-option.is-selected') || agentIconPalette.querySelector('.agent-icon-option');
-				focusedOption?.focus();
+				agentIconPalette.querySelector('.agent-icon-option')?.focus();
 			}
 		};
 
@@ -240,8 +230,6 @@
 
 				agentIconPalette.append(option);
 			}
-
-			syncPaletteSelection();
 		};
 
 		cliInput.focus();
@@ -275,11 +263,11 @@
 				return;
 			}
 
-			if (event.key === 'Tab' && !event.shiftKey) {
-				event.preventDefault();
-				setPaletteOpen(!paletteOpen, true);
-				return;
-			}
+				if (event.key === 'Tab' && !event.shiftKey) {
+					event.preventDefault();
+					setPaletteOpen(!paletteOpen);
+					return;
+				}
 
 			if (event.key === 'Escape' && paletteOpen) {
 				event.preventDefault();
