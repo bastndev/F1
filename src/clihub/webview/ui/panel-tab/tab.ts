@@ -55,7 +55,6 @@ export const createTabController = (options: TabControllerOptions) => {
 	const createButton = getRequiredElement<HTMLButtonElement>('cli-create-button');
 	const agentSelect = getRequiredElement<HTMLSelectElement>('cli-agent-select');
 	const sessionList = getRequiredElement<HTMLDivElement>('cli-session-list');
-	const layoutLeft = sessionList.closest<HTMLElement>('.layout-left');
 	let currentAgents: CliAgentOption[] = [];
 	let currentAgentSignature = '';
 
@@ -65,8 +64,18 @@ export const createTabController = (options: TabControllerOptions) => {
 		}
 	});
 
-	layoutLeft?.addEventListener('keydown', (event) => {
+	document.addEventListener('keydown', (event) => {
 		if (event.key !== 'Tab' || event.altKey || event.ctrlKey || event.metaKey) {
+			return;
+		}
+
+		const target = event.target instanceof HTMLElement ? event.target : undefined;
+		const activeElement = document.activeElement instanceof HTMLElement ? document.activeElement : undefined;
+		if (target?.closest('.xterm') || activeElement?.closest('.xterm')) {
+			return;
+		}
+
+		if (!sessionList.querySelector('.agent-session-item')) {
 			return;
 		}
 
