@@ -74,7 +74,7 @@ export class CliHubViewProvider implements vscode.WebviewViewProvider {
 		const nonce = this._getNonce();
 		const styleUris = [
 			this._getWebviewUri(webview, 'global.css'),
-			this._getWebviewUri(webview, 'webview', 'layout.css'),
+			this._getWebviewUri(webview, 'webview', 'ui', 'shared', 'styles', 'layout.css'),
 			this._getWebviewUri(webview, 'webview', 'ui', 'panel-tab', 'tab.css'),
 			this._getWebviewUri(webview, 'webview', 'ui', 'panel-translate', 'translate.css'),
 			this._getWebviewUri(webview, 'webview', 'ui', 'panel-terminal', 'terminal.css')
