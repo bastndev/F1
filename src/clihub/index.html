@@ -42,13 +42,17 @@
   		  { label: "Claude Code", aliases: ["claude", "claude code"] },
   		  { label: "Antigravity CLI", aliases: ["antigravity", "antigravity cli", "agy", "an", "ant"] },
   		  { label: "GitHub Copilot CLI", aliases: ["github copilot", "copilot", "copilot cli"] },
+  		  { label: "Codeep", aliases: ["codeep", "deep"] },
   		  { label: "Amp", aliases: ["amp"] },
   		  { label: "Kiro CLI", aliases: ["kiro", "kiro cli"] },
-  		  { label: "Kilo Code", aliases: ["kilo", "kilo code", "code","k"] }
+  		  { label: "Kilo Code", aliases: ["kilo", "kilo code", "code","k"] },
+  		  { label: "Grok", aliases: ["grok"] }
 		];
 	
 		let currentIndex = 0;
 		let selectedModel = models[0];
+		let canOpenSelectedModel = false;
+		let invalidInputTimer;
 		const textElement = document.getElementById('ai-model-name');
 		const secondarySuggestions = document.getElementById('secondary-suggestions');
 		const cliInput = document.getElementById('cli-input');
@@ -95,16 +99,36 @@
 			}
 		};
 
+		const showInvalidInput = () => {
+			clearTimeout(invalidInputTimer);
+			inputContainer.classList.add('has-input-error');
+			invalidInputTimer = setTimeout(() => {
+				inputContainer.classList.remove('has-input-error');
+			}, 1000);
+		};
+
 		const setSelectedModel = (model, isSearchResult, matches = []) => {
 			selectedModel = model;
+			canOpenSelectedModel = isSearchResult;
 			textElement.textContent = model.label;
 			inputContainer.classList.toggle('has-selection', isSearchResult);
 			textElement.classList.toggle('selected-model', isSearchResult);
 			renderSecondarySuggestions(isSearchResult ? matches : []);
 		};
 
+		const setNoMatch = () => {
+			selectedModel = undefined;
+			canOpenSelectedModel = false;
+			textElement.textContent = 'No matching CLI';
+			inputContainer.classList.remove('has-selection');
+			textElement.classList.remove('selected-model');
+			renderSecondarySuggestions([]);
+			showInvalidInput();
+		};
+
 		const openSelectedModel = () => {
-			if (!selectedModel) {
+			if (!selectedModel || !canOpenSelectedModel) {
+				showInvalidInput();
 				return;
 			}
 
@@ -133,6 +157,8 @@
 			const match = matches[0]?.model;
 			if (match) {
 				setSelectedModel(match, true, matches);
+			} else {
+				setNoMatch();
 			}
 		});
 

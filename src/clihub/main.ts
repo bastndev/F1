@@ -2,7 +2,8 @@ import * as vscode from 'vscode';
 import * as fs from 'fs';
 import * as crypto from 'crypto';
 import * as path from 'path';
-import { allowedAgents } from './webview/core/terminal-cli/agents';
+import { allowedAgents, getCliAgent } from './webview/core/terminal-cli/agents';
+import { ensureCliInstalled } from './webview/core/terminal-cli/installation';
 import { CliSessionManager } from './webview/core/terminal-cli/session-manager';
 import { getCliHubWebviewHtml } from './webview/index';
 
@@ -32,8 +33,13 @@ export class CliHubViewProvider implements vscode.WebviewViewProvider, vscode.Di
 		webviewView.onDidDispose(() => {
 			this.sessionManager.detach();
 		});
-		webviewView.webview.onDidReceiveMessage((message: CliHubMessage) => {
+		webviewView.webview.onDidReceiveMessage(async (message: CliHubMessage) => {
 			if (message.type === 'openAgent' && message.agent && allowedAgents.has(message.agent)) {
+				const agent = getCliAgent(message.agent);
+				if (!agent || !(await ensureCliInstalled(agent))) {
+					return;
+				}
+
 				this.pendingInitialAgent = message.agent;
 				webviewView.webview.html = this._getAgentHtmlForWebview(webviewView.webview, message.agent);
 				return;
@@ -49,7 +55,7 @@ export class CliHubViewProvider implements vscode.WebviewViewProvider, vscode.Di
 				this.sessionManager.attach(webviewView.webview);
 
 				if (this.pendingInitialAgent) {
-					this.sessionManager.createSession(this.pendingInitialAgent);
+					void this.sessionManager.createSession(this.pendingInitialAgent);
 					this.pendingInitialAgent = undefined;
 				} else {
 					this.sessionManager.postState();

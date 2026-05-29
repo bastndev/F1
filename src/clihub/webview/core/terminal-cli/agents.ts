@@ -10,9 +10,11 @@ export const cliAgents: CliAgent[] = [
 	{ label: 'Claude Code', command: 'claude', args: [] },
 	{ label: 'Antigravity CLI', command: 'agy', args: [] },
 	{ label: 'GitHub Copilot CLI', command: 'copilot', args: [] },
+	{ label: 'Codeep', command: 'codeep', args: [] },
 	{ label: 'Amp', command: 'amp', args: [] },
 	{ label: 'Kiro CLI', command: 'kiro-cli', args: [] },
-	{ label: 'Kilo Code', command: 'kilo', args: [] }
+	{ label: 'Kilo Code', command: 'kilo', args: [] },
+	{ label: 'Grok', command: 'grok', args: [] }
 ];
 
 export const allowedAgents = new Set(cliAgents.map((agent) => agent.label));

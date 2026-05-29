@@ -56,6 +56,7 @@ body {
 	flex-direction: column;
 	padding: 14px 18px;
 	box-sizing: border-box;
+	transition: background-color 160ms ease, border-left-color 160ms ease;
 }
 
 .input-container.has-selection {
@@ -67,6 +68,11 @@ body {
 			transparent 100%
 		),
 		var(--input-bg);
+}
+
+.input-container.has-input-error {
+	border-left-color: var(--vscode-inputValidation-errorBorder, var(--vscode-errorForeground, #f48771));
+	background-color: var(--vscode-inputValidation-errorBackground, color-mix(in srgb, var(--vscode-errorForeground, #f48771) 10%, var(--input-bg)));
 }
 
 .input-wrapper {
