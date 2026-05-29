@@ -42,10 +42,11 @@
 	<script nonce="${nonce}">
 		const vscode = acquireVsCodeApi();
 		const models = JSON.parse(document.getElementById('cli-models').textContent);
+		const persistedState = vscode.getState() || {};
 
-		let currentIndex = 0;
-		let selectedModel = models[0];
-		let paletteOpen = false;
+		let currentIndex = Number.isInteger(persistedState.currentIndex) ? persistedState.currentIndex : 0;
+		let selectedModel = models.find((model) => model.label === persistedState.selectedAgent) || models[currentIndex] || models[0];
+		let paletteOpen = persistedState.paletteOpen === true;
 		let invalidInputTimer;
 		const textElement = document.getElementById('ai-model-name');
 		const secondarySuggestions = document.getElementById('secondary-suggestions');
@@ -100,6 +101,15 @@
 			}
 		};
 
+		const saveLauncherState = () => {
+			vscode.setState({
+				currentIndex,
+				inputValue: cliInput.value,
+				paletteOpen,
+				selectedAgent: selectedModel?.label
+			});
+		};
+
 		const showInvalidInput = () => {
 			clearTimeout(invalidInputTimer);
 			inputContainer.classList.add('has-input-error');
@@ -115,6 +125,7 @@
 			textElement.classList.toggle('selected-model', isSearchResult);
 			renderSecondarySuggestions(isSearchResult ? matches : []);
 			syncPreviewIndicator();
+			saveLauncherState();
 		};
 
 		const setNoMatch = () => {
@@ -125,6 +136,7 @@
 			renderSecondarySuggestions([]);
 			syncPreviewIndicator();
 			showInvalidInput();
+			saveLauncherState();
 		};
 
 		const openModel = (model) => {
@@ -153,6 +165,7 @@
 			document.body.classList.toggle('has-agent-palette', isOpen);
 			agentIconPalette.classList.toggle('is-open', isOpen);
 			agentIconPalette.setAttribute('aria-hidden', isOpen ? 'false' : 'true');
+			saveLauncherState();
 
 			for (const option of agentIconPalette.querySelectorAll('.agent-icon-option')) {
 				option.tabIndex = isOpen ? 0 : -1;
@@ -243,6 +256,24 @@
 
 		cliInput.focus();
 		renderIconPalette();
+		if (typeof persistedState.inputValue === 'string') {
+			cliInput.value = persistedState.inputValue;
+		}
+
+		const restoreQuery = cliInput.value.trim();
+		if (restoreQuery) {
+			const matches = findModelMatches(restoreQuery);
+			const match = matches[0]?.model;
+			if (match) {
+				setSelectedModel(match, true, matches);
+			} else {
+				setNoMatch();
+			}
+		} else {
+			setSelectedModel(selectedModel, false);
+		}
+		setPaletteOpen(paletteOpen);
+
 		cliInput.addEventListener('input', () => {
 			const lowerValue = cliInput.value.toLowerCase();
 			if (cliInput.value !== lowerValue) {
