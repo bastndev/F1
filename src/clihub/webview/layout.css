@@ -1,0 +1,31 @@
+body {
+	margin: 0;
+	padding: 0;
+	height: 100vh;
+	width: 100vw;
+	overflow: hidden;
+	background-color: var(--vscode-editor-background);
+	color: var(--vscode-editor-foreground);
+}
+
+.agent-shell {
+	display: grid;
+	grid-template-columns: 225px minmax(0, 1fr) minmax(0, 1fr);
+	grid-template-rows: minmax(0, 1fr);
+	height: 100vh;
+	width: 100vw;
+	overflow: hidden;
+}
+
+.panel-load-error {
+	padding: 16px;
+	color: var(--vscode-errorForeground, #f48771);
+	box-sizing: border-box;
+}
+
+@media (max-width: 640px), (orientation: portrait) {
+	.agent-shell {
+		grid-template-columns: minmax(0, 1fr);
+		grid-template-rows: 60px minmax(0, 1fr) minmax(0, 1fr);
+	}
+}
