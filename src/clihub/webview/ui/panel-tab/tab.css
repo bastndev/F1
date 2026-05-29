@@ -88,6 +88,14 @@
 	background: var(--vscode-button-hoverBackground, var(--vscode-textLink-activeForeground));
 }
 
+.agent-new-button-label {
+	min-width: 1ch;
+	font-size: 13px;
+	font-weight: 600;
+	line-height: 1;
+	text-align: center;
+}
+
 .agent-tools-button:focus-visible,
 .agent-new-button:focus-visible,
 .agent-picker-button:focus-visible,

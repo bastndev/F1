@@ -53,6 +53,7 @@ const getProjectLabel = (cwd: string) => {
 
 export const createTabController = (options: TabControllerOptions) => {
 	const createButton = getRequiredElement<HTMLButtonElement>('cli-create-button');
+	const createButtonLabel = getRequiredElement<HTMLSpanElement>('cli-create-button-label');
 	const toolsButton = getRequiredElement<HTMLButtonElement>('cli-tools-button');
 	const toolsPopover = getRequiredElement<HTMLDivElement>('cli-tools-popover');
 	const agentButton = getRequiredElement<HTMLButtonElement>('cli-agent-button');
@@ -161,6 +162,10 @@ export const createTabController = (options: TabControllerOptions) => {
 		if (currentActiveSessionId) {
 			options.onClose(currentActiveSessionId);
 		}
+	};
+
+	const updateCreateButtonLabel = (sessionCount: number) => {
+		createButtonLabel.textContent = sessionCount >= 3 && sessionCount <= 9 ? String(sessionCount) : '+';
 	};
 
 	const handleKeyboardShortcut = (event: KeyboardEvent) => {
@@ -345,6 +350,7 @@ export const createTabController = (options: TabControllerOptions) => {
 
 	const render = (sessions: CliSessionSummary[], activeSessionId: string | undefined) => {
 		currentActiveSessionId = activeSessionId;
+		updateCreateButtonLabel(sessions.length);
 
 		if (sessions.length === 0) {
 			const emptyState = document.createElement('div');
