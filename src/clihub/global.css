@@ -8,6 +8,13 @@
 	--selection-color: var(--input-border-left);
 }
 
+/* -- -- --  - Color Tab -> */
+body.has-agent-palette {
+	--accent-color: #e2b719;
+	--input-border-left: #e2b719;
+	--selection-color: #e2b719;
+}
+
 body {
 	display: flex;
 	justify-content: center;

@@ -150,6 +150,7 @@
 
 		const setPaletteOpen = (isOpen, shouldFocus = false) => {
 			paletteOpen = isOpen;
+			document.body.classList.toggle('has-agent-palette', isOpen);
 			agentIconPalette.classList.toggle('is-open', isOpen);
 			agentIconPalette.setAttribute('aria-hidden', isOpen ? 'false' : 'true');
 
