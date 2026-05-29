@@ -179,6 +179,7 @@
 				option.className = 'agent-icon-option';
 				option.classList.toggle('is-installed', model.installed);
 				option.classList.toggle('is-missing', !model.installed);
+				option.classList.toggle('has-dark-icon', model.darkIcon === true);
 				option.type = 'button';
 				option.tabIndex = -1;
 				option.dataset.agent = model.label;

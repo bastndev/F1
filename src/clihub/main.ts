@@ -16,6 +16,7 @@ type LauncherAgent = {
 	label: string;
 	aliases: string[];
 	iconFile: string;
+	darkIcon?: boolean;
 };
 
 const launcherAgents: LauncherAgent[] = [
@@ -23,12 +24,12 @@ const launcherAgents: LauncherAgent[] = [
 	{ label: 'Codex CLI', aliases: ['codex', 'codex cli', 'code', 'co', 'c'], iconFile: 'codex.svg' },
 	{ label: 'Claude Code', aliases: ['claude', 'claude code'], iconFile: 'claudecode.svg' },
 	{ label: 'Antigravity CLI', aliases: ['antigravity', 'antigravity cli', 'agy', 'an', 'ant'], iconFile: 'Antigravity_cli.svg' },
-	{ label: 'GitHub Copilot CLI', aliases: ['github copilot', 'copilot', 'copilot cli'], iconFile: 'github-copilot.svg' },
+	{ label: 'GitHub Copilot CLI', aliases: ['github copilot', 'copilot', 'copilot cli'], iconFile: 'github-copilot.svg', darkIcon: true },
 	{ label: 'Codeep', aliases: ['codeep', 'deep'], iconFile: 'Codeep.svg' },
 	{ label: 'Amp', aliases: ['amp'], iconFile: 'amp.svg' },
 	{ label: 'Kiro CLI', aliases: ['kiro', 'kiro cli'], iconFile: 'kiro.svg' },
-	{ label: 'Kilo Code', aliases: ['kilo', 'kilo code', 'code', 'k'], iconFile: 'kilocode.svg' },
-	{ label: 'Grok', aliases: ['grok'], iconFile: 'grok.svg' }
+	{ label: 'Kilo Code', aliases: ['kilo', 'kilo code', 'code', 'k'], iconFile: 'kilocode.svg', darkIcon: true },
+	{ label: 'Grok', aliases: ['grok'], iconFile: 'grok.svg', darkIcon: true }
 ];
 
 export class CliHubViewProvider implements vscode.WebviewViewProvider, vscode.Disposable {
@@ -115,6 +116,7 @@ export class CliHubViewProvider implements vscode.WebviewViewProvider, vscode.Di
 			label: agent.label,
 			aliases: agent.aliases,
 			icon: this._getWebviewUri(webview, 'assets', 'icons-cli', agent.iconFile),
+			darkIcon: agent.darkIcon === true,
 			installed: installedByLabel.get(agent.label) === true
 		}));
 

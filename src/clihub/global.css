@@ -171,6 +171,23 @@ body {
 	filter: grayscale(1) saturate(0) opacity(0.72);
 }
 
+/*  Color icon dark and light */
+.vscode-dark .agent-icon-option.has-dark-icon:not(.is-missing) .agent-icon-image {
+	filter: invert(1) brightness(1.22) contrast(0.92);
+}
+
+.vscode-dark .agent-icon-option.has-dark-icon.is-missing .agent-icon-image {
+	filter: grayscale(1) invert(1) brightness(0.72) opacity(0.48);
+}
+
+.vscode-high-contrast .agent-icon-option.has-dark-icon:not(.is-missing) .agent-icon-image {
+	filter: invert(1) brightness(1.42) contrast(1.08);
+}
+
+.vscode-high-contrast .agent-icon-option.has-dark-icon.is-missing .agent-icon-image {
+	filter: grayscale(1) invert(1) brightness(0.86) opacity(0.62);
+}
+
 .agent-icon-image {
 	width: 24px;
 	height: 24px;
