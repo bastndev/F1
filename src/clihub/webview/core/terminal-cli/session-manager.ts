@@ -35,8 +35,6 @@ type CliHubWebviewMessage = {
 	rows?: number;
 };
 
-const maxBufferLength = 240000;
-
 type PtyHostMessage = {
 	type?: string;
 	data?: string;
@@ -44,6 +42,8 @@ type PtyHostMessage = {
 	signal?: string;
 	message?: string;
 };
+
+const maxBufferLength = 240000;
 
 const getWorkspaceCwd = () => {
 	return vscode.workspace.workspaceFolders?.[0]?.uri.fsPath || os.homedir();
@@ -77,7 +77,7 @@ const buildCommandLine = (command: string, args: string[]) => {
 };
 
 const getPtyHostPath = () => {
-	return path.join(__dirname, 'clihub', 'pty-host.js');
+	return path.join(__dirname, 'clihub', 'webview', 'core', 'terminal-cli', 'pty-host.js');
 };
 
 export class CliSessionManager implements vscode.Disposable {

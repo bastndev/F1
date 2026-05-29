@@ -2,8 +2,8 @@ import * as vscode from 'vscode';
 import * as fs from 'fs';
 import * as crypto from 'crypto';
 import * as path from 'path';
-import { allowedAgents } from './agents';
-import { CliSessionManager } from './session-manager';
+import { allowedAgents } from './webview/core/terminal-cli/agents';
+import { CliSessionManager } from './webview/core/terminal-cli/session-manager';
 import { getCliHubWebviewHtml } from './webview/index';
 
 type CliHubMessage = {
