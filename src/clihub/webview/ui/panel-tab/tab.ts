@@ -62,8 +62,11 @@ export const createTabController = (options: TabControllerOptions) => {
 	let currentAgents: CliAgentOption[] = [];
 	let currentAgentSignature = '';
 	let currentAgentLabel = '';
+	let currentActiveSessionId: string | undefined;
 	let isAgentMenuOpen = false;
 	let isToolsPopoverOpen = false;
+	let lastShortcutSignature = '';
+	let lastShortcutAt = 0;
 
 	const setAgentMenuOpen = (isOpen: boolean) => {
 		isAgentMenuOpen = isOpen;
@@ -122,10 +125,77 @@ export const createTabController = (options: TabControllerOptions) => {
 		optionButtons[nextIndex]?.focus();
 	};
 
-	createButton.addEventListener('click', () => {
+	const isCreateShortcut = (event: KeyboardEvent) => {
+		return event.altKey
+			&& !event.ctrlKey
+			&& !event.metaKey
+			&& (event.key === '+' || event.code === 'Equal' || event.code === 'NumpadAdd');
+	};
+
+	const isCloseShortcut = (event: KeyboardEvent) => {
+		return event.altKey
+			&& !event.ctrlKey
+			&& !event.metaKey
+			&& (event.key === '-' || event.code === 'Minus' || event.code === 'NumpadSubtract');
+	};
+
+	const getShortcutAction = (event: KeyboardEvent) => {
+		if (isCreateShortcut(event)) {
+			return 'create';
+		}
+
+		if (isCloseShortcut(event)) {
+			return 'close';
+		}
+
+		return undefined;
+	};
+
+	const createCurrentAgentSession = () => {
 		if (currentAgentLabel) {
 			options.onCreate(currentAgentLabel);
 		}
+	};
+
+	const closeActiveSession = () => {
+		if (currentActiveSessionId) {
+			options.onClose(currentActiveSessionId);
+		}
+	};
+
+	const handleKeyboardShortcut = (event: KeyboardEvent) => {
+		if (event.type !== 'keydown' || event.repeat) {
+			return false;
+		}
+
+		const action = getShortcutAction(event);
+		if (!action) {
+			return false;
+		}
+
+		event.preventDefault();
+		event.stopPropagation();
+
+		const shortcutSignature = `${action}:${event.code}:${event.key}`;
+		const now = Date.now();
+		if (shortcutSignature === lastShortcutSignature && now - lastShortcutAt < 180) {
+			return true;
+		}
+
+		lastShortcutSignature = shortcutSignature;
+		lastShortcutAt = now;
+
+		if (action === 'create') {
+			createCurrentAgentSession();
+			return true;
+		}
+
+		closeActiveSession();
+		return true;
+	};
+
+	createButton.addEventListener('click', () => {
+		createCurrentAgentSession();
 	});
 
 	agentButton.addEventListener('click', (event) => {
@@ -188,6 +258,10 @@ export const createTabController = (options: TabControllerOptions) => {
 	});
 
 	document.addEventListener('keydown', (event) => {
+		if (handleKeyboardShortcut(event)) {
+			return;
+		}
+
 		if (event.key === 'Escape' && (isAgentMenuOpen || isToolsPopoverOpen)) {
 			event.preventDefault();
 			closeFloatingPanels();
@@ -270,6 +344,8 @@ export const createTabController = (options: TabControllerOptions) => {
 	};
 
 	const render = (sessions: CliSessionSummary[], activeSessionId: string | undefined) => {
+		currentActiveSessionId = activeSessionId;
+
 		if (sessions.length === 0) {
 			const emptyState = document.createElement('div');
 			emptyState.className = 'agent-session-empty';
@@ -369,6 +445,7 @@ export const createTabController = (options: TabControllerOptions) => {
 	};
 
 	return {
+		handleKeyboardShortcut,
 		render,
 		setAgents
 	};
