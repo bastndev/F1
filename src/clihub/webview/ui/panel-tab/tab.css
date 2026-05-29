@@ -98,14 +98,15 @@
 	align-items: center;
 	gap: 8px;
 	box-sizing: border-box;
-	background: transparent;
+	background: var(--vscode-list-hoverBackground, rgba(128, 128, 128, 0.12));
 	color: var(--vscode-foreground);
 	text-align: left;
 	cursor: pointer;
 }
 
 .agent-session-item:hover {
-	background: var(--vscode-list-hoverBackground, rgba(128, 128, 128, 0.12));
+	border-color: color-mix(in srgb, var(--vscode-focusBorder, var(--vscode-textLink-foreground)) 30%, transparent);
+	background: color-mix(in srgb, var(--vscode-list-hoverBackground, rgba(128, 128, 128, 0.12)) 82%, var(--vscode-focusBorder, var(--vscode-textLink-foreground)));
 }
 
 .agent-session-item.is-active {
