@@ -59,22 +59,34 @@ export const cliInstallers: CliInstaller[] = [
 	{
 		label: 'Amp',
 		command: 'amp',
-		installCommand: 'curl -fsSL https://ampcode.com/install.sh | bash'
+		install: {
+			unix: 'curl -fsSL https://ampcode.com/install.sh | bash',
+			windows: 'powershell -c "irm https://ampcode.com/install.ps1 | iex"'
+		}
 	},
 	{
 		label: 'Kiro CLI',
 		command: 'kiro-cli',
-		installCommand: 'curl -fsSL https://cli.kiro.dev/install | bash'
+		install: {
+			unix: 'curl -fsSL https://cli.kiro.dev/install | bash',
+			windows: "irm 'https://cli.kiro.dev/install.ps1' | iex"
+		}
 	},
 	{
 		label: 'Kilo Code',
 		command: 'kilo',
-		installCommand: 'curl -fsSL https://kilo.ai/cli/install | bash'
+		install: {
+			unix: 'curl -fsSL https://kilo.ai/cli/install | bash',
+			windows: 'npm install -g @kilocode/cli'
+		}
 	},
 	{
 		label: 'Grok',
 		command: 'grok',
-		installCommand: 'curl -fsSL https://x.ai/cli/install.sh | bash'
+		install: {
+			unix: 'curl -fsSL https://x.ai/cli/install.sh | bash',
+			windows: 'curl -fsSL https://x.ai/cli/install.sh | bash'
+		}
 	}
 ];
 
