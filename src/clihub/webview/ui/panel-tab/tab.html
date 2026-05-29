@@ -1,10 +1,7 @@
 <div class="layout-left">
 	<div class="agent-tab-shell">
 		<div class="agent-tab-header">
-			<div class="agent-tab-heading">
-				<div class="agent-tab-kicker">CLI Hub</div>
-				<h1 class="agent-panel-title">Sessions</h1>
-			</div>
+			<select id="cli-agent-select" class="agent-select" aria-label="CLI agent"></select>
 			<button
 				id="cli-create-button"
 				class="agent-new-button"
@@ -15,7 +12,6 @@
 				<span aria-hidden="true">+</span>
 			</button>
 		</div>
-		<select id="cli-agent-select" class="agent-select" aria-label="CLI agent"></select>
 		<div id="cli-session-list" class="agent-session-list" role="listbox" aria-label="Open CLI sessions"></div>
 	</div>
 </div>
