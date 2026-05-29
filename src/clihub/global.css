@@ -129,30 +129,6 @@ body {
 	transition: opacity 0.4s ease-in-out;
 }
 
-.webview-panel {
-	display: flex;
-	flex-direction: column;
-	align-items: center;
-	justify-content: center;
-	width: 100%;
-	height: 100vh;
-	padding: 0 20px;
-	box-sizing: border-box;
-	text-align: center;
-}
-
-.webview-message {
-	font-family: var(--vscode-editor-font-family, monospace);
-	font-size: 18px;
-	color: var(--text-color);
-}
-
-.webview-agent {
-	margin-top: 8px;
-	font-size: 13px;
-	color: var(--vscode-descriptionForeground, rgba(128, 128, 128, 0.8));
-}
-
 .shortcuts {
 	width: 100%;
 	text-align: right;
@@ -176,6 +152,7 @@ body {
 	opacity: 0.6;
 }
 
+/* --- --- -- Animation -> */
 @keyframes pulseGlow {
 	0%, 100% { filter: drop-shadow(0 0 3px var(--accent-color)); }
 	50% { filter: drop-shadow(0 0 8px var(--accent-color)) brightness(1.2); }

@@ -32,22 +32,25 @@ export class CliHubViewProvider implements vscode.WebviewViewProvider {
 	) {
 		webviewView.webview.options = {
 			enableScripts: true,
-			localResourceRoots: [this._extensionUri]
+			localResourceRoots: [this._getCliHubAssetUri()]
 		};
 
 		webviewView.webview.html = this._getHtmlForWebview(webviewView.webview);
 		webviewView.webview.onDidReceiveMessage((message: { type?: string; agent?: string }) => {
-			if (message.type !== 'openAgent' || !message.agent || !allowedAgents.has(message.agent)) {
+			if (message.type === 'openAgent' && message.agent && allowedAgents.has(message.agent)) {
+				webviewView.webview.html = this._getAgentHtmlForWebview(webviewView.webview, message.agent);
 				return;
 			}
 
-			webviewView.webview.html = this._getAgentHtmlForWebview(webviewView.webview, message.agent);
+			if (message.type === 'backToLauncher') {
+				webviewView.webview.html = this._getHtmlForWebview(webviewView.webview);
+			}
 		});
 	}
 
 	private _getHtmlForWebview(webview: vscode.Webview) {
-		const htmlPath = vscode.Uri.joinPath(this._extensionUri, 'src', 'clihub', 'index.html');
-		const stylePath = vscode.Uri.joinPath(this._extensionUri, 'src', 'clihub', 'global.css');
+		const htmlPath = this._getCliHubAssetUri('index.html');
+		const stylePath = this._getCliHubAssetUri('global.css');
 
 		const styleUri = webview.asWebviewUri(stylePath);
 		const nonce = this._getNonce();
@@ -68,14 +71,31 @@ export class CliHubViewProvider implements vscode.WebviewViewProvider {
 	}
 
 	private _getAgentHtmlForWebview(webview: vscode.Webview, selectedAgent: string) {
-		const stylePath = vscode.Uri.joinPath(this._extensionUri, 'src', 'clihub', 'global.css');
+		const nonce = this._getNonce();
+		const styleUris = [
+			this._getWebviewUri(webview, 'global.css'),
+			this._getWebviewUri(webview, 'webview', 'ui', 'shared', 'styles', 'layout.css'),
+			this._getWebviewUri(webview, 'webview', 'ui', 'panel-tab', 'tab.css'),
+			this._getWebviewUri(webview, 'webview', 'ui', 'panel-translate', 'translate.css'),
+			this._getWebviewUri(webview, 'webview', 'ui', 'panel-terminal', 'terminal.css')
+		];
 
 		return getCliHubWebviewHtml({
+			extensionUri: this._extensionUri,
 			cspSource: webview.cspSource,
-			styleUri: webview.asWebviewUri(stylePath).toString(),
+			nonce,
+			styleUris,
 			selectedAgent,
 			workspacePath: this._getWorkspacePath()
 		});
+	}
+
+	private _getCliHubAssetUri(...paths: string[]) {
+		return vscode.Uri.joinPath(this._extensionUri, 'dist', 'clihub', ...paths);
+	}
+
+	private _getWebviewUri(webview: vscode.Webview, ...paths: string[]) {
+		return webview.asWebviewUri(this._getCliHubAssetUri(...paths)).toString();
 	}
 
 	private _getWorkspacePath() {

@@ -1,9 +1,25 @@
+import * as fs from 'fs';
+import * as vscode from 'vscode';
+
 type CliHubWebviewOptions = {
+	extensionUri: vscode.Uri;
 	cspSource: string;
-	styleUri: string;
+	nonce: string;
+	styleUris: string[];
 	selectedAgent: string;
 	workspacePath: string;
 };
+
+type PanelFile = {
+	dir: string;
+	name: string;
+};
+
+const panels: PanelFile[] = [
+	{ dir: 'panel-tab', name: 'tab' },
+	{ dir: 'panel-translate', name: 'translate' },
+	{ dir: 'panel-terminal', name: 'terminal' }
+];
 
 const escapeHtml = (value: string) => {
 	return value
@@ -14,78 +30,63 @@ const escapeHtml = (value: string) => {
 		.replace(/'/g, '&#039;');
 };
 
+const readPanelFile = (extensionUri: vscode.Uri, panel: PanelFile, extension: 'html' | 'css') => {
+	const fileUri = vscode.Uri.joinPath(
+		extensionUri,
+		'dist',
+		'clihub',
+		'webview',
+		'ui',
+		panel.dir,
+		`${panel.name}.${extension}`
+	);
+
+	return fs.readFileSync(fileUri.fsPath, 'utf8').trim();
+};
+
+const readPanelHtml = (extensionUri: vscode.Uri, panel: PanelFile) => {
+	try {
+		return readPanelFile(extensionUri, panel, 'html');
+	} catch {
+		return `<section class="panel-load-error">Could not load ${escapeHtml(panel.name)} panel.</section>`;
+	}
+};
+
+const replacePlaceholders = (value: string, options: CliHubWebviewOptions) => {
+	return value
+		.replace(/\$\{selectedAgent\}/g, escapeHtml(options.selectedAgent))
+		.replace(/\$\{workspacePath\}/g, escapeHtml(options.workspacePath));
+};
+
 export function getCliHubWebviewHtml(options: CliHubWebviewOptions) {
-	const selectedAgent = escapeHtml(options.selectedAgent);
-	const workspacePath = escapeHtml(options.workspacePath);
+	const styleLinks = options.styleUris
+		.map((styleUri) => `<link href="${escapeHtml(styleUri)}" rel="stylesheet">`)
+		.join('\n\t');
+
+	const panelHtml = panels
+		.map((panel) => replacePlaceholders(readPanelHtml(options.extensionUri, panel), options))
+		.filter(Boolean)
+		.join('\n\n');
 
 	return `<!DOCTYPE html>
 <html lang="en">
-<head>
-	<meta charset="UTF-8">
-	<meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src ${options.cspSource} 'unsafe-inline';">
-	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>CLI Hub</title>
-	<link href="${options.styleUri}" rel="stylesheet">
-	<style>
-		/* Layout global */
-		body {
-			margin: 0;
-			padding: 0;
-			display: flex;
-			align-items: stretch;
-			justify-content: flex-start;
-			height: 100vh;
-			width: 100vw;
-			overflow: hidden;
-			background-color: var(--vscode-editor-background);
-			color: var(--vscode-editor-foreground);
-		}
-
-		/* Panels */
-		.layout-left {
-			flex: 0 0 225px; /* 5% larger than previous 220px */
-			border-right: 1px solid var(--vscode-editorGroup-border, rgba(128, 128, 128, 0.2));
-			position: relative;
-		}
-
-		.layout-middle {
-			flex: 1;
-			border-right: 1px solid var(--vscode-editorGroup-border, rgba(128, 128, 128, 0.2));
-			overflow-y: auto;
-			position: relative;
-		}
-
-		.layout-right {
-			flex: 1;
-			overflow-y: auto;
-			position: relative;
-		}
-
-		/* Overrides for global.css to prevent unnecessary scroll */
-		.webview-panel {
-			height: 100%;
-			padding: 20px;
-			box-sizing: border-box;
-		}
-	</style>
-</head>
-<body>
-	<div class="layout-left">
-		<!-- Left Panel -->
-	</div>
-
-	<div class="layout-middle">
-		<div class="webview-panel">
-			<div class="webview-message">hello Webview</div>
-			<div class="webview-agent">${selectedAgent}</div>
+	<head>
+		<meta charset="UTF-8">
+		<meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src ${options.cspSource}; script-src 'nonce-${options.nonce}';">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<title>CLI Hub</title>
+		${styleLinks}
+	</head>
+	<body>
+		<div class="agent-shell">
+			${panelHtml}
 		</div>
-
-		<div class="workspace-path">${workspacePath}</div>
-	</div>
-
-	<div class="layout-right">
-		<!-- Right Panel -->
-	</div>
-</body>
-</html>`;
+		<script nonce="${options.nonce}">
+			const vscode = acquireVsCodeApi();
+			document.querySelector('[data-action="back-to-launcher"]')?.addEventListener('click', () => {
+				vscode.postMessage({ type: 'backToLauncher' });
+			});
+		</script>
+	</body>
+	</html>`;
 }
