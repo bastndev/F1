@@ -347,6 +347,11 @@
 	gap: 6px;
 	overflow-y: auto;
 	padding-right: 2px;
+	scrollbar-width: none;
+}
+
+.agent-session-list::-webkit-scrollbar {
+	display: none;
 }
 
 .agent-session-empty {
