@@ -5,4 +5,12 @@
 	position: relative;
 	padding: 16px 20px;
 	box-sizing: border-box;
+	border-right: 1px solid var(--vscode-editorGroup-border, rgba(128, 128, 128, 0.2));
+}
+
+@media (max-width: 640px), (orientation: portrait) {
+	.layout-right {
+		border-right: none;
+		border-bottom: 1px solid var(--vscode-editorGroup-border, rgba(128, 128, 128, 0.2));
+	}
 }
