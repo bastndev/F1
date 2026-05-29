@@ -17,10 +17,11 @@ type LauncherAgent = {
 	aliases: string[];
 	iconFile: string;
 	darkIcon?: boolean;
+	lightIcon?: boolean;
 };
 
 const launcherAgents: LauncherAgent[] = [
-	{ label: 'OpenCode', aliases: ['opencode', 'open code', 'op'], iconFile: 'opencode.svg' },
+	{ label: 'OpenCode', aliases: ['opencode', 'open code', 'op'], iconFile: 'opencode.svg', lightIcon: true },
 	{ label: 'Codex CLI', aliases: ['codex', 'codex cli', 'code', 'co', 'c'], iconFile: 'codex.svg' },
 	{ label: 'Claude Code', aliases: ['claude', 'claude code'], iconFile: 'claudecode.svg' },
 	{ label: 'Antigravity CLI', aliases: ['antigravity', 'antigravity cli', 'agy', 'an', 'ant'], iconFile: 'Antigravity_cli.svg' },
@@ -117,6 +118,7 @@ export class CliHubViewProvider implements vscode.WebviewViewProvider, vscode.Di
 			aliases: agent.aliases,
 			icon: this._getWebviewUri(webview, 'assets', 'icons-cli', agent.iconFile),
 			darkIcon: agent.darkIcon === true,
+			lightIcon: agent.lightIcon === true,
 			installed: installedByLabel.get(agent.label) === true
 		}));
 

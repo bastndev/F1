@@ -197,6 +197,14 @@ body {
 	filter: grayscale(1) invert(1) brightness(0.86) opacity(0.62);
 }
 
+.vscode-light .agent-icon-option.has-light-icon:not(.is-missing) .agent-icon-image {
+	filter: invert(1) brightness(0.42) contrast(1.45);
+}
+
+.vscode-light .agent-icon-option.has-light-icon.is-missing .agent-icon-image {
+	filter: grayscale(1) invert(1) brightness(0.36) opacity(0.52);
+}
+
 .agent-icon-image {
 	width: 24px;
 	height: 24px;
