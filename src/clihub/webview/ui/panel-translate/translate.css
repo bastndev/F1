@@ -6,12 +6,6 @@
 	border-right: 1px solid var(--vscode-editorGroup-border, rgba(128, 128, 128, 0.2));
 }
 
-.webview-panel {
-	height: 100%;
-	padding: 20px;
-	box-sizing: border-box;
-}
-
 @media (max-width: 640px), (orientation: portrait) {
 	.layout-middle {
 		border-right: none;

@@ -23,6 +23,36 @@ body {
 	box-sizing: border-box;
 }
 
+.agent-panel-content {
+	height: 100%;
+	padding: 20px;
+	box-sizing: border-box;
+}
+
+.agent-panel-content--center {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	width: 100%;
+	text-align: center;
+}
+
+.agent-panel-title {
+	margin: 0;
+	font-family: var(--vscode-editor-font-family, monospace);
+	font-size: 18px;
+	line-height: 1.3;
+	font-weight: 400;
+	color: var(--text-color);
+}
+
+.agent-panel-meta {
+	margin-top: 8px;
+	font-size: 13px;
+	color: var(--vscode-descriptionForeground, rgba(128, 128, 128, 0.8));
+}
+
 @media (max-width: 640px), (orientation: portrait) {
 	.agent-shell {
 		grid-template-columns: minmax(0, 1fr);
