@@ -323,7 +323,7 @@ body {
 	overflow: hidden;
 	display: flex;
 	align-items: center;
-	gap: 12px; /* more breathing room between suggestions - using available space on the right */
+	gap: 1px; /* balanced spacing - not too tight, not too loose */
 }
 
 .secondary-model {
@@ -340,7 +340,7 @@ body {
 }
 
 .secondary-separator {
-	padding: 0 3px;
+	padding: 0 7px;
 	opacity: 0.7;
 }
 
