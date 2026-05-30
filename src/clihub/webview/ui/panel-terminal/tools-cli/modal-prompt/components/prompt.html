@@ -1,16 +1,80 @@
-<div class="prompt-modal">
-	<div class="prompt-header">
-		<div class="prompt-title">Prompt</div>
-		<div class="prompt-subtitle">Send a message to the active CLI session</div>
-	</div>
+<div class="prompt-modal" role="dialog" aria-label="Prompt enhancer">
 
-	<div class="prompt-body">
-		<div class="prompt-placeholder">
-			hello prompt PE
-		</div>
-	</div>
+  <!-- HEADER -->
+  <div class="prompt-header">
+    <div class="prompt-header-left">
+      <div class="prompt-title">Prompt <span class="prompt-badge">PRO</span></div>
+      <div class="prompt-subtitle">send a message to the active cli session</div>
+    </div>
+    <div class="prompt-header-actions">
+      <button class="prompt-pill" id="langToggle">🌐 ES → EN</button>
+    </div>
+  </div>
 
-	<div class="prompt-footer">
-		<div class="prompt-note">This is a placeholder. Real prompt functionality coming soon.</div>
-	</div>
+  <!-- TABS -->
+  <div class="prompt-tabs">
+    <div class="prompt-tab active" data-tab="write">Write</div>
+    <div class="prompt-tab" data-tab="enhance">Enhanced</div>
+    <div class="prompt-tab" data-tab="translate">Translated</div>
+  </div>
+
+  <!-- BODY -->
+  <div class="prompt-body">
+    <div class="prompt-textarea-wrap">
+      <textarea
+        id="promptInput"
+        class="prompt-textarea"
+        placeholder="escribe tu prompt aquí…"
+        maxlength="1000"
+      ></textarea>
+      <span class="prompt-char-count" id="charCount">0/1000</span>
+    </div>
+    <div class="prompt-tools">
+      <button class="prompt-tool-btn" id="btnEnhance" data-action="enhance">
+        <i class="ti ti-wand" aria-hidden="true"></i> mejorar
+      </button>
+      <button class="prompt-tool-btn" id="btnTranslate" data-action="translate">
+        <i class="ti ti-world" aria-hidden="true"></i> traducir
+      </button>
+      <button class="prompt-tool-btn" id="btnBoth" data-action="both">
+        <i class="ti ti-sparkles" aria-hidden="true"></i> mejorar + traducir
+      </button>
+    </div>
+  </div>
+
+  <!-- DIVIDER -->
+  <div class="prompt-divider"></div>
+
+  <!-- RESULT: ENHANCED -->
+  <div id="resultEnhanced" class="prompt-result">
+    <div class="prompt-result-label">
+      <i class="ti ti-wand" aria-hidden="true"></i> prompt mejorado
+    </div>
+    <div class="prompt-result-box" id="enhancedBox">
+      <button class="prompt-copy-btn" data-target="enhancedContent">copiar</button>
+      <span id="enhancedContent"></span>
+    </div>
+  </div>
+
+  <!-- RESULT: TRANSLATED -->
+  <div id="resultTranslated" class="prompt-result">
+    <div class="prompt-result-label">
+      <i class="ti ti-world" aria-hidden="true"></i> traducción al inglés
+    </div>
+    <div class="prompt-result-box" id="translatedBox">
+      <button class="prompt-copy-btn" data-target="translatedContent">copiar</button>
+      <span id="translatedContent"></span>
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <div class="prompt-footer">
+    <div class="prompt-footer-info">
+      <i class="ti ti-cpu" aria-hidden="true"></i> claude-sonnet-4
+    </div>
+    <button class="prompt-run-btn" id="runBtn" data-action="both">
+      <i class="ti ti-send" aria-hidden="true"></i> ejecutar
+    </button>
+  </div>
+
 </div>
