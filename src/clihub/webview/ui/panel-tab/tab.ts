@@ -24,7 +24,6 @@ type TabControllerOptions = {
 	onCycleSession: (offset: 1 | -1) => void;
 	onSwitch: (sessionId: string) => void;
 	onClose: (sessionId: string) => void;
-	onOpenTool?: (tool: 'translate' | 'keymaps') => void;
 };
 
 const getRequiredElement = <T extends HTMLElement>(id: string) => {
@@ -71,15 +70,6 @@ export const createTabController = (options: TabControllerOptions) => {
 	let lastShortcutAt = 0;
 	let currentSessionCount = 0;
 	let isAltPressed = false;
-	let isCreateButtonHovered = false;
-
-	// For Tools button Alt mode
-	let originalToolsButtonContent: string | null = null;
-
-	// Capture original content for Alt mode (must be after variable declaration)
-	if (!originalToolsButtonContent) {
-		originalToolsButtonContent = toolsButton.innerHTML;
-	}
 
 	const setAgentMenuOpen = (isOpen: boolean) => {
 		isAgentMenuOpen = isOpen;
@@ -185,29 +175,6 @@ export const createTabController = (options: TabControllerOptions) => {
 		}
 	};
 
-	const enterToolsAltMode = () => {
-		if (!originalToolsButtonContent) {
-			return;
-		}
-
-		// Close popover if open when entering Alt mode
-		if (isToolsPopoverOpen) {
-			setToolsPopoverOpen(false);
-		}
-
-		toolsButton.innerHTML = `<span class="agent-tools-alt-label">⇧F1</span>`;
-		toolsButton.title = 'Open Translate (⇧F1)';
-		toolsButton.setAttribute('aria-label', 'Open Translate');
-	};
-
-	const exitToolsAltMode = () => {
-		if (originalToolsButtonContent) {
-			toolsButton.innerHTML = originalToolsButtonContent;
-		}
-		toolsButton.title = 'CLI tools';
-		toolsButton.setAttribute('aria-label', 'CLI tools');
-	};
-
 	const updateCreateButtonLabel = (sessionCount: number) => {
 		currentSessionCount = sessionCount;
 		updateCreateButtonVisuals();
@@ -216,25 +183,6 @@ export const createTabController = (options: TabControllerOptions) => {
 	const handleKeyboardShortcut = (event: KeyboardEvent) => {
 		if (event.type !== 'keydown' || event.repeat) {
 			return false;
-		}
-
-		// Shift + F1 → Open Translate tool (only for Translate)
-		if (event.shiftKey && (event.key === 'F1' || event.code === 'F1')) {
-			const shortcutSignature = `translate:${event.code}`;
-			const now = Date.now();
-			if (shortcutSignature === lastShortcutSignature && now - lastShortcutAt < 180) {
-				return true;
-			}
-			lastShortcutSignature = shortcutSignature;
-			lastShortcutAt = now;
-
-			event.preventDefault();
-			event.stopPropagation();
-
-			if (options.onOpenTool) {
-				options.onOpenTool('translate');
-			}
-			return true;
 		}
 
 		const action = getShortcutAction(event);
@@ -273,12 +221,10 @@ export const createTabController = (options: TabControllerOptions) => {
 
 	createButton.addEventListener('mouseenter', (event) => {
 		isAltPressed = event.altKey;
-		isCreateButtonHovered = true;
 		updateCreateButtonVisuals();
 	});
 
 	createButton.addEventListener('mouseleave', () => {
-		isCreateButtonHovered = false;
 		updateCreateButtonVisuals();
 	});
 
@@ -330,30 +276,11 @@ export const createTabController = (options: TabControllerOptions) => {
 	toolsButton.addEventListener('click', (event) => {
 		event.stopPropagation();
 		setAgentMenuOpen(false);
-
-		if (isAltPressed) {
-			// Alt + click on Tools button → directly open Translate
-			setToolsPopoverOpen(false);
-			if (options.onOpenTool) {
-				options.onOpenTool('translate');
-			}
-			return;
-		}
-
 		setToolsPopoverOpen(!isToolsPopoverOpen);
 	});
 
 	toolsPopover.addEventListener('click', (event) => {
 		event.stopPropagation();
-
-		const target = event.target instanceof HTMLElement ? event.target : null;
-		const toolButton = target?.closest<HTMLButtonElement>('[data-tool]');
-
-		if (toolButton?.dataset.tool && options.onOpenTool) {
-			const tool = toolButton.dataset.tool as 'translate' | 'keymaps';
-			setToolsPopoverOpen(false);
-			options.onOpenTool(tool);
-		}
 	});
 
 	document.addEventListener('click', () => {
@@ -364,7 +291,6 @@ export const createTabController = (options: TabControllerOptions) => {
 		if (event.key === 'Alt') {
 			isAltPressed = false;
 			updateCreateButtonVisuals();
-			exitToolsAltMode();
 		}
 	});
 
@@ -372,7 +298,6 @@ export const createTabController = (options: TabControllerOptions) => {
 		if (event.key === 'Alt') {
 			isAltPressed = true;
 			updateCreateButtonVisuals();
-			enterToolsAltMode();
 		}
 
 		if (handleKeyboardShortcut(event)) {

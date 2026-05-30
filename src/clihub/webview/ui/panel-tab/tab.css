@@ -348,23 +348,6 @@
 	white-space: nowrap;
 }
 
-.agent-tools-shortcut {
-	font-size: 10px;
-	line-height: 1;
-	color: var(--vscode-descriptionForeground, rgba(128, 128, 128, 0.65));
-	opacity: 0.75;
-	padding-left: 8px;
-	white-space: nowrap;
-}
-
-/* Alt mode label for the Tools button (shows ⇧F1 when Alt is held) */
-.agent-tools-alt-label {
-	font-size: 9px;
-	font-weight: 600;
-	letter-spacing: 0.02em;
-	color: var(--vscode-descriptionForeground, rgba(128, 128, 128, 0.85));
-}
-
 .agent-session-list {
 	min-height: 0;
 	display: flex;
