@@ -6,6 +6,7 @@
 	padding: 0;
 	box-sizing: border-box;
 	background: var(--vscode-terminal-background, var(--vscode-editor-background));
+    text-transform: lowercase;
 }
 
 .cli-terminal-shell {
