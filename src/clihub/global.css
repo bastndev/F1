@@ -32,9 +32,9 @@ body[data-agent="claude"] {
 }
 
 body[data-agent="codex"] {
-	--accent-color: #0066fe;
-	--input-border-left: #0066fe;
-	--selection-color: #0066fe;
+	--accent-color: #1cd1e5;
+	--input-border-left: #1cd1e5;
+	--selection-color: #1cd1e5;
 }
 
 body[data-agent="opencode"] {

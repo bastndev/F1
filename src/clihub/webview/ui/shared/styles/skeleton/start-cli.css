@@ -252,7 +252,7 @@
    ================================================================= */
 .cli-boot-skeleton[data-agent="grok"]        { --skeleton-accent: #e5e7eb; }   /* blanco */
 .cli-boot-skeleton[data-agent="claude"]      { --skeleton-accent: #e29d7f; }   /* cálido */
-.cli-boot-skeleton[data-agent="codex"]       { --skeleton-accent: #0066fe; }
+.cli-boot-skeleton[data-agent="codex"]       { --skeleton-accent: #1cd1e5; }
 .cli-boot-skeleton[data-agent="opencode"]    { --skeleton-accent: #9ca3af; }   /* gris */
 .cli-boot-skeleton[data-agent="kilocode"]    { --skeleton-accent: #e8d36b; }   /* amarillo */
 .cli-boot-skeleton[data-agent="kiro"]        { --skeleton-accent: #ae5ffd; }   /* morado */
