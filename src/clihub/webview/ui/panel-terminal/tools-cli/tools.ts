@@ -63,7 +63,8 @@ export const createToolsController = ({ container }: ToolsControllerOptions) => 
 			display: 'flex',
 			alignItems: 'center',
 			justifyContent: 'center',
-			background: 'rgba(0, 0, 0, 0.72)'
+			background: 'rgba(0, 0, 0, 0.38)',
+			backdropFilter: 'blur(16px)'
 		});
 
 		const host = document.createElement('div');
