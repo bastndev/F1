@@ -724,44 +724,59 @@
 		transform: translateY(-1px);
 	}
 
-	/* === Active state with refined glass effect === */
+	/* === Active state - more visible "new selection" effect === */
 	.agent-session-item.is-active .agent-session-icon-frame {
 		border: 1.5px solid var(--vscode-focusBorder, var(--vscode-textLink-foreground));
-		background: color-mix(in srgb, var(--vscode-focusBorder, var(--vscode-textLink-foreground)) 14%, var(--vscode-input-background, rgba(128,128,128,0.06)));
+		background: color-mix(in srgb, var(--vscode-focusBorder, var(--vscode-textLink-foreground)) 16%, var(--vscode-input-background, rgba(128,128,128,0.05)));
 		box-shadow: 
-			0 3px 12px rgba(0, 0, 0, 0.28),
+			0 4px 16px rgba(0, 0, 0, 0.32),
 			0 0 0 1px var(--vscode-focusBorder, var(--vscode-textLink-foreground)),
-			0 0 0 4px color-mix(in srgb, var(--vscode-focusBorder, var(--vscode-textLink-foreground)) 18%, transparent);
+			0 0 0 5px color-mix(in srgb, var(--vscode-focusBorder, var(--vscode-textLink-foreground)) 20%, transparent);
+		/* Quick pop when becoming the active one */
+		animation: active-pop 280ms cubic-bezier(0.23, 1.0, 0.32, 1);
 	}
 
-	/* One-time glass highlight sweep on first activation (subtle, non-repeating) */
+	/* Stronger, more visible glass sweep effect when a new circle is selected */
 	.agent-session-item.is-active .agent-session-icon-frame::after {
 		content: '';
 		position: absolute;
-		inset: 0;
+		inset: -2px;
 		border-radius: 999px;
 		background: linear-gradient(
 			135deg,
-			transparent 20%,
-			color-mix(in srgb, var(--vscode-focusBorder, var(--vscode-textLink-foreground)) 28%, transparent) 45%,
-			transparent 70%
+			transparent 15%,
+			color-mix(in srgb, #fff 55%, var(--vscode-focusBorder, var(--vscode-textLink-foreground)) 35%) 42%,
+			transparent 68%
 		);
-		opacity: 0.6;
-		animation: glass-sweep-once 420ms cubic-bezier(0.23, 1, 0.32, 1) forwards;
+		opacity: 0.85;
+		animation: glass-sweep-once 520ms cubic-bezier(0.22, 1, 0.32, 1) forwards;
 		pointer-events: none;
+	}
+
+	/* Subtle pop animation when a new item becomes active (via Tab or click) */
+	@keyframes active-pop {
+		0% {
+			transform: scale(1.12);
+		}
+		50% {
+			transform: scale(1.03);
+		}
+		100% {
+			transform: scale(1);
+		}
 	}
 
 	@keyframes glass-sweep-once {
 		0% {
-			opacity: 0.75;
-			transform: translateX(-30%);
+			opacity: 0.95;
+			transform: translateX(-45%);
 		}
-		60% {
-			opacity: 0.55;
+		45% {
+			opacity: 0.7;
 		}
 		100% {
 			opacity: 0;
-			transform: translateX(40%);
+			transform: translateX(55%);
 		}
 	}
 
