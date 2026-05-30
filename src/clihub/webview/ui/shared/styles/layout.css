@@ -6,6 +6,7 @@ body {
 	overflow: hidden;
 	background-color: var(--vscode-editor-background);
 	color: var(--vscode-editor-foreground);
+	text-transform: lowercase;
 }
 
 .agent-shell {
