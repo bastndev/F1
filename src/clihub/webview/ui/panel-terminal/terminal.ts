@@ -156,7 +156,7 @@ const switchSessionByOffset = (offset: 1 | -1) => {
 	return true;
 };
 
-const toolsController = createToolsController();
+const toolsController = layoutRight ? createToolsController({ container: layoutRight }) : undefined;
 
 const tabController = createTabController({
 	getAgentIcon: (label) => agentIcons.get(label),
@@ -167,7 +167,7 @@ const tabController = createTabController({
 	onSwitch: (sessionId) => vscode.postMessage({ type: 'cli.switch', sessionId }),
 	onClose: (sessionId) => vscode.postMessage({ type: 'cli.close', sessionId }),
 	onOpenTool: (tool) => {
-		toolsController.open(tool);
+		toolsController?.open(tool);
 	}
 });
 
