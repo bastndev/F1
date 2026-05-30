@@ -73,6 +73,14 @@ export const createTabController = (options: TabControllerOptions) => {
 	let isAltPressed = false;
 	let isCreateButtonHovered = false;
 
+	// For Tools button Alt mode
+	let originalToolsButtonContent: string | null = null;
+
+	// Capture original content for Alt mode (must be after variable declaration)
+	if (!originalToolsButtonContent) {
+		originalToolsButtonContent = toolsButton.innerHTML;
+	}
+
 	const setAgentMenuOpen = (isOpen: boolean) => {
 		isAgentMenuOpen = isOpen;
 		agentMenu.hidden = !isOpen;
@@ -169,11 +177,35 @@ export const createTabController = (options: TabControllerOptions) => {
 	};
 
 	const updateCreateButtonVisuals = () => {
-		if (isAltPressed && isCreateButtonHovered) {
+		// Show "-" as soon as Alt is pressed (anywhere), no hover required
+		if (isAltPressed) {
 			createButtonLabel.textContent = '-';
 		} else {
 			createButtonLabel.textContent = currentSessionCount >= 3 && currentSessionCount <= 9 ? String(currentSessionCount) : '+';
 		}
+	};
+
+	const enterToolsAltMode = () => {
+		if (!originalToolsButtonContent) {
+			return;
+		}
+
+		// Close popover if open when entering Alt mode
+		if (isToolsPopoverOpen) {
+			setToolsPopoverOpen(false);
+		}
+
+		toolsButton.innerHTML = `<span class="agent-tools-alt-label">⇧F1</span>`;
+		toolsButton.title = 'Open Translate (⇧F1)';
+		toolsButton.setAttribute('aria-label', 'Open Translate');
+	};
+
+	const exitToolsAltMode = () => {
+		if (originalToolsButtonContent) {
+			toolsButton.innerHTML = originalToolsButtonContent;
+		}
+		toolsButton.title = 'CLI tools';
+		toolsButton.setAttribute('aria-label', 'CLI tools');
 	};
 
 	const updateCreateButtonLabel = (sessionCount: number) => {
@@ -298,6 +330,16 @@ export const createTabController = (options: TabControllerOptions) => {
 	toolsButton.addEventListener('click', (event) => {
 		event.stopPropagation();
 		setAgentMenuOpen(false);
+
+		if (isAltPressed) {
+			// Alt + click on Tools button → directly open Translate
+			setToolsPopoverOpen(false);
+			if (options.onOpenTool) {
+				options.onOpenTool('translate');
+			}
+			return;
+		}
+
 		setToolsPopoverOpen(!isToolsPopoverOpen);
 	});
 
@@ -322,6 +364,7 @@ export const createTabController = (options: TabControllerOptions) => {
 		if (event.key === 'Alt') {
 			isAltPressed = false;
 			updateCreateButtonVisuals();
+			exitToolsAltMode();
 		}
 	});
 
@@ -329,6 +372,7 @@ export const createTabController = (options: TabControllerOptions) => {
 		if (event.key === 'Alt') {
 			isAltPressed = true;
 			updateCreateButtonVisuals();
+			enterToolsAltMode();
 		}
 
 		if (handleKeyboardShortcut(event)) {

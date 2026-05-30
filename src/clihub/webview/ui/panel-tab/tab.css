@@ -357,6 +357,14 @@
 	white-space: nowrap;
 }
 
+/* Alt mode label for the Tools button (shows ⇧F1 when Alt is held) */
+.agent-tools-alt-label {
+	font-size: 9px;
+	font-weight: 600;
+	letter-spacing: 0.02em;
+	color: var(--vscode-descriptionForeground, rgba(128, 128, 128, 0.85));
+}
+
 .agent-session-list {
 	min-height: 0;
 	display: flex;
