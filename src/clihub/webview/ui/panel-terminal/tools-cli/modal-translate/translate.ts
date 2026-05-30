@@ -8,7 +8,7 @@ const applyStyles = (element: HTMLElement, styles: Partial<CSSStyleDeclaration>)
 
 export const mountTranslatePanel = (host: HTMLElement) => {
 	const panel = document.createElement('div');
-	panel.textContent = 'hello transalte';
+	panel.textContent = 'hello transalte 1';
 
 	applyStyles(panel, {
 		minWidth: '280px',
