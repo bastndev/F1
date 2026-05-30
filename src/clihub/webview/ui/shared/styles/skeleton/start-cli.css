@@ -72,10 +72,10 @@
 	background: linear-gradient(
 		180deg,
 		transparent 0%,
-		color-mix(in srgb, var(--skeleton-accent) 7%, transparent) 42%,
+		color-mix(in srgb, var(--skeleton-accent) 5%, transparent) 42%,
 		transparent 100%
 	);
-	opacity: 0.55;
+	opacity: 0.76;
 	pointer-events: none;
 	animation: s-scan-move 3.8s linear infinite;
 	z-index: 1;
@@ -253,10 +253,7 @@
 .cli-boot-skeleton[data-agent="opencode"] { --skeleton-accent: #e8d36b; }
 .cli-boot-skeleton[data-agent="antigravity"] { --skeleton-accent: #b38cff; }
 
-.s-dot,
-.s-scan {
-	background: var(--skeleton-accent);
-}
+
 
 .s-live .s-line.full,
 .s-live .s-line.long {
