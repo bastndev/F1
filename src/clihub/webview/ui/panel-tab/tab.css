@@ -543,13 +543,14 @@
 @media (max-width: 640px), (orientation: portrait) {
 	.layout-left {
 		grid-column: 1 / -1;
-		min-height: 52px;
+		min-height: 50px;
 		border-right: none;
-		border-bottom: 1px solid var(--vscode-editorGroup-border, rgba(128, 128, 128, 0.2));
+		border-bottom: 1px solid var(--vscode-editorGroup-border, rgba(128, 128, 128, 0.22));
 		align-items: stretch;
-		padding: 7px 10px 1px 10px;
+		padding: 6px 12px 4px 10px;
 		overflow: visible;
 		z-index: 40;
+		background: var(--vscode-sideBar-background, var(--vscode-editor-background));
 	}
 
 	.agent-tab-shell {
@@ -576,7 +577,9 @@
 	}
 
 	.agent-picker-button {
-		height: 27px;
+		height: 26px;
+		font-size: 11.5px;
+		padding: 0 6px 0 8px;
 	}
 
 	.agent-header-actions {
@@ -588,8 +591,9 @@
 
 	.agent-tools-button,
 	.agent-new-button {
-		width: 27px;
-		height: 27px;
+		width: 26px;
+		height: 26px;
+		border-radius: 5px;
 	}
 
 	.agent-tools-popover {
@@ -615,9 +619,12 @@
 		gap: 0;
 		overflow-x: auto;
 		overflow-y: hidden;
-		padding: 4px 10px 4px 4px;
+		padding: 4px 12px 4px 6px;
 		margin: -4px 0 -4px -3px;
 		scrollbar-width: none;
+		/* Subtle edge fade to hint scrollable content */
+		mask-image: linear-gradient(to right, transparent, black 12px, black calc(100% - 24px), transparent);
+		-webkit-mask-image: linear-gradient(to right, transparent, black 12px, black calc(100% - 24px), transparent);
 	}
 
 	.agent-session-list::-webkit-scrollbar {
@@ -630,10 +637,10 @@
 
 	.agent-session-item {
 		position: relative;
-		flex: 0 0 33px;
-		width: 33px;
-		min-height: 33px;
-		margin-right: -9px;
+		flex: 0 0 34px;
+		width: 34px;
+		min-height: 34px;
+		margin-right: -10px;
 		border-radius: 999px;
 		padding: 0;
 		display: inline-flex;
@@ -641,71 +648,91 @@
 		justify-content: center;
 		background: transparent;
 		border-color: transparent;
-		opacity: 0.96;
+		opacity: 0.92;
 		transform: scale(1);
-		transition: opacity 250ms ease, transform 250ms cubic-bezier(0.175, 0.885, 0.32, 1.275), margin 250ms ease;
+		transition: 
+			opacity 200ms ease,
+			transform 220ms cubic-bezier(0.23, 1, 0.32, 1),
+			margin 200ms ease,
+			box-shadow 200ms ease;
+		will-change: transform;
 	}
 
-	.agent-session-item:nth-last-child(2) {
-		opacity: 0.75;
-		transform: scale(0.9);
+	/* More elegant and readable stacking */
+	.agent-session-item:nth-last-child(2) { 
+		opacity: 0.82; 
+		transform: scale(0.92); 
+		margin-right: -8px;
 	}
-
-	.agent-session-item:nth-last-child(3) {
-		opacity: 0.50;
-		transform: scale(0.8);
+	.agent-session-item:nth-last-child(3) { 
+		opacity: 0.62; 
+		transform: scale(0.84); 
+		margin-right: -6px;
 	}
-
-	.agent-session-item:nth-last-child(4) {
-		opacity: 0.30;
-		transform: scale(0.7);
+	.agent-session-item:nth-last-child(4) { 
+		opacity: 0.42; 
+		transform: scale(0.76); 
+		margin-right: -4px;
 	}
-
-	.agent-session-item:nth-last-child(n+5) {
-		opacity: 0.15;
-		transform: scale(0.6);
+	.agent-session-item:nth-last-child(n+5) { 
+		opacity: 0.22; 
+		transform: scale(0.68); 
+		margin-right: -2px;
 	}
 
 	.agent-session-item:hover {
-		z-index: 20;
+		z-index: 30;
 		opacity: 1;
-		transform: scale(1.1) translateY(-2px);
-		margin-right: -4px;
-		background: transparent;
+		transform: scale(1.08) translateY(-1px);
+		margin-right: -2px;
 	}
 
 	.agent-session-item.is-active {
-		z-index: 20;
+		z-index: 25;
 		opacity: 1;
-		transform: scale(1.05);
-		background: transparent;
+		transform: scale(1.0);
+		margin-right: -8px;
 	}
 
 	.agent-session-icon-frame {
-		width: 33px;
-		height: 33px;
+		width: 34px;
+		height: 34px;
 		box-sizing: border-box;
 		flex-shrink: 0;
-		border: 2px solid var(--vscode-sideBar-background, var(--vscode-editor-background));
+		border: 2.5px solid var(--vscode-sideBar-background, var(--vscode-editor-background));
 		border-radius: 999px;
-		background: color-mix(in srgb, var(--vscode-input-background, rgba(128, 128, 128, 0.12)) 84%, transparent);
-		box-shadow: 0 2px 5px rgba(0, 0, 0, 0.18), 0 0 0 1px color-mix(in srgb, var(--vscode-foreground) 10%, transparent);
-		transition: box-shadow 250ms ease, border-color 250ms ease, background 250ms ease;
+		background: color-mix(in srgb, var(--vscode-input-background, rgba(128, 128, 128, 0.15)) 88%, transparent);
+		box-shadow: 
+			0 1px 3px rgba(0, 0, 0, 0.25),
+			0 0 0 1px color-mix(in srgb, var(--vscode-foreground) 8%, transparent);
+		transition: 
+			box-shadow 220ms ease, 
+			border-color 200ms ease, 
+			background 200ms ease,
+			transform 220ms cubic-bezier(0.23, 1, 0.32, 1);
 	}
 
-	.agent-session-item:hover .agent-session-icon-frame,
+	.agent-session-item:hover .agent-session-icon-frame {
+		border-color: var(--vscode-focusBorder, var(--vscode-textLink-foreground));
+		background: color-mix(in srgb, var(--vscode-focusBorder, var(--vscode-textLink-foreground)) 10%, var(--vscode-input-background, rgba(128,128,128,0.1)));
+		box-shadow: 
+			0 6px 16px rgba(0, 0, 0, 0.35),
+			0 0 0 1px var(--vscode-focusBorder, var(--vscode-textLink-foreground));
+		transform: translateY(-1px);
+	}
+
 	.agent-session-item.is-active .agent-session-icon-frame {
-		border-color: var(--vscode-sideBar-background, var(--vscode-editor-background));
-		background: color-mix(in srgb, var(--vscode-focusBorder, var(--vscode-textLink-foreground)) 12%, var(--vscode-input-background, rgba(128, 128, 128, 0.12)));
-		box-shadow:
-			0 4px 12px rgba(0, 0, 0, 0.28),
-			0 0 0 1px var(--vscode-focusBorder, var(--vscode-textLink-foreground)),
-			0 0 0 3px color-mix(in srgb, var(--vscode-focusBorder, var(--vscode-textLink-foreground)) 25%, transparent);
+		border-color: var(--vscode-focusBorder, var(--vscode-textLink-foreground));
+		background: color-mix(in srgb, var(--vscode-focusBorder, var(--vscode-textLink-foreground)) 18%, var(--vscode-input-background, rgba(128,128,128,0.08)));
+		box-shadow: 
+			0 4px 14px rgba(0, 0, 0, 0.32),
+			0 0 0 1.5px var(--vscode-focusBorder, var(--vscode-textLink-foreground));
 	}
 
 	.agent-session-icon-image {
-		width: 17px;
-		height: 17px;
+		width: 18px;
+		height: 18px;
+		filter: drop-shadow(0 1px 1px rgba(0,0,0,0.25));
 	}
 
 	.agent-session-main,
