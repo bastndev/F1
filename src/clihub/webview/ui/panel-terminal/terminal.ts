@@ -166,6 +166,9 @@ const tabController = createTabController({
 	},
 	onSwitch: (sessionId) => vscode.postMessage({ type: 'cli.switch', sessionId }),
 	onClose: (sessionId) => vscode.postMessage({ type: 'cli.close', sessionId }),
+	onDismissToolModal: () => {
+		toolsController?.close();
+	},
 	onOpenTool: (tool) => {
 		toolsController?.toggle(tool);
 	}

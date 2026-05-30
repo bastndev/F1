@@ -28,6 +28,7 @@ type TabControllerOptions = {
 	onCycleSession: (offset: 1 | -1) => void;
 	onSwitch: (sessionId: string) => void;
 	onClose: (sessionId: string) => void;
+	onDismissToolModal?: () => void;
 	onOpenTool?: (tool: CliToolId) => void;
 };
 
@@ -100,6 +101,10 @@ export const createTabController = (options: TabControllerOptions) => {
 		}
 	};
 
+	const dismissToolModal = () => {
+		options.onDismissToolModal?.();
+	};
+
 	const syncAgentPicker = () => {
 		const hasAgents = currentAgents.length > 0;
 		agentButton.disabled = !hasAgents;
@@ -113,6 +118,7 @@ export const createTabController = (options: TabControllerOptions) => {
 	};
 
 	const selectAgent = (label: string) => {
+		dismissToolModal();
 		currentAgentLabel = label;
 		syncAgentPicker();
 		setAgentMenuOpen(false);
@@ -145,12 +151,14 @@ export const createTabController = (options: TabControllerOptions) => {
 
 	const createCurrentAgentSession = () => {
 		if (currentAgentLabel) {
+			dismissToolModal();
 			options.onCreate(currentAgentLabel);
 		}
 	};
 
 	const closeActiveSession = () => {
 		if (currentActiveSessionId) {
+			dismissToolModal();
 			options.onClose(currentActiveSessionId);
 		}
 	};
@@ -239,6 +247,7 @@ export const createTabController = (options: TabControllerOptions) => {
 
 	agentButton.addEventListener('click', (event) => {
 		event.stopPropagation();
+		dismissToolModal();
 		setToolsPopoverOpen(false);
 		setAgentMenuOpen(!isAgentMenuOpen);
 	});
@@ -249,6 +258,7 @@ export const createTabController = (options: TabControllerOptions) => {
 		}
 
 		event.preventDefault();
+		dismissToolModal();
 		setToolsPopoverOpen(false);
 		setAgentMenuOpen(true);
 		focusAgentOption(event.key === 'ArrowDown' ? 1 : -1);
@@ -284,6 +294,7 @@ export const createTabController = (options: TabControllerOptions) => {
 
 	toolsButton.addEventListener('click', (event) => {
 		event.stopPropagation();
+		dismissToolModal();
 		setAgentMenuOpen(false);
 		setToolsPopoverOpen(!isToolsPopoverOpen);
 	});
@@ -486,7 +497,10 @@ export const createTabController = (options: TabControllerOptions) => {
 				}
 			});
 
-			const switchSession = () => options.onSwitch(session.id);
+			const switchSession = () => {
+				dismissToolModal();
+				options.onSwitch(session.id);
+			};
 			item.addEventListener('click', switchSession);
 			item.addEventListener('keydown', (event) => {
 				if (event.key === 'Enter' || event.key === ' ') {
