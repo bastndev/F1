@@ -15,6 +15,70 @@ body.has-agent-palette {
 	--selection-color: #e2b719;
 }
 
+/* =================================================================
+   Agent accent colors — reused from skeleton
+   Applied when a specific CLI is selected or previewed
+   ================================================================= */
+body[data-agent="grok"] {
+	--accent-color: #e5e7eb;
+	--input-border-left: #e5e7eb;
+	--selection-color: #e5e7eb;
+}
+
+body[data-agent="claude"] {
+	--accent-color: #e29d7f;
+	--input-border-left: #e29d7f;
+	--selection-color: #e29d7f;
+}
+
+body[data-agent="codex"] {
+	--accent-color: #0066fe;
+	--input-border-left: #0066fe;
+	--selection-color: #0066fe;
+}
+
+body[data-agent="opencode"] {
+	--accent-color: #9ca3af;
+	--input-border-left: #9ca3af;
+	--selection-color: #9ca3af;
+}
+
+body[data-agent="kilocode"] {
+	--accent-color: #e8d36b;
+	--input-border-left: #e8d36b;
+	--selection-color: #e8d36b;
+}
+
+body[data-agent="kiro"] {
+	--accent-color: #ae5ffd;
+	--input-border-left: #ae5ffd;
+	--selection-color: #ae5ffd;
+}
+
+body[data-agent="antigravity"] {
+	--accent-color: #51f334;
+	--input-border-left: #51f334;
+	--selection-color: #51f334;
+}
+
+body[data-agent="copilot"] {
+	--accent-color: #9ca3af;
+	--input-border-left: #9ca3af;
+	--selection-color: #9ca3af;
+}
+
+body[data-agent="amp"] {
+	--accent-color: #ff7022;
+	--input-border-left: #ff7022;
+	--selection-color: #ff7022;
+}
+
+body[data-agent="codeep"] {
+	--accent-color: #ec0a0a;
+	--input-border-left: #ec0a0a;
+	--selection-color: #ec0a0a;
+}
+
 body {
 	display: flex;
 	justify-content: center;

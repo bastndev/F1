@@ -123,6 +123,41 @@ const getMatchScore = (model: LauncherModel, query: string) => {
 	return bestScore;
 };
 
+const getAgentSlug = (label: string): string => {
+	const lower = label.toLowerCase();
+	if (lower.includes('grok')) {
+		return 'grok';
+	}
+	if (lower.includes('claude')) {
+		return 'claude';
+	}
+	if (lower.includes('codex')) {
+		return 'codex';
+	}
+	if (lower.includes('opencode') || lower === 'open code') {
+		return 'opencode';
+	}
+	if (lower.includes('antigravity')) {
+		return 'antigravity';
+	}
+	if (lower.includes('copilot')) {
+		return 'copilot';
+	}
+	if (lower.includes('kilo')) {
+		return 'kilocode';
+	}
+	if (lower.includes('kiro')) {
+		return 'kiro';
+	}
+	if (lower.includes('amp')) {
+		return 'amp';
+	}
+	if (lower.includes('codeep')) {
+		return 'codeep';
+	}
+	return '';
+};
+
 const findModelMatches = (query: string) => {
 	return models
 		.map((model) => ({ model, score: getMatchScore(model, query) }))
@@ -172,6 +207,7 @@ const showInvalidInput = () => {
 
 const setSelectedModel = (model: LauncherModel | undefined, isSearchResult: boolean, matches: LauncherMatch[] = []) => {
 	if (!model) {
+		document.body.removeAttribute('data-agent');
 		return;
 	}
 
@@ -182,10 +218,24 @@ const setSelectedModel = (model: LauncherModel | undefined, isSearchResult: bool
 	renderSecondarySuggestions(isSearchResult ? matches : []);
 	syncPreviewIndicator();
 	saveLauncherState();
+
+	// Only apply the specific agent color when the user has actively found a match by typing/search.
+	// While browsing (palette open, default cycling, icon hover) we keep the original theme + yellow behavior.
+	if (isSearchResult) {
+		const slug = getAgentSlug(model.label);
+		if (slug) {
+			document.body.dataset.agent = slug;
+		} else {
+			document.body.removeAttribute('data-agent');
+		}
+	} else {
+		document.body.removeAttribute('data-agent');
+	}
 };
 
 const setNoMatch = () => {
 	selectedModel = undefined;
+	document.body.removeAttribute('data-agent');
 	textElement.textContent = 'No matching CLI';
 	inputContainer.classList.remove('has-selection');
 	textElement.classList.remove('selected-model');
