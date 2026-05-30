@@ -18,7 +18,9 @@ export type CliSessionSummary = {
 	exitCode?: number;
 };
 
-export type CliToolId = 'translate' | 'keymaps';
+import { consumeShortcut, matchesShortcut } from '../../shared/keymaps/keymaps';
+
+export type CliToolId = 'translate' | 'keymaps' | 'prompt';
 
 type TabControllerOptions = {
 	getAgentIcon: (label: string) => CliAgentIcon | undefined;
@@ -26,6 +28,7 @@ type TabControllerOptions = {
 	onCycleSession: (offset: 1 | -1) => void;
 	onSwitch: (sessionId: string) => void;
 	onClose: (sessionId: string) => void;
+	onDismissToolModal?: () => void;
 	onOpenTool?: (tool: CliToolId) => void;
 };
 
@@ -98,6 +101,10 @@ export const createTabController = (options: TabControllerOptions) => {
 		}
 	};
 
+	const dismissToolModal = () => {
+		options.onDismissToolModal?.();
+	};
+
 	const syncAgentPicker = () => {
 		const hasAgents = currentAgents.length > 0;
 		agentButton.disabled = !hasAgents;
@@ -111,6 +118,7 @@ export const createTabController = (options: TabControllerOptions) => {
 	};
 
 	const selectAgent = (label: string) => {
+		dismissToolModal();
 		currentAgentLabel = label;
 		syncAgentPicker();
 		setAgentMenuOpen(false);
@@ -131,40 +139,26 @@ export const createTabController = (options: TabControllerOptions) => {
 		optionButtons[nextIndex]?.focus();
 	};
 
-	const isCreateShortcut = (event: KeyboardEvent) => {
-		return event.altKey
-			&& !event.ctrlKey
-			&& !event.metaKey
-			&& (event.key === '+' || event.code === 'Equal' || event.code === 'NumpadAdd');
-	};
-
-	const isCloseShortcut = (event: KeyboardEvent) => {
-		return event.altKey
-			&& !event.ctrlKey
-			&& !event.metaKey
-			&& (event.key === '-' || event.code === 'Minus' || event.code === 'NumpadSubtract');
-	};
-
 	const getShortcutAction = (event: KeyboardEvent) => {
-		if (isCreateShortcut(event)) {
+		if (matchesShortcut(event, 'newSession')) {
 			return 'create';
 		}
-
-		if (isCloseShortcut(event)) {
+		if (matchesShortcut(event, 'closeSession')) {
 			return 'close';
 		}
-
 		return undefined;
 	};
 
 	const createCurrentAgentSession = () => {
 		if (currentAgentLabel) {
+			dismissToolModal();
 			options.onCreate(currentAgentLabel);
 		}
 	};
 
 	const closeActiveSession = () => {
 		if (currentActiveSessionId) {
+			dismissToolModal();
 			options.onClose(currentActiveSessionId);
 		}
 	};
@@ -186,6 +180,26 @@ export const createTabController = (options: TabControllerOptions) => {
 	const handleKeyboardShortcut = (event: KeyboardEvent) => {
 		if (event.type !== 'keydown' || event.repeat) {
 			return false;
+		}
+
+		// Tool modals (centralized in shared/keymaps)
+		if (matchesShortcut(event, 'openPrompt')) {
+			if (consumeShortcut(event, 'openPrompt')) {
+				options.onOpenTool?.('prompt');
+				return true;
+			}
+		}
+		if (matchesShortcut(event, 'openTranslate')) {
+			if (consumeShortcut(event, 'openTranslate')) {
+				options.onOpenTool?.('translate');
+				return true;
+			}
+		}
+		if (matchesShortcut(event, 'openKeymaps')) {
+			if (consumeShortcut(event, 'openKeymaps')) {
+				options.onOpenTool?.('keymaps');
+				return true;
+			}
 		}
 
 		const action = getShortcutAction(event);
@@ -233,6 +247,7 @@ export const createTabController = (options: TabControllerOptions) => {
 
 	agentButton.addEventListener('click', (event) => {
 		event.stopPropagation();
+		dismissToolModal();
 		setToolsPopoverOpen(false);
 		setAgentMenuOpen(!isAgentMenuOpen);
 	});
@@ -243,6 +258,7 @@ export const createTabController = (options: TabControllerOptions) => {
 		}
 
 		event.preventDefault();
+		dismissToolModal();
 		setToolsPopoverOpen(false);
 		setAgentMenuOpen(true);
 		focusAgentOption(event.key === 'ArrowDown' ? 1 : -1);
@@ -278,6 +294,7 @@ export const createTabController = (options: TabControllerOptions) => {
 
 	toolsButton.addEventListener('click', (event) => {
 		event.stopPropagation();
+		dismissToolModal();
 		setAgentMenuOpen(false);
 		setToolsPopoverOpen(!isToolsPopoverOpen);
 	});
@@ -288,7 +305,7 @@ export const createTabController = (options: TabControllerOptions) => {
 		const target = event.target instanceof HTMLElement ? event.target : null;
 		const toolButton = target?.closest<HTMLButtonElement>('[data-tool]');
 		const tool = toolButton?.dataset.tool;
-		if (tool === 'translate' || tool === 'keymaps') {
+		if (tool === 'translate' || tool === 'keymaps' || tool === 'prompt') {
 			setToolsPopoverOpen(false);
 			options.onOpenTool?.(tool);
 		}
@@ -480,7 +497,10 @@ export const createTabController = (options: TabControllerOptions) => {
 				}
 			});
 
-			const switchSession = () => options.onSwitch(session.id);
+			const switchSession = () => {
+				dismissToolModal();
+				options.onSwitch(session.id);
+			};
 			item.addEventListener('click', switchSession);
 			item.addEventListener('keydown', (event) => {
 				if (event.key === 'Enter' || event.key === ' ') {

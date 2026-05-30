@@ -295,6 +295,12 @@
 	line-height: 1.2;
 }
 
+.agent-tools-divider {
+	height: 1px;
+	background: var(--vscode-editorGroup-border, rgba(128, 128, 128, 0.18));
+	margin: 4px 8px;
+}
+
 .agent-tools-item {
 	width: calc(100% - 10px);
 	min-width: 0;
@@ -346,6 +352,15 @@
 	overflow: hidden;
 	text-overflow: ellipsis;
 	white-space: nowrap;
+}
+
+.agent-tools-item-shortcut {
+	color: var(--vscode-descriptionForeground, rgba(128, 128, 128, 0.65));
+	font-size: 12px;
+	line-height: 1;
+	white-space: nowrap;
+	opacity: 0.8;
+	padding-left: 12px;
 }
 
 .agent-session-list {

@@ -1,7 +1,8 @@
 import { mountKeymapsPanel } from './modal-keymaps/keymaps';
+import { mountPromptPanel } from './modal-prompt/prompt';
 import { mountTranslatePanel } from './modal-translate/translate';
 
-export type ToolId = 'translate' | 'keymaps';
+export type ToolId = 'translate' | 'keymaps' | 'prompt';
 
 type ToolContext = {
 	close: () => void;
@@ -24,16 +25,19 @@ const applyStyles = (element: HTMLElement, styles: Partial<CSSStyleDeclaration>)
 
 const toolMounts: Record<ToolId, ToolMount> = {
 	keymaps: mountKeymapsPanel,
+	prompt: mountPromptPanel,
 	translate: mountTranslatePanel
 };
 
 export const createToolsController = ({ container }: ToolsControllerOptions) => {
 	let activeModal: HTMLElement | null = null;
+	let currentTool: ToolId | null = null;
 
 	const close = () => {
 		document.removeEventListener('keydown', handleKeyDown);
 		activeModal?.remove();
 		activeModal = null;
+		currentTool = null;
 	};
 
 	const handleKeyDown = (event: KeyboardEvent) => {
@@ -80,7 +84,16 @@ export const createToolsController = ({ container }: ToolsControllerOptions) => 
 		container.append(modal);
 		document.addEventListener('keydown', handleKeyDown);
 		activeModal = modal;
+		currentTool = tool;
 	};
 
-	return { open, close };
+	const toggle = (tool: ToolId) => {
+		if (currentTool === tool) {
+			close();
+		} else {
+			open(tool);
+		}
+	};
+
+	return { open, toggle, close };
 };
