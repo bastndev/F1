@@ -181,8 +181,8 @@
 
 /* =====================================================
    Keymaps Modal Styles
-   Source of truth: modal-keymaps/keymaps.css
-   (currently duplicated here because tool CSS is not separately linked)
+   Note: modal-keymaps/keymaps.css was removed (duplication cleanup).
+   These styles are the current source of truth for the Keymaps modal.
    ===================================================== */
 
 .keymaps-modal {

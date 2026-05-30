@@ -1,11 +1,12 @@
 /**
  * Keymaps Modal
  *
- * This module owns the full Keymaps UI (markup + future behavior).
- * It is mounted dynamically into the tools modal by tools.ts.
+ * This module is the single owner of the Keymaps UI.
+ * It is mounted dynamically by tools.ts.
  *
- * Single source of truth for the Keymaps content should stay here
- * (or in keymaps.html if we later add a build step to import raw HTML).
+ * Note: keymaps.html and keymaps.css were removed to eliminate duplication.
+ * The runtime markup lives here (as KEYMAPS_HTML string).
+ * Styles currently live duplicated inside terminal.css.
  */
 
 const KEYMAPS_HTML = `
