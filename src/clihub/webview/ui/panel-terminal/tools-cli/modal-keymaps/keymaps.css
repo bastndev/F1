@@ -107,6 +107,12 @@
 	text-align: center;
 }
 
+.keymap-or {
+	font-size: 10px;
+	opacity: 0.45;
+	margin: 0 3px;
+}
+
 .keymaps-footer {
 	padding: 10px 20px;
 	border-top: 1px solid var(--vscode-editorGroup-border, rgba(128,128,128,0.15));
