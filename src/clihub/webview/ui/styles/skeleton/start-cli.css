@@ -149,6 +149,78 @@
 }
 
 /* =================================================================
+   BLOCK GROUPS — reemplaza las líneas laterales grises
+   Cada bloque: barra de acento izquierda + líneas shimmer
+   ================================================================= */
+.s-block {
+	display: grid;
+	grid-template-columns: 3px 1fr;
+	gap: 10px;
+	align-items: stretch;
+	padding: 6px 0;
+}
+
+.s-block-bar {
+	width: 3px;
+	border-radius: 2px;
+	background: color-mix(in srgb, var(--skeleton-accent) 40%, transparent);
+	animation: s-bar-pulse 3.2s ease-in-out infinite;
+}
+
+.s-block:nth-child(2n) .s-block-bar { animation-delay: -1.1s; opacity: 0.6; }
+.s-block:nth-child(3n) .s-block-bar { animation-delay: -2.4s; opacity: 0.5; }
+
+@keyframes s-bar-pulse {
+	0%, 100% { opacity: 0.25; }
+	50%       { opacity: 0.75; }
+}
+
+.s-block-lines {
+	display: flex;
+	flex-direction: column;
+	gap: 5px;
+	justify-content: center;
+}
+
+/* =================================================================
+   VERTICAL BEAM — línea que baja de arriba hacia abajo
+   (refinada con fade en extremos + color de agente)
+   ================================================================= */
+.s-vbeam-wrap {
+	position: absolute;
+	top: 0;
+	left: 10px; /* tuned for when beam lives inside .s-main (next to block bars) */
+	width: 1px;
+	height: 100%;
+	overflow: hidden;
+	z-index: 0;
+	pointer-events: none;
+}
+
+.s-vbeam {
+	position: absolute;
+	left: 0;
+	width: 1px;
+	height: 60px;
+	background: linear-gradient(
+		180deg,
+		transparent 0%,
+		color-mix(in srgb, var(--skeleton-accent) 60%, transparent) 35%,
+		color-mix(in srgb, var(--skeleton-accent) 80%, transparent) 50%,
+		color-mix(in srgb, var(--skeleton-accent) 60%, transparent) 65%,
+		transparent 100%
+	);
+	animation: s-vbeam-drop 2.8s cubic-bezier(0.4, 0.0, 0.6, 1) infinite;
+}
+
+@keyframes s-vbeam-drop {
+	0%   { top: -10%; opacity: 0; }
+	15%  { opacity: 1; }
+	85%  { opacity: 1; }
+	100% { top: 110%; opacity: 0; }
+}
+
+/* =================================================================
    LIVE ZONE — The most important part (bottom was always black)
    Stronger presence, feels like the CLI is about to speak here.
    ================================================================= */

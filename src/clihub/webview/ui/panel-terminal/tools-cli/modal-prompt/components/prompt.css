@@ -1,0 +1,82 @@
+.prompt-modal {
+	width: min(520px, calc(100vw - 32px));
+	max-height: min(420px, calc(100vh - 32px));
+	display: flex;
+	flex-direction: column;
+	box-sizing: border-box;
+	border: 1px solid var(--vscode-editorGroup-border, rgba(128, 128, 128, 0.35));
+	border-radius: 8px;
+	background: var(--vscode-editor-background);
+	color: var(--vscode-foreground);
+	font-family: var(--vscode-font-family);
+	font-size: 13px;
+	box-shadow: 0 14px 44px rgba(0, 0, 0, 0.45);
+	overflow: hidden;
+}
+
+/* Header */
+.prompt-header {
+	flex: 0 0 auto;
+	padding: 16px 20px 12px;
+	border-bottom: 1px solid var(--vscode-editorGroup-border, rgba(128, 128, 128, 0.2));
+}
+
+.prompt-title {
+	margin-bottom: 2px;
+	font-size: 15px;
+	font-weight: 600;
+	line-height: 1.3;
+}
+
+.prompt-subtitle {
+	color: var(--vscode-descriptionForeground, rgba(128, 128, 128, 0.72));
+	font-size: 11px;
+	line-height: 1.35;
+}
+
+/* Body */
+.prompt-body {
+	flex: 1 1 auto;
+	min-height: 0;
+	overflow-y: auto;
+	padding: 20px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+.prompt-placeholder {
+	color: var(--vscode-descriptionForeground, rgba(128, 128, 128, 0.65));
+	font-size: 13px;
+	opacity: 0.8;
+}
+
+/* Footer */
+.prompt-footer {
+	flex: 0 0 auto;
+	padding: 10px 20px;
+	border-top: 1px solid var(--vscode-editorGroup-border, rgba(128, 128, 128, 0.15));
+	background: var(--vscode-sideBar-background, rgba(0, 0, 0, 0.1));
+}
+
+.prompt-note {
+	color: var(--vscode-descriptionForeground, rgba(128, 128, 128, 0.55));
+	font-size: 11px;
+	line-height: 1.35;
+}
+
+/* Responsive */
+@media (max-width: 520px) {
+	.prompt-modal {
+		width: calc(100vw - 20px);
+		max-height: calc(100vh - 20px);
+	}
+
+	.prompt-header {
+		padding: 14px 16px 10px;
+	}
+
+	.prompt-body {
+		padding: 16px;
+	}
+}
