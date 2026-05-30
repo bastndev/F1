@@ -8,6 +8,9 @@ type ToolContext = {
 };
 
 type ToolMount = (host: HTMLElement, context: ToolContext) => void;
+type ToolsControllerOptions = {
+	container: HTMLElement;
+};
 
 const modalId = 'cli-tools-modal';
 
@@ -24,7 +27,7 @@ const toolMounts: Record<ToolId, ToolMount> = {
 	translate: mountTranslatePanel
 };
 
-export const createToolsController = () => {
+export const createToolsController = ({ container }: ToolsControllerOptions) => {
 	let activeModal: HTMLElement | null = null;
 
 	const close = () => {
@@ -50,7 +53,7 @@ export const createToolsController = () => {
 		modal.setAttribute('aria-label', tool);
 
 		applyStyles(modal, {
-			position: 'fixed',
+			position: 'absolute',
 			inset: '0',
 			zIndex: '1000',
 			display: 'flex',
@@ -74,7 +77,7 @@ export const createToolsController = () => {
 
 		toolMounts[tool](host, { close });
 
-		document.body.append(modal);
+		container.append(modal);
 		document.addEventListener('keydown', handleKeyDown);
 		activeModal = modal;
 	};
