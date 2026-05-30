@@ -247,21 +247,48 @@ const createBootSkeleton = (sessionId: string) => {
 	const main = document.createElement('div');
 	main.className = 's-main';
 
-	// High-quality varied line distribution (much richer than basic skeletons)
-	const mainLines = [
-		'full', 'long', 'med', 'long', 'thick',
-		'indent', 'med', 'short', 'long', 'med',
-		'full', 'tiny', 'long', 'med', 'indent',
-		'thick', 'short', 'long', 'med', 'full'
+	// Vertical beam (subtle descending light column) — placed inside .s-main
+	// so it naturally stops before the live typing dots area
+	const vbeamWrap = document.createElement('div');
+	vbeamWrap.className = 's-vbeam-wrap';
+	const vbeam = document.createElement('div');
+	vbeam.className = 's-vbeam';
+	vbeamWrap.appendChild(vbeam);
+	main.appendChild(vbeamWrap);
+
+	// BLOCK GROUPS — structured left accent bars + grouped shimmer lines
+	// (replaces previous flat list of lines for richer visual rhythm)
+	const blockGroups: string[][] = [
+		['full', 'long'],
+		['med', 'long', 'thick'],
+		['indent', 'med', 'short'],
+		['long', 'med', 'full'],
+		['tiny', 'long', 'med'],
+		['indent', 'thick', 'short', 'long'],
+		['med', 'full']
 	];
 
-	for (const variant of mainLines) {
-		const line = document.createElement('div');
-		line.className = `s-line ${variant}`;
-		main.append(line);
+	for (const group of blockGroups) {
+		const block = document.createElement('div');
+		block.className = 's-block';
+
+		const bar = document.createElement('div');
+		bar.className = 's-block-bar';
+
+		const linesWrap = document.createElement('div');
+		linesWrap.className = 's-block-lines';
+
+		for (const variant of group) {
+			const line = document.createElement('div');
+			line.className = `s-line ${variant}`;
+			linesWrap.appendChild(line);
+		}
+
+		block.append(bar, linesWrap);
+		main.appendChild(block);
 	}
 
-	skeleton.append(main);
+	skeleton.appendChild(main);
 
 	// Strong LIVE ZONE — solves the "bottom is always black" problem
 	const live = document.createElement('div');
