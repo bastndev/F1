@@ -304,7 +304,7 @@
 	border-radius: 4px;
 	padding: 0 8px;
 	display: grid;
-	grid-template-columns: 18px minmax(0, 1fr);
+	grid-template-columns: 18px minmax(0, 1fr) auto;
 	align-items: center;
 	gap: 7px;
 	box-sizing: border-box;
@@ -345,6 +345,15 @@
 	min-width: 0;
 	overflow: hidden;
 	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.agent-tools-shortcut {
+	font-size: 10px;
+	line-height: 1;
+	color: var(--vscode-descriptionForeground, rgba(128, 128, 128, 0.65));
+	opacity: 0.75;
+	padding-left: 8px;
 	white-space: nowrap;
 }
 

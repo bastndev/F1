@@ -26,6 +26,12 @@ export function createToolsModalController(): ToolsModalController {
 	let currentTool: ToolId | null = null;
 
 	const open = (tool: ToolId) => {
+		// If the same tool modal is already open, close it (toggle behavior for shortcut)
+		if (currentTool === tool && !modalRoot.hidden) {
+			close();
+			return;
+		}
+
 		currentTool = tool;
 		modalRoot.hidden = false;
 

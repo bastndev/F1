@@ -186,6 +186,25 @@ export const createTabController = (options: TabControllerOptions) => {
 			return false;
 		}
 
+		// Shift + F1 → Open Translate tool (only for Translate)
+		if (event.shiftKey && (event.key === 'F1' || event.code === 'F1')) {
+			const shortcutSignature = `translate:${event.code}`;
+			const now = Date.now();
+			if (shortcutSignature === lastShortcutSignature && now - lastShortcutAt < 180) {
+				return true;
+			}
+			lastShortcutSignature = shortcutSignature;
+			lastShortcutAt = now;
+
+			event.preventDefault();
+			event.stopPropagation();
+
+			if (options.onOpenTool) {
+				options.onOpenTool('translate');
+			}
+			return true;
+		}
+
 		const action = getShortcutAction(event);
 		if (!action) {
 			return false;
