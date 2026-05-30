@@ -41,6 +41,8 @@ declare const acquireVsCodeApi: () => VsCodeApi;
 const vscode = acquireVsCodeApi();
 const sessions = new Map<string, CliSession>();
 const terminals = new Map<string, TerminalView>();
+const bootSkeletons = new Map<string, HTMLDivElement>();
+const sessionsWithFirstOutput = new Set<string>();
 let activeSessionId: string | undefined;
 let pendingTabSwitchSessionId: string | undefined;
 
@@ -182,6 +184,94 @@ const handleTerminalKey = (event: KeyboardEvent) => {
 	return false;
 };
 
+const createBootSkeleton = (sessionId: string) => {
+	const skeleton = document.createElement('div');
+	skeleton.className = 'cli-boot-skeleton';
+	skeleton.dataset.sessionId = sessionId;
+
+	// Full-bleed anticipation field — fills the entire terminal area
+	const field = document.createElement('div');
+	field.className = 'cli-skeleton-field';
+
+	// Rich, varied line distribution designed for CLI + text chat output.
+	// The pattern feels like "upcoming conversation / command output".
+	const lineVariants: Array<[string, number]> = [
+		['full', 1], ['long', 1], ['med', 1], ['long', 1], ['block', 1],
+		['indent', 1], ['med', 1], ['short', 1], ['long', 1], ['med', 1],
+		['full', 1], ['tiny', 1], ['long', 1], ['med', 1], ['indent', 1],
+		['block', 1], ['short', 1], ['long', 1], ['med', 1], ['full', 1]
+	];
+
+	for (const [variant] of lineVariants) {
+		const line = document.createElement('div');
+		line.className = 'cli-skeleton-line';
+		line.dataset.v = variant;
+		field.append(line);
+	}
+
+	// LIVE ZONE — the critical bottom area that was previously pure black.
+	// This is where the real CLI will start writing from.
+	const liveZone = document.createElement('div');
+	liveZone.className = 'cli-skeleton-live-zone';
+
+	// A few stronger "incoming" lines
+	const liveVariants = ['long', 'full', 'med', 'long'] as const;
+	for (const v of liveVariants) {
+		const line = document.createElement('div');
+		line.className = 'cli-skeleton-line';
+		line.dataset.v = v;
+		liveZone.append(line);
+	}
+
+	// Active typing cluster at the very bottom (the "live" prompt area)
+	const typing = document.createElement('div');
+	typing.className = 'cli-skeleton-typing';
+
+	const glyph = document.createElement('span');
+	glyph.className = 'cli-skeleton-typing-glyph';
+	glyph.textContent = '▍';
+
+	const cursor = document.createElement('div');
+	cursor.className = 'cli-skeleton-typing-cursor';
+
+	typing.append(glyph, cursor);
+	liveZone.append(typing);
+
+	skeleton.append(field, liveZone);
+	terminalStack.append(skeleton);
+	bootSkeletons.set(sessionId, skeleton);
+
+	// Hard safety timeout — never trap the user in a skeleton
+	setTimeout(() => {
+		if (bootSkeletons.has(sessionId)) {
+			dismissSkeleton(sessionId);
+		}
+	}, 14000);
+
+	return skeleton;
+};
+
+const dismissSkeleton = (sessionId: string) => {
+	const skeleton = bootSkeletons.get(sessionId);
+	if (!skeleton) {
+		return;
+	}
+
+	bootSkeletons.delete(sessionId);
+	sessionsWithFirstOutput.delete(sessionId);
+
+	skeleton.classList.add('is-exiting');
+
+	const remove = () => {
+		skeleton.remove();
+	};
+
+	// Match the CSS transition duration (520ms)
+	skeleton.addEventListener('transitionend', remove, { once: true });
+	// Safety fallback in case transitionend doesn't fire
+	setTimeout(remove, 800);
+};
+
 const createTerminalView = (session: CliSession) => {
 	const pane = document.createElement('div');
 	pane.className = 'cli-terminal-pane';
@@ -213,6 +303,13 @@ const createTerminalView = (session: CliSession) => {
 	terminals.set(session.id, view);
 	requestAnimationFrame(() => fitTerminal(session.id));
 
+	// Only show the boot skeleton for freshly created sessions.
+	// Old/restored sessions (reopening the panel later) should not flash a skeleton.
+	const sessionAge = Date.now() - session.createdAt;
+	if (!bootSkeletons.has(session.id) && sessionAge < 12000) {
+		createBootSkeleton(session.id);
+	}
+
 	return view;
 };
 
@@ -224,6 +321,14 @@ const removeClosedTerminals = (openSessionIds: Set<string>) => {
 			terminals.delete(sessionId);
 		}
 	}
+
+	for (const [sessionId, skeleton] of bootSkeletons) {
+		if (!openSessionIds.has(sessionId)) {
+			skeleton.remove();
+			bootSkeletons.delete(sessionId);
+			sessionsWithFirstOutput.delete(sessionId);
+		}
+	}
 };
 
 const setActiveTerminal = () => {
@@ -231,6 +336,10 @@ const setActiveTerminal = () => {
 
 	for (const [sessionId, view] of terminals) {
 		view.pane.classList.toggle('is-active', sessionId === activeSessionId);
+	}
+
+	for (const [sessionId, skeleton] of bootSkeletons) {
+		skeleton.classList.toggle('is-active', sessionId === activeSessionId);
 	}
 
 	const activeSession = activeSessionId ? sessions.get(activeSessionId) : undefined;
@@ -271,6 +380,15 @@ const syncState = (message: Extract<ServerMessage, { type: 'cli.state' }>) => {
 	}
 
 	removeClosedTerminals(openSessionIds);
+
+	// If a session entered error/exited state before producing output, don't leave skeleton hanging
+	for (const [sessionId, skeleton] of [...bootSkeletons]) {
+		const s = sessions.get(sessionId);
+		if (s && (s.status === 'error' || s.status === 'exited')) {
+			dismissSkeleton(sessionId);
+		}
+	}
+
 	tabController.render(message.sessions, activeSessionId);
 	setActiveTerminal();
 };
@@ -286,6 +404,18 @@ const handleOutput = (message: Extract<ServerMessage, { type: 'cli.output' }>) =
 	}
 
 	terminals.get(message.sessionId)?.terminal.write(message.data);
+
+	// Skeleton dismissal contract:
+	// The skeleton must remain visible until the real CLI has started producing output,
+	// and then must linger for exactly 1 second AFTER the first output appears.
+	if (bootSkeletons.has(message.sessionId) && !sessionsWithFirstOutput.has(message.sessionId)) {
+		sessionsWithFirstOutput.add(message.sessionId);
+
+		// Wait 1 full second after the CLI actually speaks before we begin the exit animation.
+		setTimeout(() => {
+			dismissSkeleton(message.sessionId);
+		}, 1000);
+	}
 };
 
 window.addEventListener('message', (event: MessageEvent<ServerMessage>) => {
