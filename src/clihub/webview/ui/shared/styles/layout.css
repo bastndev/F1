@@ -6,6 +6,7 @@ body {
 	overflow: hidden;
 	background-color: var(--vscode-editor-background);
 	color: var(--vscode-editor-foreground);
+	text-transform: lowercase;
 }
 
 .agent-shell {
@@ -56,6 +57,6 @@ body {
 @media (max-width: 640px), (orientation: portrait) {
 	.agent-shell {
 		grid-template-columns: minmax(0, 1fr);
-		grid-template-rows: 74px minmax(0, 1fr);
+		grid-template-rows: 52px minmax(0, 1fr);
 	}
 }

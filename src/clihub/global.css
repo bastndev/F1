@@ -23,7 +23,8 @@ body {
 	margin: 0;
 	font-family: var(--font-family);
 	color: var(--text-color);
-	background-color: var(--bg-color);
+	background-color: color-mix(in srgb, var(--bg-color) 90%, black); /*Trukito*/
+	text-transform: lowercase;
 }
 
 /* CLI Hub */
@@ -57,12 +58,14 @@ body {
 
 .input-container {
 	width: 100%;
+	min-width: 0;
 	background-color: var(--input-bg);
 	border-left: 2px solid var(--input-border-left);
 	display: flex;
 	flex-direction: column;
 	padding: 14px 18px;
 	box-sizing: border-box;
+	overflow: hidden;
 	transition: background-color 160ms ease, border-left-color 160ms ease;
 }
 
@@ -106,6 +109,8 @@ body {
 	margin-top: 14px;
 	font-size: 13px;
 	color: var(--vscode-descriptionForeground, rgba(128, 128, 128, 0.8)); /* Texto secundario adaptable */
+	white-space: nowrap;
+	overflow: hidden;
 }
 
 .input-footer .highlight {
