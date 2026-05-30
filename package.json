@@ -48,6 +48,11 @@
         "command": "f1.cliHub.focus",
         "key": "f1",
         "mac": "f1"
+      },
+            {
+        "key"    : "ctrl+[Backquote]",
+        "mac"    : "cmd+[Backquote]",
+        "command": "workbench.action.toggleMaximizedPanel"
       }
     ],
     "viewsContainers": {
