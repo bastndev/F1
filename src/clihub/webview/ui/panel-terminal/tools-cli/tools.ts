@@ -1,7 +1,14 @@
 /**
  * Tools Modal Controller
- * Lives in panel-terminal/tools-cli because the modal overlays the terminal area.
+ *
+ * Thin orchestrator for the tools overlay modal.
+ * It only handles lifecycle (open/close/backdrop/escape).
+ *
+ * Each tool (keymaps, translate, ...) owns its own UI and behavior
+ * via a mount function exported from its folder.
  */
+
+import { mountKeymapsModal } from './modal-keymaps/keymaps';
 
 type ToolId = 'translate' | 'keymaps';
 
@@ -26,7 +33,7 @@ export function createToolsModalController(): ToolsModalController {
 	let currentTool: ToolId | null = null;
 
 	const open = (tool: ToolId) => {
-		// If the same tool modal is already open, close it (toggle behavior for shortcut)
+		// Toggle behavior: clicking the same tool again closes it
 		if (currentTool === tool && !modalRoot.hidden) {
 			close();
 			return;
@@ -36,130 +43,19 @@ export function createToolsModalController(): ToolsModalController {
 		modalRoot.hidden = false;
 
 		if (tool === 'keymaps') {
-			// Load the actual Keymaps documentation UI
+			mountKeymapsModal(contentHost);
+			return;
+		}
+
+		if (tool === 'translate') {
+			// Placeholder — will be replaced by real mountTranslateModal later
 			contentHost.innerHTML = `
-				<div class="keymaps-modal">
-					<div class="keymaps-header">
-						<div class="keymaps-title">Keyboard Shortcuts</div>
-						<div class="keymaps-subtitle">Available while using CLI Hub</div>
-					</div>
-
-					<div class="keymaps-content">
-						<!-- Session Management -->
-						<div class="keymaps-section">
-							<div class="keymaps-section-title">Session Management</div>
-							<div class="keymap-item">
-								<div class="keymap-left">
-									<span class="keymap-icon">＋</span>
-									<span class="keymap-label">New CLI session</span>
-								</div>
-								<div class="keymap-keys">
-									<kbd class="key">Alt</kbd><kbd class="key">+</kbd>
-								</div>
-							</div>
-							<div class="keymap-item">
-								<div class="keymap-left">
-									<span class="keymap-icon">−</span>
-									<span class="keymap-label">Close current session</span>
-								</div>
-								<div class="keymap-keys">
-									<kbd class="key">Alt</kbd><kbd class="key">−</kbd>
-								</div>
-							</div>
-						</div>
-
-						<!-- Navigation -->
-						<div class="keymaps-section">
-							<div class="keymaps-section-title">Navigation</div>
-							<div class="keymap-item">
-								<div class="keymap-left">
-									<span class="keymap-icon">⇥</span>
-									<span class="keymap-label">Next session</span>
-								</div>
-								<div class="keymap-keys">
-									<kbd class="key">Tab</kbd>
-								</div>
-							</div>
-							<div class="keymap-item">
-								<div class="keymap-left">
-									<span class="keymap-icon">⇤</span>
-									<span class="keymap-label">Previous session</span>
-								</div>
-								<div class="keymap-keys">
-									<kbd class="key">Shift</kbd><kbd class="key">Tab</kbd>
-								</div>
-							</div>
-						</div>
-
-						<!-- Panel -->
-						<div class="keymaps-section">
-							<div class="keymaps-section-title">Panel</div>
-							<div class="keymap-item">
-								<div class="keymap-left">
-									<span class="keymap-icon">⛶</span>
-									<span class="keymap-label">Toggle maximized panel</span>
-								</div>
-								<div class="keymap-keys">
-									<kbd class="key">Ctrl</kbd><kbd class="key">\`</kbd>
-									<span class="keymap-or">/</span>
-									<kbd class="key">⌘</kbd><kbd class="key">\`</kbd>
-								</div>
-							</div>
-						</div>
-
-						<!-- Tools & Modals -->
-						<div class="keymaps-section">
-							<div class="keymaps-section-title">Tools &amp; Modals</div>
-							<div class="keymap-item">
-								<div class="keymap-left">
-									<span class="keymap-icon">T</span>
-									<span class="keymap-label">Open Translate</span>
-								</div>
-								<div class="keymap-keys">
-									<kbd class="key">⇧</kbd><kbd class="key">F1</kbd>
-								</div>
-							</div>
-							<div class="keymap-item">
-								<div class="keymap-left">
-									<span class="keymap-icon">⚙︎</span>
-									<span class="keymap-label">Quick Translate (from Tools)</span>
-								</div>
-								<div class="keymap-keys">
-									<kbd class="key">Alt</kbd> + click
-								</div>
-							</div>
-						</div>
-
-						<!-- General -->
-						<div class="keymaps-section">
-							<div class="keymaps-section-title">General</div>
-							<div class="keymap-item">
-								<div class="keymap-left">
-									<span class="keymap-icon">⎋</span>
-									<span class="keymap-label">Close menus &amp; modals</span>
-								</div>
-								<div class="keymap-keys">
-									<kbd class="key">Esc</kbd>
-								</div>
-							</div>
-						</div>
-					</div>
-
-					<div class="keymaps-footer">
-						<div class="keymaps-note">These shortcuts work while the CLI Hub panel is focused.</div>
-					</div>
+				<div class="translate-modal-placeholder">
+					<h3>Translate</h3>
+					<p>Coming soon. This will be a full smart prompt + translation layer.</p>
 				</div>
 			`;
-		} else if (tool === 'translate') {
-			// Placeholder for Translate (we'll build this next)
-			contentHost.innerHTML = `
-				<div style="padding: 24px; color: var(--vscode-foreground);">
-					<h3 style="margin: 0 0 12px 0; font-size: 15px;">Translate</h3>
-					<p style="margin: 0; opacity: 0.8; font-size: 13px;">
-						Translate modal content coming soon.
-					</p>
-				</div>
-			`;
+			return;
 		}
 	};
 
@@ -171,12 +67,12 @@ export function createToolsModalController(): ToolsModalController {
 
 	const isOpen = () => !modalRoot.hidden;
 
-	// Close on backdrop click
+	// Close when clicking the backdrop
 	modalRoot.querySelector('.cli-tools-modal-backdrop')?.addEventListener('click', () => {
 		close();
 	});
 
-	// Close on Escape key (global)
+	// Global Escape handler
 	document.addEventListener('keydown', (e) => {
 		if (e.key === 'Escape' && isOpen()) {
 			e.preventDefault();

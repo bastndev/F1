@@ -161,8 +161,28 @@
 	flex-direction: column;
 }
 
+/* Temporary placeholder styles for Translate modal (while under construction) */
+.translate-modal-placeholder {
+	padding: 32px 28px;
+	text-align: center;
+	opacity: 0.85;
+}
+
+.translate-modal-placeholder h3 {
+	margin: 0 0 12px;
+	font-size: 15px;
+}
+
+.translate-modal-placeholder p {
+	margin: 0;
+	font-size: 13px;
+	opacity: 0.75;
+}
+
 /* =====================================================
-   Keymaps Modal Styles (from modal-keymaps/keymaps.css)
+   Keymaps Modal Styles
+   Source of truth: modal-keymaps/keymaps.css
+   (currently duplicated here because tool CSS is not separately linked)
    ===================================================== */
 
 .keymaps-modal {
