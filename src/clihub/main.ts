@@ -147,7 +147,8 @@ export class CliHubViewProvider implements vscode.WebviewViewProvider, vscode.Di
 			this._getWebviewUri(webview, 'webview', 'ui', 'shared', 'styles', 'layout.css'),
 			this._getWebviewUri(webview, 'webview', 'ui', 'panel-tab', 'tab.css'),
 			this._getWebviewUri(webview, 'webview', 'ui', 'panel-translate', 'translate.css'),
-			this._getWebviewUri(webview, 'webview', 'ui', 'panel-terminal', 'terminal.css')
+			this._getWebviewUri(webview, 'webview', 'ui', 'panel-terminal', 'terminal.css'),
+			this._getWebviewUri(webview, 'webview', 'ui', 'shared', 'styles', 'skeleton', 'start-cli.css')
 		];
 		const scriptUri = this._getWebviewUri(webview, 'webview', 'webview.js');
 		const agentIcons = launcherAgents.map((agent) => ({

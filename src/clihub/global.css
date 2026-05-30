@@ -15,6 +15,70 @@ body.has-agent-palette {
 	--selection-color: #e2b719;
 }
 
+/* =================================================================
+   Agent accent colors — reused from skeleton
+   Applied when a specific CLI is selected or previewed
+   ================================================================= */
+body[data-agent="grok"] {
+	--accent-color: #e5e7eb;
+	--input-border-left: #e5e7eb;
+	--selection-color: #e5e7eb;
+}
+
+body[data-agent="claude"] {
+	--accent-color: #e29d7f;
+	--input-border-left: #e29d7f;
+	--selection-color: #e29d7f;
+}
+
+body[data-agent="codex"] {
+	--accent-color: #1cd1e5;
+	--input-border-left: #1cd1e5;
+	--selection-color: #1cd1e5;
+}
+
+body[data-agent="opencode"] {
+	--accent-color: #9ca3af;
+	--input-border-left: #9ca3af;
+	--selection-color: #9ca3af;
+}
+
+body[data-agent="kilocode"] {
+	--accent-color: #e8d36b;
+	--input-border-left: #e8d36b;
+	--selection-color: #e8d36b;
+}
+
+body[data-agent="kiro"] {
+	--accent-color: #ae5ffd;
+	--input-border-left: #ae5ffd;
+	--selection-color: #ae5ffd;
+}
+
+body[data-agent="antigravity"] {
+	--accent-color: #51f334;
+	--input-border-left: #51f334;
+	--selection-color: #51f334;
+}
+
+body[data-agent="copilot"] {
+	--accent-color: #9ca3af;
+	--input-border-left: #9ca3af;
+	--selection-color: #9ca3af;
+}
+
+body[data-agent="amp"] {
+	--accent-color: #ff7022;
+	--input-border-left: #ff7022;
+	--selection-color: #ff7022;
+}
+
+body[data-agent="codeep"] {
+	--accent-color: #ec0a0a;
+	--input-border-left: #ec0a0a;
+	--selection-color: #ec0a0a;
+}
+
 body {
 	display: flex;
 	justify-content: center;
@@ -111,6 +175,9 @@ body {
 	color: var(--vscode-descriptionForeground, rgba(128, 128, 128, 0.8)); /* Texto secundario adaptable */
 	white-space: nowrap;
 	overflow: hidden;
+	display: flex;
+	align-items: center;
+	gap: 2px;
 }
 
 .input-footer .highlight {
@@ -251,10 +318,33 @@ body {
 .secondary-suggestions {
 	color: var(--vscode-descriptionForeground, rgba(128, 128, 128, 0.8));
 	opacity: 0.62;
+	flex: 1 1 auto;
+	min-width: 0;
+	overflow: hidden;
+	display: flex;
+	align-items: center;
+	gap: 1px; /* balanced spacing - not too tight, not too loose */
 }
 
-.secondary-model,
+.secondary-model {
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	flex-shrink: 1;
+	min-width: 0;
+}
+
+/* Make the last secondary suggestion truncate more aggressively if needed */
+.secondary-suggestions .secondary-model:last-child {
+	max-width: 110px; /* Prevents long names from causing horizontal jump */
+}
+
 .secondary-separator {
+	padding: 0 7px;
+	opacity: 0.7;
+}
+
+.secondary-model {
 	font-size: inherit;
 }
 

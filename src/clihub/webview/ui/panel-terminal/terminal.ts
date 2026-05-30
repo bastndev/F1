@@ -41,6 +41,8 @@ declare const acquireVsCodeApi: () => VsCodeApi;
 const vscode = acquireVsCodeApi();
 const sessions = new Map<string, CliSession>();
 const terminals = new Map<string, TerminalView>();
+const bootSkeletons = new Map<string, HTMLDivElement>();
+const sessionsWithFirstOutput = new Set<string>();
 let activeSessionId: string | undefined;
 let pendingTabSwitchSessionId: string | undefined;
 
@@ -182,6 +184,163 @@ const handleTerminalKey = (event: KeyboardEvent) => {
 	return false;
 };
 
+const getAgentSlug = (label: string): string => {
+	const lower = label.toLowerCase();
+	if (lower.includes('grok')) {
+		return 'grok';
+	}
+	if (lower.includes('claude')) {
+		return 'claude';
+	}
+	if (lower.includes('codex')) {
+		return 'codex';
+	}
+	if (lower.includes('opencode') || lower === 'open code') {
+		return 'opencode';
+	}
+	if (lower.includes('antigravity')) {
+		return 'antigravity';
+	}
+	if (lower.includes('copilot')) {
+		return 'copilot';
+	}
+	if (lower.includes('kilo')) {
+		return 'kilocode';
+	}
+	if (lower.includes('kiro')) {
+		return 'kiro';
+	}
+	if (lower.includes('amp')) {
+		return 'amp';
+	}
+	if (lower.includes('codeep')) {
+		return 'codeep';
+	}
+	return 'default';
+};
+
+const createBootSkeleton = (sessionId: string) => {
+	const session = sessions.get(sessionId);
+	const agentLabel = session?.label || '';
+	const agentSlug = getAgentSlug(agentLabel);
+
+	const skeleton = document.createElement('div');
+	skeleton.className = 'cli-boot-skeleton';
+	skeleton.dataset.sessionId = sessionId;
+	skeleton.dataset.agent = agentSlug;
+
+	// Premium scan overlay (terminal "reading" feel)
+	const scan = document.createElement('div');
+	scan.className = 's-scan';
+	skeleton.append(scan);
+
+	// Main rich line field (fills most of the vertical space)
+	const main = document.createElement('div');
+	main.className = 's-main';
+
+	// High-quality varied line distribution (much richer than basic skeletons)
+	const mainLines = [
+		'full', 'long', 'med', 'long', 'thick',
+		'indent', 'med', 'short', 'long', 'med',
+		'full', 'tiny', 'long', 'med', 'indent',
+		'thick', 'short', 'long', 'med', 'full'
+	];
+
+	for (const variant of mainLines) {
+		const line = document.createElement('div');
+		line.className = `s-line ${variant}`;
+		main.append(line);
+	}
+
+	skeleton.append(main);
+
+	// Strong LIVE ZONE — solves the "bottom is always black" problem
+	const live = document.createElement('div');
+	live.className = 's-live';
+
+	const liveLines = ['long', 'full', 'med', 'long'];
+	for (const variant of liveLines) {
+		const line = document.createElement('div');
+		line.className = `s-line ${variant}`;
+		live.append(line);
+	}
+
+	// Real typing presence (three dots) — modern and alive
+	const typing = document.createElement('div');
+	typing.className = 's-typing';
+
+	const sym = document.createElement('span');
+	sym.className = 's-sym';
+	sym.textContent = '▍';
+
+	const dots = document.createElement('div');
+	dots.className = 's-typing-dots';
+	for (let i = 0; i < 3; i++) {
+		const dot = document.createElement('div');
+		dot.className = 's-dot';
+		dots.append(dot);
+	}
+
+	typing.append(sym, dots);
+	live.append(typing);
+
+	skeleton.append(live);
+
+	// Subtle status/context row (adds polish, feels intentional)
+	const status = document.createElement('div');
+	status.className = 's-status';
+
+	const statusLeft = document.createElement('div');
+	statusLeft.className = 's-status-left';
+
+	const statusDot = document.createElement('div');
+	statusDot.className = 's-status-dot';
+
+	const statusText = document.createElement('span');
+	statusText.textContent = agentLabel ? `starting ${agentLabel}` : 'preparing session';
+
+	statusLeft.append(statusDot, statusText);
+
+	const statusRight = document.createElement('span');
+	statusRight.textContent = 'waiting for output';
+
+	status.append(statusLeft, statusRight);
+	skeleton.append(status);
+
+	terminalStack.append(skeleton);
+	bootSkeletons.set(sessionId, skeleton);
+
+	// Hard safety net
+	setTimeout(() => {
+		if (bootSkeletons.has(sessionId)) {
+			dismissSkeleton(sessionId);
+		}
+	}, 14000);
+
+	return skeleton;
+};
+
+const dismissSkeleton = (sessionId: string) => {
+	const skeleton = bootSkeletons.get(sessionId);
+	if (!skeleton) {
+		return;
+	}
+
+	bootSkeletons.delete(sessionId);
+	sessionsWithFirstOutput.delete(sessionId);
+
+	skeleton.classList.add('is-exiting');
+
+	const remove = () => {
+		skeleton.remove();
+	};
+
+	// Match the CSS transition duration (520ms)
+	skeleton.addEventListener('transitionend', remove, { once: true });
+	// Safety fallback in case transitionend doesn't fire
+	setTimeout(remove, 800);
+};
+
 const createTerminalView = (session: CliSession) => {
 	const pane = document.createElement('div');
 	pane.className = 'cli-terminal-pane';
@@ -213,6 +372,13 @@ const createTerminalView = (session: CliSession) => {
 	terminals.set(session.id, view);
 	requestAnimationFrame(() => fitTerminal(session.id));
 
+	// Only show the boot skeleton for freshly created sessions.
+	// Old/restored sessions (reopening the panel later) should not flash a skeleton.
+	const sessionAge = Date.now() - session.createdAt;
+	if (!bootSkeletons.has(session.id) && sessionAge < 12000) {
+		createBootSkeleton(session.id);
+	}
+
 	return view;
 };
 
@@ -224,6 +390,14 @@ const removeClosedTerminals = (openSessionIds: Set<string>) => {
 			terminals.delete(sessionId);
 		}
 	}
+
+	for (const [sessionId, skeleton] of bootSkeletons) {
+		if (!openSessionIds.has(sessionId)) {
+			skeleton.remove();
+			bootSkeletons.delete(sessionId);
+			sessionsWithFirstOutput.delete(sessionId);
+		}
+	}
 };
 
 const setActiveTerminal = () => {
@@ -231,6 +405,10 @@ const setActiveTerminal = () => {
 
 	for (const [sessionId, view] of terminals) {
 		view.pane.classList.toggle('is-active', sessionId === activeSessionId);
+	}
+
+	for (const [sessionId, skeleton] of bootSkeletons) {
+		skeleton.classList.toggle('is-active', sessionId === activeSessionId);
 	}
 
 	const activeSession = activeSessionId ? sessions.get(activeSessionId) : undefined;
@@ -271,6 +449,15 @@ const syncState = (message: Extract<ServerMessage, { type: 'cli.state' }>) => {
 	}
 
 	removeClosedTerminals(openSessionIds);
+
+	// If a session entered error/exited state before producing output, don't leave skeleton hanging
+	for (const [sessionId, skeleton] of [...bootSkeletons]) {
+		const s = sessions.get(sessionId);
+		if (s && (s.status === 'error' || s.status === 'exited')) {
+			dismissSkeleton(sessionId);
+		}
+	}
+
 	tabController.render(message.sessions, activeSessionId);
 	setActiveTerminal();
 };
@@ -286,6 +473,18 @@ const handleOutput = (message: Extract<ServerMessage, { type: 'cli.output' }>) =
 	}
 
 	terminals.get(message.sessionId)?.terminal.write(message.data);
+
+	// Skeleton dismissal contract:
+	// The skeleton must remain visible until the real CLI has started producing output,
+	// and then must linger for exactly 1 second AFTER the first output appears.
+	if (bootSkeletons.has(message.sessionId) && !sessionsWithFirstOutput.has(message.sessionId)) {
+		sessionsWithFirstOutput.add(message.sessionId);
+
+		// Wait 1 full second after the CLI actually speaks before we begin the exit animation.
+		setTimeout(() => {
+			dismissSkeleton(message.sessionId);
+		}, 1000);
+	}
 };
 
 window.addEventListener('message', (event: MessageEvent<ServerMessage>) => {
