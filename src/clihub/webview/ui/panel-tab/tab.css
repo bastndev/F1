@@ -354,6 +354,15 @@
 	white-space: nowrap;
 }
 
+.agent-tools-item-shortcut {
+	color: var(--vscode-descriptionForeground, rgba(128, 128, 128, 0.65));
+	font-size: 12px;
+	line-height: 1;
+	white-space: nowrap;
+	opacity: 0.8;
+	padding-left: 12px;
+}
+
 .agent-session-list {
 	min-height: 0;
 	display: flex;
