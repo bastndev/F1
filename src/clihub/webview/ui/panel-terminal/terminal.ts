@@ -1,6 +1,7 @@
 import { FitAddon } from '@xterm/addon-fit';
 import { Terminal } from '@xterm/xterm';
 import { createTabController, type CliAgentIcon, type CliAgentOption, type CliSessionSummary } from '../panel-tab/tab';
+import { openKeymapsModal } from './tools-cli/modal-keymaps/keymaps';
 
 type VsCodeApi = {
 	postMessage: (message: ClientMessage) => void;
@@ -162,7 +163,10 @@ const tabController = createTabController({
 		switchSessionByOffset(offset);
 	},
 	onSwitch: (sessionId) => vscode.postMessage({ type: 'cli.switch', sessionId }),
-	onClose: (sessionId) => vscode.postMessage({ type: 'cli.close', sessionId })
+	onClose: (sessionId) => vscode.postMessage({ type: 'cli.close', sessionId }),
+	onOpenKeymaps: () => {
+		openKeymapsModal();
+	}
 });
 
 const handleTerminalKey = (event: KeyboardEvent) => {

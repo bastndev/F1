@@ -24,6 +24,7 @@ type TabControllerOptions = {
 	onCycleSession: (offset: 1 | -1) => void;
 	onSwitch: (sessionId: string) => void;
 	onClose: (sessionId: string) => void;
+	onOpenKeymaps?: () => void;
 };
 
 const getRequiredElement = <T extends HTMLElement>(id: string) => {
@@ -281,6 +282,13 @@ export const createTabController = (options: TabControllerOptions) => {
 
 	toolsPopover.addEventListener('click', (event) => {
 		event.stopPropagation();
+
+		const target = event.target instanceof HTMLElement ? event.target : null;
+		const toolButton = target?.closest<HTMLButtonElement>('[data-tool]');
+		if (toolButton?.dataset.tool === 'keymaps') {
+			setToolsPopoverOpen(false);
+			options.onOpenKeymaps?.();
+		}
 	});
 
 	document.addEventListener('click', () => {
