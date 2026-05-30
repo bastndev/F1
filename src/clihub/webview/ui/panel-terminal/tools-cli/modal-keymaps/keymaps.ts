@@ -1,19 +1,31 @@
-/**
- * Keymaps Modal
- * 
- * Displays all available keyboard shortcuts inside the CLI Hub.
- * 
- * This component lives in panel-terminal/tools-cli because it is
- * shown as an overlay on top of the terminal area.
- */
+const applyStyles = (element: HTMLElement, styles: Partial<CSSStyleDeclaration>) => {
+	for (const [property, value] of Object.entries(styles)) {
+		if (typeof value === 'string') {
+			element.style[property as never] = value;
+		}
+	}
+};
 
-export function mountKeymapsModal(container: HTMLElement) {
-	// The HTML is already rendered via keymaps.html
-	// Here we can later add interactivity (search, filtering, etc.)
+export const mountKeymapsPanel = (host: HTMLElement) => {
+	const panel = document.createElement('div');
+	panel.textContent = 'hello keympas';
 
-	// Example: future search input handling could go here
-	console.log('[Keymaps] Modal mounted');
-}
+	applyStyles(panel, {
+		minWidth: '240px',
+		minHeight: '120px',
+		display: 'flex',
+		alignItems: 'center',
+		justifyContent: 'center',
+		padding: '24px',
+		boxSizing: 'border-box',
+		border: '1px solid var(--vscode-editorGroup-border, rgba(128, 128, 128, 0.35))',
+		borderRadius: '8px',
+		background: 'var(--vscode-editor-background)',
+		color: 'var(--vscode-foreground)',
+		fontFamily: 'var(--vscode-font-family)',
+		fontSize: '13px',
+		boxShadow: '0 14px 44px rgba(0, 0, 0, 0.45)'
+	});
 
-// Future API example (for tools.ts integration):
-// export function renderKeymaps(container: HTMLElement) { ... }
+	host.replaceChildren(panel);
+};
