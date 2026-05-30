@@ -1,5 +1,3 @@
-const keymapsModalId = 'cli-keymaps-modal';
-
 const applyStyles = (element: HTMLElement, styles: Partial<CSSStyleDeclaration>) => {
 	for (const [property, value] of Object.entries(styles)) {
 		if (typeof value === 'string') {
@@ -8,27 +6,9 @@ const applyStyles = (element: HTMLElement, styles: Partial<CSSStyleDeclaration>)
 	}
 };
 
-export const openKeymapsModal = () => {
-	document.getElementById(keymapsModalId)?.remove();
-
-	const overlay = document.createElement('div');
-	overlay.id = keymapsModalId;
-	overlay.setAttribute('role', 'dialog');
-	overlay.setAttribute('aria-modal', 'true');
-	overlay.setAttribute('aria-label', 'Keymaps');
-
-	applyStyles(overlay, {
-		position: 'fixed',
-		inset: '0',
-		zIndex: '1000',
-		display: 'flex',
-		alignItems: 'center',
-		justifyContent: 'center',
-		background: 'rgba(0, 0, 0, 0.72)'
-	});
-
+export const mountKeymapsPanel = (host: HTMLElement) => {
 	const panel = document.createElement('div');
-	panel.textContent = 'hello keymaps';
+	panel.textContent = 'hello keympas';
 
 	applyStyles(panel, {
 		minWidth: '240px',
@@ -47,29 +27,5 @@ export const openKeymapsModal = () => {
 		boxShadow: '0 14px 44px rgba(0, 0, 0, 0.45)'
 	});
 
-	const close = () => {
-		document.removeEventListener('keydown', handleKeyDown);
-		overlay.remove();
-	};
-
-	const handleKeyDown = (event: KeyboardEvent) => {
-		if (event.key === 'Escape') {
-			event.preventDefault();
-			close();
-		}
-	};
-
-	overlay.addEventListener('click', (event) => {
-		if (event.target === overlay) {
-			close();
-		}
-	});
-
-	panel.addEventListener('click', (event) => {
-		event.stopPropagation();
-	});
-
-	overlay.append(panel);
-	document.body.append(overlay);
-	document.addEventListener('keydown', handleKeyDown);
+	host.replaceChildren(panel);
 };

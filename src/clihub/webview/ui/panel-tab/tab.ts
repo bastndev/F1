@@ -18,13 +18,15 @@ export type CliSessionSummary = {
 	exitCode?: number;
 };
 
+export type CliToolId = 'translate' | 'keymaps';
+
 type TabControllerOptions = {
 	getAgentIcon: (label: string) => CliAgentIcon | undefined;
 	onCreate: (agent: string) => void;
 	onCycleSession: (offset: 1 | -1) => void;
 	onSwitch: (sessionId: string) => void;
 	onClose: (sessionId: string) => void;
-	onOpenKeymaps?: () => void;
+	onOpenTool?: (tool: CliToolId) => void;
 };
 
 const getRequiredElement = <T extends HTMLElement>(id: string) => {
@@ -285,9 +287,10 @@ export const createTabController = (options: TabControllerOptions) => {
 
 		const target = event.target instanceof HTMLElement ? event.target : null;
 		const toolButton = target?.closest<HTMLButtonElement>('[data-tool]');
-		if (toolButton?.dataset.tool === 'keymaps') {
+		const tool = toolButton?.dataset.tool;
+		if (tool === 'translate' || tool === 'keymaps') {
 			setToolsPopoverOpen(false);
-			options.onOpenKeymaps?.();
+			options.onOpenTool?.(tool);
 		}
 	});
 

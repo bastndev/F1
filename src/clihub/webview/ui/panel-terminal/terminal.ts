@@ -1,7 +1,7 @@
 import { FitAddon } from '@xterm/addon-fit';
 import { Terminal } from '@xterm/xterm';
 import { createTabController, type CliAgentIcon, type CliAgentOption, type CliSessionSummary } from '../panel-tab/tab';
-import { openKeymapsModal } from './tools-cli/modal-keymaps/keymaps';
+import { createToolsController } from './tools-cli/tools';
 
 type VsCodeApi = {
 	postMessage: (message: ClientMessage) => void;
@@ -156,6 +156,8 @@ const switchSessionByOffset = (offset: 1 | -1) => {
 	return true;
 };
 
+const toolsController = createToolsController();
+
 const tabController = createTabController({
 	getAgentIcon: (label) => agentIcons.get(label),
 	onCreate: (agent) => vscode.postMessage({ type: 'cli.create', agent }),
@@ -164,8 +166,8 @@ const tabController = createTabController({
 	},
 	onSwitch: (sessionId) => vscode.postMessage({ type: 'cli.switch', sessionId }),
 	onClose: (sessionId) => vscode.postMessage({ type: 'cli.close', sessionId }),
-	onOpenKeymaps: () => {
-		openKeymapsModal();
+	onOpenTool: (tool) => {
+		toolsController.open(tool);
 	}
 });
 
