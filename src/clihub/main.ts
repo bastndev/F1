@@ -146,7 +146,6 @@ export class CliHubViewProvider implements vscode.WebviewViewProvider, vscode.Di
 			this._getWebviewUri(webview, 'vendor', 'xterm', 'xterm.css'),
 			this._getWebviewUri(webview, 'webview', 'ui', 'shared', 'styles', 'layout.css'),
 			this._getWebviewUri(webview, 'webview', 'ui', 'panel-tab', 'tab.css'),
-			this._getWebviewUri(webview, 'webview', 'ui', 'panel-tool', 'tool.css'),
 			this._getWebviewUri(webview, 'webview', 'ui', 'panel-terminal', 'terminal.css'),
 			this._getWebviewUri(webview, 'webview', 'ui', 'shared', 'styles', 'skeleton', 'start-cli.css')
 		];

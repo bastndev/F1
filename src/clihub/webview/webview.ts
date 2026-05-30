@@ -19,8 +19,7 @@ type PanelFile = {
 
 const panels: PanelFile[] = [
 	{ dir: 'panel-tab', name: 'tab' },
-	{ dir: 'panel-terminal', name: 'terminal' },
-	{ dir: 'panel-tool', name: 'tool' }
+	{ dir: 'panel-terminal', name: 'terminal' }
 ];
 
 const escapeHtml = (value: string) => {
