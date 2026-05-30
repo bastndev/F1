@@ -168,7 +168,11 @@ const findModelMatches = (query: string) => {
 const renderSecondarySuggestions = (matches: LauncherMatch[]) => {
 	secondarySuggestions.replaceChildren();
 
-	for (const entry of matches.slice(1, 4)) {
+	// Limit to 2 secondary suggestions max to avoid layout jumps when agent names are long.
+	// Showing fewer items prevents the input area from expanding horizontally.
+	const secondaryToShow = matches.slice(1, 3);
+
+	for (const entry of secondaryToShow) {
 		const separator = document.createElement('span');
 		separator.className = 'secondary-separator';
 		separator.textContent = ' · ';
