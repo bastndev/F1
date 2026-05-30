@@ -700,7 +700,8 @@
 		height: 34px;
 		box-sizing: border-box;
 		flex-shrink: 0;
-		border: 2px solid var(--vscode-sideBar-background, var(--vscode-editor-background));
+		/* Subtle gray border for inactive items so the circles are visible in the stack */
+		border: 1.5px solid color-mix(in srgb, var(--vscode-foreground) 22%, var(--vscode-sideBar-background));
 		border-radius: 999px;
 		background: color-mix(in srgb, var(--vscode-input-background, rgba(128, 128, 128, 0.12)) 90%, transparent);
 		box-shadow: 
