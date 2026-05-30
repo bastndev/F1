@@ -20,7 +20,7 @@ export type CliSessionSummary = {
 
 import { matchesShortcut } from '../../shared/keymaps/keymaps';
 
-export type CliToolId = 'translate' | 'keymaps';
+export type CliToolId = 'translate' | 'keymaps' | 'prompt';
 
 type TabControllerOptions = {
 	getAgentIcon: (label: string) => CliAgentIcon | undefined;
@@ -274,7 +274,7 @@ export const createTabController = (options: TabControllerOptions) => {
 		const target = event.target instanceof HTMLElement ? event.target : null;
 		const toolButton = target?.closest<HTMLButtonElement>('[data-tool]');
 		const tool = toolButton?.dataset.tool;
-		if (tool === 'translate' || tool === 'keymaps') {
+		if (tool === 'translate' || tool === 'keymaps' || tool === 'prompt') {
 			setToolsPopoverOpen(false);
 			options.onOpenTool?.(tool);
 		}
