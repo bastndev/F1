@@ -72,10 +72,13 @@
 	background: linear-gradient(
 		180deg,
 		transparent 0%,
-		color-mix(in srgb, var(--skeleton-accent) 5%, transparent) 42%,
+		color-mix(in srgb, var(--skeleton-accent) 8%, transparent) 30%,
+		color-mix(in srgb, var(--skeleton-accent) 13%, transparent) 50%,
+		color-mix(in srgb, var(--skeleton-accent) 8%, transparent) 70%,
 		transparent 100%
 	);
-	opacity: 0.76;
+	opacity: 0.28; /*Linea Opacity*/
+	filter: blur(0.9px);
 	pointer-events: none;
 	animation: s-scan-move 3.8s linear infinite;
 	z-index: 1;
@@ -247,18 +250,17 @@
    AGENT PERSONALITY (very subtle tints)
    We only use accent for cursor/dots/scan highlights — never base gray
    ================================================================= */
-.cli-boot-skeleton[data-agent="grok"]   { --skeleton-accent: #5aa8ff; }
-.cli-boot-skeleton[data-agent="claude"] { --skeleton-accent: #e29d7f; }
-.cli-boot-skeleton[data-agent="codex"]  { --skeleton-accent: #7fd9a3; }
-.cli-boot-skeleton[data-agent="opencode"] { --skeleton-accent: #e8d36b; }
-.cli-boot-skeleton[data-agent="antigravity"] { --skeleton-accent: #b38cff; }
+.cli-boot-skeleton[data-agent="grok"]        { --skeleton-accent: #e5e7eb; }   /* blanco */
+.cli-boot-skeleton[data-agent="claude"]      { --skeleton-accent: #e29d7f; }   /* cálido - bien */
+.cli-boot-skeleton[data-agent="codex"]       { --skeleton-accent: #1500fe; }
+.cli-boot-skeleton[data-agent="opencode"]    { --skeleton-accent: #9ca3af; }   /* gris (corregido) */
+.cli-boot-skeleton[data-agent="kilocode"]    { --skeleton-accent: #e8d36b; }   /* amarillo (corregido) */
+.cli-boot-skeleton[data-agent="kiro"]        { --skeleton-accent: #c084fc; }   /* morado */
+.cli-boot-skeleton[data-agent="antigravity"] { --skeleton-accent: #60a5fa; }   /* azul */
+.cli-boot-skeleton[data-agent="copilot"]     { --skeleton-accent: #9ca3af; }
+.cli-boot-skeleton[data-agent="amp"]         { --skeleton-accent: #ff7022; }
+.cli-boot-skeleton[data-agent="codeep"]      { --skeleton-accent: #ec0a0a; }
 
-
-
-.s-live .s-line.full,
-.s-live .s-line.long {
-	box-shadow: 0 0 0 0.5px color-mix(in srgb, var(--skeleton-accent) 18%, transparent);
-}
 
 /* =================================================================
    EXIT TRANSITION — exactly 1s after real CLI output (requirement)
