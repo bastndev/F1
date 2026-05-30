@@ -142,6 +142,10 @@ async function main() {
 		sourcesContent: false,
 		platform: 'browser',
 		outfile: 'dist/clihub/webview/webview.js',
+		loader: {
+			'.css': 'text',
+			'.html': 'text',
+		},
 		logLevel: 'silent',
 		plugins: [
 			esbuildProblemMatcherPlugin,

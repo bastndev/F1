@@ -1,31 +1,23 @@
-const applyStyles = (element: HTMLElement, styles: Partial<CSSStyleDeclaration>) => {
-	for (const [property, value] of Object.entries(styles)) {
-		if (typeof value === 'string') {
-			element.style[property as never] = value;
-		}
+import keysStyles from './components/keys.css';
+import keysHtml from './components/keys.html';
+
+const stylesId = 'cli-keymaps-panel-styles';
+
+const ensureStyles = () => {
+	if (document.getElementById(stylesId)) {
+		return;
 	}
+
+	const style = document.createElement('style');
+	style.id = stylesId;
+	style.textContent = keysStyles;
+	document.head.append(style);
 };
 
 export const mountKeymapsPanel = (host: HTMLElement) => {
-	const panel = document.createElement('div');
-	panel.textContent = 'hello keympas';
+	ensureStyles();
 
-	applyStyles(panel, {
-		minWidth: '240px',
-		minHeight: '120px',
-		display: 'flex',
-		alignItems: 'center',
-		justifyContent: 'center',
-		padding: '24px',
-		boxSizing: 'border-box',
-		border: '1px solid var(--vscode-editorGroup-border, rgba(128, 128, 128, 0.35))',
-		borderRadius: '8px',
-		background: 'var(--vscode-editor-background)',
-		color: 'var(--vscode-foreground)',
-		fontFamily: 'var(--vscode-font-family)',
-		fontSize: '13px',
-		boxShadow: '0 14px 44px rgba(0, 0, 0, 0.45)'
-	});
-
-	host.replaceChildren(panel);
+	const template = document.createElement('template');
+	template.innerHTML = keysHtml.trim();
+	host.replaceChildren(template.content.cloneNode(true));
 };

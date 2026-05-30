@@ -1,0 +1,16 @@
+.keymaps-panel {
+	min-width: 240px;
+	min-height: 120px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	padding: 24px;
+	box-sizing: border-box;
+	border: 1px solid var(--vscode-editorGroup-border, rgba(128, 128, 128, 0.35));
+	border-radius: 8px;
+	background: var(--vscode-editor-background);
+	color: var(--vscode-foreground);
+	font-family: var(--vscode-font-family);
+	font-size: 13px;
+	box-shadow: 0 14px 44px rgba(0, 0, 0, 0.45);
+}
