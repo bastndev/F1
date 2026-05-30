@@ -184,64 +184,133 @@ const handleTerminalKey = (event: KeyboardEvent) => {
 	return false;
 };
 
+const getAgentSlug = (label: string): string => {
+	const lower = label.toLowerCase();
+	if (lower.includes('grok')) {
+		return 'grok';
+	}
+	if (lower.includes('claude')) {
+		return 'claude';
+	}
+	if (lower.includes('codex')) {
+		return 'codex';
+	}
+	if (lower.includes('opencode') || lower === 'open code') {
+		return 'opencode';
+	}
+	if (lower.includes('antigravity')) {
+		return 'antigravity';
+	}
+	if (lower.includes('copilot')) {
+		return 'copilot';
+	}
+	if (lower.includes('kilo')) {
+		return 'kilocode';
+	}
+	if (lower.includes('kiro')) {
+		return 'kiro';
+	}
+	if (lower.includes('amp')) {
+		return 'amp';
+	}
+	if (lower.includes('codeep')) {
+		return 'codeep';
+	}
+	return 'default';
+};
+
 const createBootSkeleton = (sessionId: string) => {
+	const session = sessions.get(sessionId);
+	const agentLabel = session?.label || '';
+	const agentSlug = getAgentSlug(agentLabel);
+
 	const skeleton = document.createElement('div');
 	skeleton.className = 'cli-boot-skeleton';
 	skeleton.dataset.sessionId = sessionId;
+	skeleton.dataset.agent = agentSlug;
 
-	// Full-bleed anticipation field — fills the entire terminal area
-	const field = document.createElement('div');
-	field.className = 'cli-skeleton-field';
+	// Premium scan overlay (terminal "reading" feel)
+	const scan = document.createElement('div');
+	scan.className = 's-scan';
+	skeleton.append(scan);
 
-	// Rich, varied line distribution designed for CLI + text chat output.
-	// The pattern feels like "upcoming conversation / command output".
-	const lineVariants: Array<[string, number]> = [
-		['full', 1], ['long', 1], ['med', 1], ['long', 1], ['block', 1],
-		['indent', 1], ['med', 1], ['short', 1], ['long', 1], ['med', 1],
-		['full', 1], ['tiny', 1], ['long', 1], ['med', 1], ['indent', 1],
-		['block', 1], ['short', 1], ['long', 1], ['med', 1], ['full', 1]
+	// Main rich line field (fills most of the vertical space)
+	const main = document.createElement('div');
+	main.className = 's-main';
+
+	// High-quality varied line distribution (much richer than basic skeletons)
+	const mainLines = [
+		'full', 'long', 'med', 'long', 'thick',
+		'indent', 'med', 'short', 'long', 'med',
+		'full', 'tiny', 'long', 'med', 'indent',
+		'thick', 'short', 'long', 'med', 'full'
 	];
 
-	for (const [variant] of lineVariants) {
+	for (const variant of mainLines) {
 		const line = document.createElement('div');
-		line.className = 'cli-skeleton-line';
-		line.dataset.v = variant;
-		field.append(line);
+		line.className = `s-line ${variant}`;
+		main.append(line);
 	}
 
-	// LIVE ZONE — the critical bottom area that was previously pure black.
-	// This is where the real CLI will start writing from.
-	const liveZone = document.createElement('div');
-	liveZone.className = 'cli-skeleton-live-zone';
+	skeleton.append(main);
 
-	// A few stronger "incoming" lines
-	const liveVariants = ['long', 'full', 'med', 'long'] as const;
-	for (const v of liveVariants) {
+	// Strong LIVE ZONE — solves the "bottom is always black" problem
+	const live = document.createElement('div');
+	live.className = 's-live';
+
+	const liveLines = ['long', 'full', 'med', 'long'];
+	for (const variant of liveLines) {
 		const line = document.createElement('div');
-		line.className = 'cli-skeleton-line';
-		line.dataset.v = v;
-		liveZone.append(line);
+		line.className = `s-line ${variant}`;
+		live.append(line);
 	}
 
-	// Active typing cluster at the very bottom (the "live" prompt area)
+	// Real typing presence (three dots) — modern and alive
 	const typing = document.createElement('div');
-	typing.className = 'cli-skeleton-typing';
+	typing.className = 's-typing';
 
-	const glyph = document.createElement('span');
-	glyph.className = 'cli-skeleton-typing-glyph';
-	glyph.textContent = '▍';
+	const sym = document.createElement('span');
+	sym.className = 's-sym';
+	sym.textContent = '▍';
 
-	const cursor = document.createElement('div');
-	cursor.className = 'cli-skeleton-typing-cursor';
+	const dots = document.createElement('div');
+	dots.className = 's-typing-dots';
+	for (let i = 0; i < 3; i++) {
+		const dot = document.createElement('div');
+		dot.className = 's-dot';
+		dots.append(dot);
+	}
 
-	typing.append(glyph, cursor);
-	liveZone.append(typing);
+	typing.append(sym, dots);
+	live.append(typing);
 
-	skeleton.append(field, liveZone);
+	skeleton.append(live);
+
+	// Subtle status/context row (adds polish, feels intentional)
+	const status = document.createElement('div');
+	status.className = 's-status';
+
+	const statusLeft = document.createElement('div');
+	statusLeft.className = 's-status-left';
+
+	const statusDot = document.createElement('div');
+	statusDot.className = 's-status-dot';
+
+	const statusText = document.createElement('span');
+	statusText.textContent = agentLabel ? `starting ${agentLabel}` : 'preparing session';
+
+	statusLeft.append(statusDot, statusText);
+
+	const statusRight = document.createElement('span');
+	statusRight.textContent = 'waiting for output';
+
+	status.append(statusLeft, statusRight);
+	skeleton.append(status);
+
 	terminalStack.append(skeleton);
 	bootSkeletons.set(sessionId, skeleton);
 
-	// Hard safety timeout — never trap the user in a skeleton
+	// Hard safety net
 	setTimeout(() => {
 		if (bootSkeletons.has(sessionId)) {
 			dismissSkeleton(sessionId);
