@@ -18,6 +18,8 @@ export type CliSessionSummary = {
 	exitCode?: number;
 };
 
+import { matchesShortcut } from '../../shared/keymaps/keymaps';
+
 export type CliToolId = 'translate' | 'keymaps';
 
 type TabControllerOptions = {
@@ -131,29 +133,13 @@ export const createTabController = (options: TabControllerOptions) => {
 		optionButtons[nextIndex]?.focus();
 	};
 
-	const isCreateShortcut = (event: KeyboardEvent) => {
-		return event.altKey
-			&& !event.ctrlKey
-			&& !event.metaKey
-			&& (event.key === '+' || event.code === 'Equal' || event.code === 'NumpadAdd');
-	};
-
-	const isCloseShortcut = (event: KeyboardEvent) => {
-		return event.altKey
-			&& !event.ctrlKey
-			&& !event.metaKey
-			&& (event.key === '-' || event.code === 'Minus' || event.code === 'NumpadSubtract');
-	};
-
 	const getShortcutAction = (event: KeyboardEvent) => {
-		if (isCreateShortcut(event)) {
+		if (matchesShortcut(event, 'newSession')) {
 			return 'create';
 		}
-
-		if (isCloseShortcut(event)) {
+		if (matchesShortcut(event, 'closeSession')) {
 			return 'close';
 		}
-
 		return undefined;
 	};
 
