@@ -121,3 +121,39 @@
 		inset: 0;
 	}
 }
+
+/* =====================================================
+   Tools Modal (over the terminal area)
+   ===================================================== */
+.cli-tools-modal {
+	position: absolute;
+	inset: 0;
+	z-index: 100;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+.cli-tools-modal[hidden] {
+	display: none;
+}
+
+.cli-tools-modal-backdrop {
+	position: absolute;
+	inset: 0;
+	background: rgba(0, 0, 0, 0.65);
+	/* Later we can improve this to glassmorphism */
+}
+
+.cli-tools-modal-content {
+	position: relative;
+	z-index: 1;
+	min-width: 420px;
+	max-width: 620px;
+	min-height: 320px;
+	background: var(--vscode-editor-background);
+	border: 1px solid var(--vscode-editorGroup-border, rgba(128, 128, 128, 0.3));
+	border-radius: 8px;
+	box-shadow: 0 10px 40px rgba(0, 0, 0, 0.45);
+	overflow: hidden;
+}
