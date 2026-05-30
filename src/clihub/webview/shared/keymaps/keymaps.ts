@@ -4,6 +4,9 @@
  * This file is the single source of truth for shortcut detection.
  * It only handles matching, NOT the actions themselves.
  * Actions remain in the components (tab.ts, terminal.ts, launcher).
+ *
+ * Includes both session management shortcuts and tool modal openers
+ * (Prompt, Translate, Keymaps).
  */
 
 export type ShortcutContext = 'launcher' | 'terminal';
@@ -14,7 +17,10 @@ export type ShortcutId =
   | 'nextSession'
   | 'prevSession'
   | 'toggleAgentPalette'   // launcher only
-  | 'closeLauncherPalette'; // launcher only
+  | 'closeLauncherPalette' // launcher only
+  | 'openPrompt'           // opens the Prompt tool modal
+  | 'openTranslate'        // opens the Translate tool modal
+  | 'openKeymaps';         // opens the Keymaps tool modal
 
 export interface ShortcutDefinition {
   id: ShortcutId;
@@ -94,6 +100,20 @@ export function escapeKey() {
   };
 }
 
+/** Matches Shift + F1, Shift + F2, etc. (common for opening tools/panels) */
+export function shiftFKey(num: number) {
+  const targetKey = `F${num}`;
+  return (event: KeyboardEvent): boolean => {
+    return (
+      event.shiftKey &&
+      !event.altKey &&
+      !event.ctrlKey &&
+      !event.metaKey &&
+      event.key === targetKey
+    );
+  };
+}
+
 export const shortcuts: ShortcutDefinition[] = [
   {
     id: 'newSession',
@@ -123,6 +143,30 @@ export const shortcuts: ShortcutDefinition[] = [
     description: 'Shift + Tab',
     match: shiftTab(),
   },
+
+  // Tool modals (opened via Shift + Fn)
+  {
+    id: 'openPrompt',
+    label: 'Open Prompt tool',
+    contexts: ['terminal'],
+    description: 'Shift + F1',
+    match: shiftFKey(1),
+  },
+  {
+    id: 'openTranslate',
+    label: 'Open Translate tool',
+    contexts: ['terminal'],
+    description: 'Shift + F2',
+    match: shiftFKey(2),
+  },
+  {
+    id: 'openKeymaps',
+    label: 'Open Keymaps tool',
+    contexts: ['terminal'],
+    description: 'Shift + F3',
+    match: shiftFKey(3),
+  },
+
   {
     id: 'toggleAgentPalette',
     label: 'Toggle agents palette',

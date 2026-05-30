@@ -18,7 +18,7 @@ export type CliSessionSummary = {
 	exitCode?: number;
 };
 
-import { matchesShortcut } from '../../shared/keymaps/keymaps';
+import { consumeShortcut, matchesShortcut } from '../../shared/keymaps/keymaps';
 
 export type CliToolId = 'translate' | 'keymaps' | 'prompt';
 
@@ -172,6 +172,26 @@ export const createTabController = (options: TabControllerOptions) => {
 	const handleKeyboardShortcut = (event: KeyboardEvent) => {
 		if (event.type !== 'keydown' || event.repeat) {
 			return false;
+		}
+
+		// Tool modals (centralized in shared/keymaps)
+		if (matchesShortcut(event, 'openPrompt')) {
+			if (consumeShortcut(event, 'openPrompt')) {
+				options.onOpenTool?.('prompt');
+				return true;
+			}
+		}
+		if (matchesShortcut(event, 'openTranslate')) {
+			if (consumeShortcut(event, 'openTranslate')) {
+				options.onOpenTool?.('translate');
+				return true;
+			}
+		}
+		if (matchesShortcut(event, 'openKeymaps')) {
+			if (consumeShortcut(event, 'openKeymaps')) {
+				options.onOpenTool?.('keymaps');
+				return true;
+			}
 		}
 
 		const action = getShortcutAction(event);
