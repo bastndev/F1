@@ -26,6 +26,27 @@
   box-shadow: 0 24px 60px rgba(0, 0, 0, 0.45);
   display: flex;
   flex-direction: column;
+  position: relative;
+}
+
+/* Top accent light / glow (2-color gradient according to current CLI) */
+.prompt-modal::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    var(--agent-accent, #AFA9EC) 32%,
+    color-mix(in srgb, var(--agent-accent) 65%, white) 68%,
+    transparent 100%
+  );
+  opacity: 0.55;
+  z-index: 10;
+  pointer-events: none;
 }
 
 /* ── Header ── */
