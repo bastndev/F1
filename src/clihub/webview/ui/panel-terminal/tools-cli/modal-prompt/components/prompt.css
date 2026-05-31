@@ -109,15 +109,20 @@
   transition: all 0.15s;
   font-family: 'Syne', sans-serif;
   user-select: none;
+
+  /* Reserve space for border so switching tabs doesn't cause layout jump */
+  border: 0.5px solid transparent;
+  border-bottom: none;
 }
+
 .prompt-tab:hover:not(.active) {
   color: rgba(255, 255, 255, 0.5);
 }
+
 .prompt-tab.active {
   color: var(--agent-accent, #AFA9EC);
   background: color-mix(in srgb, var(--agent-accent, #534AB7) 14%, transparent);
-  border: 0.5px solid color-mix(in srgb, var(--agent-accent, #534AB7) 22%, transparent);
-  border-bottom: none;
+  border-color: color-mix(in srgb, var(--agent-accent, #534AB7) 22%, transparent);
 }
 
 /* Cool beta badge */
@@ -152,10 +157,10 @@
   position: relative;
 }
 
-/* Visual reaction when Pro tab is active */
+/* Visual reaction when Pro tab is active (layout-safe, no jumps) */
 .prompt-textarea-wrap.is-pro .prompt-textarea {
-  border-color: color-mix(in srgb, var(--agent-accent) 38%, rgba(255, 255, 255, 0.12));
-  box-shadow: 0 0 0 1px color-mix(in srgb, var(--agent-accent) 14%, transparent);
+  /* We avoid changing border or adding box-shadow here to prevent layout shifts */
+  background: color-mix(in srgb, var(--agent-accent) 5%, rgba(255, 255, 255, 0.04));
 }
 
 .prompt-textarea {
