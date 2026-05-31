@@ -78,6 +78,9 @@ function initPromptTabs(host: HTMLElement) {
 
 	// === Skills chips (selectable buttons) ===
 	initSkillsChips(host);
+
+	// === Run button enable/disable logic ===
+	initRunButton(host, textarea);
 }
 
 function enforceLowercaseInput(textarea: HTMLTextAreaElement) {
@@ -124,6 +127,24 @@ function initSkillsChips(host: HTMLElement) {
 			// chips.forEach(c => c !== chip && c.classList.remove('selected'));
 		});
 	});
+}
+
+function initRunButton(host: HTMLElement, textarea: HTMLTextAreaElement) {
+	const runBtn = host.querySelector<HTMLButtonElement>('#runBtn');
+	if (!runBtn) {
+		return;
+	}
+
+	const updateState = () => {
+		const hasText = textarea.value.trim().length > 0;
+		runBtn.disabled = !hasText;
+	};
+
+	// Initial state
+	updateState();
+
+	// Update live as user types
+	textarea.addEventListener('input', updateState);
 }
 
 function updateFooterModel(host: HTMLElement) {
