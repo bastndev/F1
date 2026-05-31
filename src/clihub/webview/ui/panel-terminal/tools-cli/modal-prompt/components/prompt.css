@@ -120,6 +120,28 @@
   border-bottom: none;
 }
 
+/* Cool beta badge */
+.prompt-beta {
+  font-size: 9px;
+  font-weight: 500;
+  letter-spacing: 0.5px;
+  padding: 1px 5px;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.45);
+  text-transform: lowercase;
+  vertical-align: middle;
+  margin-left: 4px;
+  font-family: 'JetBrains Mono', monospace;
+  transition: all 0.15s ease;
+}
+
+.prompt-tab.active .prompt-beta {
+  background: color-mix(in srgb, var(--agent-accent) 22%, transparent);
+  color: color-mix(in srgb, var(--agent-accent) 70%, white);
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--agent-accent) 25%, transparent);
+}
+
 /* ── Body ── */
 .prompt-body {
   padding: 16px 20px;
@@ -128,6 +150,12 @@
 
 .prompt-textarea-wrap {
   position: relative;
+}
+
+/* Visual reaction when Pro tab is active */
+.prompt-textarea-wrap.is-pro .prompt-textarea {
+  border-color: color-mix(in srgb, var(--agent-accent) 38%, rgba(255, 255, 255, 0.12));
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--agent-accent) 14%, transparent);
 }
 
 .prompt-textarea {
