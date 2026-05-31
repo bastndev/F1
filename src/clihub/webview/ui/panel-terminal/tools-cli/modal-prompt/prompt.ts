@@ -1,5 +1,6 @@
 import promptStyles from './components/prompt.css';
 import promptHtml from './components/prompt.html';
+import { processPrompt, type PromptSendContext } from './core/prompt-processor';
 
 const stylesId = 'cli-prompt-panel-styles';
 
@@ -100,7 +101,7 @@ function initPromptTabs(host: HTMLElement, context: any, hasActiveSession: boole
 	// === Run button + send logic ===
 	initRunButton(host, textarea, context);
 
-	// === Ctrl+Enter / Cmd+Enter support ===
+	// === Ctrl+Enter / Cmd+Enter support — also goes through the processor ===
 	initSendShortcut(textarea, context);
 
 	// Initial char count (only when interactive)
@@ -176,7 +177,7 @@ function initRunButton(host: HTMLElement, textarea: HTMLTextAreaElement, context
 		updateCharCount(host, textarea);
 	});
 
-	// Actual send action
+	// Actual send action — delegates to the processor (future home of autocorrect + translate)
 	runBtn.addEventListener('click', () => {
 		performSend(host, textarea, context);
 	});
@@ -198,23 +199,16 @@ function initSendShortcut(textarea: HTMLTextAreaElement, context: any) {
 }
 
 function performSend(host: HTMLElement, textarea: HTMLTextAreaElement, context: any) {
-	const text = textarea.value.trim();
-	if (!text) {
-		return;
-	}
+	const result = processPrompt(textarea.value, {
+		close: context.close,
+		sendToActiveSession: context.sendToActiveSession,
+		getActiveSessionId: context.getActiveSessionId,
+	});
 
-	const sessionId = context.getActiveSessionId?.();
-	if (!sessionId || !context.sendToActiveSession) {
-		// Should not happen because UI is disabled, but defensive
+	if (result.status === 'no-session') {
+		// Defensive: should rarely happen because UI disables the button
 		showNoSessionMessage(host);
-		return;
 	}
-
-	// Send exactly what the user wrote + carriage return (simulates pressing Enter)
-	context.sendToActiveSession(text + '\r');
-
-	// Close the modal after sending (clean UX)
-	context.close();
 }
 
 function updateCharCount(host: HTMLElement, textarea: HTMLTextAreaElement) {
