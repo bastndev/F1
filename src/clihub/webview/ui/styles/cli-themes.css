@@ -1,0 +1,60 @@
+/* =================================================================
+   CLI THEMES — Agent-specific accent colors
+   These are now global and available anywhere inside .agent-shell
+   (including all tool modals: Prompt, Translate, Keymaps, etc.)
+   ================================================================= */
+
+.agent-shell[data-agent="grok"] {
+	--grok: #e5e7eb;
+	--agent-accent: #e5e7eb;
+}
+
+.agent-shell[data-agent="claude"] {
+	--claude: #e29d7f;
+	--agent-accent: #e29d7f;
+}
+
+.agent-shell[data-agent="codex"] {
+	--codex: #1cd1e5;
+	--agent-accent: #1cd1e5;
+}
+
+.agent-shell[data-agent="opencode"] {
+	--opencode: #9ca3af;
+	--agent-accent: #9ca3af;
+}
+
+.agent-shell[data-agent="kilocode"] {
+	--kilocode: #e8d36b;
+	--agent-accent: #e8d36b;
+}
+
+.agent-shell[data-agent="kiro"] {
+	--kiro: #ae5ffd;
+	--agent-accent: #ae5ffd;
+}
+
+.agent-shell[data-agent="antigravity"] {
+	--antigravity: #51f334;
+	--agent-accent: #51f334;
+}
+
+.agent-shell[data-agent="copilot"] {
+	--copilot: #9ca3af;
+	--agent-accent: #9ca3af;
+}
+
+.agent-shell[data-agent="amp"] {
+	--amp: #ff7022;
+	--agent-accent: #ff7022;
+}
+
+.agent-shell[data-agent="codeep"] {
+	--codeep: #ec0a0a;
+	--agent-accent: #ec0a0a;
+}
+
+/* Fallback when no agent is selected */
+.agent-shell {
+	--agent-accent: var(--vscode-textLink-foreground, #4daafc);
+}

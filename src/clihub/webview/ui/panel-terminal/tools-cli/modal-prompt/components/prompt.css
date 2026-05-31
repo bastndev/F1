@@ -77,16 +77,16 @@
   letter-spacing: 0.04em;
   padding: 3px 8px;
   border-radius: 20px;
-  border: 0.5px solid rgba(83, 74, 183, 0.35);
-  background: rgba(83, 74, 183, 0.2);
-  color: #AFA9EC;
+  border: 0.5px solid color-mix(in srgb, var(--agent-accent, #534AB7) 38%, transparent);
+  background: color-mix(in srgb, var(--agent-accent, #534AB7) 20%, transparent);
+  color: var(--agent-accent, #AFA9EC);
   cursor: pointer;
   font-family: 'Syne', sans-serif;
   transition: background 0.15s;
   margin-top: 2px;
 }
 .prompt-pill:hover {
-  background: rgba(83, 74, 183, 0.35);
+  background: color-mix(in srgb, var(--agent-accent, #534AB7) 35%, transparent);
 }
 
 /* ── Tabs ── */
@@ -114,9 +114,9 @@
   color: rgba(255, 255, 255, 0.5);
 }
 .prompt-tab.active {
-  color: #AFA9EC;
-  background: rgba(83, 74, 183, 0.12);
-  border: 0.5px solid rgba(83, 74, 183, 0.2);
+  color: var(--agent-accent, #AFA9EC);
+  background: color-mix(in srgb, var(--agent-accent, #534AB7) 14%, transparent);
+  border: 0.5px solid color-mix(in srgb, var(--agent-accent, #534AB7) 22%, transparent);
   border-bottom: none;
 }
 
@@ -147,7 +147,7 @@
   letter-spacing: 0.01em;
 }
 .prompt-textarea:focus {
-  border-color: rgba(83, 74, 183, 0.5);
+  border-color: color-mix(in srgb, var(--agent-accent, #534AB7) 50%, transparent);
   background: rgba(255, 255, 255, 0.05);
 }
 .prompt-textarea::placeholder {
@@ -193,9 +193,9 @@
 }
 .prompt-tool-btn:hover,
 .prompt-tool-btn.active {
-  background: rgba(83, 74, 183, 0.2);
-  border-color: rgba(83, 74, 183, 0.45);
-  color: #AFA9EC;
+  background: color-mix(in srgb, var(--agent-accent, #534AB7) 18%, transparent);
+  border-color: color-mix(in srgb, var(--agent-accent, #534AB7) 40%, transparent);
+  color: var(--agent-accent, #AFA9EC);
 }
 
 /* ── Divider ── */
@@ -349,4 +349,80 @@
   .prompt-footer {
     padding: 10px 16px;
   }
+}
+
+/* =================================================================
+   AGENT THEMING (from cli-themes.css)
+   The modal automatically picks the right accent when .agent-shell
+   has data-agent="claude", "grok", etc.
+   ================================================================= */
+.agent-shell[data-agent] .prompt-modal {
+	--prompt-accent: var(--agent-accent);
+}
+
+/* General agent accent for interactive elements */
+.agent-shell[data-agent] .prompt-tab.active {
+	color: var(--agent-accent);
+	background: color-mix(in srgb, var(--agent-accent) 14%, transparent);
+	border-color: color-mix(in srgb, var(--agent-accent) 35%, transparent);
+}
+
+.agent-shell[data-agent] .prompt-tool-btn.active,
+.agent-shell[data-agent] .prompt-tool-btn:hover {
+	background: color-mix(in srgb, var(--agent-accent) 16%, transparent);
+	border-color: color-mix(in srgb, var(--agent-accent) 38%, transparent);
+	color: var(--agent-accent);
+}
+
+.agent-shell[data-agent] .prompt-run-btn {
+	background: var(--agent-accent);
+	color: #1a1a1f;
+	font-weight: 700;
+}
+
+.agent-shell[data-agent] .prompt-run-btn:hover {
+	filter: brightness(1.1);
+}
+
+/* Claude specific warm tone refinements */
+.agent-shell[data-agent="claude"] .prompt-title {
+	color: var(--claude);
+}
+
+.agent-shell[data-agent="claude"] .prompt-run-btn {
+	color: #1f1a18; /* slightly warmer text on peach */
+}
+
+/* === Specific fixes requested === */
+
+/* 1. Textarea focus border/line now uses agent color instead of purple */
+.agent-shell[data-agent] .prompt-textarea:focus {
+	border-color: color-mix(in srgb, var(--agent-accent) 55%, transparent);
+}
+
+/* Claude specific stronger warm border on focus */
+.agent-shell[data-agent="claude"] .prompt-textarea:focus {
+	border-color: color-mix(in srgb, var(--claude) 65%, transparent);
+}
+
+/* 2. Language selector pill (🌐 ES → EN) background no longer purple */
+.agent-shell[data-agent] .prompt-pill {
+	background: color-mix(in srgb, var(--agent-accent) 18%, transparent);
+	border-color: color-mix(in srgb, var(--agent-accent) 38%, transparent);
+	color: var(--agent-accent);
+}
+
+.agent-shell[data-agent] .prompt-pill:hover {
+	background: color-mix(in srgb, var(--agent-accent) 32%, transparent);
+}
+
+/* Claude refinements for the pill */
+.agent-shell[data-agent="claude"] .prompt-pill {
+	background: color-mix(in srgb, var(--claude) 22%, transparent);
+	border-color: color-mix(in srgb, var(--claude) 45%, transparent);
+	color: var(--claude);
+}
+
+.agent-shell[data-agent="claude"] .prompt-pill:hover {
+	background: color-mix(in srgb, var(--claude) 38%, transparent);
 }
