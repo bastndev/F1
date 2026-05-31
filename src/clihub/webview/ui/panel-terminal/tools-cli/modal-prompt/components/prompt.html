@@ -1,29 +1,26 @@
-<div class="prompt-modal" role="dialog" aria-label="Mejorador de prompts">
-
+<div class="prompt-modal" role="dialog" aria-label="Prompt Enhancer">
   <!-- HEADER -->
   <div class="prompt-header">
     <div class="prompt-header-left">
       <div class="prompt-title">Prompt <span class="prompt-badge">PRO</span></div>
-      <div class="prompt-subtitle">envía un mensaje a la sesión CLI activa</div>
+      <div class="prompt-subtitle">send a message to the active CLI session</div>
     </div>
     <div class="prompt-header-actions">
       <button class="prompt-pill" id="langToggle">🌐 → EN</button>
     </div>
   </div>
-
   <!-- TABS -->
-<div class="prompt-tabs">
-  <div class="prompt-tab active" data-tab="write">Normal</div>
-  <div class="prompt-tab" data-tab="enhance">Pro <span class="prompt-beta">beta</span></div>
-</div>
-
+  <div class="prompt-tabs">
+    <div class="prompt-tab active" data-tab="write">Normal</div>
+    <div class="prompt-tab" data-tab="enhance">Pro <span class="prompt-beta">beta</span></div>
+  </div>
   <!-- BODY -->
   <div class="prompt-body">
     <div class="prompt-textarea-wrap">
       <textarea
         id="promptInput"
         class="prompt-textarea"
-        placeholder="escribe tu prompt aquí…"
+        placeholder="write your prompt here…"
         maxlength="1000"
       ></textarea>
       <span class="prompt-char-count" id="charCount">0/1000</span>
@@ -39,18 +36,15 @@
       </div>
     </div>
   </div>
-
   <!-- DIVIDER -->
   <div class="prompt-divider"></div>
-
   <!-- FOOTER -->
   <div class="prompt-footer">
     <div class="prompt-footer-info">
       <i class="ti ti-cpu" aria-hidden="true"></i> CLI
     </div>
     <button class="prompt-run-btn" id="runBtn" data-action="both" disabled>
-      <i class="ti ti-send" aria-hidden="true"></i> ejecutar
+      <i class="ti ti-send" aria-hidden="true"></i> run
     </button>
   </div>
-
 </div>
