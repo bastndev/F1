@@ -44,7 +44,7 @@ function initPromptTabs(host: HTMLElement) {
 		if (tab === 'enhance') {
 			textarea.placeholder = 'describe what you want to improve or generate…';
 		} else {
-			textarea.placeholder = 'escribe tu prompt aquí…';
+			textarea.placeholder = 'Ask anything…';
 		}
 	};
 
