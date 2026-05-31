@@ -313,65 +313,6 @@
   flex: 0 0 auto;
 }
 
-/* ── Result sections ── */
-.prompt-result {
-  display: none;
-  padding: 14px 20px;
-  flex: 0 0 auto;
-}
-.prompt-result.visible {
-  display: block;
-}
-
-.prompt-result-label {
-  font-size: 10px;
-  font-weight: 600;
-  letter-spacing: 0.08em;
-  color: var(--vscode-descriptionForeground);
-  text-transform: uppercase;
-  margin-bottom: 8px;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-.prompt-result-label i {
-  font-size: 12px;
-}
-
-.prompt-result-box {
-  background: rgba(255, 255, 255, 0.04);
-  border: 0.5px solid rgba(83, 74, 183, 0.25);
-  border-radius: 8px;
-  padding: 12px 14px;
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 12px;
-  line-height: 1.65;
-  color: #c8c4e0;
-  position: relative;
-  min-height: 60px;
-  letter-spacing: 0.01em;
-}
-
-.prompt-copy-btn {
-  position: absolute;
-  top: 8px;
-  right: 8px;
-  background: rgba(83, 74, 183, 0.15);
-  border: 0.5px solid rgba(83, 74, 183, 0.3);
-  border-radius: 5px;
-  padding: 4px 8px;
-  font-size: 10px;
-  color: #AFA9EC;
-  cursor: pointer;
-  font-family: 'Syne', sans-serif;
-  font-weight: 600;
-  letter-spacing: 0.04em;
-  transition: background 0.15s;
-}
-.prompt-copy-btn:hover {
-  background: rgba(83, 74, 183, 0.3);
-}
-
 /* ── Footer ── */
 .prompt-footer {
   display: flex;
@@ -449,9 +390,6 @@
   }
   .prompt-tabs {
     padding: 10px 16px 0;
-  }
-  .prompt-result {
-    padding: 12px 16px;
   }
   .prompt-footer {
     padding: 10px 16px;
