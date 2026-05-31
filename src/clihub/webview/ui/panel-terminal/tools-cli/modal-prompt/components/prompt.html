@@ -1,23 +1,19 @@
-<div class="prompt-modal" role="dialog" aria-label="Prompt enhancer">
-
+<div class="prompt-modal" role="dialog" aria-label="Mejorador de prompts">
   <!-- HEADER -->
   <div class="prompt-header">
     <div class="prompt-header-left">
       <div class="prompt-title">Prompt <span class="prompt-badge">PRO</span></div>
-      <div class="prompt-subtitle">send a message to the active cli session</div>
+      <div class="prompt-subtitle">envía un mensaje a la sesión del CLI activa</div>
     </div>
     <div class="prompt-header-actions">
-      <button class="prompt-pill" id="langToggle">🌐 ES → EN</button>
+      <button class="prompt-pill" id="langToggle">🌐 → EN</button>
     </div>
   </div>
-
   <!-- TABS -->
   <div class="prompt-tabs">
-    <div class="prompt-tab active" data-tab="write">Write</div>
-    <div class="prompt-tab" data-tab="enhance">Enhanced</div>
-    <div class="prompt-tab" data-tab="translate">Translated</div>
+    <div class="prompt-tab active" data-tab="write">Normal</div>
+    <div class="prompt-tab" data-tab="enhance">Pro <span class="prompt-beta">beta</span></div>
   </div>
-
   <!-- BODY -->
   <div class="prompt-body">
     <div class="prompt-textarea-wrap">
@@ -29,52 +25,30 @@
       ></textarea>
       <span class="prompt-char-count" id="charCount">0/1000</span>
     </div>
-    <div class="prompt-tools">
-      <button class="prompt-tool-btn" id="btnEnhance" data-action="enhance">
-        <i class="ti ti-wand" aria-hidden="true"></i> mejorar
-      </button>
-      <button class="prompt-tool-btn" id="btnTranslate" data-action="translate">
-        <i class="ti ti-world" aria-hidden="true"></i> traducir
-      </button>
-      <button class="prompt-tool-btn" id="btnBoth" data-action="both">
-        <i class="ti ti-sparkles" aria-hidden="true"></i> mejorar + traducir
-      </button>
+    <div class="prompt-skills">
+      <span class="prompt-skills-label">Skills:</span>
+      <div class="prompt-tools">
+        <button class="prompt-tool-btn" data-skill="skill-1">Skill 1</button>
+        <button class="prompt-tool-btn" data-skill="skill-2">Skill 2</button>
+        <button class="prompt-tool-btn" data-skill="skill-3">Skill 3</button>
+        <button class="prompt-tool-btn" data-skill="skill-4">Skill 4</button>
+        <button class="prompt-tool-btn" data-skill="skill-5">Skill 5</button>
+      </div>
     </div>
   </div>
-
-  <!-- DIVIDER -->
+  <!-- DIVIDE -->
   <div class="prompt-divider"></div>
-
-  <!-- RESULT: ENHANCED -->
-  <div id="resultEnhanced" class="prompt-result">
-    <div class="prompt-result-label">
-      <i class="ti ti-wand" aria-hidden="true"></i> prompt mejorado
-    </div>
-    <div class="prompt-result-box" id="enhancedBox">
-      <button class="prompt-copy-btn" data-target="enhancedContent">copiar</button>
-      <span id="enhancedContent"></span>
-    </div>
-  </div>
-
-  <!-- RESULT: TRANSLATED -->
-  <div id="resultTranslated" class="prompt-result">
-    <div class="prompt-result-label">
-      <i class="ti ti-world" aria-hidden="true"></i> traducción al inglés
-    </div>
-    <div class="prompt-result-box" id="translatedBox">
-      <button class="prompt-copy-btn" data-target="translatedContent">copiar</button>
-      <span id="translatedContent"></span>
-    </div>
-  </div>
-
   <!-- FOOTER -->
   <div class="prompt-footer">
     <div class="prompt-footer-info">
-      <i class="ti ti-cpu" aria-hidden="true"></i> claude-sonnet-4
+      <i class="ti ti-cpu" aria-hidden="true"></i> CLI
     </div>
-    <button class="prompt-run-btn" id="runBtn" data-action="both">
-      <i class="ti ti-send" aria-hidden="true"></i> ejecutar
-    </button>
+    <div class="prompt-run-wrap">
+      <span class="prompt-run-hint">ctrl+enter</span>
+      <button class="prompt-run-btn" id="runBtn" data-action="both" disabled>
+        <i class="ti ti-send" aria-hidden="true"></i>
+        <span>Execute</span>
+      </button>
+    </div>
   </div>
-
 </div>

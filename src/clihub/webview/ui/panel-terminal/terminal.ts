@@ -452,6 +452,7 @@ const setActiveTerminal = () => {
 		terminalLabel.textContent = 'CLI';
 		terminalStatus.textContent = 'No active session';
 		terminalBadge.textContent = 'CLI';
+		updateAgentTheme();
 		return;
 	}
 
@@ -459,10 +460,27 @@ const setActiveTerminal = () => {
 	terminalStatus.textContent = `${activeSession.status} - ${activeSession.cwd}`;
 	terminalBadge.textContent = activeSession.commandLine;
 
+	updateAgentTheme();
+
 	requestAnimationFrame(() => {
 		fitTerminal(activeSession.id);
 		terminals.get(activeSession.id)?.terminal.focus();
 	});
+};
+
+const updateAgentTheme = () => {
+	const agentShell = document.querySelector<HTMLElement>('.agent-shell');
+	if (!agentShell) {
+		return;
+	}
+
+	const activeSession = activeSessionId ? sessions.get(activeSessionId) : undefined;
+	if (activeSession?.label) {
+		const slug = getAgentSlug(activeSession.label);
+		agentShell.dataset.agent = slug || '';
+	} else {
+		delete agentShell.dataset.agent;
+	}
 };
 
 const syncState = (message: Extract<ServerMessage, { type: 'cli.state' }>) => {
