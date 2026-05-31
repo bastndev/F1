@@ -67,7 +67,7 @@ function initTranslator(host: HTMLElement) {
 			try {
 				await navigator.clipboard.writeText(text);
 				const originalText = copyBtn.innerHTML;
-				copyBtn.innerHTML = `<i class="ti ti-check"></i> <span>Copiado</span>`;
+				copyBtn.innerHTML = `<i class="ti ti-check"></i> <span>Copied</span>`;
 				setTimeout(() => {
 					copyBtn.innerHTML = originalText;
 				}, 1400);
@@ -84,10 +84,10 @@ function initTranslator(host: HTMLElement) {
 
 			if (isSpeaking) {
 				spectrum.classList.add('speaking');
-				speakBtn.innerHTML = `<i class="ti ti-player-stop"></i> <span>Detener</span>`;
+				speakBtn.innerHTML = `<i class="ti ti-player-stop"></i> <span>Stop</span>`;
 			} else {
 				spectrum.classList.remove('speaking');
-				speakBtn.innerHTML = `<i class="ti ti-volume-2"></i> <span>Escuchar</span>`;
+				speakBtn.innerHTML = `<i class="ti ti-volume-2"></i> <span>Listen</span>`;
 			}
 		});
 	}
