@@ -66,6 +66,12 @@ function initPromptTabs(host: HTMLElement) {
 	const initialActive = host.querySelector<HTMLElement>('.prompt-tab.active');
 	const initialTab = initialActive?.dataset.tab || 'write';
 	updateChatForTab(initialTab);
+
+	// Auto-focus the input immediately when the modal opens
+	// so the user can start typing without clicking
+	requestAnimationFrame(() => {
+		textarea.focus();
+	});
 }
 
 function enforceLowercaseInput(textarea: HTMLTextAreaElement) {
