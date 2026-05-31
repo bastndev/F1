@@ -57,15 +57,19 @@
 .translator-icon-wrap {
 	width: 28px;
 	height: 28px;
-	border-radius: 8px;
-	background: rgba(175, 169, 236, 0.1);
-	border: 0.5px solid rgba(175, 169, 236, 0.25);
+	border-radius: 7px;
+	background: color-mix(in srgb, var(--agent-accent) 12%, var(--vscode-input-background));
+	border: 0.5px solid color-mix(in srgb, var(--agent-accent) 28%, transparent);
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	color: var(--agent-accent, #AFA9EC);
-	font-size: 14px;
+	color: var(--agent-accent);
 	flex-shrink: 0;
+}
+
+.translator-icon-wrap svg {
+	width: 15px;
+	height: 15px;
 }
 
 .translator-title-group {
