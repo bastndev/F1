@@ -273,6 +273,8 @@
 .translator-speak {
 	border-color: rgba(93, 202, 165, 0.2);
 	color: #5DCAA5;
+	min-width: 82px;           /* fixed width so it doesn't shrink when text changes to "Stop" */
+	justify-content: center;
 }
 
 .translator-speak:hover {
@@ -288,6 +290,16 @@
 	opacity: 0.55;
 	font-family: 'JetBrains Mono', monospace;
 	flex-shrink: 0;
+}
+
+.voice-name {
+	font-size: 11px;
+	font-weight: 600;
+	color: #c97a3a; /* warm tone for Nova voice */
+	background: rgba(201, 122, 58, 0.1);
+	padding: 2px 8px;
+	border-radius: 4px;
+	font-family: 'JetBrains Mono', monospace;
 }
 
 .voice-selector {
