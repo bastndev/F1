@@ -1,5 +1,6 @@
 import promptStyles from './components/prompt.css';
 import promptHtml from './components/prompt.html';
+import { processPrompt, type PromptSendContext } from './core/prompt-processor';
 
 const stylesId = 'cli-prompt-panel-styles';
 
@@ -14,26 +15,43 @@ const ensureStyles = () => {
 	document.head.append(style);
 };
 
-export const mountPromptPanel = (host: HTMLElement) => {
+type PromptContext = {
+	close: () => void;
+	getActiveSessionId?: () => string | undefined;
+	sendToActiveSession?: (text: string) => void;
+};
+
+export const mountPromptPanel = (host: HTMLElement, context: any = { close: () => {} }) => {
 	ensureStyles();
 
 	const template = document.createElement('template');
 	template.innerHTML = promptHtml.trim();
 	host.replaceChildren(template.content.cloneNode(true));
 
+	const hasActiveSession = !!context.getActiveSessionId?.();
+
+	// === Session state handling (no session → disabled state) ===
+	initSessionState(host, hasActiveSession);
+
 	// === Tab switching logic + chat area reaction ===
-	initPromptTabs(host);
+	initPromptTabs(host, context, hasActiveSession);
 
 	// Update footer with the correct model for the current active CLI
 	updateFooterModel(host);
 };
 
-function initPromptTabs(host: HTMLElement) {
+function initPromptTabs(host: HTMLElement, context: any, hasActiveSession: boolean) {
 	const tabs = host.querySelectorAll<HTMLElement>('.prompt-tab');
 	const textarea = host.querySelector<HTMLTextAreaElement>('#promptInput');
 	const textareaWrap = host.querySelector<HTMLElement>('.prompt-textarea-wrap');
 
 	if (!tabs.length || !textarea) {
+		return;
+	}
+
+	// When there is no active session we keep everything disabled
+	if (!hasActiveSession) {
+		textarea.disabled = true;
 		return;
 	}
 
@@ -71,16 +89,25 @@ function initPromptTabs(host: HTMLElement) {
 	updateChatForTab(initialTab);
 
 	// Auto-focus the input immediately when the modal opens
-	// so the user can start typing without clicking
 	requestAnimationFrame(() => {
 		textarea.focus();
 	});
 
 	// === Skills chips (selectable buttons) ===
-	initSkillsChips(host);
+	if (hasActiveSession) {
+		initSkillsChips(host);
+	}
 
-	// === Run button enable/disable logic ===
-	initRunButton(host, textarea);
+	// === Run button + send logic ===
+	initRunButton(host, textarea, context);
+
+	// === Ctrl+Enter / Cmd+Enter support — also goes through the processor ===
+	initSendShortcut(textarea, context);
+
+	// Initial char count (only when interactive)
+	if (hasActiveSession) {
+		updateCharCount(host, textarea);
+	}
 }
 
 function enforceLowercaseInput(textarea: HTMLTextAreaElement) {
@@ -129,7 +156,7 @@ function initSkillsChips(host: HTMLElement) {
 	});
 }
 
-function initRunButton(host: HTMLElement, textarea: HTMLTextAreaElement) {
+function initRunButton(host: HTMLElement, textarea: HTMLTextAreaElement, context: any) {
 	const runBtn = host.querySelector<HTMLButtonElement>('#runBtn');
 	if (!runBtn) {
 		return;
@@ -137,14 +164,121 @@ function initRunButton(host: HTMLElement, textarea: HTMLTextAreaElement) {
 
 	const updateState = () => {
 		const hasText = textarea.value.trim().length > 0;
-		runBtn.disabled = !hasText;
+		const hasSession = !!context.getActiveSessionId?.();
+		runBtn.disabled = !hasText || !hasSession;
 	};
 
 	// Initial state
 	updateState();
 
 	// Update live as user types
-	textarea.addEventListener('input', updateState);
+	textarea.addEventListener('input', () => {
+		updateState();
+		updateCharCount(host, textarea);
+	});
+
+	// Actual send action — delegates to the processor (future home of autocorrect + translate)
+	runBtn.addEventListener('click', () => {
+		performSend(host, textarea, context);
+	});
+}
+
+function initSendShortcut(textarea: HTMLTextAreaElement, context: any) {
+	textarea.addEventListener('keydown', (e) => {
+		const isSendShortcut =
+			(e.key === 'Enter' && (e.ctrlKey || e.metaKey)) ||
+			(e.key === 'Enter' && e.ctrlKey);
+
+		if (!isSendShortcut) {
+			return;
+		}
+
+		e.preventDefault();
+		performSend(textarea.closest('.prompt-modal') as HTMLElement, textarea, context);
+	});
+}
+
+function performSend(host: HTMLElement, textarea: HTMLTextAreaElement, context: any) {
+	const result = processPrompt(textarea.value, {
+		close: context.close,
+		sendToActiveSession: context.sendToActiveSession,
+		getActiveSessionId: context.getActiveSessionId,
+	});
+
+	if (result.status === 'no-session') {
+		// Defensive: should rarely happen because UI disables the button
+		showNoSessionMessage(host);
+	}
+}
+
+function updateCharCount(host: HTMLElement, textarea: HTMLTextAreaElement) {
+	const counter = host.querySelector<HTMLElement>('#charCount');
+	if (!counter) {
+		return;
+	}
+
+	const current = textarea.value.length;
+	const max = 1000;
+	counter.textContent = `${current}/${max}`;
+}
+
+function initSessionState(host: HTMLElement, hasActiveSession: boolean) {
+	if (hasActiveSession) {
+		return;
+	}
+
+	const body = host.querySelector<HTMLElement>('.prompt-body');
+	if (!body) {
+		return;
+	}
+
+	// Disable interactive elements
+	const textarea = host.querySelector<HTMLTextAreaElement>('#promptInput');
+	const runBtn = host.querySelector<HTMLButtonElement>('#runBtn');
+	const chips = host.querySelectorAll<HTMLButtonElement>('.prompt-tool-btn');
+
+	if (textarea) {
+		textarea.disabled = true;
+	}
+	if (runBtn) {
+		runBtn.disabled = true;
+	}
+	chips.forEach((chip) => (chip.disabled = true));
+
+	// Inject a clear "no session" state
+	const state = document.createElement('div');
+	state.className = 'prompt-no-session';
+	state.innerHTML = `
+		<div class="prompt-no-session-icon">⌘</div>
+		<div class="prompt-no-session-title">No hay sesión CLI activa</div>
+		<div class="prompt-no-session-subtitle">
+			Abre una sesión desde el panel izquierdo para usar Prompt
+		</div>
+	`;
+
+	// Hide the normal interactive content but keep the structure
+	const skills = host.querySelector<HTMLElement>('.prompt-skills');
+	if (skills) {
+		skills.style.display = 'none';
+	}
+
+	body.appendChild(state);
+}
+
+function showNoSessionMessage(host: HTMLElement) {
+	const body = host.querySelector<HTMLElement>('.prompt-body');
+	if (!body) {
+		return;
+	}
+
+	let msg = body.querySelector<HTMLElement>('.prompt-no-session-temp');
+	if (!msg) {
+		msg = document.createElement('div');
+		msg.className = 'prompt-no-session-temp';
+		msg.textContent = 'Necesitas una sesión CLI activa para enviar prompts.';
+		body.appendChild(msg);
+		setTimeout(() => msg?.remove(), 2200);
+	}
 }
 
 function updateFooterModel(host: HTMLElement) {

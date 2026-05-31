@@ -6,11 +6,15 @@ export type ToolId = 'translate' | 'keymaps' | 'prompt';
 
 type ToolContext = {
 	close: () => void;
+	getActiveSessionId?: () => string | undefined;
+	sendToActiveSession?: (text: string) => void;
 };
 
 type ToolMount = (host: HTMLElement, context: ToolContext) => void;
 type ToolsControllerOptions = {
 	container: HTMLElement;
+	getActiveSessionId?: () => string | undefined;
+	sendToActiveSession?: (text: string) => void;
 };
 
 const modalId = 'cli-tools-modal';
@@ -29,7 +33,11 @@ const toolMounts: Record<ToolId, ToolMount> = {
 	translate: mountTranslatorPanel
 };
 
-export const createToolsController = ({ container }: ToolsControllerOptions) => {
+export const createToolsController = ({
+	container,
+	getActiveSessionId,
+	sendToActiveSession
+}: ToolsControllerOptions) => {
 	let activeModal: HTMLElement | null = null;
 	let currentTool: ToolId | null = null;
 
@@ -80,7 +88,11 @@ export const createToolsController = ({ container }: ToolsControllerOptions) => 
 			event.stopPropagation();
 		});
 
-		toolMounts[tool](host, { close });
+		toolMounts[tool](host, {
+			close,
+			getActiveSessionId,
+			sendToActiveSession
+		});
 
 		container.append(modal);
 		document.addEventListener('keydown', handleKeyDown);

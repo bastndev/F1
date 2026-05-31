@@ -156,7 +156,22 @@ const switchSessionByOffset = (offset: 1 | -1) => {
 	return true;
 };
 
-const toolsController = layoutRight ? createToolsController({ container: layoutRight }) : undefined;
+const toolsController = layoutRight
+	? createToolsController({
+			container: layoutRight,
+			getActiveSessionId: () => activeSessionId,
+			sendToActiveSession: (text: string) => {
+				if (!activeSessionId) {
+					return;
+				}
+				const session = sessions.get(activeSessionId);
+				if (session?.status !== 'running') {
+					return;
+				}
+				vscode.postMessage({ type: 'cli.input', sessionId: activeSessionId, data: text });
+			}
+		})
+	: undefined;
 
 const tabController = createTabController({
 	getAgentIcon: (label) => agentIcons.get(label),

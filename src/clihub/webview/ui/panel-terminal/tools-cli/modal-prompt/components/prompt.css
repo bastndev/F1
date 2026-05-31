@@ -522,3 +522,46 @@
 .agent-shell[data-agent="claude"] .prompt-pill:hover {
 	background: color-mix(in srgb, var(--claude) 38%, transparent);
 }
+
+/* ============================================================
+   NO SESSION STATE (when user opens Prompt without active CLI)
+   ============================================================ */
+.prompt-no-session {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	text-align: center;
+	padding: 32px 20px;
+	color: var(--vscode-descriptionForeground);
+	min-height: 140px;
+}
+
+.prompt-no-session-icon {
+	font-size: 28px;
+	opacity: 0.5;
+	margin-bottom: 8px;
+}
+
+.prompt-no-session-title {
+	font-size: 13px;
+	font-weight: 600;
+	color: var(--vscode-foreground);
+	margin-bottom: 4px;
+}
+
+.prompt-no-session-subtitle {
+	font-size: 11px;
+	line-height: 1.4;
+	opacity: 0.85;
+	max-width: 260px;
+}
+
+.prompt-no-session-temp {
+	margin-top: 8px;
+	font-size: 11px;
+	color: var(--vscode-errorForeground, #f48771);
+	padding: 4px 8px;
+	background: rgba(244, 135, 113, 0.1);
+	border-radius: 4px;
+}
