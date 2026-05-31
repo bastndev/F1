@@ -108,12 +108,51 @@
   background: color-mix(in srgb, var(--agent-accent, #534AB7) 35%, transparent);
 }
 
-/* ── Tabs ── */
+/* ── Toolbar & Tabs ── */
+.prompt-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  padding: 12px 20px 0;
+  flex: 0 0 auto;
+}
+
 .prompt-tabs {
   display: flex;
   gap: 2px;
-  padding: 12px 20px 0;
-  flex: 0 0 auto;
+}
+
+.prompt-actions-right {
+  display: flex;
+  margin-bottom: 6px;
+}
+
+.prompt-action-btn {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: transparent;
+  border: 1px solid var(--vscode-editorGroup-border);
+  border-radius: 6px;
+  color: var(--vscode-descriptionForeground);
+  font-family: 'Syne', sans-serif;
+  font-size: 10px;
+  font-weight: 600;
+  padding: 4px 8px;
+  cursor: pointer;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  transition: all 0.2s ease;
+}
+
+.prompt-action-btn:hover {
+  color: var(--agent-accent, #AFA9EC);
+  border-color: color-mix(in srgb, var(--agent-accent, #534AB7) 40%, transparent);
+  background: color-mix(in srgb, var(--agent-accent, #534AB7) 10%, transparent);
+}
+
+.prompt-action-btn i {
+  font-size: 13px;
 }
 
 .prompt-tab {

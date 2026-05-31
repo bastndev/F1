@@ -1,6 +1,7 @@
 import promptStyles from './components/prompt.css';
 import promptHtml from './components/prompt.html';
 import { processPrompt, type PromptSendContext } from './core/prompt-processor';
+import { applyAutocorrect } from './core/prompt-autocorrect';
 
 const stylesId = 'cli-prompt-panel-styles';
 
@@ -96,6 +97,7 @@ function initPromptTabs(host: HTMLElement, context: any, hasActiveSession: boole
 	// === Skills chips (selectable buttons) ===
 	if (hasActiveSession) {
 		initSkillsChips(host);
+		initToolbarActions(host, textarea);
 	}
 
 	// === Run button + send logic ===
@@ -153,6 +155,39 @@ function initSkillsChips(host: HTMLElement) {
 			// Optional: if you want only one skill active at a time, uncomment below
 			// chips.forEach(c => c !== chip && c.classList.remove('selected'));
 		});
+	});
+}
+
+function initToolbarActions(host: HTMLElement, textarea: HTMLTextAreaElement) {
+	const fixBtn = host.querySelector<HTMLButtonElement>('#fixSpellingBtn');
+	if (!fixBtn) {
+		return;
+	}
+
+	fixBtn.addEventListener('click', async () => {
+		const text = textarea.value;
+		if (!text.trim()) {return;}
+
+		// Mostrar breve feedback visual en el botón
+		const originalHtml = fixBtn.innerHTML;
+		fixBtn.innerHTML = '<i class="ti ti-check" aria-hidden="true"></i> Listo';
+		fixBtn.style.color = '#5DCAA5';
+		fixBtn.style.borderColor = 'rgba(29, 158, 117, 0.4)';
+
+		// Aplicar corrección usando Typo.js (respeta código y urls)
+		const corrected = await applyAutocorrect(text);
+		if (corrected !== text) {
+			textarea.value = corrected;
+			// Trigger input event to update char counts and button states
+			textarea.dispatchEvent(new Event('input'));
+		}
+
+		// Restaurar botón después de 1.5s
+		setTimeout(() => {
+			fixBtn.innerHTML = originalHtml;
+			fixBtn.style.color = '';
+			fixBtn.style.borderColor = '';
+		}, 1500);
 	});
 }
 
