@@ -1,6 +1,6 @@
 import { mountKeymapsPanel } from './modal-keymaps/keymaps';
 import { mountPromptPanel } from './modal-prompt/prompt';
-import { mountTranslatePanel } from './modal-translate/translate';
+import { mountTranslatorPanel } from './modal-translator/translator';
 
 export type ToolId = 'translate' | 'keymaps' | 'prompt';
 
@@ -26,7 +26,7 @@ const applyStyles = (element: HTMLElement, styles: Partial<CSSStyleDeclaration>)
 const toolMounts: Record<ToolId, ToolMount> = {
 	keymaps: mountKeymapsPanel,
 	prompt: mountPromptPanel,
-	translate: mountTranslatePanel
+	translate: mountTranslatorPanel
 };
 
 export const createToolsController = ({ container }: ToolsControllerOptions) => {
