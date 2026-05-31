@@ -1,61 +1,66 @@
 <div class="translator-modal">
-  <!-- Header -->
   <div class="translator-header">
     <div class="translator-header-left">
-      <div class="translator-title">
-        Translator
-        <span class="translator-badge">PRO</span>
+      <div class="translator-icon-wrap">
+        <i class="ti ti-language" aria-hidden="true"></i>
       </div>
-      <div class="translator-subtitle">CLI Response Translation</div>
+      <div class="translator-title-group">
+        <div class="translator-title">
+          Translator
+          <span class="translator-badge">PRO</span>
+        </div>
+        <div class="translator-subtitle">cli response translation</div>
+      </div>
     </div>
-
-    <div class="translator-lang">
+    <div class="translator-lang-row">
       <span class="lang-from">CLI</span>
       <span class="lang-arrow">→</span>
-
       <div class="lang-selector" id="langSelector">
         <button class="lang-option active" data-lang="es">Spanish</button>
         <button class="lang-option" data-lang="en">English</button>
         <button class="lang-option" data-lang="zh">Chinese</button>
       </div>
+      <button class="add-lang-btn" id="addLangBtn" title="Add language">+</button>
     </div>
   </div>
 
-  <!-- Translated Content -->
   <div class="translator-body">
     <div class="translator-text" id="translatedText">
-      The CLI response translated to your language will appear here, clearly and organized.
+      the cli response translated to your language will appear here, clearly and organized.
     </div>
   </div>
 
-  <!-- Controls -->
+  <div class="translator-divider"></div>
+
   <div class="translator-controls">
     <button class="translator-action-btn" id="copyBtn">
       <i class="ti ti-copy" aria-hidden="true"></i>
       <span>Copy</span>
     </button>
-
-    <button class="translator-action-btn translator-speak" id="speakBtn">
-      <i class="ti ti-volume-2" aria-hidden="true"></i>
-      <span id="speakText">Listen</span>
-    </button>
-
-    <!-- Fake Audio Spectrum -->
-    <div class="translator-spectrum" id="audioSpectrum" aria-hidden="true">
-      <div class="bar"></div>
-      <div class="bar"></div>
-      <div class="bar"></div>
-      <div class="bar"></div>
-      <div class="bar"></div>
-      <div class="bar"></div>
+    <div class="translator-controls-right">
+      <span class="voice-label">Voice</span>
+      <div class="voice-selector" id="voiceSelector">
+        <button class="voice-chip active" data-voice="nova">Nova</button>
+        <button class="voice-chip" data-voice="echo">Echo</button>
+        <button class="voice-chip" data-voice="sage">Sage</button>
+      </div>
+      <button class="translator-action-btn translator-speak" id="speakBtn">
+        <i class="ti ti-volume-2" aria-hidden="true"></i>
+        <span>Listen</span>
+      </button>
+      <div class="translator-spectrum" id="audioSpectrum" aria-hidden="true">
+        <div class="bar"></div><div class="bar"></div><div class="bar"></div>
+        <div class="bar"></div><div class="bar"></div><div class="bar"></div>
+      </div>
     </div>
   </div>
 
-  <!-- Footer -->
   <div class="translator-footer">
     <div class="translator-model">
+      <div class="model-dot"></div>
       <i class="ti ti-cpu" aria-hidden="true"></i>
-      <span id="modelName">claude-sonnet-4</span>
+      <span id="modelName">claude</span>
     </div>
+    <span class="translator-status">ready</span>
   </div>
 </div>

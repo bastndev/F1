@@ -1,227 +1,417 @@
 /* =================================================================
-   TRANSLATOR MODAL — High quality, consistent with Prompt modal
+   TRANSLATOR MODAL — Redesigned UI/UX
    ================================================================= */
 
 .translator-modal {
-	width: min(620px, calc(100vw - 32px));
-	max-height: min(520px, calc(100vh - 32px));
+	width: min(580px, calc(100vw - 32px));
+	max-height: min(540px, calc(100vh - 32px));
 	display: flex;
 	flex-direction: column;
 	box-sizing: border-box;
 	border: 1px solid var(--vscode-editorGroup-border, rgba(128, 128, 128, 0.35));
-	border-radius: 14px;
+	border-radius: 16px;
 	background: var(--vscode-editor-background);
 	color: var(--vscode-foreground);
 	font-family: var(--vscode-font-family);
 	font-size: 13px;
-	box-shadow: 0 24px 60px rgba(0, 0, 0, 0.55);
 	overflow: hidden;
+	position: relative;
 }
 
-/* Header */
+/* Accent line top */
+.translator-modal::before {
+	content: '';
+	position: absolute;
+	top: 0; left: 0; right: 0;
+	height: 1px;
+	background: linear-gradient(
+		90deg,
+		transparent 0%,
+		var(--agent-accent, #AFA9EC) 35%,
+		rgba(93, 202, 165, 0.6) 65%,
+		transparent 100%
+	);
+	opacity: 0.45;
+	pointer-events: none;
+	z-index: 1;
+}
+
+/* ── Header ─────────────────────────────────────────────────────── */
 .translator-header {
 	display: flex;
-	align-items: flex-start;
+	align-items: center;
 	justify-content: space-between;
-	padding: 16px 20px 12px;
+	padding: 14px 18px 12px;
 	border-bottom: 0.5px solid var(--vscode-editorGroup-border, rgba(128, 128, 128, 0.2));
 	flex: 0 0 auto;
+	gap: 12px;
 }
 
 .translator-header-left {
 	display: flex;
+	align-items: center;
+	gap: 10px;
+	flex-shrink: 0;
+}
+
+.translator-icon-wrap {
+	width: 28px;
+	height: 28px;
+	border-radius: 8px;
+	background: rgba(175, 169, 236, 0.1);
+	border: 0.5px solid rgba(175, 169, 236, 0.25);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	color: var(--agent-accent, #AFA9EC);
+	font-size: 14px;
+	flex-shrink: 0;
+}
+
+.translator-title-group {
+	display: flex;
 	flex-direction: column;
-	gap: 2px;
+	gap: 1px;
 }
 
 .translator-title {
-	font-size: 14px;
+	font-size: 12px;
 	font-weight: 600;
-	letter-spacing: 0.03em;
+	letter-spacing: 0.05em;
+	text-transform: uppercase;
+	color: var(--vscode-foreground);
 	display: flex;
 	align-items: center;
 	gap: 6px;
 }
 
 .translator-badge {
-	font-size: 9px;
-	padding: 1px 6px;
-	border-radius: 10px;
-	background: rgba(29, 158, 117, 0.18);
+	font-size: 8px;
+	padding: 1px 5px;
+	border-radius: 4px;
+	background: rgba(93, 202, 165, 0.12);
 	color: #5DCAA5;
-	border: 0.5px solid rgba(29, 158, 117, 0.3);
+	border: 0.5px solid rgba(93, 202, 165, 0.25);
 	font-family: 'JetBrains Mono', monospace;
-	font-weight: 600;
+	font-weight: 700;
+	letter-spacing: 0.08em;
 }
 
 .translator-subtitle {
-	font-size: 11px;
+	font-size: 10px;
 	color: var(--vscode-descriptionForeground);
-	opacity: 0.75;
+	opacity: 0.65;
 }
 
-.translator-lang {
+/* ── Language row ────────────────────────────────────────────────── */
+.translator-lang-row {
 	display: flex;
 	align-items: center;
 	gap: 8px;
-	font-size: 11px;
+	flex: 1;
+	justify-content: flex-end;
+	flex-wrap: wrap;
+}
+
+.lang-from {
+	font-size: 10px;
 	font-family: 'JetBrains Mono', monospace;
 	color: var(--vscode-descriptionForeground);
-	opacity: 0.8;
+	background: var(--vscode-input-background);
+	border: 0.5px solid var(--vscode-editorGroup-border);
+	padding: 3px 8px;
+	border-radius: 6px;
+	letter-spacing: 0.05em;
 }
 
 .lang-arrow {
 	color: var(--agent-accent, #AFA9EC);
+	font-size: 12px;
+	opacity: 0.7;
 }
 
-/* Language Selector (target language) */
 .lang-selector {
 	display: flex;
-	gap: 4px;
+	gap: 3px;
 	background: var(--vscode-input-background);
 	border: 0.5px solid var(--vscode-editorGroup-border);
-	border-radius: 999px;
-	padding: 2px;
+	border-radius: 10px;
+	padding: 3px;
 }
 
 .lang-option {
 	font-size: 10px;
-	padding: 3px 9px;
-	border-radius: 999px;
+	padding: 4px 10px;
+	border-radius: 7px;
 	border: none;
 	background: transparent;
-	color: var(--vscode-foreground);
+	color: var(--vscode-descriptionForeground);
 	cursor: pointer;
 	font-family: 'JetBrains Mono', monospace;
 	transition: all 0.15s ease;
 	white-space: nowrap;
+	letter-spacing: 0.02em;
 }
 
-.lang-option:hover {
-	background: color-mix(in srgb, var(--agent-accent) 10%, transparent);
-	color: var(--agent-accent);
+.lang-option:hover:not(.active) {
+	color: var(--agent-accent, #AFA9EC);
+	background: color-mix(in srgb, var(--agent-accent, #AFA9EC) 8%, transparent);
 }
 
 .lang-option.active {
-	background: var(--agent-accent);
-	color: #1a1a1f;
-	font-weight: 600;
+	background: var(--agent-accent, #AFA9EC);
+	color: #1a1a2e;
+	font-weight: 700;
 }
 
-/* Body / Translated Text */
+/* Scalable "add language" button */
+.add-lang-btn {
+	width: 22px;
+	height: 22px;
+	border-radius: 6px;
+	border: 0.5px dashed rgba(175, 169, 236, 0.35);
+	background: transparent;
+	color: var(--vscode-descriptionForeground);
+	cursor: pointer;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	font-size: 15px;
+	line-height: 1;
+	font-family: monospace;
+	transition: all 0.15s ease;
+	flex-shrink: 0;
+}
+
+.add-lang-btn:hover {
+	border-color: var(--agent-accent, #AFA9EC);
+	border-style: solid;
+	color: var(--agent-accent, #AFA9EC);
+	background: color-mix(in srgb, var(--agent-accent, #AFA9EC) 6%, transparent);
+}
+
+/* ── Body ────────────────────────────────────────────────────────── */
 .translator-body {
 	flex: 1 1 auto;
-	min-height: 0;
+	min-height: 100px;
+	max-height: 220px;
 	overflow-y: auto;
-	padding: 18px 20px;
+	padding: 16px 18px;
+	scrollbar-width: thin;
+	scrollbar-color: rgba(175, 169, 236, 0.2) transparent;
 }
 
 .translator-text {
-	font-size: 13.5px;
-	line-height: 1.65;
+	font-size: 13px;
+	line-height: 1.7;
 	white-space: pre-wrap;
 	color: var(--vscode-foreground);
 }
 
-/* Controls */
+.translator-text.placeholder {
+	color: var(--vscode-descriptionForeground);
+	opacity: 0.45;
+	font-style: italic;
+}
+
+/* ── Divider ─────────────────────────────────────────────────────── */
+.translator-divider {
+	height: 0.5px;
+	background: var(--vscode-editorGroup-border, rgba(128, 128, 128, 0.2));
+	flex-shrink: 0;
+}
+
+/* ── Controls ────────────────────────────────────────────────────── */
 .translator-controls {
 	display: flex;
 	align-items: center;
 	gap: 8px;
-	padding: 0 20px 16px;
+	padding: 11px 18px;
+	flex: 0 0 auto;
+	flex-wrap: wrap;
+}
+
+.translator-controls-right {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	margin-left: auto;
 	flex-wrap: wrap;
 }
 
 .translator-action-btn {
 	display: flex;
 	align-items: center;
-	gap: 6px;
-	padding: 6px 14px;
-	background: var(--vscode-button-secondaryBackground, var(--vscode-input-background));
+	gap: 5px;
+	padding: 5px 11px;
+	background: var(--vscode-input-background);
 	border: 0.5px solid var(--vscode-editorGroup-border);
 	border-radius: 8px;
-	color: var(--vscode-foreground);
-	font-size: 12px;
+	color: var(--vscode-descriptionForeground);
+	font-size: 11px;
 	font-weight: 500;
 	cursor: pointer;
 	transition: all 0.15s ease;
 	font-family: var(--vscode-font-family);
-}
-
-.translator-action-btn:hover {
-	background: color-mix(in srgb, var(--agent-accent) 12%, var(--vscode-input-background));
-	border-color: color-mix(in srgb, var(--agent-accent) 35%, var(--vscode-editorGroup-border));
-	color: var(--agent-accent);
+	letter-spacing: 0.02em;
 }
 
 .translator-action-btn i {
-	font-size: 14px;
+	font-size: 13px;
 }
 
-/* Fake Audio Spectrum */
+.translator-action-btn:hover {
+	border-color: color-mix(in srgb, var(--agent-accent, #AFA9EC) 40%, var(--vscode-editorGroup-border));
+	color: var(--agent-accent, #AFA9EC);
+	background: color-mix(in srgb, var(--agent-accent, #AFA9EC) 6%, var(--vscode-input-background));
+}
+
+.translator-speak {
+	border-color: rgba(93, 202, 165, 0.2);
+	color: #5DCAA5;
+}
+
+.translator-speak:hover {
+	border-color: rgba(93, 202, 165, 0.5);
+	background: rgba(93, 202, 165, 0.06);
+	color: #5DCAA5;
+}
+
+/* ── Voice selector ──────────────────────────────────────────────── */
+.voice-label {
+	font-size: 10px;
+	color: var(--vscode-descriptionForeground);
+	opacity: 0.55;
+	font-family: 'JetBrains Mono', monospace;
+	flex-shrink: 0;
+}
+
+.voice-selector {
+	display: flex;
+	gap: 3px;
+}
+
+.voice-chip {
+	display: flex;
+	align-items: center;
+	padding: 3px 8px;
+	background: var(--vscode-input-background);
+	border: 0.5px solid var(--vscode-editorGroup-border);
+	border-radius: 6px;
+	cursor: pointer;
+	transition: all 0.15s ease;
+	font-family: 'JetBrains Mono', monospace;
+	font-size: 10px;
+	color: var(--vscode-descriptionForeground);
+	white-space: nowrap;
+}
+
+.voice-chip:hover:not(.active) {
+	border-color: color-mix(in srgb, var(--agent-accent, #AFA9EC) 40%, var(--vscode-editorGroup-border));
+	color: var(--agent-accent, #AFA9EC);
+}
+
+.voice-chip.active {
+	border-color: rgba(175, 169, 236, 0.45);
+	color: var(--agent-accent, #AFA9EC);
+	background: color-mix(in srgb, var(--agent-accent, #AFA9EC) 8%, var(--vscode-input-background));
+}
+
+/* ── Audio spectrum ──────────────────────────────────────────────── */
 .translator-spectrum {
 	display: flex;
 	align-items: center;
-	gap: 3px;
-	height: 22px;
-	padding: 0 4px;
-	margin-left: 4px;
+	gap: 2.5px;
+	height: 20px;
+	padding: 0 2px;
 }
 
 .translator-spectrum .bar {
-	width: 3px;
-	background: var(--agent-accent);
+	width: 2.5px;
+	background: #5DCAA5;
 	border-radius: 999px;
-	opacity: 0.35;
+	opacity: 0.3;
 	transition: height 80ms linear, opacity 120ms ease;
 }
 
 .translator-spectrum.speaking .bar {
-	opacity: 0.9;
+	opacity: 0.85;
 	animation: spectrum-bar 420ms ease-in-out infinite alternate;
 }
 
-.translator-spectrum .bar:nth-child(1) { height: 6px; animation-delay: 0ms; }
-.translator-spectrum .bar:nth-child(2) { height: 14px; animation-delay: 80ms; }
-.translator-spectrum .bar:nth-child(3) { height: 18px; animation-delay: 40ms; }
-.translator-spectrum .bar:nth-child(4) { height: 10px; animation-delay: 120ms; }
-.translator-spectrum .bar:nth-child(5) { height: 16px; animation-delay: 60ms; }
-.translator-spectrum .bar:nth-child(6) { height: 8px; animation-delay: 100ms; }
+.translator-spectrum .bar:nth-child(1) { height: 5px;  animation-delay: 0ms;   }
+.translator-spectrum .bar:nth-child(2) { height: 12px; animation-delay: 80ms;  }
+.translator-spectrum .bar:nth-child(3) { height: 16px; animation-delay: 40ms;  }
+.translator-spectrum .bar:nth-child(4) { height: 9px;  animation-delay: 120ms; }
+.translator-spectrum .bar:nth-child(5) { height: 14px; animation-delay: 60ms;  }
+.translator-spectrum .bar:nth-child(6) { height: 7px;  animation-delay: 100ms; }
 
 @keyframes spectrum-bar {
-	0%   { height: 5px; }
-	100% { height: 20px; }
+	0%   { height: 4px;  }
+	100% { height: 18px; }
 }
 
-/* Footer */
+/* ── Footer ──────────────────────────────────────────────────────── */
 .translator-footer {
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
-	padding: 10px 20px;
+	padding: 9px 18px;
 	border-top: 0.5px solid var(--vscode-editorGroup-border, rgba(128, 128, 128, 0.2));
 	background: var(--vscode-sideBar-background);
 	flex: 0 0 auto;
 }
 
 .translator-model {
-	font-size: 10.5px;
+	font-size: 10px;
 	color: var(--vscode-descriptionForeground);
 	display: flex;
 	align-items: center;
-	gap: 6px;
+	gap: 5px;
 	font-family: 'JetBrains Mono', monospace;
+	opacity: 0.7;
 }
 
-/* Agent accent theming */
+.translator-model i {
+	font-size: 11px;
+}
+
+.model-dot {
+	width: 5px;
+	height: 5px;
+	border-radius: 50%;
+	background: #5DCAA5;
+	flex-shrink: 0;
+}
+
+.translator-status {
+	font-size: 10px;
+	color: var(--vscode-descriptionForeground);
+	font-family: 'JetBrains Mono', monospace;
+	opacity: 0.35;
+}
+
+/* ── Agent accent theming ────────────────────────────────────────── */
 .agent-shell[data-agent] .translator-badge {
-	background: color-mix(in srgb, var(--agent-accent) 18%, transparent);
+	background: color-mix(in srgb, var(--agent-accent) 14%, transparent);
 	color: var(--agent-accent);
-	border-color: color-mix(in srgb, var(--agent-accent) 35%, transparent);
+	border-color: color-mix(in srgb, var(--agent-accent) 30%, transparent);
 }
 
-.agent-shell[data-agent] .translator-action-btn:hover {
+.agent-shell[data-agent] .translator-icon-wrap {
+	background: color-mix(in srgb, var(--agent-accent) 10%, transparent);
+	border-color: color-mix(in srgb, var(--agent-accent) 25%, transparent);
 	color: var(--agent-accent);
+}
+
+.agent-shell[data-agent] .lang-option.active {
+	background: var(--agent-accent);
+}
+
+.agent-shell[data-agent] .voice-chip.active {
+	border-color: color-mix(in srgb, var(--agent-accent) 45%, transparent);
+	color: var(--agent-accent);
+	background: color-mix(in srgb, var(--agent-accent) 8%, var(--vscode-input-background));
 }
 
 .agent-shell[data-agent] .translator-spectrum .bar {
