@@ -232,7 +232,7 @@
   padding: 5px 12px;
   background: var(--vscode-button-secondaryBackground, var(--vscode-input-background));
   border: 0.5px solid var(--vscode-editorGroup-border);
-  border-radius: 999px; /* pill / chip style */
+  border-radius: 7px;
   color: var(--vscode-button-secondaryForeground, var(--vscode-foreground));
   font-size: 11px;
   cursor: pointer;
