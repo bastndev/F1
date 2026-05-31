@@ -101,7 +101,7 @@
   font-size: 11px;
   font-weight: 600;
   letter-spacing: 0.05em;
-  color: rgba(255, 255, 255, 0.3);
+  color: var(--vscode-descriptionForeground);
   padding: 6px 12px;
   border-radius: 6px 6px 0 0;
   cursor: pointer;
@@ -116,7 +116,8 @@
 }
 
 .prompt-tab:hover:not(.active) {
-  color: rgba(255, 255, 255, 0.5);
+  color: var(--vscode-foreground);
+  opacity: 0.7;
 }
 
 .prompt-tab.active {
@@ -184,7 +185,7 @@
   background: var(--vscode-input-background);
 }
 .prompt-textarea::placeholder {
-  color: rgba(255, 255, 255, 0.2);
+  color: var(--vscode-input-placeholderForeground);
 }
 
 .prompt-char-count {
@@ -193,7 +194,8 @@
   right: 12px;
   font-size: 10px;
   font-family: 'JetBrains Mono', monospace;
-  color: rgba(255, 255, 255, 0.2);
+  color: var(--vscode-descriptionForeground);
+  opacity: 0.6;
   pointer-events: none;
 }
 
@@ -210,16 +212,17 @@
   align-items: center;
   gap: 5px;
   padding: 5px 10px;
-  background: rgba(255, 255, 255, 0.05);
-  border: 0.5px solid rgba(255, 255, 255, 0.1);
+  background: var(--vscode-button-secondaryBackground, var(--vscode-input-background));
+  border: 0.5px solid var(--vscode-editorGroup-border);
   border-radius: 6px;
-  color: rgba(255, 255, 255, 0.5);
+  color: var(--vscode-button-secondaryForeground, var(--vscode-foreground));
   font-size: 11px;
   cursor: pointer;
   font-family: 'Syne', sans-serif;
   font-weight: 500;
   transition: all 0.15s;
   letter-spacing: 0.02em;
+  opacity: 0.85;
 }
 .prompt-tool-btn i {
   font-size: 13px;
@@ -234,7 +237,7 @@
 /* ── Divider ── */
 .prompt-divider {
   height: 0.5px;
-  background: rgba(255, 255, 255, 0.06);
+  background: var(--vscode-editorGroup-border);
   margin: 0 20px;
   flex: 0 0 auto;
 }
@@ -253,7 +256,7 @@
   font-size: 10px;
   font-weight: 600;
   letter-spacing: 0.08em;
-  color: rgba(255, 255, 255, 0.3);
+  color: var(--vscode-descriptionForeground);
   text-transform: uppercase;
   margin-bottom: 8px;
   display: flex;
