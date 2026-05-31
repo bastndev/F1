@@ -230,7 +230,7 @@
   align-items: center;
   gap: 5px;
   padding: 5px 12px;
-  background: #1b1c23;
+  background: #1b1c23; /* dark mode */
   border: 0.5px solid var(--vscode-editorGroup-border);
   border-radius: 7px;
   color: var(--vscode-button-secondaryForeground, var(--vscode-foreground));
@@ -241,6 +241,11 @@
   transition: all 0.15s ease;
   letter-spacing: 0.02em;
   opacity: 0.9;
+}
+
+/* Light mode - softer, more pleasant gray */
+.vscode-light .prompt-tool-btn {
+  background: #f0f0f3;
 }
 
 .prompt-tool-btn i {
