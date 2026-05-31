@@ -6,7 +6,7 @@ const applyStyles = (element: HTMLElement, styles: Partial<CSSStyleDeclaration>)
 	}
 };
 
-export const mountTranslatePanel = (host: HTMLElement) => {
+export const mountTranslatorPanel = (host: HTMLElement) => {
 	const panel = document.createElement('div');
 	panel.textContent = 'hello transalte 1';
 
