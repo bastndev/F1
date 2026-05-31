@@ -34,6 +34,9 @@ function initPromptTabs(host: HTMLElement) {
 		return;
 	}
 
+	// Force lowercase input, with Shift as the only way to write uppercase
+	enforceLowercaseInput(textarea);
+
 	const updateChatForTab = (tab: string) => {
 		if (!textareaWrap) {
 			return;
@@ -63,4 +66,36 @@ function initPromptTabs(host: HTMLElement) {
 	const initialActive = host.querySelector<HTMLElement>('.prompt-tab.active');
 	const initialTab = initialActive?.dataset.tab || 'write';
 	updateChatForTab(initialTab);
+}
+
+function enforceLowercaseInput(textarea: HTMLTextAreaElement) {
+	// Handle normal typing + Caps Lock
+	textarea.addEventListener('keydown', (e) => {
+		if (e.key.length === 1 && /[a-zA-Z]/.test(e.key)) {
+			if (e.shiftKey) {
+				// User is intentionally using Shift → allow uppercase
+				return;
+			}
+			// Force lowercase (this defeats Caps Lock as well)
+			e.preventDefault();
+			const start = textarea.selectionStart ?? 0;
+			const end = textarea.selectionEnd ?? 0;
+			const char = e.key.toLowerCase();
+			textarea.value = textarea.value.slice(0, start) + char + textarea.value.slice(end);
+			const newPos = start + 1;
+			textarea.selectionStart = textarea.selectionEnd = newPos;
+		}
+	});
+
+	// Paste: for simplicity we also force lowercase
+	textarea.addEventListener('paste', (e) => {
+		e.preventDefault();
+		const text = e.clipboardData?.getData('text') || '';
+		const lower = text.toLowerCase();
+		const start = textarea.selectionStart ?? 0;
+		const end = textarea.selectionEnd ?? 0;
+		textarea.value = textarea.value.slice(0, start) + lower + textarea.value.slice(end);
+		const newPos = start + lower.length;
+		textarea.selectionStart = textarea.selectionEnd = newPos;
+	});
 }
