@@ -201,11 +201,27 @@
   pointer-events: none;
 }
 
-/* ── Tool buttons ── */
+/* ── Skills row ── */
+.prompt-skills {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 10px;
+  flex-wrap: wrap;
+}
+
+.prompt-skills-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--vscode-descriptionForeground);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+/* ── Tool buttons (Skills chips) ── */
 .prompt-tools {
   display: flex;
   gap: 6px;
-  margin-top: 10px;
   flex-wrap: wrap;
 }
 
@@ -213,27 +229,39 @@
   display: flex;
   align-items: center;
   gap: 5px;
-  padding: 5px 10px;
+  padding: 5px 12px;
   background: var(--vscode-button-secondaryBackground, var(--vscode-input-background));
   border: 0.5px solid var(--vscode-editorGroup-border);
-  border-radius: 6px;
+  border-radius: 999px; /* pill / chip style */
   color: var(--vscode-button-secondaryForeground, var(--vscode-foreground));
   font-size: 11px;
   cursor: pointer;
   font-family: 'Syne', sans-serif;
   font-weight: 500;
-  transition: all 0.15s;
+  transition: all 0.15s ease;
   letter-spacing: 0.02em;
-  opacity: 0.85;
+  opacity: 0.9;
 }
+
 .prompt-tool-btn i {
   font-size: 13px;
 }
-.prompt-tool-btn:hover,
+
+/* Hover */
+.prompt-tool-btn:hover {
+  background: color-mix(in srgb, var(--agent-accent, #534AB7) 12%, var(--vscode-input-background));
+  border-color: color-mix(in srgb, var(--agent-accent, #534AB7) 35%, var(--vscode-editorGroup-border));
+  color: var(--agent-accent, var(--vscode-foreground));
+}
+
+/* Selected state — filled with the current agent's color (Claude, Grok, etc.) */
+.prompt-tool-btn.selected,
 .prompt-tool-btn.active {
-  background: color-mix(in srgb, var(--agent-accent, #534AB7) 18%, transparent);
-  border-color: color-mix(in srgb, var(--agent-accent, #534AB7) 40%, transparent);
-  color: var(--agent-accent, #AFA9EC);
+  background: var(--agent-accent, #AFA9EC);
+  border-color: var(--agent-accent, #AFA9EC);
+  color: #1a1a1f; /* dark readable text on the accent */
+  font-weight: 600;
+  opacity: 1;
 }
 
 /* ── Divider ── */

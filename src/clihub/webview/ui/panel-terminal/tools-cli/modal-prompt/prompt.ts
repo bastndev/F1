@@ -72,6 +72,9 @@ function initPromptTabs(host: HTMLElement) {
 	requestAnimationFrame(() => {
 		textarea.focus();
 	});
+
+	// === Skills chips (selectable buttons) ===
+	initSkillsChips(host);
 }
 
 function enforceLowercaseInput(textarea: HTMLTextAreaElement) {
@@ -103,5 +106,19 @@ function enforceLowercaseInput(textarea: HTMLTextAreaElement) {
 		textarea.value = textarea.value.slice(0, start) + lower + textarea.value.slice(end);
 		const newPos = start + lower.length;
 		textarea.selectionStart = textarea.selectionEnd = newPos;
+	});
+}
+
+function initSkillsChips(host: HTMLElement) {
+	const chips = host.querySelectorAll<HTMLButtonElement>('.prompt-tool-btn');
+
+	chips.forEach((chip) => {
+		chip.addEventListener('click', () => {
+			// Toggle selection
+			chip.classList.toggle('selected');
+
+			// Optional: if you want only one skill active at a time, uncomment below
+			// chips.forEach(c => c !== chip && c.classList.remove('selected'));
+		});
 	});
 }
