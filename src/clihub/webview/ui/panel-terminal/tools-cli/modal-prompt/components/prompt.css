@@ -133,19 +133,21 @@
   letter-spacing: 0.5px;
   padding: 1px 5px;
   border-radius: 4px;
-  background: rgba(255, 255, 255, 0.08);
-  color: rgba(255, 255, 255, 0.45);
+  background: var(--vscode-badge-background, rgba(0, 0, 0, 0.08));
+  color: var(--vscode-badge-foreground, var(--vscode-descriptionForeground));
   text-transform: lowercase;
   vertical-align: middle;
   margin-left: 4px;
   font-family: 'JetBrains Mono', monospace;
   transition: all 0.15s ease;
+  opacity: 0.85;
 }
 
 .prompt-tab.active .prompt-beta {
   background: color-mix(in srgb, var(--agent-accent) 22%, transparent);
   color: color-mix(in srgb, var(--agent-accent) 70%, white);
   box-shadow: 0 0 0 1px color-mix(in srgb, var(--agent-accent) 25%, transparent);
+  opacity: 1;
 }
 
 /* ── Body ── */
