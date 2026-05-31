@@ -23,6 +23,9 @@ export const mountPromptPanel = (host: HTMLElement) => {
 
 	// === Tab switching logic + chat area reaction ===
 	initPromptTabs(host);
+
+	// Update footer with the correct model for the current active CLI
+	updateFooterModel(host);
 };
 
 function initPromptTabs(host: HTMLElement) {
@@ -121,4 +124,20 @@ function initSkillsChips(host: HTMLElement) {
 			// chips.forEach(c => c !== chip && c.classList.remove('selected'));
 		});
 	});
+}
+
+function updateFooterModel(host: HTMLElement) {
+	const labelEl = document.getElementById('cli-terminal-label');
+	const label = labelEl?.textContent?.trim() || 'unknown';
+
+	// Make it as simple as possible: "claude", "grok", "kiro", etc.
+	const simpleName = label
+		.toLowerCase()
+		.replace(/\s*(cli|code)\s*$/i, '')   // remove trailing " CLI" or " Code"
+		.replace(/\s+/g, '');                // remove any remaining spaces
+
+	const footerInfo = host.querySelector<HTMLElement>('.prompt-footer-info');
+	if (footerInfo) {
+		footerInfo.innerHTML = `<i class="ti ti-cpu" aria-hidden="true"></i> ${simpleName}`;
+	}
 }
