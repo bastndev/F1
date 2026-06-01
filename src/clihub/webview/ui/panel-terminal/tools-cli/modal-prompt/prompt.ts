@@ -1,6 +1,8 @@
 import promptStyles from './components/prompt.css';
 import promptHtml from './components/prompt.html';
 import { processPrompt, type PromptSendContext } from './core/prompt-processor';
+import { runFullAutocorrect } from './core/prompt-autocorrect';
+import { translatePromptText, type PromptTranslateRequest, type PromptTranslateResult } from './core/prompt-translate';
 
 const stylesId = 'cli-prompt-panel-styles';
 
@@ -19,9 +21,10 @@ type PromptContext = {
 	close: () => void;
 	getActiveSessionId?: () => string | undefined;
 	sendToActiveSession?: (text: string) => void;
+	translatePrompt?: (request: PromptTranslateRequest) => Promise<PromptTranslateResult>;
 };
 
-export const mountPromptPanel = (host: HTMLElement, context: any = { close: () => {} }) => {
+export const mountPromptPanel = (host: HTMLElement, context: PromptContext = { close: () => {} }) => {
 	ensureStyles();
 
 	const template = document.createElement('template');
@@ -30,17 +33,12 @@ export const mountPromptPanel = (host: HTMLElement, context: any = { close: () =
 
 	const hasActiveSession = !!context.getActiveSessionId?.();
 
-	// === Session state handling (no session → disabled state) ===
 	initSessionState(host, hasActiveSession);
-
-	// === Tab switching logic + chat area reaction ===
 	initPromptTabs(host, context, hasActiveSession);
-
-	// Update footer with the correct model for the current active CLI
 	updateFooterModel(host);
 };
 
-function initPromptTabs(host: HTMLElement, context: any, hasActiveSession: boolean) {
+function initPromptTabs(host: HTMLElement, context: PromptContext, hasActiveSession: boolean) {
 	const tabs = host.querySelectorAll<HTMLElement>('.prompt-tab');
 	const textarea = host.querySelector<HTMLTextAreaElement>('#promptInput');
 	const textareaWrap = host.querySelector<HTMLElement>('.prompt-textarea-wrap');
@@ -58,60 +56,30 @@ function initPromptTabs(host: HTMLElement, context: any, hasActiveSession: boole
 	// Force lowercase input, with Shift as the only way to write uppercase
 	enforceLowercaseInput(textarea);
 
-	const updateChatForTab = (tab: string) => {
-		if (!textareaWrap) {
-			return;
-		}
+	// Single tab — set placeholder once
+	if (textareaWrap) {
+		textareaWrap.classList.remove('is-pro');
+	}
+	textarea.placeholder = 'Ask anything…';
 
-		textareaWrap.classList.toggle('is-pro', tab === 'enhance');
-
-		if (tab === 'enhance') {
-			textarea.placeholder = 'describe what you want to improve or generate…';
-		} else {
-			textarea.placeholder = 'Ask anything…';
-		}
-	};
-
-	tabs.forEach((tabEl) => {
-		tabEl.addEventListener('click', () => {
-			// Switch active states
-			tabs.forEach((t) => t.classList.remove('active'));
-			tabEl.classList.add('active');
-
-			const tab = tabEl.dataset.tab || 'write';
-			updateChatForTab(tab);
-		});
-	});
-
-	// Initialize with current active tab
-	const initialActive = host.querySelector<HTMLElement>('.prompt-tab.active');
-	const initialTab = initialActive?.dataset.tab || 'write';
-	updateChatForTab(initialTab);
-
-	// Auto-focus the input immediately when the modal opens
 	requestAnimationFrame(() => {
 		textarea.focus();
 	});
 
-	// === Skills chips (selectable buttons) ===
 	if (hasActiveSession) {
 		initSkillsChips(host);
+		initToolbarActions(host, textarea, context);
 	}
 
-	// === Run button + send logic ===
 	initRunButton(host, textarea, context);
-
-	// === Ctrl+Enter / Cmd+Enter support — also goes through the processor ===
 	initSendShortcut(textarea, context);
 
-	// Initial char count (only when interactive)
 	if (hasActiveSession) {
 		updateCharCount(host, textarea);
 	}
 }
 
 function enforceLowercaseInput(textarea: HTMLTextAreaElement) {
-	// Handle normal typing + Caps Lock
 	textarea.addEventListener('keydown', (e) => {
 		if (e.key.length === 1 && /[a-zA-Z]/.test(e.key)) {
 			if (e.shiftKey) {
@@ -129,7 +97,6 @@ function enforceLowercaseInput(textarea: HTMLTextAreaElement) {
 		}
 	});
 
-	// Paste: for simplicity we also force lowercase
 	textarea.addEventListener('paste', (e) => {
 		e.preventDefault();
 		const text = e.clipboardData?.getData('text') || '';
@@ -147,8 +114,7 @@ function initSkillsChips(host: HTMLElement) {
 
 	chips.forEach((chip) => {
 		chip.addEventListener('click', () => {
-			// Toggle selection
-			chip.classList.toggle('selected');
+					chip.classList.toggle('selected');
 
 			// Optional: if you want only one skill active at a time, uncomment below
 			// chips.forEach(c => c !== chip && c.classList.remove('selected'));
@@ -156,7 +122,83 @@ function initSkillsChips(host: HTMLElement) {
 	});
 }
 
-function initRunButton(host: HTMLElement, textarea: HTMLTextAreaElement, context: any) {
+function initToolbarActions(host: HTMLElement, textarea: HTMLTextAreaElement, context: PromptContext) {
+	const fixBtn = host.querySelector<HTMLButtonElement>('#fixSpellingBtn');
+	const translateBtn = host.querySelector<HTMLButtonElement>('#translateBtn');
+
+	if (fixBtn) {
+		const originalHtml = fixBtn.innerHTML;
+		fixBtn.addEventListener('click', async () => {
+			const text = textarea.value;
+			if (!text.trim()) {return;}
+
+			fixBtn.innerHTML = '<i class="ti ti-loader" aria-hidden="true"></i> Corrigiendo...';
+			fixBtn.disabled = true;
+
+			try {
+				const result = await runFullAutocorrect(text);
+
+				if (result.correctedText !== text) {
+					textarea.value = result.correctedText;
+					textarea.dispatchEvent(new Event('input'));
+
+					const total = result.typoCorrections + result.languageToolCorrections;
+					fixBtn.innerHTML = `<i class="ti ti-check" aria-hidden="true"></i> ${total} correcciones`;
+					fixBtn.style.color = '#5DCAA5';
+				} else {
+					fixBtn.innerHTML = '<i class="ti ti-check" aria-hidden="true"></i> Sin cambios';
+				}
+			} catch (err) {
+				console.error('Error en corrección:', err);
+				fixBtn.innerHTML = '<i class="ti ti-alert-triangle" aria-hidden="true"></i> Error';
+			} finally {
+				fixBtn.disabled = false;
+
+				setTimeout(() => {
+					fixBtn.innerHTML = originalHtml;
+					fixBtn.style.color = '';
+					fixBtn.style.borderColor = '';
+				}, 2000);
+			}
+		});
+	}
+
+	if (translateBtn) {
+		const originalHtml = translateBtn.innerHTML;
+		translateBtn.addEventListener('click', async () => {
+			const text = textarea.value;
+			if (!text.trim()) {return;}
+
+			translateBtn.innerHTML = '<i class="ti ti-loader" aria-hidden="true"></i> Translating...';
+			translateBtn.disabled = true;
+
+			try {
+				const result = await translatePromptText(text, context);
+				if (result.text && result.text !== text.trim()) {
+					textarea.value = result.text;
+					textarea.dispatchEvent(new Event('input'));
+					translateBtn.innerHTML = `<i class="ti ti-check" aria-hidden="true"></i> ${result.provider || 'Translated'}`;
+					translateBtn.style.color = '#5DCAA5';
+				} else {
+					translateBtn.innerHTML = '<i class="ti ti-check" aria-hidden="true"></i> Sin cambios';
+				}
+			} catch (err) {
+				console.error('Error en traducción:', err);
+				translateBtn.innerHTML = '<i class="ti ti-alert-triangle" aria-hidden="true"></i> Error';
+			} finally {
+				translateBtn.disabled = false;
+
+				setTimeout(() => {
+					translateBtn.innerHTML = originalHtml;
+					translateBtn.style.color = '';
+					translateBtn.style.borderColor = '';
+				}, 2200);
+			}
+		});
+	}
+}
+
+function initRunButton(host: HTMLElement, textarea: HTMLTextAreaElement, context: PromptContext) {
 	const runBtn = host.querySelector<HTMLButtonElement>('#runBtn');
 	if (!runBtn) {
 		return;
@@ -183,7 +225,7 @@ function initRunButton(host: HTMLElement, textarea: HTMLTextAreaElement, context
 	});
 }
 
-function initSendShortcut(textarea: HTMLTextAreaElement, context: any) {
+function initSendShortcut(textarea: HTMLTextAreaElement, context: PromptContext) {
 	textarea.addEventListener('keydown', (e) => {
 		const isSendShortcut =
 			(e.key === 'Enter' && (e.ctrlKey || e.metaKey)) ||
@@ -198,7 +240,12 @@ function initSendShortcut(textarea: HTMLTextAreaElement, context: any) {
 	});
 }
 
-function performSend(host: HTMLElement, textarea: HTMLTextAreaElement, context: any) {
+function performSend(host: HTMLElement, textarea: HTMLTextAreaElement, context: PromptContext) {
+	if (!context.sendToActiveSession) {
+		showNoSessionMessage(host);
+		return;
+	}
+
 	const result = processPrompt(textarea.value, {
 		close: context.close,
 		sendToActiveSession: context.sendToActiveSession,

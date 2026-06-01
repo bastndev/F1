@@ -4,7 +4,7 @@
    Requiere: Tabler Icons (outline) cargado en el host
    ============================================================ */
 
-/* --- Reset local --- */
+/* Local reset */
 .prompt-modal *,
 .prompt-modal *::before,
 .prompt-modal *::after {
@@ -13,7 +13,7 @@
   padding: 0;
 }
 
-/* ── Contenedor principal ── */
+/* Main container */
 .prompt-modal {
   width: min(500px, calc(100vw - 32px));
   background: var(--vscode-editor-background);
@@ -49,7 +49,7 @@
   pointer-events: none;
 }
 
-/* ── Header ── */
+/* Header */
 .prompt-header {
   display: flex;
   align-items: flex-start;
@@ -108,12 +108,60 @@
   background: color-mix(in srgb, var(--agent-accent, #534AB7) 35%, transparent);
 }
 
-/* ── Tabs ── */
+/* Toolbar & Tabs */
+.prompt-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  padding: 12px 20px 0;
+  flex: 0 0 auto;
+}
+
 .prompt-tabs {
   display: flex;
   gap: 2px;
-  padding: 12px 20px 0;
-  flex: 0 0 auto;
+}
+
+.prompt-actions-right {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 6px;
+}
+
+/* Translate button — same base as Fix, slight blue-tinted accent on hover */
+.prompt-action-btn--translate:hover {
+  color: color-mix(in srgb, var(--agent-accent, #AFA9EC) 85%, #7dd3fc);
+  border-color: color-mix(in srgb, var(--agent-accent, #534AB7) 40%, #38bdf8 20%);
+  background: color-mix(in srgb, var(--agent-accent, #534AB7) 10%, transparent);
+}
+
+.prompt-action-btn {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: transparent;
+  border: 1px solid var(--vscode-editorGroup-border);
+  border-radius: 6px;
+  color: var(--vscode-descriptionForeground);
+  font-family: 'Syne', sans-serif;
+  font-size: 10px;
+  font-weight: 600;
+  padding: 4px 8px;
+  cursor: pointer;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  transition: all 0.2s ease;
+}
+
+.prompt-action-btn:hover {
+  color: var(--agent-accent, #AFA9EC);
+  border-color: color-mix(in srgb, var(--agent-accent, #534AB7) 40%, transparent);
+  background: color-mix(in srgb, var(--agent-accent, #534AB7) 10%, transparent);
+}
+
+.prompt-action-btn i {
+  font-size: 13px;
 }
 
 .prompt-tab {
@@ -132,11 +180,6 @@
   /* Reserve space for border so switching tabs doesn't cause layout jump */
   border: 0.5px solid transparent;
   border-bottom: none;
-}
-
-.prompt-tab:hover:not(.active) {
-  color: var(--vscode-foreground);
-  opacity: 0.7;
 }
 
 .prompt-tab.active {
@@ -169,7 +212,7 @@
   opacity: 1;
 }
 
-/* ── Body ── */
+/* Body */
 .prompt-body {
   padding: 16px 20px;
   flex: 0 0 auto;
@@ -177,12 +220,6 @@
 
 .prompt-textarea-wrap {
   position: relative;
-}
-
-/* Visual reaction when Pro tab is active (layout-safe, no jumps) */
-.prompt-textarea-wrap.is-pro .prompt-textarea {
-  /* We avoid changing border or adding box-shadow here to prevent layout shifts */
-  background: color-mix(in srgb, var(--agent-accent) 5%, rgba(255, 255, 255, 0.04));
 }
 
 .prompt-textarea {
@@ -220,7 +257,7 @@
   pointer-events: none;
 }
 
-/* ── Skills row ── */
+/* Skills row */
 .prompt-skills {
   display: flex;
   align-items: center;
@@ -237,7 +274,7 @@
   flex-shrink: 0;
 }
 
-/* ── Tool buttons (Skills chips) ── */
+/* Tool buttons (Skills chips) */
 .prompt-tools {
   display: flex;
   gap: 6px;
@@ -324,7 +361,7 @@
   }
 }
 
-/* ── Divider ── */
+/* Divider */
 .prompt-divider {
   height: 0.5px;
   background: var(--vscode-editorGroup-border);
@@ -332,7 +369,7 @@
   flex: 0 0 auto;
 }
 
-/* ── Footer ── */
+/* Footer */
 .prompt-footer {
   display: flex;
   align-items: center;
@@ -355,7 +392,7 @@
   font-size: 12px;
 }
 
-/* ── Run button area ── */
+/* Run button area */
 .prompt-run-wrap {
   display: flex;
   align-items: center;
@@ -402,7 +439,7 @@
   transform: none;
 }
 
-/* ── Loading spinner ── */
+/* Loading spinner */
 .prompt-spin {
   display: inline-block;
   animation: prompt-spin 0.8s linear infinite;
@@ -411,7 +448,7 @@
   to { transform: rotate(360deg); }
 }
 
-/* ── Responsive ── */
+/* Responsive */
 @media (max-width: 520px) {
   .prompt-modal {
     width: calc(100vw - 20px);
