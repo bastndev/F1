@@ -23,3 +23,8 @@ Thumbs.db
 NOTES.md
 analizar/
 analizar2/
+
+.claude/
+.agents/
+
+skills-lock.json
