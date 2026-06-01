@@ -100,7 +100,16 @@ export const PERSONAL_MISTAKES: Record<string, string> = {
   'agranda': 'agrandar',
   'conoes': 'conoces',
   'emnos': 'menos',
-  // Add your most common personal mistakes here
+  
+  // Add MORE:
+  'mla': 'la',
+  'codigo': 'codigo',
+  'ais': 'a si',
+  'mejroa': 'mejorar',
+  'manrea': 'manera',
+  'aoptimiza': 'optimizar',
+  'vuiero': 'quiero',
+
 };
 
 /**
