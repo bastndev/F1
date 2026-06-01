@@ -12,6 +12,7 @@
 export const PERSONAL_MISTAKES: Record<string, string> = {
   // Palabras comunes que unes o te equivocas al escribir rápido
   'ue': 'que',
+  'eu': 'que',
   'q': 'que',
   'xq': 'porque',
   'x': 'por',
