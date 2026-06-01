@@ -54,35 +54,11 @@ function initPromptTabs(host: HTMLElement, context: any, hasActiveSession: boole
 	// Force lowercase input, with Shift as the only way to write uppercase
 	enforceLowercaseInput(textarea);
 
-	const updateChatForTab = (tab: string) => {
-		if (!textareaWrap) {
-			return;
-		}
-
-		textareaWrap.classList.toggle('is-pro', tab === 'enhance');
-
-		if (tab === 'enhance') {
-			textarea.placeholder = 'describe what you want to improve or generate…';
-		} else {
-			textarea.placeholder = 'Ask anything…';
-		}
-	};
-
-	tabs.forEach((tabEl) => {
-		tabEl.addEventListener('click', () => {
-			// Switch active states
-			tabs.forEach((t) => t.classList.remove('active'));
-			tabEl.classList.add('active');
-
-			const tab = tabEl.dataset.tab || 'write';
-			updateChatForTab(tab);
-		});
-	});
-
-	// Initialize with current active tab
-	const initialActive = host.querySelector<HTMLElement>('.prompt-tab.active');
-	const initialTab = initialActive?.dataset.tab || 'write';
-	updateChatForTab(initialTab);
+	// Single tab — set placeholder once
+	if (textareaWrap) {
+		textareaWrap.classList.remove('is-pro');
+	}
+	textarea.placeholder = 'Ask anything…';
 
 	requestAnimationFrame(() => {
 		textarea.focus();

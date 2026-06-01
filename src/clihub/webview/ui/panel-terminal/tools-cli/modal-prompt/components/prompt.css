@@ -182,11 +182,6 @@
   border-bottom: none;
 }
 
-.prompt-tab:hover:not(.active) {
-  color: var(--vscode-foreground);
-  opacity: 0.7;
-}
-
 .prompt-tab.active {
   color: var(--agent-accent, #AFA9EC);
   background: color-mix(in srgb, var(--agent-accent, #534AB7) 14%, transparent);
@@ -225,12 +220,6 @@
 
 .prompt-textarea-wrap {
   position: relative;
-}
-
-/* Visual reaction when Pro tab is active (layout-safe, no jumps) */
-.prompt-textarea-wrap.is-pro .prompt-textarea {
-  /* We avoid changing border or adding box-shadow here to prevent layout shifts */
-  background: color-mix(in srgb, var(--agent-accent) 5%, rgba(255, 255, 255, 0.04));
 }
 
 .prompt-textarea {
