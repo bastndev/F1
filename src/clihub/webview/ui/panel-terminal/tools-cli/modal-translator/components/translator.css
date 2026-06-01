@@ -291,10 +291,22 @@
 	background: color-mix(in srgb, var(--agent-accent, #AFA9EC) 6%, var(--vscode-input-background));
 }
 
+@keyframes translate-btn-pulse {
+	0%, 100% {
+		box-shadow: 0 0 0 0 rgba(175, 169, 236, 0);
+	}
+	50% {
+		box-shadow: 0 0 0 3px color-mix(in srgb, var(--agent-accent, #AFA9EC) 25%, transparent);
+		border-color: color-mix(in srgb, var(--agent-accent, #AFA9EC) 80%, var(--vscode-editorGroup-border));
+		background: color-mix(in srgb, var(--agent-accent, #AFA9EC) 12%, var(--vscode-input-background));
+	}
+}
+
 #translateBtn {
 	border-color: color-mix(in srgb, var(--agent-accent, #AFA9EC) 40%, var(--vscode-editorGroup-border));
 	color: var(--agent-accent, #AFA9EC);
 	background: color-mix(in srgb, var(--agent-accent, #AFA9EC) 6%, var(--vscode-input-background));
+	animation: translate-btn-pulse 2s ease-in-out 3;
 }
 
 #translateBtn:hover {

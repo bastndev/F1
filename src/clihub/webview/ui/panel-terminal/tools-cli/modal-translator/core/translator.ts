@@ -67,7 +67,7 @@ export function initializeTranslator(host: HTMLElement, context: ToolContext) {
 	if (textEl) {
 		if (extracted) {
 			textEl.textContent = extracted;
-			textEl.classList.remove('placeholder');
+			textEl.classList.add('placeholder');
 		} else {
 			textEl.textContent = 'Select text in the terminal to translate it to Spanish.';
 			textEl.classList.add('placeholder');
