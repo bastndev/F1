@@ -17,15 +17,24 @@ export interface LanguageToolError {
 
 const LT_API_URL = 'https://api.languagetoolplus.com/v2/check';
 
+// Simple cache — avoids duplicate API calls for the same text
+const ltCache = new Map<string, LanguageToolError[]>();
+
+
 export async function checkWithLanguageTool(text: string): Promise<LanguageToolError[]> {
 	if (!text || text.trim().length < 3) {
 		return [];
 	}
 
+	// Return cached result if available
+	if (ltCache.has(text)) {
+		return ltCache.get(text)!;
+	}
+
 	try {
 		const params = new URLSearchParams({
 			text: text,
-			language: 'es',           // Spanish only for now
+			language: 'es',
 			enabledOnly: 'false',
 		});
 
@@ -35,8 +44,7 @@ export async function checkWithLanguageTool(text: string): Promise<LanguageToolE
 				'Content-Type': 'application/x-www-form-urlencoded',
 			},
 			body: params.toString(),
-			signal: AbortSignal.timeout(8000), // 8 second timeout
-
+			signal: AbortSignal.timeout(3000), // reduced from 8s to 3s
 		});
 
 		if (!response.ok) {
@@ -47,17 +55,22 @@ export async function checkWithLanguageTool(text: string): Promise<LanguageToolE
 		const data = await response.json();
 		const matches: LTMatch[] = data.matches || [];
 
-		return matches.map((match) => ({
+		const result: LanguageToolError[] = matches.map((match) => ({
 			word: text.substring(match.offset, match.offset + match.length),
 			offset: match.offset,
 			length: match.length,
 			message: match.message,
 			suggestions: match.replacements.map(r => r.value).slice(0, 5),
-			severity: match.rule.issueType === 'misspelling' ? 'spelling' : 
-			          match.rule.issueType === 'grammar' ? 'grammar' : 'style',
+			severity: (match.rule.issueType === 'misspelling' ? 'spelling' :
+			          match.rule.issueType === 'grammar' ? 'grammar' : 'style') as LanguageToolError['severity'],
 		}));
+
+		// Cache before returning
+		ltCache.set(text, result);
+		return result;
+
 	} catch (error) {
-		console.warn('[LanguageTool] Error llamando a la API:', error);
+		console.warn('[LanguageTool] API unreachable, skipping:', error);
 		return [];
 	}
 }
@@ -79,11 +92,10 @@ export async function applyLanguageToolCorrections(text: string): Promise<{
 	let correctedText = text;
 	let correctionsMade = 0;
 
-	// Apply from the end to the beginning to preserve offsets
+	// Apply from end to beginning to preserve offsets
 	const sorted = [...errors].sort((a, b) => b.offset - a.offset);
 
 	for (const err of sorted) {
-		// Only apply if there are suggestions and it's a clear grammar/style error
 		if (err.suggestions.length > 0 && (err.severity === 'grammar' || err.severity === 'style')) {
 			const replacement = err.suggestions[0];
 			correctedText =

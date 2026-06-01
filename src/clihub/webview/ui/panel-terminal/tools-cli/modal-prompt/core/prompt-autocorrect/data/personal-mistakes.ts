@@ -23,37 +23,24 @@ export const PERSONAL_MISTAKES: Record<string, string> = {
   'busno': 'bueno',
   'poer': 'pero',
   'speas': 'sepas',
-  'quyehablo': 'que hablo',
   'iprota': 'importa',
-  'letnop': 'lento',
   'gustwaria': 'gustaría',
   'protafolio': 'portafolio',
   'buente': 'bueno',
-  'orotgraficas': 'ortográficas',
-  'enpoieco': 'empiezo',
-  'aclara': 'aclarar',
   'improtante': 'importante',
   'pieso': 'pienso',
   'simpre': 'siempre',
-  'emnos': 'menos',
   'paresare': 'pasaré',
-  'smejor': 'mejor',
-  'agranda': 'agrandar',
-  'palabrqas': 'palabras',
-  'conoes': 'conoces',
-  'proo': 'porque',
   'enepsar': 'empezar',
-  'dicioen': 'decir',
   'escalabe': 'escalable',
   'mantible': 'mantenible',
-  'ortograia': 'ortografía',
-  'comoescribo': 'como escribo',
-  'quehabmos': 'qué hablamos',
   'ahirta': 'ahora',
-  'progrmacion': 'programación',
-  'progrmadore': 'programadores',
-  'sespecidficamente': 'específicamente',
   'habalndo': 'hablando',
+  'segudno': 'segundo',
+  'segudnos': 'segundos',
+  'segundoass': 'segundos',
+  'domora': 'demora',
+  'preciono': 'presiono',
   // Fast-typing word merges and drops
   'quieroq': 'quiero que',
   'unneuvo': 'un nuevo',
@@ -63,6 +50,7 @@ export const PERSONAL_MISTAKES: Record<string, string> = {
   'asets': 'assets',
   'analzia': 'analiza',
   'fallas orograficas': 'fallas ortográficas',
+  'fallas orotgraficas': 'fallas ortográficas',
   'entrraremos': 'entrenaremos',
   'hi': 'ahí',
   'mellamo': 'me llamo',
@@ -71,9 +59,16 @@ export const PERSONAL_MISTAKES: Record<string, string> = {
   'enel': 'en el',
   'nocreo': 'no creo',
   'porahora': 'por ahora',
-  'noq ueiroalgo': 'no quiero algo',
   'naimacion': 'animación',
-  'enpoico': 'empiezo',
+  'elinformea': 'el informe',
+  'elinforma': 'el informe',
+  'loq': 'lo que',
+  'loq estama': 'lo que tenemos',
+  'desun': 'dé un',
+  'infrome': 'informe',
+  'quietectua': 'arquitectura',
+  'merjora': 'mejorar',
+  'queiro': 'quiero',
   // Transposition errors
   'loguica': 'lógica',
   'ideoma': 'idioma',
@@ -81,9 +76,18 @@ export const PERSONAL_MISTAKES: Record<string, string> = {
   'enpesar': 'empezar',
   'enpecemos': 'empecemos',
   'enpiezo': 'empiezo',
+  'enpoieco': 'empiezo',
   'precionando': 'presionando',
   'precione': 'presione',
   'implentaste': 'implementaste',
+  'letnop': 'lento',
+  'ortograia': 'ortografía',
+  'orotgraficas': 'ortográficas',
+  'orografuicas': 'ortográficas',
+  'progrmacion': 'programación',
+  'progrmadore': 'programadores',
+  'sespecidficamente': 'específicamente',
+  'palabrqas': 'palabras',
   // Spelling errors
   'nesesario': 'necesario',
   'posivilidad': 'posibilidad',
@@ -92,26 +96,37 @@ export const PERSONAL_MISTAKES: Record<string, string> = {
   'elejir': 'elegir',
   'tradusca': 'traduzca',
   'verda': 'verdad',
-  'nsue': 'no sé',
-  'meva': 'me va',
+  'smejor': 'mejor',
+  'agranda': 'agrandar',
+  'conoes': 'conoces',
+  'emnos': 'menos',
   // Add your most common personal mistakes here
 };
 
 /**
  * Apply personal writing patterns before any other correction layer.
+ * Handles both single-word and multi-word patterns sorted by length
+ * to avoid partial replacements.
  */
 export function applyPersonalMistakes(text: string): string {
   let result = text;
+
   // Sort by length descending to avoid partial replacements
+  // (multi-word patterns like 'quieroq ue' must run before 'quieroq')
   const entries = Object.entries(PERSONAL_MISTAKES)
     .sort(([a], [b]) => b.length - a.length);
+
   for (const [mistake, correction] of entries) {
-    // Use word boundaries to avoid replacing inside other words
-    const regex = new RegExp(`\\b${escapeRegExp(mistake)}\\b`, 'gi');
-    result = result.replace(regex, (match) => {
-      return preserveCase(match, correction);
-    });
+    const escaped = escapeRegExp(mistake);
+    // Multi-word patterns: match as-is (spaces included)
+    // Single-word patterns: use word boundaries
+    const pattern = mistake.includes(' ')
+      ? new RegExp(escaped, 'gi')
+      : new RegExp(`\\b${escaped}\\b`, 'gi');
+
+    result = result.replace(pattern, (match) => preserveCase(match, correction));
   }
+
   return result;
 }
 
