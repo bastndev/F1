@@ -30,15 +30,15 @@ export async function autocorrectText(text: string): Promise<string> {
 function replaceSegment(segment: string, typo: any): string {
 	const wordPattern = /[\p{L}]+/gu;
 	return segment.replace(wordPattern, (word) => {
-		if (word.length < 3) return word;
+		if (word.length < 3) {return word;}
 
 		// Do not touch protected technical terms
-		if (isProtectedTerm(word)) return word;
+		if (isProtectedTerm(word)) {return word;}
 
-		if (typo.check(word)) return word;
+		if (typo.check(word)) {return word;}
 
 		const suggestions = typo.suggest(word);
-		if (!suggestions || suggestions.length === 0) return word;
+		if (!suggestions || suggestions.length === 0) {return word;}
 
 		// Only aggressively correct short words
 		if (word.length <= 8) {
