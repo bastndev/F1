@@ -58,7 +58,6 @@ const pendingPromptTranslations = new Map<string, PendingPromptTranslation>();
 let activeSessionId: string | undefined;
 let pendingTabSwitchSessionId: string | undefined;
 let nextPromptTranslationId = 1;
-const lastPromptBySession = new Map<string, string>();
 
 const isAgentIcon = (value: unknown): value is CliAgentIcon => {
 	if (!value || typeof value !== 'object') {
@@ -201,7 +200,6 @@ const toolsController = layoutRight
 					if (session?.status !== 'running') {
 						return;
 					}
-					lastPromptBySession.set(activeSessionId, text.trim());
 					vscode.postMessage({ type: 'cli.input', sessionId: activeSessionId, data: text });
 				},
 				translatePrompt,
@@ -214,28 +212,6 @@ const toolsController = layoutRight
 						return '';
 					}
 					return view.terminal.hasSelection() ? view.terminal.getSelection() : '';
-				},
-				getTerminalLines: () => {
-					if (!activeSessionId) {
-						return [];
-					}
-					const view = terminals.get(activeSessionId);
-					if (!view) {
-						return [];
-					}
-					const buffer = view.terminal.buffer.active;
-					const lines: string[] = [];
-					const startRow = Math.max(0, buffer.length - 300);
-					for (let i = startRow; i < buffer.length; i++) {
-						const line = buffer.getLine(i);
-						if (line) {
-							lines.push(line.translateToString(true));
-						}
-					}
-					return lines;
-				},
-				getLastPrompt: () => {
-					return activeSessionId ? lastPromptBySession.get(activeSessionId) : undefined;
 				}
 			})
 		: undefined;

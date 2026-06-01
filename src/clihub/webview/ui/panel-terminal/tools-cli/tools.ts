@@ -11,8 +11,6 @@ export type ToolContext = {
 	sendToActiveSession?: (text: string) => void;
 	translatePrompt?: (request: PromptTranslateRequest) => Promise<PromptTranslateResult>;
 	getTerminalSelection?: () => string;
-	getTerminalLines?: () => string[];
-	getLastPrompt?: () => string | undefined;
 };
 
 type ToolMount = (host: HTMLElement, context: ToolContext) => void;
@@ -22,8 +20,6 @@ export type ToolsControllerOptions = {
 	sendToActiveSession?: (text: string) => void;
 	translatePrompt?: (request: PromptTranslateRequest) => Promise<PromptTranslateResult>;
 	getTerminalSelection?: () => string;
-	getTerminalLines?: () => string[];
-	getLastPrompt?: () => string | undefined;
 };
 
 const modalId = 'cli-tools-modal';
@@ -47,9 +43,7 @@ const toolMounts: Record<ToolId, ToolMount> = {
 		getActiveSessionId,
 		sendToActiveSession,
 		translatePrompt,
-		getTerminalSelection,
-		getTerminalLines,
-		getLastPrompt
+		getTerminalSelection
 	}: ToolsControllerOptions) => {
 		let activeModal: HTMLElement | null = null;
 		let currentTool: ToolId | null = null;
@@ -112,9 +106,7 @@ const toolMounts: Record<ToolId, ToolMount> = {
 					getActiveSessionId,
 					sendToActiveSession,
 					translatePrompt,
-					getTerminalSelection,
-					getTerminalLines,
-					getLastPrompt
+					getTerminalSelection
 				});
 
 		container.append(modal);

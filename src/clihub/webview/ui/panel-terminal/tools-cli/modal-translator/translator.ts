@@ -40,7 +40,7 @@ function initTranslator(host: HTMLElement, context: ToolContext) {
 			textEl.textContent = extracted;
 			textEl.classList.remove('placeholder');
 		} else {
-			textEl.textContent = 'No content found to translate. Select text in the terminal or run a prompt first.';
+			textEl.textContent = 'Please select text in the terminal to translate.';
 			textEl.classList.add('placeholder');
 		}
 	}
