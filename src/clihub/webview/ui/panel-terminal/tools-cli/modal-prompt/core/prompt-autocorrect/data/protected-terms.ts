@@ -44,7 +44,7 @@ export const PROTECTED_TERMS = new Set<string>([
   'class', 'function', 'const', 'let', 'var', 'import', 'export', 'default',
   'return', 'throw', 'try', 'catch', 'finally', 'switch', 'case', 'break',
   // Personal technical terms
-  'codigo', 'webview', 'clihub', 'autocorrect', 'typo',
+  'codigo', 'webview', 'clihub', 'autocorrect', 'typo', 'lynxjs'
 ]);
 
 export function isProtectedTerm(word: string): boolean {
