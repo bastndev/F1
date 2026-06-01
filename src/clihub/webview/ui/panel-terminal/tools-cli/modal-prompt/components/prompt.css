@@ -124,7 +124,16 @@
 
 .prompt-actions-right {
   display: flex;
+  align-items: center;
+  gap: 6px;
   margin-bottom: 6px;
+}
+
+/* Translate button — same base as Fix, slight blue-tinted accent on hover */
+.prompt-action-btn--translate:hover {
+  color: color-mix(in srgb, var(--agent-accent, #AFA9EC) 85%, #7dd3fc);
+  border-color: color-mix(in srgb, var(--agent-accent, #534AB7) 40%, #38bdf8 20%);
+  background: color-mix(in srgb, var(--agent-accent, #534AB7) 10%, transparent);
 }
 
 .prompt-action-btn {
