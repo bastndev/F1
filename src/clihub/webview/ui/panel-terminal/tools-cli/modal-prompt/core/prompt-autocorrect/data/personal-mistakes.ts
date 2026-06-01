@@ -107,6 +107,15 @@ export const PERSONAL_MISTAKES: Record<string, string> = {
 	'auora': 'ahora',
 	'eleimianr': 'eliminar',
 	'udads': 'dudas',
+	'quer': 'que',
+	'nueco': 'nuevo',
+	'llamdo': 'llamado',
+	'razil': 'raiz',
+	'razix': 'raiz',
+	'razi': 'raiz',
+	'prouectpo': 'proyecto',
+	'temine': 'termine',
+	'iamgen': 'imagen',
 
 	// Spelling and accent fixes
 	'basico': 'básico',

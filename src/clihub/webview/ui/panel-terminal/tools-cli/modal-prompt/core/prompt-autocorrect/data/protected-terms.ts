@@ -55,7 +55,7 @@ export const PROTECTED_TERMS = new Set<string>([
 	'return', 'throw', 'try', 'catch', 'finally', 'switch', 'case', 'break',
 
 	// Local technical terms that should not be over-corrected by the dictionary.
-	'autocorrect', 'typo', 'lynxjs'
+	'autocorrect', 'typo', 'lynxjs', 'testear'
 ]);
 
 export function isProtectedTerm(word: string): boolean {
