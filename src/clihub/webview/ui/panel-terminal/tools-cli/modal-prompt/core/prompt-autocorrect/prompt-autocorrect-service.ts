@@ -1,34 +1,45 @@
-import { autocorrectText as runTypo } from './auto-replacer';
+import { autocorrectTextWithStats as runLocalAutocorrect } from './auto-replacer';
 import { applyLanguageToolCorrections } from './language-tool-service';
 
 export interface AutocorrectResult {
 	correctedText: string;
+	personalCorrections: number;
 	typoCorrections: number;
 	languageToolCorrections: number;
 }
 
-export async function runFullAutocorrect(text: string): Promise<AutocorrectResult> {
+export interface AutocorrectOptions {
+	useLanguageTool?: boolean;
+}
+
+export async function runFullAutocorrect(text: string, options: AutocorrectOptions = {}): Promise<AutocorrectResult> {
 	if (!text || text.trim().length < 3) {
 		return {
 			correctedText: text,
+			personalCorrections: 0,
 			typoCorrections: 0,
 			languageToolCorrections: 0,
 		};
 	}
 
-	// Layer 1: Typo.js (now more conservative)
-	const afterTypo = await runTypo(text);
+	const local = await runLocalAutocorrect(text);
 
-	// Layer 2: LanguageTool (grammar + context)
+	if (options.useLanguageTool !== true) {
+		return {
+			correctedText: local.correctedText,
+			personalCorrections: local.personalCorrections,
+			typoCorrections: local.personalCorrections + local.typoCorrections,
+			languageToolCorrections: 0,
+		};
+	}
+
 	const { correctedText: finalText, correctionsMade: ltCorrections } =
-		await applyLanguageToolCorrections(afterTypo);
-
-	// Approximate count of Typo corrections
-	const typoCorrections = (afterTypo !== text) ? 1 : 0; // simplified for now
+		await applyLanguageToolCorrections(local.correctedText);
 
 	return {
 		correctedText: finalText,
-		typoCorrections,
+		personalCorrections: local.personalCorrections,
+		typoCorrections: local.personalCorrections + local.typoCorrections,
 		languageToolCorrections: ltCorrections,
 	};
 }

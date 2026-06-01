@@ -28,15 +28,22 @@ export async function getTypoInstance(): Promise<Typo | null> {
 			}
 
 			const [aff, dic] = await Promise.all([affRes.text(), dicRes.text()]);
-			
+
 			// Typo-js expects the name of the language, the .aff content, and the .dic content
 			typoInstance = new Typo('es', aff, dic);
 			isLoaded = true;
 		} catch (e) {
 			console.error('Error loading typo.js dictionaries:', e);
+			typoInstance = null;
+			isLoaded = false;
+			loadPromise = null;
 		}
 	})();
 
 	await loadPromise;
 	return typoInstance;
+}
+
+export function warmTypoInstance(): void {
+	void getTypoInstance();
 }
