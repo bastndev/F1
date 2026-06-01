@@ -116,6 +116,7 @@ export const PERSONAL_MISTAKES: Record<string, string> = {
 	'prouectpo': 'proyecto',
 	'temine': 'termine',
 	'iamgen': 'imagen',
+	'simpel': 'simple',
 
 	// Spelling and accent fixes
 	'basico': 'básico',
@@ -166,6 +167,7 @@ export const PERSONAL_MISTAKES: Record<string, string> = {
 	'validacion': 'validación',
 	'configuracion': 'configuración',
 	'extension': 'extensión',
+	'unanueva': 'una nueva',
 
 };
 
