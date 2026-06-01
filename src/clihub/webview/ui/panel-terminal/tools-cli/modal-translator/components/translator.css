@@ -136,21 +136,21 @@
 
 .lang-selector {
 	display: flex;
-	gap: 3px;
+	gap: 2px;
 	background: var(--vscode-input-background);
 	border: 0.5px solid var(--vscode-editorGroup-border);
-	border-radius: 10px;
-	padding: 3px;
+	border-radius: 8px;
+	padding: 2px;
 }
 
 .lang-option {
 	font-size: 10px;
-	padding: 4px 10px;
-	border-radius: 7px;
+	padding: 3px 9px;
+	border-radius: 6px;
 	border: none;
 	background: transparent;
 	color: var(--vscode-descriptionForeground);
-	cursor: pointer;
+	cursor: default;
 	font-family: 'JetBrains Mono', monospace;
 	transition: all 0.15s ease;
 	white-space: nowrap;
@@ -170,9 +170,9 @@
 
 /* Scalable "add language" button */
 .add-lang-btn {
-	width: 22px;
-	height: 22px;
-	border-radius: 6px;
+	width: 20px;
+	height: 20px;
+	border-radius: 5px;
 	border: 0.5px dashed rgba(175, 169, 236, 0.35);
 	background: transparent;
 	color: var(--vscode-descriptionForeground);
@@ -180,7 +180,7 @@
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	font-size: 15px;
+	font-size: 13px;
 	line-height: 1;
 	font-family: monospace;
 	transition: all 0.15s ease;
