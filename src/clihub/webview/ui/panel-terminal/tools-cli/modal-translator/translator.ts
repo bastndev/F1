@@ -33,17 +33,49 @@ function initTranslator(host: HTMLElement, context: ToolContext) {
 	const textEl = host.querySelector<HTMLElement>('#translatedText');
 	const modelEl = host.querySelector<HTMLElement>('#modelName');
 
-	// Inject extracted text
-	if (textEl) {
+	const modalEl = host.querySelector<HTMLElement>('.translator-modal');
+	
+	let currentTargetLang = 'es'; // default: Español
+
+	const performTranslation = async () => {
 		const extracted = extractTextToTranslate(context);
-		if (extracted) {
-			textEl.textContent = extracted;
-			textEl.classList.remove('placeholder');
-		} else {
-			textEl.textContent = 'Please select text in the terminal (CLI) to translate.';
-			textEl.classList.add('placeholder');
+		if (!extracted) {
+			if (textEl) {
+				textEl.textContent = 'Please select text in the terminal to translate.';
+				textEl.classList.add('placeholder');
+			}
+			return;
 		}
-	}
+
+		if (!textEl || !modalEl || !context.translatePrompt) {
+			if (textEl) {
+				textEl.textContent = extracted;
+				textEl.classList.remove('placeholder');
+			}
+			return;
+		}
+
+		modalEl.classList.add('is-translating');
+		// Optional: you can show a loading state on the text itself, or just leave the original text while loading
+		textEl.textContent = extracted;
+		textEl.classList.remove('placeholder');
+
+		try {
+			const result = await context.translatePrompt({
+				text: extracted,
+				from: 'auto',
+				to: currentTargetLang
+			});
+			
+			if (result.text) {
+				textEl.textContent = result.text;
+			}
+		} catch (err) {
+			console.error('Translation error:', err);
+		} finally {
+			modalEl.classList.remove('is-translating');
+		}
+	};
 
 	// Update model name from active CLI (same pattern as Prompt)
 	const labelEl = document.getElementById('cli-terminal-label');
@@ -56,19 +88,26 @@ function initTranslator(host: HTMLElement, context: ToolContext) {
 
 	// === Language Selector (target language) ===
 	const langSelector = host.querySelector<HTMLElement>('#langSelector');
-	let currentTargetLang = 'es'; // default: Español
 
 	if (langSelector) {
 		const options = langSelector.querySelectorAll<HTMLButtonElement>('.lang-option');
 
 		options.forEach((option) => {
 			option.addEventListener('click', () => {
+				if (option.classList.contains('active')) {
+					return;
+				}
+				
 				options.forEach((o) => o.classList.remove('active'));
 				option.classList.add('active');
 				currentTargetLang = option.dataset.lang || 'es';
+				performTranslation();
 			});
 		});
 	}
+
+	// Trigger initial translation
+	performTranslation();
 
 	// Copy functionality
 	if (copyBtn && textEl) {

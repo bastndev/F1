@@ -77,6 +77,14 @@ function initPromptTabs(host: HTMLElement, context: PromptContext, hasActiveSess
 	if (hasActiveSession) {
 		updateCharCount(host, textarea);
 	}
+
+	const adjustHeight = () => {
+		textarea.style.height = 'auto';
+		textarea.style.height = textarea.scrollHeight + 'px';
+	};
+	textarea.addEventListener('input', adjustHeight);
+	// Initial adjustment (using requestAnimationFrame to ensure CSS is applied)
+	requestAnimationFrame(adjustHeight);
 }
 
 function enforceLowercaseInput(textarea: HTMLTextAreaElement) {

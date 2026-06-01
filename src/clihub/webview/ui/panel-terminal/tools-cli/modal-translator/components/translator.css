@@ -36,6 +36,17 @@
 	z-index: 1;
 }
 
+.translator-modal.is-translating::before {
+	opacity: 0.85;
+	background-size: 200% 100%;
+	animation: translator-scan 1.5s linear infinite;
+}
+
+@keyframes translator-scan {
+	0% { background-position: 200% 0; }
+	100% { background-position: -200% 0; }
+}
+
 /* ── Header ─────────────────────────────────────────────────────── */
 .translator-header {
 	display: flex;

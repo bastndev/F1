@@ -27,6 +27,7 @@
   display: flex;
   flex-direction: column;
   position: relative;
+  max-height: 100%;
 }
 
 /* Top accent light / glow (2-color gradient according to current CLI) */
@@ -225,6 +226,8 @@
 .prompt-textarea {
   width: 100%;
   min-height: 100px;
+  max-height: calc(100vh - 260px);
+  overflow-y: auto;
   background: var(--vscode-input-background);
   border: 0.5px solid var(--vscode-editorGroup-border);
   border-radius: 8px;
@@ -232,7 +235,7 @@
   font-family: 'JetBrains Mono', monospace;
   font-size: 12.5px;
   line-height: 1.6;
-  padding: 12px 14px;
+  padding: 12px 14px 28px 14px;
   resize: none;
   outline: none;
   transition: border-color 0.2s, background 0.2s;
