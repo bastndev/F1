@@ -89,6 +89,13 @@ const toolMounts: Record<ToolId, ToolMount> = {
 			});
 	
 			const host = document.createElement('div');
+			applyStyles(host, {
+				display: 'flex',
+				width: 'min(580px, calc(100% - 32px))',
+				height: 'calc(100% - 32px)',
+				maxHeight: 'calc(100% - 32px)',
+				boxSizing: 'border-box'
+			});
 			modal.append(host);
 	
 			modal.addEventListener('click', (event) => {
