@@ -18,6 +18,7 @@ export function initializeTranslator(host: HTMLElement, context: ToolContext) {
 	const speakBtn = host.querySelector<HTMLButtonElement>('#speakBtn');
 	const spectrum = host.querySelector<HTMLElement>('#audioSpectrum');
 	const copyBtn = host.querySelector<HTMLButtonElement>('#copyBtn');
+	const translateBtn = host.querySelector<HTMLButtonElement>('#translateBtn');
 	const textEl = host.querySelector<HTMLElement>('#translatedText');
 	const modelEl = host.querySelector<HTMLElement>('#modelName');
 
@@ -38,7 +39,7 @@ export function initializeTranslator(host: HTMLElement, context: ToolContext) {
 		}
 
 		modalEl.classList.add('is-translating');
-		textEl.textContent = extracted;
+		textEl.textContent = 'Translating...';
 		textEl.classList.remove('placeholder');
 
 		try {
@@ -47,7 +48,6 @@ export function initializeTranslator(host: HTMLElement, context: ToolContext) {
 		} catch (err) {
 			console.error('[Translator] EN→ES failed:', err);
 			textEl.textContent = extracted;
-			textEl.classList.add('placeholder');
 		} finally {
 			modalEl.classList.remove('is-translating');
 		}
@@ -62,8 +62,17 @@ export function initializeTranslator(host: HTMLElement, context: ToolContext) {
 
 	let isSpeaking = false;
 
-	// Auto-translate on open (shows English briefly → loading animation → Spanish)
-	performTranslation();
+	// Show extracted text on open (no auto-translate; user clicks Translate)
+	const extracted = extractTextToTranslate(context);
+	if (textEl) {
+		if (extracted) {
+			textEl.textContent = extracted;
+			textEl.classList.remove('placeholder');
+		} else {
+			textEl.textContent = 'Select text in the terminal to translate it to Spanish.';
+			textEl.classList.add('placeholder');
+		}
+	}
 
 	// Copy button
 	if (copyBtn && textEl) {
@@ -83,6 +92,13 @@ export function initializeTranslator(host: HTMLElement, context: ToolContext) {
 			} catch {
 				console.log('Clipboard not available');
 			}
+		});
+	}
+
+	// Translate button
+	if (translateBtn) {
+		translateBtn.addEventListener('click', () => {
+			performTranslation();
 		});
 	}
 

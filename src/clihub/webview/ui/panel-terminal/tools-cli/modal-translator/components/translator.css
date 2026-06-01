@@ -230,7 +230,7 @@
 	font-size: 13px;
 	line-height: 1.7;
 	white-space: pre-wrap;
-	color: var(--vscode-foreground);
+	color: #ffffff;
 }
 
 .translator-text.placeholder {

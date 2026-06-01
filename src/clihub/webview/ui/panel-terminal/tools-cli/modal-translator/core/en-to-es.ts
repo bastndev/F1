@@ -1,77 +1,146 @@
 /**
- * Minimal, dedicated English → Spanish translator
+ * English → Spanish translator with multiple free providers.
  * Used exclusively by the Translator modal for terminal/CLI output.
  *
- * Direct fetch to Google unofficial endpoint (no extension host, no extra providers).
- * Hardcoded EN → ES as per requirement.
+ * Provider cascade (all free, no API key):
+ *   1. MyMemory    — api.mymemory.translated.net
+ *   2. Lingva      — lingva.thedaviddelta.com (Google mirror, CORS-friendly)
+ *   3. LibreTranslate — libretranslate.de (open-source)
+ *
+ * Tries each in order; falls back to the next on failure.
  */
 
-const GOOGLE_TRANSLATE_URL = 'https://translate.googleapis.com/translate_a/single';
-const TIMEOUT_MS = 9000;
+const TIMEOUT_MS = 10000;
 
+type TranslationProvider = {
+	name: string;
+	translate: (text: string, signal: AbortSignal) => Promise<string>;
+};
+
+// ── Provider: MyMemory ─────────────────────────────────────────────
+async function translateMyMemory(text: string, signal: AbortSignal): Promise<string> {
+	const params = new URLSearchParams({
+		q: text,
+		langpair: 'en|es',
+	});
+
+	const res = await fetch(
+		`https://api.mymemory.translated.net/get?${params.toString()}`,
+		{ signal }
+	);
+
+	if (!res.ok) {
+		throw new Error(`MyMemory HTTP ${res.status}`);
+	}
+
+	const json = await res.json() as {
+		responseData?: { translatedText?: string };
+		responseStatus?: number;
+	};
+
+	if (json.responseStatus && json.responseStatus >= 400) {
+		throw new Error(`MyMemory status ${json.responseStatus}`);
+	}
+
+	const translated = json.responseData?.translatedText;
+	if (!translated?.trim()) {
+		throw new Error('MyMemory returned empty result.');
+	}
+
+	return decodeHtmlEntities(translated);
+}
+
+// ── Provider: Lingva Translate (Google mirror) ─────────────────────
+async function translateLingva(text: string, signal: AbortSignal): Promise<string> {
+	const encoded = encodeURIComponent(text);
+	const res = await fetch(
+		`https://lingva.thedaviddelta.com/api/v1/en/es/${encoded}`,
+		{ signal }
+	);
+
+	if (!res.ok) {
+		throw new Error(`Lingva HTTP ${res.status}`);
+	}
+
+	const json = await res.json() as { translation?: string };
+	const translated = json.translation;
+	if (!translated?.trim()) {
+		throw new Error('Lingva returned empty result.');
+	}
+
+	return translated;
+}
+
+// ── Provider: LibreTranslate ───────────────────────────────────────
+async function translateLibre(text: string, signal: AbortSignal): Promise<string> {
+	const res = await fetch('https://libretranslate.de/translate', {
+		method: 'POST',
+		headers: { 'Content-Type': 'application/json' },
+		body: JSON.stringify({
+			q: text,
+			source: 'en',
+			target: 'es',
+			format: 'text',
+		}),
+		signal,
+	});
+
+	if (!res.ok) {
+		throw new Error(`LibreTranslate HTTP ${res.status}`);
+	}
+
+	const json = await res.json() as { translatedText?: string };
+	const translated = json.translatedText;
+	if (!translated?.trim()) {
+		throw new Error('LibreTranslate returned empty result.');
+	}
+
+	return translated;
+}
+
+// ── Provider list (tried in order) ─────────────────────────────────
+const providers: TranslationProvider[] = [
+	{ name: 'MyMemory', translate: translateMyMemory },
+	{ name: 'Lingva', translate: translateLingva },
+	{ name: 'LibreTranslate', translate: translateLibre },
+];
+
+// ── Public API ─────────────────────────────────────────────────────
 export async function translateEnToSpanish(text: string): Promise<string> {
 	const clean = text.trim();
 	if (!clean) {
 		return '';
 	}
 
-	const params = new URLSearchParams({
-		client: 'gtx',
-		sl: 'en',
-		tl: 'es',
-		dt: 't',
-		q: clean,
-	});
-
-	const url = `${GOOGLE_TRANSLATE_URL}?${params.toString()}`;
-
 	const controller = new AbortController();
 	const timeoutId = setTimeout(() => controller.abort(), TIMEOUT_MS);
 
+	const errors: string[] = [];
+
 	try {
-		const response = await fetch(url, {
-			method: 'GET',
-			headers: {
-				Accept: 'application/json',
-			},
-			signal: controller.signal,
-		});
+		for (const provider of providers) {
+			try {
+				const result = await provider.translate(clean, controller.signal);
+				console.log(`[Translator] ✓ ${provider.name} succeeded`);
+				return result;
+			} catch (err) {
+				const msg = err instanceof Error ? err.message : String(err);
+				console.warn(`[Translator] ✗ ${provider.name} failed: ${msg}`);
+				errors.push(`${provider.name}: ${msg}`);
 
-		if (!response.ok) {
-			throw new Error(`Translation request failed with status ${response.status}`);
+				if (controller.signal.aborted) {
+					throw new Error('Translation timed out.');
+				}
+			}
 		}
 
-		const data = await response.json();
-		return parseGoogleTranslateResponse(data);
-	} catch (error) {
-		if (controller.signal.aborted) {
-			throw new Error('Translation timed out.');
-		}
-		console.warn('[Translator] EN→ES direct translation failed:', error);
-		throw error;
+		throw new Error(`All providers failed:\n${errors.join('\n')}`);
 	} finally {
 		clearTimeout(timeoutId);
 	}
 }
 
-function parseGoogleTranslateResponse(response: unknown): string {
-	if (!Array.isArray(response) || !Array.isArray(response[0])) {
-		throw new Error('Unexpected translation response format.');
-	}
-
-	const text = response[0]
-		.map((segment: unknown) =>
-			Array.isArray(segment) && typeof segment[0] === 'string' ? segment[0] : ''
-		)
-		.join('');
-
-	if (!text.trim()) {
-		throw new Error('Translation returned empty result.');
-	}
-
-	return decodeHtmlEntities(text);
-}
-
+// ── Utilities ──────────────────────────────────────────────────────
 function decodeHtmlEntities(text: string): string {
 	const namedEntities: Record<string, string> = {
 		amp: '&',

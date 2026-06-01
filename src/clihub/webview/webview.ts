@@ -73,7 +73,7 @@ export function getCliHubWebviewHtml(options: CliHubWebviewOptions) {
 <html lang="en">
 	<head>
 		<meta charset="UTF-8">
-		<meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src ${options.cspSource} data:; style-src ${options.cspSource} 'unsafe-inline'; script-src 'nonce-${options.nonce}'; connect-src ${options.cspSource};">
+		<meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src ${options.cspSource} data:; style-src ${options.cspSource} 'unsafe-inline'; script-src 'nonce-${options.nonce}'; connect-src ${options.cspSource} https://api.mymemory.translated.net https://lingva.thedaviddelta.com https://libretranslate.de;">
 		<meta name="viewport" content="width=device-width, initial-scale=1.0">
 		<title>CLI Hub</title>
 		${styleLinks}
