@@ -1,5 +1,7 @@
 import translatorStyles from './components/translator.css';
 import translatorHtml from './components/translator.html';
+import type { ToolContext } from '../tools';
+import { extractTextToTranslate } from './core/copy-txt';
 
 const stylesId = 'cli-translator-panel-styles';
 
@@ -14,22 +16,34 @@ const ensureStyles = () => {
 	document.head.append(style);
 };
 
-export const mountTranslatorPanel = (host: HTMLElement) => {
+export const mountTranslatorPanel = (host: HTMLElement, context: ToolContext) => {
 	ensureStyles();
 
 	const template = document.createElement('template');
 	template.innerHTML = translatorHtml.trim();
 	host.replaceChildren(template.content.cloneNode(true));
 
-	initTranslator(host);
+	initTranslator(host, context);
 };
 
-function initTranslator(host: HTMLElement) {
+function initTranslator(host: HTMLElement, context: ToolContext) {
 	const speakBtn = host.querySelector<HTMLButtonElement>('#speakBtn');
 	const spectrum = host.querySelector<HTMLElement>('#audioSpectrum');
 	const copyBtn = host.querySelector<HTMLButtonElement>('#copyBtn');
 	const textEl = host.querySelector<HTMLElement>('#translatedText');
 	const modelEl = host.querySelector<HTMLElement>('#modelName');
+
+	// Inject extracted text
+	if (textEl) {
+		const extracted = extractTextToTranslate(context);
+		if (extracted) {
+			textEl.textContent = extracted;
+			textEl.classList.remove('placeholder');
+		} else {
+			textEl.textContent = 'No content found to translate. Select text in the terminal or run a prompt first.';
+			textEl.classList.add('placeholder');
+		}
+	}
 
 	// Update model name from active CLI (same pattern as Prompt)
 	const labelEl = document.getElementById('cli-terminal-label');
