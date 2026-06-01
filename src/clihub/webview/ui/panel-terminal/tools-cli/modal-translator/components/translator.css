@@ -291,6 +291,17 @@
 	background: color-mix(in srgb, var(--agent-accent, #AFA9EC) 6%, var(--vscode-input-background));
 }
 
+#translateBtn {
+	border-color: color-mix(in srgb, var(--agent-accent, #AFA9EC) 40%, var(--vscode-editorGroup-border));
+	color: var(--agent-accent, #AFA9EC);
+	background: color-mix(in srgb, var(--agent-accent, #AFA9EC) 6%, var(--vscode-input-background));
+}
+
+#translateBtn:hover {
+	border-color: color-mix(in srgb, var(--agent-accent, #AFA9EC) 70%, var(--vscode-editorGroup-border));
+	background: color-mix(in srgb, var(--agent-accent, #AFA9EC) 12%, var(--vscode-input-background));
+}
+
 .translator-speak {
 	border-color: rgba(93, 202, 165, 0.2);
 	color: #5DCAA5;
