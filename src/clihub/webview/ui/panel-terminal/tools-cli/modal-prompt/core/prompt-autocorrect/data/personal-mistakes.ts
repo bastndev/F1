@@ -11,11 +11,15 @@ export const PERSONAL_MISTAKES: Record<string, string> = {
   'k': 'que',
   'uiero': 'quiero',
   'Jifas': 'digas',
+  'xplico': 'explico',
   // Adjacent key typos
   'camos': 'vamos',
   'coy': 'voy',
   'cienes': 'vienes',
   'cas': 'vas',
+  'alga': 'salga',
+  'sio': 'sí',
+  'favco': 'favor',
   // Fast-typing word merges and drops
   'quieroq': 'quiero que',
   'unneuvo': 'un nuevo',
@@ -29,6 +33,26 @@ export const PERSONAL_MISTAKES: Record<string, string> = {
   'hi': 'ahí',
   'mellamo': 'me llamo',
   'muyrapido': 'muy rápido',
+  'elcodigo': 'el código',
+  'enel': 'en el',
+  'nocreo': 'no creo',
+  'porahora': 'por ahora',
+  // Transposition errors
+  'loguica': 'lógica',
+  'ideoma': 'idioma',
+  'priemro': 'primero',
+  'enpesar': 'empezar',
+  'enpecemos': 'empecemos',
+  'precionando': 'presionando',
+  'precione': 'presione',
+  'implentaste': 'implementaste',
+  // Spelling errors
+  'nesesario': 'necesario',
+  'posivilidad': 'posibilidad',
+  'sujeries': 'sugerencias',
+  'sujerencias': 'sugerencias',
+  'elejir': 'elegir',
+  'tradusca': 'traduzca',
   // Add your most common personal mistakes here
 };
 
