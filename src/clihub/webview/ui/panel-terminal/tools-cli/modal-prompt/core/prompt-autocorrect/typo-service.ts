@@ -10,12 +10,11 @@ export async function getTypoInstance(): Promise<Typo | null> {
 
 	loadPromise = (async () => {
 		try {
-			// Find the script base URL (dist/clihub/webview/)
 			const scriptEl = document.querySelector<HTMLScriptElement>('script[src$="webview.js"]');
 			if (!scriptEl) { throw new Error('webview.js script not found'); }
 			
 			const baseUrl = new URL('.', scriptEl.src).href;
-			// Las carpetas se copian tal cual, manteniendo la estructura desde webview/
+			// Folders are copied as-is from the webview directory
 			const affUrl = baseUrl + 'ui/panel-terminal/tools-cli/modal-prompt/core/prompt-autocorrect/dictionaries/es.aff';
 			const dicUrl = baseUrl + 'ui/panel-terminal/tools-cli/modal-prompt/core/prompt-autocorrect/dictionaries/es.dic';
 

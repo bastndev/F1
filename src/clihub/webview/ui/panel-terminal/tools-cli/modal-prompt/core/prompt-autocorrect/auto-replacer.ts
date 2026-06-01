@@ -5,7 +5,7 @@ import { isProtectedTerm } from './data/protected-terms';
 const protectedPattern = /```[\s\S]*?```|`[^`\n]+`|https?:\/\/[^\s"'`<>]+|[\w.-]+@[\w.-]+\.\w{2,}|(?:\.{1,2}\/|~\/|\/)[^\s"'`<>]+|#[0-9a-fA-F]{3,8}\b/g;
 
 export async function autocorrectText(text: string): Promise<string> {
-	// 1. Primero aplicamos tus errores personales (prioridad alta)
+	// Apply personal writing patterns first (highest priority)
 	let processed = applyPersonalMistakes(text);
 
 	const typo = await getTypoInstance();
@@ -32,7 +32,7 @@ function replaceSegment(segment: string, typo: any): string {
 	return segment.replace(wordPattern, (word) => {
 		if (word.length < 3) return word;
 
-		// No tocar palabras técnicas protegidas
+		// Do not touch protected technical terms
 		if (isProtectedTerm(word)) return word;
 
 		if (typo.check(word)) return word;
@@ -40,7 +40,7 @@ function replaceSegment(segment: string, typo: any): string {
 		const suggestions = typo.suggest(word);
 		if (!suggestions || suggestions.length === 0) return word;
 
-		// Solo corregir palabras cortas de forma agresiva
+		// Only aggressively correct short words
 		if (word.length <= 8) {
 			return applyOriginalCasing(word, suggestions[0]);
 		}

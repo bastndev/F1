@@ -1,16 +1,5 @@
-/**
- * personal-mistakes.ts
- * 
- * Errores frecuentes que tú cometes al escribir rápido.
- * Esta capa tiene la prioridad más alta.
- * 
- * Formato: "error_comun": "correccion"
- * 
- * Ejemplos basados en cómo escribes:
- */
-
 export const PERSONAL_MISTAKES: Record<string, string> = {
-  // Palabras comunes que unes o te equivocas al escribir rápido
+  // Common words you tend to mistype when writing fast
   'ue': 'que',
   'eu': 'que',
   'q': 'que',
@@ -20,32 +9,29 @@ export const PERSONAL_MISTAKES: Record<string, string> = {
   'tmb': 'también',
   'k': 'que',
 
-  // Errores frecuentes de tipeo (teclas cercanas)
+  // Frequent typing errors (adjacent keys)
   'camos': 'vamos',
   'coy': 'voy',
   'cienes': 'vienes',
   'cas': 'vas',
 
-  // Ejemplos de tu estilo (agrega los que veas que se repiten)
   // 'mellamo': 'me llamo',
   // 'muyrapido': 'muy rápido',
-  // 'crrejir': 'corregir',
-
-  // Agrega aquí tus errores personales más comunes
+  // Add your most common personal mistakes here
 };
 
 /**
- * Aplica correcciones personales antes de cualquier otra capa.
+ * Apply personal writing patterns before any other layer.
  */
 export function applyPersonalMistakes(text: string): string {
   let result = text;
 
-  // Ordenamos por longitud descendente para evitar reemplazos parciales
+  // Sort by length descending to avoid partial replacements
   const entries = Object.entries(PERSONAL_MISTAKES)
     .sort(([a], [b]) => b.length - a.length);
 
   for (const [mistake, correction] of entries) {
-    // Usamos word boundaries para no reemplazar dentro de otras palabras
+    // Use word boundaries to avoid replacing inside other words
     const regex = new RegExp(`\\b${escapeRegExp(mistake)}\\b`, 'gi');
     result = result.replace(regex, (match) => {
       return preserveCase(match, correction);

@@ -1,15 +1,3 @@
-/**
- * language-tool-service.ts
- *
- * Capa 2 — LanguageTool (gramática + contexto)
- *
- * Esta es la pieza "inteligente" que faltaba.
- * Basada en la arquitectura del plan original (SpellCheckService de ./analizar/).
- *
- * Por ahora hace una llamada simple a la API pública de LanguageTool.
- * Más adelante podemos mejorarla con debounce, merging de errores, etc.
- */
-
 export interface LTMatch {
 	message: string;
 	offset: number;
@@ -37,7 +25,7 @@ export async function checkWithLanguageTool(text: string): Promise<LanguageToolE
 	try {
 		const params = new URLSearchParams({
 			text: text,
-			language: 'es',           // Por ahora solo español
+			language: 'es',           // Spanish only for now
 			enabledOnly: 'false',
 		});
 
@@ -47,7 +35,8 @@ export async function checkWithLanguageTool(text: string): Promise<LanguageToolE
 				'Content-Type': 'application/x-www-form-urlencoded',
 			},
 			body: params.toString(),
-			signal: AbortSignal.timeout(8000), // 8 segundos de timeout
+			signal: AbortSignal.timeout(8000), // 8 second timeout
+
 		});
 
 		if (!response.ok) {
@@ -74,8 +63,8 @@ export async function checkWithLanguageTool(text: string): Promise<LanguageToolE
 }
 
 /**
- * Aplica correcciones de LanguageTool de forma conservadora.
- * Actualmente solo aplica si hay una sugerencia clara.
+ * Applies LanguageTool corrections conservatively.
+ * Only applies when there's a clear single suggestion.
  */
 export async function applyLanguageToolCorrections(text: string): Promise<{
 	correctedText: string;
@@ -90,11 +79,11 @@ export async function applyLanguageToolCorrections(text: string): Promise<{
 	let correctedText = text;
 	let correctionsMade = 0;
 
-	// Aplicamos de atrás hacia adelante
+	// Apply from the end to the beginning to preserve offsets
 	const sorted = [...errors].sort((a, b) => b.offset - a.offset);
 
 	for (const err of sorted) {
-		// Solo aplicamos si hay sugerencias y es un error claro de gramática o estilo
+		// Only apply if there are suggestions and it's a clear grammar/style error
 		if (err.suggestions.length > 0 && (err.severity === 'grammar' || err.severity === 'style')) {
 			const replacement = err.suggestions[0];
 			correctedText =

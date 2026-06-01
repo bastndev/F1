@@ -31,13 +31,8 @@ export const mountPromptPanel = (host: HTMLElement, context: any = { close: () =
 
 	const hasActiveSession = !!context.getActiveSessionId?.();
 
-	// === Session state handling (no session → disabled state) ===
 	initSessionState(host, hasActiveSession);
-
-	// === Tab switching logic + chat area reaction ===
 	initPromptTabs(host, context, hasActiveSession);
-
-	// Update footer with the correct model for the current active CLI
 	updateFooterModel(host);
 };
 
@@ -89,31 +84,24 @@ function initPromptTabs(host: HTMLElement, context: any, hasActiveSession: boole
 	const initialTab = initialActive?.dataset.tab || 'write';
 	updateChatForTab(initialTab);
 
-	// Auto-focus the input immediately when the modal opens
 	requestAnimationFrame(() => {
 		textarea.focus();
 	});
 
-	// === Skills chips (selectable buttons) ===
 	if (hasActiveSession) {
 		initSkillsChips(host);
 		initToolbarActions(host, textarea);
 	}
 
-	// === Run button + send logic ===
 	initRunButton(host, textarea, context);
-
-	// === Ctrl+Enter / Cmd+Enter support — also goes through the processor ===
 	initSendShortcut(textarea, context);
 
-	// Initial char count (only when interactive)
 	if (hasActiveSession) {
 		updateCharCount(host, textarea);
 	}
 }
 
 function enforceLowercaseInput(textarea: HTMLTextAreaElement) {
-	// Handle normal typing + Caps Lock
 	textarea.addEventListener('keydown', (e) => {
 		if (e.key.length === 1 && /[a-zA-Z]/.test(e.key)) {
 			if (e.shiftKey) {
@@ -131,7 +119,6 @@ function enforceLowercaseInput(textarea: HTMLTextAreaElement) {
 		}
 	});
 
-	// Paste: for simplicity we also force lowercase
 	textarea.addEventListener('paste', (e) => {
 		e.preventDefault();
 		const text = e.clipboardData?.getData('text') || '';
@@ -149,8 +136,7 @@ function initSkillsChips(host: HTMLElement) {
 
 	chips.forEach((chip) => {
 		chip.addEventListener('click', () => {
-			// Toggle selection
-			chip.classList.toggle('selected');
+					chip.classList.toggle('selected');
 
 			// Optional: if you want only one skill active at a time, uncomment below
 			// chips.forEach(c => c !== chip && c.classList.remove('selected'));
@@ -168,13 +154,13 @@ function initToolbarActions(host: HTMLElement, textarea: HTMLTextAreaElement) {
 		const text = textarea.value;
 		if (!text.trim()) {return;}
 
-		// Mostrar feedback mientras procesa (LanguageTool puede tardar)
+		// Show feedback while processing (LanguageTool can be slow)
 		const originalHtml = fixBtn.innerHTML;
 		fixBtn.innerHTML = '<i class="ti ti-loader" aria-hidden="true"></i> Corrigiendo...';
 		fixBtn.disabled = true;
 
 		try {
-			// Usamos la versión completa (Typo + LanguageTool)
+			// Use full version (Typo + LanguageTool)
 			const result = await runFullAutocorrect(text);
 
 			if (result.correctedText !== text) {
@@ -193,7 +179,7 @@ function initToolbarActions(host: HTMLElement, textarea: HTMLTextAreaElement) {
 		} finally {
 			fixBtn.disabled = false;
 
-			// Restaurar botón después de 2 segundos
+			// Restore button after 2 seconds
 			setTimeout(() => {
 				fixBtn.innerHTML = originalHtml;
 				fixBtn.style.color = '';

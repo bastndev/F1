@@ -1,13 +1,3 @@
-/**
- * prompt-autocorrect-service.ts
- *
- * Orquestador de las dos capas (inspirado en el SpellCheckService del plan anterior).
- *
- * Flujo actual:
- *   1. Typo.js (ortografía básica - más conservador ahora)
- *   2. LanguageTool (gramática y contexto - la parte "inteligente")
- */
-
 import { autocorrectText as runTypo } from './auto-replacer';
 import { applyLanguageToolCorrections } from './language-tool-service';
 
@@ -26,15 +16,15 @@ export async function runFullAutocorrect(text: string): Promise<AutocorrectResul
 		};
 	}
 
-	// Capa 1: Typo.js (ya mejorado con lógica más conservadora)
+	// Layer 1: Typo.js (now more conservative)
 	const afterTypo = await runTypo(text);
 
-	// Capa 2: LanguageTool (gramática + contexto)
+	// Layer 2: LanguageTool (grammar + context)
 	const { correctedText: finalText, correctionsMade: ltCorrections } =
 		await applyLanguageToolCorrections(afterTypo);
 
-	// Contamos cuántas hizo Typo (aproximado)
-	const typoCorrections = (afterTypo !== text) ? 1 : 0; // simplificado por ahora
+	// Approximate count of Typo corrections
+	const typoCorrections = (afterTypo !== text) ? 1 : 0; // simplified for now
 
 	return {
 		correctedText: finalText,
