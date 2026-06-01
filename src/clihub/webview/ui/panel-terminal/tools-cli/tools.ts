@@ -5,19 +5,21 @@ import { mountTranslatorPanel } from './modal-translator/translator';
 
 export type ToolId = 'translate' | 'keymaps' | 'prompt';
 
-type ToolContext = {
+export type ToolContext = {
 	close: () => void;
 	getActiveSessionId?: () => string | undefined;
 	sendToActiveSession?: (text: string) => void;
 	translatePrompt?: (request: PromptTranslateRequest) => Promise<PromptTranslateResult>;
+	getTerminalSelection?: () => string;
 };
 
 type ToolMount = (host: HTMLElement, context: ToolContext) => void;
-type ToolsControllerOptions = {
+export type ToolsControllerOptions = {
 	container: HTMLElement;
 	getActiveSessionId?: () => string | undefined;
 	sendToActiveSession?: (text: string) => void;
 	translatePrompt?: (request: PromptTranslateRequest) => Promise<PromptTranslateResult>;
+	getTerminalSelection?: () => string;
 };
 
 const modalId = 'cli-tools-modal';
@@ -36,68 +38,76 @@ const toolMounts: Record<ToolId, ToolMount> = {
 	translate: mountTranslatorPanel
 };
 
-export const createToolsController = ({
-	container,
-	getActiveSessionId,
-	sendToActiveSession,
-	translatePrompt
-}: ToolsControllerOptions) => {
-	let activeModal: HTMLElement | null = null;
-	let currentTool: ToolId | null = null;
-
-	const close = () => {
-		document.removeEventListener('keydown', handleKeyDown);
-		activeModal?.remove();
-		activeModal = null;
-		currentTool = null;
-	};
-
-	const handleKeyDown = (event: KeyboardEvent) => {
-		if (event.key === 'Escape') {
-			event.preventDefault();
-			close();
-		}
-	};
-
-	const open = (tool: ToolId) => {
-		close();
-
-		const modal = document.createElement('div');
-		modal.id = modalId;
-		modal.setAttribute('role', 'dialog');
-		modal.setAttribute('aria-modal', 'true');
-		modal.setAttribute('aria-label', tool);
-
-		applyStyles(modal, {
-			position: 'absolute',
-			inset: '0',
-			zIndex: '1000',
-			display: 'flex',
-			alignItems: 'center',
-			justifyContent: 'center',
-			background: 'rgba(0, 0, 0, 0.38)',
-			backdropFilter: 'blur(16px)'
-		});
-
-		const host = document.createElement('div');
-		modal.append(host);
-
-		modal.addEventListener('click', (event) => {
-			if (event.target === modal) {
+	export const createToolsController = ({
+		container,
+		getActiveSessionId,
+		sendToActiveSession,
+		translatePrompt,
+		getTerminalSelection
+	}: ToolsControllerOptions) => {
+		let activeModal: HTMLElement | null = null;
+		let currentTool: ToolId | null = null;
+	
+		const close = () => {
+			document.removeEventListener('keydown', handleKeyDown);
+			activeModal?.remove();
+			activeModal = null;
+			currentTool = null;
+		};
+	
+		const handleKeyDown = (event: KeyboardEvent) => {
+			if (event.key === 'Escape') {
+				event.preventDefault();
 				close();
 			}
-		});
-
-		host.addEventListener('click', (event) => {
-			event.stopPropagation();
-		});
-
-			toolMounts[tool](host, {
-				close,
-				getActiveSessionId,
-				sendToActiveSession,
-				translatePrompt
+		};
+	
+		const open = (tool: ToolId) => {
+			close();
+	
+			const modal = document.createElement('div');
+			modal.id = modalId;
+			modal.setAttribute('role', 'dialog');
+			modal.setAttribute('aria-modal', 'true');
+			modal.setAttribute('aria-label', tool);
+	
+			applyStyles(modal, {
+				position: 'absolute',
+				inset: '0',
+				zIndex: '1000',
+				display: 'flex',
+				alignItems: 'center',
+				justifyContent: 'center',
+				background: 'rgba(0, 0, 0, 0.38)',
+				backdropFilter: 'blur(16px)'
 			});
+	
+			const host = document.createElement('div');
+			applyStyles(host, {
+				display: 'flex',
+				width: 'min(580px, calc(100% - 32px))',
+				maxHeight: 'calc(100% - 32px)',
+				boxSizing: 'border-box'
+			});
+			modal.append(host);
+	
+			modal.addEventListener('click', (event) => {
+				if (event.target === modal) {
+					close();
+				}
+			});
+	
+			host.addEventListener('click', (event) => {
+				event.stopPropagation();
+			});
+	
+				toolMounts[tool](host, {
+					close,
+					getActiveSessionId,
+					sendToActiveSession,
+					translatePrompt,
+					getTerminalSelection
+				});
 
 		container.append(modal);
 		document.addEventListener('keydown', handleKeyDown);

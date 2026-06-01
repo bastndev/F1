@@ -202,7 +202,17 @@ const toolsController = layoutRight
 					}
 					vscode.postMessage({ type: 'cli.input', sessionId: activeSessionId, data: text });
 				},
-				translatePrompt
+				translatePrompt,
+				getTerminalSelection: () => {
+					if (!activeSessionId) {
+						return '';
+					}
+					const view = terminals.get(activeSessionId);
+					if (!view) {
+						return '';
+					}
+					return view.terminal.hasSelection() ? view.terminal.getSelection() : '';
+				}
 			})
 		: undefined;
 
