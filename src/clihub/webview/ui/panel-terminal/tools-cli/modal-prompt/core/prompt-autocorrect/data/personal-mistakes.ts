@@ -93,6 +93,7 @@ export const PERSONAL_MISTAKES: Record<string, string> = {
   'tradusca': 'traduzca',
   'verda': 'verdad',
   'nsue': 'no sé',
+  'meva': 'me va',
   // Add your most common personal mistakes here
 };
 
