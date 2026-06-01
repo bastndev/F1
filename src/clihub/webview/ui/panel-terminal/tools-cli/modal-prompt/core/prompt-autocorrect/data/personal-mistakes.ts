@@ -169,6 +169,7 @@ export const PERSONAL_MISTAKES: Record<string, string> = {
 	'extension': 'extensión',
 	'unanueva': 'una nueva',
 	'pro': 'por',
+	'eta': 'esta',
 };
 
 export interface PersonalMistakeResult {
