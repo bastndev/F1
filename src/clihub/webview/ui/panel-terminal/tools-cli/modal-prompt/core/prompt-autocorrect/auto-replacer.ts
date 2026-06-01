@@ -36,11 +36,21 @@ function replaceSegment(segment: string, typo: any): string {
 
 		// If misspelled, get suggestions
 		const suggestions = typo.suggest(word);
-		if (suggestions && suggestions.length > 0) {
+		if (!suggestions || suggestions.length === 0) {
+			return word;
+		}
+
+		// === MEJORA: Ser más conservador ===
+		// Solo aplicamos la primera sugerencia en casos "claros":
+		// - La palabra original es corta (<= 8 caracteres)
+		// - Hay al menos una sugerencia
+		// Esto evita casos como "mellamo" → "Chola" o "crrejir" → "crujir"
+		if (word.length <= 8) {
 			const bestSuggestion = suggestions[0];
 			return applyOriginalCasing(word, bestSuggestion);
 		}
 
+		// Para palabras más largas o dudosas, no corregimos automáticamente
 		return word;
 	});
 }

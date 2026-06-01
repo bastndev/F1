@@ -1,7 +1,7 @@
 import promptStyles from './components/prompt.css';
 import promptHtml from './components/prompt.html';
 import { processPrompt, type PromptSendContext } from './core/prompt-processor';
-import { applyAutocorrect } from './core/prompt-autocorrect';
+import { applyAutocorrect, runFullAutocorrect } from './core/prompt-autocorrect';
 
 const stylesId = 'cli-prompt-panel-styles';
 
@@ -168,26 +168,38 @@ function initToolbarActions(host: HTMLElement, textarea: HTMLTextAreaElement) {
 		const text = textarea.value;
 		if (!text.trim()) {return;}
 
-		// Mostrar breve feedback visual en el botón
+		// Mostrar feedback mientras procesa (LanguageTool puede tardar)
 		const originalHtml = fixBtn.innerHTML;
-		fixBtn.innerHTML = '<i class="ti ti-check" aria-hidden="true"></i> Listo';
-		fixBtn.style.color = '#5DCAA5';
-		fixBtn.style.borderColor = 'rgba(29, 158, 117, 0.4)';
+		fixBtn.innerHTML = '<i class="ti ti-loader" aria-hidden="true"></i> Corrigiendo...';
+		fixBtn.disabled = true;
 
-		// Aplicar corrección usando Typo.js (respeta código y urls)
-		const corrected = await applyAutocorrect(text);
-		if (corrected !== text) {
-			textarea.value = corrected;
-			// Trigger input event to update char counts and button states
-			textarea.dispatchEvent(new Event('input'));
+		try {
+			// Usamos la versión completa (Typo + LanguageTool)
+			const result = await runFullAutocorrect(text);
+
+			if (result.correctedText !== text) {
+				textarea.value = result.correctedText;
+				textarea.dispatchEvent(new Event('input'));
+
+				const total = result.typoCorrections + result.languageToolCorrections;
+				fixBtn.innerHTML = `<i class="ti ti-check" aria-hidden="true"></i> ${total} correcciones`;
+				fixBtn.style.color = '#5DCAA5';
+			} else {
+				fixBtn.innerHTML = '<i class="ti ti-check" aria-hidden="true"></i> Sin cambios';
+			}
+		} catch (err) {
+			console.error('Error en corrección:', err);
+			fixBtn.innerHTML = '<i class="ti ti-alert-triangle" aria-hidden="true"></i> Error';
+		} finally {
+			fixBtn.disabled = false;
+
+			// Restaurar botón después de 2 segundos
+			setTimeout(() => {
+				fixBtn.innerHTML = originalHtml;
+				fixBtn.style.color = '';
+				fixBtn.style.borderColor = '';
+			}, 2000);
 		}
-
-		// Restaurar botón después de 1.5s
-		setTimeout(() => {
-			fixBtn.innerHTML = originalHtml;
-			fixBtn.style.color = '';
-			fixBtn.style.borderColor = '';
-		}, 1500);
 	});
 }
 
