@@ -1,56 +1,50 @@
 import { getTypoInstance } from './typo-service';
+import { applyPersonalMistakes } from './data/personal-mistakes';
+import { isProtectedTerm } from './data/protected-terms';
 
 const protectedPattern = /```[\s\S]*?```|`[^`\n]+`|https?:\/\/[^\s"'`<>]+|[\w.-]+@[\w.-]+\.\w{2,}|(?:\.{1,2}\/|~\/|\/)[^\s"'`<>]+|#[0-9a-fA-F]{3,8}\b/g;
 
 export async function autocorrectText(text: string): Promise<string> {
+	// 1. Primero aplicamos tus errores personales (prioridad alta)
+	let processed = applyPersonalMistakes(text);
+
 	const typo = await getTypoInstance();
 	if (!typo) {
-		return text; // Fallback to original text if typo failed to load
+		return processed;
 	}
 
 	let result = '';
 	let lastIndex = 0;
 
-	for (const match of text.matchAll(protectedPattern)) {
+	for (const match of processed.matchAll(protectedPattern)) {
 		const index = match.index ?? 0;
-		result += replaceSegment(text.slice(lastIndex, index), typo);
+		result += replaceSegment(processed.slice(lastIndex, index), typo);
 		result += match[0];
 		lastIndex = index + match[0].length;
 	}
 
-	result += replaceSegment(text.slice(lastIndex), typo);
+	result += replaceSegment(processed.slice(lastIndex), typo);
 	return result;
 }
 
 function replaceSegment(segment: string, typo: any): string {
-	// Match words, including accented characters
 	const wordPattern = /[\p{L}]+/gu;
 	return segment.replace(wordPattern, (word) => {
-		// Minimum length to correct
-		if (word.length < 3) { return word; }
+		if (word.length < 3) return word;
 
-		// Typo.js check
-		if (typo.check(word)) {
-			return word;
-		}
+		// No tocar palabras técnicas protegidas
+		if (isProtectedTerm(word)) return word;
 
-		// If misspelled, get suggestions
+		if (typo.check(word)) return word;
+
 		const suggestions = typo.suggest(word);
-		if (!suggestions || suggestions.length === 0) {
-			return word;
-		}
+		if (!suggestions || suggestions.length === 0) return word;
 
-		// === MEJORA: Ser más conservador ===
-		// Solo aplicamos la primera sugerencia en casos "claros":
-		// - La palabra original es corta (<= 8 caracteres)
-		// - Hay al menos una sugerencia
-		// Esto evita casos como "mellamo" → "Chola" o "crrejir" → "crujir"
+		// Solo corregir palabras cortas de forma agresiva
 		if (word.length <= 8) {
-			const bestSuggestion = suggestions[0];
-			return applyOriginalCasing(word, bestSuggestion);
+			return applyOriginalCasing(word, suggestions[0]);
 		}
 
-		// Para palabras más largas o dudosas, no corregimos automáticamente
 		return word;
 	});
 }
