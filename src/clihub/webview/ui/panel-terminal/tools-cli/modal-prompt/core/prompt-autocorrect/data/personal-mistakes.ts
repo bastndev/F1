@@ -8,6 +8,7 @@ export const PERSONAL_MISTAKES: Record<string, string> = {
   'tb': 'también',
   'tmb': 'también',
   'k': 'que',
+  'uiero': 'quiero',
 
   // Frequent typing errors (adjacent keys)
   'camos': 'vamos',
