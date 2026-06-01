@@ -6,10 +6,15 @@ import { allowedAgents, cliAgents, getCliAgent } from './webview/core/terminal-c
 import { ensureCliInstalled, isCliInstalled } from './webview/core/terminal-cli/installation';
 import { CliSessionManager } from './webview/core/terminal-cli/session-manager';
 import { getCliHubWebviewHtml } from './webview/webview';
+import { translatePromptToEnglish } from './core/prompt-translate';
 
 type CliHubMessage = {
 	type?: string;
 	agent?: string;
+	id?: string;
+	text?: string;
+	from?: string;
+	to?: string;
 };
 
 type LauncherAgent = {
@@ -47,6 +52,7 @@ export class CliHubViewProvider implements vscode.WebviewViewProvider, vscode.Di
 	private readonly sessionManager = new CliSessionManager();
 	private readonly launcherStateSessionId = crypto.randomBytes(16).toString('hex');
 	private pendingInitialAgent?: string;
+	private activePromptTranslation?: AbortController;
 
 	constructor(private readonly _extensionUri: vscode.Uri) {}
 
@@ -76,8 +82,8 @@ export class CliHubViewProvider implements vscode.WebviewViewProvider, vscode.Di
 				return;
 			}
 
-			if (message.type === 'cli.ready') {
-				this.sessionManager.attach(webviewView.webview);
+				if (message.type === 'cli.ready') {
+					this.sessionManager.attach(webviewView.webview);
 
 				if (this.pendingInitialAgent) {
 					void this.sessionManager.createSession(this.pendingInitialAgent);
@@ -86,17 +92,77 @@ export class CliHubViewProvider implements vscode.WebviewViewProvider, vscode.Di
 					this.sessionManager.postState();
 				}
 
-				return;
-			}
+					return;
+				}
 
-			if (message.type?.startsWith('cli.')) {
-				this.sessionManager.handleMessage(message);
-			}
+				if (message.type === 'prompt.translate') {
+					await this._handlePromptTranslate(webviewView.webview, message);
+					return;
+				}
+	
+				if (message.type?.startsWith('cli.')) {
+					this.sessionManager.handleMessage(message);
+				}
 		});
 	}
 
 	public dispose() {
+		this.activePromptTranslation?.abort();
 		this.sessionManager.dispose();
+	}
+
+	private async _handlePromptTranslate(webview: vscode.Webview, message: CliHubMessage) {
+		if (typeof message.id !== 'string') {
+			return;
+		}
+
+		if (typeof message.text !== 'string') {
+			await this._postPromptTranslationError(webview, message.id, 'No text provided for translation.');
+			return;
+		}
+
+		this.activePromptTranslation?.abort();
+		const controller = new AbortController();
+		this.activePromptTranslation = controller;
+
+		try {
+			const result = await translatePromptToEnglish({
+				text: message.text,
+				from: message.from || 'es',
+				to: message.to || 'en',
+				signal: controller.signal,
+			});
+
+			await webview.postMessage({
+				type: 'prompt.translated',
+				id: message.id,
+				text: result.text,
+				provider: result.providerName,
+				fromCache: result.fromCache,
+			});
+		} catch (error) {
+			if (controller.signal.aborted) {
+				return;
+			}
+
+			await this._postPromptTranslationError(
+				webview,
+				message.id,
+				error instanceof Error ? error.message : 'Translation failed.'
+			);
+		} finally {
+			if (this.activePromptTranslation === controller) {
+				this.activePromptTranslation = undefined;
+			}
+		}
+	}
+
+	private async _postPromptTranslationError(webview: vscode.Webview, id: string, message: string) {
+		await webview.postMessage({
+			type: 'prompt.translationError',
+			id,
+			message,
+		});
 	}
 
 	private async _getHtmlForWebview(webview: vscode.Webview) {

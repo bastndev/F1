@@ -1,7 +1,8 @@
 import promptStyles from './components/prompt.css';
 import promptHtml from './components/prompt.html';
 import { processPrompt, type PromptSendContext } from './core/prompt-processor';
-import { applyAutocorrect, runFullAutocorrect } from './core/prompt-autocorrect';
+import { runFullAutocorrect } from './core/prompt-autocorrect';
+import { translatePromptText, type PromptTranslateRequest, type PromptTranslateResult } from './core/prompt-translate';
 
 const stylesId = 'cli-prompt-panel-styles';
 
@@ -20,9 +21,10 @@ type PromptContext = {
 	close: () => void;
 	getActiveSessionId?: () => string | undefined;
 	sendToActiveSession?: (text: string) => void;
+	translatePrompt?: (request: PromptTranslateRequest) => Promise<PromptTranslateResult>;
 };
 
-export const mountPromptPanel = (host: HTMLElement, context: any = { close: () => {} }) => {
+export const mountPromptPanel = (host: HTMLElement, context: PromptContext = { close: () => {} }) => {
 	ensureStyles();
 
 	const template = document.createElement('template');
@@ -36,7 +38,7 @@ export const mountPromptPanel = (host: HTMLElement, context: any = { close: () =
 	updateFooterModel(host);
 };
 
-function initPromptTabs(host: HTMLElement, context: any, hasActiveSession: boolean) {
+function initPromptTabs(host: HTMLElement, context: PromptContext, hasActiveSession: boolean) {
 	const tabs = host.querySelectorAll<HTMLElement>('.prompt-tab');
 	const textarea = host.querySelector<HTMLTextAreaElement>('#promptInput');
 	const textareaWrap = host.querySelector<HTMLElement>('.prompt-textarea-wrap');
@@ -66,7 +68,7 @@ function initPromptTabs(host: HTMLElement, context: any, hasActiveSession: boole
 
 	if (hasActiveSession) {
 		initSkillsChips(host);
-		initToolbarActions(host, textarea);
+		initToolbarActions(host, textarea, context);
 	}
 
 	initRunButton(host, textarea, context);
@@ -120,52 +122,83 @@ function initSkillsChips(host: HTMLElement) {
 	});
 }
 
-function initToolbarActions(host: HTMLElement, textarea: HTMLTextAreaElement) {
+function initToolbarActions(host: HTMLElement, textarea: HTMLTextAreaElement, context: PromptContext) {
 	const fixBtn = host.querySelector<HTMLButtonElement>('#fixSpellingBtn');
-	if (!fixBtn) {
-		return;
+	const translateBtn = host.querySelector<HTMLButtonElement>('#translateBtn');
+
+	if (fixBtn) {
+		const originalHtml = fixBtn.innerHTML;
+		fixBtn.addEventListener('click', async () => {
+			const text = textarea.value;
+			if (!text.trim()) {return;}
+
+			fixBtn.innerHTML = '<i class="ti ti-loader" aria-hidden="true"></i> Corrigiendo...';
+			fixBtn.disabled = true;
+
+			try {
+				const result = await runFullAutocorrect(text);
+
+				if (result.correctedText !== text) {
+					textarea.value = result.correctedText;
+					textarea.dispatchEvent(new Event('input'));
+
+					const total = result.typoCorrections + result.languageToolCorrections;
+					fixBtn.innerHTML = `<i class="ti ti-check" aria-hidden="true"></i> ${total} correcciones`;
+					fixBtn.style.color = '#5DCAA5';
+				} else {
+					fixBtn.innerHTML = '<i class="ti ti-check" aria-hidden="true"></i> Sin cambios';
+				}
+			} catch (err) {
+				console.error('Error en corrección:', err);
+				fixBtn.innerHTML = '<i class="ti ti-alert-triangle" aria-hidden="true"></i> Error';
+			} finally {
+				fixBtn.disabled = false;
+
+				setTimeout(() => {
+					fixBtn.innerHTML = originalHtml;
+					fixBtn.style.color = '';
+					fixBtn.style.borderColor = '';
+				}, 2000);
+			}
+		});
 	}
 
-	fixBtn.addEventListener('click', async () => {
-		const text = textarea.value;
-		if (!text.trim()) {return;}
+	if (translateBtn) {
+		const originalHtml = translateBtn.innerHTML;
+		translateBtn.addEventListener('click', async () => {
+			const text = textarea.value;
+			if (!text.trim()) {return;}
 
-		// Show feedback while processing (LanguageTool can be slow)
-		const originalHtml = fixBtn.innerHTML;
-		fixBtn.innerHTML = '<i class="ti ti-loader" aria-hidden="true"></i> Corrigiendo...';
-		fixBtn.disabled = true;
+			translateBtn.innerHTML = '<i class="ti ti-loader" aria-hidden="true"></i> Translating...';
+			translateBtn.disabled = true;
 
-		try {
-			// Use full version (Typo + LanguageTool)
-			const result = await runFullAutocorrect(text);
+			try {
+				const result = await translatePromptText(text, context);
+				if (result.text && result.text !== text.trim()) {
+					textarea.value = result.text;
+					textarea.dispatchEvent(new Event('input'));
+					translateBtn.innerHTML = `<i class="ti ti-check" aria-hidden="true"></i> ${result.provider || 'Translated'}`;
+					translateBtn.style.color = '#5DCAA5';
+				} else {
+					translateBtn.innerHTML = '<i class="ti ti-check" aria-hidden="true"></i> Sin cambios';
+				}
+			} catch (err) {
+				console.error('Error en traducción:', err);
+				translateBtn.innerHTML = '<i class="ti ti-alert-triangle" aria-hidden="true"></i> Error';
+			} finally {
+				translateBtn.disabled = false;
 
-			if (result.correctedText !== text) {
-				textarea.value = result.correctedText;
-				textarea.dispatchEvent(new Event('input'));
-
-				const total = result.typoCorrections + result.languageToolCorrections;
-				fixBtn.innerHTML = `<i class="ti ti-check" aria-hidden="true"></i> ${total} correcciones`;
-				fixBtn.style.color = '#5DCAA5';
-			} else {
-				fixBtn.innerHTML = '<i class="ti ti-check" aria-hidden="true"></i> Sin cambios';
+				setTimeout(() => {
+					translateBtn.innerHTML = originalHtml;
+					translateBtn.style.color = '';
+					translateBtn.style.borderColor = '';
+				}, 2200);
 			}
-		} catch (err) {
-			console.error('Error en corrección:', err);
-			fixBtn.innerHTML = '<i class="ti ti-alert-triangle" aria-hidden="true"></i> Error';
-		} finally {
-			fixBtn.disabled = false;
-
-			// Restore button after 2 seconds
-			setTimeout(() => {
-				fixBtn.innerHTML = originalHtml;
-				fixBtn.style.color = '';
-				fixBtn.style.borderColor = '';
-			}, 2000);
-		}
-	});
+		});
+	}
 }
 
-function initRunButton(host: HTMLElement, textarea: HTMLTextAreaElement, context: any) {
+function initRunButton(host: HTMLElement, textarea: HTMLTextAreaElement, context: PromptContext) {
 	const runBtn = host.querySelector<HTMLButtonElement>('#runBtn');
 	if (!runBtn) {
 		return;
@@ -192,7 +225,7 @@ function initRunButton(host: HTMLElement, textarea: HTMLTextAreaElement, context
 	});
 }
 
-function initSendShortcut(textarea: HTMLTextAreaElement, context: any) {
+function initSendShortcut(textarea: HTMLTextAreaElement, context: PromptContext) {
 	textarea.addEventListener('keydown', (e) => {
 		const isSendShortcut =
 			(e.key === 'Enter' && (e.ctrlKey || e.metaKey)) ||
@@ -207,7 +240,12 @@ function initSendShortcut(textarea: HTMLTextAreaElement, context: any) {
 	});
 }
 
-function performSend(host: HTMLElement, textarea: HTMLTextAreaElement, context: any) {
+function performSend(host: HTMLElement, textarea: HTMLTextAreaElement, context: PromptContext) {
+	if (!context.sendToActiveSession) {
+		showNoSessionMessage(host);
+		return;
+	}
+
 	const result = processPrompt(textarea.value, {
 		close: context.close,
 		sendToActiveSession: context.sendToActiveSession,

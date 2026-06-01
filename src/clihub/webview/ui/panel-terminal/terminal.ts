@@ -2,6 +2,7 @@ import { FitAddon } from '@xterm/addon-fit';
 import { Terminal } from '@xterm/xterm';
 import { createTabController, type CliAgentIcon, type CliAgentOption, type CliSessionSummary } from '../panel-tab/tab';
 import { createToolsController } from './tools-cli/tools';
+import type { PromptTranslateRequest, PromptTranslateResult } from './tools-cli/modal-prompt/core/prompt-translate';
 
 type VsCodeApi = {
 	postMessage: (message: ClientMessage) => void;
@@ -13,7 +14,8 @@ type ClientMessage =
 	| { type: 'cli.input'; sessionId: string; data: string }
 	| { type: 'cli.switch'; sessionId: string }
 	| { type: 'cli.resize'; sessionId?: string; cols: number; rows: number }
-	| { type: 'cli.close'; sessionId: string };
+	| { type: 'cli.close'; sessionId: string }
+	| { type: 'prompt.translate'; id: string; text: string; from: string; to: string };
 
 type CliSession = CliSessionSummary & {
 	commandLine: string;
@@ -29,12 +31,20 @@ type ServerMessage =
 		sessions: CliSession[];
 	}
 	| { type: 'cli.output'; sessionId: string; data: string }
-	| { type: 'cli.error'; message: string };
+	| { type: 'cli.error'; message: string }
+	| { type: 'prompt.translated'; id: string; text: string; provider?: string; fromCache?: boolean }
+	| { type: 'prompt.translationError'; id: string; message: string };
 
 type TerminalView = {
 	terminal: Terminal;
 	fitAddon: FitAddon;
 	pane: HTMLDivElement;
+};
+
+type PendingPromptTranslation = {
+	resolve: (value: PromptTranslateResult) => void;
+	reject: (reason?: unknown) => void;
+	timeout: number;
 };
 
 declare const acquireVsCodeApi: () => VsCodeApi;
@@ -44,8 +54,10 @@ const sessions = new Map<string, CliSession>();
 const terminals = new Map<string, TerminalView>();
 const bootSkeletons = new Map<string, HTMLDivElement>();
 const sessionsWithFirstOutput = new Set<string>();
+const pendingPromptTranslations = new Map<string, PendingPromptTranslation>();
 let activeSessionId: string | undefined;
 let pendingTabSwitchSessionId: string | undefined;
+let nextPromptTranslationId = 1;
 
 const isAgentIcon = (value: unknown): value is CliAgentIcon => {
 	if (!value || typeof value !== 'object') {
@@ -156,6 +168,26 @@ const switchSessionByOffset = (offset: 1 | -1) => {
 	return true;
 };
 
+const translatePrompt = (request: PromptTranslateRequest): Promise<PromptTranslateResult> => {
+	const id = `prompt-translate-${nextPromptTranslationId++}`;
+
+	return new Promise((resolve, reject) => {
+		const timeout = window.setTimeout(() => {
+			pendingPromptTranslations.delete(id);
+			reject(new Error('Translation timed out.'));
+		}, 20000);
+
+		pendingPromptTranslations.set(id, { resolve, reject, timeout });
+		vscode.postMessage({
+			type: 'prompt.translate',
+			id,
+			text: request.text,
+			from: request.from,
+			to: request.to,
+		});
+	});
+};
+
 const toolsController = layoutRight
 	? createToolsController({
 			container: layoutRight,
@@ -165,13 +197,14 @@ const toolsController = layoutRight
 					return;
 				}
 				const session = sessions.get(activeSessionId);
-				if (session?.status !== 'running') {
-					return;
-				}
-				vscode.postMessage({ type: 'cli.input', sessionId: activeSessionId, data: text });
-			}
-		})
-	: undefined;
+					if (session?.status !== 'running') {
+						return;
+					}
+					vscode.postMessage({ type: 'cli.input', sessionId: activeSessionId, data: text });
+				},
+				translatePrompt
+			})
+		: undefined;
 
 const tabController = createTabController({
 	getAgentIcon: (label) => agentIcons.get(label),
@@ -556,6 +589,32 @@ const handleOutput = (message: Extract<ServerMessage, { type: 'cli.output' }>) =
 	}
 };
 
+const resolvePromptTranslation = (message: Extract<ServerMessage, { type: 'prompt.translated' }>) => {
+	const pending = pendingPromptTranslations.get(message.id);
+	if (!pending) {
+		return;
+	}
+
+	window.clearTimeout(pending.timeout);
+	pendingPromptTranslations.delete(message.id);
+	pending.resolve({
+		text: message.text,
+		provider: message.provider,
+		fromCache: message.fromCache,
+	});
+};
+
+const rejectPromptTranslation = (message: Extract<ServerMessage, { type: 'prompt.translationError' }>) => {
+	const pending = pendingPromptTranslations.get(message.id);
+	if (!pending) {
+		return;
+	}
+
+	window.clearTimeout(pending.timeout);
+	pendingPromptTranslations.delete(message.id);
+	pending.reject(new Error(message.message));
+};
+
 window.addEventListener('message', (event: MessageEvent<ServerMessage>) => {
 	const message = event.data;
 
@@ -566,6 +625,16 @@ window.addEventListener('message', (event: MessageEvent<ServerMessage>) => {
 
 	if (message.type === 'cli.output') {
 		handleOutput(message);
+		return;
+	}
+
+	if (message.type === 'prompt.translated') {
+		resolvePromptTranslation(message);
+		return;
+	}
+
+	if (message.type === 'prompt.translationError') {
+		rejectPromptTranslation(message);
 		return;
 	}
 
