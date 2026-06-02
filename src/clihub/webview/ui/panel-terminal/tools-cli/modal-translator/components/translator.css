@@ -139,6 +139,18 @@
 	letter-spacing: 0.05em;
 }
 
+.lang-to {
+	font-size: 10px;
+	font-family: 'JetBrains Mono', monospace;
+	color: #5DCAA5;
+	background: color-mix(in srgb, #5DCAA5 12%, var(--vscode-input-background));
+	border: 0.5px solid color-mix(in srgb, #5DCAA5 35%, var(--vscode-editorGroup-border));
+	padding: 3px 9px;
+	border-radius: 6px;
+	letter-spacing: 0.05em;
+	font-weight: 500;
+}
+
 .lang-arrow {
 	color: var(--agent-accent, #AFA9EC);
 	font-size: 12px;
@@ -218,7 +230,7 @@
 	font-size: 13px;
 	line-height: 1.7;
 	white-space: pre-wrap;
-	color: var(--vscode-foreground);
+	color: #ffffff;
 }
 
 .translator-text.placeholder {
@@ -277,6 +289,29 @@
 	border-color: color-mix(in srgb, var(--agent-accent, #AFA9EC) 40%, var(--vscode-editorGroup-border));
 	color: var(--agent-accent, #AFA9EC);
 	background: color-mix(in srgb, var(--agent-accent, #AFA9EC) 6%, var(--vscode-input-background));
+}
+
+@keyframes translate-btn-pulse {
+	0%, 100% {
+		box-shadow: 0 0 0 0 rgba(175, 169, 236, 0);
+	}
+	50% {
+		box-shadow: 0 0 0 3px color-mix(in srgb, var(--agent-accent, #AFA9EC) 25%, transparent);
+		border-color: color-mix(in srgb, var(--agent-accent, #AFA9EC) 80%, var(--vscode-editorGroup-border));
+		background: color-mix(in srgb, var(--agent-accent, #AFA9EC) 12%, var(--vscode-input-background));
+	}
+}
+
+#translateBtn {
+	border-color: color-mix(in srgb, var(--agent-accent, #AFA9EC) 40%, var(--vscode-editorGroup-border));
+	color: var(--agent-accent, #AFA9EC);
+	background: color-mix(in srgb, var(--agent-accent, #AFA9EC) 6%, var(--vscode-input-background));
+	animation: translate-btn-pulse 2s ease-in-out 3;
+}
+
+#translateBtn:hover {
+	border-color: color-mix(in srgb, var(--agent-accent, #AFA9EC) 70%, var(--vscode-editorGroup-border));
+	background: color-mix(in srgb, var(--agent-accent, #AFA9EC) 12%, var(--vscode-input-background));
 }
 
 .translator-speak {

@@ -280,8 +280,8 @@ const getAgentSlug = (label: string): string => {
 	if (lower.includes('amp')) {
 		return 'amp';
 	}
-	if (lower.includes('codeep')) {
-		return 'codeep';
+	if (lower.includes('cursor')) {
+		return 'cursor';
 	}
 	return 'default';
 };
