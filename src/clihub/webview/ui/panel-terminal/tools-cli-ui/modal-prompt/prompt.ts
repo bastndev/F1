@@ -530,7 +530,7 @@ function updateFooterModel(host: HTMLElement) {
 	// Make it as simple as possible: "claude", "grok", "kiro", etc.
 	const simpleName = label
 		.toLowerCase()
-		.replace(/\s*(cli|code)\s*$/i, '')   // remove trailing " CLI" or " Code"
+		.replace(/\s+(cli|code)\s*$/i, '')   // remove trailing " CLI" or " Code" (standalone only)
 		.replace(/\s+/g, '');                // remove any remaining spaces
 
 	const footerInfo = host.querySelector<HTMLElement>('.prompt-footer-info');

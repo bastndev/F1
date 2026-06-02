@@ -72,7 +72,7 @@ function initializeTranslator(host: HTMLElement, context: ToolContext) {
 	const labelEl = document.getElementById('cli-terminal-label');
 	if (modelEl && labelEl) {
 		const label = labelEl.textContent?.trim() || 'CLI';
-		modelEl.textContent = label.toLowerCase().replace(/\s*(cli|code)\s*$/i, '');
+		modelEl.textContent = label.toLowerCase().replace(/\s+(cli|code)\s*$/i, '');
 	}
 
 	let isSpeaking = false;
