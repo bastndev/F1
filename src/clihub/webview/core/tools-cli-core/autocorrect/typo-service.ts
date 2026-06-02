@@ -15,8 +15,8 @@ export async function getTypoInstance(): Promise<Typo | null> {
 			
 			const baseUrl = new URL('.', scriptEl.src).href;
 			// Folders are copied as-is from the webview directory
-			const affUrl = baseUrl + 'ui/panel-terminal/tools-cli/modal-prompt/core/prompt-autocorrect/dictionaries/es.aff';
-			const dicUrl = baseUrl + 'ui/panel-terminal/tools-cli/modal-prompt/core/prompt-autocorrect/dictionaries/es.dic';
+				const affUrl = baseUrl + 'core/tools-cli-core/autocorrect/dictionaries/es.aff';
+				const dicUrl = baseUrl + 'core/tools-cli-core/autocorrect/dictionaries/es.dic';
 
 			const [affRes, dicRes] = await Promise.all([
 				fetch(affUrl),

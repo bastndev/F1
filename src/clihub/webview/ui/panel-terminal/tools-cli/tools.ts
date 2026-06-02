@@ -1,6 +1,6 @@
 import { mountKeymapsPanel } from './modal-keymaps/keymaps';
 import { mountPromptPanel } from './modal-prompt/prompt';
-import type { PromptTranslateRequest, PromptTranslateResult } from './modal-prompt/core/prompt-translate';
+import type { PromptTranslateRequest, PromptTranslateResult } from '../../../core/tools-cli-core/prompt';
 import { mountTranslatorPanel } from './modal-translator/translator';
 
 export type ToolId = 'translate' | 'keymaps' | 'prompt';

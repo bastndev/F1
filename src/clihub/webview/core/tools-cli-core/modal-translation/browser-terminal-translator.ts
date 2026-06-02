@@ -10,6 +10,8 @@
  * Tries each in order; falls back to the next on failure.
  */
 
+import { decodeHtmlEntities } from './html-entities';
+
 const TIMEOUT_MS = 10000;
 
 type TranslationProvider = {
@@ -138,35 +140,4 @@ export async function translateEnToSpanish(text: string): Promise<string> {
 	} finally {
 		clearTimeout(timeoutId);
 	}
-}
-
-// ── Utilities ──────────────────────────────────────────────────────
-function decodeHtmlEntities(text: string): string {
-	const namedEntities: Record<string, string> = {
-		amp: '&',
-		lt: '<',
-		gt: '>',
-		quot: '"',
-		apos: "'",
-		'#39': "'",
-	};
-
-	return text.replace(/&(#x?[0-9a-f]+|\w+);/gi, (entity, name: string) => {
-		const normalized = name.toLowerCase();
-		if (normalized.startsWith('#x')) {
-			try {
-				return String.fromCodePoint(Number.parseInt(normalized.slice(2), 16));
-			} catch {
-				return entity;
-			}
-		}
-		if (normalized.startsWith('#')) {
-			try {
-				return String.fromCodePoint(Number.parseInt(normalized.slice(1), 10));
-			} catch {
-				return entity;
-			}
-		}
-		return namedEntities[normalized] ?? entity;
-	});
 }
