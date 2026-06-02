@@ -33,7 +33,7 @@ const launcherAgents: LauncherAgent[] = [
 	{ label: 'Codex CLI', aliases: ['codex', 'codex cli', 'code', 'co', 'c'], iconFile: 'codex.svg' },
 	{ label: 'Claude Code', aliases: ['claude', 'claude code'], iconFile: 'claudecode.svg' },
 	{ label: 'Antigravity CLI', aliases: ['antigravity', 'antigravity cli', 'agy', 'an', 'ant'], iconFile: 'Antigravity_cli.svg' },
-	{ label: 'GitHub Copilot CLI', aliases: ['github copilot', 'copilot', 'copilot cli'], iconFile: 'github-copilot.svg', darkIcon: true },
+	{ label: 'Copilot CLI', aliases: ['github copilot', 'copilot', 'copilot cli'], iconFile: 'github-copilot.svg', darkIcon: true },
 	{ label: 'Cursor', aliases: ['cursor'], iconFile: 'cursor.svg', darkIcon: true },
 	{ label: 'Amp', aliases: ['amp'], iconFile: 'amp.svg' },
 	{ label: 'Kiro CLI', aliases: ['kiro', 'kiro cli'], iconFile: 'kiro.svg' },
