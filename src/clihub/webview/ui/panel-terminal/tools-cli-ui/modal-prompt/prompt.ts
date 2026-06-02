@@ -198,8 +198,10 @@ function initPromptTabs(host: HTMLElement, context: PromptContext, hasActiveSess
 function enforceLowercaseInput(textarea: HTMLTextAreaElement) {
 	textarea.addEventListener('keydown', (e) => {
 		if (e.key.length === 1 && /[a-zA-Z]/.test(e.key)) {
-			if (e.shiftKey) {
+			if (e.shiftKey || e.ctrlKey || e.metaKey) {
 				// User is intentionally using Shift → allow uppercase
+				// or using Ctrl/Meta for shortcuts like Ctrl+V (paste image), Ctrl+C, etc.
+				// Do not insert the letter (e.g. "v" from Ctrl+V)
 				return;
 			}
 			// Force lowercase (this defeats Caps Lock as well)
