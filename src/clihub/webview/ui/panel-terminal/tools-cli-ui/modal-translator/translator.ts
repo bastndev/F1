@@ -23,6 +23,11 @@ export const mountTranslatorPanel = (host: HTMLElement, context: ToolContext) =>
 	template.innerHTML = translatorHtml.trim();
 	host.replaceChildren(template.content.cloneNode(true));
 
+	const closeBtn = host.querySelector<HTMLButtonElement>('#closeTranslatorBtn');
+	if (closeBtn) {
+		closeBtn.addEventListener('click', () => context.close());
+	}
+
 	initializeTranslator(host, context);
 };
 
