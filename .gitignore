@@ -9,7 +9,7 @@ dist/
 *.vsix
 
 # Test files downloaded by @vscode/test
-.vscode-test/
+.vscode-test/   
 .vscode-test-web/
 
 # Temporary files

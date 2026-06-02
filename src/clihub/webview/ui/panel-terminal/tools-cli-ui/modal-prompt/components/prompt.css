@@ -243,10 +243,98 @@
 }
 .prompt-textarea:focus {
   /* No border painting on focus — border stays consistent */
-  background: var(--vscode-input-background);
+  background: transparent;
 }
 .prompt-textarea::placeholder {
   color: var(--vscode-input-placeholderForeground);
+}
+
+/* === Image marker highlighting for the prompt chat ===
+   We use an overlay div (.prompt-textarea-highlight) behind the textarea
+   so we can style substrings like [Image #1] with a distinct bg + rounded border.
+   The textarea text is made transparent (caret stays visible) so the highlighted
+   version in the overlay shows through.
+   Only a little rounded border as requested ("solo un poco").
+   Mode aware: white bg + dark text in dark mode; black bg + light text in light mode.
+*/
+.prompt-textarea-wrap {
+  position: relative;
+  /* The wrap now provides the visible field background, border and rounded corners for the chat input.
+     This makes the highlight text and marker badges sit on a solid bg. */
+  background: var(--vscode-input-background);
+  border: 0.5px solid var(--vscode-editorGroup-border);
+  border-radius: 8px;
+}
+
+.prompt-textarea-highlight {
+  position: absolute;
+  inset: 0;
+  padding: 12px 14px 28px 14px; /* match textarea padding (extra bottom leaves room for char count) */
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12.5px;
+  line-height: 1.6;
+  letter-spacing: 0.01em;
+  white-space: pre-wrap;
+  word-break: break-word;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 0;
+  color: var(--vscode-input-foreground);
+  /* highlight only paints the text (plain + markers), no bg/border here - provided by wrap */
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  /* force own compositing layer */
+  transform: translateZ(0);
+}
+
+.prompt-textarea {
+  color: transparent; /* regular text is drawn by the highlight overlay; caret remains */
+  caret-color: var(--vscode-input-foreground);
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  position: relative;
+  z-index: 1;
+  /* padding, font etc still come from the base .prompt-textarea rule above */
+}
+
+.prompt-textarea-highlight .prompt-image-marker {
+  /* default / dark mode */
+  background: #ffffff;
+  color: #1e1e1e;
+  border-radius: 3px; /* solo un poco */
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.15);
+  padding: 1px 0;
+  margin: 0;
+  display: inline;
+}
+
+.vscode-light .prompt-textarea-highlight .prompt-image-marker {
+  /* light mode: inverted for the marker */
+  background: #000000;
+  color: #ffffff;
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.25);
+}
+
+/* Selection styling for the highlight overlay (so blue bg shows when selecting text including over markers) */
+.prompt-textarea-highlight .selected {
+  background-color: var(--vscode-selection-background, #007acc);
+  color: var(--vscode-selection-foreground, #ffffff) !important;
+  border-radius: 2px;
+}
+
+/* When a marker is (partially) selected, the selection style wins over the badge */
+.prompt-textarea-highlight .selected.prompt-image-marker,
+.prompt-textarea-highlight .prompt-image-marker .selected {
+  background: inherit;
+  color: inherit !important;
+  box-shadow: none;
+}
+
+/* Explicit color for plain text segments in the highlight (to ensure visibility through the transparent textarea) */
+.prompt-textarea-highlight .plain {
+  color: var(--vscode-input-foreground);
 }
 
 .prompt-char-count {
@@ -258,6 +346,7 @@
   color: var(--vscode-descriptionForeground);
   opacity: 0.6;
   pointer-events: none;
+  z-index: 2;
 }
 
 /* Skills row */

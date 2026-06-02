@@ -57,6 +57,7 @@ function initPromptTabs(host: HTMLElement, context: PromptContext, hasActiveSess
 	const tabs = host.querySelectorAll<HTMLElement>('.prompt-tab');
 	const textarea = host.querySelector<HTMLTextAreaElement>('#promptInput');
 	const textareaWrap = host.querySelector<HTMLElement>('.prompt-textarea-wrap');
+	const highlight = host.querySelector<HTMLElement>('.prompt-textarea-highlight');
 
 	if (!tabs.length || !textarea) {
 		return;
@@ -190,9 +191,42 @@ function initPromptTabs(host: HTMLElement, context: PromptContext, hasActiveSess
 		textarea.style.height = 'auto';
 		textarea.style.height = textarea.scrollHeight + 'px';
 	};
-	textarea.addEventListener('input', adjustHeight);
-	// Initial adjustment (using requestAnimationFrame to ensure CSS is applied)
-	requestAnimationFrame(adjustHeight);
+
+	const onInputForHighlight = () => {
+		adjustHeight();
+		if (highlight && textareaWrap) {
+			// use raf to ensure update happens after value commit and to help layer paint
+			requestAnimationFrame(() => {
+				updatePromptImageHighlight(textareaWrap, textarea, highlight);
+			});
+		}
+	};
+
+	textarea.addEventListener('input', onInputForHighlight);
+
+	// scroll sync for the highlight overlay (so long text + markers stay aligned)
+	textarea.addEventListener('scroll', () => {
+		if (highlight) {
+			highlight.scrollTop = textarea.scrollTop;
+			highlight.scrollLeft = textarea.scrollLeft;
+		}
+	});
+
+	// selectionchange: update highlight so .selected spans get the blue bg when user selects text
+	const onSelectionChange = () => {
+		if (document.activeElement === textarea && highlight && textareaWrap) {
+			updatePromptImageHighlight(textareaWrap, textarea, highlight);
+		}
+	};
+	document.addEventListener('selectionchange', onSelectionChange);
+
+	// Initial adjustment + first highlight render
+	requestAnimationFrame(() => {
+		adjustHeight();
+		if (highlight && textareaWrap) {
+			updatePromptImageHighlight(textareaWrap, textarea, highlight);
+		}
+	});
 }
 
 function enforceLowercaseInput(textarea: HTMLTextAreaElement) {
@@ -212,6 +246,7 @@ function enforceLowercaseInput(textarea: HTMLTextAreaElement) {
 			textarea.value = textarea.value.slice(0, start) + char + textarea.value.slice(end);
 			const newPos = start + 1;
 			textarea.selectionStart = textarea.selectionEnd = newPos;
+			textarea.dispatchEvent(new Event('input', { bubbles: true }));
 		}
 	});
 
@@ -240,6 +275,7 @@ function enforceLowercaseInput(textarea: HTMLTextAreaElement) {
 		textarea.value = textarea.value.slice(0, start) + lower + textarea.value.slice(end);
 		const newPos = start + lower.length;
 		textarea.selectionStart = textarea.selectionEnd = newPos;
+		textarea.dispatchEvent(new Event('input', { bubbles: true }));
 	});
 }
 
@@ -612,4 +648,155 @@ function setupImagePaste(
 
 		insertTextAtSelection(textarea, insertValue);
 	});
+}
+
+/* === Visual highlighting for [Image #N] markers inside the prompt textarea ===
+   Overlay technique so we can give [Image #1] a distinct bg + small rounded border.
+   We also mirror the user's text selection into the overlay so the standard blue
+   selection background appears correctly when selecting text (including over markers).
+   The real textarea is transparent (text + bg) so the overlay content shows, but
+   caret is still rendered by the textarea on top (using caret-color).
+*/
+function updatePromptImageHighlight(
+  wrap: HTMLElement,
+  textarea: HTMLTextAreaElement,
+  highlight: HTMLElement
+) {
+  if (!wrap || !textarea || !highlight) {
+    return;
+  }
+
+  let selStart = -1;
+  let selEnd = -1;
+  if (document.activeElement === textarea) {
+    selStart = textarea.selectionStart ?? -1;
+    selEnd = textarea.selectionEnd ?? -1;
+  }
+
+  highlight.replaceChildren(...buildPromptHighlightNodes(textarea.value, selStart, selEnd));
+
+  // keep scroll in sync
+  highlight.scrollTop = textarea.scrollTop;
+  highlight.scrollLeft = textarea.scrollLeft;
+}
+
+function buildPromptHighlightNodes(text: string, selStart: number = -1, selEnd: number = -1): Node[] {
+  if (!text) {
+    return [];
+  }
+
+  const nodes: Node[] = [];
+  let lastIndex = 0;
+
+  const hasSel = selStart >= 0 && selEnd > selStart;
+
+  const markerMatches = Array.from(text.matchAll(/\[Image #(\d+)\]/g));
+
+  for (const match of markerMatches) {
+    const mStart = match.index ?? 0;
+    const mEnd = mStart + match[0].length;
+
+    // plain text before this marker
+    if (mStart > lastIndex) {
+      appendSegment(nodes, text, lastIndex, mStart, selStart, selEnd, hasSel, false);
+    }
+
+    // the marker token
+    appendSegment(nodes, text, mStart, mEnd, selStart, selEnd, hasSel, true);
+
+    lastIndex = mEnd;
+  }
+
+  // trailing plain text
+  if (lastIndex < text.length) {
+    appendSegment(nodes, text, lastIndex, text.length, selStart, selEnd, hasSel, false);
+  }
+
+  return nodes;
+}
+
+function appendSegment(
+  nodes: Node[],
+  fullText: string,
+  from: number,
+  to: number,
+  selStart: number,
+  selEnd: number,
+  hasSel: boolean,
+  isMarker: boolean
+) {
+  if (from >= to) {
+    return;
+  }
+
+  const segmentText = fullText.slice(from, to);
+
+  if (!hasSel || to <= selStart || from >= selEnd) {
+    // no selection overlap
+    if (isMarker) {
+      const span = document.createElement('span');
+      span.className = 'prompt-image-marker';
+      span.textContent = segmentText;
+      nodes.push(span);
+    } else {
+      const span = document.createElement('span');
+      span.className = 'plain';
+      span.textContent = segmentText;
+      nodes.push(span);
+    }
+    return;
+  }
+
+  // overlaps selection: split into before / selected / after
+  const selFrom = Math.max(from, selStart);
+  const selTo = Math.min(to, selEnd);
+
+  if (from < selFrom) {
+    const before = fullText.slice(from, selFrom);
+    if (isMarker) {
+      const span = document.createElement('span');
+      span.className = 'prompt-image-marker';
+      span.textContent = before;
+      nodes.push(span);
+    } else {
+      const span = document.createElement('span');
+      span.className = 'plain';
+      span.textContent = before;
+      nodes.push(span);
+    }
+  }
+
+  if (selFrom < selTo) {
+    const selectedText = fullText.slice(selFrom, selTo);
+    const selSpan = document.createElement('span');
+    selSpan.className = 'selected';
+    if (isMarker) {
+      // wrap marker content so badge can be overridden by .selected
+      const markerSpan = document.createElement('span');
+      markerSpan.className = 'prompt-image-marker';
+      markerSpan.textContent = selectedText;
+      selSpan.appendChild(markerSpan);
+    } else {
+      const plainSel = document.createElement('span');
+      plainSel.className = 'plain';
+      plainSel.textContent = selectedText;
+      selSpan.appendChild(plainSel);
+    }
+    nodes.push(selSpan);
+  }
+
+  if (selTo < to) {
+    const after = fullText.slice(selTo, to);
+    if (isMarker) {
+      const span = document.createElement('span');
+      span.className = 'prompt-image-marker';
+      span.textContent = after;
+      nodes.push(span);
+    } else {
+      const span = document.createElement('span');
+      span.className = 'plain';
+      span.textContent = after;
+      nodes.push(span);
+    }
+  }
 }
