@@ -1,5 +1,7 @@
 /* ============================================================
    FILE MENTION PICKER — triggered by "@" in the prompt textarea
+   Located under the prompt modal UI components (presentation only).
+   The data contract (FileMentionEntry / Request) lives in core.
    ============================================================ */
 
 .fm-dropdown {
@@ -16,7 +18,7 @@
   flex-direction: column;
   font-family: 'JetBrains Mono', monospace;
   font-size: 12px;
-  /* Reset inherited lowercase */
+  /* Reset inherited lowercase (prompt forces lowercase) */
   text-transform: none;
   animation: fm-appear 0.15s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
 }
@@ -24,29 +26,6 @@
 @keyframes fm-appear {
   from { opacity: 0; transform: translateY(-6px) scale(0.97); }
   to   { opacity: 1; transform: translateY(0) scale(1); }
-}
-
-.fm-search-wrap {
-  padding: 8px 10px 6px;
-  border-bottom: 0.5px solid var(--vscode-editorGroup-border, rgba(128,128,128,0.2));
-  flex-shrink: 0;
-}
-
-.fm-search {
-  width: 100%;
-  background: var(--vscode-input-background);
-  border: 0.5px solid var(--vscode-editorGroup-border);
-  border-radius: 5px;
-  color: var(--vscode-input-foreground);
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 11px;
-  padding: 4px 8px;
-  outline: none;
-  text-transform: none;
-}
-.fm-search::placeholder {
-  color: var(--vscode-input-placeholderForeground);
-  opacity: 0.6;
 }
 
 .fm-list {

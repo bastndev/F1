@@ -1,14 +1,8 @@
 import fileMentionCss from './file-mention.css';
-
-export type FileMentionEntry = {
-	name: string;
-	path: string;
-	isDirectory: boolean;
-};
-
-export type FileMentionRequest = (query: string) => Promise<FileMentionEntry[]>;
+import type { FileMentionEntry, FileMentionRequest } from '../../../../../../core/tools-cli-core/prompt/file-mention';
 
 const stylesId = 'cli-file-mention-styles';
+
 const ensureStyles = () => {
 	if (document.getElementById(stylesId)) { return; }
 	const s = document.createElement('style');
@@ -25,10 +19,14 @@ export function mountFileMentionPicker(
 	ensureStyles();
 
 	let dropdown: HTMLElement | null = null;
-	let entries: FileMentionEntry[] = []; 
+	let entries: FileMentionEntry[] = [];
 	let activeIndex = 0;
 	let mentionStart = -1; // position of "@" in textarea
 	let currentQuery = '';
+
+	// Cache full workspace list for the lifetime of this prompt panel mount.
+	// Avoids hammering the host with findFiles on every keystroke after "@".
+	let cachedEntries: FileMentionEntry[] | null = null;
 
 	// ── helpers ──────────────────────────────────────────────────────
 
@@ -41,15 +39,28 @@ export function mountFileMentionPicker(
 		};
 	};
 
+	const positionDropdown = () => {
+		if (!dropdown) { return; }
+		const pos = getDropdownPosition();
+		Object.assign(dropdown.style, {
+			position: 'absolute',
+			bottom: pos.bottom + 'px',
+			left: pos.left + 'px',
+		});
+	};
+
 	const renderItems = (items: FileMentionEntry[], filter: string) => {
 		if (!dropdown) { return; }
 		const list = dropdown.querySelector<HTMLElement>('.fm-list');
 		if (!list) { return; }
 
-		// folders first, then files; both filtered by query
+		// folders first, then files; filtered by name OR path (better discoverability)
 		const lc = filter.toLowerCase();
 		const filtered = items
-			.filter(e => e.name.toLowerCase().includes(lc))
+			.filter(e => {
+				const haystack = `${e.name} ${e.path}`.toLowerCase();
+				return haystack.includes(lc);
+			})
 			.sort((a, b) => {
 				if (a.isDirectory !== b.isDirectory) { return a.isDirectory ? -1 : 1; }
 				return a.name.localeCompare(b.name);
@@ -71,7 +82,7 @@ export function mountFileMentionPicker(
 
 			const iconClass = entry.isDirectory ? 'folder' : 'file';
 			const icon = entry.isDirectory ? '📁' : '📄';
-			// show relative path without the filename
+			// show relative path without the filename (parent dir)
 			const dir = entry.path.includes('/')
 				? entry.path.slice(0, entry.path.lastIndexOf('/')) || '.'
 				: '.';
@@ -102,16 +113,20 @@ export function mountFileMentionPicker(
 	};
 
 	const selectEntry = (entry: FileMentionEntry) => {
-		// Replace "@query" in textarea with the file path
+		// Replace "@query" in textarea with "@path " (trailing space for natural flow)
 		const before = textarea.value.slice(0, mentionStart);
-		const after  = textarea.value.slice(mentionStart + 1 + currentQuery.length);
-		const insert = `@${entry.path}`;
-		textarea.value = before + insert + after;
+		const after = textarea.value.slice(mentionStart + 1 + currentQuery.length);
+		const insert = `@${entry.path} `;
+		const newValue = before + insert + after;
 		const pos = before.length + insert.length;
-		textarea.setSelectionRange(pos, pos);
-		textarea.dispatchEvent(new Event('input', { bubbles: true }));
+
+		// Close first to avoid re-triggering the input handler during dispatch
 		closeDropdown();
+
+		textarea.value = newValue;
+		textarea.setSelectionRange(pos, pos);
 		textarea.focus();
+		textarea.dispatchEvent(new Event('input', { bubbles: true }));
 	};
 
 	const closeDropdown = () => {
@@ -120,6 +135,7 @@ export function mountFileMentionPicker(
 		mentionStart = -1;
 		currentQuery = '';
 		document.removeEventListener('click', onOutsideClick);
+		// Note: we intentionally keep cachedEntries for the rest of the prompt session
 	};
 
 	const onOutsideClick = (e: MouseEvent) => {
@@ -133,13 +149,6 @@ export function mountFileMentionPicker(
 			dropdown = document.createElement('div');
 			dropdown.className = 'fm-dropdown';
 
-			const pos = getDropdownPosition();
-			Object.assign(dropdown.style, {
-				position: 'absolute',
-				bottom: pos.bottom + 'px',
-				left: pos.left + 'px',
-			});
-
 			dropdown.innerHTML = `
 				<div class="fm-list"></div>
 			`;
@@ -148,9 +157,15 @@ export function mountFileMentionPicker(
 			document.addEventListener('click', onOutsideClick);
 		}
 
-		// Load file list from host
-		const allEntries = await requestFiles(query);
-		renderItems(allEntries, query);
+		// Always refresh position (textarea can grow with multiline content)
+		positionDropdown();
+
+		if (!cachedEntries) {
+			// First time for this prompt panel instance: fetch from host (expensive findFiles)
+			cachedEntries = await requestFiles(query);
+		}
+
+		renderItems(cachedEntries!, query);
 	};
 
 	// ── Textarea listeners ───────────────────────────────────────────

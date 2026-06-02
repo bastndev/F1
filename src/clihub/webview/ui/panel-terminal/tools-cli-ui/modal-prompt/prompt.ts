@@ -11,8 +11,9 @@ import {
 	collectImageMarkerIds,
 	protectImageMarkers,
 	restoreImageMarkers,
+	type FileMentionEntry,
 } from '../../../../core/tools-cli-core/prompt';
-import { mountFileMentionPicker } from '../../../../core/tools-cli-core/prompt/file-mention/file-mention';
+import { mountFileMentionPicker } from './components/file-mention/file-mention';
 
 const stylesId = 'cli-prompt-panel-styles';
 
@@ -38,7 +39,7 @@ type PromptContext = {
 	sendToActiveSession?: (text: string) => void;
 	translatePrompt?: (request: PromptTranslateRequest) => Promise<PromptTranslateResult>;
 	preparePromptWithAttachments?: (text: string, attachments: ImageAttachment[]) => Promise<string>;
-	requestWorkspaceFiles?: () => Promise<Array<{ name: string; path: string; isDirectory: boolean }>>;
+	requestWorkspaceFiles?: () => Promise<FileMentionEntry[]>;
 };
 
 export const mountPromptPanel = (host: HTMLElement, context: PromptContext = { close: () => {} }) => {

@@ -2,7 +2,7 @@ import { FitAddon } from '@xterm/addon-fit';
 import { Terminal } from '@xterm/xterm';
 import { createTabController, type CliAgentIcon, type CliAgentOption, type CliSessionSummary } from '../panel-tab/tab';
 import { createToolsController } from './tools-cli-ui/tools';
-import type { ImageAttachment, PromptTranslateRequest, PromptTranslateResult } from '../../core/tools-cli-core/prompt';
+import type { ImageAttachment, PromptTranslateRequest, PromptTranslateResult, FileMentionEntry } from '../../core/tools-cli-core/prompt';
 
 type VsCodeApi = {
 	postMessage: (message: ClientMessage) => void;
@@ -38,7 +38,7 @@ type ServerMessage =
 	| { type: 'prompt.translationError'; id: string; message: string }
 	| { type: 'prompt.prepared'; id: string; text: string }
 	| { type: 'prompt.prepareError'; id: string; message: string }
-	| { type: 'workspace.files'; id: string; files: Array<{ name: string; path: string; isDirectory: boolean }> };
+	| { type: 'workspace.files'; id: string; files: FileMentionEntry[] };
 
 type TerminalView = {
 	terminal: Terminal;
@@ -225,11 +225,10 @@ const preparePromptWithAttachments = (text: string, attachments: ImageAttachment
 	});
 };
 
-type WorkspaceFilesEntry = { name: string; path: string; isDirectory: boolean };
-const pendingWorkspaceFiles = new Map<string, (files: WorkspaceFilesEntry[]) => void>();
+const pendingWorkspaceFiles = new Map<string, (files: FileMentionEntry[]) => void>();
 let nextWorkspaceFilesId = 1;
 
-const requestWorkspaceFiles = (): Promise<WorkspaceFilesEntry[]> => {
+const requestWorkspaceFiles = (): Promise<FileMentionEntry[]> => {
 	const id = `ws-files-${nextWorkspaceFilesId++}`;
 	return new Promise((resolve) => {
 		const timeout = window.setTimeout(() => {
