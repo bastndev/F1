@@ -47,7 +47,7 @@ export const cliInstallers: CliInstaller[] = [
 		}
 	},
 	{
-		label: 'GitHub Copilot CLI',
+		label: 'Copilot CLI',
 		command: 'copilot',
 		installCommand: 'curl -fsSL https://gh.io/copilot-install | bash'
 	},

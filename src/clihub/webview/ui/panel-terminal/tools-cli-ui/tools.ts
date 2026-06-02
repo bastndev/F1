@@ -95,7 +95,7 @@ const toolMounts: Record<ToolId, ToolMount> = {
 			modal.append(host);
 	
 			modal.addEventListener('click', (event) => {
-				if (event.target === modal) {
+				if (event.target === modal && tool === 'keymaps') {
 					close();
 				}
 			});

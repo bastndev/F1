@@ -23,6 +23,11 @@ export const mountTranslatorPanel = (host: HTMLElement, context: ToolContext) =>
 	template.innerHTML = translatorHtml.trim();
 	host.replaceChildren(template.content.cloneNode(true));
 
+	const closeBtn = host.querySelector<HTMLButtonElement>('#closeTranslatorBtn');
+	if (closeBtn) {
+		closeBtn.addEventListener('click', () => context.close());
+	}
+
 	initializeTranslator(host, context);
 };
 
@@ -67,7 +72,7 @@ function initializeTranslator(host: HTMLElement, context: ToolContext) {
 	const labelEl = document.getElementById('cli-terminal-label');
 	if (modelEl && labelEl) {
 		const label = labelEl.textContent?.trim() || 'CLI';
-		modelEl.textContent = label.toLowerCase().replace(/\s*(cli|code)\s*$/i, '');
+		modelEl.textContent = label.toLowerCase().replace(/\s+(cli|code)\s*$/i, '');
 	}
 
 	let isSpeaking = false;

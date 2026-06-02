@@ -9,7 +9,7 @@ export const cliAgents: CliAgent[] = [
 	{ label: 'Codex CLI', command: 'codex', args: [] },
 	{ label: 'Claude Code', command: 'claude', args: [] },
 	{ label: 'Antigravity CLI', command: 'agy', args: [] },
-	{ label: 'GitHub Copilot CLI', command: 'copilot', args: [] },
+	{ label: 'Copilot CLI', command: 'copilot', args: [] },
 	{ label: 'Cursor', command: 'cursor', args: ['agent'] },
 	{ label: 'Amp', command: 'amp', args: [] },
 	{ label: 'Kiro CLI', command: 'kiro-cli', args: [] },

@@ -46,11 +46,16 @@ export const mountPromptPanel = (host: HTMLElement, context: PromptContext = { c
 	template.innerHTML = promptHtml.trim();
 	host.replaceChildren(template.content.cloneNode(true));
 
+	const closeBtn = host.querySelector<HTMLButtonElement>('#closePromptBtn');
+	if (closeBtn) {
+		closeBtn.addEventListener('click', () => context.close());
+	}
+
 	const hasActiveSession = !!context.getActiveSessionId?.();
 
+	updateFooterModel(host);
 	initSessionState(host, hasActiveSession);
 	initPromptTabs(host, context, hasActiveSession);
-	updateFooterModel(host);
 };
 
 function initPromptTabs(host: HTMLElement, context: PromptContext, hasActiveSession: boolean) {
@@ -242,7 +247,11 @@ function enforceLowercaseInput(textarea: HTMLTextAreaElement) {
 			e.preventDefault();
 			const start = textarea.selectionStart ?? 0;
 			const end = textarea.selectionEnd ?? 0;
-			const char = e.key.toLowerCase();
+			// Auto-capitalize: if typing at the very beginning (pos 0) uppercase the letter
+			const isFirstChar = start === 0 && textarea.value.slice(end).trimStart() === textarea.value.slice(end);
+			const char = (isFirstChar && start === 0 && textarea.value.slice(0, start) === '') 
+				? e.key.toUpperCase() 
+				: e.key.toLowerCase();
 			textarea.value = textarea.value.slice(0, start) + char + textarea.value.slice(end);
 			const newPos = start + 1;
 			textarea.selectionStart = textarea.selectionEnd = newPos;
@@ -387,9 +396,11 @@ function initRunButton(
 	}
 
 	const updateState = () => {
-		const hasText = textarea.value.trim().length > 0;
+		const text = textarea.value.trim();
 		const hasSession = !!context.getActiveSessionId?.();
-		runBtn.disabled = !hasText || !hasSession;
+		// Activate only after a real word: 6+ chars OR first space (second word started)
+		const hasEnoughText = text.length >= 6 || text.includes(' ');
+		runBtn.disabled = !hasEnoughText || !hasSession;
 	};
 
 	// Initial state
@@ -432,11 +443,28 @@ function updateCharCount(host: HTMLElement, textarea: HTMLTextAreaElement) {
 	}
 
 	const current = textarea.value.length;
-	const max = 1000;
+	const max = 1500;
 	counter.textContent = `${current}/${max}`;
+
+	// Remove previous states
+	counter.classList.remove('warn', 'danger');
+
+	if (current >= 1350) {
+		// >90% — red + shake
+		counter.classList.add('danger');
+	} else if (current >= 1050) {
+		// >70% — yellow warning
+		counter.classList.add('warn');
+	}
 }
 
 function initSessionState(host: HTMLElement, hasActiveSession: boolean) {
+	// Update session dot state
+	const dot = host.querySelector<HTMLElement>('#sessionDot');
+	if (dot && !hasActiveSession) {
+		dot.classList.add('offline');
+	}
+
 	if (hasActiveSession) {
 		return;
 	}
@@ -502,12 +530,12 @@ function updateFooterModel(host: HTMLElement) {
 	// Make it as simple as possible: "claude", "grok", "kiro", etc.
 	const simpleName = label
 		.toLowerCase()
-		.replace(/\s*(cli|code)\s*$/i, '')   // remove trailing " CLI" or " Code"
+		.replace(/\s+(cli|code)\s*$/i, '')   // remove trailing " CLI" or " Code" (standalone only)
 		.replace(/\s+/g, '');                // remove any remaining spaces
 
 	const footerInfo = host.querySelector<HTMLElement>('.prompt-footer-info');
 	if (footerInfo) {
-		footerInfo.innerHTML = `<i class="ti ti-cpu" aria-hidden="true"></i> ${simpleName}`;
+		footerInfo.innerHTML = `<span class="prompt-session-dot" id="sessionDot"></span><i class="ti ti-cpu" aria-hidden="true"></i> ${simpleName}`;
 	}
 }
 

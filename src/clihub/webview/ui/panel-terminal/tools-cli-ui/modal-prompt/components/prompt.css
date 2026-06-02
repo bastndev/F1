@@ -28,6 +28,8 @@
   flex-direction: column;
   position: relative;
   max-height: 100%;
+  /* Reset inherited lowercase from .layout-right in terminal.css */
+  text-transform: none;
 }
 
 /* Top accent light / glow (2-color gradient according to current CLI) */
@@ -91,22 +93,42 @@
   letter-spacing: 0.01em;
 }
 
-.prompt-pill {
+.prompt-subtitle-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.prompt-lang-indicator {
   font-size: 10px;
   font-weight: 500;
   letter-spacing: 0.04em;
-  padding: 3px 8px;
-  border-radius: 10px;
-  border: 0.5px solid color-mix(in srgb, var(--agent-accent, #534AB7) 38%, transparent);
+  padding: 3px 6px;
   background: color-mix(in srgb, var(--agent-accent, #534AB7) 20%, transparent);
   color: var(--agent-accent, #AFA9EC);
-  cursor: pointer;
+  border-radius: 0;
   font-family: 'Syne', sans-serif;
-  transition: background 0.15s;
-  margin-top: 2px;
+  user-select: none;
+  cursor: default;
 }
-.prompt-pill:hover {
-  background: color-mix(in srgb, var(--agent-accent, #534AB7) 35%, transparent);
+
+.prompt-close-btn {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12.5px;
+  font-weight: 500;
+  color: var(--vscode-descriptionForeground);
+  background: transparent;
+  border: none;
+  padding: 0 4px;
+  cursor: pointer;
+  text-transform: lowercase;
+  opacity: 0.6;
+  transition: all 0.15s;
+}
+.prompt-close-btn:hover {
+  opacity: 1;
+  color: var(--vscode-foreground);
+  background: transparent;
 }
 
 /* Toolbar & Tabs */
@@ -347,6 +369,21 @@
   opacity: 0.6;
   pointer-events: none;
   z-index: 2;
+  transition: color 0.3s ease, opacity 0.3s ease;
+}
+.prompt-char-count.warn {
+  color: #e5a030;
+  opacity: 0.9;
+}
+.prompt-char-count.danger {
+  color: #e05252;
+  opacity: 1;
+  animation: char-shake 0.35s ease;
+}
+@keyframes char-shake {
+  0%, 100% { transform: translateX(0); }
+  25%       { transform: translateX(-3px); }
+  75%       { transform: translateX(3px); }
 }
 
 /* Skills row */
@@ -484,6 +521,24 @@
   font-size: 12px;
 }
 
+/* Session live dot */
+.prompt-session-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #5DCAA5;
+  flex-shrink: 0;
+  animation: session-pulse 2.4s ease-in-out infinite;
+}
+.prompt-session-dot.offline {
+  background: var(--vscode-editorGroup-border);
+  animation: none;
+}
+@keyframes session-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(93, 202, 165, 0.5); opacity: 1; }
+  50%       { box-shadow: 0 0 0 4px rgba(93, 202, 165, 0);  opacity: 0.75; }
+}
+
 /* Run button area */
 .prompt-run-wrap {
   display: flex;
@@ -513,22 +568,32 @@
   font-size: 12px;
   cursor: pointer;
   letter-spacing: 0.04em;
-  transition: all 0.18s;
+  transition: background 0.18s, transform 0.18s, box-shadow 0.18s, opacity 0.25s;
+  transform-origin: center;
+}
+.prompt-run-btn:not(:disabled) {
+  animation: run-btn-appear 0.28s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+@keyframes run-btn-appear {
+  from { transform: scale(0.88); opacity: 0.6; }
+  to   { transform: scale(1);    opacity: 1; }
 }
 .prompt-run-btn i {
   font-size: 14px;
 }
-.prompt-run-btn:hover {
+.prompt-run-btn:hover:not(:disabled) {
   background: rgba(83, 74, 183, 1);
   transform: translateY(-1px);
+  box-shadow: 0 4px 16px rgba(83, 74, 183, 0.45);
 }
-.prompt-run-btn:active {
+.prompt-run-btn:active:not(:disabled) {
   transform: scale(0.97);
 }
 .prompt-run-btn:disabled {
-  opacity: 0.6;
+  opacity: 0.5;
   cursor: not-allowed;
   transform: none;
+  box-shadow: none;
 }
 
 /* Loading spinner */
@@ -620,32 +685,15 @@
 
 /* === Specific fixes requested === */
 
-/* 2. Language selector pill (🌐 ES → EN) background no longer purple */
-.agent-shell[data-agent] .prompt-pill {
-	background: color-mix(in srgb, var(--agent-accent) 18%, transparent);
-	border-color: color-mix(in srgb, var(--agent-accent) 38%, transparent);
-	color: var(--agent-accent);
-}
-
-/* Image marker tokens in the prompt chat (from screenshot/path paste) */
-.prompt-textarea {
-	/* markers like [Image #1] will appear inline; keep readable */
-}
-
-.agent-shell[data-agent] .prompt-pill:hover {
-	background: color-mix(in srgb, var(--agent-accent) 32%, transparent);
-}
-
-/* Claude refinements for the pill */
-.agent-shell[data-agent="claude"] .prompt-pill {
+.agent-shell[data-agent="claude"] .prompt-lang-indicator {
 	background: color-mix(in srgb, var(--claude) 22%, transparent);
-	border-color: color-mix(in srgb, var(--claude) 45%, transparent);
 	color: var(--claude);
 }
 
-.agent-shell[data-agent="claude"] .prompt-pill:hover {
-	background: color-mix(in srgb, var(--claude) 38%, transparent);
-}
+/* Image marker tokens in the prompt chat (from screenshot/path paste) */
+/* markers like [Image #1] will appear inline; keep readable */
+/* .prompt-textarea {
+} */
 
 /* ============================================================
    NO SESSION STATE (when user opens Prompt without active CLI)
