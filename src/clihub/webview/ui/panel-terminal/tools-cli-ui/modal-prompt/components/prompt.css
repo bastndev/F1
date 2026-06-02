@@ -97,21 +97,17 @@
   gap: 8px;
 }
 
-.prompt-pill {
+.prompt-lang-indicator {
   font-size: 10px;
   font-weight: 500;
   letter-spacing: 0.04em;
-  padding: 3px 8px;
-  border-radius: 10px;
-  border: 0.5px solid color-mix(in srgb, var(--agent-accent, #534AB7) 38%, transparent);
+  padding: 3px 6px;
   background: color-mix(in srgb, var(--agent-accent, #534AB7) 20%, transparent);
   color: var(--agent-accent, #AFA9EC);
-  cursor: pointer;
+  border-radius: 0;
   font-family: 'Syne', sans-serif;
-  transition: background 0.15s;
-}
-.prompt-pill:hover {
-  background: color-mix(in srgb, var(--agent-accent, #534AB7) 35%, transparent);
+  user-select: none;
+  cursor: default;
 }
 
 .prompt-close-btn {
@@ -644,32 +640,15 @@
 
 /* === Specific fixes requested === */
 
-/* 2. Language selector pill (🌐 ES → EN) background no longer purple */
-.agent-shell[data-agent] .prompt-pill {
-	background: color-mix(in srgb, var(--agent-accent) 18%, transparent);
-	border-color: color-mix(in srgb, var(--agent-accent) 38%, transparent);
-	color: var(--agent-accent);
+.agent-shell[data-agent="claude"] .prompt-lang-indicator {
+	background: color-mix(in srgb, var(--claude) 22%, transparent);
+	color: var(--claude);
 }
 
 /* Image marker tokens in the prompt chat (from screenshot/path paste) */
 /* markers like [Image #1] will appear inline; keep readable */
 /* .prompt-textarea {
 } */
-
-.agent-shell[data-agent] .prompt-pill:hover {
-	background: color-mix(in srgb, var(--agent-accent) 32%, transparent);
-}
-
-/* Claude refinements for the pill */
-.agent-shell[data-agent="claude"] .prompt-pill {
-	background: color-mix(in srgb, var(--claude) 22%, transparent);
-	border-color: color-mix(in srgb, var(--claude) 45%, transparent);
-	color: var(--claude);
-}
-
-.agent-shell[data-agent="claude"] .prompt-pill:hover {
-	background: color-mix(in srgb, var(--claude) 38%, transparent);
-}
 
 /* ============================================================
    NO SESSION STATE (when user opens Prompt without active CLI)
