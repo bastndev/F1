@@ -6,7 +6,7 @@ import { allowedAgents, cliAgents, getCliAgent } from './webview/core/terminal-c
 import { ensureCliInstalled, isCliInstalled } from './webview/core/terminal-cli/installation';
 import { CliSessionManager } from './webview/core/terminal-cli/session-manager';
 import { getCliHubWebviewHtml } from './webview/webview';
-import { translatePromptToEnglish } from './core/prompt-translate';
+import { translatePromptToEnglish } from './webview/ui/panel-terminal/tools-cli/shared/providers/prompt-translate';
 
 type CliHubMessage = {
 	type?: string;
