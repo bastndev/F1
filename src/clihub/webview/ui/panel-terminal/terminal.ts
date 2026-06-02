@@ -1,7 +1,7 @@
 import { FitAddon } from '@xterm/addon-fit';
 import { Terminal } from '@xterm/xterm';
 import { createTabController, type CliAgentIcon, type CliAgentOption, type CliSessionSummary } from '../panel-tab/tab';
-import { createToolsController } from './tools-cli/tools';
+import { createToolsController } from './tools-cli-ui/tools';
 import type { PromptTranslateRequest, PromptTranslateResult } from '../../core/tools-cli-core/prompt';
 
 type VsCodeApi = {
