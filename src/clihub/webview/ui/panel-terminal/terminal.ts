@@ -2,7 +2,7 @@ import { FitAddon } from '@xterm/addon-fit';
 import { Terminal } from '@xterm/xterm';
 import { createTabController, type CliAgentIcon, type CliAgentOption, type CliSessionSummary } from '../panel-tab/tab';
 import { createToolsController } from './tools-cli-ui/tools';
-import type { PromptTranslateRequest, PromptTranslateResult } from '../../core/tools-cli-core/prompt';
+import type { ImageAttachment, PromptTranslateRequest, PromptTranslateResult } from '../../core/tools-cli-core/prompt';
 
 type VsCodeApi = {
 	postMessage: (message: ClientMessage) => void;
@@ -15,7 +15,8 @@ type ClientMessage =
 	| { type: 'cli.switch'; sessionId: string }
 	| { type: 'cli.resize'; sessionId?: string; cols: number; rows: number }
 	| { type: 'cli.close'; sessionId: string }
-	| { type: 'prompt.translate'; id: string; text: string; from: string; to: string };
+	| { type: 'prompt.translate'; id: string; text: string; from: string; to: string }
+	| { type: 'prompt.prepare'; id: string; text: string; attachments: ImageAttachment[] };
 
 type CliSession = CliSessionSummary & {
 	commandLine: string;
@@ -33,7 +34,9 @@ type ServerMessage =
 	| { type: 'cli.output'; sessionId: string; data: string }
 	| { type: 'cli.error'; message: string }
 	| { type: 'prompt.translated'; id: string; text: string; provider?: string; fromCache?: boolean }
-	| { type: 'prompt.translationError'; id: string; message: string };
+	| { type: 'prompt.translationError'; id: string; message: string }
+	| { type: 'prompt.prepared'; id: string; text: string }
+	| { type: 'prompt.prepareError'; id: string; message: string };
 
 type TerminalView = {
 	terminal: Terminal;
@@ -47,6 +50,12 @@ type PendingPromptTranslation = {
 	timeout: number;
 };
 
+type PendingPromptPrepare = {
+	resolve: (value: string) => void;
+	reject: (reason?: unknown) => void;
+	timeout: number;
+};
+
 declare const acquireVsCodeApi: () => VsCodeApi;
 
 const vscode = acquireVsCodeApi();
@@ -55,9 +64,11 @@ const terminals = new Map<string, TerminalView>();
 const bootSkeletons = new Map<string, HTMLDivElement>();
 const sessionsWithFirstOutput = new Set<string>();
 const pendingPromptTranslations = new Map<string, PendingPromptTranslation>();
+const pendingPromptPrepares = new Map<string, PendingPromptPrepare>();
 let activeSessionId: string | undefined;
 let pendingTabSwitchSessionId: string | undefined;
 let nextPromptTranslationId = 1;
+let nextPromptPrepareId = 1;
 
 const isAgentIcon = (value: unknown): value is CliAgentIcon => {
 	if (!value || typeof value !== 'object') {
@@ -188,6 +199,30 @@ const translatePrompt = (request: PromptTranslateRequest): Promise<PromptTransla
 	});
 };
 
+const preparePromptWithAttachments = (text: string, attachments: ImageAttachment[]): Promise<string> => {
+	if (!attachments || attachments.length === 0) {
+		// No images — just return original (caller can still send)
+		return Promise.resolve(text);
+	}
+
+	const id = `prompt-prepare-${nextPromptPrepareId++}`;
+
+	return new Promise((resolve, reject) => {
+		const timeout = window.setTimeout(() => {
+			pendingPromptPrepares.delete(id);
+			reject(new Error('Image attachment prepare timed out.'));
+		}, 30000);
+
+		pendingPromptPrepares.set(id, { resolve, reject, timeout });
+		vscode.postMessage({
+			type: 'prompt.prepare',
+			id,
+			text,
+			attachments,
+		});
+	});
+};
+
 const toolsController = layoutRight
 	? createToolsController({
 			container: layoutRight,
@@ -203,6 +238,7 @@ const toolsController = layoutRight
 					vscode.postMessage({ type: 'cli.input', sessionId: activeSessionId, data: text });
 				},
 				translatePrompt,
+				preparePromptWithAttachments,
 				getTerminalSelection: () => {
 					if (!activeSessionId) {
 						return '';
@@ -625,6 +661,26 @@ const rejectPromptTranslation = (message: Extract<ServerMessage, { type: 'prompt
 	pending.reject(new Error(message.message));
 };
 
+const resolvePromptPrepare = (message: Extract<ServerMessage, { type: 'prompt.prepared' }>) => {
+	const pending = pendingPromptPrepares.get(message.id);
+	if (!pending) {
+		return;
+	}
+	window.clearTimeout(pending.timeout);
+	pendingPromptPrepares.delete(message.id);
+	pending.resolve(message.text);
+};
+
+const rejectPromptPrepare = (message: Extract<ServerMessage, { type: 'prompt.prepareError' }>) => {
+	const pending = pendingPromptPrepares.get(message.id);
+	if (!pending) {
+		return;
+	}
+	window.clearTimeout(pending.timeout);
+	pendingPromptPrepares.delete(message.id);
+	pending.reject(new Error(message.message));
+};
+
 window.addEventListener('message', (event: MessageEvent<ServerMessage>) => {
 	const message = event.data;
 
@@ -645,6 +701,16 @@ window.addEventListener('message', (event: MessageEvent<ServerMessage>) => {
 
 	if (message.type === 'prompt.translationError') {
 		rejectPromptTranslation(message);
+		return;
+	}
+
+	if (message.type === 'prompt.prepared') {
+		resolvePromptPrepare(message);
+		return;
+	}
+
+	if (message.type === 'prompt.prepareError') {
+		rejectPromptPrepare(message);
 		return;
 	}
 

@@ -538,6 +538,11 @@
 	color: var(--agent-accent);
 }
 
+/* Image marker tokens in the prompt chat (from screenshot/path paste) */
+.prompt-textarea {
+	/* markers like [Image #1] will appear inline; keep readable */
+}
+
 .agent-shell[data-agent] .prompt-pill:hover {
 	background: color-mix(in srgb, var(--agent-accent) 32%, transparent);
 }
