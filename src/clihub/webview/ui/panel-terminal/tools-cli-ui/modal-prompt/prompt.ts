@@ -247,7 +247,11 @@ function enforceLowercaseInput(textarea: HTMLTextAreaElement) {
 			e.preventDefault();
 			const start = textarea.selectionStart ?? 0;
 			const end = textarea.selectionEnd ?? 0;
-			const char = e.key.toLowerCase();
+			// Auto-capitalize: if typing at the very beginning (pos 0) uppercase the letter
+			const isFirstChar = start === 0 && textarea.value.slice(end).trimStart() === textarea.value.slice(end);
+			const char = (isFirstChar && start === 0 && textarea.value.slice(0, start) === '') 
+				? e.key.toUpperCase() 
+				: e.key.toLowerCase();
 			textarea.value = textarea.value.slice(0, start) + char + textarea.value.slice(end);
 			const newPos = start + 1;
 			textarea.selectionStart = textarea.selectionEnd = newPos;
@@ -392,9 +396,11 @@ function initRunButton(
 	}
 
 	const updateState = () => {
-		const hasText = textarea.value.trim().length > 0;
+		const text = textarea.value.trim();
 		const hasSession = !!context.getActiveSessionId?.();
-		runBtn.disabled = !hasText || !hasSession;
+		// Activate only after a real word: 6+ chars OR first space (second word started)
+		const hasEnoughText = text.length >= 6 || text.includes(' ');
+		runBtn.disabled = !hasEnoughText || !hasSession;
 	};
 
 	// Initial state
