@@ -1,4 +1,4 @@
-import { runFullAutocorrect } from './prompt-autocorrect-service';
+import { runFullAutocorrect } from './autocorrect-service';
 import { warmTypoInstance } from './typo-service';
 
 export async function applyAutocorrect(text: string): Promise<string> {
@@ -6,5 +6,5 @@ export async function applyAutocorrect(text: string): Promise<string> {
 	return result.correctedText;
 }
 
-export { runFullAutocorrect } from './prompt-autocorrect-service';
+export { runFullAutocorrect } from './autocorrect-service';
 export { warmTypoInstance };

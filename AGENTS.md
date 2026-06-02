@@ -1,40 +1,71 @@
 # AGENTS.md
 
+## Project
+
+- VS Code extension.
+- Built with: esbuild.
+- Language: TypeScript.
+
+## Package manager
+
+- Use `bun` for this workspace. The lockfile is `bun.lock`.
+- Run package scripts with `bun <script>`.
+
 ## Commands
 
 ```bash
-bun run compile      # Full build: check-types → lint → esbuild (production)
-bun run watch        # Dev mode: parallel tsc + esbuild watchers
-bun run check-types  # TypeScript only (no emit)
-bun run lint         # ESLint on src/
+bun check-types      # check types without emitting
+bun lint             # run linter
+bun compile          # compile/bundle (dev)
+bun watch            # watch and rebuild on changes
 ```
 
-No test suite exists. Verify changes with `npm run compile` (must pass typecheck + lint + build).
+`compile` already runs typecheck and lint before bundling; use it as the normal pre-finish gate.
+
+No formatter, test runner is configured.
 
 ## Architecture
 
-VS Code extension providing a panel with multiple CLI agent integrations (OpenCode, Codex, Claude Code, etc.).
+- VS Code extension targeting `^1.75.0`.
+- Extension host main: `./dist/extension.js`; build before launching because runtime output lives under `dist/`.
+- Source activation entrypoint: `src/extension.ts`.
 
-**Three esbuild contexts** (see `esbuild.js`):
-1. **Extension host** (Node/CJS): `src/extension.ts` → `dist/extension.js`
-2. **Webview** (browser/IIFE): `src/clihub/webview/ui/panel-terminal/terminal.ts` → `dist/clihub/webview/webview.js`
-3. **PTY host** (Node/CJS): `src/clihub/webview/core/terminal-cli/pty-host.ts` → `dist/clihub/webview/core/terminal-cli/pty-host.js`
+## Build entrypoints
 
-**Externals** (not bundled): `vscode`, `node-pty`
+The esbuild config creates separate bundles; keep host and browser targets separate.
 
-**Static assets**: HTML/CSS/SVG from `src/clihub/` are copied to `dist/clihub/` on build. The esbuild plugin `clihub-assets` handles this automatically.
+| Source | Output | Format | Platform |
+|---|---|---|---|
+| `src/extension.ts` | `dist/extension.js` | `cjs` | `node` |
+| `src/clihub/webview/ui/panel-terminal/terminal.ts` | `dist/clihub/webview/webview.js` | `iife` | `browser` |
+| `src/clihub/index.ts` | `dist/clihub/index.js` | `iife` | `browser` |
+| `src/clihub/webview/core/terminal-cli/pty-host.ts` | `dist/clihub/webview/core/terminal-cli/pty-host.js` | `cjs` | `node` |
 
-## Key entrypoints
+## Runtime assets and packaging
 
-- `src/extension.ts` — VS Code activation, registers `CliHubViewProvider`
-- `src/clihub/main.ts` — Webview provider, message routing, HTML templating
-- `src/clihub/webview/` — Browser-side UI (terminal, tabs, translate panels)
-- `src/clihub/webview/core/terminal-cli/` — PTY management, session handling, agent definitions
+- `dist/` is ignored, so build before launching, testing, or packaging.
+- `vscode` is provided by the extension host; keep it external in extension bundles.
 
-## Conventions
+## Testing and launch
 
-- Webview code runs in browser context — no Node.js APIs (use message passing to extension host)
-- PTY operations must go through `pty-host.ts` (separate Node context)
-- HTML uses placeholder substitution: `${styleUri}`, `${nonce}`, `${cliModels}`, `${workspacePath}`, `${contentSecurityPolicy}`
-- CSP is strict: `default-src 'none'`, nonce-based scripts only
-- ESLint enforces `camelCase`/`PascalCase` for imports, `curly`, `eqeqeq`, `semi`
+- VS Code's default build task is `watch`; launch configs may start that task automatically.
+- Launch configs: `Run Extension`.
+
+## Key Conventions
+
+- Error messages with prefix `[MySkills]`.
+- Nonce of 64 chars for webview security.
+- Minimum 1200ms loading on create operations (UX).
+- Use `vscode.Uri.joinPath()` for paths.
+
+## Caveats
+
+- No test runner configured — no `test` script or test config found.
+- No formatter detected — no Prettier config or format script.
+
+## Boundaries
+
+- Prefer existing local patterns and helper APIs before adding new abstractions.
+- Keep generated, packaged, and runtime asset boundaries intact; do not move files across host/webview ownership without updating build and packaging config.
+- Webview DOM code is vanilla TypeScript; do not introduce a framework unless the project explicitly adopts one.
+- After changing host/webview message contracts, verify both the webview bridge and the extension host handler.

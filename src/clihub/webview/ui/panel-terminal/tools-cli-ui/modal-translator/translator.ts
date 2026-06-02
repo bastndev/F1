@@ -1,27 +1,38 @@
-/**
- * Translator modal logic (behavior).
- *
- * All the important logic for the Translator tool lives here, as required.
- * This file handles:
- *   - Extracting selected text from terminal
- *   - Triggering EN → ES translation
- *   - Wiring UI controls (copy, fake speak)
- *   - Updating model label
- *   - Managing loading state
- */
+import translatorStyles from './components/translator.css';
+import translatorHtml from './components/translator.html';
+import type { ToolContext } from '../tools';
+import { translateEnToSpanish } from '../../../../core/tools-cli-core/modal-translation/browser-terminal-translator';
 
-import type { ToolContext } from '../../tools';
-import { extractTextToTranslate } from './copy-txt';
-import { translateEnToSpanish } from './en-to-es';
+const stylesId = 'cli-translator-panel-styles';
 
-export function initializeTranslator(host: HTMLElement, context: ToolContext) {
+const ensureStyles = () => {
+	if (document.getElementById(stylesId)) {
+		return;
+	}
+
+	const style = document.createElement('style');
+	style.id = stylesId;
+	style.textContent = translatorStyles;
+	document.head.append(style);
+};
+
+export const mountTranslatorPanel = (host: HTMLElement, context: ToolContext) => {
+	ensureStyles();
+
+	const template = document.createElement('template');
+	template.innerHTML = translatorHtml.trim();
+	host.replaceChildren(template.content.cloneNode(true));
+
+	initializeTranslator(host, context);
+};
+
+function initializeTranslator(host: HTMLElement, context: ToolContext) {
 	const speakBtn = host.querySelector<HTMLButtonElement>('#speakBtn');
 	const spectrum = host.querySelector<HTMLElement>('#audioSpectrum');
 	const copyBtn = host.querySelector<HTMLButtonElement>('#copyBtn');
 	const translateBtn = host.querySelector<HTMLButtonElement>('#translateBtn');
 	const textEl = host.querySelector<HTMLElement>('#translatedText');
 	const modelEl = host.querySelector<HTMLElement>('#modelName');
-
 	const modalEl = host.querySelector<HTMLElement>('.translator-modal');
 
 	const performTranslation = async () => {
@@ -46,14 +57,13 @@ export function initializeTranslator(host: HTMLElement, context: ToolContext) {
 			const spanish = await translateEnToSpanish(extracted);
 			textEl.textContent = spanish || extracted;
 		} catch (err) {
-			console.error('[Translator] EN→ES failed:', err);
+			console.error('[Translator] EN->ES failed:', err);
 			textEl.textContent = extracted;
 		} finally {
 			modalEl.classList.remove('is-translating');
 		}
 	};
 
-	// Update model name from active CLI
 	const labelEl = document.getElementById('cli-terminal-label');
 	if (modelEl && labelEl) {
 		const label = labelEl.textContent?.trim() || 'CLI';
@@ -61,8 +71,6 @@ export function initializeTranslator(host: HTMLElement, context: ToolContext) {
 	}
 
 	let isSpeaking = false;
-
-	// Show extracted text on open (no auto-translate; user clicks Translate)
 	const extracted = extractTextToTranslate(context);
 	if (textEl) {
 		if (extracted) {
@@ -74,7 +82,6 @@ export function initializeTranslator(host: HTMLElement, context: ToolContext) {
 		}
 	}
 
-	// Copy button
 	if (copyBtn && textEl) {
 		copyBtn.addEventListener('click', async () => {
 			const text = textEl.textContent || '';
@@ -95,14 +102,12 @@ export function initializeTranslator(host: HTMLElement, context: ToolContext) {
 		});
 	}
 
-	// Translate button
 	if (translateBtn) {
 		translateBtn.addEventListener('click', () => {
 			performTranslation();
 		});
 	}
 
-	// Fake Speak + Spectrum (UI only)
 	if (speakBtn && spectrum) {
 		speakBtn.addEventListener('click', () => {
 			isSpeaking = !isSpeaking;
@@ -116,4 +121,8 @@ export function initializeTranslator(host: HTMLElement, context: ToolContext) {
 			}
 		});
 	}
+}
+
+function extractTextToTranslate(context: ToolContext): string {
+	return context.getTerminalSelection?.() || '';
 }

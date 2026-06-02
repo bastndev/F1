@@ -238,11 +238,11 @@
   padding: 12px 14px 28px 14px;
   resize: none;
   outline: none;
-  transition: border-color 0.2s, background 0.2s;
+  transition: background 0.2s;
   letter-spacing: 0.01em;
 }
 .prompt-textarea:focus {
-  border-color: var(--vscode-focusBorder);
+  /* No border painting on focus — border stays consistent */
   background: var(--vscode-input-background);
 }
 .prompt-textarea::placeholder {
@@ -530,16 +530,6 @@
 }
 
 /* === Specific fixes requested === */
-
-/* 1. Textarea focus border/line now uses agent color instead of purple */
-.agent-shell[data-agent] .prompt-textarea:focus {
-	border-color: color-mix(in srgb, var(--agent-accent) 55%, transparent);
-}
-
-/* Claude specific stronger warm border on focus */
-.agent-shell[data-agent="claude"] .prompt-textarea:focus {
-	border-color: color-mix(in srgb, var(--claude) 65%, transparent);
-}
 
 /* 2. Language selector pill (🌐 ES → EN) background no longer purple */
 .agent-shell[data-agent] .prompt-pill {

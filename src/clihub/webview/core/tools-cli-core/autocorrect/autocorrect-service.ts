@@ -1,4 +1,4 @@
-import { autocorrectTextWithStats as runLocalAutocorrect } from './auto-replacer';
+import { autocorrectTextWithStats as runLocalAutocorrect } from './local-replacer';
 import { applyLanguageToolCorrections } from './language-tool-service';
 
 export interface AutocorrectResult {

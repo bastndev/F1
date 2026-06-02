@@ -1,8 +1,7 @@
 import promptStyles from './components/prompt.css';
 import promptHtml from './components/prompt.html';
-import { processPrompt, type PromptSendContext } from './core/prompt-processor';
-import { runFullAutocorrect } from './core/prompt-autocorrect';
-import { translatePromptText, type PromptTranslateRequest, type PromptTranslateResult } from './core/prompt-translate';
+import { runFullAutocorrect } from '../../../../core/tools-cli-core/autocorrect';
+import { processPrompt, translatePromptText, type PromptTranslateRequest, type PromptTranslateResult } from '../../../../core/tools-cli-core/prompt';
 
 const stylesId = 'cli-prompt-panel-styles';
 
