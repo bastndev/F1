@@ -53,9 +53,9 @@ export const mountPromptPanel = (host: HTMLElement, context: PromptContext = { c
 
 	const hasActiveSession = !!context.getActiveSessionId?.();
 
+	updateFooterModel(host);
 	initSessionState(host, hasActiveSession);
 	initPromptTabs(host, context, hasActiveSession);
-	updateFooterModel(host);
 };
 
 function initPromptTabs(host: HTMLElement, context: PromptContext, hasActiveSession: boolean) {
@@ -437,11 +437,28 @@ function updateCharCount(host: HTMLElement, textarea: HTMLTextAreaElement) {
 	}
 
 	const current = textarea.value.length;
-	const max = 1000;
+	const max = 1500;
 	counter.textContent = `${current}/${max}`;
+
+	// Remove previous states
+	counter.classList.remove('warn', 'danger');
+
+	if (current >= 1350) {
+		// >90% — red + shake
+		counter.classList.add('danger');
+	} else if (current >= 1050) {
+		// >70% — yellow warning
+		counter.classList.add('warn');
+	}
 }
 
 function initSessionState(host: HTMLElement, hasActiveSession: boolean) {
+	// Update session dot state
+	const dot = host.querySelector<HTMLElement>('#sessionDot');
+	if (dot && !hasActiveSession) {
+		dot.classList.add('offline');
+	}
+
 	if (hasActiveSession) {
 		return;
 	}
@@ -512,7 +529,7 @@ function updateFooterModel(host: HTMLElement) {
 
 	const footerInfo = host.querySelector<HTMLElement>('.prompt-footer-info');
 	if (footerInfo) {
-		footerInfo.innerHTML = `<i class="ti ti-cpu" aria-hidden="true"></i> ${simpleName}`;
+		footerInfo.innerHTML = `<span class="prompt-session-dot" id="sessionDot"></span><i class="ti ti-cpu" aria-hidden="true"></i> ${simpleName}`;
 	}
 }
 

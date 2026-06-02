@@ -367,6 +367,21 @@
   opacity: 0.6;
   pointer-events: none;
   z-index: 2;
+  transition: color 0.3s ease, opacity 0.3s ease;
+}
+.prompt-char-count.warn {
+  color: #e5a030;
+  opacity: 0.9;
+}
+.prompt-char-count.danger {
+  color: #e05252;
+  opacity: 1;
+  animation: char-shake 0.35s ease;
+}
+@keyframes char-shake {
+  0%, 100% { transform: translateX(0); }
+  25%       { transform: translateX(-3px); }
+  75%       { transform: translateX(3px); }
 }
 
 /* Skills row */
@@ -504,6 +519,24 @@
   font-size: 12px;
 }
 
+/* Session live dot */
+.prompt-session-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #5DCAA5;
+  flex-shrink: 0;
+  animation: session-pulse 2.4s ease-in-out infinite;
+}
+.prompt-session-dot.offline {
+  background: var(--vscode-editorGroup-border);
+  animation: none;
+}
+@keyframes session-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(93, 202, 165, 0.5); opacity: 1; }
+  50%       { box-shadow: 0 0 0 4px rgba(93, 202, 165, 0);  opacity: 0.75; }
+}
+
 /* Run button area */
 .prompt-run-wrap {
   display: flex;
@@ -533,22 +566,32 @@
   font-size: 12px;
   cursor: pointer;
   letter-spacing: 0.04em;
-  transition: all 0.18s;
+  transition: background 0.18s, transform 0.18s, box-shadow 0.18s, opacity 0.25s;
+  transform-origin: center;
+}
+.prompt-run-btn:not(:disabled) {
+  animation: run-btn-appear 0.28s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+@keyframes run-btn-appear {
+  from { transform: scale(0.88); opacity: 0.6; }
+  to   { transform: scale(1);    opacity: 1; }
 }
 .prompt-run-btn i {
   font-size: 14px;
 }
-.prompt-run-btn:hover {
+.prompt-run-btn:hover:not(:disabled) {
   background: rgba(83, 74, 183, 1);
   transform: translateY(-1px);
+  box-shadow: 0 4px 16px rgba(83, 74, 183, 0.45);
 }
-.prompt-run-btn:active {
+.prompt-run-btn:active:not(:disabled) {
   transform: scale(0.97);
 }
 .prompt-run-btn:disabled {
-  opacity: 0.6;
+  opacity: 0.5;
   cursor: not-allowed;
   transform: none;
+  box-shadow: none;
 }
 
 /* Loading spinner */
