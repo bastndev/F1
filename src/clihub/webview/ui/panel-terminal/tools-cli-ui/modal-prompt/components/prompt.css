@@ -91,6 +91,12 @@
   letter-spacing: 0.01em;
 }
 
+.prompt-subtitle-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
 .prompt-pill {
   font-size: 10px;
   font-weight: 500;
@@ -103,10 +109,28 @@
   cursor: pointer;
   font-family: 'Syne', sans-serif;
   transition: background 0.15s;
-  margin-top: 2px;
 }
 .prompt-pill:hover {
   background: color-mix(in srgb, var(--agent-accent, #534AB7) 35%, transparent);
+}
+
+.prompt-close-btn {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  font-weight: 500;
+  color: var(--vscode-descriptionForeground);
+  background: var(--vscode-editorWidget-background, transparent);
+  border: 1px solid var(--vscode-editorGroup-border);
+  border-radius: 4px;
+  padding: 3px 6px;
+  cursor: pointer;
+  text-transform: lowercase;
+  opacity: 0.7;
+  transition: all 0.15s;
+}
+.prompt-close-btn:hover {
+  opacity: 1;
+  background: var(--vscode-list-hoverBackground);
 }
 
 /* Toolbar & Tabs */

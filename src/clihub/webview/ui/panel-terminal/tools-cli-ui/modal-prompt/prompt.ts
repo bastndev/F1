@@ -46,6 +46,11 @@ export const mountPromptPanel = (host: HTMLElement, context: PromptContext = { c
 	template.innerHTML = promptHtml.trim();
 	host.replaceChildren(template.content.cloneNode(true));
 
+	const closeBtn = host.querySelector<HTMLButtonElement>('#closePromptBtn');
+	if (closeBtn) {
+		closeBtn.addEventListener('click', () => context.close());
+	}
+
 	const hasActiveSession = !!context.getActiveSessionId?.();
 
 	initSessionState(host, hasActiveSession);
