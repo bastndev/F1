@@ -7,6 +7,8 @@ import { ensureCliInstalled, isCliInstalled } from './webview/core/terminal-cli/
 import { CliSessionManager } from './webview/core/terminal-cli/session-manager';
 import { getCliHubWebviewHtml } from './webview/webview';
 import { translatePromptToEnglish } from './webview/core/tools-cli-core/modal-translation/host-prompt-translator';
+import { preparePromptForCLI } from './webview/core/tools-cli-core/prompt/attachments/host-preparer';
+import type { ImageAttachment } from './webview/core/tools-cli-core/prompt';
 
 type CliHubMessage = {
 	type?: string;
@@ -15,6 +17,7 @@ type CliHubMessage = {
 	text?: string;
 	from?: string;
 	to?: string;
+	attachments?: ImageAttachment[];
 };
 
 type LauncherAgent = {
@@ -54,7 +57,10 @@ export class CliHubViewProvider implements vscode.WebviewViewProvider, vscode.Di
 	private pendingInitialAgent?: string;
 	private activePromptTranslation?: AbortController;
 
-	constructor(private readonly _extensionUri: vscode.Uri) {}
+	constructor(
+		private readonly _extensionUri: vscode.Uri,
+		private readonly _extensionContext?: vscode.ExtensionContext
+	) {}
 
 	public async resolveWebviewView(
 		webviewView: vscode.WebviewView,
@@ -97,6 +103,11 @@ export class CliHubViewProvider implements vscode.WebviewViewProvider, vscode.Di
 
 				if (message.type === 'prompt.translate') {
 					await this._handlePromptTranslate(webviewView.webview, message);
+					return;
+				}
+
+				if (message.type === 'prompt.prepare') {
+					await this._handlePromptPrepare(webviewView.webview, message);
 					return;
 				}
 	
@@ -154,6 +165,32 @@ export class CliHubViewProvider implements vscode.WebviewViewProvider, vscode.Di
 			if (this.activePromptTranslation === controller) {
 				this.activePromptTranslation = undefined;
 			}
+		}
+	}
+
+	private async _handlePromptPrepare(webview: vscode.Webview, message: CliHubMessage) {
+		if (typeof message.id !== 'string') {
+			return;
+		}
+
+		const text = typeof message.text === 'string' ? message.text : '';
+		const attachments = Array.isArray(message.attachments) ? message.attachments : [];
+
+		try {
+			const ctx = this._extensionContext || { globalStorageUri: undefined } as any;
+			const preparedText = await preparePromptForCLI(text, attachments as any, ctx);
+
+			await webview.postMessage({
+				type: 'prompt.prepared',
+				id: message.id,
+				text: preparedText,
+			});
+		} catch (error) {
+			await webview.postMessage({
+				type: 'prompt.prepareError',
+				id: message.id,
+				message: error instanceof Error ? error.message : 'Failed to prepare image attachments.',
+			});
 		}
 	}
 

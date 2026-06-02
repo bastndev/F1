@@ -1,6 +1,6 @@
 import { mountKeymapsPanel } from './modal-keymaps/keymaps';
 import { mountPromptPanel } from './modal-prompt/prompt';
-import type { PromptTranslateRequest, PromptTranslateResult } from '../../../core/tools-cli-core/prompt';
+import type { ImageAttachment, PromptTranslateRequest, PromptTranslateResult } from '../../../core/tools-cli-core/prompt';
 import { mountTranslatorPanel } from './modal-translator/translator';
 
 export type ToolId = 'translate' | 'keymaps' | 'prompt';
@@ -11,6 +11,7 @@ export type ToolContext = {
 	sendToActiveSession?: (text: string) => void;
 	translatePrompt?: (request: PromptTranslateRequest) => Promise<PromptTranslateResult>;
 	getTerminalSelection?: () => string;
+	preparePromptWithAttachments?: (text: string, attachments: ImageAttachment[]) => Promise<string>;
 };
 
 type ToolMount = (host: HTMLElement, context: ToolContext) => void;
@@ -20,6 +21,7 @@ export type ToolsControllerOptions = {
 	sendToActiveSession?: (text: string) => void;
 	translatePrompt?: (request: PromptTranslateRequest) => Promise<PromptTranslateResult>;
 	getTerminalSelection?: () => string;
+	preparePromptWithAttachments?: (text: string, attachments: ImageAttachment[]) => Promise<string>;
 };
 
 const modalId = 'cli-tools-modal';
@@ -43,7 +45,8 @@ const toolMounts: Record<ToolId, ToolMount> = {
 		getActiveSessionId,
 		sendToActiveSession,
 		translatePrompt,
-		getTerminalSelection
+		getTerminalSelection,
+		preparePromptWithAttachments
 	}: ToolsControllerOptions) => {
 		let activeModal: HTMLElement | null = null;
 		let currentTool: ToolId | null = null;
@@ -106,7 +109,8 @@ const toolMounts: Record<ToolId, ToolMount> = {
 					getActiveSessionId,
 					sendToActiveSession,
 					translatePrompt,
-					getTerminalSelection
+					getTerminalSelection,
+					preparePromptWithAttachments
 				});
 
 		container.append(modal);

@@ -1,7 +1,17 @@
 import promptStyles from './components/prompt.css';
 import promptHtml from './components/prompt.html';
 import { runFullAutocorrect } from '../../../../core/tools-cli-core/autocorrect';
-import { processPrompt, translatePromptText, type PromptTranslateRequest, type PromptTranslateResult } from '../../../../core/tools-cli-core/prompt';
+import {
+	processPrompt,
+	translatePromptText,
+	type PromptTranslateRequest,
+	type PromptTranslateResult,
+	type ImageAttachment,
+	isImageAttachment,
+	collectImageMarkerIds,
+	protectImageMarkers,
+	restoreImageMarkers,
+} from '../../../../core/tools-cli-core/prompt';
 
 const stylesId = 'cli-prompt-panel-styles';
 
@@ -16,11 +26,17 @@ const ensureStyles = () => {
 	document.head.append(style);
 };
 
+// Image paste support (screenshots from clipboard + pasted image paths) — adapted for our prompt chat.
+// When Execute is pressed the resolved image paths are substituted so they appear in the CLI input.
+const imagePathPattern =
+	/(?:"([^"\r\n]+\.(?:png|jpe?g|gif|webp|bmp|svg|tiff?))"|'([^'\r\n]+\.(?:png|jpe?g|gif|webp|bmp|svg|tiff?))'|((?:~|\/)[^\r\n\t"'<>]*?\.(?:png|jpe?g|gif|webp|bmp|svg|tiff?)))/gi;
+
 type PromptContext = {
 	close: () => void;
 	getActiveSessionId?: () => string | undefined;
 	sendToActiveSession?: (text: string) => void;
 	translatePrompt?: (request: PromptTranslateRequest) => Promise<PromptTranslateResult>;
+	preparePromptWithAttachments?: (text: string, attachments: ImageAttachment[]) => Promise<string>;
 };
 
 export const mountPromptPanel = (host: HTMLElement, context: PromptContext = { close: () => {} }) => {
@@ -55,6 +71,95 @@ function initPromptTabs(host: HTMLElement, context: PromptContext, hasActiveSess
 	// Force lowercase input, with Shift as the only way to write uppercase
 	enforceLowercaseInput(textarea);
 
+	// Image attachments state (lives while this modal instance is mounted)
+	let imageAttachments: ImageAttachment[] = [];
+	let nextImageAttachmentId = 1;
+
+	const registerPathImageAttachment = (path: string): string => {
+		const id = nextImageAttachmentId++;
+		const marker = `[Image #${id}]`;
+		imageAttachments.push({
+			id,
+			marker,
+			source: 'path',
+			path,
+			type: getImageTypeFromPath(path),
+			name: getPathBaseName(path),
+		});
+		return marker;
+	};
+
+	const registerClipboardImageAttachment = (file: File): string => {
+		const id = nextImageAttachmentId++;
+		const marker = `[Image #${id}]`;
+		const attachment: ImageAttachment = {
+			id,
+			marker,
+			source: 'clipboard',
+			type: file.type || 'image/png',
+			name: file.name || `Image ${id}`,
+			size: file.size,
+		};
+		imageAttachments.push(attachment);
+
+		const reader = new FileReader();
+		reader.addEventListener('load', () => {
+			if (typeof reader.result === 'string') {
+				attachment.dataUrl = reader.result;
+			}
+		});
+		reader.readAsDataURL(file);
+
+		return marker;
+	};
+
+	// Setup paste that supports images/screenshots + paths (must run before or combined with lowercase)
+	setupImagePaste(textarea, registerPathImageAttachment, registerClipboardImageAttachment);
+
+	// Atomic delete for [Image #N] markers (Backspace/Delete removes whole token)
+	textarea.addEventListener('keydown', (e) => {
+		handleImageMarkerDeleteKey(textarea, e);
+	});
+
+	// The real send that handles image resolution before calling processPrompt.
+	// This must live inside init so it closes over the live imageAttachments array.
+	async function doPerformSendWithImages(
+		hostEl: HTMLElement,
+		ta: HTMLTextAreaElement,
+		ctx: PromptContext,
+		currentAttachments: ImageAttachment[]
+	) {
+		if (!ctx.sendToActiveSession) {
+			showNoSessionMessage(hostEl);
+			return;
+		}
+
+		let textToSend = ta.value;
+
+		const referenced = getReferencedImageAttachments(textToSend, currentAttachments);
+
+		if (referenced.length > 0 && ctx.preparePromptWithAttachments) {
+			try {
+				// This goes to host (via terminal.ts) which saves any clipboard images to disk
+				// and returns text where [Image #N] markers have been replaced by real paths.
+				textToSend = await ctx.preparePromptWithAttachments(textToSend, referenced);
+			} catch (err) {
+				console.error('[Prompt] Failed to prepare image attachments:', err);
+				// fallthrough with original text (markers will be visible, paths not resolved)
+			}
+		}
+
+		const result = processPrompt(textToSend, {
+			close: ctx.close,
+			sendToActiveSession: ctx.sendToActiveSession,
+			getActiveSessionId: ctx.getActiveSessionId,
+		});
+
+		if (result.status === 'no-session') {
+			showNoSessionMessage(hostEl);
+		}
+	}
+
 	// Single tab — set placeholder once
 	if (textareaWrap) {
 		textareaWrap.classList.remove('is-pro');
@@ -70,8 +175,12 @@ function initPromptTabs(host: HTMLElement, context: PromptContext, hasActiveSess
 		initToolbarActions(host, textarea, context);
 	}
 
-	initRunButton(host, textarea, context);
-	initSendShortcut(textarea, context);
+	const performSendNow = async () => {
+		await doPerformSendWithImages(host, textarea, context, imageAttachments);
+	};
+
+	initRunButton(host, textarea, context, performSendNow);
+	initSendShortcut(textarea, context, performSendNow);
 
 	if (hasActiveSession) {
 		updateCharCount(host, textarea);
@@ -89,8 +198,10 @@ function initPromptTabs(host: HTMLElement, context: PromptContext, hasActiveSess
 function enforceLowercaseInput(textarea: HTMLTextAreaElement) {
 	textarea.addEventListener('keydown', (e) => {
 		if (e.key.length === 1 && /[a-zA-Z]/.test(e.key)) {
-			if (e.shiftKey) {
+			if (e.shiftKey || e.ctrlKey || e.metaKey) {
 				// User is intentionally using Shift → allow uppercase
+				// or using Ctrl/Meta for shortcuts like Ctrl+V (paste image), Ctrl+C, etc.
+				// Do not insert the letter (e.g. "v" from Ctrl+V)
 				return;
 			}
 			// Force lowercase (this defeats Caps Lock as well)
@@ -105,8 +216,24 @@ function enforceLowercaseInput(textarea: HTMLTextAreaElement) {
 	});
 
 	textarea.addEventListener('paste', (e) => {
+		const clipboard = e.clipboardData;
+		if (!clipboard) {
+			return;
+		}
+		// If the paste contains real image files or looks like image paths, let the image paste handler deal with it.
+		const hasImageFile = Array.from(clipboard.items).some(
+			(it) => it.kind === 'file' && it.type.startsWith('image/')
+		);
+		const pastedForCheck = clipboard.getData('text/plain') || '';
+		imagePathPattern.lastIndex = 0;
+		const looksLikeImagePath = imagePathPattern.test(pastedForCheck);
+		if (hasImageFile || looksLikeImagePath) {
+			// Do not lowercase or prevent here — the dedicated image paste listener will handle and prevent.
+			return;
+		}
+
 		e.preventDefault();
-		const text = e.clipboardData?.getData('text') || '';
+		const text = pastedForCheck;
 		const lower = text.toLowerCase();
 		const start = textarea.selectionStart ?? 0;
 		const end = textarea.selectionEnd ?? 0;
@@ -143,10 +270,13 @@ function initToolbarActions(host: HTMLElement, textarea: HTMLTextAreaElement, co
 			fixBtn.disabled = true;
 
 			try {
-				const result = await runFullAutocorrect(text);
+				// Protect image markers so autocorrect doesn't touch [Image #N]
+				const { text: protectedText, markers } = protectImageMarkers(text);
+				const result = await runFullAutocorrect(protectedText);
+				const corrected = restoreImageMarkers(result.correctedText, markers);
 
-				if (result.correctedText !== text) {
-					textarea.value = result.correctedText;
+				if (corrected !== text) {
+					textarea.value = corrected;
 					textarea.dispatchEvent(new Event('input'));
 
 					const total = result.typoCorrections + result.languageToolCorrections;
@@ -180,9 +310,13 @@ function initToolbarActions(host: HTMLElement, textarea: HTMLTextAreaElement, co
 			translateBtn.disabled = true;
 
 			try {
-				const result = await translatePromptText(text, context);
-				if (result.text && result.text !== text.trim()) {
-					textarea.value = result.text;
+				// Protect markers before sending to prompt translation (ES→EN)
+				const { text: protectedText, markers } = protectImageMarkers(text);
+				const result = await translatePromptText(protectedText, context);
+				const translated = result.text ? restoreImageMarkers(result.text, markers) : '';
+
+				if (translated && translated !== text.trim()) {
+					textarea.value = translated;
 					textarea.dispatchEvent(new Event('input'));
 					translateBtn.innerHTML = `<i class="ti ti-check" aria-hidden="true"></i> ${result.provider || 'Translated'}`;
 					translateBtn.style.color = '#5DCAA5';
@@ -205,7 +339,12 @@ function initToolbarActions(host: HTMLElement, textarea: HTMLTextAreaElement, co
 	}
 }
 
-function initRunButton(host: HTMLElement, textarea: HTMLTextAreaElement, context: PromptContext) {
+function initRunButton(
+	host: HTMLElement,
+	textarea: HTMLTextAreaElement,
+	context: PromptContext,
+	performSendImpl: () => Promise<void>
+) {
 	const runBtn = host.querySelector<HTMLButtonElement>('#runBtn');
 	if (!runBtn) {
 		return;
@@ -227,12 +366,13 @@ function initRunButton(host: HTMLElement, textarea: HTMLTextAreaElement, context
 	});
 
 	// Actual send action — delegates to the processor (future home of autocorrect + translate)
-	runBtn.addEventListener('click', () => {
-		performSend(host, textarea, context);
+	// Now also resolves image attachments so paths appear in the CLI when Enter is pressed.
+	runBtn.addEventListener('click', async () => {
+		await performSendImpl();
 	});
 }
 
-function initSendShortcut(textarea: HTMLTextAreaElement, context: PromptContext) {
+function initSendShortcut(textarea: HTMLTextAreaElement, context: PromptContext, performSendImpl: () => Promise<void>) {
 	textarea.addEventListener('keydown', (e) => {
 		const isSendShortcut =
 			(e.key === 'Enter' && (e.ctrlKey || e.metaKey)) ||
@@ -243,27 +383,11 @@ function initSendShortcut(textarea: HTMLTextAreaElement, context: PromptContext)
 		}
 
 		e.preventDefault();
-		performSend(textarea.closest('.prompt-modal') as HTMLElement, textarea, context);
+		void performSendImpl();
 	});
 }
 
-function performSend(host: HTMLElement, textarea: HTMLTextAreaElement, context: PromptContext) {
-	if (!context.sendToActiveSession) {
-		showNoSessionMessage(host);
-		return;
-	}
-
-	const result = processPrompt(textarea.value, {
-		close: context.close,
-		sendToActiveSession: context.sendToActiveSession,
-		getActiveSessionId: context.getActiveSessionId,
-	});
-
-	if (result.status === 'no-session') {
-		// Defensive: should rarely happen because UI disables the button
-		showNoSessionMessage(host);
-	}
-}
+// performSend moved inside initPromptTabs as doPerformSendWithImages so it can close over the per-mount imageAttachments state.
 
 function updateCharCount(host: HTMLElement, textarea: HTMLTextAreaElement) {
 	const counter = host.querySelector<HTMLElement>('#charCount');
@@ -349,4 +473,143 @@ function updateFooterModel(host: HTMLElement) {
 	if (footerInfo) {
 		footerInfo.innerHTML = `<i class="ti ti-cpu" aria-hidden="true"></i> ${simpleName}`;
 	}
+}
+
+// --- Image attachments helpers (paste screenshots + paths, atomic markers, referenced collection) ---
+
+function replaceImagePathsWithMarkers(text: string, register: (path: string) => string): string {
+	if (!text) {
+		return text;
+	}
+	return text.replace(imagePathPattern, (match, doubleQuoted: string | undefined, singleQuoted: string | undefined, unquoted: string | undefined) => {
+		const p = (doubleQuoted ?? singleQuoted ?? unquoted ?? match).trim();
+		return register(p);
+	});
+}
+
+function getReferencedImageAttachments(text: string, attachments: ImageAttachment[]): ImageAttachment[] {
+	const ids = collectImageMarkerIds(text);
+	return attachments.filter((a) => ids.has(a.id) && isImageAttachment(a));
+}
+
+function insertTextAtSelection(textarea: HTMLTextAreaElement, text: string) {
+	const start = textarea.selectionStart ?? textarea.value.length;
+	const end = textarea.selectionEnd ?? textarea.value.length;
+	const before = textarea.value.slice(0, start);
+	const after = textarea.value.slice(end);
+	const toInsert = addSmartSpacing(before, text, after);
+
+	textarea.value = before + toInsert + after;
+	const pos = before.length + toInsert.length;
+	textarea.setSelectionRange(pos, pos);
+	textarea.dispatchEvent(new Event('input', { bubbles: true }));
+}
+
+function addSmartSpacing(before: string, text: string, after: string): string {
+	let value = text;
+	if (before && !/\s$/.test(before) && value && !/^[\s,.;:!?)]/.test(value)) {
+		value = ' ' + value;
+	}
+	if (after && !/^\s/.test(after) && value && !/[\s([¿¡]$/.test(value)) {
+		value = value + ' ';
+	}
+	return value;
+}
+
+function handleImageMarkerDeleteKey(textarea: HTMLTextAreaElement, event: KeyboardEvent): boolean {
+	if (event.key !== 'Backspace' && event.key !== 'Delete') {
+		return false;
+	}
+	if (event.altKey || event.ctrlKey || event.metaKey) {
+		return false;
+	}
+	if (textarea.selectionStart !== textarea.selectionEnd) {
+		return false;
+	}
+
+	const caret = textarea.selectionStart ?? 0;
+	const range = findImageMarkerDeleteRange(textarea.value, caret, event.key as 'Backspace' | 'Delete');
+	if (!range) {
+		return false;
+	}
+
+	event.preventDefault();
+	textarea.value = textarea.value.slice(0, range.start) + textarea.value.slice(range.end);
+	textarea.setSelectionRange(range.start, range.start);
+	textarea.dispatchEvent(new Event('input', { bubbles: true }));
+	return true;
+}
+
+function findImageMarkerDeleteRange(
+	text: string,
+	caret: number,
+	key: 'Backspace' | 'Delete'
+): { start: number; end: number } | undefined {
+	for (const match of text.matchAll(/\[Image #(\d+)\]/g)) {
+		const start = match.index ?? 0;
+		const end = start + match[0].length;
+		const inside = caret > start && caret < end;
+		const backAfter = key === 'Backspace' && caret === end;
+		const delBefore = key === 'Delete' && caret === start;
+		if (inside || backAfter || delBefore) {
+			return { start, end };
+		}
+	}
+	return undefined;
+}
+
+function getImageTypeFromPath(path: string): string {
+	const ext = path.split('.').pop()?.toLowerCase();
+	if (!ext) {
+		return 'image/*';
+	}
+	if (ext === 'jpg') {
+		return 'image/jpeg';
+	}
+	if (ext === 'svg') {
+		return 'image/svg+xml';
+	}
+	if (ext === 'tif') {
+		return 'image/tiff';
+	}
+	return `image/${ext}`;
+}
+
+function getPathBaseName(path: string): string {
+	return path.split(/[\\/]/).filter(Boolean).pop() ?? path;
+}
+
+function setupImagePaste(
+	textarea: HTMLTextAreaElement,
+	registerPath: (path: string) => string,
+	registerClipboard: (file: File) => string
+) {
+	textarea.addEventListener('paste', (event: ClipboardEvent) => {
+		const clipboardData = event.clipboardData;
+		if (!clipboardData) {
+			return;
+		}
+
+		const pastedText = clipboardData.getData('text/plain');
+		const imageFiles = Array.from(clipboardData.items)
+			.filter((item) => item.kind === 'file' && item.type.startsWith('image/'))
+			.map((item) => item.getAsFile())
+			.filter((file): file is File => file !== null);
+
+		const textWithMarkers = replaceImagePathsWithMarkers(pastedText, registerPath);
+		const hasImagePath = textWithMarkers !== pastedText;
+
+		if (!hasImagePath && imageFiles.length === 0) {
+			return;
+		}
+
+		event.preventDefault();
+
+		const imageMarkers = imageFiles.map(registerClipboard);
+		const insertValue = [textWithMarkers, ...imageMarkers]
+			.filter((part) => part && part.trim().length > 0)
+			.join(textWithMarkers && imageMarkers.length ? ' ' : '');
+
+		insertTextAtSelection(textarea, insertValue);
+	});
 }
