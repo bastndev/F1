@@ -1,7 +1,7 @@
 import * as http from 'http';
 import * as https from 'https';
-import { buildCacheKey, getCachedTranslation, setCachedTranslation } from './cache';
-import type { PromptTranslationProviderId, PromptTranslationRequest, PromptTranslationResult } from './types';
+import { buildCacheKey, getCachedTranslation, setCachedTranslation } from '../cache';
+import type { PromptTranslationProviderId, PromptTranslationRequest, PromptTranslationResult } from '../types';
 
 const providerNames: Record<PromptTranslationProviderId, string> = {
 	myMemory: 'MyMemory',
