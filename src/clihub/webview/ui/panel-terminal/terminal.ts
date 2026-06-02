@@ -16,7 +16,8 @@ type ClientMessage =
 	| { type: 'cli.resize'; sessionId?: string; cols: number; rows: number }
 	| { type: 'cli.close'; sessionId: string }
 	| { type: 'prompt.translate'; id: string; text: string; from: string; to: string }
-	| { type: 'prompt.prepare'; id: string; text: string; attachments: ImageAttachment[] };
+	| { type: 'prompt.prepare'; id: string; text: string; attachments: ImageAttachment[] }
+	| { type: 'workspace.listFiles'; id: string };
 
 type CliSession = CliSessionSummary & {
 	commandLine: string;
@@ -36,7 +37,8 @@ type ServerMessage =
 	| { type: 'prompt.translated'; id: string; text: string; provider?: string; fromCache?: boolean }
 	| { type: 'prompt.translationError'; id: string; message: string }
 	| { type: 'prompt.prepared'; id: string; text: string }
-	| { type: 'prompt.prepareError'; id: string; message: string };
+	| { type: 'prompt.prepareError'; id: string; message: string }
+	| { type: 'workspace.files'; id: string; files: Array<{ name: string; path: string; isDirectory: boolean }> };
 
 type TerminalView = {
 	terminal: Terminal;
@@ -223,6 +225,25 @@ const preparePromptWithAttachments = (text: string, attachments: ImageAttachment
 	});
 };
 
+type WorkspaceFilesEntry = { name: string; path: string; isDirectory: boolean };
+const pendingWorkspaceFiles = new Map<string, (files: WorkspaceFilesEntry[]) => void>();
+let nextWorkspaceFilesId = 1;
+
+const requestWorkspaceFiles = (): Promise<WorkspaceFilesEntry[]> => {
+	const id = `ws-files-${nextWorkspaceFilesId++}`;
+	return new Promise((resolve) => {
+		const timeout = window.setTimeout(() => {
+			pendingWorkspaceFiles.delete(id);
+			resolve([]);
+		}, 5000);
+		pendingWorkspaceFiles.set(id, (files) => {
+			clearTimeout(timeout);
+			resolve(files);
+		});
+		vscode.postMessage({ type: 'workspace.listFiles', id });
+	});
+};
+
 const toolsController = layoutRight
 	? createToolsController({
 			container: layoutRight,
@@ -239,6 +260,7 @@ const toolsController = layoutRight
 				},
 				translatePrompt,
 				preparePromptWithAttachments,
+				requestWorkspaceFiles,
 				getTerminalSelection: () => {
 					if (!activeSessionId) {
 						return '';
@@ -711,6 +733,15 @@ window.addEventListener('message', (event: MessageEvent<ServerMessage>) => {
 
 	if (message.type === 'prompt.prepareError') {
 		rejectPromptPrepare(message);
+		return;
+	}
+
+	if (message.type === 'workspace.files') {
+		const handler = pendingWorkspaceFiles.get(message.id);
+		if (handler) {
+			pendingWorkspaceFiles.delete(message.id);
+			handler(message.files);
+		}
 		return;
 	}
 

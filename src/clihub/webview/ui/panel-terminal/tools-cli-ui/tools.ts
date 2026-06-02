@@ -12,6 +12,7 @@ export type ToolContext = {
 	translatePrompt?: (request: PromptTranslateRequest) => Promise<PromptTranslateResult>;
 	getTerminalSelection?: () => string;
 	preparePromptWithAttachments?: (text: string, attachments: ImageAttachment[]) => Promise<string>;
+	requestWorkspaceFiles?: () => Promise<Array<{ name: string; path: string; isDirectory: boolean }>>;
 };
 
 type ToolMount = (host: HTMLElement, context: ToolContext) => void;
@@ -22,6 +23,7 @@ export type ToolsControllerOptions = {
 	translatePrompt?: (request: PromptTranslateRequest) => Promise<PromptTranslateResult>;
 	getTerminalSelection?: () => string;
 	preparePromptWithAttachments?: (text: string, attachments: ImageAttachment[]) => Promise<string>;
+	requestWorkspaceFiles?: () => Promise<Array<{ name: string; path: string; isDirectory: boolean }>>;
 };
 
 const modalId = 'cli-tools-modal';
@@ -46,7 +48,8 @@ const toolMounts: Record<ToolId, ToolMount> = {
 		sendToActiveSession,
 		translatePrompt,
 		getTerminalSelection,
-		preparePromptWithAttachments
+		preparePromptWithAttachments,
+		requestWorkspaceFiles
 	}: ToolsControllerOptions) => {
 		let activeModal: HTMLElement | null = null;
 		let currentTool: ToolId | null = null;
@@ -110,7 +113,8 @@ const toolMounts: Record<ToolId, ToolMount> = {
 					sendToActiveSession,
 					translatePrompt,
 					getTerminalSelection,
-					preparePromptWithAttachments
+					preparePromptWithAttachments,
+					requestWorkspaceFiles
 				});
 
 		container.append(modal);

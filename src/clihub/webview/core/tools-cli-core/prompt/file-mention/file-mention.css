@@ -1,0 +1,117 @@
+/* ============================================================
+   FILE MENTION PICKER — triggered by "@" in the prompt textarea
+   ============================================================ */
+
+.fm-dropdown {
+  position: absolute;
+  z-index: 9999;
+  background: var(--vscode-editorWidget-background, #1e1e2e);
+  border: 1px solid var(--vscode-editorGroup-border, rgba(128,128,128,0.3));
+  border-radius: 8px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.55);
+  width: 320px;
+  max-height: 240px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  /* Reset inherited lowercase */
+  text-transform: none;
+  animation: fm-appear 0.15s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+@keyframes fm-appear {
+  from { opacity: 0; transform: translateY(-6px) scale(0.97); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.fm-search-wrap {
+  padding: 8px 10px 6px;
+  border-bottom: 0.5px solid var(--vscode-editorGroup-border, rgba(128,128,128,0.2));
+  flex-shrink: 0;
+}
+
+.fm-search {
+  width: 100%;
+  background: var(--vscode-input-background);
+  border: 0.5px solid var(--vscode-editorGroup-border);
+  border-radius: 5px;
+  color: var(--vscode-input-foreground);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  padding: 4px 8px;
+  outline: none;
+  text-transform: none;
+}
+.fm-search::placeholder {
+  color: var(--vscode-input-placeholderForeground);
+  opacity: 0.6;
+}
+
+.fm-list {
+  overflow-y: auto;
+  flex: 1;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(175,169,236,0.2) transparent;
+}
+
+.fm-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 10px;
+  cursor: pointer;
+  transition: background 0.1s;
+  user-select: none;
+  min-width: 0;
+}
+
+.fm-item:hover,
+.fm-item.active {
+  background: var(--vscode-list-hoverBackground, rgba(175,169,236,0.08));
+}
+
+.fm-item.active {
+  background: color-mix(in srgb, var(--agent-accent, #534AB7) 14%, transparent);
+}
+
+.fm-icon {
+  font-size: 13px;
+  flex-shrink: 0;
+  opacity: 0.85;
+}
+
+/* Folder icon orange/yellow, file icon muted */
+.fm-icon.folder { color: #e8a742; }
+.fm-icon.file   { color: var(--vscode-descriptionForeground); }
+
+.fm-name {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--vscode-foreground);
+  font-size: 11.5px;
+}
+
+.fm-path {
+  font-size: 10px;
+  color: var(--vscode-descriptionForeground);
+  opacity: 0.55;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 120px;
+  flex-shrink: 0;
+  text-align: right;
+}
+
+.fm-empty {
+  padding: 20px 12px;
+  color: var(--vscode-descriptionForeground);
+  opacity: 0.5;
+  text-align: center;
+  font-size: 11px;
+  font-style: italic;
+}

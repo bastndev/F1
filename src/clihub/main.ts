@@ -110,6 +110,11 @@ export class CliHubViewProvider implements vscode.WebviewViewProvider, vscode.Di
 					await this._handlePromptPrepare(webviewView.webview, message);
 					return;
 				}
+
+				if (message.type === 'workspace.listFiles') {
+					await this._handleWorkspaceListFiles(webviewView.webview, message);
+					return;
+				}
 	
 				if (message.type?.startsWith('cli.')) {
 					this.sessionManager.handleMessage(message);
@@ -120,6 +125,72 @@ export class CliHubViewProvider implements vscode.WebviewViewProvider, vscode.Di
 	public dispose() {
 		this.activePromptTranslation?.abort();
 		this.sessionManager.dispose();
+	}
+
+	private async _handleWorkspaceListFiles(webview: vscode.Webview, message: CliHubMessage) {
+		if (typeof message.id !== 'string') {
+			return;
+		}
+
+		try {
+			// Find files excluding common ignored directories
+			const uris = await vscode.workspace.findFiles('**/*', '{**/node_modules/**,**/.git/**,**/dist/**,**/out/**}', 1000);
+			const workspaceFolder = vscode.workspace.workspaceFolders?.[0];
+			
+			const files = uris.map(uri => {
+				const isDirectory = false; // findFiles only returns files
+				const name = path.basename(uri.fsPath);
+				// Get relative path if within workspace, else use full fsPath
+				let relativePath = uri.fsPath;
+				if (workspaceFolder && uri.fsPath.startsWith(workspaceFolder.uri.fsPath)) {
+					relativePath = uri.fsPath.substring(workspaceFolder.uri.fsPath.length + 1);
+					// Replace backslashes with forward slashes for consistency
+					relativePath = relativePath.replace(/\\/g, '/');
+				}
+
+				return {
+					name,
+					path: relativePath,
+					isDirectory
+				};
+			});
+
+			// If we also want directories, we could get unique directory paths from the files list
+			const dirs = new Set<string>();
+			files.forEach(f => {
+				const dirPath = path.dirname(f.path);
+				if (dirPath !== '.') {
+					// Add all parent directories
+					let current = dirPath;
+					while (current !== '.' && current !== '') {
+						dirs.add(current);
+						current = path.dirname(current);
+					}
+				}
+			});
+
+			const allEntries = [...files];
+			dirs.forEach(dir => {
+				allEntries.push({
+					name: path.basename(dir),
+					path: dir,
+					isDirectory: true
+				});
+			});
+
+			await webview.postMessage({
+				type: 'workspace.files',
+				id: message.id,
+				files: allEntries
+			});
+		} catch (error) {
+			console.error('Error listing workspace files:', error);
+			await webview.postMessage({
+				type: 'workspace.files',
+				id: message.id,
+				files: [] // Return empty on error
+			});
+		}
 	}
 
 	private async _handlePromptTranslate(webview: vscode.Webview, message: CliHubMessage) {

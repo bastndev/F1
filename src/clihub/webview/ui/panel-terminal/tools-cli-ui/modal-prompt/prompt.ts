@@ -12,6 +12,7 @@ import {
 	protectImageMarkers,
 	restoreImageMarkers,
 } from '../../../../core/tools-cli-core/prompt';
+import { mountFileMentionPicker } from '../../../../core/tools-cli-core/prompt/file-mention/file-mention';
 
 const stylesId = 'cli-prompt-panel-styles';
 
@@ -37,6 +38,7 @@ type PromptContext = {
 	sendToActiveSession?: (text: string) => void;
 	translatePrompt?: (request: PromptTranslateRequest) => Promise<PromptTranslateResult>;
 	preparePromptWithAttachments?: (text: string, attachments: ImageAttachment[]) => Promise<string>;
+	requestWorkspaceFiles?: () => Promise<Array<{ name: string; path: string; isDirectory: boolean }>>;
 };
 
 export const mountPromptPanel = (host: HTMLElement, context: PromptContext = { close: () => {} }) => {
@@ -76,6 +78,18 @@ function initPromptTabs(host: HTMLElement, context: PromptContext, hasActiveSess
 
 	// Force lowercase input, with Shift as the only way to write uppercase
 	enforceLowercaseInput(textarea);
+
+	// @ file mention picker
+	if (context.requestWorkspaceFiles) {
+		const textareaWrapEl = host.querySelector<HTMLElement>('.prompt-textarea-wrap');
+		if (textareaWrapEl) {
+			mountFileMentionPicker(
+				textarea,
+				textareaWrapEl,
+				() => context.requestWorkspaceFiles!()
+			);
+		}
+	}
 
 	// Image attachments state (lives while this modal instance is mounted)
 	let imageAttachments: ImageAttachment[] = [];
