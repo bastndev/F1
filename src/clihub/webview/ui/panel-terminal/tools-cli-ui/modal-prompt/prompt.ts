@@ -81,6 +81,10 @@ function initPromptTabs(host: HTMLElement, context: PromptContext, hasActiveSess
 	enforceLowercaseInput(textarea);
 
 	// @ file mention picker
+	// We pass the wrap as the "anchor" for position calculations (getBoundingClientRect).
+	// Internally the picker now portals the dropdown to the outer #cli-tools-modal
+	// (using position:absolute relative to it) so the list can float freely upwards
+	// in the full dialog area without being height-limited by the input box or card.
 	if (context.requestWorkspaceFiles) {
 		const textareaWrapEl = host.querySelector<HTMLElement>('.prompt-textarea-wrap');
 		if (textareaWrapEl) {

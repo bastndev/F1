@@ -28,24 +28,52 @@ export function mountFileMentionPicker(
 	// Avoids hammering the host with findFiles on every keystroke after "@".
 	let cachedEntries: FileMentionEntry[] | null = null;
 
+	// Portal target: we append the dropdown here (instead of the small textarea wrap)
+	// so it can float freely in the upper area of the whole modal without being
+	// height-clipped by the input box or .prompt-modal card.
+	// We use #cli-tools-modal (the full overlay) when available for maximum freedom.
+	const portal = (container.closest('#cli-tools-modal') ||
+	                container.closest('.prompt-modal') ||
+	                document.body) as HTMLElement;
+
 	// ── helpers ──────────────────────────────────────────────────────
 
-	const getDropdownPosition = () => {
-		const rect = textarea.getBoundingClientRect();
-		const containerRect = container.getBoundingClientRect();
-		return {
-			bottom: containerRect.bottom - rect.top,
-			left: 0,
-		};
-	};
-
+	/**
+	 * Position the dropdown "above" the textarea using the portal as containing block.
+	 * This allows the picker to have full height freedom in the upper part of the
+	 * dialog (it is no longer constrained to the height of .prompt-textarea-wrap
+	 * or the prompt card itself).
+	 */
 	const positionDropdown = () => {
 		if (!dropdown) { return; }
-		const pos = getDropdownPosition();
+
+		const taRect = textarea.getBoundingClientRect();
+		const portalRect = portal.getBoundingClientRect();
+
+		// Measure after content is rendered so we have the real list height.
+		const h = dropdown.offsetHeight || 220;
+
+		// Place the *bottom* of the dropdown a few px above the top of the textarea,
+		// relative to the portal (so it can live high up in the modal overlay).
+		const left = taRect.left - portalRect.left;
+		const top = taRect.top - portalRect.top - h - 6;
+
+		// Clamp left so the dropdown doesn't overflow the right edge of the portal
+		// (helps when the input is near the right of the card and 320px width would
+		// otherwise hang too far "de costado").
+		let finalLeft = left;
+		const dropdownWidth = dropdown.offsetWidth || 320;
+		const maxLeft = Math.max(0, portalRect.width - dropdownWidth - 12);
+		if (finalLeft > maxLeft) {
+			finalLeft = maxLeft;
+		}
+
 		Object.assign(dropdown.style, {
 			position: 'absolute',
-			bottom: pos.bottom + 'px',
-			left: pos.left + 'px',
+			left: `${finalLeft}px`,
+			top: `${top}px`,
+			// Clear legacy bottom positioning from previous implementation
+			bottom: '',
 		});
 	};
 
@@ -145,20 +173,16 @@ export function mountFileMentionPicker(
 	};
 
 	const openDropdown = async (query: string) => {
-		if (!dropdown) {
+		const isFirstCreation = !dropdown;
+
+		if (isFirstCreation) {
 			dropdown = document.createElement('div');
 			dropdown.className = 'fm-dropdown';
 
 			dropdown.innerHTML = `
 				<div class="fm-list"></div>
 			`;
-
-			container.appendChild(dropdown);
-			document.addEventListener('click', onOutsideClick);
 		}
-
-		// Always refresh position (textarea can grow with multiline content)
-		positionDropdown();
 
 		if (!cachedEntries) {
 			// First time for this prompt panel instance: fetch from host (expensive findFiles)
@@ -166,6 +190,21 @@ export function mountFileMentionPicker(
 		}
 
 		renderItems(cachedEntries!, query);
+
+		if (isFirstCreation && dropdown) {
+			// Append *after* we have real content (and thus real height).
+			// No empty unpositioned box flashes during the initial fetch.
+			// Append to portal so the tall list can live freely above the prompt card.
+			portal.appendChild(dropdown);
+			document.addEventListener('click', onOutsideClick);
+		}
+
+		// Always (re)position after render because:
+		// - list height depends on filter results
+		// - textarea may have grown
+		// This uses the portal for absolute coords so the picker is not clipped
+		// by the small .prompt-textarea-wrap or the modal card height.
+		positionDropdown();
 	};
 
 	// ── Textarea listeners ───────────────────────────────────────────
