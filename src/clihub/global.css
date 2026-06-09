@@ -102,17 +102,29 @@ body {
 	padding: 0 20px;
 }
 
-.logo {
-	font-family: monospace;
-	font-size: 12px;
-	line-height: 1.2;
+	.logo {
+		position: relative;
+		font-family: monospace;
+		font-size: 12px;
+		line-height: 1.2;
 	color: var(--text-color); /* Se adapta al tema (negro en claro, blanco en oscuro) */
 	margin-bottom: 0.5rem; /* Margen reducido para acercarlo al chat */
 	white-space: pre;
 	text-align: center;
 	user-select: none;
-	-webkit-user-select: none;
-}
+		-webkit-user-select: none;
+	}
+
+	.logo-bolt {
+		position: absolute;
+		top: 1px;
+		right: 57px;
+		color: var(--accent-color);
+		filter: drop-shadow(0 0 5px var(--accent-color));
+		font-size: 13px;
+		line-height: 1;
+		animation: pulseGlow 2.5s ease-in-out;
+	}
 
 /* --- --- TXT Hub -> */
 .hub-text {
