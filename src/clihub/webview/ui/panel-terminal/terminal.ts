@@ -287,6 +287,23 @@ const openPromptFromTerminal = (sessionId: string) => {
 	toolsController.open('prompt');
 };
 
+const openTranslatorFromTerminal = (sessionId: string) => {
+	if (!isPromptFilterEnabled || !toolsController) {
+		return;
+	}
+
+	if (sessionId !== activeSessionId) {
+		return;
+	}
+
+	const session = sessions.get(sessionId);
+	if (session?.status !== 'running') {
+		return;
+	}
+
+	toolsController.open('translate');
+};
+
 const toolsController = layoutRight
 	? createToolsController({
 			container: layoutRight,
@@ -599,12 +616,13 @@ const createTerminalView = (session: CliSession) => {
 		}
 
 		const moved = Math.hypot(event.clientX - pointerStart.x, event.clientY - pointerStart.y);
-		if (moved > promptFilterClickMoveThreshold || pointerStart.hadSelection) {
-			return;
-		}
-
 		window.setTimeout(() => {
-			if (!terminal.hasSelection()) {
+			if (terminal.hasSelection()) {
+				openTranslatorFromTerminal(session.id);
+				return;
+			}
+
+			if (moved <= promptFilterClickMoveThreshold && !pointerStart.hadSelection) {
 				openPromptFromTerminal(session.id);
 			}
 		}, 0);
