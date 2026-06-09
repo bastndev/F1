@@ -22,7 +22,6 @@ type LauncherState = {
 	launcherSessionId: string;
 	currentIndex: number;
 	inputValue: string;
-	paletteOpen: boolean;
 	selectedAgent?: string;
 };
 
@@ -57,7 +56,6 @@ const isLauncherState = (value: unknown): value is LauncherState => {
 		&& typeof state.currentIndex === 'number'
 		&& Number.isInteger(state.currentIndex)
 		&& typeof state.inputValue === 'string'
-		&& typeof state.paletteOpen === 'boolean'
 		&& (state.selectedAgent === undefined || typeof state.selectedAgent === 'string');
 };
 
@@ -196,7 +194,6 @@ const saveLauncherState = () => {
 		launcherSessionId: launcherStateSessionId,
 		currentIndex,
 		inputValue: cliInput.value,
-		paletteOpen,
 		selectedAgent: selectedModel?.label
 	});
 };

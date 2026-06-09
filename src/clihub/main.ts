@@ -77,6 +77,13 @@ export class CliHubViewProvider implements vscode.WebviewViewProvider, vscode.Di
 			this.sessionManager.detach();
 		});
 		webviewView.webview.onDidReceiveMessage(async (message: CliHubMessage) => {
+			if (message.type === 'launcher.open') {
+				this.pendingInitialAgent = undefined;
+				this.sessionManager.detach();
+				webviewView.webview.html = await this._getHtmlForWebview(webviewView.webview);
+				return;
+			}
+
 			if (message.type === 'openAgent' && message.agent && allowedAgents.has(message.agent)) {
 				const agent = getCliAgent(message.agent);
 				if (!agent || !(await ensureCliInstalled(agent))) {
@@ -88,8 +95,8 @@ export class CliHubViewProvider implements vscode.WebviewViewProvider, vscode.Di
 				return;
 			}
 
-				if (message.type === 'cli.ready') {
-					this.sessionManager.attach(webviewView.webview);
+			if (message.type === 'cli.ready') {
+				this.sessionManager.attach(webviewView.webview);
 
 				if (this.pendingInitialAgent) {
 					void this.sessionManager.createSession(this.pendingInitialAgent);
@@ -98,27 +105,27 @@ export class CliHubViewProvider implements vscode.WebviewViewProvider, vscode.Di
 					this.sessionManager.postState();
 				}
 
-					return;
-				}
+				return;
+			}
 
-				if (message.type === 'prompt.translate') {
-					await this._handlePromptTranslate(webviewView.webview, message);
-					return;
-				}
+			if (message.type === 'prompt.translate') {
+				await this._handlePromptTranslate(webviewView.webview, message);
+				return;
+			}
 
-				if (message.type === 'prompt.prepare') {
-					await this._handlePromptPrepare(webviewView.webview, message);
-					return;
-				}
+			if (message.type === 'prompt.prepare') {
+				await this._handlePromptPrepare(webviewView.webview, message);
+				return;
+			}
 
-				if (message.type === 'workspace.listFiles') {
-					await this._handleWorkspaceListFiles(webviewView.webview, message);
-					return;
-				}
-	
-				if (message.type?.startsWith('cli.')) {
-					this.sessionManager.handleMessage(message);
-				}
+			if (message.type === 'workspace.listFiles') {
+				await this._handleWorkspaceListFiles(webviewView.webview, message);
+				return;
+			}
+
+			if (message.type?.startsWith('cli.')) {
+				this.sessionManager.handleMessage(message);
+			}
 		});
 	}
 

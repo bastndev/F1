@@ -15,6 +15,7 @@ type ClientMessage =
 	| { type: 'cli.switch'; sessionId: string }
 	| { type: 'cli.resize'; sessionId?: string; cols: number; rows: number }
 	| { type: 'cli.close'; sessionId: string }
+	| { type: 'launcher.open' }
 	| { type: 'prompt.translate'; id: string; text: string; from: string; to: string }
 	| { type: 'prompt.prepare'; id: string; text: string; attachments: ImageAttachment[] }
 	| { type: 'workspace.listFiles'; id: string };
@@ -69,6 +70,7 @@ const pendingPromptTranslations = new Map<string, PendingPromptTranslation>();
 const pendingPromptPrepares = new Map<string, PendingPromptPrepare>();
 let activeSessionId: string | undefined;
 let pendingTabSwitchSessionId: string | undefined;
+let hasOpenedSession = false;
 let nextPromptTranslationId = 1;
 let nextPromptPrepareId = 1;
 
@@ -599,6 +601,11 @@ const updateAgentTheme = () => {
 };
 
 const syncState = (message: Extract<ServerMessage, { type: 'cli.state' }>) => {
+	const shouldReturnToLauncher = hasOpenedSession && message.sessions.length === 0;
+	if (message.sessions.length > 0) {
+		hasOpenedSession = true;
+	}
+
 	activeSessionId = message.activeSessionId;
 	tabController.setAgents(message.agents);
 	sessions.clear();
@@ -629,6 +636,11 @@ const syncState = (message: Extract<ServerMessage, { type: 'cli.state' }>) => {
 
 	tabController.render(message.sessions, activeSessionId);
 	setActiveTerminal();
+
+	if (shouldReturnToLauncher) {
+		hasOpenedSession = false;
+		vscode.postMessage({ type: 'launcher.open' });
+	}
 };
 
 const handleOutput = (message: Extract<ServerMessage, { type: 'cli.output' }>) => {
