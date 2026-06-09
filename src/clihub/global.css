@@ -117,8 +117,8 @@ body {
 
 	.logo-bolt {
 		position: absolute;
-		top: -13px;
-		right: 34px;
+		top: 1px;
+		right: 1px;
 		color: var(--accent-color);
 		filter: drop-shadow(0 0 5px var(--accent-color));
 		font-size: 13px;
