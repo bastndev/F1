@@ -455,6 +455,34 @@
 	background: var(--vscode-focusBorder, var(--vscode-textLink-foreground));
 }
 
+.agent-tools-toast {
+	position: fixed;
+	left: 50%;
+	bottom: 14px;
+	z-index: 2000;
+	max-width: calc(100vw - 28px);
+	padding: 7px 10px;
+	border: 1px solid var(--vscode-editorGroup-border, rgba(128, 128, 128, 0.28));
+	border-radius: 6px;
+	box-sizing: border-box;
+	background: var(--vscode-notifications-background, var(--vscode-editorWidget-background, var(--vscode-editor-background)));
+	color: var(--vscode-notifications-foreground, var(--vscode-foreground));
+	font-family: var(--vscode-font-family);
+	font-size: 12px;
+	line-height: 1.2;
+	opacity: 0;
+	pointer-events: none;
+	transform: translate(-50%, 8px);
+	transition: opacity 140ms ease, transform 140ms ease;
+	box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+	white-space: nowrap;
+}
+
+.agent-tools-toast.is-visible {
+	opacity: 1;
+	transform: translate(-50%, 0);
+}
+
 .agent-session-list {
 	min-height: 0;
 	display: flex;

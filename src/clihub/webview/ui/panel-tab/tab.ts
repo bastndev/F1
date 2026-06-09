@@ -58,6 +58,8 @@ const getProjectLabel = (cwd: string) => {
 	return projectName ? `~/${projectName}` : '~/workspace';
 };
 
+const promptFilterToastId = 'cli-prompt-filter-toast';
+
 export const createTabController = (options: TabControllerOptions) => {
 	const createButton = getRequiredElement<HTMLButtonElement>('cli-create-button');
 	const createButtonLabel = getRequiredElement<HTMLSpanElement>('cli-create-button-label');
@@ -79,6 +81,7 @@ export const createTabController = (options: TabControllerOptions) => {
 	let currentSessionCount = 0;
 	let isAltPressed = false;
 	let isPromptFilterEnabled = false;
+	let promptFilterToastTimer: number | undefined;
 
 	const setAgentMenuOpen = (isOpen: boolean) => {
 		isAgentMenuOpen = isOpen;
@@ -108,10 +111,38 @@ export const createTabController = (options: TabControllerOptions) => {
 		options.onDismissToolModal?.();
 	};
 
-	const setPromptFilterEnabled = (enabled: boolean) => {
+	const showPromptFilterToast = (enabled: boolean) => {
+		window.clearTimeout(promptFilterToastTimer);
+
+		let toast = document.getElementById(promptFilterToastId);
+		if (!toast) {
+			toast = document.createElement('div');
+			toast.id = promptFilterToastId;
+			toast.className = 'agent-tools-toast';
+			toast.setAttribute('role', 'status');
+			toast.setAttribute('aria-live', 'polite');
+			document.body.append(toast);
+		}
+
+		toast.textContent = enabled ? 'Prompt filter enabled ✅' : 'Prompt filter disabled ❌';
+		toast.classList.add('is-visible');
+
+		promptFilterToastTimer = window.setTimeout(() => {
+			toast?.classList.remove('is-visible');
+		}, 1600);
+	};
+
+	const setPromptFilterEnabled = (enabled: boolean, notify = true) => {
 		isPromptFilterEnabled = enabled;
 		promptFilterToggle.checked = enabled;
 		options.onPromptFilterChange?.(enabled);
+		if (notify) {
+			showPromptFilterToast(enabled);
+		}
+	};
+
+	const togglePromptFilter = () => {
+		setPromptFilterEnabled(!isPromptFilterEnabled);
 	};
 
 	const syncAgentPicker = () => {
@@ -219,6 +250,13 @@ export const createTabController = (options: TabControllerOptions) => {
 		if (matchesShortcut(event, 'toggleAgentPicker')) {
 			if (consumeShortcut(event, 'toggleAgentPicker')) {
 				toggleAgentPicker();
+				return true;
+			}
+		}
+
+		if (matchesShortcut(event, 'togglePromptFilter')) {
+			if (consumeShortcut(event, 'togglePromptFilter')) {
+				togglePromptFilter();
 				return true;
 			}
 		}
@@ -356,7 +394,7 @@ export const createTabController = (options: TabControllerOptions) => {
 		}
 	});
 
-	setPromptFilterEnabled(isPromptFilterEnabled);
+	setPromptFilterEnabled(isPromptFilterEnabled, false);
 
 	document.addEventListener('click', () => {
 		closeFloatingPanels();

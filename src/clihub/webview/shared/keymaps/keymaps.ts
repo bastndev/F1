@@ -15,6 +15,7 @@ export type ShortcutId =
   | 'newSession'
   | 'closeSession'
   | 'toggleAgentPicker'   // terminal agent selector
+  | 'togglePromptFilter'  // terminal prompt filter
   | 'nextSession'
   | 'prevSession'
   | 'toggleAgentPalette'   // launcher only
@@ -107,6 +108,19 @@ export function ctrlTab() {
   };
 }
 
+/** Matches Ctrl + Space */
+export function ctrlSpace() {
+  return (event: KeyboardEvent): boolean => {
+    return (
+      (event.key === ' ' || event.code === 'Space') &&
+      event.ctrlKey &&
+      !event.altKey &&
+      !event.metaKey &&
+      !event.shiftKey
+    );
+  };
+}
+
 /** Matches Escape key */
 export function escapeKey() {
   return (event: KeyboardEvent): boolean => {
@@ -149,6 +163,13 @@ export const shortcuts: ShortcutDefinition[] = [
     contexts: ['terminal'],
     description: 'Ctrl + Tab',
     match: ctrlTab(),
+  },
+  {
+    id: 'togglePromptFilter',
+    label: 'Toggle Prompt filter',
+    contexts: ['terminal'],
+    description: 'Ctrl + Space',
+    match: ctrlSpace(),
   },
   {
     id: 'nextSession',
