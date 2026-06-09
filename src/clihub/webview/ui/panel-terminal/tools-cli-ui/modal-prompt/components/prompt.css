@@ -359,6 +359,17 @@
   color: var(--vscode-input-foreground);
 }
 
+/* @file-mention tokens — blue, matching VS Code link / variable colour */
+.prompt-textarea-highlight .prompt-mention {
+  color: var(--vscode-textLink-foreground, #58a6ff);
+  font-weight: 500;
+}
+
+/* When a mention is (partially) selected, the selection colour wins */
+.prompt-textarea-highlight .selected .prompt-mention {
+  color: inherit !important;
+}
+
 .prompt-char-count {
   position: absolute;
   bottom: 10px;

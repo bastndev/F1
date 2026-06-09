@@ -9,10 +9,17 @@ import { getCliHubWebviewHtml } from './webview/webview';
 import { translatePromptToEnglish } from './webview/core/tools-cli-core/modal-translation/host-prompt-translator';
 import { preparePromptForCLI } from './webview/core/tools-cli-core/prompt/attachments/host-preparer';
 import type { ImageAttachment } from './webview/core/tools-cli-core/prompt';
+import {
+	getAgentLaunchGuardMessage,
+	type AgentLaunchExtensionMode,
+	type AgentLaunchGuardMessage,
+	type AgentLaunchSource
+} from './webview/ui/panel-terminal/agent-safety/agent-launch-guard';
 
 type CliHubMessage = {
 	type?: string;
 	agent?: string;
+	launchGuard?: AgentLaunchGuardMessage;
 	id?: string;
 	text?: string;
 	from?: string;
@@ -79,7 +86,15 @@ export class CliHubViewProvider implements vscode.WebviewViewProvider, vscode.Di
 		webviewView.webview.onDidReceiveMessage(async (message: CliHubMessage) => {
 			if (message.type === 'openAgent' && message.agent && allowedAgents.has(message.agent)) {
 				const agent = getCliAgent(message.agent);
-				if (!agent || !(await ensureCliInstalled(agent))) {
+				if (!agent) {
+					return;
+				}
+
+				if (!(await this._confirmAgentLaunch(message.agent, 'launcher'))) {
+					return;
+				}
+
+				if (!(await ensureCliInstalled(agent))) {
 					return;
 				}
 
@@ -116,6 +131,12 @@ export class CliHubViewProvider implements vscode.WebviewViewProvider, vscode.Di
 				return;
 			}
 
+			if (message.type === 'cli.create' && message.agent && allowedAgents.has(message.agent)) {
+				if (!(await this._confirmAgentLaunch(message.agent, 'panel'))) {
+					return;
+				}
+			}
+
 			if (message.type?.startsWith('cli.')) {
 				const result = this.sessionManager.handleMessage(message);
 				if (result === 'closed-last-session') {
@@ -129,6 +150,39 @@ export class CliHubViewProvider implements vscode.WebviewViewProvider, vscode.Di
 	public dispose() {
 		this.activePromptTranslation?.abort();
 		this.sessionManager.dispose();
+	}
+
+	private _getAgentLaunchExtensionMode(): AgentLaunchExtensionMode {
+		if (this._extensionContext?.extensionMode === vscode.ExtensionMode.Development) {
+			return 'development';
+		}
+		if (this._extensionContext?.extensionMode === vscode.ExtensionMode.Test) {
+			return 'test';
+		}
+		if (this._extensionContext?.extensionMode === vscode.ExtensionMode.Production) {
+			return 'production';
+		}
+
+		return 'unknown';
+	}
+
+	private async _confirmAgentLaunch(agentLabel: string, source: AgentLaunchSource) {
+		const guard = getAgentLaunchGuardMessage(agentLabel, {
+			source,
+			extensionMode: this._getAgentLaunchExtensionMode()
+		});
+		if (!guard) {
+			return true;
+		}
+
+		const choice = await vscode.window.showWarningMessage(
+			guard.message,
+			{ modal: true, detail: guard.detail },
+			guard.confirmLabel,
+			guard.cancelLabel
+		);
+
+		return choice === guard.confirmLabel;
 	}
 
 	private async _handleWorkspaceListFiles(webview: vscode.Webview, message: CliHubMessage) {

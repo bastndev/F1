@@ -1,6 +1,7 @@
 import { FitAddon } from '@xterm/addon-fit';
 import { Terminal } from '@xterm/xterm';
 import { createTabController, type CliAgentIcon, type CliAgentOption, type CliSessionSummary } from '../panel-tab/tab';
+import { createCliCreateMessage, type AgentLaunchGuardMessage } from './agent-safety/agent-launch-guard';
 import { createToolsController } from './tools-cli-ui/tools';
 import type { ImageAttachment, PromptTranslateRequest, PromptTranslateResult, FileMentionEntry } from '../../core/tools-cli-core/prompt';
 
@@ -10,7 +11,7 @@ type VsCodeApi = {
 
 type ClientMessage =
 	| { type: 'cli.ready' }
-	| { type: 'cli.create'; agent: string }
+	| { type: 'cli.create'; agent: string; launchGuard?: AgentLaunchGuardMessage }
 	| { type: 'cli.input'; sessionId: string; data: string }
 	| { type: 'cli.switch'; sessionId: string }
 	| { type: 'cli.resize'; sessionId?: string; cols: number; rows: number }
@@ -336,7 +337,10 @@ const toolsController = layoutRight
 
 const tabController = createTabController({
 	getAgentIcon: (label) => agentIcons.get(label),
-	onCreate: (agent) => vscode.postMessage({ type: 'cli.create', agent }),
+	onCreate: (agent) => vscode.postMessage(createCliCreateMessage(agent, {
+		source: 'panel',
+		extensionMode: 'unknown'
+	})),
 	onCycleSession: (offset) => {
 		switchSessionByOffset(offset);
 	},

@@ -693,7 +693,10 @@ function setupImagePaste(
 			.filter((part) => part && part.trim().length > 0)
 			.join(textWithMarkers && imageMarkers.length ? ' ' : '');
 
-		insertTextAtSelection(textarea, insertValue);
+		// Add a trailing space when the insert ends with an image marker so the
+		// cursor lands right after the token ready to type — same as @path mentions.
+		const insertWithSpacing = insertValue.endsWith(']') ? insertValue + ' ' : insertValue;
+		insertTextAtSelection(textarea, insertWithSpacing);
 	});
 }
 
@@ -727,6 +730,8 @@ function updatePromptImageHighlight(
   highlight.scrollLeft = textarea.scrollLeft;
 }
 
+type TokenKind = 'image' | 'mention' | 'plain';
+
 function buildPromptHighlightNodes(text: string, selStart: number = -1, selEnd: number = -1): Node[] {
   if (!text) {
     return [];
@@ -734,34 +739,43 @@ function buildPromptHighlightNodes(text: string, selStart: number = -1, selEnd: 
 
   const nodes: Node[] = [];
   let lastIndex = 0;
-
   const hasSel = selStart >= 0 && selEnd > selStart;
 
-  const markerMatches = Array.from(text.matchAll(/\[Image #(\d+)\]/g));
+  // Collect all special tokens (image markers + @file mentions) sorted by position.
+  type Token = { start: number; end: number; kind: TokenKind };
+  const tokens: Token[] = [];
 
-  for (const match of markerMatches) {
-    const mStart = match.index ?? 0;
-    const mEnd = mStart + match[0].length;
+  for (const match of text.matchAll(/\[Image #(\d+)\]/g)) {
+    tokens.push({ start: match.index ?? 0, end: (match.index ?? 0) + match[0].length, kind: 'image' });
+  }
+  // @mention: '@' followed by any non-whitespace chars (file paths inserted by the picker)
+  for (const match of text.matchAll(/@\S+/g)) {
+    tokens.push({ start: match.index ?? 0, end: (match.index ?? 0) + match[0].length, kind: 'mention' });
+  }
+  tokens.sort((a, b) => a.start - b.start);
 
-    // plain text before this marker
-    if (mStart > lastIndex) {
-      appendSegment(nodes, text, lastIndex, mStart, selStart, selEnd, hasSel, false);
+  for (const token of tokens) {
+    // Guard against overlapping tokens (should not happen in practice)
+    if (token.start < lastIndex) { continue; }
+
+    // plain text before this token
+    if (token.start > lastIndex) {
+      appendSegment(nodes, text, lastIndex, token.start, selStart, selEnd, hasSel, 'plain');
     }
-
-    // the marker token
-    appendSegment(nodes, text, mStart, mEnd, selStart, selEnd, hasSel, true);
-
-    lastIndex = mEnd;
+    // the token itself
+    appendSegment(nodes, text, token.start, token.end, selStart, selEnd, hasSel, token.kind);
+    lastIndex = token.end;
   }
 
   // trailing plain text
   if (lastIndex < text.length) {
-    appendSegment(nodes, text, lastIndex, text.length, selStart, selEnd, hasSel, false);
+    appendSegment(nodes, text, lastIndex, text.length, selStart, selEnd, hasSel, 'plain');
   }
 
   return nodes;
 }
 
+/** Append one text segment to the node list, honouring selection overlap. */
 function appendSegment(
   nodes: Node[],
   fullText: string,
@@ -770,80 +784,46 @@ function appendSegment(
   selStart: number,
   selEnd: number,
   hasSel: boolean,
-  isMarker: boolean
+  kind: TokenKind
 ) {
-  if (from >= to) {
-    return;
-  }
+  if (from >= to) { return; }
+
+  const cssClass = kind === 'image' ? 'prompt-image-marker'
+                 : kind === 'mention' ? 'prompt-mention'
+                 : 'plain';
+
+  const makeSpan = (content: string, cls: string): HTMLSpanElement => {
+    const s = document.createElement('span');
+    s.className = cls;
+    s.textContent = content;
+    return s;
+  };
 
   const segmentText = fullText.slice(from, to);
 
   if (!hasSel || to <= selStart || from >= selEnd) {
-    // no selection overlap
-    if (isMarker) {
-      const span = document.createElement('span');
-      span.className = 'prompt-image-marker';
-      span.textContent = segmentText;
-      nodes.push(span);
-    } else {
-      const span = document.createElement('span');
-      span.className = 'plain';
-      span.textContent = segmentText;
-      nodes.push(span);
-    }
+    // No selection overlap — simple case
+    nodes.push(makeSpan(segmentText, cssClass));
     return;
   }
 
-  // overlaps selection: split into before / selected / after
+  // Overlaps selection: split into before / selected / after
   const selFrom = Math.max(from, selStart);
-  const selTo = Math.min(to, selEnd);
+  const selTo   = Math.min(to,   selEnd);
 
   if (from < selFrom) {
-    const before = fullText.slice(from, selFrom);
-    if (isMarker) {
-      const span = document.createElement('span');
-      span.className = 'prompt-image-marker';
-      span.textContent = before;
-      nodes.push(span);
-    } else {
-      const span = document.createElement('span');
-      span.className = 'plain';
-      span.textContent = before;
-      nodes.push(span);
-    }
+    nodes.push(makeSpan(fullText.slice(from, selFrom), cssClass));
   }
 
   if (selFrom < selTo) {
-    const selectedText = fullText.slice(selFrom, selTo);
     const selSpan = document.createElement('span');
     selSpan.className = 'selected';
-    if (isMarker) {
-      // wrap marker content so badge can be overridden by .selected
-      const markerSpan = document.createElement('span');
-      markerSpan.className = 'prompt-image-marker';
-      markerSpan.textContent = selectedText;
-      selSpan.appendChild(markerSpan);
-    } else {
-      const plainSel = document.createElement('span');
-      plainSel.className = 'plain';
-      plainSel.textContent = selectedText;
-      selSpan.appendChild(plainSel);
-    }
+    // Nest the token span inside .selected so the badge/colour can be overridden
+    selSpan.appendChild(makeSpan(fullText.slice(selFrom, selTo), cssClass));
     nodes.push(selSpan);
   }
 
   if (selTo < to) {
-    const after = fullText.slice(selTo, to);
-    if (isMarker) {
-      const span = document.createElement('span');
-      span.className = 'prompt-image-marker';
-      span.textContent = after;
-      nodes.push(span);
-    } else {
-      const span = document.createElement('span');
-      span.className = 'plain';
-      span.textContent = after;
-      nodes.push(span);
-    }
+    nodes.push(makeSpan(fullText.slice(selTo, to), cssClass));
   }
 }

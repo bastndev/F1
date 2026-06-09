@@ -82,14 +82,28 @@ export function mountFileMentionPicker(
 		const list = dropdown.querySelector<HTMLElement>('.fm-list');
 		if (!list) { return; }
 
-		// folders first, then files; filtered by name OR path (better discoverability)
+		// Relevance-first sort: name starts-with query > name contains query > path contains query.
+		// Within each tier: directories before files, then alphabetical.
 		const lc = filter.toLowerCase();
+
+		/** 0 = name starts with query (best), 1 = name contains query, 2 = only path matches */
+		const relevance = (e: FileMentionEntry): number => {
+			const nameLc = e.name.toLowerCase();
+			if (nameLc.startsWith(lc)) { return 0; }
+			if (nameLc.includes(lc))   { return 1; }
+			return 2;
+		};
+
 		const filtered = items
 			.filter(e => {
 				const haystack = `${e.name} ${e.path}`.toLowerCase();
 				return haystack.includes(lc);
 			})
 			.sort((a, b) => {
+				const ra = relevance(a);
+				const rb = relevance(b);
+				if (ra !== rb) { return ra - rb; }
+				// Within same relevance tier: directories first, then alphabetical
 				if (a.isDirectory !== b.isDirectory) { return a.isDirectory ? -1 : 1; }
 				return a.name.localeCompare(b.name);
 			});
@@ -209,13 +223,72 @@ export function mountFileMentionPicker(
 
 	// ── Textarea listeners ───────────────────────────────────────────
 
+	/**
+	 * Ctrl+Backspace while the caret is right after an @mention:
+	 * deletes everything between '@' and the caret, leaving '@' so
+	 * the user can type a new path without closing the modal.
+	 * Returns true if it handled the event (caller should return early).
+	 */
+	const handleMentionCtrlBackspace = (e: KeyboardEvent): boolean => {
+		if (!e.ctrlKey || e.key !== 'Backspace') { return false; }
+
+		const caret = textarea.selectionStart ?? 0;
+		const selEnd = textarea.selectionEnd ?? 0;
+
+		// Only act when nothing is selected and caret is not at the very start
+		if (caret !== selEnd || caret === 0) { return false; }
+
+		const value = textarea.value;
+
+		// selectEntry appends a trailing space after the path ("@path ").
+		// If the caret is sitting right after that space, skip it before scanning
+		// so the backwards walk reaches '@' in one Ctrl+Backspace press.
+		// We also extend the delete range to consume that trailing space.
+		let scanFrom = caret;
+		if (scanFrom > 0 && value[scanFrom - 1] === ' ') {
+			scanFrom -= 1;
+		}
+
+		// Scan backwards looking for a bare '@' trigger.
+		// Stop at any whitespace that isn't the one space we already skipped.
+		let atPos = -1;
+		for (let i = scanFrom - 1; i >= 0; i--) {
+			const ch = value[i];
+			if (ch === '@') {
+				// Valid trigger: at start-of-string OR preceded by whitespace
+				if (i === 0 || /\s/.test(value[i - 1])) {
+					atPos = i;
+				}
+				break;
+			}
+			if (/\s/.test(ch)) { break; } // left the token, stop
+		}
+
+		if (atPos === -1) { return false; }
+
+		// Delete from the char right after '@' up to the original caret
+		// (includes the trailing space when present) → leaves a clean '@'
+		e.preventDefault();
+		e.stopPropagation();
+		const newValue = value.slice(0, atPos + 1) + value.slice(caret);
+		textarea.value = newValue;
+		const newPos = atPos + 1;
+		textarea.setSelectionRange(newPos, newPos);
+		textarea.dispatchEvent(new Event('input', { bubbles: true }));
+		return true;
+	};
+
 	textarea.addEventListener('keydown', (e) => {
+		// Ctrl+Backspace on an @mention → erase the path, keep '@'
+		// Must run BEFORE the dropdown guard so it works even when dropdown is closed.
+		if (handleMentionCtrlBackspace(e)) { return; }
+
 		if (!dropdown) { return; }
 		if (e.key === 'ArrowDown') { e.preventDefault(); activeIndex = Math.min(activeIndex + 1, entries.length - 1); updateActive(); }
 		if (e.key === 'ArrowUp')   { e.preventDefault(); activeIndex = Math.max(activeIndex - 1, 0); updateActive(); }
 		if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) { /* let send shortcut handle */ return; }
 		if (e.key === 'Enter')  { e.preventDefault(); if (entries[activeIndex]) { selectEntry(entries[activeIndex]); } }
-		if (e.key === 'Escape') { closeDropdown(); }
+		if (e.key === 'Escape') { e.stopPropagation(); closeDropdown(); }
 		if (e.key === 'Tab')    { e.preventDefault(); if (entries[activeIndex]) { selectEntry(entries[activeIndex]); } }
 	});
 
