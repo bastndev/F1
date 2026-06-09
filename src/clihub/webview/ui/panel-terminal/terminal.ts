@@ -1,7 +1,8 @@
 import { FitAddon } from '@xterm/addon-fit';
 import { Terminal } from '@xterm/xterm';
 import { createTabController, type CliAgentIcon, type CliAgentOption, type CliSessionSummary } from '../panel-tab/tab';
-import { createToolsController } from './tools-cli/tools';
+import { createToolsController } from './tools-cli-ui/tools';
+import type { ImageAttachment, PromptTranslateRequest, PromptTranslateResult, FileMentionEntry } from '../../core/tools-cli-core/prompt';
 
 type VsCodeApi = {
 	postMessage: (message: ClientMessage) => void;
@@ -13,7 +14,10 @@ type ClientMessage =
 	| { type: 'cli.input'; sessionId: string; data: string }
 	| { type: 'cli.switch'; sessionId: string }
 	| { type: 'cli.resize'; sessionId?: string; cols: number; rows: number }
-	| { type: 'cli.close'; sessionId: string };
+	| { type: 'cli.close'; sessionId: string }
+	| { type: 'prompt.translate'; id: string; text: string; from: string; to: string }
+	| { type: 'prompt.prepare'; id: string; text: string; attachments: ImageAttachment[] }
+	| { type: 'workspace.listFiles'; id: string };
 
 type CliSession = CliSessionSummary & {
 	commandLine: string;
@@ -29,12 +33,29 @@ type ServerMessage =
 		sessions: CliSession[];
 	}
 	| { type: 'cli.output'; sessionId: string; data: string }
-	| { type: 'cli.error'; message: string };
+	| { type: 'cli.error'; message: string }
+	| { type: 'prompt.translated'; id: string; text: string; provider?: string; fromCache?: boolean }
+	| { type: 'prompt.translationError'; id: string; message: string }
+	| { type: 'prompt.prepared'; id: string; text: string }
+	| { type: 'prompt.prepareError'; id: string; message: string }
+	| { type: 'workspace.files'; id: string; files: FileMentionEntry[] };
 
 type TerminalView = {
 	terminal: Terminal;
 	fitAddon: FitAddon;
 	pane: HTMLDivElement;
+};
+
+type PendingPromptTranslation = {
+	resolve: (value: PromptTranslateResult) => void;
+	reject: (reason?: unknown) => void;
+	timeout: number;
+};
+
+type PendingPromptPrepare = {
+	resolve: (value: string) => void;
+	reject: (reason?: unknown) => void;
+	timeout: number;
 };
 
 declare const acquireVsCodeApi: () => VsCodeApi;
@@ -44,8 +65,12 @@ const sessions = new Map<string, CliSession>();
 const terminals = new Map<string, TerminalView>();
 const bootSkeletons = new Map<string, HTMLDivElement>();
 const sessionsWithFirstOutput = new Set<string>();
+const pendingPromptTranslations = new Map<string, PendingPromptTranslation>();
+const pendingPromptPrepares = new Map<string, PendingPromptPrepare>();
 let activeSessionId: string | undefined;
 let pendingTabSwitchSessionId: string | undefined;
+let nextPromptTranslationId = 1;
+let nextPromptPrepareId = 1;
 
 const isAgentIcon = (value: unknown): value is CliAgentIcon => {
 	if (!value || typeof value !== 'object') {
@@ -156,6 +181,68 @@ const switchSessionByOffset = (offset: 1 | -1) => {
 	return true;
 };
 
+const translatePrompt = (request: PromptTranslateRequest): Promise<PromptTranslateResult> => {
+	const id = `prompt-translate-${nextPromptTranslationId++}`;
+
+	return new Promise((resolve, reject) => {
+		const timeout = window.setTimeout(() => {
+			pendingPromptTranslations.delete(id);
+			reject(new Error('Translation timed out.'));
+		}, 20000);
+
+		pendingPromptTranslations.set(id, { resolve, reject, timeout });
+		vscode.postMessage({
+			type: 'prompt.translate',
+			id,
+			text: request.text,
+			from: request.from,
+			to: request.to,
+		});
+	});
+};
+
+const preparePromptWithAttachments = (text: string, attachments: ImageAttachment[]): Promise<string> => {
+	if (!attachments || attachments.length === 0) {
+		// No images — just return original (caller can still send)
+		return Promise.resolve(text);
+	}
+
+	const id = `prompt-prepare-${nextPromptPrepareId++}`;
+
+	return new Promise((resolve, reject) => {
+		const timeout = window.setTimeout(() => {
+			pendingPromptPrepares.delete(id);
+			reject(new Error('Image attachment prepare timed out.'));
+		}, 30000);
+
+		pendingPromptPrepares.set(id, { resolve, reject, timeout });
+		vscode.postMessage({
+			type: 'prompt.prepare',
+			id,
+			text,
+			attachments,
+		});
+	});
+};
+
+const pendingWorkspaceFiles = new Map<string, (files: FileMentionEntry[]) => void>();
+let nextWorkspaceFilesId = 1;
+
+const requestWorkspaceFiles = (): Promise<FileMentionEntry[]> => {
+	const id = `ws-files-${nextWorkspaceFilesId++}`;
+	return new Promise((resolve) => {
+		const timeout = window.setTimeout(() => {
+			pendingWorkspaceFiles.delete(id);
+			resolve([]);
+		}, 5000);
+		pendingWorkspaceFiles.set(id, (files) => {
+			clearTimeout(timeout);
+			resolve(files);
+		});
+		vscode.postMessage({ type: 'workspace.listFiles', id });
+	});
+};
+
 const toolsController = layoutRight
 	? createToolsController({
 			container: layoutRight,
@@ -165,13 +252,26 @@ const toolsController = layoutRight
 					return;
 				}
 				const session = sessions.get(activeSessionId);
-				if (session?.status !== 'running') {
-					return;
+					if (session?.status !== 'running') {
+						return;
+					}
+					vscode.postMessage({ type: 'cli.input', sessionId: activeSessionId, data: text });
+				},
+				translatePrompt,
+				preparePromptWithAttachments,
+				requestWorkspaceFiles,
+				getTerminalSelection: () => {
+					if (!activeSessionId) {
+						return '';
+					}
+					const view = terminals.get(activeSessionId);
+					if (!view) {
+						return '';
+					}
+					return view.terminal.hasSelection() ? view.terminal.getSelection() : '';
 				}
-				vscode.postMessage({ type: 'cli.input', sessionId: activeSessionId, data: text });
-			}
-		})
-	: undefined;
+			})
+		: undefined;
 
 const tabController = createTabController({
 	getAgentIcon: (label) => agentIcons.get(label),
@@ -237,8 +337,8 @@ const getAgentSlug = (label: string): string => {
 	if (lower.includes('amp')) {
 		return 'amp';
 	}
-	if (lower.includes('codeep')) {
-		return 'codeep';
+	if (lower.includes('cursor')) {
+		return 'cursor';
 	}
 	return 'default';
 };
@@ -556,6 +656,52 @@ const handleOutput = (message: Extract<ServerMessage, { type: 'cli.output' }>) =
 	}
 };
 
+const resolvePromptTranslation = (message: Extract<ServerMessage, { type: 'prompt.translated' }>) => {
+	const pending = pendingPromptTranslations.get(message.id);
+	if (!pending) {
+		return;
+	}
+
+	window.clearTimeout(pending.timeout);
+	pendingPromptTranslations.delete(message.id);
+	pending.resolve({
+		text: message.text,
+		provider: message.provider,
+		fromCache: message.fromCache,
+	});
+};
+
+const rejectPromptTranslation = (message: Extract<ServerMessage, { type: 'prompt.translationError' }>) => {
+	const pending = pendingPromptTranslations.get(message.id);
+	if (!pending) {
+		return;
+	}
+
+	window.clearTimeout(pending.timeout);
+	pendingPromptTranslations.delete(message.id);
+	pending.reject(new Error(message.message));
+};
+
+const resolvePromptPrepare = (message: Extract<ServerMessage, { type: 'prompt.prepared' }>) => {
+	const pending = pendingPromptPrepares.get(message.id);
+	if (!pending) {
+		return;
+	}
+	window.clearTimeout(pending.timeout);
+	pendingPromptPrepares.delete(message.id);
+	pending.resolve(message.text);
+};
+
+const rejectPromptPrepare = (message: Extract<ServerMessage, { type: 'prompt.prepareError' }>) => {
+	const pending = pendingPromptPrepares.get(message.id);
+	if (!pending) {
+		return;
+	}
+	window.clearTimeout(pending.timeout);
+	pendingPromptPrepares.delete(message.id);
+	pending.reject(new Error(message.message));
+};
+
 window.addEventListener('message', (event: MessageEvent<ServerMessage>) => {
 	const message = event.data;
 
@@ -566,6 +712,35 @@ window.addEventListener('message', (event: MessageEvent<ServerMessage>) => {
 
 	if (message.type === 'cli.output') {
 		handleOutput(message);
+		return;
+	}
+
+	if (message.type === 'prompt.translated') {
+		resolvePromptTranslation(message);
+		return;
+	}
+
+	if (message.type === 'prompt.translationError') {
+		rejectPromptTranslation(message);
+		return;
+	}
+
+	if (message.type === 'prompt.prepared') {
+		resolvePromptPrepare(message);
+		return;
+	}
+
+	if (message.type === 'prompt.prepareError') {
+		rejectPromptPrepare(message);
+		return;
+	}
+
+	if (message.type === 'workspace.files') {
+		const handler = pendingWorkspaceFiles.get(message.id);
+		if (handler) {
+			pendingWorkspaceFiles.delete(message.id);
+			handler(message.files);
+		}
 		return;
 	}
 

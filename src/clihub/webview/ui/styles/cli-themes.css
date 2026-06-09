@@ -49,10 +49,11 @@
 	--agent-accent: #ff7022;
 }
 
-.agent-shell[data-agent="codeep"] {
-	--codeep: #ec0a0a;
-	--agent-accent: #ec0a0a;
+.agent-shell[data-agent="cursor"] {
+	--cursor: #e5e7eb;
+	--agent-accent: #e5e7eb;
 }
+
 
 /* Fallback when no agent is selected */
 .agent-shell {

@@ -6,10 +6,18 @@ import { allowedAgents, cliAgents, getCliAgent } from './webview/core/terminal-c
 import { ensureCliInstalled, isCliInstalled } from './webview/core/terminal-cli/installation';
 import { CliSessionManager } from './webview/core/terminal-cli/session-manager';
 import { getCliHubWebviewHtml } from './webview/webview';
+import { translatePromptToEnglish } from './webview/core/tools-cli-core/modal-translation/host-prompt-translator';
+import { preparePromptForCLI } from './webview/core/tools-cli-core/prompt/attachments/host-preparer';
+import type { ImageAttachment } from './webview/core/tools-cli-core/prompt';
 
 type CliHubMessage = {
 	type?: string;
 	agent?: string;
+	id?: string;
+	text?: string;
+	from?: string;
+	to?: string;
+	attachments?: ImageAttachment[];
 };
 
 type LauncherAgent = {
@@ -25,8 +33,8 @@ const launcherAgents: LauncherAgent[] = [
 	{ label: 'Codex CLI', aliases: ['codex', 'codex cli', 'code', 'co', 'c'], iconFile: 'codex.svg' },
 	{ label: 'Claude Code', aliases: ['claude', 'claude code'], iconFile: 'claudecode.svg' },
 	{ label: 'Antigravity CLI', aliases: ['antigravity', 'antigravity cli', 'agy', 'an', 'ant'], iconFile: 'Antigravity_cli.svg' },
-	{ label: 'GitHub Copilot CLI', aliases: ['github copilot', 'copilot', 'copilot cli'], iconFile: 'github-copilot.svg', darkIcon: true },
-	{ label: 'Codeep', aliases: ['codeep', 'deep'], iconFile: 'Codeep.svg' },
+	{ label: 'Copilot CLI', aliases: ['github copilot', 'copilot', 'copilot cli'], iconFile: 'github-copilot.svg', darkIcon: true },
+	{ label: 'Cursor', aliases: ['cursor'], iconFile: 'cursor.svg', darkIcon: true },
 	{ label: 'Amp', aliases: ['amp'], iconFile: 'amp.svg' },
 	{ label: 'Kiro CLI', aliases: ['kiro', 'kiro cli'], iconFile: 'kiro.svg' },
 	{ label: 'Kilo Code', aliases: ['kilo', 'kilo code', 'code', 'k'], iconFile: 'kilocode.svg', darkIcon: true },
@@ -47,8 +55,12 @@ export class CliHubViewProvider implements vscode.WebviewViewProvider, vscode.Di
 	private readonly sessionManager = new CliSessionManager();
 	private readonly launcherStateSessionId = crypto.randomBytes(16).toString('hex');
 	private pendingInitialAgent?: string;
+	private activePromptTranslation?: AbortController;
 
-	constructor(private readonly _extensionUri: vscode.Uri) {}
+	constructor(
+		private readonly _extensionUri: vscode.Uri,
+		private readonly _extensionContext?: vscode.ExtensionContext
+	) {}
 
 	public async resolveWebviewView(
 		webviewView: vscode.WebviewView,
@@ -89,14 +101,180 @@ export class CliHubViewProvider implements vscode.WebviewViewProvider, vscode.Di
 				return;
 			}
 
+			if (message.type === 'prompt.translate') {
+				await this._handlePromptTranslate(webviewView.webview, message);
+				return;
+			}
+
+			if (message.type === 'prompt.prepare') {
+				await this._handlePromptPrepare(webviewView.webview, message);
+				return;
+			}
+
+			if (message.type === 'workspace.listFiles') {
+				await this._handleWorkspaceListFiles(webviewView.webview, message);
+				return;
+			}
+
 			if (message.type?.startsWith('cli.')) {
-				this.sessionManager.handleMessage(message);
+				const result = this.sessionManager.handleMessage(message);
+				if (result === 'closed-last-session') {
+					this.sessionManager.detach();
+					webviewView.webview.html = await this._getHtmlForWebview(webviewView.webview);
+				}
 			}
 		});
 	}
 
 	public dispose() {
+		this.activePromptTranslation?.abort();
 		this.sessionManager.dispose();
+	}
+
+	private async _handleWorkspaceListFiles(webview: vscode.Webview, message: CliHubMessage) {
+		if (typeof message.id !== 'string') {
+			return;
+		}
+
+		try {
+			// Find files excluding common ignored directories
+			const uris = await vscode.workspace.findFiles('**/*', '{**/node_modules/**,**/.git/**,**/dist/**,**/out/**}', 1000);
+			const workspaceFolder = vscode.workspace.workspaceFolders?.[0];
+			
+			const files = uris.map(uri => {
+				const isDirectory = false; // findFiles only returns files
+				const name = path.basename(uri.fsPath);
+				// Get relative path if within workspace, else use full fsPath
+				let relativePath = uri.fsPath;
+				if (workspaceFolder && uri.fsPath.startsWith(workspaceFolder.uri.fsPath)) {
+					relativePath = uri.fsPath.substring(workspaceFolder.uri.fsPath.length + 1);
+					// Replace backslashes with forward slashes for consistency
+					relativePath = relativePath.replace(/\\/g, '/');
+				}
+
+				return {
+					name,
+					path: relativePath,
+					isDirectory
+				};
+			});
+
+			// If we also want directories, we could get unique directory paths from the files list
+			const dirs = new Set<string>();
+			files.forEach(f => {
+				const dirPath = path.dirname(f.path);
+				if (dirPath !== '.') {
+					// Add all parent directories
+					let current = dirPath;
+					while (current !== '.' && current !== '') {
+						dirs.add(current);
+						current = path.dirname(current);
+					}
+				}
+			});
+
+			const allEntries = [...files];
+			dirs.forEach(dir => {
+				allEntries.push({
+					name: path.basename(dir),
+					path: dir,
+					isDirectory: true
+				});
+			});
+
+			await webview.postMessage({
+				type: 'workspace.files',
+				id: message.id,
+				files: allEntries
+			});
+		} catch (error) {
+			console.error('Error listing workspace files:', error);
+			await webview.postMessage({
+				type: 'workspace.files',
+				id: message.id,
+				files: [] // Return empty on error
+			});
+		}
+	}
+
+	private async _handlePromptTranslate(webview: vscode.Webview, message: CliHubMessage) {
+		if (typeof message.id !== 'string') {
+			return;
+		}
+
+		if (typeof message.text !== 'string') {
+			await this._postPromptTranslationError(webview, message.id, 'No text provided for translation.');
+			return;
+		}
+
+		this.activePromptTranslation?.abort();
+		const controller = new AbortController();
+		this.activePromptTranslation = controller;
+
+		try {
+			const result = await translatePromptToEnglish({
+				text: message.text,
+				from: message.from || 'es',
+				to: message.to || 'en',
+				signal: controller.signal,
+			});
+
+			await webview.postMessage({
+				type: 'prompt.translated',
+				id: message.id,
+				text: result.text,
+				provider: result.providerName,
+				fromCache: result.fromCache,
+			});
+		} catch (error) {
+			if (controller.signal.aborted) {
+				return;
+			}
+
+			await this._postPromptTranslationError(
+				webview,
+				message.id,
+				error instanceof Error ? error.message : 'Translation failed.'
+			);
+		} finally {
+			if (this.activePromptTranslation === controller) {
+				this.activePromptTranslation = undefined;
+			}
+		}
+	}
+
+	private async _handlePromptPrepare(webview: vscode.Webview, message: CliHubMessage) {
+		if (typeof message.id !== 'string') {
+			return;
+		}
+
+		const text = typeof message.text === 'string' ? message.text : '';
+		const attachments = Array.isArray(message.attachments) ? message.attachments : [];
+
+		try {
+			const ctx = this._extensionContext || { globalStorageUri: undefined } as any;
+			const preparedText = await preparePromptForCLI(text, attachments as any, ctx);
+
+			await webview.postMessage({
+				type: 'prompt.prepared',
+				id: message.id,
+				text: preparedText,
+			});
+		} catch (error) {
+			await webview.postMessage({
+				type: 'prompt.prepareError',
+				id: message.id,
+				message: error instanceof Error ? error.message : 'Failed to prepare image attachments.',
+			});
+		}
+	}
+
+	private async _postPromptTranslationError(webview: vscode.Webview, id: string, message: string) {
+		await webview.postMessage({
+			type: 'prompt.translationError',
+			id,
+			message,
+		});
 	}
 
 	private async _getHtmlForWebview(webview: vscode.Webview) {

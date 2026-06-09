@@ -9,7 +9,7 @@ dist/
 *.vsix
 
 # Test files downloaded by @vscode/test
-.vscode-test/
+.vscode-test/   
 .vscode-test-web/
 
 # Temporary files
@@ -23,3 +23,9 @@ Thumbs.db
 NOTES.md
 analizar/
 analizar2/
+analizar-pe/
+
+.claude/
+.agents/
+
+skills-lock.json

@@ -73,11 +73,12 @@ body[data-agent="amp"] {
 	--selection-color: #ff7022;
 }
 
-body[data-agent="codeep"] {
-	--accent-color: #ec0a0a;
-	--input-border-left: #ec0a0a;
-	--selection-color: #ec0a0a;
+body[data-agent="cursor"] {
+	--accent-color: #e5e7eb;
+	--input-border-left: #e5e7eb;
+	--selection-color: #e5e7eb;
 }
+
 
 body {
 	display: flex;
@@ -87,7 +88,7 @@ body {
 	margin: 0;
 	font-family: var(--font-family);
 	color: var(--text-color);
-	background-color: color-mix(in srgb, var(--bg-color) 90%, black); /*Trukito*/
+	background-color: var(--vscode-sideBar-background, var(--vscode-editor-background));
 	/* text-transform: lowercase; */
 }
 

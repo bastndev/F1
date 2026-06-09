@@ -3,27 +3,40 @@
   <div class="prompt-header">
     <div class="prompt-header-left">
       <div class="prompt-title">Prompt <span class="prompt-badge">PRO</span></div>
-      <div class="prompt-subtitle">send a message to the active CLI session</div>
+      <div class="prompt-subtitle-row">
+        <div class="prompt-subtitle">send a message to the active CLI session</div>
+        <span class="prompt-lang-indicator" id="langToggle">🌐 → EN</span>
+      </div>
     </div>
     <div class="prompt-header-actions">
-      <button class="prompt-pill" id="langToggle">🌐 → EN</button>
+      <button class="prompt-close-btn" id="closePromptBtn" aria-label="Close" title="Close (Esc)">esc</button>
     </div>
   </div>
-  <!-- TABS -->
-  <div class="prompt-tabs">
-    <div class="prompt-tab active" data-tab="write">Normal</div>
-    <div class="prompt-tab" data-tab="enhance">Pro <span class="prompt-beta">beta</span></div>
+  <!-- TOOLBAR (TABS + ACTIONS) -->
+  <div class="prompt-toolbar">
+    <div class="prompt-tabs">
+      <div class="prompt-tab active" data-tab="write">Pro <span class="prompt-beta">beta</span></div>
+    </div>
+    <div class="prompt-actions-right">
+      <button class="prompt-action-btn" id="fixSpellingBtn" title="Fix spelling" aria-label="Fix spelling">
+        <i class="ti ti-wand" aria-hidden="true"></i> Fix
+      </button>
+      <button class="prompt-action-btn prompt-action-btn--translate" id="translateBtn" title="Translate prompt" aria-label="Translate prompt">
+        <i class="ti ti-language" aria-hidden="true"></i> Translate
+      </button>
+    </div>
   </div>
   <!-- BODY -->
   <div class="prompt-body">
     <div class="prompt-textarea-wrap">
+      <div class="prompt-textarea-highlight" aria-hidden="true"></div>
       <textarea
         id="promptInput"
         class="prompt-textarea"
         placeholder="write your prompt here…"
-        maxlength="1000"
+        maxlength="1500"
       ></textarea>
-      <span class="prompt-char-count" id="charCount">0/1000</span>
+      <span class="prompt-char-count" id="charCount">0/1500</span>
     </div>
     <div class="prompt-skills">
       <span class="prompt-skills-label">Skills:</span>
@@ -36,11 +49,12 @@
       </div>
     </div>
   </div>
-  <!-- DIVIDE -->
+  <!-- DIVIDER -->
   <div class="prompt-divider"></div>
   <!-- FOOTER -->
   <div class="prompt-footer">
     <div class="prompt-footer-info">
+      <span class="prompt-session-dot" id="sessionDot"></span>
       <i class="ti ti-cpu" aria-hidden="true"></i> CLI
     </div>
     <div class="prompt-run-wrap">

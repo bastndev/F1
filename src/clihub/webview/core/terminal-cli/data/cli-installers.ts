@@ -47,14 +47,17 @@ export const cliInstallers: CliInstaller[] = [
 		}
 	},
 	{
-		label: 'GitHub Copilot CLI',
+		label: 'Copilot CLI',
 		command: 'copilot',
 		installCommand: 'curl -fsSL https://gh.io/copilot-install | bash'
 	},
 	{
-		label: 'Codeep',
-		command: 'codeep',
-		installCommand: 'curl -fsSL https://raw.githubusercontent.com/VladoIvankovic/Codeep/main/install.sh | bash'
+		label: 'Cursor',
+		command: 'cursor',
+		install: {
+			unix: 'curl https://cursor.com/install -fsS | bash',
+			windows: 'curl https://cursor.com/install -fsS | bash'
+		}
 	},
 	{
 		label: 'Amp',
