@@ -139,6 +139,31 @@ export const createTabController = (options: TabControllerOptions) => {
 		optionButtons[nextIndex]?.focus();
 	};
 
+	const focusSelectedAgentOption = () => {
+		const optionButtons = Array.from(agentMenu.querySelectorAll<HTMLButtonElement>('.agent-picker-option'));
+		const selectedOption = optionButtons.find((option) => option.dataset.agentLabel === currentAgentLabel);
+		(selectedOption || optionButtons[0])?.focus();
+	};
+
+	const toggleAgentPicker = () => {
+		if (currentAgents.length === 0) {
+			return;
+		}
+
+		dismissToolModal();
+		setToolsPopoverOpen(false);
+		setAgentMenuOpen(!isAgentMenuOpen);
+
+		if (!isAgentMenuOpen) {
+			agentButton.focus();
+			return;
+		}
+
+		requestAnimationFrame(() => {
+			focusSelectedAgentOption();
+		});
+	};
+
 	const getShortcutAction = (event: KeyboardEvent) => {
 		if (matchesShortcut(event, 'newSession')) {
 			return 'create';
@@ -180,6 +205,13 @@ export const createTabController = (options: TabControllerOptions) => {
 	const handleKeyboardShortcut = (event: KeyboardEvent) => {
 		if (event.type !== 'keydown' || event.repeat) {
 			return false;
+		}
+
+		if (matchesShortcut(event, 'toggleAgentPicker')) {
+			if (consumeShortcut(event, 'toggleAgentPicker')) {
+				toggleAgentPicker();
+				return true;
+			}
 		}
 
 		// Tool modals (centralized in shared/keymaps)

@@ -14,6 +14,7 @@ export type ShortcutContext = 'launcher' | 'terminal';
 export type ShortcutId =
   | 'newSession'
   | 'closeSession'
+  | 'toggleAgentPicker'   // terminal agent selector
   | 'nextSession'
   | 'prevSession'
   | 'toggleAgentPalette'   // launcher only
@@ -93,6 +94,19 @@ export function shiftTab() {
   };
 }
 
+/** Matches Ctrl + Tab */
+export function ctrlTab() {
+  return (event: KeyboardEvent): boolean => {
+    return (
+      event.key === 'Tab' &&
+      event.ctrlKey &&
+      !event.altKey &&
+      !event.metaKey &&
+      !event.shiftKey
+    );
+  };
+}
+
 /** Matches Escape key */
 export function escapeKey() {
   return (event: KeyboardEvent): boolean => {
@@ -128,6 +142,13 @@ export const shortcuts: ShortcutDefinition[] = [
     contexts: ['terminal'],
     description: 'Alt + -',
     match: altKey('-'),
+  },
+  {
+    id: 'toggleAgentPicker',
+    label: 'Open CLI selector',
+    contexts: ['terminal'],
+    description: 'Ctrl + Tab',
+    match: ctrlTab(),
   },
   {
     id: 'nextSession',
