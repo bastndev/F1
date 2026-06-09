@@ -73,6 +73,7 @@ let activeSessionId: string | undefined;
 let pendingTabSwitchSessionId: string | undefined;
 let nextPromptTranslationId = 1;
 let nextPromptPrepareId = 1;
+let isPromptFilterEnabled = false;
 
 const isAgentIcon = (value: unknown): value is CliAgentIcon => {
 	if (!value || typeof value !== 'object') {
@@ -268,6 +269,23 @@ const requestWorkspaceFiles = (): Promise<FileMentionEntry[]> => {
 	});
 };
 
+const openPromptFromTerminal = (sessionId: string) => {
+	if (!isPromptFilterEnabled || !toolsController) {
+		return;
+	}
+
+	if (sessionId !== activeSessionId) {
+		return;
+	}
+
+	const session = sessions.get(sessionId);
+	if (session?.status !== 'running') {
+		return;
+	}
+
+	toolsController.open('prompt');
+};
+
 const toolsController = layoutRight
 	? createToolsController({
 			container: layoutRight,
@@ -277,26 +295,26 @@ const toolsController = layoutRight
 					return;
 				}
 				const session = sessions.get(activeSessionId);
-					if (session?.status !== 'running') {
-						return;
-					}
-					vscode.postMessage({ type: 'cli.input', sessionId: activeSessionId, data: text });
-				},
-				translatePrompt,
-				preparePromptWithAttachments,
-				requestWorkspaceFiles,
-				getTerminalSelection: () => {
-					if (!activeSessionId) {
-						return '';
-					}
-					const view = terminals.get(activeSessionId);
-					if (!view) {
-						return '';
-					}
-					return view.terminal.hasSelection() ? view.terminal.getSelection() : '';
+				if (session?.status !== 'running') {
+					return;
 				}
-			})
-		: undefined;
+				vscode.postMessage({ type: 'cli.input', sessionId: activeSessionId, data: text });
+			},
+			translatePrompt,
+			preparePromptWithAttachments,
+			requestWorkspaceFiles,
+			getTerminalSelection: () => {
+				if (!activeSessionId) {
+					return '';
+				}
+				const view = terminals.get(activeSessionId);
+				if (!view) {
+					return '';
+				}
+				return view.terminal.hasSelection() ? view.terminal.getSelection() : '';
+			}
+		})
+	: undefined;
 
 const tabController = createTabController({
 	getAgentIcon: (label) => agentIcons.get(label),
@@ -311,6 +329,9 @@ const tabController = createTabController({
 	},
 	onOpenTool: (tool) => {
 		toolsController?.toggle(tool);
+	},
+	onPromptFilterChange: (enabled) => {
+		isPromptFilterEnabled = enabled;
 	}
 });
 
@@ -547,6 +568,9 @@ const createTerminalView = (session: CliSession) => {
 		if (currentSession?.status === 'running') {
 			vscode.postMessage({ type: 'cli.input', sessionId: session.id, data });
 		}
+	});
+	pane.addEventListener('pointerdown', () => {
+		openPromptFromTerminal(session.id);
 	});
 
 	const view = { terminal, fitAddon, pane };

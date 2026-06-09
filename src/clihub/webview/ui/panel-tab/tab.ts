@@ -30,6 +30,7 @@ type TabControllerOptions = {
 	onClose: (sessionId: string) => void;
 	onDismissToolModal?: () => void;
 	onOpenTool?: (tool: CliToolId) => void;
+	onPromptFilterChange?: (enabled: boolean) => void;
 };
 
 const getRequiredElement = <T extends HTMLElement>(id: string) => {
@@ -62,6 +63,7 @@ export const createTabController = (options: TabControllerOptions) => {
 	const createButtonLabel = getRequiredElement<HTMLSpanElement>('cli-create-button-label');
 	const toolsButton = getRequiredElement<HTMLButtonElement>('cli-tools-button');
 	const toolsPopover = getRequiredElement<HTMLDivElement>('cli-tools-popover');
+	const promptFilterToggle = getRequiredElement<HTMLInputElement>('cli-prompt-filter-toggle');
 	const agentButton = getRequiredElement<HTMLButtonElement>('cli-agent-button');
 	const agentLabel = getRequiredElement<HTMLSpanElement>('cli-agent-label');
 	const agentMenu = getRequiredElement<HTMLDivElement>('cli-agent-menu');
@@ -76,6 +78,7 @@ export const createTabController = (options: TabControllerOptions) => {
 	let lastShortcutAt = 0;
 	let currentSessionCount = 0;
 	let isAltPressed = false;
+	let isPromptFilterEnabled = false;
 
 	const setAgentMenuOpen = (isOpen: boolean) => {
 		isAgentMenuOpen = isOpen;
@@ -103,6 +106,12 @@ export const createTabController = (options: TabControllerOptions) => {
 
 	const dismissToolModal = () => {
 		options.onDismissToolModal?.();
+	};
+
+	const setPromptFilterEnabled = (enabled: boolean) => {
+		isPromptFilterEnabled = enabled;
+		promptFilterToggle.checked = enabled;
+		options.onPromptFilterChange?.(enabled);
 	};
 
 	const syncAgentPicker = () => {
@@ -331,6 +340,10 @@ export const createTabController = (options: TabControllerOptions) => {
 		setToolsPopoverOpen(!isToolsPopoverOpen);
 	});
 
+	promptFilterToggle.addEventListener('change', () => {
+		setPromptFilterEnabled(promptFilterToggle.checked);
+	});
+
 	toolsPopover.addEventListener('click', (event) => {
 		event.stopPropagation();
 
@@ -342,6 +355,8 @@ export const createTabController = (options: TabControllerOptions) => {
 			options.onOpenTool?.(tool);
 		}
 	});
+
+	setPromptFilterEnabled(isPromptFilterEnabled);
 
 	document.addEventListener('click', () => {
 		closeFloatingPanels();
