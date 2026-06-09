@@ -223,7 +223,56 @@ export function mountFileMentionPicker(
 
 	// ── Textarea listeners ───────────────────────────────────────────
 
+	/**
+	 * Ctrl+Backspace while the caret is right after an @mention:
+	 * deletes everything between '@' and the caret, leaving '@' so
+	 * the user can type a new path without closing the modal.
+	 * Returns true if it handled the event (caller should return early).
+	 */
+	const handleMentionCtrlBackspace = (e: KeyboardEvent): boolean => {
+		if (!e.ctrlKey || e.key !== 'Backspace') { return false; }
+
+		const caret = textarea.selectionStart ?? 0;
+		const selEnd = textarea.selectionEnd ?? 0;
+
+		// Only act when nothing is selected and caret is not at the very start
+		if (caret !== selEnd || caret === 0) { return false; }
+
+		const value = textarea.value;
+
+		// Scan backwards from caret looking for a bare '@' trigger.
+		// We stop as soon as we hit whitespace (we've left the mention token).
+		let atPos = -1;
+		for (let i = caret - 1; i >= 0; i--) {
+			const ch = value[i];
+			if (ch === '@') {
+				// Valid trigger: at start-of-string OR preceded by whitespace
+				if (i === 0 || /\s/.test(value[i - 1])) {
+					atPos = i;
+				}
+				break;
+			}
+			if (/\s/.test(ch)) { break; } // left the token, stop
+		}
+
+		if (atPos === -1) { return false; }
+
+		// Delete from the char right after '@' up to the caret → leaves '@'
+		e.preventDefault();
+		e.stopPropagation();
+		const newValue = value.slice(0, atPos + 1) + value.slice(caret);
+		textarea.value = newValue;
+		const newPos = atPos + 1;
+		textarea.setSelectionRange(newPos, newPos);
+		textarea.dispatchEvent(new Event('input', { bubbles: true }));
+		return true;
+	};
+
 	textarea.addEventListener('keydown', (e) => {
+		// Ctrl+Backspace on an @mention → erase the path, keep '@'
+		// Must run BEFORE the dropdown guard so it works even when dropdown is closed.
+		if (handleMentionCtrlBackspace(e)) { return; }
+
 		if (!dropdown) { return; }
 		if (e.key === 'ArrowDown') { e.preventDefault(); activeIndex = Math.min(activeIndex + 1, entries.length - 1); updateActive(); }
 		if (e.key === 'ArrowUp')   { e.preventDefault(); activeIndex = Math.max(activeIndex - 1, 0); updateActive(); }
