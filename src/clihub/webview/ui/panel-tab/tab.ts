@@ -59,6 +59,24 @@ const getProjectLabel = (cwd: string) => {
 };
 
 const promptFilterToastId = 'cli-prompt-filter-toast';
+const promptFilterStorageKey = 'clihub.promptFilter.enabled';
+
+const readPromptFilterPreference = () => {
+	try {
+		const storedValue = window.localStorage.getItem(promptFilterStorageKey);
+		return storedValue === null ? true : storedValue === 'true';
+	} catch {
+		return true;
+	}
+};
+
+const writePromptFilterPreference = (enabled: boolean) => {
+	try {
+		window.localStorage.setItem(promptFilterStorageKey, String(enabled));
+	} catch {
+		// Ignore unavailable webview storage.
+	}
+};
 
 export const createTabController = (options: TabControllerOptions) => {
 	const createButton = getRequiredElement<HTMLButtonElement>('cli-create-button');
@@ -80,7 +98,7 @@ export const createTabController = (options: TabControllerOptions) => {
 	let lastShortcutAt = 0;
 	let currentSessionCount = 0;
 	let isAltPressed = false;
-	let isPromptFilterEnabled = false;
+	let isPromptFilterEnabled = readPromptFilterPreference();
 	let promptFilterToastTimer: number | undefined;
 
 	const setAgentMenuOpen = (isOpen: boolean) => {
@@ -135,6 +153,7 @@ export const createTabController = (options: TabControllerOptions) => {
 	const setPromptFilterEnabled = (enabled: boolean, notify = true) => {
 		isPromptFilterEnabled = enabled;
 		promptFilterToggle.checked = enabled;
+		writePromptFilterPreference(enabled);
 		options.onPromptFilterChange?.(enabled);
 		if (notify) {
 			showPromptFilterToast(enabled);
