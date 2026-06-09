@@ -92,7 +92,7 @@ let currentIndex = typeof persistedState?.currentIndex === 'number'
 	? persistedState.currentIndex
 	: 0;
 let selectedModel: LauncherModel | undefined = models.find((model) => model.label === persistedState?.selectedAgent) || models[currentIndex] || models[0];
-let paletteOpen = persistedState?.paletteOpen === true;
+let paletteOpen = true;
 let invalidInputTimer: ReturnType<typeof setTimeout> | undefined;
 
 const textElement = getRequiredElement<HTMLSpanElement>('ai-model-name');
