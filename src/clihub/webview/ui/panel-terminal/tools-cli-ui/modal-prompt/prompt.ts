@@ -693,7 +693,10 @@ function setupImagePaste(
 			.filter((part) => part && part.trim().length > 0)
 			.join(textWithMarkers && imageMarkers.length ? ' ' : '');
 
-		insertTextAtSelection(textarea, insertValue);
+		// Add a trailing space when the insert ends with an image marker so the
+		// cursor lands right after the token ready to type — same as @path mentions.
+		const insertWithSpacing = insertValue.endsWith(']') ? insertValue + ' ' : insertValue;
+		insertTextAtSelection(textarea, insertWithSpacing);
 	});
 }
 
