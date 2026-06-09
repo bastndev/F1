@@ -77,13 +77,6 @@ export class CliHubViewProvider implements vscode.WebviewViewProvider, vscode.Di
 			this.sessionManager.detach();
 		});
 		webviewView.webview.onDidReceiveMessage(async (message: CliHubMessage) => {
-			if (message.type === 'launcher.open') {
-				this.pendingInitialAgent = undefined;
-				this.sessionManager.detach();
-				webviewView.webview.html = await this._getHtmlForWebview(webviewView.webview);
-				return;
-			}
-
 			if (message.type === 'openAgent' && message.agent && allowedAgents.has(message.agent)) {
 				const agent = getCliAgent(message.agent);
 				if (!agent || !(await ensureCliInstalled(agent))) {
@@ -124,7 +117,11 @@ export class CliHubViewProvider implements vscode.WebviewViewProvider, vscode.Di
 			}
 
 			if (message.type?.startsWith('cli.')) {
-				this.sessionManager.handleMessage(message);
+				const result = this.sessionManager.handleMessage(message);
+				if (result === 'closed-last-session') {
+					this.sessionManager.detach();
+					webviewView.webview.html = await this._getHtmlForWebview(webviewView.webview);
+				}
 			}
 		});
 	}

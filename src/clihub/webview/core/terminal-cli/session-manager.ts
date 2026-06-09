@@ -36,6 +36,8 @@ type CliHubWebviewMessage = {
 	rows?: number;
 };
 
+type CliHubMessageResult = 'closed-last-session' | undefined;
+
 type PtyHostMessage = {
 	type?: string;
 	data?: string;
@@ -228,7 +230,7 @@ export class CliSessionManager implements vscode.Disposable {
 		this.postState();
 	}
 
-	public handleMessage(message: CliHubWebviewMessage) {
+	public handleMessage(message: CliHubWebviewMessage): CliHubMessageResult {
 		switch (message.type) {
 			case 'cli.create':
 				if (message.agent) {
@@ -250,13 +252,15 @@ export class CliSessionManager implements vscode.Disposable {
 				break;
 			case 'cli.close':
 				if (message.sessionId) {
-					this.closeSession(message.sessionId);
+					return this.closeSession(message.sessionId);
 				}
 				break;
 			case 'cli.ready':
 				this.postState();
 				break;
 		}
+
+		return undefined;
 	}
 
 	public postState() {
@@ -314,10 +318,10 @@ export class CliSessionManager implements vscode.Disposable {
 		session.process?.send?.({ type: 'resize', cols: session.cols, rows: session.rows });
 	}
 
-	private closeSession(sessionId: string) {
+	private closeSession(sessionId: string): CliHubMessageResult {
 		const session = this.sessions.get(sessionId);
 		if (!session) {
-			return;
+			return undefined;
 		}
 
 		this.disposeSession(session);
@@ -327,7 +331,13 @@ export class CliSessionManager implements vscode.Disposable {
 			this.activeSessionId = this.sessions.keys().next().value;
 		}
 
+		if (this.sessions.size === 0) {
+			this.activeSessionId = undefined;
+			return 'closed-last-session';
+		}
+
 		this.postState();
+		return undefined;
 	}
 
 	private disposeSession(session: CliSession) {
