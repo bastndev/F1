@@ -22,7 +22,6 @@ type LauncherState = {
 	launcherSessionId: string;
 	currentIndex: number;
 	inputValue: string;
-	paletteOpen: boolean;
 	selectedAgent?: string;
 };
 
@@ -57,7 +56,6 @@ const isLauncherState = (value: unknown): value is LauncherState => {
 		&& typeof state.currentIndex === 'number'
 		&& Number.isInteger(state.currentIndex)
 		&& typeof state.inputValue === 'string'
-		&& typeof state.paletteOpen === 'boolean'
 		&& (state.selectedAgent === undefined || typeof state.selectedAgent === 'string');
 };
 
@@ -92,7 +90,7 @@ let currentIndex = typeof persistedState?.currentIndex === 'number'
 	? persistedState.currentIndex
 	: 0;
 let selectedModel: LauncherModel | undefined = models.find((model) => model.label === persistedState?.selectedAgent) || models[currentIndex] || models[0];
-let paletteOpen = persistedState?.paletteOpen === true;
+let paletteOpen = true;
 let invalidInputTimer: ReturnType<typeof setTimeout> | undefined;
 
 const textElement = getRequiredElement<HTMLSpanElement>('ai-model-name');
@@ -196,7 +194,6 @@ const saveLauncherState = () => {
 		launcherSessionId: launcherStateSessionId,
 		currentIndex,
 		inputValue: cliInput.value,
-		paletteOpen,
 		selectedAgent: selectedModel?.label
 	});
 };

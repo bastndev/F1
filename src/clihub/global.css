@@ -88,7 +88,7 @@ body {
 	margin: 0;
 	font-family: var(--font-family);
 	color: var(--text-color);
-	background-color: color-mix(in srgb, var(--bg-color) 90%, black); /*Trukito*/
+	background-color: var(--vscode-sideBar-background, var(--vscode-editor-background));
 	/* text-transform: lowercase; */
 }
 

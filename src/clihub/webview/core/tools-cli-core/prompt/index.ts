@@ -14,3 +14,8 @@ export {
 export type { ImageAttachment } from './attachments/types';
 export { isImageAttachment } from './attachments/types';
 export { buildPromptTextWithImages } from './attachments/prepare';
+
+// File mention picker (@ in prompt textarea) — only the data contract lives in core.
+// The actual DOM implementation (mountFileMentionPicker + styles) lives in the UI layer
+// under tools-cli-ui/modal-prompt/components/file-mention to keep core free of presentation.
+export type { FileMentionEntry, FileMentionRequest } from './file-mention';

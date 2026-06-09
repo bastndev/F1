@@ -11,7 +11,9 @@ import {
 	collectImageMarkerIds,
 	protectImageMarkers,
 	restoreImageMarkers,
+	type FileMentionEntry,
 } from '../../../../core/tools-cli-core/prompt';
+import { mountFileMentionPicker } from './components/file-mention/file-mention';
 
 const stylesId = 'cli-prompt-panel-styles';
 
@@ -37,6 +39,7 @@ type PromptContext = {
 	sendToActiveSession?: (text: string) => void;
 	translatePrompt?: (request: PromptTranslateRequest) => Promise<PromptTranslateResult>;
 	preparePromptWithAttachments?: (text: string, attachments: ImageAttachment[]) => Promise<string>;
+	requestWorkspaceFiles?: () => Promise<FileMentionEntry[]>;
 };
 
 export const mountPromptPanel = (host: HTMLElement, context: PromptContext = { close: () => {} }) => {
@@ -76,6 +79,22 @@ function initPromptTabs(host: HTMLElement, context: PromptContext, hasActiveSess
 
 	// Force lowercase input, with Shift as the only way to write uppercase
 	enforceLowercaseInput(textarea);
+
+	// @ file mention picker
+	// We pass the wrap as the "anchor" for position calculations (getBoundingClientRect).
+	// Internally the picker now portals the dropdown to the outer #cli-tools-modal
+	// (using position:absolute relative to it) so the list can float freely upwards
+	// in the full dialog area without being height-limited by the input box or card.
+	if (context.requestWorkspaceFiles) {
+		const textareaWrapEl = host.querySelector<HTMLElement>('.prompt-textarea-wrap');
+		if (textareaWrapEl) {
+			mountFileMentionPicker(
+				textarea,
+				textareaWrapEl,
+				() => context.requestWorkspaceFiles!()
+			);
+		}
+	}
 
 	// Image attachments state (lives while this modal instance is mounted)
 	let imageAttachments: ImageAttachment[] = [];
