@@ -240,10 +240,19 @@ export function mountFileMentionPicker(
 
 		const value = textarea.value;
 
-		// Scan backwards from caret looking for a bare '@' trigger.
-		// We stop as soon as we hit whitespace (we've left the mention token).
+		// selectEntry appends a trailing space after the path ("@path ").
+		// If the caret is sitting right after that space, skip it before scanning
+		// so the backwards walk reaches '@' in one Ctrl+Backspace press.
+		// We also extend the delete range to consume that trailing space.
+		let scanFrom = caret;
+		if (scanFrom > 0 && value[scanFrom - 1] === ' ') {
+			scanFrom -= 1;
+		}
+
+		// Scan backwards looking for a bare '@' trigger.
+		// Stop at any whitespace that isn't the one space we already skipped.
 		let atPos = -1;
-		for (let i = caret - 1; i >= 0; i--) {
+		for (let i = scanFrom - 1; i >= 0; i--) {
 			const ch = value[i];
 			if (ch === '@') {
 				// Valid trigger: at start-of-string OR preceded by whitespace
@@ -257,7 +266,8 @@ export function mountFileMentionPicker(
 
 		if (atPos === -1) { return false; }
 
-		// Delete from the char right after '@' up to the caret → leaves '@'
+		// Delete from the char right after '@' up to the original caret
+		// (includes the trailing space when present) → leaves a clean '@'
 		e.preventDefault();
 		e.stopPropagation();
 		const newValue = value.slice(0, atPos + 1) + value.slice(caret);
