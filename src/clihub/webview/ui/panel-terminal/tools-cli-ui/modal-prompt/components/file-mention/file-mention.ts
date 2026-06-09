@@ -82,14 +82,28 @@ export function mountFileMentionPicker(
 		const list = dropdown.querySelector<HTMLElement>('.fm-list');
 		if (!list) { return; }
 
-		// folders first, then files; filtered by name OR path (better discoverability)
+		// Relevance-first sort: name starts-with query > name contains query > path contains query.
+		// Within each tier: directories before files, then alphabetical.
 		const lc = filter.toLowerCase();
+
+		/** 0 = name starts with query (best), 1 = name contains query, 2 = only path matches */
+		const relevance = (e: FileMentionEntry): number => {
+			const nameLc = e.name.toLowerCase();
+			if (nameLc.startsWith(lc)) { return 0; }
+			if (nameLc.includes(lc))   { return 1; }
+			return 2;
+		};
+
 		const filtered = items
 			.filter(e => {
 				const haystack = `${e.name} ${e.path}`.toLowerCase();
 				return haystack.includes(lc);
 			})
 			.sort((a, b) => {
+				const ra = relevance(a);
+				const rb = relevance(b);
+				if (ra !== rb) { return ra - rb; }
+				// Within same relevance tier: directories first, then alphabetical
 				if (a.isDirectory !== b.isDirectory) { return a.isDirectory ? -1 : 1; }
 				return a.name.localeCompare(b.name);
 			});
