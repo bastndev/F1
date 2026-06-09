@@ -67,6 +67,8 @@ const bootSkeletons = new Map<string, HTMLDivElement>();
 const sessionsWithFirstOutput = new Set<string>();
 const pendingPromptTranslations = new Map<string, PendingPromptTranslation>();
 const pendingPromptPrepares = new Map<string, PendingPromptPrepare>();
+const visualSleepSessionThreshold = 3;
+const maxWebviewBufferLength = 240000;
 let activeSessionId: string | undefined;
 let pendingTabSwitchSessionId: string | undefined;
 let nextPromptTranslationId = 1;
@@ -133,6 +135,29 @@ const getTerminalTheme = () => {
 
 const getFontFamily = () => {
 	return cssValue('--vscode-editor-font-family', cssValue('--vscode-font-family', 'monospace'));
+};
+
+const trimSessionBuffer = (buffer: string) => {
+	if (buffer.length <= maxWebviewBufferLength) {
+		return buffer;
+	}
+
+	return buffer.slice(buffer.length - maxWebviewBufferLength);
+};
+
+const appendToSessionBuffer = (session: CliSession, data: string) => {
+	session.buffer = trimSessionBuffer(session.buffer + data);
+};
+
+const isVisualSleepEnabled = (sessionCount: number = sessions.size) => {
+	return sessionCount > visualSleepSessionThreshold;
+};
+
+const shouldKeepTerminalAwake = (
+	sessionId: string,
+	visualSleepEnabled: boolean = isVisualSleepEnabled()
+) => {
+	return !visualSleepEnabled || sessionId === activeSessionId;
 };
 
 const fitTerminal = (sessionId: string | undefined = activeSessionId) => {
@@ -493,6 +518,11 @@ const dismissSkeleton = (sessionId: string) => {
 };
 
 const createTerminalView = (session: CliSession) => {
+	const existingView = terminals.get(session.id);
+	if (existingView) {
+		return existingView;
+	}
+
 	const pane = document.createElement('div');
 	pane.className = 'cli-terminal-pane';
 	pane.dataset.sessionId = session.id;
@@ -533,12 +563,16 @@ const createTerminalView = (session: CliSession) => {
 	return view;
 };
 
+const disposeTerminalView = (sessionId: string, view: TerminalView) => {
+	view.terminal.dispose();
+	view.pane.remove();
+	terminals.delete(sessionId);
+};
+
 const removeClosedTerminals = (openSessionIds: Set<string>) => {
 	for (const [sessionId, view] of terminals) {
 		if (!openSessionIds.has(sessionId)) {
-			view.terminal.dispose();
-			view.pane.remove();
-			terminals.delete(sessionId);
+			disposeTerminalView(sessionId, view);
 		}
 	}
 
@@ -551,8 +585,25 @@ const removeClosedTerminals = (openSessionIds: Set<string>) => {
 	}
 };
 
+const sleepInactiveTerminals = (visualSleepEnabled: boolean, openSessionIds: Set<string>) => {
+	if (!visualSleepEnabled) {
+		return;
+	}
+
+	for (const [sessionId, view] of terminals) {
+		if (openSessionIds.has(sessionId) && !shouldKeepTerminalAwake(sessionId, visualSleepEnabled)) {
+			disposeTerminalView(sessionId, view);
+		}
+	}
+};
+
 const setActiveTerminal = () => {
 	layoutRight?.classList.toggle('has-empty-state', !activeSessionId);
+
+	const activeSession = activeSessionId ? sessions.get(activeSessionId) : undefined;
+	if (activeSession && shouldKeepTerminalAwake(activeSession.id)) {
+		createTerminalView(activeSession);
+	}
 
 	for (const [sessionId, view] of terminals) {
 		view.pane.classList.toggle('is-active', sessionId === activeSessionId);
@@ -562,7 +613,6 @@ const setActiveTerminal = () => {
 		skeleton.classList.toggle('is-active', sessionId === activeSessionId);
 	}
 
-	const activeSession = activeSessionId ? sessions.get(activeSessionId) : undefined;
 	if (!activeSession) {
 		terminalLabel.textContent = 'CLI';
 		terminalStatus.textContent = 'No active session';
@@ -603,13 +653,18 @@ const syncState = (message: Extract<ServerMessage, { type: 'cli.state' }>) => {
 	tabController.setAgents(message.agents);
 	sessions.clear();
 
+	const visualSleepEnabled = isVisualSleepEnabled(message.sessions.length);
 	const openSessionIds = new Set<string>();
 	for (const session of message.sessions) {
-		sessions.set(session.id, session);
+		const cappedSession = {
+			...session,
+			buffer: trimSessionBuffer(session.buffer)
+		};
+		sessions.set(cappedSession.id, cappedSession);
 		openSessionIds.add(session.id);
 
-		if (!terminals.has(session.id)) {
-			createTerminalView(session);
+		if (shouldKeepTerminalAwake(cappedSession.id, visualSleepEnabled)) {
+			createTerminalView(cappedSession);
 		}
 	}
 
@@ -618,6 +673,7 @@ const syncState = (message: Extract<ServerMessage, { type: 'cli.state' }>) => {
 	}
 
 	removeClosedTerminals(openSessionIds);
+	sleepInactiveTerminals(visualSleepEnabled, openSessionIds);
 
 	// If a session entered error/exited state before producing output, don't leave skeleton hanging
 	for (const [sessionId, skeleton] of [...bootSkeletons]) {
@@ -634,14 +690,18 @@ const syncState = (message: Extract<ServerMessage, { type: 'cli.state' }>) => {
 const handleOutput = (message: Extract<ServerMessage, { type: 'cli.output' }>) => {
 	const session = sessions.get(message.sessionId);
 	if (session) {
-		session.buffer += message.data;
+		appendToSessionBuffer(session, message.data);
 	}
 
-	if (!terminals.has(message.sessionId) && session) {
+	let restoredFromBuffer = false;
+	if (!terminals.has(message.sessionId) && session && shouldKeepTerminalAwake(message.sessionId)) {
 		createTerminalView(session);
+		restoredFromBuffer = true;
 	}
 
-	terminals.get(message.sessionId)?.terminal.write(message.data);
+	if (!restoredFromBuffer) {
+		terminals.get(message.sessionId)?.terminal.write(message.data);
+	}
 
 	// Skeleton dismissal contract:
 	// The skeleton must remain visible until the real CLI has started producing output,
