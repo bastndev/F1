@@ -69,6 +69,7 @@ const pendingPromptTranslations = new Map<string, PendingPromptTranslation>();
 const pendingPromptPrepares = new Map<string, PendingPromptPrepare>();
 const visualSleepSessionThreshold = 3;
 const maxWebviewBufferLength = 240000;
+const promptFilterClickMoveThreshold = 6;
 let activeSessionId: string | undefined;
 let pendingTabSwitchSessionId: string | undefined;
 let nextPromptTranslationId = 1;
@@ -569,8 +570,47 @@ const createTerminalView = (session: CliSession) => {
 			vscode.postMessage({ type: 'cli.input', sessionId: session.id, data });
 		}
 	});
-	pane.addEventListener('pointerdown', () => {
-		openPromptFromTerminal(session.id);
+
+	let promptFilterPointerStart: {
+		x: number;
+		y: number;
+		pointerId: number;
+		hadSelection: boolean;
+	} | undefined;
+
+	pane.addEventListener('pointerdown', (event) => {
+		if (event.button !== 0) {
+			promptFilterPointerStart = undefined;
+			return;
+		}
+
+		promptFilterPointerStart = {
+			x: event.clientX,
+			y: event.clientY,
+			pointerId: event.pointerId,
+			hadSelection: terminal.hasSelection()
+		};
+	});
+	pane.addEventListener('pointerup', (event) => {
+		const pointerStart = promptFilterPointerStart;
+		promptFilterPointerStart = undefined;
+		if (!pointerStart || pointerStart.pointerId !== event.pointerId) {
+			return;
+		}
+
+		const moved = Math.hypot(event.clientX - pointerStart.x, event.clientY - pointerStart.y);
+		if (moved > promptFilterClickMoveThreshold || pointerStart.hadSelection) {
+			return;
+		}
+
+		window.setTimeout(() => {
+			if (!terminal.hasSelection()) {
+				openPromptFromTerminal(session.id);
+			}
+		}, 0);
+	});
+	pane.addEventListener('pointercancel', () => {
+		promptFilterPointerStart = undefined;
 	});
 
 	const view = { terminal, fitAddon, pane };
