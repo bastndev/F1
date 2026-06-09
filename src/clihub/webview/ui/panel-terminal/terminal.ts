@@ -69,10 +69,12 @@ const pendingPromptTranslations = new Map<string, PendingPromptTranslation>();
 const pendingPromptPrepares = new Map<string, PendingPromptPrepare>();
 const visualSleepSessionThreshold = 3;
 const maxWebviewBufferLength = 240000;
+const promptFilterClickMoveThreshold = 6;
 let activeSessionId: string | undefined;
 let pendingTabSwitchSessionId: string | undefined;
 let nextPromptTranslationId = 1;
 let nextPromptPrepareId = 1;
+let isPromptFilterEnabled = false;
 
 const isAgentIcon = (value: unknown): value is CliAgentIcon => {
 	if (!value || typeof value !== 'object') {
@@ -268,6 +270,40 @@ const requestWorkspaceFiles = (): Promise<FileMentionEntry[]> => {
 	});
 };
 
+const openPromptFromTerminal = (sessionId: string) => {
+	if (!isPromptFilterEnabled || !toolsController) {
+		return;
+	}
+
+	if (sessionId !== activeSessionId) {
+		return;
+	}
+
+	const session = sessions.get(sessionId);
+	if (session?.status !== 'running') {
+		return;
+	}
+
+	toolsController.open('prompt');
+};
+
+const openTranslatorFromTerminal = (sessionId: string) => {
+	if (!isPromptFilterEnabled || !toolsController) {
+		return;
+	}
+
+	if (sessionId !== activeSessionId) {
+		return;
+	}
+
+	const session = sessions.get(sessionId);
+	if (session?.status !== 'running') {
+		return;
+	}
+
+	toolsController.open('translate');
+};
+
 const toolsController = layoutRight
 	? createToolsController({
 			container: layoutRight,
@@ -277,26 +313,26 @@ const toolsController = layoutRight
 					return;
 				}
 				const session = sessions.get(activeSessionId);
-					if (session?.status !== 'running') {
-						return;
-					}
-					vscode.postMessage({ type: 'cli.input', sessionId: activeSessionId, data: text });
-				},
-				translatePrompt,
-				preparePromptWithAttachments,
-				requestWorkspaceFiles,
-				getTerminalSelection: () => {
-					if (!activeSessionId) {
-						return '';
-					}
-					const view = terminals.get(activeSessionId);
-					if (!view) {
-						return '';
-					}
-					return view.terminal.hasSelection() ? view.terminal.getSelection() : '';
+				if (session?.status !== 'running') {
+					return;
 				}
-			})
-		: undefined;
+				vscode.postMessage({ type: 'cli.input', sessionId: activeSessionId, data: text });
+			},
+			translatePrompt,
+			preparePromptWithAttachments,
+			requestWorkspaceFiles,
+			getTerminalSelection: () => {
+				if (!activeSessionId) {
+					return '';
+				}
+				const view = terminals.get(activeSessionId);
+				if (!view) {
+					return '';
+				}
+				return view.terminal.hasSelection() ? view.terminal.getSelection() : '';
+			}
+		})
+	: undefined;
 
 const tabController = createTabController({
 	getAgentIcon: (label) => agentIcons.get(label),
@@ -311,6 +347,9 @@ const tabController = createTabController({
 	},
 	onOpenTool: (tool) => {
 		toolsController?.toggle(tool);
+	},
+	onPromptFilterChange: (enabled) => {
+		isPromptFilterEnabled = enabled;
 	}
 });
 
@@ -547,6 +586,49 @@ const createTerminalView = (session: CliSession) => {
 		if (currentSession?.status === 'running') {
 			vscode.postMessage({ type: 'cli.input', sessionId: session.id, data });
 		}
+	});
+
+	let promptFilterPointerStart: {
+		x: number;
+		y: number;
+		pointerId: number;
+		hadSelection: boolean;
+	} | undefined;
+
+	pane.addEventListener('pointerdown', (event) => {
+		if (event.button !== 0) {
+			promptFilterPointerStart = undefined;
+			return;
+		}
+
+		promptFilterPointerStart = {
+			x: event.clientX,
+			y: event.clientY,
+			pointerId: event.pointerId,
+			hadSelection: terminal.hasSelection()
+		};
+	});
+	pane.addEventListener('pointerup', (event) => {
+		const pointerStart = promptFilterPointerStart;
+		promptFilterPointerStart = undefined;
+		if (!pointerStart || pointerStart.pointerId !== event.pointerId) {
+			return;
+		}
+
+		const moved = Math.hypot(event.clientX - pointerStart.x, event.clientY - pointerStart.y);
+		window.setTimeout(() => {
+			if (terminal.hasSelection()) {
+				openTranslatorFromTerminal(session.id);
+				return;
+			}
+
+			if (moved <= promptFilterClickMoveThreshold && !pointerStart.hadSelection) {
+				openPromptFromTerminal(session.id);
+			}
+		}, 0);
+	});
+	pane.addEventListener('pointercancel', () => {
+		promptFilterPointerStart = undefined;
 	});
 
 	const view = { terminal, fitAddon, pane };

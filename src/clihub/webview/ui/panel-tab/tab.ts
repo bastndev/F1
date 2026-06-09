@@ -30,6 +30,7 @@ type TabControllerOptions = {
 	onClose: (sessionId: string) => void;
 	onDismissToolModal?: () => void;
 	onOpenTool?: (tool: CliToolId) => void;
+	onPromptFilterChange?: (enabled: boolean) => void;
 };
 
 const getRequiredElement = <T extends HTMLElement>(id: string) => {
@@ -57,11 +58,32 @@ const getProjectLabel = (cwd: string) => {
 	return projectName ? `~/${projectName}` : '~/workspace';
 };
 
+const promptFilterToastId = 'cli-prompt-filter-toast';
+const promptFilterStorageKey = 'clihub.promptFilter.enabled';
+
+const readPromptFilterPreference = () => {
+	try {
+		const storedValue = window.localStorage.getItem(promptFilterStorageKey);
+		return storedValue === null ? true : storedValue === 'true';
+	} catch {
+		return true;
+	}
+};
+
+const writePromptFilterPreference = (enabled: boolean) => {
+	try {
+		window.localStorage.setItem(promptFilterStorageKey, String(enabled));
+	} catch {
+		// Ignore unavailable webview storage.
+	}
+};
+
 export const createTabController = (options: TabControllerOptions) => {
 	const createButton = getRequiredElement<HTMLButtonElement>('cli-create-button');
 	const createButtonLabel = getRequiredElement<HTMLSpanElement>('cli-create-button-label');
 	const toolsButton = getRequiredElement<HTMLButtonElement>('cli-tools-button');
 	const toolsPopover = getRequiredElement<HTMLDivElement>('cli-tools-popover');
+	const promptFilterToggle = getRequiredElement<HTMLInputElement>('cli-prompt-filter-toggle');
 	const agentButton = getRequiredElement<HTMLButtonElement>('cli-agent-button');
 	const agentLabel = getRequiredElement<HTMLSpanElement>('cli-agent-label');
 	const agentMenu = getRequiredElement<HTMLDivElement>('cli-agent-menu');
@@ -76,6 +98,8 @@ export const createTabController = (options: TabControllerOptions) => {
 	let lastShortcutAt = 0;
 	let currentSessionCount = 0;
 	let isAltPressed = false;
+	let isPromptFilterEnabled = readPromptFilterPreference();
+	let promptFilterToastTimer: number | undefined;
 
 	const setAgentMenuOpen = (isOpen: boolean) => {
 		isAgentMenuOpen = isOpen;
@@ -103,6 +127,41 @@ export const createTabController = (options: TabControllerOptions) => {
 
 	const dismissToolModal = () => {
 		options.onDismissToolModal?.();
+	};
+
+	const showPromptFilterToast = (enabled: boolean) => {
+		window.clearTimeout(promptFilterToastTimer);
+
+		let toast = document.getElementById(promptFilterToastId);
+		if (!toast) {
+			toast = document.createElement('div');
+			toast.id = promptFilterToastId;
+			toast.className = 'agent-tools-toast';
+			toast.setAttribute('role', 'status');
+			toast.setAttribute('aria-live', 'polite');
+			document.body.append(toast);
+		}
+
+		toast.textContent = enabled ? 'Prompt filter enabled ✅' : 'Prompt filter disabled ❌';
+		toast.classList.add('is-visible');
+
+		promptFilterToastTimer = window.setTimeout(() => {
+			toast?.classList.remove('is-visible');
+		}, 1600);
+	};
+
+	const setPromptFilterEnabled = (enabled: boolean, notify = true) => {
+		isPromptFilterEnabled = enabled;
+		promptFilterToggle.checked = enabled;
+		writePromptFilterPreference(enabled);
+		options.onPromptFilterChange?.(enabled);
+		if (notify) {
+			showPromptFilterToast(enabled);
+		}
+	};
+
+	const togglePromptFilter = () => {
+		setPromptFilterEnabled(!isPromptFilterEnabled);
 	};
 
 	const syncAgentPicker = () => {
@@ -210,6 +269,13 @@ export const createTabController = (options: TabControllerOptions) => {
 		if (matchesShortcut(event, 'toggleAgentPicker')) {
 			if (consumeShortcut(event, 'toggleAgentPicker')) {
 				toggleAgentPicker();
+				return true;
+			}
+		}
+
+		if (matchesShortcut(event, 'togglePromptFilter')) {
+			if (consumeShortcut(event, 'togglePromptFilter')) {
+				togglePromptFilter();
 				return true;
 			}
 		}
@@ -331,6 +397,10 @@ export const createTabController = (options: TabControllerOptions) => {
 		setToolsPopoverOpen(!isToolsPopoverOpen);
 	});
 
+	promptFilterToggle.addEventListener('change', () => {
+		setPromptFilterEnabled(promptFilterToggle.checked);
+	});
+
 	toolsPopover.addEventListener('click', (event) => {
 		event.stopPropagation();
 
@@ -342,6 +412,8 @@ export const createTabController = (options: TabControllerOptions) => {
 			options.onOpenTool?.(tool);
 		}
 	});
+
+	setPromptFilterEnabled(isPromptFilterEnabled, false);
 
 	document.addEventListener('click', () => {
 		closeFloatingPanels();
