@@ -229,7 +229,7 @@ export function mountFileMentionPicker(
 		if (e.key === 'ArrowUp')   { e.preventDefault(); activeIndex = Math.max(activeIndex - 1, 0); updateActive(); }
 		if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) { /* let send shortcut handle */ return; }
 		if (e.key === 'Enter')  { e.preventDefault(); if (entries[activeIndex]) { selectEntry(entries[activeIndex]); } }
-		if (e.key === 'Escape') { closeDropdown(); }
+		if (e.key === 'Escape') { e.stopPropagation(); closeDropdown(); }
 		if (e.key === 'Tab')    { e.preventDefault(); if (entries[activeIndex]) { selectEntry(entries[activeIndex]); } }
 	});
 
