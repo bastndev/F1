@@ -837,12 +837,13 @@
 }
 
 .prompt-model-item {
+  position: relative;
   display: flex;
   align-items: center;
-  justify-content: space-between;
   gap: 12px;
   width: 100%;
-  padding: 5px 8px;
+  /* Left gutter reserved for the active dot so names stay aligned */
+  padding: 5px 8px 5px 20px;
   background: transparent;
   border: none;
   border-radius: 6px;
@@ -867,19 +868,25 @@
   color: var(--vscode-descriptionForeground);
   opacity: 0.7;
   white-space: nowrap;
+  margin-left: auto;
 }
 
 .prompt-model-item.active .prompt-model-item-name {
   color: var(--agent-accent, #AFA9EC);
 }
 
+/* Active dot lives in the reserved gutter — out of the flex flow so it never
+   shifts the name out of column alignment. */
 .prompt-model-item.active::before {
   content: '';
+  position: absolute;
+  left: 8px;
+  top: 50%;
+  transform: translateY(-50%);
   width: 4px;
   height: 4px;
   border-radius: 50%;
   background: var(--agent-accent, #AFA9EC);
-  flex-shrink: 0;
 }
 
 /* Session live dot */
