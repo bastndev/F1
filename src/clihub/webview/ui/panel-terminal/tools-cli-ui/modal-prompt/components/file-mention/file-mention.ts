@@ -158,7 +158,7 @@ export function mountFileMentionPicker(
 		// Replace "@query" in textarea with "@path " (trailing space for natural flow)
 		const before = textarea.value.slice(0, mentionStart);
 		const after = textarea.value.slice(mentionStart + 1 + currentQuery.length);
-		const insert = `@${entry.path} `;
+		const insert = entry.isDirectory ? `@~/${entry.name}/ ` : `@~/${entry.name} `;
 		const newValue = before + insert + after;
 		const pos = before.length + insert.length;
 
