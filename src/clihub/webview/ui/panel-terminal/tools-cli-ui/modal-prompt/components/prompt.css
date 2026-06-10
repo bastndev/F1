@@ -370,6 +370,14 @@
   color: inherit !important;
 }
 
+/* Misspelled words — red wavy underline drawn under the (visible) overlay text.
+   The text colour stays inherited so only the squiggle signals the error. */
+.prompt-textarea-highlight .prompt-misspelled {
+  text-decoration: underline wavy var(--vscode-editorError-foreground, #f14c4c);
+  text-decoration-skip-ink: none;
+  text-underline-offset: 2px;
+}
+
 .prompt-char-count {
   position: absolute;
   bottom: 10px;

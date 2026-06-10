@@ -1,6 +1,5 @@
 import promptStyles from './components/prompt.css';
 import promptHtml from './components/prompt.html';
-import { runFullAutocorrect } from '../../../../core/tools-cli-core/autocorrect';
 import {
 	processPrompt,
 	translatePromptText,
@@ -12,6 +11,7 @@ import {
 	protectImageMarkers,
 	restoreImageMarkers,
 	type FileMentionEntry,
+	type SpellIssue,
 } from '../../../../core/tools-cli-core/prompt';
 import { mountFileMentionPicker } from './components/file-mention/file-mention';
 
@@ -40,6 +40,7 @@ type PromptContext = {
 	translatePrompt?: (request: PromptTranslateRequest) => Promise<PromptTranslateResult>;
 	preparePromptWithAttachments?: (text: string, attachments: ImageAttachment[]) => Promise<string>;
 	requestWorkspaceFiles?: () => Promise<FileMentionEntry[]>;
+	requestSpellcheck?: (text: string) => Promise<SpellIssue[]>;
 };
 
 export const mountPromptPanel = (host: HTMLElement, context: PromptContext = { close: () => {} }) => {
@@ -216,14 +217,54 @@ function initPromptTabs(host: HTMLElement, context: PromptContext, hasActiveSess
 		textarea.style.height = textarea.scrollHeight + 'px';
 	};
 
+	// Live spell-marking state. Misspelled-word ranges come from the host (cspell trie).
+	// Ranges are offset-based, so they go stale the moment the text changes — we clear
+	// them on input and recompute ~400ms after the user pauses typing.
+	let spellIssues: SpellIssue[] = [];
+	let spellcheckTimer: number | undefined;
+	let spellcheckToken = 0;
+
+	const renderHighlight = () => {
+		if (highlight && textareaWrap) {
+			updatePromptImageHighlight(textareaWrap, textarea, highlight, spellIssues);
+		}
+	};
+
+	const runSpellcheck = () => {
+		if (!context.requestSpellcheck) {
+			return;
+		}
+
+		const token = ++spellcheckToken;
+		const text = textarea.value;
+		if (!text.trim()) {
+			return;
+		}
+
+		void context.requestSpellcheck(text).then((issues) => {
+			// Drop stale responses and any result whose offsets no longer match the text.
+			if (token !== spellcheckToken || textarea.value !== text) {
+				return;
+			}
+			spellIssues = issues;
+			renderHighlight();
+		});
+	};
+
+	const scheduleSpellcheck = () => {
+		window.clearTimeout(spellcheckTimer);
+		spellcheckTimer = window.setTimeout(runSpellcheck, 400);
+	};
+
 	const onInputForHighlight = () => {
 		adjustHeight();
+		// Clear stale squiggles immediately so underlines never drift while typing.
+		spellIssues = [];
 		if (highlight && textareaWrap) {
 			// use raf to ensure update happens after value commit and to help layer paint
-			requestAnimationFrame(() => {
-				updatePromptImageHighlight(textareaWrap, textarea, highlight);
-			});
+			requestAnimationFrame(renderHighlight);
 		}
+		scheduleSpellcheck();
 	};
 
 	textarea.addEventListener('input', onInputForHighlight);
@@ -239,7 +280,7 @@ function initPromptTabs(host: HTMLElement, context: PromptContext, hasActiveSess
 	// selectionchange: update highlight so .selected spans get the blue bg when user selects text
 	const onSelectionChange = () => {
 		if (document.activeElement === textarea && highlight && textareaWrap) {
-			updatePromptImageHighlight(textareaWrap, textarea, highlight);
+			renderHighlight();
 		}
 	};
 	document.addEventListener('selectionchange', onSelectionChange);
@@ -247,9 +288,7 @@ function initPromptTabs(host: HTMLElement, context: PromptContext, hasActiveSess
 	// Initial adjustment + first highlight render
 	requestAnimationFrame(() => {
 		adjustHeight();
-		if (highlight && textareaWrap) {
-			updatePromptImageHighlight(textareaWrap, textarea, highlight);
-		}
+		renderHighlight();
 	});
 }
 
@@ -321,48 +360,7 @@ function initSkillsChips(host: HTMLElement) {
 }
 
 function initToolbarActions(host: HTMLElement, textarea: HTMLTextAreaElement, context: PromptContext) {
-	const fixBtn = host.querySelector<HTMLButtonElement>('#fixSpellingBtn');
 	const translateBtn = host.querySelector<HTMLButtonElement>('#translateBtn');
-
-	if (fixBtn) {
-		const originalHtml = fixBtn.innerHTML;
-		fixBtn.addEventListener('click', async () => {
-			const text = textarea.value;
-			if (!text.trim()) {return;}
-
-			fixBtn.innerHTML = '<i class="ti ti-loader" aria-hidden="true"></i> Corrigiendo...';
-			fixBtn.disabled = true;
-
-			try {
-				// Protect image markers so autocorrect doesn't touch [Image #N]
-				const { text: protectedText, markers } = protectImageMarkers(text);
-				const result = await runFullAutocorrect(protectedText);
-				const corrected = restoreImageMarkers(result.correctedText, markers);
-
-				if (corrected !== text) {
-					textarea.value = corrected;
-					textarea.dispatchEvent(new Event('input'));
-
-					const total = result.typoCorrections + result.languageToolCorrections;
-					fixBtn.innerHTML = `<i class="ti ti-check" aria-hidden="true"></i> ${total} correcciones`;
-					fixBtn.style.color = '#5DCAA5';
-				} else {
-					fixBtn.innerHTML = '<i class="ti ti-check" aria-hidden="true"></i> Sin cambios';
-				}
-			} catch (err) {
-				console.error('Error en corrección:', err);
-				fixBtn.innerHTML = '<i class="ti ti-alert-triangle" aria-hidden="true"></i> Error';
-			} finally {
-				fixBtn.disabled = false;
-
-				setTimeout(() => {
-					fixBtn.innerHTML = originalHtml;
-					fixBtn.style.color = '';
-					fixBtn.style.borderColor = '';
-				}, 2000);
-			}
-		});
-	}
 
 	if (translateBtn) {
 		const originalHtml = translateBtn.innerHTML;
@@ -710,7 +708,8 @@ function setupImagePaste(
 function updatePromptImageHighlight(
   wrap: HTMLElement,
   textarea: HTMLTextAreaElement,
-  highlight: HTMLElement
+  highlight: HTMLElement,
+  spellIssues: SpellIssue[] = []
 ) {
   if (!wrap || !textarea || !highlight) {
     return;
@@ -723,16 +722,16 @@ function updatePromptImageHighlight(
     selEnd = textarea.selectionEnd ?? -1;
   }
 
-  highlight.replaceChildren(...buildPromptHighlightNodes(textarea.value, selStart, selEnd));
+  highlight.replaceChildren(...buildPromptHighlightNodes(textarea.value, selStart, selEnd, spellIssues));
 
   // keep scroll in sync
   highlight.scrollTop = textarea.scrollTop;
   highlight.scrollLeft = textarea.scrollLeft;
 }
 
-type TokenKind = 'image' | 'mention' | 'plain';
+type TokenKind = 'image' | 'mention' | 'misspelled' | 'plain';
 
-function buildPromptHighlightNodes(text: string, selStart: number = -1, selEnd: number = -1): Node[] {
+function buildPromptHighlightNodes(text: string, selStart: number = -1, selEnd: number = -1, spellIssues: SpellIssue[] = []): Node[] {
   if (!text) {
     return [];
   }
@@ -741,7 +740,7 @@ function buildPromptHighlightNodes(text: string, selStart: number = -1, selEnd: 
   let lastIndex = 0;
   const hasSel = selStart >= 0 && selEnd > selStart;
 
-  // Collect all special tokens (image markers + @file mentions) sorted by position.
+  // Collect all special tokens (image markers + @file mentions + misspelled words) sorted by position.
   type Token = { start: number; end: number; kind: TokenKind };
   const tokens: Token[] = [];
 
@@ -752,7 +751,15 @@ function buildPromptHighlightNodes(text: string, selStart: number = -1, selEnd: 
   for (const match of text.matchAll(/@\S+/g)) {
     tokens.push({ start: match.index ?? 0, end: (match.index ?? 0) + match[0].length, kind: 'mention' });
   }
-  tokens.sort((a, b) => a.start - b.start);
+  // Misspelled words flagged by the host spell-checker.
+  for (const issue of spellIssues) {
+    if (issue.offset >= 0 && issue.length > 0 && issue.offset + issue.length <= text.length) {
+      tokens.push({ start: issue.offset, end: issue.offset + issue.length, kind: 'misspelled' });
+    }
+  }
+  // Image/mention tokens take priority over misspelled ones when ranges collide.
+  const tokenPriority: Record<TokenKind, number> = { image: 0, mention: 0, misspelled: 1, plain: 2 };
+  tokens.sort((a, b) => a.start - b.start || tokenPriority[a.kind] - tokenPriority[b.kind]);
 
   for (const token of tokens) {
     // Guard against overlapping tokens (should not happen in practice)
@@ -790,6 +797,7 @@ function appendSegment(
 
   const cssClass = kind === 'image' ? 'prompt-image-marker'
                  : kind === 'mention' ? 'prompt-mention'
+                 : kind === 'misspelled' ? 'prompt-misspelled'
                  : 'plain';
 
   const makeSpan = (content: string, cls: string): HTMLSpanElement => {

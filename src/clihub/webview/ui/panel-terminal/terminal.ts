@@ -3,7 +3,7 @@ import { Terminal } from '@xterm/xterm';
 import { createTabController, type CliAgentIcon, type CliAgentOption, type CliSessionSummary } from '../panel-tab/tab';
 import { createCliCreateMessage, type AgentLaunchGuardMessage } from './agent-safety/agent-launch-guard';
 import { createToolsController } from './tools-cli-ui/tools';
-import type { ImageAttachment, PromptTranslateRequest, PromptTranslateResult, FileMentionEntry } from '../../core/tools-cli-core/prompt';
+import type { ImageAttachment, PromptTranslateRequest, PromptTranslateResult, FileMentionEntry, SpellIssue } from '../../core/tools-cli-core/prompt';
 
 type VsCodeApi = {
 	postMessage: (message: ClientMessage) => void;
@@ -18,6 +18,7 @@ type ClientMessage =
 	| { type: 'cli.close'; sessionId: string }
 	| { type: 'prompt.translate'; id: string; text: string; from: string; to: string }
 	| { type: 'prompt.prepare'; id: string; text: string; attachments: ImageAttachment[] }
+	| { type: 'prompt.spellcheck'; id: string; text: string }
 	| { type: 'workspace.listFiles'; id: string };
 
 type CliSession = CliSessionSummary & {
@@ -39,6 +40,7 @@ type ServerMessage =
 	| { type: 'prompt.translationError'; id: string; message: string }
 	| { type: 'prompt.prepared'; id: string; text: string }
 	| { type: 'prompt.prepareError'; id: string; message: string }
+	| { type: 'prompt.spellResult'; id: string; issues: SpellIssue[] }
 	| { type: 'workspace.files'; id: string; files: FileMentionEntry[] };
 
 type TerminalView = {
@@ -271,6 +273,24 @@ const requestWorkspaceFiles = (): Promise<FileMentionEntry[]> => {
 	});
 };
 
+const pendingSpellchecks = new Map<string, (issues: SpellIssue[]) => void>();
+let nextSpellcheckId = 1;
+
+const requestSpellcheck = (text: string): Promise<SpellIssue[]> => {
+	const id = `spell-${nextSpellcheckId++}`;
+	return new Promise((resolve) => {
+		const timeout = window.setTimeout(() => {
+			pendingSpellchecks.delete(id);
+			resolve([]);
+		}, 5000);
+		pendingSpellchecks.set(id, (issues) => {
+			clearTimeout(timeout);
+			resolve(issues);
+		});
+		vscode.postMessage({ type: 'prompt.spellcheck', id, text });
+	});
+};
+
 const openPromptFromTerminal = (sessionId: string) => {
 	if (!isPromptFilterEnabled || !toolsController) {
 		return;
@@ -322,6 +342,7 @@ const toolsController = layoutRight
 			translatePrompt,
 			preparePromptWithAttachments,
 			requestWorkspaceFiles,
+			requestSpellcheck,
 			getTerminalSelection: () => {
 				if (!activeSessionId) {
 					return '';
@@ -878,6 +899,15 @@ window.addEventListener('message', (event: MessageEvent<ServerMessage>) => {
 
 	if (message.type === 'prompt.prepareError') {
 		rejectPromptPrepare(message);
+		return;
+	}
+
+	if (message.type === 'prompt.spellResult') {
+		const handler = pendingSpellchecks.get(message.id);
+		if (handler) {
+			pendingSpellchecks.delete(message.id);
+			handler(message.issues);
+		}
 		return;
 	}
 

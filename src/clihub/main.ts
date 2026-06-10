@@ -7,6 +7,7 @@ import { ensureCliInstalled, isCliInstalled } from './webview/core/terminal-cli/
 import { CliSessionManager } from './webview/core/terminal-cli/session-manager';
 import { getCliHubWebviewHtml } from './webview/webview';
 import { translatePromptToEnglish } from './webview/core/tools-cli-core/modal-translation/host-prompt-translator';
+import { checkText as spellCheckText, warmSpellchecker } from './webview/core/tools-cli-core/autocorrect/host-spellcheck';
 import { preparePromptForCLI } from './webview/core/tools-cli-core/prompt/attachments/host-preparer';
 import type { ImageAttachment } from './webview/core/tools-cli-core/prompt';
 import {
@@ -105,6 +106,7 @@ export class CliHubViewProvider implements vscode.WebviewViewProvider, vscode.Di
 
 			if (message.type === 'cli.ready') {
 				this.sessionManager.attach(webviewView.webview);
+				warmSpellchecker();
 
 				if (this.pendingInitialAgent) {
 					void this.sessionManager.createSession(this.pendingInitialAgent);
@@ -123,6 +125,11 @@ export class CliHubViewProvider implements vscode.WebviewViewProvider, vscode.Di
 
 			if (message.type === 'prompt.prepare') {
 				await this._handlePromptPrepare(webviewView.webview, message);
+				return;
+			}
+
+			if (message.type === 'prompt.spellcheck') {
+				await this._handlePromptSpellcheck(webviewView.webview, message);
 				return;
 			}
 
@@ -319,6 +326,30 @@ export class CliHubViewProvider implements vscode.WebviewViewProvider, vscode.Di
 				type: 'prompt.prepareError',
 				id: message.id,
 				message: error instanceof Error ? error.message : 'Failed to prepare image attachments.',
+			});
+		}
+	}
+
+	private async _handlePromptSpellcheck(webview: vscode.Webview, message: CliHubMessage) {
+		if (typeof message.id !== 'string') {
+			return;
+		}
+
+		const text = typeof message.text === 'string' ? message.text : '';
+
+		try {
+			const issues = await spellCheckText(text);
+			await webview.postMessage({
+				type: 'prompt.spellResult',
+				id: message.id,
+				issues,
+			});
+		} catch {
+			// Spell-marking is best-effort; never block the prompt on a failure.
+			await webview.postMessage({
+				type: 'prompt.spellResult',
+				id: message.id,
+				issues: [],
 			});
 		}
 	}
