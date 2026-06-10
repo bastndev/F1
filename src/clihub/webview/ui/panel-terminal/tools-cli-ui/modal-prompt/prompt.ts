@@ -174,8 +174,9 @@ function initPromptTabs(host: HTMLElement, context: PromptContext, hasActiveSess
 			const savedBtnHtml = runBtn?.innerHTML;
 			setTranslating(true);
 			if (runBtn) {
+				runBtn.classList.add('is-translating');
 				runBtn.disabled = true;
-				runBtn.innerHTML = '<i class="ti ti-loader-2 prompt-spin" aria-hidden="true"></i><span>Translating…</span>';
+				runBtn.innerHTML = '<i class="ti ti-sparkles" aria-hidden="true"></i><span>Translating…</span>';
 			}
 			try {
 				const { text: protectedText, markers } = protectImageMarkers(textToSend);

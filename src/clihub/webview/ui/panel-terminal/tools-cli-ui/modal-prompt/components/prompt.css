@@ -230,6 +230,36 @@
   50%       { opacity: 0.4; transform: scale(0.75); }
 }
 
+/* Translating state for run button (uses grey + glass flash animation) */
+.prompt-run-btn:disabled.is-translating,
+.agent-shell[data-agent] .prompt-run-btn:disabled.is-translating,
+.vscode-light .prompt-run-btn:disabled.is-translating {
+  position: relative;
+  overflow: hidden;
+}
+
+.prompt-run-btn:disabled.is-translating::after {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  background: linear-gradient(
+    115deg,
+    transparent 25%,
+    rgba(255, 255, 255, 0.4) 45%,
+    rgba(255, 255, 255, 0.6) 50%,
+    rgba(255, 255, 255, 0.4) 55%,
+    transparent 75%
+  );
+  animation: translating-glass-sweep 1.2s infinite;
+  pointer-events: none;
+  border-radius: inherit;
+}
+
+@keyframes translating-glass-sweep {
+  0% { transform: translateX(-150%); }
+  100% { transform: translateX(150%); }
+}
+
 /* Spinner icon — hidden until .is-translating */
 .prompt-translate-spinner {
   display: none;
