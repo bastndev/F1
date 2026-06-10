@@ -497,8 +497,15 @@
   font-weight: 500;
 }
 
+/* @folder-mention tokens — yellow (ends with /) */
+.prompt-textarea-highlight .prompt-mention-folder {
+  color: #e8c25a;
+  font-weight: 500;
+}
+
 /* When a mention is (partially) selected, the selection colour wins */
-.prompt-textarea-highlight .selected .prompt-mention {
+.prompt-textarea-highlight .selected .prompt-mention,
+.prompt-textarea-highlight .selected .prompt-mention-folder {
   color: inherit !important;
 }
 

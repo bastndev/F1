@@ -818,7 +818,7 @@ function updatePromptImageHighlight(
   highlight.scrollLeft = textarea.scrollLeft;
 }
 
-type TokenKind = 'image' | 'mention' | 'misspelled' | 'plain';
+type TokenKind = 'image' | 'mention' | 'mention-folder' | 'misspelled' | 'plain';
 
 function buildPromptHighlightNodes(text: string, selStart: number = -1, selEnd: number = -1, spellIssues: SpellIssue[] = []): Node[] {
   if (!text) {
@@ -838,7 +838,8 @@ function buildPromptHighlightNodes(text: string, selStart: number = -1, selEnd: 
   }
   // @mention: '@' followed by any non-whitespace chars (file paths inserted by the picker)
   for (const match of text.matchAll(/@\S+/g)) {
-    tokens.push({ start: match.index ?? 0, end: (match.index ?? 0) + match[0].length, kind: 'mention' });
+    const kind: TokenKind = match[0].endsWith('/') ? 'mention-folder' : 'mention';
+    tokens.push({ start: match.index ?? 0, end: (match.index ?? 0) + match[0].length, kind });
   }
   // Misspelled words flagged by the host spell-checker.
   for (const issue of spellIssues) {
@@ -847,7 +848,7 @@ function buildPromptHighlightNodes(text: string, selStart: number = -1, selEnd: 
     }
   }
   // Image/mention tokens take priority over misspelled ones when ranges collide.
-  const tokenPriority: Record<TokenKind, number> = { image: 0, mention: 0, misspelled: 1, plain: 2 };
+  const tokenPriority: Record<TokenKind, number> = { image: 0, mention: 0, 'mention-folder': 0, misspelled: 1, plain: 2 };
   tokens.sort((a, b) => a.start - b.start || tokenPriority[a.kind] - tokenPriority[b.kind]);
 
   for (const token of tokens) {
@@ -886,6 +887,7 @@ function appendSegment(
 
   const cssClass = kind === 'image' ? 'prompt-image-marker'
                  : kind === 'mention' ? 'prompt-mention'
+                 : kind === 'mention-folder' ? 'prompt-mention-folder'
                  : kind === 'misspelled' ? 'prompt-misspelled'
                  : 'plain';
 
