@@ -74,6 +74,11 @@
   margin-bottom: 3px;
 }
 
+.prompt-title-filter {
+  color: var(--vscode-descriptionForeground);
+  font-weight: 300;
+}
+
 .prompt-badge {
   font-size: 9px;
   background: rgba(29, 158, 117, 0.2);
