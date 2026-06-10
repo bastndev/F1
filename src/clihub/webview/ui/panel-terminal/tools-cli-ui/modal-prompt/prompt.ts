@@ -147,9 +147,10 @@ function initPromptTabs(host: HTMLElement, context: PromptContext, hasActiveSess
 	// Setup paste that supports images/screenshots + paths (must run before or combined with lowercase)
 	setupImagePaste(textarea, registerPathImageAttachment, registerClipboardImageAttachment);
 
-	// Atomic delete for [Image #N] markers (Backspace/Delete removes whole token)
+	// Atomic delete and traversal for [Image #N] markers
 	textarea.addEventListener('keydown', (e) => {
-		handleImageMarkerDeleteKey(textarea, e);
+		if (handleImageMarkerDeleteKey(textarea, e)) return;
+		if (handleImageMarkerArrowKey(textarea, e)) return;
 	});
 
 	// The real send that handles optional auto-translate + image resolution before processPrompt.
@@ -315,9 +316,24 @@ function initPromptTabs(host: HTMLElement, context: PromptContext, hasActiveSess
 		}
 	});
 
+	const forceCaretOutOfMarkers = () => {
+		if (textarea.selectionStart !== textarea.selectionEnd) return;
+		const caret = textarea.selectionStart ?? 0;
+		for (const match of textarea.value.matchAll(/\[Image #(\d+)\]/g)) {
+			const start = match.index ?? 0;
+			const end = start + match[0].length;
+			if (caret > start && caret < end) {
+				const newCaret = (caret - start) < (end - caret) ? start : end;
+				textarea.setSelectionRange(newCaret, newCaret);
+				break;
+			}
+		}
+	};
+
 	// selectionchange: update highlight so .selected spans get the blue bg when user selects text
 	const onSelectionChange = () => {
 		if (document.activeElement === textarea && highlight && textareaWrap) {
+			forceCaretOutOfMarkers();
 			renderHighlight();
 		}
 	};
@@ -661,6 +677,39 @@ function findImageMarkerDeleteRange(
 		}
 	}
 	return undefined;
+}
+
+function handleImageMarkerArrowKey(textarea: HTMLTextAreaElement, event: KeyboardEvent): boolean {
+	if (event.key !== 'ArrowLeft' && event.key !== 'ArrowRight') {
+		return false;
+	}
+	// Allow Ctrl/Meta for word jumping behavior, but still intercept if we hit/are inside a marker
+	if (event.shiftKey || event.altKey) {
+		return false;
+	}
+	if (textarea.selectionStart !== textarea.selectionEnd) {
+		return false;
+	}
+
+	const caret = textarea.selectionStart ?? 0;
+	
+	for (const match of textarea.value.matchAll(/\[Image #(\d+)\]/g)) {
+		const start = match.index ?? 0;
+		const end = start + match[0].length;
+		
+		const inside = caret > start && caret < end;
+		const movingLeftInto = event.key === 'ArrowLeft' && caret === end;
+		const movingRightInto = event.key === 'ArrowRight' && caret === start;
+		
+		if (inside || movingLeftInto || movingRightInto) {
+			event.preventDefault();
+			const newCaret = event.key === 'ArrowLeft' ? start : end;
+			textarea.setSelectionRange(newCaret, newCaret);
+			return true;
+		}
+	}
+	
+	return false;
 }
 
 function getImageTypeFromPath(path: string): string {

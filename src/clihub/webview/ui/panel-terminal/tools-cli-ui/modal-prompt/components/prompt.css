@@ -392,6 +392,8 @@
   outline: none;
   transition: background 0.2s;
   letter-spacing: 0.01em;
+  white-space: pre-wrap;
+  word-break: break-word;
 }
 .prompt-textarea:focus {
   /* No border painting on focus — border stays consistent */
