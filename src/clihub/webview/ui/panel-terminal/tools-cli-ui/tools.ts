@@ -8,7 +8,7 @@ export type ToolId = 'translate' | 'keymaps' | 'prompt';
 export type ToolContext = {
 	close: () => void;
 	getActiveSessionId?: () => string | undefined;
-	sendToActiveSession?: (text: string, options?: { paste?: boolean }) => void;
+	sendToActiveSession?: (text: string, options?: { paste?: boolean; submit?: boolean }) => void;
 	translatePrompt?: (request: PromptTranslateRequest) => Promise<PromptTranslateResult>;
 	getTerminalSelection?: () => string;
 	preparePromptWithAttachments?: (text: string, attachments: ImageAttachment[]) => Promise<string>;
@@ -20,7 +20,7 @@ type ToolMount = (host: HTMLElement, context: ToolContext) => void;
 export type ToolsControllerOptions = {
 	container: HTMLElement;
 	getActiveSessionId?: () => string | undefined;
-	sendToActiveSession?: (text: string, options?: { paste?: boolean }) => void;
+	sendToActiveSession?: (text: string, options?: { paste?: boolean; submit?: boolean }) => void;
 	translatePrompt?: (request: PromptTranslateRequest) => Promise<PromptTranslateResult>;
 	getTerminalSelection?: () => string;
 	preparePromptWithAttachments?: (text: string, attachments: ImageAttachment[]) => Promise<string>;

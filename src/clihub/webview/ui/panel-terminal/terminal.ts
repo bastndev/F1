@@ -329,26 +329,43 @@ const toolsController = layoutRight
 	? createToolsController({
 			container: layoutRight,
 			getActiveSessionId: () => activeSessionId,
-			sendToActiveSession: (text: string, options?: { paste?: boolean }) => {
+			sendToActiveSession: (text: string, options?: { paste?: boolean; submit?: boolean }) => {
 				if (!activeSessionId) {
 					return;
 				}
-				const session = sessions.get(activeSessionId);
+				const sessionId = activeSessionId;
+				const session = sessions.get(sessionId);
 				if (session?.status !== 'running') {
 					return;
 				}
+				const view = terminals.get(sessionId);
 				let data = text;
 				// Frame pasted text in bracketed-paste markers when the CLI has
 				// enabled that mode (xterm tracks DECSET 2004 per terminal). TUI
 				// CLIs rely on this to insert multi-char input cleanly; without it
 				// some (e.g. Copilot) garble or drop chunked input entirely.
-				if (options?.paste) {
-					const view = terminals.get(activeSessionId);
-					if (view?.terminal.modes.bracketedPasteMode) {
-						data = `\x1b[200~${text}\x1b[201~`;
-					}
+				if (options?.paste && view?.terminal.modes.bracketedPasteMode) {
+					data = `\x1b[200~${text}\x1b[201~`;
 				}
-				vscode.postMessage({ type: 'cli.input', sessionId: activeSessionId, data });
+				// CLIs that requested focus reporting (DECSET 1004) may ignore key
+				// input while the terminal reports itself unfocused — and it does
+				// while the user types in the prompt modal. Announce focus-in so the
+				// submit registers; the real focus events keep flowing as usual.
+				if (options?.submit && view?.terminal.modes.sendFocusMode) {
+					data = `\x1b[I${data}`;
+				}
+				vscode.postMessage({ type: 'cli.input', sessionId, data });
+				if (options?.submit) {
+					// Enter must arrive as its own write or TUI CLIs treat it as part
+					// of the paste. Copilot digests pastes noticeably slower than the
+					// rest, so it gets a longer pause before the keypress.
+					const delay = getAgentSlug(session.label) === 'copilot' ? 750 : 150;
+					setTimeout(() => {
+						if (sessions.get(sessionId)?.status === 'running') {
+							vscode.postMessage({ type: 'cli.input', sessionId, data: '\r' });
+						}
+					}, delay);
+				}
 			},
 			translatePrompt,
 			preparePromptWithAttachments,
