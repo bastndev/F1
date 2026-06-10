@@ -124,7 +124,7 @@ async function main() {
 		sourcesContent: false,
 		platform: 'node',
 		outfile: 'dist/extension.js',
-		external: ['vscode', 'node-pty'],
+		external: ['vscode', 'node-pty', 'cspell-trie-lib', '@cspell/dict-es-es'],
 		logLevel: 'silent',
 		plugins: [
 			cliHubAssetsPlugin,

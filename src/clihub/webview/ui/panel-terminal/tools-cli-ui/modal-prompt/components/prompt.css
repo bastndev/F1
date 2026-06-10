@@ -74,6 +74,11 @@
   margin-bottom: 3px;
 }
 
+.prompt-title-filter {
+  color: var(--vscode-descriptionForeground);
+  font-weight: 300;
+}
+
 .prompt-badge {
   font-size: 9px;
   background: rgba(29, 158, 117, 0.2);
@@ -157,6 +162,131 @@
   color: color-mix(in srgb, var(--agent-accent, #AFA9EC) 85%, #7dd3fc);
   border-color: color-mix(in srgb, var(--agent-accent, #534AB7) 40%, #38bdf8 20%);
   background: color-mix(in srgb, var(--agent-accent, #534AB7) 10%, transparent);
+}
+
+/* === Translate auto-toggle ===
+   Pill on the left of the toolbar. Active by default.
+   aria-pressed="true"  → accent colour + pulsing dot
+   aria-pressed="false" → muted / low-opacity
+   .is-translating      → spinner, pointer-events off */
+
+.prompt-translate-toggle {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 10px 4px 8px;
+  background: transparent;
+  border: 1px solid var(--vscode-editorGroup-border);
+  border-radius: 20px;
+  color: var(--vscode-descriptionForeground);
+  font-family: 'Syne', sans-serif;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: lowercase;
+  cursor: pointer;
+  transition: color 0.2s ease, border-color 0.2s ease, background 0.2s ease, opacity 0.2s ease;
+  margin-bottom: 6px;
+  opacity: 0.5;
+  flex-shrink: 0;
+}
+
+.prompt-translate-toggle:hover {
+  opacity: 1;
+  color: var(--agent-accent, #AFA9EC);
+  border-color: color-mix(in srgb, var(--agent-accent, #534AB7) 40%, transparent);
+  background: color-mix(in srgb, var(--agent-accent, #534AB7) 8%, transparent);
+}
+
+.prompt-translate-toggle[aria-pressed="true"] {
+  color: var(--agent-accent, #AFA9EC);
+  border-color: color-mix(in srgb, var(--agent-accent, #534AB7) 45%, transparent);
+  background: color-mix(in srgb, var(--agent-accent, #534AB7) 10%, transparent);
+  opacity: 1;
+}
+
+.prompt-translate-toggle i {
+  font-size: 12px;
+}
+
+/* Live indicator dot */
+.prompt-translate-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: currentColor;
+  flex-shrink: 0;
+  opacity: 0.3;
+  transition: opacity 0.2s, transform 0.2s;
+}
+
+.prompt-translate-toggle[aria-pressed="true"] .prompt-translate-dot {
+  opacity: 1;
+  animation: translate-dot-pulse 2.2s ease-in-out infinite;
+}
+
+@keyframes translate-dot-pulse {
+  0%, 100% { opacity: 1;    transform: scale(1);    }
+  50%       { opacity: 0.4; transform: scale(0.75); }
+}
+
+/* Translating state for run button (uses grey + glass flash animation) */
+.prompt-run-btn:disabled.is-translating,
+.agent-shell[data-agent] .prompt-run-btn:disabled.is-translating,
+.vscode-light .prompt-run-btn:disabled.is-translating {
+  position: relative;
+  overflow: hidden;
+}
+
+.prompt-run-btn:disabled.is-translating::after {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  background: linear-gradient(
+    115deg,
+    transparent 25%,
+    rgba(255, 255, 255, 0.4) 45%,
+    rgba(255, 255, 255, 0.6) 50%,
+    rgba(255, 255, 255, 0.4) 55%,
+    transparent 75%
+  );
+  animation: translating-glass-sweep 1.2s infinite;
+  pointer-events: none;
+  border-radius: inherit;
+}
+
+@keyframes translating-glass-sweep {
+  0% { transform: translateX(-150%); }
+  100% { transform: translateX(150%); }
+}
+
+/* Spinner icon — hidden until .is-translating */
+.prompt-translate-spinner {
+  display: none;
+  animation: prompt-spin 0.75s linear infinite;
+}
+
+/* Translating state: swap icon ↔ spinner, lock the button */
+.prompt-translate-toggle.is-translating {
+  pointer-events: none;
+  opacity: 1;
+}
+
+.prompt-translate-toggle.is-translating .prompt-translate-icon {
+  display: none;
+}
+
+.prompt-translate-toggle.is-translating .prompt-translate-spinner {
+  display: inline-block;
+}
+
+.prompt-translate-toggle.is-translating .prompt-translate-dot {
+  animation: translate-dot-blink 0.5s step-start infinite;
+}
+
+@keyframes translate-dot-blink {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0; }
 }
 
 .prompt-action-btn {
@@ -261,7 +391,10 @@
   resize: none;
   outline: none;
   transition: background 0.2s;
-  letter-spacing: 0.01em;
+  font-variant-ligatures: none;
+  white-space: pre-wrap;
+  overflow-wrap: break-word;
+  word-break: normal;
 }
 .prompt-textarea:focus {
   /* No border painting on focus — border stays consistent */
@@ -295,9 +428,10 @@
   font-family: 'JetBrains Mono', monospace;
   font-size: 12.5px;
   line-height: 1.6;
-  letter-spacing: 0.01em;
+  font-variant-ligatures: none;
   white-space: pre-wrap;
-  word-break: break-word;
+  overflow-wrap: break-word;
+  word-break: normal;
   overflow: hidden;
   pointer-events: none;
   z-index: 0;
@@ -365,9 +499,26 @@
   font-weight: 500;
 }
 
+/* @folder-mention tokens — yellow (ends with /) */
+.prompt-textarea-highlight .prompt-mention-folder {
+  color: #e8c25a;
+  font-weight: 500;
+}
+
 /* When a mention is (partially) selected, the selection colour wins */
-.prompt-textarea-highlight .selected .prompt-mention {
+.prompt-textarea-highlight .selected .prompt-mention,
+.prompt-textarea-highlight .selected .prompt-mention-folder {
   color: inherit !important;
+}
+
+/* Misspelled words — red wavy squiggle drawn as a background-image tile so it
+   has zero impact on line-height (text-decoration: wavy adds subtle extra space
+   per line that drifts the overlay out of sync with the textarea cursor). */
+.prompt-textarea-highlight .prompt-misspelled {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='6' height='3'%3E%3Cpath d='M0 2 Q1.5 1 3 2 Q4.5 3 6 2' stroke='%23f14c4c' stroke-width='1' fill='none'/%3E%3C/svg%3E");
+  background-position: left bottom;
+  background-repeat: repeat-x;
+  background-size: 6px 3px;
 }
 
 .prompt-char-count {

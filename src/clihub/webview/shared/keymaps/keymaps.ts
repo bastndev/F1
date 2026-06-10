@@ -128,6 +128,19 @@ export function escapeKey() {
   };
 }
 
+/** Matches CapsLock key (no modifiers) */
+export function Capslock() {
+  return (event: KeyboardEvent): boolean => {
+    return (
+      event.key === 'CapsLock' &&
+      !event.altKey &&
+      !event.ctrlKey &&
+      !event.metaKey &&
+      !event.shiftKey
+    );
+  };
+}
+
 /** Matches Shift + F1, Shift + F2, etc. (common for opening tools/panels) */
 export function shiftFKey(num: number) {
   const targetKey = `F${num}`;
@@ -161,8 +174,8 @@ export const shortcuts: ShortcutDefinition[] = [
     id: 'toggleAgentPicker',
     label: 'Open CLI selector',
     contexts: ['terminal'],
-    description: 'Ctrl + Tab',
-    match: ctrlTab(),
+    description: 'Capslock',
+    match: Capslock(),
   },
   {
     id: 'togglePromptFilter',
