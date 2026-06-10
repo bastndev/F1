@@ -101,6 +101,11 @@ function initPromptTabs(host: HTMLElement, context: PromptContext, hasActiveSess
 	let imageAttachments: ImageAttachment[] = [];
 	let nextImageAttachmentId = 1;
 
+	// Translate toggle — on by default, persisted to localStorage across sessions.
+	// localStorage key: 'f1-translate-auto' → '1' (on) | '0' (off). Missing key = on.
+	const translateState = { enabled: localStorage.getItem('f1-translate-auto') !== '0' };
+	let setTranslating: (active: boolean) => void = () => {};
+
 	const registerPathImageAttachment = (path: string): string => {
 		const id = nextImageAttachmentId++;
 		const marker = `[Image #${id}]`;
@@ -147,8 +152,8 @@ function initPromptTabs(host: HTMLElement, context: PromptContext, hasActiveSess
 		handleImageMarkerDeleteKey(textarea, e);
 	});
 
-	// The real send that handles image resolution before calling processPrompt.
-	// This must live inside init so it closes over the live imageAttachments array.
+	// The real send that handles optional auto-translate + image resolution before processPrompt.
+	// Lives inside init so it closes over translateState / setTranslating / imageAttachments.
 	async function doPerformSendWithImages(
 		hostEl: HTMLElement,
 		ta: HTMLTextAreaElement,
@@ -162,16 +167,42 @@ function initPromptTabs(host: HTMLElement, context: PromptContext, hasActiveSess
 
 		let textToSend = ta.value;
 
+		// Auto-translate (ES → EN) when the toggle is active.
+		// The textarea keeps the original text; the CLI receives the translation.
+		if (translateState.enabled && ctx.translatePrompt) {
+			const runBtn = hostEl.querySelector<HTMLButtonElement>('#runBtn');
+			const savedBtnHtml = runBtn?.innerHTML;
+			setTranslating(true);
+			if (runBtn) {
+				runBtn.disabled = true;
+				runBtn.innerHTML = '<i class="ti ti-loader-2 prompt-spin" aria-hidden="true"></i><span>Translating…</span>';
+			}
+			try {
+				const { text: protectedText, markers } = protectImageMarkers(textToSend);
+				const result = await translatePromptText(protectedText, ctx);
+				const translated = result.text ? restoreImageMarkers(result.text, markers) : '';
+				if (translated && translated !== textToSend.trim()) {
+					textToSend = translated;
+				}
+			} catch (err) {
+				console.error('[Prompt] Auto-translate failed:', err);
+			} finally {
+				setTranslating(false);
+				if (runBtn && savedBtnHtml !== undefined) {
+					runBtn.innerHTML = savedBtnHtml;
+					const trimmed = ta.value.trim();
+					runBtn.disabled = !(trimmed.length >= 6 || trimmed.includes(' ')) || !ctx.getActiveSessionId?.();
+				}
+			}
+		}
+
 		const referenced = getReferencedImageAttachments(textToSend, currentAttachments);
 
 		if (referenced.length > 0 && ctx.preparePromptWithAttachments) {
 			try {
-				// This goes to host (via terminal.ts) which saves any clipboard images to disk
-				// and returns text where [Image #N] markers have been replaced by real paths.
 				textToSend = await ctx.preparePromptWithAttachments(textToSend, referenced);
 			} catch (err) {
 				console.error('[Prompt] Failed to prepare image attachments:', err);
-				// fallthrough with original text (markers will be visible, paths not resolved)
 			}
 		}
 
@@ -198,7 +229,15 @@ function initPromptTabs(host: HTMLElement, context: PromptContext, hasActiveSess
 
 	if (hasActiveSession) {
 		initSkillsChips(host);
-		initToolbarActions(host, textarea, context);
+		const tools = initToolbarActions(
+			host,
+			() => translateState.enabled,
+			(val) => {
+				translateState.enabled = val;
+				try { localStorage.setItem('f1-translate-auto', val ? '1' : '0'); } catch { /* storage unavailable */ }
+			}
+		);
+		setTranslating = tools.setTranslating;
 	}
 
 	const performSendNow = async () => {
@@ -357,46 +396,32 @@ function initSkillsChips(host: HTMLElement) {
 	});
 }
 
-function initToolbarActions(host: HTMLElement, textarea: HTMLTextAreaElement, context: PromptContext) {
-	const translateBtn = host.querySelector<HTMLButtonElement>('#translateBtn');
+function initToolbarActions(
+	host: HTMLElement,
+	getEnabled: () => boolean,
+	setEnabled: (val: boolean) => void
+): { setTranslating: (active: boolean) => void } {
+	const toggleBtn = host.querySelector<HTMLButtonElement>('#translateToggle');
 
-	if (translateBtn) {
-		const originalHtml = translateBtn.innerHTML;
-		translateBtn.addEventListener('click', async () => {
-			const text = textarea.value;
-			if (!text.trim()) {return;}
-
-			translateBtn.innerHTML = '<i class="ti ti-loader" aria-hidden="true"></i> Translating...';
-			translateBtn.disabled = true;
-
-			try {
-				// Protect markers before sending to prompt translation (ES→EN)
-				const { text: protectedText, markers } = protectImageMarkers(text);
-				const result = await translatePromptText(protectedText, context);
-				const translated = result.text ? restoreImageMarkers(result.text, markers) : '';
-
-				if (translated && translated !== text.trim()) {
-					textarea.value = translated;
-					textarea.dispatchEvent(new Event('input'));
-					translateBtn.innerHTML = `<i class="ti ti-check" aria-hidden="true"></i> ${result.provider || 'Translated'}`;
-					translateBtn.style.color = '#5DCAA5';
-				} else {
-					translateBtn.innerHTML = '<i class="ti ti-check" aria-hidden="true"></i> Sin cambios';
-				}
-			} catch (err) {
-				console.error('Error en traducción:', err);
-				translateBtn.innerHTML = '<i class="ti ti-alert-triangle" aria-hidden="true"></i> Error';
-			} finally {
-				translateBtn.disabled = false;
-
-				setTimeout(() => {
-					translateBtn.innerHTML = originalHtml;
-					translateBtn.style.color = '';
-					translateBtn.style.borderColor = '';
-				}, 2200);
-			}
-		});
+	if (!toggleBtn) {
+		return { setTranslating: () => {} };
 	}
+
+	// Sync visual state from persisted preference (aria-pressed="true" is the HTML default,
+	// but we still set it explicitly so it reflects localStorage on every mount).
+	toggleBtn.setAttribute('aria-pressed', getEnabled() ? 'true' : 'false');
+
+	toggleBtn.addEventListener('click', () => {
+		const next = !getEnabled();
+		setEnabled(next);
+		toggleBtn.setAttribute('aria-pressed', next ? 'true' : 'false');
+	});
+
+	return {
+		setTranslating: (active: boolean) => {
+			toggleBtn.classList.toggle('is-translating', active);
+		},
+	};
 }
 
 function initRunButton(

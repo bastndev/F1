@@ -12,15 +12,21 @@
       <button class="prompt-close-btn" id="closePromptBtn" aria-label="Close" title="Close (Esc)">esc</button>
     </div>
   </div>
-  <!-- TOOLBAR (TABS + ACTIONS) -->
+  <!-- TOOLBAR (TRANSLATE TOGGLE + TABS) -->
   <div class="prompt-toolbar">
+    <button
+      class="prompt-translate-toggle"
+      id="translateToggle"
+      aria-pressed="true"
+      title="Auto-translate to English before sending (click to toggle)"
+    >
+      <span class="prompt-translate-dot" aria-hidden="true"></span>
+      <i class="ti ti-language prompt-translate-icon" aria-hidden="true"></i>
+      <i class="ti ti-loader-2 prompt-translate-spinner" aria-hidden="true"></i>
+      <span class="prompt-translate-label">translate</span>
+    </button>
     <div class="prompt-tabs">
       <div class="prompt-tab active" data-tab="write">Pro <span class="prompt-beta">beta</span></div>
-    </div>
-    <div class="prompt-actions-right">
-      <button class="prompt-action-btn prompt-action-btn--translate" id="translateBtn" title="Translate prompt" aria-label="Translate prompt">
-        <i class="ti ti-language" aria-hidden="true"></i> Translate
-      </button>
     </div>
   </div>
   <!-- BODY -->

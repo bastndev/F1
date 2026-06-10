@@ -159,6 +159,101 @@
   background: color-mix(in srgb, var(--agent-accent, #534AB7) 10%, transparent);
 }
 
+/* === Translate auto-toggle ===
+   Pill on the left of the toolbar. Active by default.
+   aria-pressed="true"  → accent colour + pulsing dot
+   aria-pressed="false" → muted / low-opacity
+   .is-translating      → spinner, pointer-events off */
+
+.prompt-translate-toggle {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 10px 4px 8px;
+  background: transparent;
+  border: 1px solid var(--vscode-editorGroup-border);
+  border-radius: 20px;
+  color: var(--vscode-descriptionForeground);
+  font-family: 'Syne', sans-serif;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: lowercase;
+  cursor: pointer;
+  transition: color 0.2s ease, border-color 0.2s ease, background 0.2s ease, opacity 0.2s ease;
+  margin-bottom: 6px;
+  opacity: 0.5;
+  flex-shrink: 0;
+}
+
+.prompt-translate-toggle:hover {
+  opacity: 1;
+  color: var(--agent-accent, #AFA9EC);
+  border-color: color-mix(in srgb, var(--agent-accent, #534AB7) 40%, transparent);
+  background: color-mix(in srgb, var(--agent-accent, #534AB7) 8%, transparent);
+}
+
+.prompt-translate-toggle[aria-pressed="true"] {
+  color: var(--agent-accent, #AFA9EC);
+  border-color: color-mix(in srgb, var(--agent-accent, #534AB7) 45%, transparent);
+  background: color-mix(in srgb, var(--agent-accent, #534AB7) 10%, transparent);
+  opacity: 1;
+}
+
+.prompt-translate-toggle i {
+  font-size: 12px;
+}
+
+/* Live indicator dot */
+.prompt-translate-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: currentColor;
+  flex-shrink: 0;
+  opacity: 0.3;
+  transition: opacity 0.2s, transform 0.2s;
+}
+
+.prompt-translate-toggle[aria-pressed="true"] .prompt-translate-dot {
+  opacity: 1;
+  animation: translate-dot-pulse 2.2s ease-in-out infinite;
+}
+
+@keyframes translate-dot-pulse {
+  0%, 100% { opacity: 1;    transform: scale(1);    }
+  50%       { opacity: 0.4; transform: scale(0.75); }
+}
+
+/* Spinner icon — hidden until .is-translating */
+.prompt-translate-spinner {
+  display: none;
+  animation: prompt-spin 0.75s linear infinite;
+}
+
+/* Translating state: swap icon ↔ spinner, lock the button */
+.prompt-translate-toggle.is-translating {
+  pointer-events: none;
+  opacity: 1;
+}
+
+.prompt-translate-toggle.is-translating .prompt-translate-icon {
+  display: none;
+}
+
+.prompt-translate-toggle.is-translating .prompt-translate-spinner {
+  display: inline-block;
+}
+
+.prompt-translate-toggle.is-translating .prompt-translate-dot {
+  animation: translate-dot-blink 0.5s step-start infinite;
+}
+
+@keyframes translate-dot-blink {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0; }
+}
+
 .prompt-action-btn {
   display: flex;
   align-items: center;
