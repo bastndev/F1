@@ -836,8 +836,8 @@ function buildPromptHighlightNodes(text: string, selStart: number = -1, selEnd: 
   for (const match of text.matchAll(/\[Image #(\d+)\]/g)) {
     tokens.push({ start: match.index ?? 0, end: (match.index ?? 0) + match[0].length, kind: 'image' });
   }
-  // @mention: '@' followed by any non-whitespace chars (file paths inserted by the picker)
-  for (const match of text.matchAll(/@\S+/g)) {
+  // @mention: '@' followed by any non-whitespace chars, must be preceded by whitespace or start of string
+  for (const match of text.matchAll(/(?<=^|\s)@\S+/g)) {
     const kind: TokenKind = match[0].endsWith('/') ? 'mention-folder' : 'mention';
     tokens.push({ start: match.index ?? 0, end: (match.index ?? 0) + match[0].length, kind });
   }
