@@ -13,7 +13,7 @@ export type ToolContext = {
 	getTerminalSelection?: () => string;
 	preparePromptWithAttachments?: (text: string, attachments: ImageAttachment[]) => Promise<string>;
 	requestWorkspaceFiles?: () => Promise<FileMentionEntry[]>;
-	requestSpellcheck?: (text: string) => Promise<SpellIssue[]>;
+	requestSpellcheck?: (text: string, strict: boolean) => Promise<SpellIssue[]>;
 };
 
 type ToolMount = (host: HTMLElement, context: ToolContext) => void;
@@ -25,7 +25,7 @@ export type ToolsControllerOptions = {
 	getTerminalSelection?: () => string;
 	preparePromptWithAttachments?: (text: string, attachments: ImageAttachment[]) => Promise<string>;
 	requestWorkspaceFiles?: () => Promise<FileMentionEntry[]>;
-	requestSpellcheck?: (text: string) => Promise<SpellIssue[]>;
+	requestSpellcheck?: (text: string, strict: boolean) => Promise<SpellIssue[]>;
 };
 
 const modalId = 'cli-tools-modal';

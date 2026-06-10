@@ -18,7 +18,7 @@ type ClientMessage =
 	| { type: 'cli.close'; sessionId: string }
 	| { type: 'prompt.translate'; id: string; text: string; from: string; to: string }
 	| { type: 'prompt.prepare'; id: string; text: string; attachments: ImageAttachment[] }
-	| { type: 'prompt.spellcheck'; id: string; text: string }
+	| { type: 'prompt.spellcheck'; id: string; text: string; strict: boolean }
 	| { type: 'workspace.listFiles'; id: string };
 
 type CliSession = CliSessionSummary & {
@@ -276,7 +276,7 @@ const requestWorkspaceFiles = (): Promise<FileMentionEntry[]> => {
 const pendingSpellchecks = new Map<string, (issues: SpellIssue[]) => void>();
 let nextSpellcheckId = 1;
 
-const requestSpellcheck = (text: string): Promise<SpellIssue[]> => {
+const requestSpellcheck = (text: string, strict: boolean): Promise<SpellIssue[]> => {
 	const id = `spell-${nextSpellcheckId++}`;
 	return new Promise((resolve) => {
 		const timeout = window.setTimeout(() => {
@@ -287,7 +287,7 @@ const requestSpellcheck = (text: string): Promise<SpellIssue[]> => {
 			clearTimeout(timeout);
 			resolve(issues);
 		});
-		vscode.postMessage({ type: 'prompt.spellcheck', id, text });
+		vscode.postMessage({ type: 'prompt.spellcheck', id, text, strict });
 	});
 };
 

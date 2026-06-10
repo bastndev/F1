@@ -40,7 +40,7 @@ type PromptContext = {
 	translatePrompt?: (request: PromptTranslateRequest) => Promise<PromptTranslateResult>;
 	preparePromptWithAttachments?: (text: string, attachments: ImageAttachment[]) => Promise<string>;
 	requestWorkspaceFiles?: () => Promise<FileMentionEntry[]>;
-	requestSpellcheck?: (text: string) => Promise<SpellIssue[]>;
+	requestSpellcheck?: (text: string, strict: boolean) => Promise<SpellIssue[]>;
 };
 
 export const mountPromptPanel = (host: HTMLElement, context: PromptContext = { close: () => {} }) => {
@@ -105,6 +105,13 @@ function initPromptTabs(host: HTMLElement, context: PromptContext, hasActiveSess
 	// localStorage key: 'f1-translate-auto' → '1' (on) | '0' (off). Missing key = on.
 	const translateState = { enabled: localStorage.getItem('f1-translate-auto') !== '0' };
 	let setTranslating: (active: boolean) => void = () => {};
+
+	// Strict-accents toggle — OFF by default (missing tildes ignored). When ON,
+	// the host re-flags accent omissions. Persisted across IDE restarts.
+	// localStorage key: 'f1-spellcheck-strict' → '1' (on) | '0'/missing (off).
+	const strictState = { enabled: localStorage.getItem('f1-spellcheck-strict') === '1' };
+	// Assigned once runSpellcheck/renderHighlight exist; re-marks on toggle.
+	let rerunSpellcheck: () => void = () => {};
 
 	const registerPathImageAttachment = (path: string): string => {
 		const id = nextImageAttachmentId++;
@@ -240,6 +247,16 @@ function initPromptTabs(host: HTMLElement, context: PromptContext, hasActiveSess
 			}
 		);
 		setTranslating = tools.setTranslating;
+
+		initStrictToggle(
+			host,
+			() => strictState.enabled,
+			(val) => {
+				strictState.enabled = val;
+				try { localStorage.setItem('f1-spellcheck-strict', val ? '1' : '0'); } catch { /* storage unavailable */ }
+				rerunSpellcheck();
+			}
+		);
 	}
 
 	const performSendNow = async () => {
@@ -282,7 +299,7 @@ function initPromptTabs(host: HTMLElement, context: PromptContext, hasActiveSess
 			return;
 		}
 
-		void context.requestSpellcheck(text).then((issues) => {
+		void context.requestSpellcheck(text, strictState.enabled).then((issues) => {
 			// Drop stale responses and any result whose offsets no longer match the text.
 			if (token !== spellcheckToken || textarea.value !== text) {
 				return;
@@ -290,6 +307,14 @@ function initPromptTabs(host: HTMLElement, context: PromptContext, hasActiveSess
 			spellIssues = issues;
 			renderHighlight();
 		});
+	};
+
+	// Toggling strict changes verdicts for already-typed text: clear stale marks
+	// immediately, then recompute under the new mode.
+	rerunSpellcheck = () => {
+		spellIssues = [];
+		renderHighlight();
+		runSpellcheck();
 	};
 
 	const scheduleSpellcheck = () => {
@@ -438,6 +463,26 @@ function initToolbarActions(
 			toggleBtn.classList.toggle('is-translating', active);
 		},
 	};
+}
+
+function initStrictToggle(
+	host: HTMLElement,
+	getEnabled: () => boolean,
+	setEnabled: (val: boolean) => void
+) {
+	const toggleBtn = host.querySelector<HTMLButtonElement>('#strictToggle');
+	if (!toggleBtn) {
+		return;
+	}
+
+	// Reflect the persisted preference on every mount.
+	toggleBtn.setAttribute('aria-pressed', getEnabled() ? 'true' : 'false');
+
+	toggleBtn.addEventListener('click', () => {
+		const next = !getEnabled();
+		setEnabled(next);
+		toggleBtn.setAttribute('aria-pressed', next ? 'true' : 'false');
+	});
 }
 
 function initRunButton(
