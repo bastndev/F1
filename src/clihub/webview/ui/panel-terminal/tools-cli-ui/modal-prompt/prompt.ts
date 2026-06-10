@@ -149,8 +149,8 @@ function initPromptTabs(host: HTMLElement, context: PromptContext, hasActiveSess
 
 	// Atomic delete and traversal for [Image #N] markers
 	textarea.addEventListener('keydown', (e) => {
-		if (handleImageMarkerDeleteKey(textarea, e)) return;
-		if (handleImageMarkerArrowKey(textarea, e)) return;
+		if (handleImageMarkerDeleteKey(textarea, e)) {return;}
+		if (handleImageMarkerArrowKey(textarea, e)) {return;}
 	});
 
 	// The real send that handles optional auto-translate + image resolution before processPrompt.
@@ -317,7 +317,7 @@ function initPromptTabs(host: HTMLElement, context: PromptContext, hasActiveSess
 	});
 
 	const forceCaretOutOfMarkers = () => {
-		if (textarea.selectionStart !== textarea.selectionEnd) return;
+		if (textarea.selectionStart !== textarea.selectionEnd) {return;}
 		const caret = textarea.selectionStart ?? 0;
 		for (const match of textarea.value.matchAll(/\[Image #(\d+)\]/g)) {
 			const start = match.index ?? 0;
@@ -716,9 +716,9 @@ function handleImageMarkerArrowKey(textarea: HTMLTextAreaElement, event: Keyboar
 		if (inside || movingLeftInto || movingRightInto || movingLeftFromSpace || movingRightFromSpace) {
 			event.preventDefault();
 			let newCaret;
-			if (movingLeftFromSpace) newCaret = start;
-			else if (movingRightFromSpace) newCaret = end;
-			else newCaret = event.key === 'ArrowLeft' ? start : end;
+			if (movingLeftFromSpace) {newCaret = start;}
+			else if (movingRightFromSpace) {newCaret = end;}
+			else {newCaret = event.key === 'ArrowLeft' ? start : end;}
 			
 			textarea.setSelectionRange(newCaret, newCaret);
 			return true;
@@ -818,7 +818,7 @@ function updatePromptImageHighlight(
   highlight.scrollLeft = textarea.scrollLeft;
 }
 
-type TokenKind = 'image' | 'mention' | 'misspelled' | 'plain';
+type TokenKind = 'image' | 'mention' | 'mention-folder' | 'misspelled' | 'plain';
 
 function buildPromptHighlightNodes(text: string, selStart: number = -1, selEnd: number = -1, spellIssues: SpellIssue[] = []): Node[] {
   if (!text) {
@@ -836,9 +836,10 @@ function buildPromptHighlightNodes(text: string, selStart: number = -1, selEnd: 
   for (const match of text.matchAll(/\[Image #(\d+)\]/g)) {
     tokens.push({ start: match.index ?? 0, end: (match.index ?? 0) + match[0].length, kind: 'image' });
   }
-  // @mention: '@' followed by any non-whitespace chars (file paths inserted by the picker)
-  for (const match of text.matchAll(/@\S+/g)) {
-    tokens.push({ start: match.index ?? 0, end: (match.index ?? 0) + match[0].length, kind: 'mention' });
+  // @mention: '@' followed by any non-whitespace chars, must be preceded by whitespace or start of string
+  for (const match of text.matchAll(/(?<=^|\s)@\S+/g)) {
+    const kind: TokenKind = match[0].endsWith('/') ? 'mention-folder' : 'mention';
+    tokens.push({ start: match.index ?? 0, end: (match.index ?? 0) + match[0].length, kind });
   }
   // Misspelled words flagged by the host spell-checker.
   for (const issue of spellIssues) {
@@ -847,7 +848,7 @@ function buildPromptHighlightNodes(text: string, selStart: number = -1, selEnd: 
     }
   }
   // Image/mention tokens take priority over misspelled ones when ranges collide.
-  const tokenPriority: Record<TokenKind, number> = { image: 0, mention: 0, misspelled: 1, plain: 2 };
+  const tokenPriority: Record<TokenKind, number> = { image: 0, mention: 0, 'mention-folder': 0, misspelled: 1, plain: 2 };
   tokens.sort((a, b) => a.start - b.start || tokenPriority[a.kind] - tokenPriority[b.kind]);
 
   for (const token of tokens) {
@@ -868,6 +869,12 @@ function buildPromptHighlightNodes(text: string, selStart: number = -1, selEnd: 
     appendSegment(nodes, text, lastIndex, text.length, selStart, selEnd, hasSel, 'plain');
   }
 
+  // A trailing newline in a pre-wrap div doesn't create a visual new line 
+  // unless there's an element after it. Mirroring requires appending a <br>.
+  if (text.endsWith('\n')) {
+    nodes.push(document.createElement('br'));
+  }
+
   return nodes;
 }
 
@@ -886,6 +893,7 @@ function appendSegment(
 
   const cssClass = kind === 'image' ? 'prompt-image-marker'
                  : kind === 'mention' ? 'prompt-mention'
+                 : kind === 'mention-folder' ? 'prompt-mention-folder'
                  : kind === 'misspelled' ? 'prompt-misspelled'
                  : 'plain';
 
