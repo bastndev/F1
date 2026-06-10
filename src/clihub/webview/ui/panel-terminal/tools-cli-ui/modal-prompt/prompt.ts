@@ -641,15 +641,14 @@ function handleImageMarkerDeleteKey(textarea: HTMLTextAreaElement, event: Keyboa
 	if (event.key !== 'Backspace' && event.key !== 'Delete') {
 		return false;
 	}
-	if (event.altKey || event.ctrlKey || event.metaKey) {
-		return false;
-	}
+	// We deliberately allow Ctrl/Alt/Meta modifiers here so that Ctrl+Backspace 
+	// also cleanly deletes the entire image block instead of just a part of it.
 	if (textarea.selectionStart !== textarea.selectionEnd) {
 		return false;
 	}
 
 	const caret = textarea.selectionStart ?? 0;
-	const range = findImageMarkerDeleteRange(textarea.value, caret, event.key as 'Backspace' | 'Delete');
+	const range = findImageMarkerDeleteRange(textarea.value, caret, event);
 	if (!range) {
 		return false;
 	}
@@ -664,16 +663,26 @@ function handleImageMarkerDeleteKey(textarea: HTMLTextAreaElement, event: Keyboa
 function findImageMarkerDeleteRange(
 	text: string,
 	caret: number,
-	key: 'Backspace' | 'Delete'
+	event: KeyboardEvent
 ): { start: number; end: number } | undefined {
+	const isBack = event.key === 'Backspace';
+	const isDel = event.key === 'Delete';
+	const isWordMod = event.ctrlKey || event.altKey;
+
 	for (const match of text.matchAll(/\[Image #(\d+)\]/g)) {
 		const start = match.index ?? 0;
 		const end = start + match[0].length;
+		
 		const inside = caret > start && caret < end;
-		const backAfter = key === 'Backspace' && caret === end;
-		const delBefore = key === 'Delete' && caret === start;
-		if (inside || backAfter || delBefore) {
-			return { start, end };
+		const backAfter = isBack && caret === end;
+		const backAfterSpace = isBack && isWordMod && caret === end + 1 && text[end] === ' ';
+		const delBefore = isDel && caret === start;
+		const delBeforeSpace = isDel && isWordMod && caret === start - 1 && text[start - 1] === ' ';
+		
+		if (inside || backAfter || backAfterSpace || delBefore || delBeforeSpace) {
+			const finalStart = delBeforeSpace ? start - 1 : start;
+			const finalEnd = backAfterSpace ? end + 1 : end;
+			return { start: finalStart, end: finalEnd };
 		}
 	}
 	return undefined;
@@ -684,7 +693,7 @@ function handleImageMarkerArrowKey(textarea: HTMLTextAreaElement, event: Keyboar
 		return false;
 	}
 	// Allow Ctrl/Meta for word jumping behavior, but still intercept if we hit/are inside a marker
-	if (event.shiftKey || event.altKey) {
+	if (event.shiftKey || event.metaKey) {
 		return false;
 	}
 	if (textarea.selectionStart !== textarea.selectionEnd) {
@@ -692,6 +701,7 @@ function handleImageMarkerArrowKey(textarea: HTMLTextAreaElement, event: Keyboar
 	}
 
 	const caret = textarea.selectionStart ?? 0;
+	const isWordMod = event.ctrlKey || event.altKey;
 	
 	for (const match of textarea.value.matchAll(/\[Image #(\d+)\]/g)) {
 		const start = match.index ?? 0;
@@ -700,10 +710,16 @@ function handleImageMarkerArrowKey(textarea: HTMLTextAreaElement, event: Keyboar
 		const inside = caret > start && caret < end;
 		const movingLeftInto = event.key === 'ArrowLeft' && caret === end;
 		const movingRightInto = event.key === 'ArrowRight' && caret === start;
+		const movingLeftFromSpace = event.key === 'ArrowLeft' && isWordMod && caret === end + 1 && textarea.value[end] === ' ';
+		const movingRightFromSpace = event.key === 'ArrowRight' && isWordMod && caret === start - 1 && textarea.value[start - 1] === ' ';
 		
-		if (inside || movingLeftInto || movingRightInto) {
+		if (inside || movingLeftInto || movingRightInto || movingLeftFromSpace || movingRightFromSpace) {
 			event.preventDefault();
-			const newCaret = event.key === 'ArrowLeft' ? start : end;
+			let newCaret;
+			if (movingLeftFromSpace) newCaret = start;
+			else if (movingRightFromSpace) newCaret = end;
+			else newCaret = event.key === 'ArrowLeft' ? start : end;
+			
 			textarea.setSelectionRange(newCaret, newCaret);
 			return true;
 		}
