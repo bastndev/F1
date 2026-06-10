@@ -869,6 +869,12 @@ function buildPromptHighlightNodes(text: string, selStart: number = -1, selEnd: 
     appendSegment(nodes, text, lastIndex, text.length, selStart, selEnd, hasSel, 'plain');
   }
 
+  // A trailing newline in a pre-wrap div doesn't create a visual new line 
+  // unless there's an element after it. Mirroring requires appending a <br>.
+  if (text.endsWith('\n')) {
+    nodes.push(document.createElement('br'));
+  }
+
   return nodes;
 }
 
