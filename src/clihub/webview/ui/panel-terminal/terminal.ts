@@ -329,7 +329,7 @@ const toolsController = layoutRight
 	? createToolsController({
 			container: layoutRight,
 			getActiveSessionId: () => activeSessionId,
-			sendToActiveSession: (text: string) => {
+			sendToActiveSession: (text: string, options?: { paste?: boolean }) => {
 				if (!activeSessionId) {
 					return;
 				}
@@ -337,7 +337,18 @@ const toolsController = layoutRight
 				if (session?.status !== 'running') {
 					return;
 				}
-				vscode.postMessage({ type: 'cli.input', sessionId: activeSessionId, data: text });
+				let data = text;
+				// Frame pasted text in bracketed-paste markers when the CLI has
+				// enabled that mode (xterm tracks DECSET 2004 per terminal). TUI
+				// CLIs rely on this to insert multi-char input cleanly; without it
+				// some (e.g. Copilot) garble or drop chunked input entirely.
+				if (options?.paste) {
+					const view = terminals.get(activeSessionId);
+					if (view?.terminal.modes.bracketedPasteMode) {
+						data = `\x1b[200~${text}\x1b[201~`;
+					}
+				}
+				vscode.postMessage({ type: 'cli.input', sessionId: activeSessionId, data });
 			},
 			translatePrompt,
 			preparePromptWithAttachments,
