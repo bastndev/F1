@@ -149,8 +149,8 @@ function initPromptTabs(host: HTMLElement, context: PromptContext, hasActiveSess
 
 	// Atomic delete and traversal for [Image #N] markers
 	textarea.addEventListener('keydown', (e) => {
-		if (handleImageMarkerDeleteKey(textarea, e)) return;
-		if (handleImageMarkerArrowKey(textarea, e)) return;
+		if (handleImageMarkerDeleteKey(textarea, e)) {return;}
+		if (handleImageMarkerArrowKey(textarea, e)) {return;}
 	});
 
 	// The real send that handles optional auto-translate + image resolution before processPrompt.
@@ -317,7 +317,7 @@ function initPromptTabs(host: HTMLElement, context: PromptContext, hasActiveSess
 	});
 
 	const forceCaretOutOfMarkers = () => {
-		if (textarea.selectionStart !== textarea.selectionEnd) return;
+		if (textarea.selectionStart !== textarea.selectionEnd) {return;}
 		const caret = textarea.selectionStart ?? 0;
 		for (const match of textarea.value.matchAll(/\[Image #(\d+)\]/g)) {
 			const start = match.index ?? 0;
@@ -716,9 +716,9 @@ function handleImageMarkerArrowKey(textarea: HTMLTextAreaElement, event: Keyboar
 		if (inside || movingLeftInto || movingRightInto || movingLeftFromSpace || movingRightFromSpace) {
 			event.preventDefault();
 			let newCaret;
-			if (movingLeftFromSpace) newCaret = start;
-			else if (movingRightFromSpace) newCaret = end;
-			else newCaret = event.key === 'ArrowLeft' ? start : end;
+			if (movingLeftFromSpace) {newCaret = start;}
+			else if (movingRightFromSpace) {newCaret = end;}
+			else {newCaret = event.key === 'ArrowLeft' ? start : end;}
 			
 			textarea.setSelectionRange(newCaret, newCaret);
 			return true;
