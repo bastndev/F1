@@ -36,6 +36,7 @@ const imagePathPattern =
 type PromptContext = {
 	close: () => void;
 	getActiveSessionId?: () => string | undefined;
+	getActiveModelName?: () => string | undefined;
 	sendToActiveSession?: (text: string, options?: { paste?: boolean; submit?: boolean }) => void;
 	translatePrompt?: (request: PromptTranslateRequest) => Promise<PromptTranslateResult>;
 	preparePromptWithAttachments?: (text: string, attachments: ImageAttachment[]) => Promise<string>;
@@ -57,7 +58,7 @@ export const mountPromptPanel = (host: HTMLElement, context: PromptContext = { c
 
 	const hasActiveSession = !!context.getActiveSessionId?.();
 
-	updateFooterModel(host);
+	updateFooterModel(host, context.getActiveModelName?.());
 	initSessionState(host, hasActiveSession);
 	initPromptTabs(host, context, hasActiveSession);
 };
@@ -624,7 +625,7 @@ function showNoSessionMessage(host: HTMLElement) {
 	}
 }
 
-function updateFooterModel(host: HTMLElement) {
+function updateFooterModel(host: HTMLElement, modelName?: string) {
 	const labelEl = document.getElementById('cli-terminal-label');
 	const label = labelEl?.textContent?.trim() || 'unknown';
 
@@ -635,8 +636,19 @@ function updateFooterModel(host: HTMLElement) {
 		.replace(/\s+/g, '');                // remove any remaining spaces
 
 	const footerInfo = host.querySelector<HTMLElement>('.prompt-footer-info');
-	if (footerInfo) {
-		footerInfo.innerHTML = `<span class="prompt-session-dot" id="sessionDot"></span><i class="ti ti-cpu" aria-hidden="true"></i> ${simpleName}`;
+	if (!footerInfo) {
+		return;
+	}
+
+	footerInfo.innerHTML = `<span class="prompt-session-dot" id="sessionDot"></span><i class="ti ti-cpu" aria-hidden="true"></i> ${simpleName}`;
+
+	// Detected model (best-effort, only when confidently scraped from the
+	// session output). textContent — the value originates in terminal output.
+	if (modelName) {
+		const modelEl = document.createElement('span');
+		modelEl.className = 'prompt-footer-model';
+		modelEl.textContent = modelName;
+		footerInfo.append(modelEl);
 	}
 }
 

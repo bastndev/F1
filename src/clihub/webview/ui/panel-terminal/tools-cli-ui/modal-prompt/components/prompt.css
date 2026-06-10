@@ -757,6 +757,18 @@
   font-size: 12px;
 }
 
+/* Detected model chip — only rendered when confidently scraped from the
+   session output, so absence is the normal state. */
+.prompt-footer-model {
+  font-size: 9.5px;
+  padding: 1px 6px;
+  border: 0.5px solid var(--vscode-editorGroup-border);
+  border-radius: 10px;
+  color: var(--vscode-descriptionForeground);
+  opacity: 0.75;
+  white-space: nowrap;
+}
+
 /* Session live dot */
 .prompt-session-dot {
   width: 6px;

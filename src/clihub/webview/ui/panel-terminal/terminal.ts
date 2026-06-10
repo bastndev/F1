@@ -3,6 +3,7 @@ import { Terminal } from '@xterm/xterm';
 import { createTabController, type CliAgentIcon, type CliAgentOption, type CliSessionSummary } from '../panel-tab/tab';
 import { createCliCreateMessage, type AgentLaunchGuardMessage } from './agent-safety/agent-launch-guard';
 import { createToolsController } from './tools-cli-ui/tools';
+import { detectModelName } from '../../core/terminal-cli/model-detect';
 import type { ImageAttachment, PromptTranslateRequest, PromptTranslateResult, FileMentionEntry, SpellIssue } from '../../core/tools-cli-core/prompt';
 
 type VsCodeApi = {
@@ -329,6 +330,16 @@ const toolsController = layoutRight
 	? createToolsController({
 			container: layoutRight,
 			getActiveSessionId: () => activeSessionId,
+			getActiveModelName: () => {
+				if (!activeSessionId) {
+					return undefined;
+				}
+				const session = sessions.get(activeSessionId);
+				if (!session) {
+					return undefined;
+				}
+				return detectModelName(getAgentSlug(session.label), session.buffer);
+			},
 			sendToActiveSession: (text: string, options?: { paste?: boolean; submit?: boolean }) => {
 				if (!activeSessionId) {
 					return;
