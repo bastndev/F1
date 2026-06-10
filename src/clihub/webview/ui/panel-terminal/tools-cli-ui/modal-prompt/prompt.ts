@@ -349,21 +349,20 @@ function initPromptTabs(host: HTMLElement, context: PromptContext, hasActiveSess
 function enforceLowercaseInput(textarea: HTMLTextAreaElement) {
 	textarea.addEventListener('keydown', (e) => {
 		if (e.key.length === 1 && /[a-zA-Z]/.test(e.key)) {
-			if (e.shiftKey || e.ctrlKey || e.metaKey) {
-				// User is intentionally using Shift → allow uppercase
-				// or using Ctrl/Meta for shortcuts like Ctrl+V (paste image), Ctrl+C, etc.
-				// Do not insert the letter (e.g. "v" from Ctrl+V)
-				return;
+			if (e.ctrlKey || e.metaKey) {
+				return; // keyboard shortcuts (Ctrl+C, Ctrl+V, etc.) — let browser handle
 			}
-			// Force lowercase (this defeats Caps Lock as well)
 			e.preventDefault();
 			const start = textarea.selectionStart ?? 0;
 			const end = textarea.selectionEnd ?? 0;
-			// Auto-capitalize: if typing at the very beginning (pos 0) uppercase the letter
-			const isFirstChar = start === 0 && textarea.value.slice(end).trimStart() === textarea.value.slice(end);
-			const char = (isFirstChar && start === 0 && textarea.value.slice(0, start) === '') 
-				? e.key.toUpperCase() 
-				: e.key.toLowerCase();
+			let char: string;
+			if (e.shiftKey) {
+				char = e.key.toUpperCase();
+			} else {
+				// Auto-capitalize first character; force lowercase elsewhere (defeats Caps Lock)
+				const isFirstChar = start === 0 && textarea.value.slice(0, start) === '' && textarea.value.slice(end).trimStart() === textarea.value.slice(end);
+				char = isFirstChar ? e.key.toUpperCase() : e.key.toLowerCase();
+			}
 			textarea.value = textarea.value.slice(0, start) + char + textarea.value.slice(end);
 			const newPos = start + 1;
 			textarea.selectionStart = textarea.selectionEnd = newPos;
