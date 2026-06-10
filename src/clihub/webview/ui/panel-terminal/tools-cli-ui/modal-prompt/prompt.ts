@@ -258,8 +258,6 @@ function initPromptTabs(host: HTMLElement, context: PromptContext, hasActiveSess
 
 	const onInputForHighlight = () => {
 		adjustHeight();
-		// Clear stale squiggles immediately so underlines never drift while typing.
-		spellIssues = [];
 		if (highlight && textareaWrap) {
 			// use raf to ensure update happens after value commit and to help layer paint
 			requestAnimationFrame(renderHighlight);

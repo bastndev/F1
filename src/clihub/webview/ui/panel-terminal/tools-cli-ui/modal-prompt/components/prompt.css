@@ -370,12 +370,14 @@
   color: inherit !important;
 }
 
-/* Misspelled words — red wavy underline drawn under the (visible) overlay text.
-   The text colour stays inherited so only the squiggle signals the error. */
+/* Misspelled words — red wavy squiggle drawn as a background-image tile so it
+   has zero impact on line-height (text-decoration: wavy adds subtle extra space
+   per line that drifts the overlay out of sync with the textarea cursor). */
 .prompt-textarea-highlight .prompt-misspelled {
-  text-decoration: underline wavy var(--vscode-editorError-foreground, #f14c4c);
-  text-decoration-skip-ink: none;
-  text-underline-offset: 2px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='6' height='3'%3E%3Cpath d='M0 2 Q1.5 1 3 2 Q4.5 3 6 2' stroke='%23f14c4c' stroke-width='1' fill='none'/%3E%3C/svg%3E");
+  background-position: left bottom;
+  background-repeat: repeat-x;
+  background-size: 6px 3px;
 }
 
 .prompt-char-count {
