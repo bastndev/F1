@@ -1,6 +1,5 @@
 import promptStyles from './components/prompt.css';
 import promptHtml from './components/prompt.html';
-import { runFullAutocorrect } from '../../../../core/tools-cli-core/autocorrect';
 import {
 	processPrompt,
 	translatePromptText,
@@ -12,6 +11,7 @@ import {
 	protectImageMarkers,
 	restoreImageMarkers,
 	type FileMentionEntry,
+	type SpellIssue,
 } from '../../../../core/tools-cli-core/prompt';
 import { mountFileMentionPicker } from './components/file-mention/file-mention';
 
@@ -40,6 +40,7 @@ type PromptContext = {
 	translatePrompt?: (request: PromptTranslateRequest) => Promise<PromptTranslateResult>;
 	preparePromptWithAttachments?: (text: string, attachments: ImageAttachment[]) => Promise<string>;
 	requestWorkspaceFiles?: () => Promise<FileMentionEntry[]>;
+	requestSpellcheck?: (text: string) => Promise<SpellIssue[]>;
 };
 
 export const mountPromptPanel = (host: HTMLElement, context: PromptContext = { close: () => {} }) => {
@@ -100,6 +101,11 @@ function initPromptTabs(host: HTMLElement, context: PromptContext, hasActiveSess
 	let imageAttachments: ImageAttachment[] = [];
 	let nextImageAttachmentId = 1;
 
+	// Translate toggle — on by default, persisted to localStorage across sessions.
+	// localStorage key: 'f1-translate-auto' → '1' (on) | '0' (off). Missing key = on.
+	const translateState = { enabled: localStorage.getItem('f1-translate-auto') !== '0' };
+	let setTranslating: (active: boolean) => void = () => {};
+
 	const registerPathImageAttachment = (path: string): string => {
 		const id = nextImageAttachmentId++;
 		const marker = `[Image #${id}]`;
@@ -141,13 +147,14 @@ function initPromptTabs(host: HTMLElement, context: PromptContext, hasActiveSess
 	// Setup paste that supports images/screenshots + paths (must run before or combined with lowercase)
 	setupImagePaste(textarea, registerPathImageAttachment, registerClipboardImageAttachment);
 
-	// Atomic delete for [Image #N] markers (Backspace/Delete removes whole token)
+	// Atomic delete and traversal for [Image #N] markers
 	textarea.addEventListener('keydown', (e) => {
-		handleImageMarkerDeleteKey(textarea, e);
+		if (handleImageMarkerDeleteKey(textarea, e)) return;
+		if (handleImageMarkerArrowKey(textarea, e)) return;
 	});
 
-	// The real send that handles image resolution before calling processPrompt.
-	// This must live inside init so it closes over the live imageAttachments array.
+	// The real send that handles optional auto-translate + image resolution before processPrompt.
+	// Lives inside init so it closes over translateState / setTranslating / imageAttachments.
 	async function doPerformSendWithImages(
 		hostEl: HTMLElement,
 		ta: HTMLTextAreaElement,
@@ -161,16 +168,43 @@ function initPromptTabs(host: HTMLElement, context: PromptContext, hasActiveSess
 
 		let textToSend = ta.value;
 
+		// Auto-translate (ES → EN) when the toggle is active.
+		// The textarea keeps the original text; the CLI receives the translation.
+		if (translateState.enabled && ctx.translatePrompt) {
+			const runBtn = hostEl.querySelector<HTMLButtonElement>('#runBtn');
+			const savedBtnHtml = runBtn?.innerHTML;
+			setTranslating(true);
+			if (runBtn) {
+				runBtn.classList.add('is-translating');
+				runBtn.disabled = true;
+				runBtn.innerHTML = '<i class="ti ti-sparkles" aria-hidden="true"></i><span>Translating…</span>';
+			}
+			try {
+				const { text: protectedText, markers } = protectImageMarkers(textToSend);
+				const result = await translatePromptText(protectedText, ctx);
+				const translated = result.text ? restoreImageMarkers(result.text, markers) : '';
+				if (translated && translated !== textToSend.trim()) {
+					textToSend = translated;
+				}
+			} catch (err) {
+				console.error('[Prompt] Auto-translate failed:', err);
+			} finally {
+				setTranslating(false);
+				if (runBtn && savedBtnHtml !== undefined) {
+					runBtn.innerHTML = savedBtnHtml;
+					const trimmed = ta.value.trim();
+					runBtn.disabled = !(trimmed.length >= 6 || trimmed.includes(' ')) || !ctx.getActiveSessionId?.();
+				}
+			}
+		}
+
 		const referenced = getReferencedImageAttachments(textToSend, currentAttachments);
 
 		if (referenced.length > 0 && ctx.preparePromptWithAttachments) {
 			try {
-				// This goes to host (via terminal.ts) which saves any clipboard images to disk
-				// and returns text where [Image #N] markers have been replaced by real paths.
 				textToSend = await ctx.preparePromptWithAttachments(textToSend, referenced);
 			} catch (err) {
 				console.error('[Prompt] Failed to prepare image attachments:', err);
-				// fallthrough with original text (markers will be visible, paths not resolved)
 			}
 		}
 
@@ -197,7 +231,15 @@ function initPromptTabs(host: HTMLElement, context: PromptContext, hasActiveSess
 
 	if (hasActiveSession) {
 		initSkillsChips(host);
-		initToolbarActions(host, textarea, context);
+		const tools = initToolbarActions(
+			host,
+			() => translateState.enabled,
+			(val) => {
+				translateState.enabled = val;
+				try { localStorage.setItem('f1-translate-auto', val ? '1' : '0'); } catch { /* storage unavailable */ }
+			}
+		);
+		setTranslating = tools.setTranslating;
 	}
 
 	const performSendNow = async () => {
@@ -216,14 +258,52 @@ function initPromptTabs(host: HTMLElement, context: PromptContext, hasActiveSess
 		textarea.style.height = textarea.scrollHeight + 'px';
 	};
 
+	// Live spell-marking state. Misspelled-word ranges come from the host (cspell trie).
+	// Ranges are offset-based, so they go stale the moment the text changes — we clear
+	// them on input and recompute ~400ms after the user pauses typing.
+	let spellIssues: SpellIssue[] = [];
+	let spellcheckTimer: number | undefined;
+	let spellcheckToken = 0;
+
+	const renderHighlight = () => {
+		if (highlight && textareaWrap) {
+			updatePromptImageHighlight(textareaWrap, textarea, highlight, spellIssues);
+		}
+	};
+
+	const runSpellcheck = () => {
+		if (!context.requestSpellcheck) {
+			return;
+		}
+
+		const token = ++spellcheckToken;
+		const text = textarea.value;
+		if (!text.trim()) {
+			return;
+		}
+
+		void context.requestSpellcheck(text).then((issues) => {
+			// Drop stale responses and any result whose offsets no longer match the text.
+			if (token !== spellcheckToken || textarea.value !== text) {
+				return;
+			}
+			spellIssues = issues;
+			renderHighlight();
+		});
+	};
+
+	const scheduleSpellcheck = () => {
+		window.clearTimeout(spellcheckTimer);
+		spellcheckTimer = window.setTimeout(runSpellcheck, 400);
+	};
+
 	const onInputForHighlight = () => {
 		adjustHeight();
 		if (highlight && textareaWrap) {
 			// use raf to ensure update happens after value commit and to help layer paint
-			requestAnimationFrame(() => {
-				updatePromptImageHighlight(textareaWrap, textarea, highlight);
-			});
+			requestAnimationFrame(renderHighlight);
 		}
+		scheduleSpellcheck();
 	};
 
 	textarea.addEventListener('input', onInputForHighlight);
@@ -236,10 +316,25 @@ function initPromptTabs(host: HTMLElement, context: PromptContext, hasActiveSess
 		}
 	});
 
+	const forceCaretOutOfMarkers = () => {
+		if (textarea.selectionStart !== textarea.selectionEnd) return;
+		const caret = textarea.selectionStart ?? 0;
+		for (const match of textarea.value.matchAll(/\[Image #(\d+)\]/g)) {
+			const start = match.index ?? 0;
+			const end = start + match[0].length;
+			if (caret > start && caret < end) {
+				const newCaret = (caret - start) < (end - caret) ? start : end;
+				textarea.setSelectionRange(newCaret, newCaret);
+				break;
+			}
+		}
+	};
+
 	// selectionchange: update highlight so .selected spans get the blue bg when user selects text
 	const onSelectionChange = () => {
 		if (document.activeElement === textarea && highlight && textareaWrap) {
-			updatePromptImageHighlight(textareaWrap, textarea, highlight);
+			forceCaretOutOfMarkers();
+			renderHighlight();
 		}
 	};
 	document.addEventListener('selectionchange', onSelectionChange);
@@ -247,9 +342,7 @@ function initPromptTabs(host: HTMLElement, context: PromptContext, hasActiveSess
 	// Initial adjustment + first highlight render
 	requestAnimationFrame(() => {
 		adjustHeight();
-		if (highlight && textareaWrap) {
-			updatePromptImageHighlight(textareaWrap, textarea, highlight);
-		}
+		renderHighlight();
 	});
 }
 
@@ -320,87 +413,32 @@ function initSkillsChips(host: HTMLElement) {
 	});
 }
 
-function initToolbarActions(host: HTMLElement, textarea: HTMLTextAreaElement, context: PromptContext) {
-	const fixBtn = host.querySelector<HTMLButtonElement>('#fixSpellingBtn');
-	const translateBtn = host.querySelector<HTMLButtonElement>('#translateBtn');
+function initToolbarActions(
+	host: HTMLElement,
+	getEnabled: () => boolean,
+	setEnabled: (val: boolean) => void
+): { setTranslating: (active: boolean) => void } {
+	const toggleBtn = host.querySelector<HTMLButtonElement>('#translateToggle');
 
-	if (fixBtn) {
-		const originalHtml = fixBtn.innerHTML;
-		fixBtn.addEventListener('click', async () => {
-			const text = textarea.value;
-			if (!text.trim()) {return;}
-
-			fixBtn.innerHTML = '<i class="ti ti-loader" aria-hidden="true"></i> Corrigiendo...';
-			fixBtn.disabled = true;
-
-			try {
-				// Protect image markers so autocorrect doesn't touch [Image #N]
-				const { text: protectedText, markers } = protectImageMarkers(text);
-				const result = await runFullAutocorrect(protectedText);
-				const corrected = restoreImageMarkers(result.correctedText, markers);
-
-				if (corrected !== text) {
-					textarea.value = corrected;
-					textarea.dispatchEvent(new Event('input'));
-
-					const total = result.typoCorrections + result.languageToolCorrections;
-					fixBtn.innerHTML = `<i class="ti ti-check" aria-hidden="true"></i> ${total} correcciones`;
-					fixBtn.style.color = '#5DCAA5';
-				} else {
-					fixBtn.innerHTML = '<i class="ti ti-check" aria-hidden="true"></i> Sin cambios';
-				}
-			} catch (err) {
-				console.error('Error en corrección:', err);
-				fixBtn.innerHTML = '<i class="ti ti-alert-triangle" aria-hidden="true"></i> Error';
-			} finally {
-				fixBtn.disabled = false;
-
-				setTimeout(() => {
-					fixBtn.innerHTML = originalHtml;
-					fixBtn.style.color = '';
-					fixBtn.style.borderColor = '';
-				}, 2000);
-			}
-		});
+	if (!toggleBtn) {
+		return { setTranslating: () => {} };
 	}
 
-	if (translateBtn) {
-		const originalHtml = translateBtn.innerHTML;
-		translateBtn.addEventListener('click', async () => {
-			const text = textarea.value;
-			if (!text.trim()) {return;}
+	// Sync visual state from persisted preference (aria-pressed="true" is the HTML default,
+	// but we still set it explicitly so it reflects localStorage on every mount).
+	toggleBtn.setAttribute('aria-pressed', getEnabled() ? 'true' : 'false');
 
-			translateBtn.innerHTML = '<i class="ti ti-loader" aria-hidden="true"></i> Translating...';
-			translateBtn.disabled = true;
+	toggleBtn.addEventListener('click', () => {
+		const next = !getEnabled();
+		setEnabled(next);
+		toggleBtn.setAttribute('aria-pressed', next ? 'true' : 'false');
+	});
 
-			try {
-				// Protect markers before sending to prompt translation (ES→EN)
-				const { text: protectedText, markers } = protectImageMarkers(text);
-				const result = await translatePromptText(protectedText, context);
-				const translated = result.text ? restoreImageMarkers(result.text, markers) : '';
-
-				if (translated && translated !== text.trim()) {
-					textarea.value = translated;
-					textarea.dispatchEvent(new Event('input'));
-					translateBtn.innerHTML = `<i class="ti ti-check" aria-hidden="true"></i> ${result.provider || 'Translated'}`;
-					translateBtn.style.color = '#5DCAA5';
-				} else {
-					translateBtn.innerHTML = '<i class="ti ti-check" aria-hidden="true"></i> Sin cambios';
-				}
-			} catch (err) {
-				console.error('Error en traducción:', err);
-				translateBtn.innerHTML = '<i class="ti ti-alert-triangle" aria-hidden="true"></i> Error';
-			} finally {
-				translateBtn.disabled = false;
-
-				setTimeout(() => {
-					translateBtn.innerHTML = originalHtml;
-					translateBtn.style.color = '';
-					translateBtn.style.borderColor = '';
-				}, 2200);
-			}
-		});
-	}
+	return {
+		setTranslating: (active: boolean) => {
+			toggleBtn.classList.toggle('is-translating', active);
+		},
+	};
 }
 
 function initRunButton(
@@ -603,15 +641,14 @@ function handleImageMarkerDeleteKey(textarea: HTMLTextAreaElement, event: Keyboa
 	if (event.key !== 'Backspace' && event.key !== 'Delete') {
 		return false;
 	}
-	if (event.altKey || event.ctrlKey || event.metaKey) {
-		return false;
-	}
+	// We deliberately allow Ctrl/Alt/Meta modifiers here so that Ctrl+Backspace 
+	// also cleanly deletes the entire image block instead of just a part of it.
 	if (textarea.selectionStart !== textarea.selectionEnd) {
 		return false;
 	}
 
 	const caret = textarea.selectionStart ?? 0;
-	const range = findImageMarkerDeleteRange(textarea.value, caret, event.key as 'Backspace' | 'Delete');
+	const range = findImageMarkerDeleteRange(textarea.value, caret, event);
 	if (!range) {
 		return false;
 	}
@@ -626,19 +663,69 @@ function handleImageMarkerDeleteKey(textarea: HTMLTextAreaElement, event: Keyboa
 function findImageMarkerDeleteRange(
 	text: string,
 	caret: number,
-	key: 'Backspace' | 'Delete'
+	event: KeyboardEvent
 ): { start: number; end: number } | undefined {
+	const isBack = event.key === 'Backspace';
+	const isDel = event.key === 'Delete';
+	const isWordMod = event.ctrlKey || event.altKey;
+
 	for (const match of text.matchAll(/\[Image #(\d+)\]/g)) {
 		const start = match.index ?? 0;
 		const end = start + match[0].length;
+		
 		const inside = caret > start && caret < end;
-		const backAfter = key === 'Backspace' && caret === end;
-		const delBefore = key === 'Delete' && caret === start;
-		if (inside || backAfter || delBefore) {
-			return { start, end };
+		const backAfter = isBack && caret === end;
+		const backAfterSpace = isBack && isWordMod && caret === end + 1 && text[end] === ' ';
+		const delBefore = isDel && caret === start;
+		const delBeforeSpace = isDel && isWordMod && caret === start - 1 && text[start - 1] === ' ';
+		
+		if (inside || backAfter || backAfterSpace || delBefore || delBeforeSpace) {
+			const finalStart = delBeforeSpace ? start - 1 : start;
+			const finalEnd = backAfterSpace ? end + 1 : end;
+			return { start: finalStart, end: finalEnd };
 		}
 	}
 	return undefined;
+}
+
+function handleImageMarkerArrowKey(textarea: HTMLTextAreaElement, event: KeyboardEvent): boolean {
+	if (event.key !== 'ArrowLeft' && event.key !== 'ArrowRight') {
+		return false;
+	}
+	// Allow Ctrl/Meta for word jumping behavior, but still intercept if we hit/are inside a marker
+	if (event.shiftKey || event.metaKey) {
+		return false;
+	}
+	if (textarea.selectionStart !== textarea.selectionEnd) {
+		return false;
+	}
+
+	const caret = textarea.selectionStart ?? 0;
+	const isWordMod = event.ctrlKey || event.altKey;
+	
+	for (const match of textarea.value.matchAll(/\[Image #(\d+)\]/g)) {
+		const start = match.index ?? 0;
+		const end = start + match[0].length;
+		
+		const inside = caret > start && caret < end;
+		const movingLeftInto = event.key === 'ArrowLeft' && caret === end;
+		const movingRightInto = event.key === 'ArrowRight' && caret === start;
+		const movingLeftFromSpace = event.key === 'ArrowLeft' && isWordMod && caret === end + 1 && textarea.value[end] === ' ';
+		const movingRightFromSpace = event.key === 'ArrowRight' && isWordMod && caret === start - 1 && textarea.value[start - 1] === ' ';
+		
+		if (inside || movingLeftInto || movingRightInto || movingLeftFromSpace || movingRightFromSpace) {
+			event.preventDefault();
+			let newCaret;
+			if (movingLeftFromSpace) newCaret = start;
+			else if (movingRightFromSpace) newCaret = end;
+			else newCaret = event.key === 'ArrowLeft' ? start : end;
+			
+			textarea.setSelectionRange(newCaret, newCaret);
+			return true;
+		}
+	}
+	
+	return false;
 }
 
 function getImageTypeFromPath(path: string): string {
@@ -710,7 +797,8 @@ function setupImagePaste(
 function updatePromptImageHighlight(
   wrap: HTMLElement,
   textarea: HTMLTextAreaElement,
-  highlight: HTMLElement
+  highlight: HTMLElement,
+  spellIssues: SpellIssue[] = []
 ) {
   if (!wrap || !textarea || !highlight) {
     return;
@@ -723,16 +811,16 @@ function updatePromptImageHighlight(
     selEnd = textarea.selectionEnd ?? -1;
   }
 
-  highlight.replaceChildren(...buildPromptHighlightNodes(textarea.value, selStart, selEnd));
+  highlight.replaceChildren(...buildPromptHighlightNodes(textarea.value, selStart, selEnd, spellIssues));
 
   // keep scroll in sync
   highlight.scrollTop = textarea.scrollTop;
   highlight.scrollLeft = textarea.scrollLeft;
 }
 
-type TokenKind = 'image' | 'mention' | 'plain';
+type TokenKind = 'image' | 'mention' | 'misspelled' | 'plain';
 
-function buildPromptHighlightNodes(text: string, selStart: number = -1, selEnd: number = -1): Node[] {
+function buildPromptHighlightNodes(text: string, selStart: number = -1, selEnd: number = -1, spellIssues: SpellIssue[] = []): Node[] {
   if (!text) {
     return [];
   }
@@ -741,7 +829,7 @@ function buildPromptHighlightNodes(text: string, selStart: number = -1, selEnd: 
   let lastIndex = 0;
   const hasSel = selStart >= 0 && selEnd > selStart;
 
-  // Collect all special tokens (image markers + @file mentions) sorted by position.
+  // Collect all special tokens (image markers + @file mentions + misspelled words) sorted by position.
   type Token = { start: number; end: number; kind: TokenKind };
   const tokens: Token[] = [];
 
@@ -752,7 +840,15 @@ function buildPromptHighlightNodes(text: string, selStart: number = -1, selEnd: 
   for (const match of text.matchAll(/@\S+/g)) {
     tokens.push({ start: match.index ?? 0, end: (match.index ?? 0) + match[0].length, kind: 'mention' });
   }
-  tokens.sort((a, b) => a.start - b.start);
+  // Misspelled words flagged by the host spell-checker.
+  for (const issue of spellIssues) {
+    if (issue.offset >= 0 && issue.length > 0 && issue.offset + issue.length <= text.length) {
+      tokens.push({ start: issue.offset, end: issue.offset + issue.length, kind: 'misspelled' });
+    }
+  }
+  // Image/mention tokens take priority over misspelled ones when ranges collide.
+  const tokenPriority: Record<TokenKind, number> = { image: 0, mention: 0, misspelled: 1, plain: 2 };
+  tokens.sort((a, b) => a.start - b.start || tokenPriority[a.kind] - tokenPriority[b.kind]);
 
   for (const token of tokens) {
     // Guard against overlapping tokens (should not happen in practice)
@@ -790,6 +886,7 @@ function appendSegment(
 
   const cssClass = kind === 'image' ? 'prompt-image-marker'
                  : kind === 'mention' ? 'prompt-mention'
+                 : kind === 'misspelled' ? 'prompt-misspelled'
                  : 'plain';
 
   const makeSpan = (content: string, cls: string): HTMLSpanElement => {

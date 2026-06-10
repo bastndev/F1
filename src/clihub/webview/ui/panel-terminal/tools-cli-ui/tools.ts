@@ -1,6 +1,6 @@
 import { mountKeymapsPanel } from './modal-keymaps/keymaps';
 import { mountPromptPanel } from './modal-prompt/prompt';
-import type { ImageAttachment, PromptTranslateRequest, PromptTranslateResult, FileMentionEntry } from '../../../core/tools-cli-core/prompt';
+import type { ImageAttachment, PromptTranslateRequest, PromptTranslateResult, FileMentionEntry, SpellIssue } from '../../../core/tools-cli-core/prompt';
 import { mountTranslatorPanel } from './modal-translator/translator';
 
 export type ToolId = 'translate' | 'keymaps' | 'prompt';
@@ -13,6 +13,7 @@ export type ToolContext = {
 	getTerminalSelection?: () => string;
 	preparePromptWithAttachments?: (text: string, attachments: ImageAttachment[]) => Promise<string>;
 	requestWorkspaceFiles?: () => Promise<FileMentionEntry[]>;
+	requestSpellcheck?: (text: string) => Promise<SpellIssue[]>;
 };
 
 type ToolMount = (host: HTMLElement, context: ToolContext) => void;
@@ -24,6 +25,7 @@ export type ToolsControllerOptions = {
 	getTerminalSelection?: () => string;
 	preparePromptWithAttachments?: (text: string, attachments: ImageAttachment[]) => Promise<string>;
 	requestWorkspaceFiles?: () => Promise<FileMentionEntry[]>;
+	requestSpellcheck?: (text: string) => Promise<SpellIssue[]>;
 };
 
 const modalId = 'cli-tools-modal';
@@ -49,7 +51,8 @@ const toolMounts: Record<ToolId, ToolMount> = {
 		translatePrompt,
 		getTerminalSelection,
 		preparePromptWithAttachments,
-		requestWorkspaceFiles
+		requestWorkspaceFiles,
+		requestSpellcheck
 	}: ToolsControllerOptions) => {
 		let activeModal: HTMLElement | null = null;
 		let currentTool: ToolId | null = null;
@@ -114,7 +117,8 @@ const toolMounts: Record<ToolId, ToolMount> = {
 					translatePrompt,
 					getTerminalSelection,
 					preparePromptWithAttachments,
-					requestWorkspaceFiles
+					requestWorkspaceFiles,
+					requestSpellcheck
 				});
 
 		container.append(modal);

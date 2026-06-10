@@ -2,7 +2,7 @@
   <!-- HEADER -->
   <div class="prompt-header">
     <div class="prompt-header-left">
-      <div class="prompt-title">Prompt <span class="prompt-badge">PRO</span></div>
+      <div class="prompt-title"><span class="prompt-title-filter">FILTER</span> PROMPT <span class="prompt-badge">PRO</span></div>
       <div class="prompt-subtitle-row">
         <div class="prompt-subtitle">send a message to the active CLI session</div>
         <span class="prompt-lang-indicator" id="langToggle">🌐 → EN</span>
@@ -12,18 +12,21 @@
       <button class="prompt-close-btn" id="closePromptBtn" aria-label="Close" title="Close (Esc)">esc</button>
     </div>
   </div>
-  <!-- TOOLBAR (TABS + ACTIONS) -->
+  <!-- TOOLBAR (TRANSLATE TOGGLE + TABS) -->
   <div class="prompt-toolbar">
+    <button
+      class="prompt-translate-toggle"
+      id="translateToggle"
+      aria-pressed="true"
+      title="Auto-translate to English before sending (click to toggle)"
+    >
+      <span class="prompt-translate-dot" aria-hidden="true"></span>
+      <i class="ti ti-language prompt-translate-icon" aria-hidden="true"></i>
+      <i class="ti ti-loader-2 prompt-translate-spinner" aria-hidden="true"></i>
+      <span class="prompt-translate-label">translate</span>
+    </button>
     <div class="prompt-tabs">
       <div class="prompt-tab active" data-tab="write">Pro <span class="prompt-beta">beta</span></div>
-    </div>
-    <div class="prompt-actions-right">
-      <button class="prompt-action-btn" id="fixSpellingBtn" title="Fix spelling" aria-label="Fix spelling">
-        <i class="ti ti-wand" aria-hidden="true"></i> Fix
-      </button>
-      <button class="prompt-action-btn prompt-action-btn--translate" id="translateBtn" title="Translate prompt" aria-label="Translate prompt">
-        <i class="ti ti-language" aria-hidden="true"></i> Translate
-      </button>
     </div>
   </div>
   <!-- BODY -->
