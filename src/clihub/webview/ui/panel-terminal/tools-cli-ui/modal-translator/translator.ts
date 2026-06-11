@@ -3,6 +3,7 @@ import translatorHtml from './components/translator.html';
 import loadingStyles from '../../../styles/skeleton/translator-loading.css';
 import type { ToolContext } from '../tools';
 import { translateEnToSpanish } from '../../../../core/tools-cli-core/modal-translation/browser-terminal-translator';
+import { renderMarkdownLite } from './markdown-lite';
 
 const stylesId = 'cli-translator-panel-styles';
 
@@ -67,10 +68,15 @@ function initializeTranslator(host: HTMLElement, context: ToolContext) {
 		return { text: await translateEnToSpanish(text) };
 	};
 
+	// Raw text behind whatever is on screen — the Copy button copies this,
+	// not the rendered markdown's flattened textContent.
+	let copyText = '';
+
 	const performTranslation = async () => {
 		const extracted = extractTextToTranslate(context);
 		if (!extracted) {
 			if (textEl) {
+				textEl.classList.remove('is-rendered');
 				textEl.textContent = 'Select text in the terminal to translate it to Spanish.';
 				textEl.classList.add('placeholder');
 			}
@@ -92,17 +98,19 @@ function initializeTranslator(host: HTMLElement, context: ToolContext) {
 			translateBtn.disabled = true;
 		}
 		modalEl.classList.add('is-translating');
-		textEl.classList.remove('placeholder');
+		textEl.classList.remove('placeholder', 'is-rendered');
 		textEl.replaceChildren(buildSkeleton(lockedHeight));
 		setStatus('translating…');
 
 		try {
 			const result = await translateToSpanish(extracted);
-			revealText(textEl, result.text || extracted);
+			copyText = result.text || extracted;
+			revealText(textEl, copyText);
 			setStatus(result.provider ? `translated · ${result.provider.toLowerCase()}` : 'translated');
 		} catch (err) {
 			console.error('[Translator] EN->ES failed:', err);
-			textEl.textContent = extracted;
+			copyText = extracted;
+			revealText(textEl, extracted);
 			setStatus('translation failed');
 			// Failed attempts may be transient (rate limit, network) — allow retry.
 			if (translateBtn) {
@@ -126,6 +134,7 @@ function initializeTranslator(host: HTMLElement, context: ToolContext) {
 	const extracted = extractTextToTranslate(context);
 	if (textEl) {
 		if (extracted) {
+			copyText = extracted;
 			textEl.textContent = extracted;
 			textEl.classList.add('placeholder');
 		} else {
@@ -136,7 +145,7 @@ function initializeTranslator(host: HTMLElement, context: ToolContext) {
 
 	if (copyBtn && textEl) {
 		copyBtn.addEventListener('click', async () => {
-			const text = textEl.textContent || '';
+			const text = copyText || textEl.textContent || '';
 			if (!text) {
 				return;
 			}
@@ -234,7 +243,10 @@ function buildSkeleton(availableHeight: number): HTMLElement {
 }
 
 function revealText(textEl: HTMLElement, value: string): void {
-	textEl.textContent = value;
+	// CLI answers are usually markdown — render headings, lists, and code
+	// instead of showing raw markers. renderMarkdownLite escapes all input.
+	textEl.innerHTML = renderMarkdownLite(value);
+	textEl.classList.add('is-rendered');
 	textEl.classList.remove('is-revealing');
 	// Restart the animation even if a previous reveal is still applied.
 	void textEl.offsetWidth;
