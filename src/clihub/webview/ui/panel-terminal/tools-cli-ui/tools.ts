@@ -160,5 +160,5 @@ const toolMounts: Record<ToolId, ToolMount> = {
 		}
 	};
 
-	return { open, toggle, close, isOpen: () => currentTool !== null };
+	return { open, toggle, close, isOpen: () => currentTool !== null, getOpenTool: () => currentTool };
 };

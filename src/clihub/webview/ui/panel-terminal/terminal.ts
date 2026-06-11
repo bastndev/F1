@@ -548,7 +548,8 @@ const tabController = createTabController({
 	},
 	onPromptFilterChange: (enabled) => {
 		isPromptFilterEnabled = enabled;
-	}
+	},
+	getOpenToolModal: () => toolsController?.getOpenTool() ?? null
 });
 
 const handleTerminalKey = (event: KeyboardEvent) => {
