@@ -461,7 +461,7 @@
 	bottom: 14px;
 	z-index: 2000;
 	max-width: calc(100vw - 28px);
-	padding: 7px 10px;
+	padding: 4px 12px;
 	border: 1px solid var(--vscode-editorGroup-border, rgba(128, 128, 128, 0.28));
 	border-radius: 6px;
 	box-sizing: border-box;
@@ -481,6 +481,20 @@
 .agent-tools-toast.is-visible {
 	opacity: 1;
 	transform: translate(-50%, 0);
+}
+
+.agent-tools-toast.is-enabled {
+	color: #10b981;
+	background: color-mix(in srgb, #10b981 15%, var(--vscode-editor-background, #1e1e1e));
+	border-color: #10b981;
+	box-shadow: 0 0 10px color-mix(in srgb, #10b981 30%, transparent), 0 8px 24px rgba(0, 0, 0, 0.4);
+}
+
+.agent-tools-toast.is-disabled {
+	color: #ef4444;
+	background: color-mix(in srgb, #ef4444 15%, var(--vscode-editor-background, #1e1e1e));
+	border-color: #ef4444;
+	box-shadow: 0 0 10px color-mix(in srgb, #ef4444 30%, transparent), 0 8px 24px rgba(0, 0, 0, 0.4);
 }
 
 .agent-session-list {
