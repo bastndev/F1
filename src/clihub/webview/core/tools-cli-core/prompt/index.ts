@@ -10,10 +10,27 @@ export {
 	protectImageMarkers,
 	restoreImageMarkers,
 	substituteMarkersWithPaths,
+	stripPromptTokens,
+	protectMentions,
+	restoreMentions,
 } from './attachments/markers';
 export type { ImageAttachment } from './attachments/types';
 export { isImageAttachment } from './attachments/types';
 export { buildPromptTextWithImages } from './attachments/prepare';
+
+// Collapsed-paste support: large pasted blocks become atomic markers in the
+// textarea and are expanded back to the original content on send.
+export {
+	pasteMarkerPattern,
+	shouldCollapsePaste,
+	buildPasteMarker,
+	countLines,
+	detectPasteKind,
+	expandPasteMarkers,
+	protectPasteMarkers,
+	restorePasteMarkers,
+} from './attachments/pastes';
+export type { PasteAttachment, PasteKind } from './attachments/pastes';
 
 // Live spell-marking: the misspelled-range contract shared between host and webview.
 export type { SpellIssue } from './spellcheck-types';

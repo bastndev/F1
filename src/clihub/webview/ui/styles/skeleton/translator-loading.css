@@ -1,0 +1,171 @@
+/* =================================================================
+   TRANSLATOR LOADING — skeleton + text reveal for the Translator modal
+   Same premium spirit as start-cli.css: shimmer sweep lines with
+   paragraph rhythm, a scan beam, and a live typing row. No generic
+   gray skeleton feel.
+   ================================================================= */
+
+.translator-skeleton {
+	position: relative;
+	display: flex;
+	flex-direction: column;
+	overflow: hidden;
+	--skeleton-accent: var(--agent-accent, #AFA9EC);
+}
+
+/* ── Scan beam — sweeps top → bottom over the whole field ───────── */
+.t-skel-scan {
+	position: absolute;
+	left: 0;
+	right: 0;
+	height: 38px;
+	background: linear-gradient(
+		180deg,
+		transparent 0%,
+		color-mix(in srgb, var(--skeleton-accent) 7%, transparent) 30%,
+		color-mix(in srgb, var(--skeleton-accent) 12%, transparent) 50%,
+		color-mix(in srgb, var(--skeleton-accent) 7%, transparent) 70%,
+		transparent 100%
+	);
+	opacity: 0.4;
+	filter: blur(0.9px);
+	pointer-events: none;
+	animation: t-skel-scan-move 3.2s linear infinite;
+	z-index: 1;
+}
+
+@keyframes t-skel-scan-move {
+	0%   { top: -14%; }
+	100% { top: 108%; }
+}
+
+/* ── Line field — fills the locked body height ──────────────────── */
+.t-skel-lines {
+	flex: 1 1 auto;
+	display: flex;
+	flex-direction: column;
+	justify-content: space-between;
+	gap: 10px;
+	min-height: 0;
+	overflow: hidden;
+}
+
+.t-skel-line {
+	height: 10px;
+	border-radius: 4px;
+	flex: 0 0 auto;
+	background: linear-gradient(
+		90deg,
+		transparent 0%,
+		color-mix(in srgb, var(--vscode-foreground) 5%, transparent) 18%,
+		color-mix(in srgb, var(--skeleton-accent) 18%, transparent) 48%,
+		color-mix(in srgb, var(--vscode-foreground) 6%, transparent) 78%,
+		transparent 100%
+	);
+	background-size: 280% 100%;
+	background-position: 140% 50%;
+	opacity: 0.6;
+	will-change: background-position;
+	animation: t-skel-shimmer 4.2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* Width variants — natural prose rhythm */
+.t-skel-line.full  { width: 100%; opacity: 0.5;  }
+.t-skel-line.long  { width: 84%;  opacity: 0.58; }
+.t-skel-line.med   { width: 61%;  opacity: 0.62; }
+.t-skel-line.short { width: 37%;  opacity: 0.5;  }
+
+/* Paragraph break — extra air before the line */
+.t-skel-line.t-skel-gap { margin-top: 12px; }
+
+/* Staggered timing so the sweep feels organic, not mechanical */
+.t-skel-line:nth-child(2n)   { animation-duration: 5.4s; animation-delay: -0.7s; }
+.t-skel-line:nth-child(3n+1) { animation-duration: 3.8s; animation-delay: -2.3s; }
+.t-skel-line:nth-child(4n+2) { animation-duration: 5.9s; animation-delay: -1.4s; }
+.t-skel-line:nth-child(5n)   { animation-duration: 4.4s; animation-delay: -3.6s; }
+
+@keyframes t-skel-shimmer {
+	0%   { background-position: 155% 50%; }
+	100% { background-position: -70% 50%; }
+}
+
+/* ── Typing presence — pinned at the bottom of the field ────────── */
+.t-skel-typing {
+	flex: 0 0 auto;
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	padding-top: 12px;
+	z-index: 2;
+}
+
+.t-skel-sym {
+	font-family: 'JetBrains Mono', ui-monospace, monospace;
+	font-size: 13px;
+	line-height: 1;
+	color: var(--skeleton-accent);
+	opacity: 0.8;
+}
+
+.t-skel-dots {
+	display: flex;
+	gap: 3px;
+	align-items: center;
+}
+
+.t-skel-dot {
+	width: 3.5px;
+	height: 3.5px;
+	border-radius: 50%;
+	background: var(--skeleton-accent);
+	opacity: 0.65;
+	animation: t-skel-typing-dot 1.35s ease-in-out infinite;
+}
+
+.t-skel-dot:nth-child(2) { animation-delay: 0.18s; }
+.t-skel-dot:nth-child(3) { animation-delay: 0.36s; }
+
+@keyframes t-skel-typing-dot {
+	0%, 80%, 100% { opacity: 0.25; transform: scale(0.7); }
+	40%           { opacity: 1;    transform: scale(1);   }
+}
+
+/* ── Text reveal — translation wipes in top → bottom ────────────── */
+.translator-text.is-revealing {
+	animation: translator-text-reveal 950ms cubic-bezier(0.25, 1, 0.35, 1) both;
+}
+
+@keyframes translator-text-reveal {
+	0% {
+		clip-path: inset(0 0 100% 0);
+		opacity: 0.25;
+		filter: blur(2.5px);
+		transform: translateY(-6px);
+	}
+	55% {
+		opacity: 1;
+		filter: blur(0);
+	}
+	100% {
+		clip-path: inset(0);
+		opacity: 1;
+		filter: none;
+		transform: none;
+	}
+}
+
+/* ── Reduced motion ──────────────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+	.t-skel-line,
+	.t-skel-dot,
+	.translator-text.is-revealing {
+		animation: none !important;
+	}
+
+	.t-skel-line {
+		background: color-mix(in srgb, var(--vscode-foreground) 9%, transparent);
+		opacity: 0.42;
+	}
+
+	.t-skel-scan { display: none; }
+}

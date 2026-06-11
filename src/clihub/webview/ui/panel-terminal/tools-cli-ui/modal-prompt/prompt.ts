@@ -12,6 +12,17 @@ import {
 	restoreImageMarkers,
 	type FileMentionEntry,
 	type SpellIssue,
+	type PasteAttachment,
+	shouldCollapsePaste,
+	buildPasteMarker,
+	countLines,
+	detectPasteKind,
+	expandPasteMarkers,
+	protectPasteMarkers,
+	restorePasteMarkers,
+	stripPromptTokens,
+	protectMentions,
+	restoreMentions,
 } from '../../../../core/tools-cli-core/prompt';
 import { mountFileMentionPicker } from './components/file-mention/file-mention';
 
@@ -33,14 +44,33 @@ const ensureStyles = () => {
 const imagePathPattern =
 	/(?:"([^"\r\n]+\.(?:png|jpe?g|gif|webp|bmp|svg|tiff?))"|'([^'\r\n]+\.(?:png|jpe?g|gif|webp|bmp|svg|tiff?))'|((?:~|\/)[^\r\n\t"'<>]*?\.(?:png|jpe?g|gif|webp|bmp|svg|tiff?)))/gi;
 
+// Every atomic token in the textarea: [Image #N], [Code #N +X lines], [Text #N +X lines].
+// Used by delete/arrow/caret handling so all marker types behave as single units.
+const atomicMarkerPattern = /\[(?:Image|Code|Text) #\d+[^\]]*\]/g;
+
+// Draft state per CLI session, surviving modal close/Esc (a too-easy accident
+// while typing). Lives in module scope: the webview JS context persists while
+// the panel is open, and entries are keyed by session id so a draft dies with
+// its session and can never resurface in another CLI.
+type PromptDraft = {
+	text: string;
+	imageAttachments: ImageAttachment[];
+	nextImageAttachmentId: number;
+	pasteAttachments: PasteAttachment[];
+	nextPasteAttachmentId: number;
+};
+const promptDrafts = new Map<string, PromptDraft>();
+
 type PromptContext = {
 	close: () => void;
 	getActiveSessionId?: () => string | undefined;
-	sendToActiveSession?: (text: string) => void;
+	getActiveModelName?: () => string | undefined;
+	sendToActiveSession?: (text: string, options?: { paste?: boolean; submit?: boolean }) => void;
 	translatePrompt?: (request: PromptTranslateRequest) => Promise<PromptTranslateResult>;
 	preparePromptWithAttachments?: (text: string, attachments: ImageAttachment[]) => Promise<string>;
 	requestWorkspaceFiles?: () => Promise<FileMentionEntry[]>;
-	requestSpellcheck?: (text: string) => Promise<SpellIssue[]>;
+	requestWorkspaceSkills?: () => Promise<string[]>;
+	requestSpellcheck?: (text: string, strict: boolean) => Promise<SpellIssue[]>;
 };
 
 export const mountPromptPanel = (host: HTMLElement, context: PromptContext = { close: () => {} }) => {
@@ -57,7 +87,7 @@ export const mountPromptPanel = (host: HTMLElement, context: PromptContext = { c
 
 	const hasActiveSession = !!context.getActiveSessionId?.();
 
-	updateFooterModel(host);
+	updateFooterModel(host, context, hasActiveSession);
 	initSessionState(host, hasActiveSession);
 	initPromptTabs(host, context, hasActiveSession);
 };
@@ -97,14 +127,61 @@ function initPromptTabs(host: HTMLElement, context: PromptContext, hasActiveSess
 		}
 	}
 
-	// Image attachments state (lives while this modal instance is mounted)
-	let imageAttachments: ImageAttachment[] = [];
-	let nextImageAttachmentId = 1;
+	// Restore the draft for this session, if the modal was closed mid-typing.
+	const draftKey = context.getActiveSessionId?.();
+	const savedDraft = draftKey ? promptDrafts.get(draftKey) : undefined;
+
+	// Image attachments state (survives modal close via the session draft)
+	let imageAttachments: ImageAttachment[] = savedDraft?.imageAttachments ?? [];
+	let nextImageAttachmentId = savedDraft?.nextImageAttachmentId ?? 1;
+
+	// Collapsed-paste state — large pasted blocks live here verbatim while the
+	// textarea only shows their [Code/Text #N +X lines] marker.
+	const pasteAttachments: PasteAttachment[] = savedDraft?.pasteAttachments ?? [];
+	let nextPasteAttachmentId = savedDraft?.nextPasteAttachmentId ?? 1;
+
+	if (savedDraft?.text) {
+		textarea.value = savedDraft.text;
+	}
+
+	const saveDraft = () => {
+		if (!draftKey) {
+			return;
+		}
+		promptDrafts.set(draftKey, {
+			text: textarea.value,
+			imageAttachments,
+			nextImageAttachmentId,
+			pasteAttachments,
+			nextPasteAttachmentId,
+		});
+	};
+	textarea.addEventListener('input', saveDraft);
+
+	// Custom undo/redo: programmatic value writes (lowercase enforcement,
+	// marker insertion) wipe the browser's native undo stack, so Ctrl+Z needs
+	// its own history.
+	setupUndoHistory(textarea);
+
+	const registerPasteAttachment = (content: string): string => {
+		const id = nextPasteAttachmentId++;
+		const kind = detectPasteKind(content);
+		const marker = buildPasteMarker(kind, id, countLines(content));
+		pasteAttachments.push({ id, marker, kind, content });
+		return marker;
+	};
 
 	// Translate toggle — on by default, persisted to localStorage across sessions.
 	// localStorage key: 'f1-translate-auto' → '1' (on) | '0' (off). Missing key = on.
 	const translateState = { enabled: localStorage.getItem('f1-translate-auto') !== '0' };
 	let setTranslating: (active: boolean) => void = () => {};
+
+	// Strict-accents toggle — OFF by default (missing tildes ignored). When ON,
+	// the host re-flags accent omissions. Persisted across IDE restarts.
+	// localStorage key: 'f1-spellcheck-strict' → '1' (on) | '0'/missing (off).
+	const strictState = { enabled: localStorage.getItem('f1-spellcheck-strict') === '1' };
+	// Assigned once runSpellcheck/renderHighlight exist; re-marks on toggle.
+	let rerunSpellcheck: () => void = () => {};
 
 	const registerPathImageAttachment = (path: string): string => {
 		const id = nextImageAttachmentId++;
@@ -147,6 +224,10 @@ function initPromptTabs(host: HTMLElement, context: PromptContext, hasActiveSess
 	// Setup paste that supports images/screenshots + paths (must run before or combined with lowercase)
 	setupImagePaste(textarea, registerPathImageAttachment, registerClipboardImageAttachment);
 
+	// Large text/code pastes collapse into an atomic marker instead of flooding
+	// the textarea (the other paste handlers skip these via shouldCollapsePaste).
+	setupPasteCollapse(textarea, registerPasteAttachment);
+
 	// Atomic delete and traversal for [Image #N] markers
 	textarea.addEventListener('keydown', (e) => {
 		if (handleImageMarkerDeleteKey(textarea, e)) {return;}
@@ -180,9 +261,16 @@ function initPromptTabs(host: HTMLElement, context: PromptContext, hasActiveSess
 				runBtn.innerHTML = '<i class="ti ti-sparkles" aria-hidden="true"></i><span>Translating…</span>';
 			}
 			try {
-				const { text: protectedText, markers } = protectImageMarkers(textToSend);
+				// Image markers, paste markers AND @mention routes must survive
+				// translation untouched — they also shrink the payload the
+				// translator has to process, so requests are faster and safer.
+				const { text: imageProtected, markers } = protectImageMarkers(textToSend);
+				const { text: pasteProtected, markers: pasteMarkers } = protectPasteMarkers(imageProtected);
+				const { text: protectedText, mentions } = protectMentions(pasteProtected);
 				const result = await translatePromptText(protectedText, ctx);
-				const translated = result.text ? restoreImageMarkers(result.text, markers) : '';
+				const translated = result.text
+					? restoreImageMarkers(restorePasteMarkers(restoreMentions(result.text, mentions), pasteMarkers), markers)
+					: '';
 				if (translated && translated !== textToSend.trim()) {
 					textToSend = translated;
 				}
@@ -208,6 +296,17 @@ function initPromptTabs(host: HTMLElement, context: PromptContext, hasActiveSess
 			}
 		}
 
+		// Collapsed pastes leave the textarea as markers; the CLI gets the
+		// original verbatim content (never lowercased, never translated).
+		textToSend = expandPasteMarkers(textToSend, pasteAttachments);
+
+		// Selected skill chips ride along as an explicit instruction. Appended
+		// post-translation (already English) so it never hits the translator.
+		if (selectedSkills.size > 0) {
+			const names = [...selectedSkills].map((name) => `"${name}"`).join(', ');
+			textToSend += `\n\nUse the following skill${selectedSkills.size === 1 ? '' : 's'}: ${names}.`;
+		}
+
 		const result = processPrompt(textToSend, {
 			close: ctx.close,
 			sendToActiveSession: ctx.sendToActiveSession,
@@ -216,6 +315,11 @@ function initPromptTabs(host: HTMLElement, context: PromptContext, hasActiveSess
 
 		if (result.status === 'no-session') {
 			showNoSessionMessage(hostEl);
+		}
+
+		// Sent successfully — the draft has served its purpose.
+		if (result.status === 'sent' && draftKey) {
+			promptDrafts.delete(draftKey);
 		}
 	}
 
@@ -229,8 +333,11 @@ function initPromptTabs(host: HTMLElement, context: PromptContext, hasActiveSess
 		textarea.focus();
 	});
 
+	// Skills the user toggles on travel with the prompt as an explicit instruction.
+	const selectedSkills = new Set<string>();
+
 	if (hasActiveSession) {
-		initSkillsChips(host);
+		initSkillsChips(host, context, selectedSkills);
 		const tools = initToolbarActions(
 			host,
 			() => translateState.enabled,
@@ -240,6 +347,16 @@ function initPromptTabs(host: HTMLElement, context: PromptContext, hasActiveSess
 			}
 		);
 		setTranslating = tools.setTranslating;
+
+		initStrictToggle(
+			host,
+			() => strictState.enabled,
+			(val) => {
+				strictState.enabled = val;
+				try { localStorage.setItem('f1-spellcheck-strict', val ? '1' : '0'); } catch { /* storage unavailable */ }
+				rerunSpellcheck();
+			}
+		);
 	}
 
 	const performSendNow = async () => {
@@ -282,7 +399,7 @@ function initPromptTabs(host: HTMLElement, context: PromptContext, hasActiveSess
 			return;
 		}
 
-		void context.requestSpellcheck(text).then((issues) => {
+		void context.requestSpellcheck(text, strictState.enabled).then((issues) => {
 			// Drop stale responses and any result whose offsets no longer match the text.
 			if (token !== spellcheckToken || textarea.value !== text) {
 				return;
@@ -290,6 +407,14 @@ function initPromptTabs(host: HTMLElement, context: PromptContext, hasActiveSess
 			spellIssues = issues;
 			renderHighlight();
 		});
+	};
+
+	// Toggling strict changes verdicts for already-typed text: clear stale marks
+	// immediately, then recompute under the new mode.
+	rerunSpellcheck = () => {
+		spellIssues = [];
+		renderHighlight();
+		runSpellcheck();
 	};
 
 	const scheduleSpellcheck = () => {
@@ -319,7 +444,7 @@ function initPromptTabs(host: HTMLElement, context: PromptContext, hasActiveSess
 	const forceCaretOutOfMarkers = () => {
 		if (textarea.selectionStart !== textarea.selectionEnd) {return;}
 		const caret = textarea.selectionStart ?? 0;
-		for (const match of textarea.value.matchAll(/\[Image #(\d+)\]/g)) {
+		for (const match of textarea.value.matchAll(atomicMarkerPattern)) {
 			const start = match.index ?? 0;
 			const end = start + match[0].length;
 			if (caret > start && caret < end) {
@@ -346,24 +471,78 @@ function initPromptTabs(host: HTMLElement, context: PromptContext, hasActiveSess
 	});
 }
 
+// Snapshot-based undo/redo (Ctrl+Z / Ctrl+Shift+Z or Ctrl+Y). Every input
+// event — typing, paste collapse, marker insertion/deletion — pushes a
+// snapshot; restoring replays value + caret and re-dispatches 'input' so the
+// highlight, char count, draft and run-button state all stay in sync.
+function setupUndoHistory(textarea: HTMLTextAreaElement) {
+	type Snapshot = { value: string; start: number; end: number };
+	const history: Snapshot[] = [
+		{ value: textarea.value, start: textarea.value.length, end: textarea.value.length },
+	];
+	let index = 0;
+	let isRestoring = false;
+	const maxEntries = 200;
+
+	textarea.addEventListener('input', () => {
+		if (isRestoring || history[index]?.value === textarea.value) {
+			return;
+		}
+		history.splice(index + 1);
+		history.push({
+			value: textarea.value,
+			start: textarea.selectionStart ?? textarea.value.length,
+			end: textarea.selectionEnd ?? textarea.value.length,
+		});
+		if (history.length > maxEntries) {
+			history.shift();
+		}
+		index = history.length - 1;
+	});
+
+	const restore = (snapshot: Snapshot) => {
+		isRestoring = true;
+		textarea.value = snapshot.value;
+		textarea.setSelectionRange(snapshot.start, snapshot.end);
+		textarea.dispatchEvent(new Event('input', { bubbles: true }));
+		isRestoring = false;
+	};
+
+	textarea.addEventListener('keydown', (e) => {
+		if (!(e.ctrlKey || e.metaKey) || e.altKey) {
+			return;
+		}
+		const key = e.key.toLowerCase();
+		if (key !== 'z' && key !== 'y') {
+			return;
+		}
+		e.preventDefault();
+		const isRedo = key === 'y' || (key === 'z' && e.shiftKey);
+		if (isRedo && index < history.length - 1) {
+			restore(history[++index]);
+		} else if (!isRedo && index > 0) {
+			restore(history[--index]);
+		}
+	});
+}
+
 function enforceLowercaseInput(textarea: HTMLTextAreaElement) {
 	textarea.addEventListener('keydown', (e) => {
 		if (e.key.length === 1 && /[a-zA-Z]/.test(e.key)) {
-			if (e.shiftKey || e.ctrlKey || e.metaKey) {
-				// User is intentionally using Shift → allow uppercase
-				// or using Ctrl/Meta for shortcuts like Ctrl+V (paste image), Ctrl+C, etc.
-				// Do not insert the letter (e.g. "v" from Ctrl+V)
-				return;
+			if (e.ctrlKey || e.metaKey) {
+				return; // keyboard shortcuts (Ctrl+C, Ctrl+V, etc.) — let browser handle
 			}
-			// Force lowercase (this defeats Caps Lock as well)
 			e.preventDefault();
 			const start = textarea.selectionStart ?? 0;
 			const end = textarea.selectionEnd ?? 0;
-			// Auto-capitalize: if typing at the very beginning (pos 0) uppercase the letter
-			const isFirstChar = start === 0 && textarea.value.slice(end).trimStart() === textarea.value.slice(end);
-			const char = (isFirstChar && start === 0 && textarea.value.slice(0, start) === '') 
-				? e.key.toUpperCase() 
-				: e.key.toLowerCase();
+			let char: string;
+			if (e.shiftKey) {
+				char = e.key.toUpperCase();
+			} else {
+				// Auto-capitalize first character; force lowercase elsewhere (defeats Caps Lock)
+				const isFirstChar = start === 0 && textarea.value.slice(0, start) === '' && textarea.value.slice(end).trimStart() === textarea.value.slice(end);
+				char = isFirstChar ? e.key.toUpperCase() : e.key.toLowerCase();
+			}
 			textarea.value = textarea.value.slice(0, start) + char + textarea.value.slice(end);
 			const newPos = start + 1;
 			textarea.selectionStart = textarea.selectionEnd = newPos;
@@ -383,8 +562,8 @@ function enforceLowercaseInput(textarea: HTMLTextAreaElement) {
 		const pastedForCheck = clipboard.getData('text/plain') || '';
 		imagePathPattern.lastIndex = 0;
 		const looksLikeImagePath = imagePathPattern.test(pastedForCheck);
-		if (hasImageFile || looksLikeImagePath) {
-			// Do not lowercase or prevent here — the dedicated image paste listener will handle and prevent.
+		if (hasImageFile || looksLikeImagePath || shouldCollapsePaste(pastedForCheck)) {
+			// Do not lowercase or prevent here — the dedicated image/collapse paste listeners handle these.
 			return;
 		}
 
@@ -400,16 +579,52 @@ function enforceLowercaseInput(textarea: HTMLTextAreaElement) {
 	});
 }
 
-function initSkillsChips(host: HTMLElement) {
-	const chips = host.querySelectorAll<HTMLButtonElement>('.prompt-tool-btn');
+// Populate the Skills row with the skills installed in the workspace
+// (.agents/skills/* and .claude/skills/*, folders containing a SKILL.md —
+// scanned host-side). The row only appears when at least one skill exists.
+function initSkillsChips(host: HTMLElement, context: PromptContext, selectedSkills: Set<string>) {
+	const row = host.querySelector<HTMLElement>('.prompt-skills');
+	const chipsHost = host.querySelector<HTMLElement>('#skillChips');
+	if (!row || !chipsHost || !context.requestWorkspaceSkills) {
+		return;
+	}
 
-	chips.forEach((chip) => {
-		chip.addEventListener('click', () => {
-					chip.classList.toggle('selected');
+	void context.requestWorkspaceSkills().then((skills) => {
+		if (!row.isConnected) {
+			return;
+		}
 
-			// Optional: if you want only one skill active at a time, uncomment below
-			// chips.forEach(c => c !== chip && c.classList.remove('selected'));
-		});
+		chipsHost.replaceChildren();
+
+		// No skills installed: show an inert dashed "+" placeholder.
+		// TODO(future): wire this to a skill install/create flow after the refactor.
+		if (!skills.length) {
+			const addChip = document.createElement('button');
+			addChip.className = 'prompt-tool-btn prompt-skill-add';
+			addChip.textContent = '+';
+			addChip.title = 'Add skills — coming soon';
+			addChip.setAttribute('aria-disabled', 'true');
+			chipsHost.append(addChip);
+			row.hidden = false;
+			return;
+		}
+
+		for (const name of skills) {
+			const chip = document.createElement('button');
+			chip.className = 'prompt-tool-btn';
+			chip.dataset.skill = name;
+			chip.textContent = name;
+			chip.title = `Ask the CLI to use its "${name}" skill`;
+			chip.addEventListener('click', () => {
+				if (chip.classList.toggle('selected')) {
+					selectedSkills.add(name);
+				} else {
+					selectedSkills.delete(name);
+				}
+			});
+			chipsHost.append(chip);
+		}
+		row.hidden = false;
 	});
 }
 
@@ -441,6 +656,26 @@ function initToolbarActions(
 	};
 }
 
+function initStrictToggle(
+	host: HTMLElement,
+	getEnabled: () => boolean,
+	setEnabled: (val: boolean) => void
+) {
+	const toggleBtn = host.querySelector<HTMLButtonElement>('#strictToggle');
+	if (!toggleBtn) {
+		return;
+	}
+
+	// Reflect the persisted preference on every mount.
+	toggleBtn.setAttribute('aria-pressed', getEnabled() ? 'true' : 'false');
+
+	toggleBtn.addEventListener('click', () => {
+		const next = !getEnabled();
+		setEnabled(next);
+		toggleBtn.setAttribute('aria-pressed', next ? 'true' : 'false');
+	});
+}
+
 function initRunButton(
 	host: HTMLElement,
 	textarea: HTMLTextAreaElement,
@@ -457,7 +692,9 @@ function initRunButton(
 		const hasSession = !!context.getActiveSessionId?.();
 		// Activate only after a real word: 6+ chars OR first space (second word started)
 		const hasEnoughText = text.length >= 6 || text.includes(' ');
-		runBtn.disabled = !hasEnoughText || !hasSession;
+		// Limit applies to the effective (typed) length — markers/@routes are free.
+		const overLimit = stripPromptTokens(textarea.value).length > 1500;
+		runBtn.disabled = !hasEnoughText || !hasSession || overLimit;
 	};
 
 	// Initial state
@@ -499,7 +736,9 @@ function updateCharCount(host: HTMLElement, textarea: HTMLTextAreaElement) {
 		return;
 	}
 
-	const current = textarea.value.length;
+	// Tokens (images, pastes, @routes) don't spend prompt budget — they resolve
+	// outside the textarea and never go through translation.
+	const current = stripPromptTokens(textarea.value).length;
 	const max = 1500;
 	counter.textContent = `${current}/${max}`;
 
@@ -580,7 +819,18 @@ function showNoSessionMessage(host: HTMLElement) {
 	}
 }
 
-function updateFooterModel(host: HTMLElement) {
+// Exact public model strings for Claude Code. The in-CLI "/model" menu only
+// exposes aliases (default/fable/opus/haiku) — passing the full string via
+// "/model <id>" unlocks specific versions the menu hides.
+const claudeModels: Array<{ id: string; label: string }> = [
+	{ id: 'claude-fable-5', label: 'fable 5' },
+	{ id: 'claude-opus-4-8', label: 'opus 4.8' },
+	{ id: 'claude-opus-4-7', label: 'opus 4.7' },
+	{ id: 'claude-opus-4-6', label: 'opus 4.6' },
+	{ id: 'claude-sonnet-4-6', label: 'sonnet 4.6' },
+];
+
+function updateFooterModel(host: HTMLElement, context: PromptContext, hasActiveSession: boolean) {
 	const labelEl = document.getElementById('cli-terminal-label');
 	const label = labelEl?.textContent?.trim() || 'unknown';
 
@@ -591,9 +841,106 @@ function updateFooterModel(host: HTMLElement) {
 		.replace(/\s+/g, '');                // remove any remaining spaces
 
 	const footerInfo = host.querySelector<HTMLElement>('.prompt-footer-info');
-	if (footerInfo) {
-		footerInfo.innerHTML = `<span class="prompt-session-dot" id="sessionDot"></span><i class="ti ti-cpu" aria-hidden="true"></i> ${simpleName}`;
+	if (!footerInfo) {
+		return;
 	}
+
+	footerInfo.innerHTML = `<span class="prompt-session-dot" id="sessionDot"></span><i class="ti ti-cpu" aria-hidden="true"></i> ${simpleName}`;
+
+	const modelName = context.getActiveModelName?.();
+
+	// Claude gets a model switcher (the full version list the /model menu
+	// hides); every other CLI keeps the read-only detected-model chip.
+	if (simpleName === 'claude' && hasActiveSession && context.sendToActiveSession) {
+		footerInfo.append(buildClaudeModelSwitcher(context, modelName));
+		return;
+	}
+
+	// Detected model (best-effort, only when confidently scraped from the
+	// session output). textContent — the value originates in terminal output.
+	if (modelName) {
+		const modelEl = document.createElement('span');
+		modelEl.className = 'prompt-footer-model';
+		modelEl.textContent = modelName;
+		footerInfo.append(modelEl);
+	}
+}
+
+function buildClaudeModelSwitcher(context: PromptContext, detectedModel?: string): HTMLElement {
+	const wrap = document.createElement('span');
+	wrap.className = 'prompt-model-switch';
+
+	const button = document.createElement('button');
+	button.className = 'prompt-footer-model prompt-footer-model-btn';
+	button.setAttribute('aria-haspopup', 'listbox');
+	button.setAttribute('aria-expanded', 'false');
+	button.title = 'Switch model (sends /model with the exact model string)';
+
+	const buttonLabel = document.createElement('span');
+	buttonLabel.textContent = detectedModel ?? 'model';
+	const caret = document.createElement('span');
+	caret.className = 'prompt-model-caret';
+	caret.textContent = '▼';
+	caret.setAttribute('aria-hidden', 'true');
+	button.append(buttonLabel, caret);
+
+	const menu = document.createElement('div');
+	menu.className = 'prompt-model-menu';
+	menu.setAttribute('role', 'listbox');
+
+	const closeMenu = () => {
+		menu.classList.remove('open');
+		button.setAttribute('aria-expanded', 'false');
+		document.removeEventListener('click', onOutsideClick, true);
+	};
+
+	const onOutsideClick = (event: MouseEvent) => {
+		if (!wrap.contains(event.target as Node)) {
+			closeMenu();
+		}
+	};
+
+	for (const model of claudeModels) {
+		const item = document.createElement('button');
+		item.className = 'prompt-model-item';
+		item.setAttribute('role', 'option');
+		if (detectedModel && model.label === detectedModel) {
+			item.classList.add('active');
+		}
+
+		const name = document.createElement('span');
+		name.className = 'prompt-model-item-name';
+		name.textContent = model.label;
+		const id = document.createElement('code');
+		id.className = 'prompt-model-item-id';
+		id.textContent = model.id;
+		item.append(name, id);
+
+		item.addEventListener('click', () => {
+			// Switch silently: the user never types it; Claude just confirms in
+			// the terminal. Keep the modal open so they can continue prompting.
+			context.sendToActiveSession?.(`/model ${model.id}`, { paste: true, submit: true });
+			buttonLabel.textContent = model.label;
+			menu.querySelectorAll('.prompt-model-item.active').forEach((el) => el.classList.remove('active'));
+			item.classList.add('active');
+			closeMenu();
+		});
+
+		menu.append(item);
+	}
+
+	button.addEventListener('click', () => {
+		const isOpen = menu.classList.toggle('open');
+		button.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+		if (isOpen) {
+			document.addEventListener('click', onOutsideClick, true);
+		} else {
+			document.removeEventListener('click', onOutsideClick, true);
+		}
+	});
+
+	wrap.append(button, menu);
+	return wrap;
 }
 
 // --- Image attachments helpers (paste screenshots + paths, atomic markers, referenced collection) ---
@@ -669,7 +1016,7 @@ function findImageMarkerDeleteRange(
 	const isDel = event.key === 'Delete';
 	const isWordMod = event.ctrlKey || event.altKey;
 
-	for (const match of text.matchAll(/\[Image #(\d+)\]/g)) {
+	for (const match of text.matchAll(atomicMarkerPattern)) {
 		const start = match.index ?? 0;
 		const end = start + match[0].length;
 		
@@ -702,8 +1049,8 @@ function handleImageMarkerArrowKey(textarea: HTMLTextAreaElement, event: Keyboar
 
 	const caret = textarea.selectionStart ?? 0;
 	const isWordMod = event.ctrlKey || event.altKey;
-	
-	for (const match of textarea.value.matchAll(/\[Image #(\d+)\]/g)) {
+
+	for (const match of textarea.value.matchAll(atomicMarkerPattern)) {
 		const start = match.index ?? 0;
 		const end = start + match[0].length;
 		
@@ -766,6 +1113,12 @@ function setupImagePaste(
 			.map((item) => item.getAsFile())
 			.filter((file): file is File => file !== null);
 
+		// Large text-only pastes belong to the collapse handler, even when they
+		// happen to contain image paths somewhere inside.
+		if (imageFiles.length === 0 && shouldCollapsePaste(pastedText)) {
+			return;
+		}
+
 		const textWithMarkers = replaceImagePathsWithMarkers(pastedText, registerPath);
 		const hasImagePath = textWithMarkers !== pastedText;
 
@@ -784,6 +1137,33 @@ function setupImagePaste(
 		// cursor lands right after the token ready to type — same as @path mentions.
 		const insertWithSpacing = insertValue.endsWith(']') ? insertValue + ' ' : insertValue;
 		insertTextAtSelection(textarea, insertWithSpacing);
+	});
+}
+
+function setupPasteCollapse(textarea: HTMLTextAreaElement, registerPaste: (content: string) => string) {
+	textarea.addEventListener('paste', (event: ClipboardEvent) => {
+		const clipboardData = event.clipboardData;
+		if (!clipboardData) {
+			return;
+		}
+
+		// Real image files are the image handler's job.
+		const hasImageFile = Array.from(clipboardData.items).some(
+			(item) => item.kind === 'file' && item.type.startsWith('image/')
+		);
+		if (hasImageFile) {
+			return;
+		}
+
+		const pastedText = clipboardData.getData('text/plain');
+		if (!shouldCollapsePaste(pastedText)) {
+			return;
+		}
+
+		event.preventDefault();
+		const marker = registerPaste(pastedText);
+		// Trailing space so the cursor lands ready to keep typing, like @mentions.
+		insertTextAtSelection(textarea, marker + ' ');
 	});
 }
 
@@ -818,7 +1198,7 @@ function updatePromptImageHighlight(
   highlight.scrollLeft = textarea.scrollLeft;
 }
 
-type TokenKind = 'image' | 'mention' | 'mention-folder' | 'misspelled' | 'plain';
+type TokenKind = 'image' | 'mention' | 'mention-folder' | 'paste-code' | 'paste-text' | 'misspelled' | 'plain';
 
 function buildPromptHighlightNodes(text: string, selStart: number = -1, selEnd: number = -1, spellIssues: SpellIssue[] = []): Node[] {
   if (!text) {
@@ -836,6 +1216,11 @@ function buildPromptHighlightNodes(text: string, selStart: number = -1, selEnd: 
   for (const match of text.matchAll(/\[Image #(\d+)\]/g)) {
     tokens.push({ start: match.index ?? 0, end: (match.index ?? 0) + match[0].length, kind: 'image' });
   }
+  // Collapsed-paste markers: [Code #1 +22 lines] (green) / [Text #2 +5 lines] (fuchsia)
+  for (const match of text.matchAll(/\[(Code|Text) #\d+ \+\d+ lines?\]/g)) {
+    const kind: TokenKind = match[1] === 'Code' ? 'paste-code' : 'paste-text';
+    tokens.push({ start: match.index ?? 0, end: (match.index ?? 0) + match[0].length, kind });
+  }
   // @mention: '@' followed by any non-whitespace chars, must be preceded by whitespace or start of string
   for (const match of text.matchAll(/(?<=^|\s)@\S+/g)) {
     const kind: TokenKind = match[0].endsWith('/') ? 'mention-folder' : 'mention';
@@ -848,7 +1233,7 @@ function buildPromptHighlightNodes(text: string, selStart: number = -1, selEnd: 
     }
   }
   // Image/mention tokens take priority over misspelled ones when ranges collide.
-  const tokenPriority: Record<TokenKind, number> = { image: 0, mention: 0, 'mention-folder': 0, misspelled: 1, plain: 2 };
+  const tokenPriority: Record<TokenKind, number> = { image: 0, mention: 0, 'mention-folder': 0, 'paste-code': 0, 'paste-text': 0, misspelled: 1, plain: 2 };
   tokens.sort((a, b) => a.start - b.start || tokenPriority[a.kind] - tokenPriority[b.kind]);
 
   for (const token of tokens) {
@@ -894,6 +1279,8 @@ function appendSegment(
   const cssClass = kind === 'image' ? 'prompt-image-marker'
                  : kind === 'mention' ? 'prompt-mention'
                  : kind === 'mention-folder' ? 'prompt-mention-folder'
+                 : kind === 'paste-code' ? 'prompt-paste-marker prompt-paste-code'
+                 : kind === 'paste-text' ? 'prompt-paste-marker prompt-paste-text'
                  : kind === 'misspelled' ? 'prompt-misspelled'
                  : 'plain';
 

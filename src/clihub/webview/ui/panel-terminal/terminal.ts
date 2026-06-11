@@ -3,7 +3,9 @@ import { Terminal } from '@xterm/xterm';
 import { createTabController, type CliAgentIcon, type CliAgentOption, type CliSessionSummary } from '../panel-tab/tab';
 import { createCliCreateMessage, type AgentLaunchGuardMessage } from './agent-safety/agent-launch-guard';
 import { createToolsController } from './tools-cli-ui/tools';
+import { detectModelName } from '../../core/terminal-cli/model-detect';
 import type { ImageAttachment, PromptTranslateRequest, PromptTranslateResult, FileMentionEntry, SpellIssue } from '../../core/tools-cli-core/prompt';
+import type { VoiceState } from '../../core/tools-cli-core/modal-voice/voice-types';
 
 type VsCodeApi = {
 	postMessage: (message: ClientMessage) => void;
@@ -18,8 +20,12 @@ type ClientMessage =
 	| { type: 'cli.close'; sessionId: string }
 	| { type: 'prompt.translate'; id: string; text: string; from: string; to: string }
 	| { type: 'prompt.prepare'; id: string; text: string; attachments: ImageAttachment[] }
-	| { type: 'prompt.spellcheck'; id: string; text: string }
-	| { type: 'workspace.listFiles'; id: string };
+	| { type: 'prompt.spellcheck'; id: string; text: string; strict: boolean }
+	| { type: 'workspace.listFiles'; id: string }
+	| { type: 'workspace.listSkills'; id: string }
+	| { type: 'voice.speak'; text: string }
+	| { type: 'voice.stop' }
+	| { type: 'voice.query' };
 
 type CliSession = CliSessionSummary & {
 	commandLine: string;
@@ -41,7 +47,9 @@ type ServerMessage =
 	| { type: 'prompt.prepared'; id: string; text: string }
 	| { type: 'prompt.prepareError'; id: string; message: string }
 	| { type: 'prompt.spellResult'; id: string; issues: SpellIssue[] }
-	| { type: 'workspace.files'; id: string; files: FileMentionEntry[] };
+	| { type: 'workspace.files'; id: string; files: FileMentionEntry[] }
+	| { type: 'workspace.skills'; id: string; skills: string[] }
+	| { type: 'voice.state'; state: VoiceState; message?: string };
 
 type TerminalView = {
 	terminal: Terminal;
@@ -215,10 +223,12 @@ const translatePrompt = (request: PromptTranslateRequest): Promise<PromptTransla
 	const id = `prompt-translate-${nextPromptTranslationId++}`;
 
 	return new Promise((resolve, reject) => {
+		// Generous ceiling: long selections fan out into many sequential
+		// provider requests on the host (450-byte chunks on MyMemory).
 		const timeout = window.setTimeout(() => {
 			pendingPromptTranslations.delete(id);
 			reject(new Error('Translation timed out.'));
-		}, 20000);
+		}, 60000);
 
 		pendingPromptTranslations.set(id, { resolve, reject, timeout });
 		vscode.postMessage({
@@ -229,6 +239,31 @@ const translatePrompt = (request: PromptTranslateRequest): Promise<PromptTransla
 			to: request.to,
 		});
 	});
+};
+
+// Voice playback runs in the extension host (Piper TTS, shared with the ATM
+// extension). The webview fires commands and mirrors broadcast state.
+let voiceStateListener: ((state: VoiceState, message?: string) => void) | undefined;
+
+const speakText = (text: string) => {
+	vscode.postMessage({ type: 'voice.speak', text });
+};
+
+const stopSpeech = () => {
+	vscode.postMessage({ type: 'voice.stop' });
+};
+
+const queryVoiceState = () => {
+	vscode.postMessage({ type: 'voice.query' });
+};
+
+const onVoiceState = (listener: (state: VoiceState, message?: string) => void) => {
+	voiceStateListener = listener;
+	return () => {
+		if (voiceStateListener === listener) {
+			voiceStateListener = undefined;
+		}
+	};
 };
 
 const preparePromptWithAttachments = (text: string, attachments: ImageAttachment[]): Promise<string> => {
@@ -273,10 +308,28 @@ const requestWorkspaceFiles = (): Promise<FileMentionEntry[]> => {
 	});
 };
 
+const pendingWorkspaceSkills = new Map<string, (skills: string[]) => void>();
+let nextWorkspaceSkillsId = 1;
+
+const requestWorkspaceSkills = (): Promise<string[]> => {
+	const id = `ws-skills-${nextWorkspaceSkillsId++}`;
+	return new Promise((resolve) => {
+		const timeout = window.setTimeout(() => {
+			pendingWorkspaceSkills.delete(id);
+			resolve([]);
+		}, 5000);
+		pendingWorkspaceSkills.set(id, (skills) => {
+			clearTimeout(timeout);
+			resolve(skills);
+		});
+		vscode.postMessage({ type: 'workspace.listSkills', id });
+	});
+};
+
 const pendingSpellchecks = new Map<string, (issues: SpellIssue[]) => void>();
 let nextSpellcheckId = 1;
 
-const requestSpellcheck = (text: string): Promise<SpellIssue[]> => {
+const requestSpellcheck = (text: string, strict: boolean): Promise<SpellIssue[]> => {
 	const id = `spell-${nextSpellcheckId++}`;
 	return new Promise((resolve) => {
 		const timeout = window.setTimeout(() => {
@@ -287,7 +340,7 @@ const requestSpellcheck = (text: string): Promise<SpellIssue[]> => {
 			clearTimeout(timeout);
 			resolve(issues);
 		});
-		vscode.postMessage({ type: 'prompt.spellcheck', id, text });
+		vscode.postMessage({ type: 'prompt.spellcheck', id, text, strict });
 	});
 };
 
@@ -329,20 +382,63 @@ const toolsController = layoutRight
 	? createToolsController({
 			container: layoutRight,
 			getActiveSessionId: () => activeSessionId,
-			sendToActiveSession: (text: string) => {
+			getActiveModelName: () => {
+				if (!activeSessionId) {
+					return undefined;
+				}
+				const session = sessions.get(activeSessionId);
+				if (!session) {
+					return undefined;
+				}
+				return detectModelName(getAgentSlug(session.label), session.buffer);
+			},
+			sendToActiveSession: (text: string, options?: { paste?: boolean; submit?: boolean }) => {
 				if (!activeSessionId) {
 					return;
 				}
-				const session = sessions.get(activeSessionId);
+				const sessionId = activeSessionId;
+				const session = sessions.get(sessionId);
 				if (session?.status !== 'running') {
 					return;
 				}
-				vscode.postMessage({ type: 'cli.input', sessionId: activeSessionId, data: text });
+				const view = terminals.get(sessionId);
+				let data = text;
+				// Frame pasted text in bracketed-paste markers when the CLI has
+				// enabled that mode (xterm tracks DECSET 2004 per terminal). TUI
+				// CLIs rely on this to insert multi-char input cleanly; without it
+				// some (e.g. Copilot) garble or drop chunked input entirely.
+				if (options?.paste && view?.terminal.modes.bracketedPasteMode) {
+					data = `\x1b[200~${text}\x1b[201~`;
+				}
+				// CLIs that requested focus reporting (DECSET 1004) may ignore key
+				// input while the terminal reports itself unfocused — and it does
+				// while the user types in the prompt modal. Announce focus-in so the
+				// submit registers; the real focus events keep flowing as usual.
+				if (options?.submit && view?.terminal.modes.sendFocusMode) {
+					data = `\x1b[I${data}`;
+				}
+				vscode.postMessage({ type: 'cli.input', sessionId, data });
+				if (options?.submit) {
+					// Enter must arrive as its own write or TUI CLIs treat it as part
+					// of the paste. Copilot digests pastes noticeably slower than the
+					// rest, so it gets a longer pause before the keypress.
+					const delay = getAgentSlug(session.label) === 'copilot' ? 750 : 150;
+					setTimeout(() => {
+						if (sessions.get(sessionId)?.status === 'running') {
+							vscode.postMessage({ type: 'cli.input', sessionId, data: '\r' });
+						}
+					}, delay);
+				}
 			},
 			translatePrompt,
 			preparePromptWithAttachments,
 			requestWorkspaceFiles,
+			requestWorkspaceSkills,
 			requestSpellcheck,
+			speakText,
+			stopSpeech,
+			queryVoiceState,
+			onVoiceState,
 			getTerminalSelection: () => {
 				if (!activeSessionId) {
 					return '';
@@ -887,6 +983,11 @@ window.addEventListener('message', (event: MessageEvent<ServerMessage>) => {
 		return;
 	}
 
+	if (message.type === 'voice.state') {
+		voiceStateListener?.(message.state, message.message);
+		return;
+	}
+
 	if (message.type === 'prompt.translationError') {
 		rejectPromptTranslation(message);
 		return;
@@ -916,6 +1017,15 @@ window.addEventListener('message', (event: MessageEvent<ServerMessage>) => {
 		if (handler) {
 			pendingWorkspaceFiles.delete(message.id);
 			handler(message.files);
+		}
+		return;
+	}
+
+	if (message.type === 'workspace.skills') {
+		const handler = pendingWorkspaceSkills.get(message.id);
+		if (handler) {
+			pendingWorkspaceSkills.delete(message.id);
+			handler(message.skills);
 		}
 		return;
 	}

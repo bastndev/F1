@@ -1,6 +1,7 @@
 import { mountKeymapsPanel } from './modal-keymaps/keymaps';
 import { mountPromptPanel } from './modal-prompt/prompt';
 import type { ImageAttachment, PromptTranslateRequest, PromptTranslateResult, FileMentionEntry, SpellIssue } from '../../../core/tools-cli-core/prompt';
+import type { VoiceState } from '../../../core/tools-cli-core/modal-voice/voice-types';
 import { mountTranslatorPanel } from './modal-translator/translator';
 
 export type ToolId = 'translate' | 'keymaps' | 'prompt';
@@ -8,24 +9,36 @@ export type ToolId = 'translate' | 'keymaps' | 'prompt';
 export type ToolContext = {
 	close: () => void;
 	getActiveSessionId?: () => string | undefined;
-	sendToActiveSession?: (text: string) => void;
+	getActiveModelName?: () => string | undefined;
+	sendToActiveSession?: (text: string, options?: { paste?: boolean; submit?: boolean }) => void;
 	translatePrompt?: (request: PromptTranslateRequest) => Promise<PromptTranslateResult>;
 	getTerminalSelection?: () => string;
 	preparePromptWithAttachments?: (text: string, attachments: ImageAttachment[]) => Promise<string>;
 	requestWorkspaceFiles?: () => Promise<FileMentionEntry[]>;
-	requestSpellcheck?: (text: string) => Promise<SpellIssue[]>;
+	requestWorkspaceSkills?: () => Promise<string[]>;
+	requestSpellcheck?: (text: string, strict: boolean) => Promise<SpellIssue[]>;
+	speakText?: (text: string) => void;
+	stopSpeech?: () => void;
+	queryVoiceState?: () => void;
+	onVoiceState?: (listener: (state: VoiceState, message?: string) => void) => () => void;
 };
 
 type ToolMount = (host: HTMLElement, context: ToolContext) => void;
 export type ToolsControllerOptions = {
 	container: HTMLElement;
 	getActiveSessionId?: () => string | undefined;
-	sendToActiveSession?: (text: string) => void;
+	getActiveModelName?: () => string | undefined;
+	sendToActiveSession?: (text: string, options?: { paste?: boolean; submit?: boolean }) => void;
 	translatePrompt?: (request: PromptTranslateRequest) => Promise<PromptTranslateResult>;
 	getTerminalSelection?: () => string;
 	preparePromptWithAttachments?: (text: string, attachments: ImageAttachment[]) => Promise<string>;
 	requestWorkspaceFiles?: () => Promise<FileMentionEntry[]>;
-	requestSpellcheck?: (text: string) => Promise<SpellIssue[]>;
+	requestWorkspaceSkills?: () => Promise<string[]>;
+	requestSpellcheck?: (text: string, strict: boolean) => Promise<SpellIssue[]>;
+	speakText?: (text: string) => void;
+	stopSpeech?: () => void;
+	queryVoiceState?: () => void;
+	onVoiceState?: (listener: (state: VoiceState, message?: string) => void) => () => void;
 };
 
 const modalId = 'cli-tools-modal';
@@ -47,12 +60,18 @@ const toolMounts: Record<ToolId, ToolMount> = {
 	export const createToolsController = ({
 		container,
 		getActiveSessionId,
+		getActiveModelName,
 		sendToActiveSession,
 		translatePrompt,
 		getTerminalSelection,
 		preparePromptWithAttachments,
 		requestWorkspaceFiles,
-		requestSpellcheck
+		requestWorkspaceSkills,
+		requestSpellcheck,
+		speakText,
+		stopSpeech,
+		queryVoiceState,
+		onVoiceState
 	}: ToolsControllerOptions) => {
 		let activeModal: HTMLElement | null = null;
 		let currentTool: ToolId | null = null;
@@ -113,12 +132,18 @@ const toolMounts: Record<ToolId, ToolMount> = {
 				toolMounts[tool](host, {
 					close,
 					getActiveSessionId,
+					getActiveModelName,
 					sendToActiveSession,
 					translatePrompt,
 					getTerminalSelection,
 					preparePromptWithAttachments,
 					requestWorkspaceFiles,
-					requestSpellcheck
+					requestWorkspaceSkills,
+					requestSpellcheck,
+					speakText,
+					stopSpeech,
+					queryVoiceState,
+					onVoiceState
 				});
 
 		container.append(modal);
