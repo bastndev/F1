@@ -218,10 +218,12 @@ const translatePrompt = (request: PromptTranslateRequest): Promise<PromptTransla
 	const id = `prompt-translate-${nextPromptTranslationId++}`;
 
 	return new Promise((resolve, reject) => {
+		// Generous ceiling: long selections fan out into many sequential
+		// provider requests on the host (450-byte chunks on MyMemory).
 		const timeout = window.setTimeout(() => {
 			pendingPromptTranslations.delete(id);
 			reject(new Error('Translation timed out.'));
-		}, 20000);
+		}, 60000);
 
 		pendingPromptTranslations.set(id, { resolve, reject, timeout });
 		vscode.postMessage({

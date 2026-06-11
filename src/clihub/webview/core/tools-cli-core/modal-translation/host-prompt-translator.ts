@@ -9,9 +9,12 @@ const providerNames: Record<PromptTranslationProviderId, string> = {
 	googleUnofficial: 'Google Translate',
 };
 
-const providerOrder: PromptTranslationProviderId[] = ['myMemory', 'googleUnofficial'];
-const maxTextLength = 4000;
+const maxTextLength = 20000;
 const myMemoryChunkBytes = 450;
+const googleChunkBytes = 1500;
+// Above this size MyMemory needs dozens of 450-byte requests, so prefer
+// Google (few large chunks, much faster) and keep MyMemory as fallback.
+const longTextThresholdChars = 900;
 const requestTimeoutMs = 10000;
 const rateLimitCooldownMs = 2 * 60 * 1000;
 const providerCooldownUntil = new Map<PromptTranslationProviderId, number>();
@@ -58,6 +61,10 @@ export async function translatePromptToEnglish(request: PromptTranslationRequest
 	if (cached) {
 		return cached;
 	}
+
+	const providerOrder: PromptTranslationProviderId[] = cleanText.length > longTextThresholdChars
+		? ['googleUnofficial', 'myMemory']
+		: ['myMemory', 'googleUnofficial'];
 
 	const errors: ProviderError[] = [];
 	for (const providerId of providerOrder) {
@@ -107,13 +114,13 @@ async function translateWithMyMemory(
 	to: string,
 	signal?: AbortSignal,
 ): Promise<PromptTranslationResult> {
-	const chunks = splitByUtf8Bytes(text, myMemoryChunkBytes);
+	const chunks = chunkTextForTranslation(text, myMemoryChunkBytes);
 	const translatedChunks: string[] = [];
 
 	for (const chunk of chunks) {
 		throwIfAborted(signal);
 		const params = new URLSearchParams({
-			q: chunk,
+			q: chunk.text,
 			langpair: `${normalizeMyMemoryLanguage(from)}|${normalizeMyMemoryLanguage(to)}`,
 			mt: '1',
 		});
@@ -136,7 +143,7 @@ async function translateWithMyMemory(
 			throw new ProviderError('myMemory', providerNames.myMemory, 'failed', response.responseDetails || 'MyMemory returned an empty response.');
 		}
 
-		translatedChunks.push(decodeHtmlEntities(response.responseData.translatedText));
+		translatedChunks.push(chunk.prefix + decodeHtmlEntities(response.responseData.translatedText));
 	}
 
 	return {
@@ -152,20 +159,28 @@ async function translateWithGoogleUnofficial(
 	to: string,
 	signal?: AbortSignal,
 ): Promise<PromptTranslationResult> {
-	const params = new URLSearchParams({
-		client: 'gtx',
-		sl: from === 'auto' ? 'auto' : from,
-		tl: to,
-		dt: 't',
-		q: text,
-	});
-	const response = await requestJson<unknown>(
-		`https://translate.googleapis.com/translate_a/single?${params.toString()}`,
-		signal
-	);
+	const chunks = chunkTextForTranslation(text, googleChunkBytes);
+	const translatedChunks: string[] = [];
+
+	for (const chunk of chunks) {
+		throwIfAborted(signal);
+		const params = new URLSearchParams({
+			client: 'gtx',
+			sl: from === 'auto' ? 'auto' : from,
+			tl: to,
+			dt: 't',
+			q: chunk.text,
+		});
+		const response = await requestJson<unknown>(
+			`https://translate.googleapis.com/translate_a/single?${params.toString()}`,
+			signal
+		);
+
+		translatedChunks.push(chunk.prefix + parseGoogleTranslateResponse(response));
+	}
 
 	return {
-		text: parseGoogleTranslateResponse(response),
+		text: translatedChunks.join(''),
 		providerId: 'googleUnofficial',
 		providerName: providerNames.googleUnofficial,
 	};
@@ -338,6 +353,76 @@ function normalizeMyMemoryLanguage(code: string): string {
 		return 'pt-BR';
 	}
 	return code;
+}
+
+type TextChunk = {
+	text: string;
+	// Paragraph separator that preceded this chunk in the original text.
+	// Kept out of the provider request and re-attached on reassembly, so
+	// paragraph structure survives translation untouched.
+	prefix: string;
+};
+
+function chunkTextForTranslation(text: string, maxBytes: number): TextChunk[] {
+	if (Buffer.byteLength(text, 'utf8') <= maxBytes) {
+		return [{ text, prefix: '' }];
+	}
+
+	// Paragraph units with the blank-line separator that precedes each one.
+	const parts = text.split(/(\n[ \t]*\n[\s]*)/);
+	const units: { sep: string; body: string }[] = [];
+	let pendingSep = '';
+	for (let i = 0; i < parts.length; i += 1) {
+		if (i % 2 === 1) {
+			pendingSep += parts[i];
+			continue;
+		}
+		if (parts[i]) {
+			units.push({ sep: pendingSep, body: parts[i] });
+			pendingSep = '';
+		}
+	}
+
+	const chunks: TextChunk[] = [];
+	let currentText = '';
+	let currentPrefix = '';
+
+	const flush = () => {
+		if (currentText) {
+			chunks.push({ text: currentText, prefix: currentPrefix });
+			currentText = '';
+			currentPrefix = '';
+		}
+	};
+
+	for (const unit of units) {
+		if (Buffer.byteLength(unit.body, 'utf8') > maxBytes) {
+			flush();
+			const pieces = splitByUtf8Bytes(unit.body, maxBytes);
+			pieces.forEach((piece, index) => {
+				chunks.push({ text: piece, prefix: index === 0 ? unit.sep : '' });
+			});
+			continue;
+		}
+
+		if (!currentText) {
+			currentPrefix = unit.sep;
+			currentText = unit.body;
+			continue;
+		}
+
+		const joined = `${currentText}${unit.sep}${unit.body}`;
+		if (Buffer.byteLength(joined, 'utf8') > maxBytes) {
+			flush();
+			currentPrefix = unit.sep;
+			currentText = unit.body;
+		} else {
+			currentText = joined;
+		}
+	}
+
+	flush();
+	return chunks;
 }
 
 function splitByUtf8Bytes(text: string, maxBytes: number): string[] {

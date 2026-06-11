@@ -49,6 +49,24 @@ function initializeTranslator(host: HTMLElement, context: ToolContext) {
 		}
 	};
 
+	// Translate via the extension host (chunked providers, cache, no CORS —
+	// handles long multi-paragraph selections). The direct browser providers
+	// remain only as a fallback if the host route is unavailable.
+	const translateToSpanish = async (text: string): Promise<{ text: string; provider?: string }> => {
+		if (context.translatePrompt) {
+			try {
+				const result = await context.translatePrompt({ text, from: 'en', to: 'es' });
+				if (result.text.trim()) {
+					return { text: result.text, provider: result.provider };
+				}
+			} catch (err) {
+				console.warn('[Translator] Host translation failed, trying browser providers:', err);
+			}
+		}
+
+		return { text: await translateEnToSpanish(text) };
+	};
+
 	const performTranslation = async () => {
 		const extracted = extractTextToTranslate(context);
 		if (!extracted) {
@@ -79,9 +97,9 @@ function initializeTranslator(host: HTMLElement, context: ToolContext) {
 		setStatus('translating…');
 
 		try {
-			const spanish = await translateEnToSpanish(extracted);
-			revealText(textEl, spanish || extracted);
-			setStatus('translated');
+			const result = await translateToSpanish(extracted);
+			revealText(textEl, result.text || extracted);
+			setStatus(result.provider ? `translated · ${result.provider.toLowerCase()}` : 'translated');
 		} catch (err) {
 			console.error('[Translator] EN->ES failed:', err);
 			textEl.textContent = extracted;
