@@ -4,6 +4,7 @@ import loadingStyles from '../../../styles/skeleton/translator-loading.css';
 import type { ToolContext } from '../tools';
 import { translateEnToSpanish } from '../../../../core/tools-cli-core/modal-translation/browser-terminal-translator';
 import { renderMarkdownLite } from './markdown-lite';
+import { segmentTerminalSelection } from './terminal-text';
 
 const stylesId = 'cli-translator-panel-styles';
 
@@ -103,10 +104,35 @@ function initializeTranslator(host: HTMLElement, context: ToolContext) {
 		setStatus('translating…');
 
 		try {
-			const result = await translateToSpanish(extracted);
-			copyText = result.text || extracted;
-			revealText(textEl, copyText);
-			setStatus(result.provider ? `translated · ${result.provider.toLowerCase()}` : 'translated');
+			// Split the selection into translatable prose and verbatim frames
+			// (tree diagrams). Box tables arrive as pipe markdown inside prose;
+			// trees skip translation entirely and render as monospace blocks.
+			const segments = segmentTerminalSelection(extracted);
+			if (!segments.length) {
+				segments.push({ kind: 'prose', content: extracted });
+			}
+
+			const renderedParts: string[] = [];
+			const copyParts: string[] = [];
+			let provider: string | undefined;
+
+			for (const segment of segments) {
+				if (segment.kind === 'diagram') {
+					renderedParts.push(`\`\`\`tree\n${segment.content}\n\`\`\``);
+					copyParts.push(segment.content);
+					continue;
+				}
+
+				const result = await translateToSpanish(segment.content);
+				const value = result.text || segment.content;
+				provider ??= result.provider;
+				renderedParts.push(value);
+				copyParts.push(value);
+			}
+
+			copyText = copyParts.join('\n\n');
+			revealText(textEl, renderedParts.join('\n\n'));
+			setStatus(provider ? `translated · ${provider.toLowerCase()}` : 'translated');
 		} catch (err) {
 			console.error('[Translator] EN->ES failed:', err);
 			copyText = extracted;

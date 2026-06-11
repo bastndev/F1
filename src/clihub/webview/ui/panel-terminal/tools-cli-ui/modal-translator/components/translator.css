@@ -367,6 +367,51 @@
 	padding: 0;
 }
 
+.translator-text .md-table {
+	width: 100%;
+	border-collapse: collapse;
+	margin: 2px 0 14px;
+	font-size: 12px;
+	line-height: 1.5;
+}
+
+.translator-text .md-table th {
+	text-align: left;
+	font-weight: 600;
+	color: var(--agent-accent, #AFA9EC);
+	padding: 5px 12px 7px 0;
+	border-bottom: 1px solid color-mix(in srgb, var(--agent-accent, #AFA9EC) 35%, transparent);
+	letter-spacing: 0.02em;
+}
+
+.translator-text .md-table td {
+	padding: 6px 12px 6px 0;
+	border-bottom: 0.5px solid var(--vscode-editorGroup-border, rgba(128, 128, 128, 0.18));
+	vertical-align: top;
+}
+
+.translator-text .md-table tr:last-child td {
+	border-bottom: none;
+}
+
+.translator-text .md-table td:first-child,
+.translator-text .md-table th:first-child {
+	white-space: nowrap;
+	color: var(--vscode-foreground);
+}
+
+/* Tree / architecture diagrams — verbatim, framed by a fine accent line */
+.translator-text .md-pre.md-tree {
+	background: transparent;
+	border: none;
+	border-left: 2px solid color-mix(in srgb, var(--agent-accent, #AFA9EC) 35%, transparent);
+	border-radius: 0;
+	padding: 2px 0 2px 14px;
+	color: var(--vscode-foreground);
+	line-height: 1.6;
+	overflow-x: auto;
+}
+
 .translator-text .md-quote {
 	margin: 0 0 10px;
 	padding: 2px 0 2px 10px;

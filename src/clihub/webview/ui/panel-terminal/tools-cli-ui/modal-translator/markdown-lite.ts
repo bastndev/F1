@@ -46,7 +46,9 @@ export function renderMarkdownLite(markdown: string): string {
 	let listStart = 1;
 	let listItems: string[] = [];
 	let inCode = false;
+	let codeLang = '';
 	let codeLines: string[] = [];
+	let tableRows: string[] = [];
 
 	const flushParagraph = () => {
 		if (paragraph.length) {
@@ -65,14 +67,41 @@ export function renderMarkdownLite(markdown: string): string {
 	};
 
 	const flushCode = () => {
-		html.push(`<pre class="md-pre"><code>${escapeHtml(codeLines.join('\n'))}</code></pre>`);
+		const treeClass = codeLang === 'tree' ? ' md-tree' : '';
+		html.push(`<pre class="md-pre${treeClass}"><code>${escapeHtml(codeLines.join('\n'))}</code></pre>`);
 		inCode = false;
+		codeLang = '';
 		codeLines = [];
+	};
+
+	const flushTable = () => {
+		if (!tableRows.length) {
+			return;
+		}
+
+		const parseRow = (row: string) =>
+			row.replace(/^\|/, '').replace(/\|$/, '').split('|').map((cell) => cell.trim());
+		const rows = tableRows.map(parseRow);
+		tableRows = [];
+
+		let header: string[] | null = null;
+		let data = rows;
+		if (rows.length >= 2 && rows[1].every((cell) => !cell || /^:?-{2,}:?$/.test(cell))) {
+			header = rows[0];
+			data = rows.slice(2);
+		}
+
+		const cells = (tag: 'th' | 'td', row: string[]) =>
+			row.map((cell) => `<${tag}>${renderInline(cell)}</${tag}>`).join('');
+		const head = header ? `<thead><tr>${cells('th', header)}</tr></thead>` : '';
+		const body = data.map((row) => `<tr>${cells('td', row)}</tr>`).join('');
+		html.push(`<table class="md-table">${head}<tbody>${body}</tbody></table>`);
 	};
 
 	const flushAll = () => {
 		flushParagraph();
 		flushList();
+		flushTable();
 	};
 
 	for (const raw of lines) {
@@ -90,8 +119,17 @@ export function renderMarkdownLite(markdown: string): string {
 		if (trimmed.startsWith('```')) {
 			flushAll();
 			inCode = true;
+			codeLang = (trimmed.match(/^```(\w+)/)?.[1] || '').toLowerCase();
 			continue;
 		}
+
+		if (trimmed.startsWith('|') && (trimmed.match(/\|/g) || []).length >= 2) {
+			flushParagraph();
+			flushList();
+			tableRows.push(trimmed);
+			continue;
+		}
+		flushTable();
 
 		if (!trimmed) {
 			flushAll();
