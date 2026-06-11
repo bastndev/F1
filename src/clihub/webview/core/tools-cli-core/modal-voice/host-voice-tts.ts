@@ -468,8 +468,16 @@ export function stopVoicePlayback(): void {
  * Speaks the given text with the resolved Piper resources. Resolves when
  * playback finishes (or is stopped by the user); rejects on process errors.
  * Callers obtain `resources` via ensureSpanishVoice() first.
+ *
+ * `onAudioStart` fires when the first synthesized bytes reach the player —
+ * i.e. when sound actually becomes audible, seconds after spawn for long
+ * texts. UIs should switch to their "speaking" visuals then, not earlier.
  */
-export async function playSpanishText(resources: VoiceResources, text: string): Promise<void> {
+export async function playSpanishText(
+	resources: VoiceResources,
+	text: string,
+	onAudioStart?: () => void,
+): Promise<void> {
 	const cleaned = text.trim();
 	if (!cleaned) {
 		throw new Error('No text provided');
@@ -507,6 +515,12 @@ export async function playSpanishText(resources: VoiceResources, text: string): 
 	const noop = () => undefined;
 	piper.stdout.on('error', noop);
 	player.stdin.on('error', noop);
+
+	piper.stdout.once('data', () => {
+		if (!stoppedByUser) {
+			onAudioStart?.();
+		}
+	});
 
 	piper.stdout.pipe(player.stdin);
 	piper.stdin.write(cleaned);

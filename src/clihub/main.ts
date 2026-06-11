@@ -367,8 +367,11 @@ export class CliHubViewProvider implements vscode.WebviewViewProvider, vscode.Di
 			// Reuses ATM's piper engine/voice when installed; downloads into
 			// F1's globalStorage (with a progress notification) otherwise.
 			const resources = await ensureSpanishVoice(this._extensionContext);
-			await post('speaking');
-			await playSpanishText(resources, text);
+			// 'preparing' holds through synthesis; 'speaking' fires only once
+			// the first audio bytes flow, so the UI animates with the sound.
+			await playSpanishText(resources, text, () => {
+				void post('speaking');
+			});
 			await post('idle');
 		} catch (error) {
 			if (wasVoiceStoppedByUser()) {

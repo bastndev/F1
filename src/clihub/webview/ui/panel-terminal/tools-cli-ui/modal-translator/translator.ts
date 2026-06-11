@@ -76,7 +76,10 @@ function initializeTranslator(host: HTMLElement, context: ToolContext) {
 
 	// Copy/Listen start disabled (gray) and only light up — softly, via the
 	// button transition — once there is a translation result to act on.
+	// hasResult also keeps voice.state resyncs from re-enabling Listen early.
+	let hasResult = false;
 	const enableResultActions = () => {
+		hasResult = true;
 		if (copyBtn) {
 			copyBtn.disabled = false;
 		}
@@ -236,7 +239,9 @@ function initializeTranslator(host: HTMLElement, context: ToolContext) {
 			isSpeaking = state === 'speaking';
 			speakBtn.classList.toggle('speaking', isSpeaking);
 			speakBtn.classList.toggle('is-preparing', state === 'preparing');
-			speakBtn.disabled = state === 'preparing';
+			// Stay disabled until something was translated, except while a
+			// playback from a previous open is running (so it can be stopped).
+			speakBtn.disabled = state === 'preparing' || (!hasResult && !isSpeaking);
 
 			const label = state === 'preparing' ? 'Preparing voice…' : isSpeaking ? 'Stop' : 'Listen';
 			speakBtn.title = label;
