@@ -25,7 +25,8 @@ type ClientMessage =
 	| { type: 'workspace.listSkills'; id: string }
 	| { type: 'voice.speak'; text: string }
 	| { type: 'voice.stop' }
-	| { type: 'voice.query' };
+	| { type: 'voice.query' }
+	| { type: 'clipboard.read'; id: string };
 
 type CliSession = CliSessionSummary & {
 	commandLine: string;
@@ -49,7 +50,8 @@ type ServerMessage =
 	| { type: 'prompt.spellResult'; id: string; issues: SpellIssue[] }
 	| { type: 'workspace.files'; id: string; files: FileMentionEntry[] }
 	| { type: 'workspace.skills'; id: string; skills: string[] }
-	| { type: 'voice.state'; state: VoiceState; message?: string };
+	| { type: 'voice.state'; state: VoiceState; message?: string }
+	| { type: 'clipboard.text'; id: string; text: string };
 
 type TerminalView = {
 	terminal: Terminal;
@@ -326,6 +328,24 @@ const requestWorkspaceSkills = (): Promise<string[]> => {
 	});
 };
 
+const pendingClipboardReads = new Map<string, (text: string) => void>();
+let nextClipboardReadId = 1;
+
+const readClipboard = (): Promise<string> => {
+	const id = `clipboard-read-${nextClipboardReadId++}`;
+	return new Promise((resolve) => {
+		const timeout = window.setTimeout(() => {
+			pendingClipboardReads.delete(id);
+			resolve('');
+		}, 3000);
+		pendingClipboardReads.set(id, (text) => {
+			clearTimeout(timeout);
+			resolve(text);
+		});
+		vscode.postMessage({ type: 'clipboard.read', id });
+	});
+};
+
 const pendingSpellchecks = new Map<string, (issues: SpellIssue[]) => void>();
 let nextSpellcheckId = 1;
 
@@ -377,6 +397,66 @@ const openTranslatorFromTerminal = (sessionId: string) => {
 
 	toolsController.open('translate');
 };
+
+// ── Copy-to-translate ────────────────────────────────────────────────
+// TUI CLIs (Claude Code, OpenCode, Grok, Kilo…) enable mouse tracking, so
+// drags never become an xterm.js selection and the pointerup auto-open
+// above never fires. Those CLIs copy the highlighted text themselves —
+// through the pty with an OSC 52 sequence, or natively (xclip/wl-copy).
+// Both detection paths land here, mirroring the selection flow: remember
+// the text (Shift+F2 uses it as the selection fallback) and pop the
+// translator open.
+let lastCopiedText = '';
+
+const handleCopiedText = (text: string, sessionId?: string) => {
+	if (!text.trim()) {
+		return;
+	}
+	lastCopiedText = text;
+
+	if (!isPromptFilterEnabled || !toolsController) {
+		return;
+	}
+	if (sessionId && sessionId !== activeSessionId) {
+		return;
+	}
+	const session = activeSessionId ? sessions.get(activeSessionId) : undefined;
+	if (session?.status !== 'running') {
+		return;
+	}
+	// Never remount over an open modal (e.g. the user pressed Copy inside
+	// the translator itself, which also lands on the clipboard).
+	if (toolsController.isOpen()) {
+		return;
+	}
+	toolsController.open('translate');
+};
+
+// Fallback detector for CLIs that copy natively instead of via OSC 52:
+// watch the system clipboard while the panel is focused and the prompt
+// filter (light toggle) is on. The baseline re-arms on focus, so text
+// copied elsewhere in the IDE can never trigger the translator.
+let clipboardBaseline: string | undefined;
+
+window.addEventListener('focus', () => {
+	clipboardBaseline = undefined;
+});
+
+window.setInterval(() => {
+	if (!isPromptFilterEnabled || !document.hasFocus() || !activeSessionId) {
+		return;
+	}
+	void readClipboard().then((text) => {
+		if (clipboardBaseline === undefined) {
+			clipboardBaseline = text;
+			return;
+		}
+		if (text && text !== clipboardBaseline) {
+			clipboardBaseline = text;
+			handleCopiedText(text);
+		}
+	});
+}, 800);
 
 const toolsController = layoutRight
 	? createToolsController({
@@ -440,14 +520,11 @@ const toolsController = layoutRight
 			queryVoiceState,
 			onVoiceState,
 			getTerminalSelection: () => {
-				if (!activeSessionId) {
-					return '';
-				}
-				const view = terminals.get(activeSessionId);
-				if (!view) {
-					return '';
-				}
-				return view.terminal.hasSelection() ? view.terminal.getSelection() : '';
+				const view = activeSessionId ? terminals.get(activeSessionId) : undefined;
+				const selection = view?.terminal.hasSelection() ? view.terminal.getSelection() : '';
+				// TUI CLIs never produce an xterm selection — fall back to the
+				// text they copied (captured via OSC 52 or the clipboard watch).
+				return selection || lastCopiedText;
 			}
 		})
 	: undefined;
@@ -471,7 +548,8 @@ const tabController = createTabController({
 	},
 	onPromptFilterChange: (enabled) => {
 		isPromptFilterEnabled = enabled;
-	}
+	},
+	getOpenToolModal: () => toolsController?.getOpenTool() ?? null
 });
 
 const handleTerminalKey = (event: KeyboardEvent) => {
@@ -698,6 +776,30 @@ const createTerminalView = (session: CliSession) => {
 		theme: getTerminalTheme()
 	});
 	terminal.attachCustomKeyEventHandler(handleTerminalKey);
+
+	// TUI CLIs copy their internal selection with OSC 52, which xterm.js
+	// ignores by default. Honor the copy (write it to the real clipboard)
+	// and route it through the copy-to-translate flow.
+	terminal.parser.registerOscHandler(52, (data) => {
+		const separator = data.indexOf(';');
+		const payload = separator >= 0 ? data.slice(separator + 1) : data;
+		if (!payload || payload === '?') {
+			return true;
+		}
+		try {
+			const bytes = Uint8Array.from(atob(payload), (char) => char.charCodeAt(0));
+			const text = new TextDecoder().decode(bytes);
+			if (text) {
+				void navigator.clipboard.writeText(text);
+				clipboardBaseline = text; // keep the clipboard poll from double-firing
+				handleCopiedText(text, session.id);
+			}
+		} catch {
+			// Not a valid base64 copy payload — ignore.
+		}
+		return true;
+	});
+
 	const fitAddon = new FitAddon();
 	terminal.loadAddon(fitAddon);
 	terminal.open(pane);
@@ -985,6 +1087,15 @@ window.addEventListener('message', (event: MessageEvent<ServerMessage>) => {
 
 	if (message.type === 'voice.state') {
 		voiceStateListener?.(message.state, message.message);
+		return;
+	}
+
+	if (message.type === 'clipboard.text') {
+		const handler = pendingClipboardReads.get(message.id);
+		if (handler) {
+			pendingClipboardReads.delete(message.id);
+			handler(message.text);
+		}
 		return;
 	}
 

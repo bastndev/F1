@@ -48,6 +48,14 @@ const imagePathPattern =
 // Used by delete/arrow/caret handling so all marker types behave as single units.
 const atomicMarkerPattern = /\[(?:Image|Code|Text) #\d+[^\]]*\]/g;
 
+// Budget for the *effective* typed text — markers and @mentions are free, and
+// large pastes collapse into markers, so this only constrains hand-typed prose.
+// Kept well under the host translator's 20k hard cap so a send can never die
+// there mid-flight. Warn/danger track ~70% / ~90%.
+const promptCharLimit = 5000;
+const promptCharWarn = 3500;
+const promptCharDanger = 4500;
+
 // Draft state per CLI session, surviving modal close/Esc (a too-easy accident
 // while typing). Lives in module scope: the webview JS context persists while
 // the panel is open, and entries are keyed by session id so a draft dies with
@@ -693,7 +701,7 @@ function initRunButton(
 		// Activate only after a real word: 6+ chars OR first space (second word started)
 		const hasEnoughText = text.length >= 6 || text.includes(' ');
 		// Limit applies to the effective (typed) length — markers/@routes are free.
-		const overLimit = stripPromptTokens(textarea.value).length > 1500;
+		const overLimit = stripPromptTokens(textarea.value).length > promptCharLimit;
 		runBtn.disabled = !hasEnoughText || !hasSession || overLimit;
 	};
 
@@ -739,17 +747,16 @@ function updateCharCount(host: HTMLElement, textarea: HTMLTextAreaElement) {
 	// Tokens (images, pastes, @routes) don't spend prompt budget — they resolve
 	// outside the textarea and never go through translation.
 	const current = stripPromptTokens(textarea.value).length;
-	const max = 1500;
-	counter.textContent = `${current}/${max}`;
+	counter.textContent = `${current}/${promptCharLimit}`;
 
 	// Remove previous states
 	counter.classList.remove('warn', 'danger');
 
-	if (current >= 1350) {
-		// >90% — red + shake
+	if (current >= promptCharDanger) {
+		// red + shake
 		counter.classList.add('danger');
-	} else if (current >= 1050) {
-		// >70% — yellow warning
+	} else if (current >= promptCharWarn) {
+		// yellow warning
 		counter.classList.add('warn');
 	}
 }

@@ -31,6 +31,8 @@ type TabControllerOptions = {
 	onDismissToolModal?: () => void;
 	onOpenTool?: (tool: CliToolId) => void;
 	onPromptFilterChange?: (enabled: boolean) => void;
+	/** Which tool modal is currently open, if any (used to gate shortcuts). */
+	getOpenToolModal?: () => CliToolId | null;
 };
 
 const getRequiredElement = <T extends HTMLElement>(id: string) => {
@@ -269,6 +271,12 @@ export const createTabController = (options: TabControllerOptions) => {
 		}
 
 		if (matchesShortcut(event, 'toggleAgentPicker')) {
+			// While the user is typing in the Prompt or Translator modal, CapsLock
+			// is just CapsLock — it must not dismiss the modal or open the CLI list.
+			const openTool = options.getOpenToolModal?.() ?? null;
+			if (openTool === 'prompt' || openTool === 'translate') {
+				return false;
+			}
 			if (consumeShortcut(event, 'toggleAgentPicker')) {
 				toggleAgentPicker();
 				return true;

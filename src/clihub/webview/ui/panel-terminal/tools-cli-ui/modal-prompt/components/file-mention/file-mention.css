@@ -74,6 +74,12 @@
   font-size: 11.5px;
 }
 
+/* Characters matched by the fuzzy filter — shows why an entry surfaced */
+.fm-name .fm-match {
+  color: var(--agent-accent, #afa9ec);
+  font-weight: 700;
+}
+
 .fm-path {
   font-size: 10px;
   color: var(--vscode-descriptionForeground);
