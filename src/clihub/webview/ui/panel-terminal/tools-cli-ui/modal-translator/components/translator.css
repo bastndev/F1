@@ -551,17 +551,89 @@
 	box-shadow: none;
 }
 
+/* Icon-only copy button at the far right of the controls row */
+.translator-copy {
+	padding: 5px 7px;
+	justify-content: center;
+}
+
+.translator-copy svg,
+.translator-copy i {
+	width: 14px;
+	height: 14px;
+	font-size: 14px;
+	display: block;
+	transition: transform 0.2s cubic-bezier(0.34, 1.4, 0.64, 1);
+}
+
+.translator-copy:hover svg {
+	transform: scale(1.12) rotate(-4deg);
+}
+
+.translator-copy.copied,
+.translator-copy.copied:hover {
+	border-color: rgba(93, 202, 165, 0.5);
+	color: #5DCAA5;
+	background: rgba(93, 202, 165, 0.07);
+}
+
 .translator-speak {
 	border-color: rgba(93, 202, 165, 0.2);
 	color: #5DCAA5;
-	min-width: 82px;           /* fixed width so it doesn't shrink when text changes to "Stop" */
+	min-width: 82px;           /* fixed slot — the spectrum swaps in without resizing */
 	justify-content: center;
+	position: relative;
+	overflow: hidden;
 }
 
 .translator-speak:hover {
 	border-color: rgba(93, 202, 165, 0.5);
 	background: rgba(93, 202, 165, 0.06);
 	color: #5DCAA5;
+}
+
+.translator-speak .speak-idle {
+	display: flex;
+	align-items: center;
+	gap: 5px;
+	transition: opacity 0.18s ease, transform 0.22s ease;
+}
+
+/* Stop glyph revealed on hover while audio is playing */
+.translator-speak .speak-stop {
+	position: absolute;
+	inset: 0;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	opacity: 0;
+	transform: scale(0.7);
+	transition: opacity 0.18s ease, transform 0.22s ease;
+	pointer-events: none;
+}
+
+.translator-speak .speak-stop i {
+	font-size: 12px;
+}
+
+.translator-speak.speaking {
+	border-color: rgba(93, 202, 165, 0.5);
+	background: rgba(93, 202, 165, 0.07);
+	box-shadow: 0 0 0 3px rgba(93, 202, 165, 0.08);
+}
+
+.translator-speak.speaking .speak-idle {
+	opacity: 0;
+	transform: translateY(6px) scale(0.9);
+}
+
+.translator-speak.speaking:hover .speak-stop {
+	opacity: 1;
+	transform: scale(1);
+}
+
+.translator-speak.speaking:hover .translator-spectrum {
+	opacity: 0.18;
 }
 
 /* ── Voice selector ──────────────────────────────────────────────── */
@@ -614,13 +686,18 @@
 	background: color-mix(in srgb, var(--agent-accent, #AFA9EC) 8%, var(--vscode-input-background));
 }
 
-/* ── Audio spectrum ──────────────────────────────────────────────── */
+/* ── Audio spectrum — lives inside the Listen button, same slot ──── */
 .translator-spectrum {
+	position: absolute;
+	inset: 0;
 	display: flex;
 	align-items: center;
+	justify-content: center;
 	gap: 2.5px;
-	height: 20px;
-	padding: 0 2px;
+	opacity: 0;
+	transform: scale(0.6);
+	transition: opacity 0.2s ease, transform 0.25s cubic-bezier(0.34, 1.4, 0.64, 1);
+	pointer-events: none;
 }
 
 .translator-spectrum .bar {
@@ -631,7 +708,12 @@
 	transition: height 80ms linear, opacity 120ms ease;
 }
 
-.translator-spectrum.speaking .bar {
+.translator-speak.speaking .translator-spectrum {
+	opacity: 1;
+	transform: scale(1);
+}
+
+.translator-speak.speaking .translator-spectrum .bar {
 	opacity: 0.85;
 	animation: spectrum-bar 420ms ease-in-out infinite alternate;
 }

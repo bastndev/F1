@@ -189,10 +189,12 @@ function initializeTranslator(host: HTMLElement, context: ToolContext) {
 
 			try {
 				await navigator.clipboard.writeText(text);
-				const originalText = copyBtn.innerHTML;
-				copyBtn.innerHTML = `<i class="ti ti-check"></i> <span>Copied</span>`;
+				const originalHtml = copyBtn.innerHTML;
+				copyBtn.classList.add('copied');
+				copyBtn.innerHTML = `<i class="ti ti-check"></i>`;
 				setTimeout(() => {
-					copyBtn.innerHTML = originalText;
+					copyBtn.innerHTML = originalHtml;
+					copyBtn.classList.remove('copied');
 				}, 1400);
 			} catch {
 				console.log('Clipboard not available');
@@ -207,16 +209,14 @@ function initializeTranslator(host: HTMLElement, context: ToolContext) {
 	}
 
 	if (speakBtn && spectrum) {
+		// The spectrum lives inside the button and shares its slot: CSS swaps
+		// the idle label for the animated bars (and a stop glyph on hover).
 		speakBtn.addEventListener('click', () => {
 			isSpeaking = !isSpeaking;
-
-			if (isSpeaking) {
-				spectrum.classList.add('speaking');
-				speakBtn.innerHTML = `<i class="ti ti-player-stop"></i> <span>Stop</span>`;
-			} else {
-				spectrum.classList.remove('speaking');
-				speakBtn.innerHTML = `<i class="ti ti-volume-2"></i> <span>Listen</span>`;
-			}
+			speakBtn.classList.toggle('speaking', isSpeaking);
+			const label = isSpeaking ? 'Stop' : 'Listen';
+			speakBtn.title = label;
+			speakBtn.setAttribute('aria-label', label);
 		});
 	}
 }
