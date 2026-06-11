@@ -1,5 +1,6 @@
 import translatorStyles from './components/translator.css';
 import translatorHtml from './components/translator.html';
+import loadingStyles from '../../../styles/skeleton/translator-loading.css';
 import type { ToolContext } from '../tools';
 import { translateEnToSpanish } from '../../../../core/tools-cli-core/modal-translation/browser-terminal-translator';
 
@@ -12,7 +13,7 @@ const ensureStyles = () => {
 
 	const style = document.createElement('style');
 	style.id = stylesId;
-	style.textContent = translatorStyles;
+	style.textContent = `${translatorStyles}\n${loadingStyles}`;
 	document.head.append(style);
 };
 
@@ -39,6 +40,14 @@ function initializeTranslator(host: HTMLElement, context: ToolContext) {
 	const textEl = host.querySelector<HTMLElement>('#translatedText');
 	const modelEl = host.querySelector<HTMLElement>('#modelName');
 	const modalEl = host.querySelector<HTMLElement>('.translator-modal');
+	const bodyEl = host.querySelector<HTMLElement>('.translator-body');
+	const statusEl = host.querySelector<HTMLElement>('.translator-status');
+
+	const setStatus = (status: string) => {
+		if (statusEl) {
+			statusEl.textContent = status;
+		}
+	};
 
 	const performTranslation = async () => {
 		const extracted = extractTextToTranslate(context);
@@ -54,18 +63,38 @@ function initializeTranslator(host: HTMLElement, context: ToolContext) {
 			return;
 		}
 
+		// Freeze the body at its current height so swapping the text for the
+		// skeleton doesn't collapse the modal and snap it back on completion.
+		const lockedHeight = bodyEl?.offsetHeight ?? 0;
+		if (bodyEl) {
+			bodyEl.style.height = `${lockedHeight}px`;
+		}
+
+		if (translateBtn) {
+			translateBtn.disabled = true;
+		}
 		modalEl.classList.add('is-translating');
-		textEl.textContent = 'Translating...';
 		textEl.classList.remove('placeholder');
+		textEl.replaceChildren(buildSkeleton(lockedHeight));
+		setStatus('translating…');
 
 		try {
 			const spanish = await translateEnToSpanish(extracted);
-			textEl.textContent = spanish || extracted;
+			revealText(textEl, spanish || extracted);
+			setStatus('translated');
 		} catch (err) {
 			console.error('[Translator] EN->ES failed:', err);
 			textEl.textContent = extracted;
+			setStatus('translation failed');
+			// Failed attempts may be transient (rate limit, network) — allow retry.
+			if (translateBtn) {
+				translateBtn.disabled = false;
+			}
 		} finally {
 			modalEl.classList.remove('is-translating');
+			if (bodyEl) {
+				bodyEl.style.height = '';
+			}
 		}
 	};
 
@@ -130,4 +159,69 @@ function initializeTranslator(host: HTMLElement, context: ToolContext) {
 
 function extractTextToTranslate(context: ToolContext): string {
 	return context.getTerminalSelection?.() || '';
+}
+
+function buildSkeleton(availableHeight: number): HTMLElement {
+	const wrap = document.createElement('div');
+	wrap.className = 'translator-skeleton';
+	wrap.setAttribute('aria-hidden', 'true');
+
+	// The body is height-locked while loading; size the skeleton to fill it
+	// edge to edge (minus the body's 16px vertical padding). Overflow clips.
+	const contentHeight = Math.max(66, availableHeight - 32);
+	wrap.style.height = `${contentHeight}px`;
+
+	const scan = document.createElement('div');
+	scan.className = 't-skel-scan';
+	wrap.append(scan);
+
+	const lines = document.createElement('div');
+	lines.className = 't-skel-lines';
+	wrap.append(lines);
+
+	// One line per ~22px of field (13px font × 1.7 line-height), reserving
+	// room for the typing row. Width pattern mimics prose; every 4th line
+	// starts a new "paragraph".
+	const pattern = ['full', 'long', 'full', 'med', 'long', 'short', 'full', 'long', 'med', 'full', 'short'];
+	const lineCount = Math.min(60, Math.max(3, Math.floor((contentHeight - 30) / 22)));
+
+	for (let i = 0; i < lineCount; i += 1) {
+		const line = document.createElement('div');
+		line.className = `t-skel-line ${pattern[i % pattern.length]}`;
+		if (i > 0 && i % 4 === 0) {
+			line.classList.add('t-skel-gap');
+		}
+		lines.append(line);
+	}
+
+	const typing = document.createElement('div');
+	typing.className = 't-skel-typing';
+
+	const sym = document.createElement('span');
+	sym.className = 't-skel-sym';
+	sym.textContent = '›';
+	typing.append(sym);
+
+	const dots = document.createElement('span');
+	dots.className = 't-skel-dots';
+	for (let i = 0; i < 3; i += 1) {
+		const dot = document.createElement('span');
+		dot.className = 't-skel-dot';
+		dots.append(dot);
+	}
+	typing.append(dots);
+	wrap.append(typing);
+
+	return wrap;
+}
+
+function revealText(textEl: HTMLElement, value: string): void {
+	textEl.textContent = value;
+	textEl.classList.remove('is-revealing');
+	// Restart the animation even if a previous reveal is still applied.
+	void textEl.offsetWidth;
+	textEl.classList.add('is-revealing');
+	textEl.addEventListener('animationend', () => {
+		textEl.classList.remove('is-revealing');
+	}, { once: true });
 }

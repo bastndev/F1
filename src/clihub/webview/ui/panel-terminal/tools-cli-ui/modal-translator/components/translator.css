@@ -349,6 +349,17 @@
 	background: color-mix(in srgb, var(--agent-accent, #AFA9EC) 12%, var(--vscode-input-background));
 }
 
+#translateBtn:disabled,
+#translateBtn:disabled:hover {
+	border-color: var(--vscode-editorGroup-border);
+	color: var(--vscode-descriptionForeground);
+	background: var(--vscode-input-background);
+	opacity: 0.45;
+	cursor: not-allowed;
+	animation: none;
+	box-shadow: none;
+}
+
 .translator-speak {
 	border-color: rgba(93, 202, 165, 0.2);
 	color: #5DCAA5;
