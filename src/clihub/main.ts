@@ -7,6 +7,14 @@ import { ensureCliInstalled, isCliInstalled } from './webview/core/terminal-cli/
 import { CliSessionManager } from './webview/core/terminal-cli/session-manager';
 import { getCliHubWebviewHtml } from './webview/webview';
 import { translatePromptToEnglish } from './webview/core/tools-cli-core/modal-translation/host-prompt-translator';
+import {
+	ensureSpanishVoice,
+	playSpanishText,
+	stopVoicePlayback,
+	isVoiceSpeaking,
+	wasVoiceStoppedByUser
+} from './webview/core/tools-cli-core/modal-voice/host-voice-tts';
+import type { VoiceState } from './webview/core/tools-cli-core/modal-voice/voice-types';
 import { checkText as spellCheckText, warmSpellchecker } from './webview/core/tools-cli-core/autocorrect/host-spellcheck';
 import { preparePromptForCLI } from './webview/core/tools-cli-core/prompt/attachments/host-preparer';
 import type { ImageAttachment } from './webview/core/tools-cli-core/prompt';
@@ -65,6 +73,7 @@ export class CliHubViewProvider implements vscode.WebviewViewProvider, vscode.Di
 	private readonly launcherStateSessionId = crypto.randomBytes(16).toString('hex');
 	private pendingInitialAgent?: string;
 	private activePromptTranslation?: AbortController;
+	private voiceRequestSeq = 0;
 
 	constructor(
 		private readonly _extensionUri: vscode.Uri,
@@ -124,6 +133,22 @@ export class CliHubViewProvider implements vscode.WebviewViewProvider, vscode.Di
 				return;
 			}
 
+			if (message.type === 'voice.speak') {
+				await this._handleVoiceSpeak(webviewView.webview, message);
+				return;
+			}
+
+			if (message.type === 'voice.stop') {
+				stopVoicePlayback();
+				// The active playback promise resolves and posts 'idle'.
+				return;
+			}
+
+			if (message.type === 'voice.query') {
+				await this._postVoiceState(webviewView.webview, isVoiceSpeaking() ? 'speaking' : 'idle');
+				return;
+			}
+
 			if (message.type === 'prompt.prepare') {
 				await this._handlePromptPrepare(webviewView.webview, message);
 				return;
@@ -162,6 +187,7 @@ export class CliHubViewProvider implements vscode.WebviewViewProvider, vscode.Di
 
 	public dispose() {
 		this.activePromptTranslation?.abort();
+		stopVoicePlayback();
 		this.sessionManager.dispose();
 	}
 
@@ -309,6 +335,52 @@ export class CliHubViewProvider implements vscode.WebviewViewProvider, vscode.Di
 				id: message.id,
 				files: [] // Return empty on error
 			});
+		}
+	}
+
+	private async _postVoiceState(webview: vscode.Webview, state: VoiceState, detail?: string) {
+		await webview.postMessage({ type: 'voice.state', state, message: detail });
+	}
+
+	private async _handleVoiceSpeak(webview: vscode.Webview, message: CliHubMessage) {
+		const text = typeof message.text === 'string' ? message.text.trim() : '';
+		if (!text) {
+			return;
+		}
+
+		if (!this._extensionContext) {
+			await this._postVoiceState(webview, 'error', 'Voice unavailable: no extension context.');
+			return;
+		}
+
+		// A newer speak request supersedes this one; only the latest may
+		// report state, otherwise its 'idle' would overwrite 'speaking'.
+		const seq = ++this.voiceRequestSeq;
+		const post = async (state: VoiceState, detail?: string) => {
+			if (seq === this.voiceRequestSeq) {
+				await this._postVoiceState(webview, state, detail);
+			}
+		};
+
+		try {
+			await post('preparing');
+			// Reuses ATM's piper engine/voice when installed; downloads into
+			// F1's globalStorage (with a progress notification) otherwise.
+			const resources = await ensureSpanishVoice(this._extensionContext);
+			// 'preparing' holds through synthesis; 'speaking' fires only once
+			// the first audio bytes flow, so the UI animates with the sound.
+			await playSpanishText(resources, text, () => {
+				void post('speaking');
+			});
+			await post('idle');
+		} catch (error) {
+			if (wasVoiceStoppedByUser()) {
+				await post('idle');
+				return;
+			}
+			const detail = error instanceof Error ? error.message : 'Voice playback failed.';
+			console.error('[f1-voice] Playback error:', error);
+			await post('error', detail);
 		}
 	}
 

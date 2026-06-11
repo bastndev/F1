@@ -5,6 +5,7 @@ import { createCliCreateMessage, type AgentLaunchGuardMessage } from './agent-sa
 import { createToolsController } from './tools-cli-ui/tools';
 import { detectModelName } from '../../core/terminal-cli/model-detect';
 import type { ImageAttachment, PromptTranslateRequest, PromptTranslateResult, FileMentionEntry, SpellIssue } from '../../core/tools-cli-core/prompt';
+import type { VoiceState } from '../../core/tools-cli-core/modal-voice/voice-types';
 
 type VsCodeApi = {
 	postMessage: (message: ClientMessage) => void;
@@ -21,7 +22,10 @@ type ClientMessage =
 	| { type: 'prompt.prepare'; id: string; text: string; attachments: ImageAttachment[] }
 	| { type: 'prompt.spellcheck'; id: string; text: string; strict: boolean }
 	| { type: 'workspace.listFiles'; id: string }
-	| { type: 'workspace.listSkills'; id: string };
+	| { type: 'workspace.listSkills'; id: string }
+	| { type: 'voice.speak'; text: string }
+	| { type: 'voice.stop' }
+	| { type: 'voice.query' };
 
 type CliSession = CliSessionSummary & {
 	commandLine: string;
@@ -44,7 +48,8 @@ type ServerMessage =
 	| { type: 'prompt.prepareError'; id: string; message: string }
 	| { type: 'prompt.spellResult'; id: string; issues: SpellIssue[] }
 	| { type: 'workspace.files'; id: string; files: FileMentionEntry[] }
-	| { type: 'workspace.skills'; id: string; skills: string[] };
+	| { type: 'workspace.skills'; id: string; skills: string[] }
+	| { type: 'voice.state'; state: VoiceState; message?: string };
 
 type TerminalView = {
 	terminal: Terminal;
@@ -236,6 +241,31 @@ const translatePrompt = (request: PromptTranslateRequest): Promise<PromptTransla
 	});
 };
 
+// Voice playback runs in the extension host (Piper TTS, shared with the ATM
+// extension). The webview fires commands and mirrors broadcast state.
+let voiceStateListener: ((state: VoiceState, message?: string) => void) | undefined;
+
+const speakText = (text: string) => {
+	vscode.postMessage({ type: 'voice.speak', text });
+};
+
+const stopSpeech = () => {
+	vscode.postMessage({ type: 'voice.stop' });
+};
+
+const queryVoiceState = () => {
+	vscode.postMessage({ type: 'voice.query' });
+};
+
+const onVoiceState = (listener: (state: VoiceState, message?: string) => void) => {
+	voiceStateListener = listener;
+	return () => {
+		if (voiceStateListener === listener) {
+			voiceStateListener = undefined;
+		}
+	};
+};
+
 const preparePromptWithAttachments = (text: string, attachments: ImageAttachment[]): Promise<string> => {
 	if (!attachments || attachments.length === 0) {
 		// No images — just return original (caller can still send)
@@ -405,6 +435,10 @@ const toolsController = layoutRight
 			requestWorkspaceFiles,
 			requestWorkspaceSkills,
 			requestSpellcheck,
+			speakText,
+			stopSpeech,
+			queryVoiceState,
+			onVoiceState,
 			getTerminalSelection: () => {
 				if (!activeSessionId) {
 					return '';
@@ -946,6 +980,11 @@ window.addEventListener('message', (event: MessageEvent<ServerMessage>) => {
 
 	if (message.type === 'prompt.translated') {
 		resolvePromptTranslation(message);
+		return;
+	}
+
+	if (message.type === 'voice.state') {
+		voiceStateListener?.(message.state, message.message);
 		return;
 	}
 

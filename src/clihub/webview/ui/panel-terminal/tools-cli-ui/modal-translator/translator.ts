@@ -2,6 +2,7 @@ import translatorStyles from './components/translator.css';
 import translatorHtml from './components/translator.html';
 import loadingStyles from '../../../styles/skeleton/translator-loading.css';
 import type { ToolContext } from '../tools';
+import type { VoiceState } from '../../../../core/tools-cli-core/modal-voice/voice-types';
 import { translateEnToSpanish } from '../../../../core/tools-cli-core/modal-translation/browser-terminal-translator';
 import { renderMarkdownLite } from './markdown-lite';
 import { segmentTerminalSelection } from './terminal-text';
@@ -75,7 +76,10 @@ function initializeTranslator(host: HTMLElement, context: ToolContext) {
 
 	// Copy/Listen start disabled (gray) and only light up — softly, via the
 	// button transition — once there is a translation result to act on.
+	// hasResult also keeps voice.state resyncs from re-enabling Listen early.
+	let hasResult = false;
 	const enableResultActions = () => {
+		hasResult = true;
 		if (copyBtn) {
 			copyBtn.disabled = false;
 		}
@@ -227,14 +231,43 @@ function initializeTranslator(host: HTMLElement, context: ToolContext) {
 	}
 
 	if (speakBtn && spectrum) {
-		// The spectrum lives inside the button and shares its slot: CSS swaps
-		// the idle label for the animated bars (and a stop glyph on hover).
-		speakBtn.addEventListener('click', () => {
-			isSpeaking = !isSpeaking;
+		// Real playback runs in the extension host (Piper TTS, sharing the ATM
+		// extension's downloaded engine/voice). The button mirrors broadcast
+		// voice.state events: CSS swaps the idle label for the animated bars
+		// (and a stop glyph on hover) while actually speaking.
+		const applyVoiceState = (state: VoiceState, message?: string) => {
+			isSpeaking = state === 'speaking';
 			speakBtn.classList.toggle('speaking', isSpeaking);
-			const label = isSpeaking ? 'Stop' : 'Listen';
+			speakBtn.classList.toggle('is-preparing', state === 'preparing');
+			// Stay disabled until something was translated, except while a
+			// playback from a previous open is running (so it can be stopped).
+			speakBtn.disabled = state === 'preparing' || (!hasResult && !isSpeaking);
+
+			const label = state === 'preparing' ? 'Preparing voice…' : isSpeaking ? 'Stop' : 'Listen';
 			speakBtn.title = label;
 			speakBtn.setAttribute('aria-label', label);
+
+			if (state === 'error') {
+				setStatus(message ? `voice · ${message.toLowerCase()}` : 'voice error');
+			}
+		};
+
+		context.onVoiceState?.(applyVoiceState);
+		// Playback may still be running from a previous open — resync.
+		context.queryVoiceState?.();
+
+		speakBtn.addEventListener('click', () => {
+			if (isSpeaking) {
+				context.stopSpeech?.();
+				return;
+			}
+
+			// Read what is on screen: rendered text flattens markdown and the
+			// code chips speak as "code here #N" (kept in English on purpose).
+			const value = textEl?.textContent?.trim();
+			if (value && context.speakText) {
+				context.speakText(value);
+			}
 		});
 	}
 }
