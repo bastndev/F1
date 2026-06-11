@@ -1,4 +1,45 @@
+import { pasteMarkerPattern } from './pastes';
+
 export const imageMarkerPattern = /\[Image #(\d+)\]/g;
+
+// @file/@folder mentions — same shape the highlight overlay recognizes.
+export const mentionTokenPattern = /(?<=^|\s)@\S+/g;
+
+/**
+ * Text with all non-typed tokens removed: image markers, collapsed-paste
+ * markers, and @mentions. This is what the char counter should measure — the
+ * tokens expand/resolve outside the textarea and are never translated, so
+ * they shouldn't spend the user's prompt budget.
+ */
+export function stripPromptTokens(text: string): string {
+	return text
+		.replace(imageMarkerPattern, '')
+		.replace(pasteMarkerPattern, '')
+		.replace(mentionTokenPattern, '');
+}
+
+export interface ProtectedMention {
+	mention: string;
+	placeholder: string;
+}
+
+/** Shield @mentions from translation — file routes must pass through verbatim. */
+export function protectMentions(text: string): { text: string; mentions: ProtectedMention[] } {
+	const mentions: ProtectedMention[] = [];
+	let index = 0;
+	const protectedText = text.replace(mentionTokenPattern, (mention) => {
+		const placeholder = `ZXQCLIHUBMNT${index++}QXZ`;
+		mentions.push({ mention, placeholder });
+		return placeholder;
+	});
+	return { text: protectedText, mentions };
+}
+
+export function restoreMentions(text: string, mentions: ProtectedMention[]): string {
+	return mentions.reduce((result, { mention, placeholder }) => {
+		return result.split(placeholder).join(mention);
+	}, text);
+}
 
 export function collectImageMarkerIds(text: string): Set<number> {
 	const ids = new Set<number>();

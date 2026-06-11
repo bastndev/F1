@@ -10,6 +10,9 @@ export {
 	protectImageMarkers,
 	restoreImageMarkers,
 	substituteMarkersWithPaths,
+	stripPromptTokens,
+	protectMentions,
+	restoreMentions,
 } from './attachments/markers';
 export type { ImageAttachment } from './attachments/types';
 export { isImageAttachment } from './attachments/types';

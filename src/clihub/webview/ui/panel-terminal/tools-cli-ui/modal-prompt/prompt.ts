@@ -20,6 +20,9 @@ import {
 	expandPasteMarkers,
 	protectPasteMarkers,
 	restorePasteMarkers,
+	stripPromptTokens,
+	protectMentions,
+	restoreMentions,
 } from '../../../../core/tools-cli-core/prompt';
 import { mountFileMentionPicker } from './components/file-mention/file-mention';
 
@@ -217,12 +220,15 @@ function initPromptTabs(host: HTMLElement, context: PromptContext, hasActiveSess
 				runBtn.innerHTML = '<i class="ti ti-sparkles" aria-hidden="true"></i><span>Translating…</span>';
 			}
 			try {
-				// Image AND paste markers must survive translation untouched.
+				// Image markers, paste markers AND @mention routes must survive
+				// translation untouched — they also shrink the payload the
+				// translator has to process, so requests are faster and safer.
 				const { text: imageProtected, markers } = protectImageMarkers(textToSend);
-				const { text: protectedText, markers: pasteMarkers } = protectPasteMarkers(imageProtected);
+				const { text: pasteProtected, markers: pasteMarkers } = protectPasteMarkers(imageProtected);
+				const { text: protectedText, mentions } = protectMentions(pasteProtected);
 				const result = await translatePromptText(protectedText, ctx);
 				const translated = result.text
-					? restoreImageMarkers(restorePasteMarkers(result.text, pasteMarkers), markers)
+					? restoreImageMarkers(restorePasteMarkers(restoreMentions(result.text, mentions), pasteMarkers), markers)
 					: '';
 				if (translated && translated !== textToSend.trim()) {
 					textToSend = translated;
@@ -539,7 +545,9 @@ function initRunButton(
 		const hasSession = !!context.getActiveSessionId?.();
 		// Activate only after a real word: 6+ chars OR first space (second word started)
 		const hasEnoughText = text.length >= 6 || text.includes(' ');
-		runBtn.disabled = !hasEnoughText || !hasSession;
+		// Limit applies to the effective (typed) length — markers/@routes are free.
+		const overLimit = stripPromptTokens(textarea.value).length > 1500;
+		runBtn.disabled = !hasEnoughText || !hasSession || overLimit;
 	};
 
 	// Initial state
@@ -581,7 +589,9 @@ function updateCharCount(host: HTMLElement, textarea: HTMLTextAreaElement) {
 		return;
 	}
 
-	const current = textarea.value.length;
+	// Tokens (images, pastes, @routes) don't spend prompt budget — they resolve
+	// outside the textarea and never go through translation.
+	const current = stripPromptTokens(textarea.value).length;
 	const max = 1500;
 	counter.textContent = `${current}/${max}`;
 
