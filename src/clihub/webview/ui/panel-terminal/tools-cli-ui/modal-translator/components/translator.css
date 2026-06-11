@@ -577,6 +577,17 @@
 	background: rgba(93, 202, 165, 0.07);
 }
 
+/* The confirmation check draws itself in left to right */
+.translator-copy.copied svg path:last-child {
+	stroke-dasharray: 24;
+	stroke-dashoffset: 24;
+	animation: copy-check-draw 0.35s ease-out 0.05s forwards;
+}
+
+@keyframes copy-check-draw {
+	to { stroke-dashoffset: 0; }
+}
+
 .translator-speak {
 	border-color: rgba(93, 202, 165, 0.2);
 	color: #5DCAA5;
@@ -700,9 +711,10 @@
 	pointer-events: none;
 }
 
+/* Audio is voice playback — the bars stay green/white, never agent-tinted. */
 .translator-spectrum .bar {
 	width: 2.5px;
-	background: #5DCAA5;
+	background: linear-gradient(180deg, #eafff6 0%, #5DCAA5 60%, #3fa583 100%);
 	border-radius: 999px;
 	opacity: 0.3;
 	transition: height 80ms linear, opacity 120ms ease;
@@ -713,21 +725,42 @@
 	transform: scale(1);
 }
 
+/* Each bar gets its own amplitude and tempo so the meter reads as a real
+   voice signal instead of a synchronized wave. */
 .translator-speak.speaking .translator-spectrum .bar {
-	opacity: 0.85;
-	animation: spectrum-bar 420ms ease-in-out infinite alternate;
+	opacity: 0.9;
 }
 
-.translator-spectrum .bar:nth-child(1) { height: 5px;  animation-delay: 0ms;   }
-.translator-spectrum .bar:nth-child(2) { height: 12px; animation-delay: 80ms;  }
-.translator-spectrum .bar:nth-child(3) { height: 16px; animation-delay: 40ms;  }
-.translator-spectrum .bar:nth-child(4) { height: 9px;  animation-delay: 120ms; }
-.translator-spectrum .bar:nth-child(5) { height: 14px; animation-delay: 60ms;  }
-.translator-spectrum .bar:nth-child(6) { height: 7px;  animation-delay: 100ms; }
+.translator-spectrum .bar:nth-child(1) { height: 5px;  }
+.translator-spectrum .bar:nth-child(2) { height: 12px; }
+.translator-spectrum .bar:nth-child(3) { height: 16px; }
+.translator-spectrum .bar:nth-child(4) { height: 9px;  }
+.translator-spectrum .bar:nth-child(5) { height: 14px; }
+.translator-spectrum .bar:nth-child(6) { height: 7px;  }
 
-@keyframes spectrum-bar {
-	0%   { height: 4px;  }
-	100% { height: 18px; }
+.translator-speak.speaking .bar:nth-child(1) { animation: spectrum-low  520ms ease-in-out -120ms infinite alternate; }
+.translator-speak.speaking .bar:nth-child(2) { animation: spectrum-mid  370ms ease-in-out -240ms infinite alternate; }
+.translator-speak.speaking .bar:nth-child(3) { animation: spectrum-high 430ms ease-in-out  -60ms infinite alternate; }
+.translator-speak.speaking .bar:nth-child(4) { animation: spectrum-mid  480ms ease-in-out -330ms infinite alternate; }
+.translator-speak.speaking .bar:nth-child(5) { animation: spectrum-high 340ms ease-in-out -180ms infinite alternate; }
+.translator-speak.speaking .bar:nth-child(6) { animation: spectrum-low  410ms ease-in-out -280ms infinite alternate; }
+
+@keyframes spectrum-low {
+	0%   { height: 3px;  opacity: 0.55; }
+	60%  { height: 9px; }
+	100% { height: 12px; opacity: 0.95; }
+}
+
+@keyframes spectrum-mid {
+	0%   { height: 4px;  opacity: 0.6; }
+	45%  { height: 13px; }
+	100% { height: 16px; opacity: 1; }
+}
+
+@keyframes spectrum-high {
+	0%   { height: 5px;  opacity: 0.65; }
+	55%  { height: 12px; }
+	100% { height: 19px; opacity: 1; }
 }
 
 /* ── Footer ──────────────────────────────────────────────────────── */
@@ -793,6 +826,3 @@
 	background: color-mix(in srgb, var(--agent-accent) 8%, var(--vscode-input-background));
 }
 
-.agent-shell[data-agent] .translator-spectrum .bar {
-	background: var(--agent-accent);
-}
