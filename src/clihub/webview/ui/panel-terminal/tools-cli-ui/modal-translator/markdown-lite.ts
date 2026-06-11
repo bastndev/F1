@@ -29,7 +29,10 @@ function renderInline(text: string): string {
 	out = out.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
 	out = out.replace(/__([^_]+)__/g, '<strong>$1</strong>');
 	out = out.replace(/(^|[\s(])\*([^*\n]+)\*(?=$|[\s).,;:!?])/g, '$1<em>$2</em>');
-	out = out.replace(/\[([^\]]+)\]\((https?:\/\/[^)\s]+)\)/g, '<a class="md-link" href="$2">$1</a>');
+	out = out.replace(
+		/\[([^\]]+)\]\((https?:\/\/[^)\s]+)\)/g,
+		'<a class="md-link" href="$2" rel="noopener noreferrer">$1</a>',
+	);
 
 	out = out.replace(/\u0000(\d+)\u0000/g, (_match, index: string) =>
 		`<code class="md-code">${codeSpans[Number(index)]}</code>`);
