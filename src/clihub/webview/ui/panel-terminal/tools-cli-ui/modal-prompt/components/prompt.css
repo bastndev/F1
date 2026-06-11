@@ -667,24 +667,22 @@
 }
 
 /* Empty state: inert dashed "+" placeholder, tinted with the CLI accent.
+   The base chip's 0.5px border renders dashes invisibly — this needs a full
+   1px dashed border to show the dots at rest, plus a squarer shape.
    TODO(future): becomes the entry point of the skill install/create flow. */
-.prompt-skill-add {
-  border-style: dashed;
-  border-color: color-mix(in srgb, var(--agent-accent, #534AB7) 45%, transparent);
+.prompt-skill-add,
+.prompt-skill-add:hover {
+  border: 1px dashed color-mix(in srgb, var(--agent-accent, #534AB7) 65%, transparent);
+  border-radius: 4px;
   color: var(--agent-accent, #AFA9EC);
   background: color-mix(in srgb, var(--agent-accent, #534AB7) 6%, transparent);
-  min-width: 30px;
-  font-size: 13px;
+  width: 28px;
+  height: 26px;
+  padding: 0;
+  justify-content: center;
+  font-size: 14px;
   line-height: 1;
   cursor: default;
-}
-
-.prompt-skill-add:hover {
-  /* Inert for now — keep the resting look, no interactive affordance */
-  border-style: dashed;
-  border-color: color-mix(in srgb, var(--agent-accent, #534AB7) 45%, transparent);
-  color: var(--agent-accent, #AFA9EC);
-  background: color-mix(in srgb, var(--agent-accent, #534AB7) 6%, transparent);
 }
 
 .prompt-skills-label {
