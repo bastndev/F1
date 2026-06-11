@@ -1,6 +1,6 @@
 export interface PromptSendContext {
 	close: () => void;
-	sendToActiveSession: (data: string) => void;
+	sendToActiveSession: (data: string, options?: { paste?: boolean; submit?: boolean }) => void;
 	getActiveSessionId?: () => string | undefined;
 }
 
@@ -28,9 +28,10 @@ export function processPrompt(
 		return { status: 'no-session' };
 	}
 
-	// Current behavior: send exactly what the user wrote + \r (simulates pressing Enter)
-	// Future: this will run autocorrect + translation before sending.
-	context.sendToActiveSession(text + '\r');
+	// Two-phase send, imitating a human: paste the text, then press Enter as a
+	// separate keystroke. The terminal layer owns the timing and per-CLI quirks
+	// (bracketed paste, focus reporting, Copilot's slower paste handling).
+	context.sendToActiveSession(text, { paste: true, submit: true });
 
 	context.close();
 

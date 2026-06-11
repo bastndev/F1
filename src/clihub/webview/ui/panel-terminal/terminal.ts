@@ -3,6 +3,7 @@ import { Terminal } from '@xterm/xterm';
 import { createTabController, type CliAgentIcon, type CliAgentOption, type CliSessionSummary } from '../panel-tab/tab';
 import { createCliCreateMessage, type AgentLaunchGuardMessage } from './agent-safety/agent-launch-guard';
 import { createToolsController } from './tools-cli-ui/tools';
+import { detectModelName } from '../../core/terminal-cli/model-detect';
 import type { ImageAttachment, PromptTranslateRequest, PromptTranslateResult, FileMentionEntry, SpellIssue } from '../../core/tools-cli-core/prompt';
 
 type VsCodeApi = {
@@ -18,7 +19,7 @@ type ClientMessage =
 	| { type: 'cli.close'; sessionId: string }
 	| { type: 'prompt.translate'; id: string; text: string; from: string; to: string }
 	| { type: 'prompt.prepare'; id: string; text: string; attachments: ImageAttachment[] }
-	| { type: 'prompt.spellcheck'; id: string; text: string }
+	| { type: 'prompt.spellcheck'; id: string; text: string; strict: boolean }
 	| { type: 'workspace.listFiles'; id: string };
 
 type CliSession = CliSessionSummary & {
@@ -276,7 +277,7 @@ const requestWorkspaceFiles = (): Promise<FileMentionEntry[]> => {
 const pendingSpellchecks = new Map<string, (issues: SpellIssue[]) => void>();
 let nextSpellcheckId = 1;
 
-const requestSpellcheck = (text: string): Promise<SpellIssue[]> => {
+const requestSpellcheck = (text: string, strict: boolean): Promise<SpellIssue[]> => {
 	const id = `spell-${nextSpellcheckId++}`;
 	return new Promise((resolve) => {
 		const timeout = window.setTimeout(() => {
@@ -287,7 +288,7 @@ const requestSpellcheck = (text: string): Promise<SpellIssue[]> => {
 			clearTimeout(timeout);
 			resolve(issues);
 		});
-		vscode.postMessage({ type: 'prompt.spellcheck', id, text });
+		vscode.postMessage({ type: 'prompt.spellcheck', id, text, strict });
 	});
 };
 
@@ -329,15 +330,53 @@ const toolsController = layoutRight
 	? createToolsController({
 			container: layoutRight,
 			getActiveSessionId: () => activeSessionId,
-			sendToActiveSession: (text: string) => {
+			getActiveModelName: () => {
+				if (!activeSessionId) {
+					return undefined;
+				}
+				const session = sessions.get(activeSessionId);
+				if (!session) {
+					return undefined;
+				}
+				return detectModelName(getAgentSlug(session.label), session.buffer);
+			},
+			sendToActiveSession: (text: string, options?: { paste?: boolean; submit?: boolean }) => {
 				if (!activeSessionId) {
 					return;
 				}
-				const session = sessions.get(activeSessionId);
+				const sessionId = activeSessionId;
+				const session = sessions.get(sessionId);
 				if (session?.status !== 'running') {
 					return;
 				}
-				vscode.postMessage({ type: 'cli.input', sessionId: activeSessionId, data: text });
+				const view = terminals.get(sessionId);
+				let data = text;
+				// Frame pasted text in bracketed-paste markers when the CLI has
+				// enabled that mode (xterm tracks DECSET 2004 per terminal). TUI
+				// CLIs rely on this to insert multi-char input cleanly; without it
+				// some (e.g. Copilot) garble or drop chunked input entirely.
+				if (options?.paste && view?.terminal.modes.bracketedPasteMode) {
+					data = `\x1b[200~${text}\x1b[201~`;
+				}
+				// CLIs that requested focus reporting (DECSET 1004) may ignore key
+				// input while the terminal reports itself unfocused — and it does
+				// while the user types in the prompt modal. Announce focus-in so the
+				// submit registers; the real focus events keep flowing as usual.
+				if (options?.submit && view?.terminal.modes.sendFocusMode) {
+					data = `\x1b[I${data}`;
+				}
+				vscode.postMessage({ type: 'cli.input', sessionId, data });
+				if (options?.submit) {
+					// Enter must arrive as its own write or TUI CLIs treat it as part
+					// of the paste. Copilot digests pastes noticeably slower than the
+					// rest, so it gets a longer pause before the keypress.
+					const delay = getAgentSlug(session.label) === 'copilot' ? 750 : 150;
+					setTimeout(() => {
+						if (sessions.get(sessionId)?.status === 'running') {
+							vscode.postMessage({ type: 'cli.input', sessionId, data: '\r' });
+						}
+					}, delay);
+				}
 			},
 			translatePrompt,
 			preparePromptWithAttachments,

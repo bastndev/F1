@@ -8,24 +8,26 @@ export type ToolId = 'translate' | 'keymaps' | 'prompt';
 export type ToolContext = {
 	close: () => void;
 	getActiveSessionId?: () => string | undefined;
-	sendToActiveSession?: (text: string) => void;
+	getActiveModelName?: () => string | undefined;
+	sendToActiveSession?: (text: string, options?: { paste?: boolean; submit?: boolean }) => void;
 	translatePrompt?: (request: PromptTranslateRequest) => Promise<PromptTranslateResult>;
 	getTerminalSelection?: () => string;
 	preparePromptWithAttachments?: (text: string, attachments: ImageAttachment[]) => Promise<string>;
 	requestWorkspaceFiles?: () => Promise<FileMentionEntry[]>;
-	requestSpellcheck?: (text: string) => Promise<SpellIssue[]>;
+	requestSpellcheck?: (text: string, strict: boolean) => Promise<SpellIssue[]>;
 };
 
 type ToolMount = (host: HTMLElement, context: ToolContext) => void;
 export type ToolsControllerOptions = {
 	container: HTMLElement;
 	getActiveSessionId?: () => string | undefined;
-	sendToActiveSession?: (text: string) => void;
+	getActiveModelName?: () => string | undefined;
+	sendToActiveSession?: (text: string, options?: { paste?: boolean; submit?: boolean }) => void;
 	translatePrompt?: (request: PromptTranslateRequest) => Promise<PromptTranslateResult>;
 	getTerminalSelection?: () => string;
 	preparePromptWithAttachments?: (text: string, attachments: ImageAttachment[]) => Promise<string>;
 	requestWorkspaceFiles?: () => Promise<FileMentionEntry[]>;
-	requestSpellcheck?: (text: string) => Promise<SpellIssue[]>;
+	requestSpellcheck?: (text: string, strict: boolean) => Promise<SpellIssue[]>;
 };
 
 const modalId = 'cli-tools-modal';
@@ -47,6 +49,7 @@ const toolMounts: Record<ToolId, ToolMount> = {
 	export const createToolsController = ({
 		container,
 		getActiveSessionId,
+		getActiveModelName,
 		sendToActiveSession,
 		translatePrompt,
 		getTerminalSelection,
@@ -113,6 +116,7 @@ const toolMounts: Record<ToolId, ToolMount> = {
 				toolMounts[tool](host, {
 					close,
 					getActiveSessionId,
+					getActiveModelName,
 					sendToActiveSession,
 					translatePrompt,
 					getTerminalSelection,

@@ -26,6 +26,7 @@ type CliHubMessage = {
 	from?: string;
 	to?: string;
 	attachments?: ImageAttachment[];
+	strict?: boolean;
 };
 
 type LauncherAgent = {
@@ -336,9 +337,10 @@ export class CliHubViewProvider implements vscode.WebviewViewProvider, vscode.Di
 		}
 
 		const text = typeof message.text === 'string' ? message.text : '';
+		const strict = message.strict === true;
 
 		try {
-			const issues = await spellCheckText(text);
+			const issues = await spellCheckText(text, strict);
 			await webview.postMessage({
 				type: 'prompt.spellResult',
 				id: message.id,
