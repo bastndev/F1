@@ -54,15 +54,11 @@
       ></textarea>
       <span class="prompt-char-count" id="charCount">0/1500</span>
     </div>
-    <div class="prompt-skills">
+    <!-- Chips are populated at mount with the skills installed in the
+         workspace (.agents/skills + .claude/skills); hidden when none. -->
+    <div class="prompt-skills" hidden>
       <span class="prompt-skills-label">Skills:</span>
-      <div class="prompt-tools">
-        <button class="prompt-tool-btn" data-skill="skill-1">Skill 1</button>
-        <button class="prompt-tool-btn" data-skill="skill-2">Skill 2</button>
-        <button class="prompt-tool-btn" data-skill="skill-3">Skill 3</button>
-        <button class="prompt-tool-btn" data-skill="skill-4">Skill 4</button>
-        <button class="prompt-tool-btn" data-skill="skill-5">Skill 5</button>
-      </div>
+      <div class="prompt-tools" id="skillChips"></div>
     </div>
   </div>
   <!-- DIVIDER -->

@@ -20,7 +20,8 @@ type ClientMessage =
 	| { type: 'prompt.translate'; id: string; text: string; from: string; to: string }
 	| { type: 'prompt.prepare'; id: string; text: string; attachments: ImageAttachment[] }
 	| { type: 'prompt.spellcheck'; id: string; text: string; strict: boolean }
-	| { type: 'workspace.listFiles'; id: string };
+	| { type: 'workspace.listFiles'; id: string }
+	| { type: 'workspace.listSkills'; id: string };
 
 type CliSession = CliSessionSummary & {
 	commandLine: string;
@@ -42,7 +43,8 @@ type ServerMessage =
 	| { type: 'prompt.prepared'; id: string; text: string }
 	| { type: 'prompt.prepareError'; id: string; message: string }
 	| { type: 'prompt.spellResult'; id: string; issues: SpellIssue[] }
-	| { type: 'workspace.files'; id: string; files: FileMentionEntry[] };
+	| { type: 'workspace.files'; id: string; files: FileMentionEntry[] }
+	| { type: 'workspace.skills'; id: string; skills: string[] };
 
 type TerminalView = {
 	terminal: Terminal;
@@ -274,6 +276,24 @@ const requestWorkspaceFiles = (): Promise<FileMentionEntry[]> => {
 	});
 };
 
+const pendingWorkspaceSkills = new Map<string, (skills: string[]) => void>();
+let nextWorkspaceSkillsId = 1;
+
+const requestWorkspaceSkills = (): Promise<string[]> => {
+	const id = `ws-skills-${nextWorkspaceSkillsId++}`;
+	return new Promise((resolve) => {
+		const timeout = window.setTimeout(() => {
+			pendingWorkspaceSkills.delete(id);
+			resolve([]);
+		}, 5000);
+		pendingWorkspaceSkills.set(id, (skills) => {
+			clearTimeout(timeout);
+			resolve(skills);
+		});
+		vscode.postMessage({ type: 'workspace.listSkills', id });
+	});
+};
+
 const pendingSpellchecks = new Map<string, (issues: SpellIssue[]) => void>();
 let nextSpellcheckId = 1;
 
@@ -381,6 +401,7 @@ const toolsController = layoutRight
 			translatePrompt,
 			preparePromptWithAttachments,
 			requestWorkspaceFiles,
+			requestWorkspaceSkills,
 			requestSpellcheck,
 			getTerminalSelection: () => {
 				if (!activeSessionId) {
@@ -955,6 +976,15 @@ window.addEventListener('message', (event: MessageEvent<ServerMessage>) => {
 		if (handler) {
 			pendingWorkspaceFiles.delete(message.id);
 			handler(message.files);
+		}
+		return;
+	}
+
+	if (message.type === 'workspace.skills') {
+		const handler = pendingWorkspaceSkills.get(message.id);
+		if (handler) {
+			pendingWorkspaceSkills.delete(message.id);
+			handler(message.skills);
 		}
 		return;
 	}

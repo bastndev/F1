@@ -14,6 +14,7 @@ export type ToolContext = {
 	getTerminalSelection?: () => string;
 	preparePromptWithAttachments?: (text: string, attachments: ImageAttachment[]) => Promise<string>;
 	requestWorkspaceFiles?: () => Promise<FileMentionEntry[]>;
+	requestWorkspaceSkills?: () => Promise<string[]>;
 	requestSpellcheck?: (text: string, strict: boolean) => Promise<SpellIssue[]>;
 };
 
@@ -27,6 +28,7 @@ export type ToolsControllerOptions = {
 	getTerminalSelection?: () => string;
 	preparePromptWithAttachments?: (text: string, attachments: ImageAttachment[]) => Promise<string>;
 	requestWorkspaceFiles?: () => Promise<FileMentionEntry[]>;
+	requestWorkspaceSkills?: () => Promise<string[]>;
 	requestSpellcheck?: (text: string, strict: boolean) => Promise<SpellIssue[]>;
 };
 
@@ -55,6 +57,7 @@ const toolMounts: Record<ToolId, ToolMount> = {
 		getTerminalSelection,
 		preparePromptWithAttachments,
 		requestWorkspaceFiles,
+		requestWorkspaceSkills,
 		requestSpellcheck
 	}: ToolsControllerOptions) => {
 		let activeModal: HTMLElement | null = null;
@@ -122,6 +125,7 @@ const toolMounts: Record<ToolId, ToolMount> = {
 					getTerminalSelection,
 					preparePromptWithAttachments,
 					requestWorkspaceFiles,
+					requestWorkspaceSkills,
 					requestSpellcheck
 				});
 
