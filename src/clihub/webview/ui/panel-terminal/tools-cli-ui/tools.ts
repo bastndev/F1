@@ -1,6 +1,7 @@
 import { mountKeymapsPanel } from './modal-keymaps/keymaps';
 import { mountPromptPanel } from './modal-prompt/prompt';
 import type { ImageAttachment, PromptTranslateRequest, PromptTranslateResult, FileMentionEntry, SpellIssue } from '../../../core/tools-cli-core/prompt';
+import type { VoiceState } from '../../../core/tools-cli-core/modal-voice/voice-types';
 import { mountTranslatorPanel } from './modal-translator/translator';
 
 export type ToolId = 'translate' | 'keymaps' | 'prompt';
@@ -16,6 +17,10 @@ export type ToolContext = {
 	requestWorkspaceFiles?: () => Promise<FileMentionEntry[]>;
 	requestWorkspaceSkills?: () => Promise<string[]>;
 	requestSpellcheck?: (text: string, strict: boolean) => Promise<SpellIssue[]>;
+	speakText?: (text: string) => void;
+	stopSpeech?: () => void;
+	queryVoiceState?: () => void;
+	onVoiceState?: (listener: (state: VoiceState, message?: string) => void) => () => void;
 };
 
 type ToolMount = (host: HTMLElement, context: ToolContext) => void;
@@ -30,6 +35,10 @@ export type ToolsControllerOptions = {
 	requestWorkspaceFiles?: () => Promise<FileMentionEntry[]>;
 	requestWorkspaceSkills?: () => Promise<string[]>;
 	requestSpellcheck?: (text: string, strict: boolean) => Promise<SpellIssue[]>;
+	speakText?: (text: string) => void;
+	stopSpeech?: () => void;
+	queryVoiceState?: () => void;
+	onVoiceState?: (listener: (state: VoiceState, message?: string) => void) => () => void;
 };
 
 const modalId = 'cli-tools-modal';
@@ -58,7 +67,11 @@ const toolMounts: Record<ToolId, ToolMount> = {
 		preparePromptWithAttachments,
 		requestWorkspaceFiles,
 		requestWorkspaceSkills,
-		requestSpellcheck
+		requestSpellcheck,
+		speakText,
+		stopSpeech,
+		queryVoiceState,
+		onVoiceState
 	}: ToolsControllerOptions) => {
 		let activeModal: HTMLElement | null = null;
 		let currentTool: ToolId | null = null;
@@ -126,7 +139,11 @@ const toolMounts: Record<ToolId, ToolMount> = {
 					preparePromptWithAttachments,
 					requestWorkspaceFiles,
 					requestWorkspaceSkills,
-					requestSpellcheck
+					requestSpellcheck,
+					speakText,
+					stopSpeech,
+					queryVoiceState,
+					onVoiceState
 				});
 
 		container.append(modal);

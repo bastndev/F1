@@ -584,6 +584,25 @@
 	box-shadow: 0 0 0 3px rgba(93, 202, 165, 0.08);
 }
 
+/* Host is resolving/downloading the voice (progress notification shows
+   details) — the label breathes until playback actually starts. */
+.translator-speak.is-preparing,
+.translator-speak.is-preparing:hover {
+	cursor: progress;
+	opacity: 1;
+	border-color: rgba(93, 202, 165, 0.35);
+	color: #5DCAA5;
+	background: var(--vscode-input-background);
+}
+
+.translator-speak.is-preparing .speak-idle {
+	animation: speak-preparing-pulse 1.1s ease-in-out infinite;
+}
+
+@keyframes speak-preparing-pulse {
+	50% { opacity: 0.35; }
+}
+
 .translator-speak.speaking .speak-idle {
 	opacity: 0;
 	transform: translateY(6px) scale(0.9);
