@@ -17,7 +17,7 @@ import {
 import type { VoiceState } from './webview/core/tools-cli-core/modal-voice/voice-types';
 import { checkText as spellCheckText, warmSpellchecker } from './webview/core/tools-cli-core/autocorrect/host-spellcheck';
 import { preparePromptForCLI } from './webview/core/tools-cli-core/prompt/attachments/host-preparer';
-import type { ImageAttachment } from './webview/core/tools-cli-core/prompt';
+import type { ImageAttachment, SkillRoot, WorkspaceSkill } from './webview/core/tools-cli-core/prompt';
 import {
 	getAgentLaunchGuardMessage,
 	type AgentLaunchExtensionMode,
@@ -241,14 +241,18 @@ export class CliHubViewProvider implements vscode.WebviewViewProvider, vscode.Di
 		}
 
 		// A skill is a directory under one of these roots containing a SKILL.md.
-		// Only the folder name is surfaced; .agents takes precedence on duplicates.
-		const skillRoots = ['.agents/skills', '.claude/skills'];
-		const names = new Set<string>();
+		// Duplicated names collapse into one entry that remembers every root it
+		// lives in, so the webview can resolve the right copy per active CLI.
+		const skillRoots: Array<{ id: SkillRoot; rel: string }> = [
+			{ id: 'agents', rel: '.agents/skills' },
+			{ id: 'claude', rel: '.claude/skills' },
+		];
+		const rootsByName = new Map<string, SkillRoot[]>();
 		const workspaceFolder = vscode.workspace.workspaceFolders?.[0];
 
 		if (workspaceFolder) {
 			for (const root of skillRoots) {
-				const rootUri = vscode.Uri.joinPath(workspaceFolder.uri, ...root.split('/'));
+				const rootUri = vscode.Uri.joinPath(workspaceFolder.uri, ...root.rel.split('/'));
 				let entries: Array<[string, vscode.FileType]>;
 				try {
 					entries = await vscode.workspace.fs.readDirectory(rootUri);
@@ -270,16 +274,20 @@ export class CliHubViewProvider implements vscode.WebviewViewProvider, vscode.Di
 
 				for (const name of await Promise.all(checks)) {
 					if (name) {
-						names.add(name);
+						rootsByName.set(name, [...(rootsByName.get(name) ?? []), root.id]);
 					}
 				}
 			}
 		}
 
+		const skills: WorkspaceSkill[] = [...rootsByName.entries()]
+			.sort(([a], [b]) => a.localeCompare(b))
+			.map(([name, roots]) => ({ name, roots }));
+
 		await webview.postMessage({
 			type: 'workspace.skills',
 			id: message.id,
-			skills: [...names].sort(),
+			skills,
 		});
 	}
 

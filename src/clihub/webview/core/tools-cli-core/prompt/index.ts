@@ -13,7 +13,19 @@ export {
 	stripPromptTokens,
 	protectMentions,
 	restoreMentions,
+	protectSkillTokens,
+	restoreSkillTokens,
 } from './attachments/markers';
+
+// Workspace skills: [Skill #name] tokens in the textarea, expanded on send
+// into instructions with the SKILL.md route resolved for the active CLI.
+export {
+	skillTokenPattern,
+	buildSkillToken,
+	resolveSkillPath,
+	expandSkillTokens,
+} from './skills';
+export type { WorkspaceSkill, SkillRoot } from './skills';
 export type { ImageAttachment } from './attachments/types';
 export { isImageAttachment } from './attachments/types';
 export { buildPromptTextWithImages } from './attachments/prepare';

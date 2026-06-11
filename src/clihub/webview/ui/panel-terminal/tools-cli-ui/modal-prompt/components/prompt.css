@@ -569,6 +569,13 @@
   box-shadow: 0 0 0 1px color-mix(in srgb, #e879f9 35%, transparent);
 }
 
+/* Skill tokens — [Skill #cavecrew], violet to match the skill chips */
+.prompt-textarea-highlight .prompt-skill-marker {
+  background: color-mix(in srgb, #a78bfa 16%, transparent);
+  color: #a78bfa;
+  box-shadow: 0 0 0 1px color-mix(in srgb, #a78bfa 35%, transparent);
+}
+
 /* When a paste marker is (partially) selected, the selection style wins */
 .prompt-textarea-highlight .selected .prompt-paste-marker,
 .prompt-textarea-highlight .selected.prompt-paste-marker {

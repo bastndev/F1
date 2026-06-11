@@ -1,4 +1,5 @@
 import { pasteMarkerPattern } from './pastes';
+import { skillTokenPattern } from '../skills';
 
 export const imageMarkerPattern = /\[Image #(\d+)\]/g;
 
@@ -7,15 +8,39 @@ export const mentionTokenPattern = /(?<=^|\s)@\S+/g;
 
 /**
  * Text with all non-typed tokens removed: image markers, collapsed-paste
- * markers, and @mentions. This is what the char counter should measure — the
- * tokens expand/resolve outside the textarea and are never translated, so
- * they shouldn't spend the user's prompt budget.
+ * markers, skill tokens, and @mentions. This is what the char counter should
+ * measure — the tokens expand/resolve outside the textarea and are never
+ * translated, so they shouldn't spend the user's prompt budget.
  */
 export function stripPromptTokens(text: string): string {
 	return text
 		.replace(imageMarkerPattern, '')
 		.replace(pasteMarkerPattern, '')
+		.replace(skillTokenPattern, '')
 		.replace(mentionTokenPattern, '');
+}
+
+export interface ProtectedSkillToken {
+	token: string;
+	placeholder: string;
+}
+
+/** Shield [Skill #name] tokens from translation, mirroring protectImageMarkers. */
+export function protectSkillTokens(text: string): { text: string; tokens: ProtectedSkillToken[] } {
+	const tokens: ProtectedSkillToken[] = [];
+	let index = 0;
+	const protectedText = text.replace(skillTokenPattern, (token) => {
+		const placeholder = `ZXQCLIHUBSKL${index++}QXZ`;
+		tokens.push({ token, placeholder });
+		return placeholder;
+	});
+	return { text: protectedText, tokens };
+}
+
+export function restoreSkillTokens(text: string, tokens: ProtectedSkillToken[]): string {
+	return tokens.reduce((result, { token, placeholder }) => {
+		return result.split(placeholder).join(token);
+	}, text);
 }
 
 export interface ProtectedMention {
