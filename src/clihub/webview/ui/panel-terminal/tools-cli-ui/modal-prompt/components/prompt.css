@@ -547,6 +547,36 @@
   box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.25);
 }
 
+/* Collapsed-paste markers — [Code #1 +22 lines] green, [Text #2 +5 lines] fuchsia.
+   Tinted badges like the image marker so they read as atomic tokens. */
+.prompt-textarea-highlight .prompt-paste-marker {
+  border-radius: 3px;
+  padding: 1px 0;
+  margin: 0;
+  display: inline;
+  font-weight: 500;
+}
+
+.prompt-textarea-highlight .prompt-paste-code {
+  background: color-mix(in srgb, #4ade80 16%, transparent);
+  color: #4ade80;
+  box-shadow: 0 0 0 1px color-mix(in srgb, #4ade80 35%, transparent);
+}
+
+.prompt-textarea-highlight .prompt-paste-text {
+  background: color-mix(in srgb, #e879f9 16%, transparent);
+  color: #e879f9;
+  box-shadow: 0 0 0 1px color-mix(in srgb, #e879f9 35%, transparent);
+}
+
+/* When a paste marker is (partially) selected, the selection style wins */
+.prompt-textarea-highlight .selected .prompt-paste-marker,
+.prompt-textarea-highlight .selected.prompt-paste-marker {
+  background: inherit;
+  color: inherit !important;
+  box-shadow: none;
+}
+
 /* Selection styling for the highlight overlay (so blue bg shows when selecting text including over markers) */
 .prompt-textarea-highlight .selected {
   background-color: var(--vscode-selection-background, #007acc);

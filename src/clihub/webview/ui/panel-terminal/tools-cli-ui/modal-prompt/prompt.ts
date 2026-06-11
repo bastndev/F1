@@ -12,6 +12,14 @@ import {
 	restoreImageMarkers,
 	type FileMentionEntry,
 	type SpellIssue,
+	type PasteAttachment,
+	shouldCollapsePaste,
+	buildPasteMarker,
+	countLines,
+	detectPasteKind,
+	expandPasteMarkers,
+	protectPasteMarkers,
+	restorePasteMarkers,
 } from '../../../../core/tools-cli-core/prompt';
 import { mountFileMentionPicker } from './components/file-mention/file-mention';
 
@@ -32,6 +40,10 @@ const ensureStyles = () => {
 // When Execute is pressed the resolved image paths are substituted so they appear in the CLI input.
 const imagePathPattern =
 	/(?:"([^"\r\n]+\.(?:png|jpe?g|gif|webp|bmp|svg|tiff?))"|'([^'\r\n]+\.(?:png|jpe?g|gif|webp|bmp|svg|tiff?))'|((?:~|\/)[^\r\n\t"'<>]*?\.(?:png|jpe?g|gif|webp|bmp|svg|tiff?)))/gi;
+
+// Every atomic token in the textarea: [Image #N], [Code #N +X lines], [Text #N +X lines].
+// Used by delete/arrow/caret handling so all marker types behave as single units.
+const atomicMarkerPattern = /\[(?:Image|Code|Text) #\d+[^\]]*\]/g;
 
 type PromptContext = {
 	close: () => void;
@@ -102,6 +114,19 @@ function initPromptTabs(host: HTMLElement, context: PromptContext, hasActiveSess
 	let imageAttachments: ImageAttachment[] = [];
 	let nextImageAttachmentId = 1;
 
+	// Collapsed-paste state — large pasted blocks live here verbatim while the
+	// textarea only shows their [Code/Text #N +X lines] marker.
+	const pasteAttachments: PasteAttachment[] = [];
+	let nextPasteAttachmentId = 1;
+
+	const registerPasteAttachment = (content: string): string => {
+		const id = nextPasteAttachmentId++;
+		const kind = detectPasteKind(content);
+		const marker = buildPasteMarker(kind, id, countLines(content));
+		pasteAttachments.push({ id, marker, kind, content });
+		return marker;
+	};
+
 	// Translate toggle — on by default, persisted to localStorage across sessions.
 	// localStorage key: 'f1-translate-auto' → '1' (on) | '0' (off). Missing key = on.
 	const translateState = { enabled: localStorage.getItem('f1-translate-auto') !== '0' };
@@ -155,6 +180,10 @@ function initPromptTabs(host: HTMLElement, context: PromptContext, hasActiveSess
 	// Setup paste that supports images/screenshots + paths (must run before or combined with lowercase)
 	setupImagePaste(textarea, registerPathImageAttachment, registerClipboardImageAttachment);
 
+	// Large text/code pastes collapse into an atomic marker instead of flooding
+	// the textarea (the other paste handlers skip these via shouldCollapsePaste).
+	setupPasteCollapse(textarea, registerPasteAttachment);
+
 	// Atomic delete and traversal for [Image #N] markers
 	textarea.addEventListener('keydown', (e) => {
 		if (handleImageMarkerDeleteKey(textarea, e)) {return;}
@@ -188,9 +217,13 @@ function initPromptTabs(host: HTMLElement, context: PromptContext, hasActiveSess
 				runBtn.innerHTML = '<i class="ti ti-sparkles" aria-hidden="true"></i><span>Translating…</span>';
 			}
 			try {
-				const { text: protectedText, markers } = protectImageMarkers(textToSend);
+				// Image AND paste markers must survive translation untouched.
+				const { text: imageProtected, markers } = protectImageMarkers(textToSend);
+				const { text: protectedText, markers: pasteMarkers } = protectPasteMarkers(imageProtected);
 				const result = await translatePromptText(protectedText, ctx);
-				const translated = result.text ? restoreImageMarkers(result.text, markers) : '';
+				const translated = result.text
+					? restoreImageMarkers(restorePasteMarkers(result.text, pasteMarkers), markers)
+					: '';
 				if (translated && translated !== textToSend.trim()) {
 					textToSend = translated;
 				}
@@ -215,6 +248,10 @@ function initPromptTabs(host: HTMLElement, context: PromptContext, hasActiveSess
 				console.error('[Prompt] Failed to prepare image attachments:', err);
 			}
 		}
+
+		// Collapsed pastes leave the textarea as markers; the CLI gets the
+		// original verbatim content (never lowercased, never translated).
+		textToSend = expandPasteMarkers(textToSend, pasteAttachments);
 
 		const result = processPrompt(textToSend, {
 			close: ctx.close,
@@ -345,7 +382,7 @@ function initPromptTabs(host: HTMLElement, context: PromptContext, hasActiveSess
 	const forceCaretOutOfMarkers = () => {
 		if (textarea.selectionStart !== textarea.selectionEnd) {return;}
 		const caret = textarea.selectionStart ?? 0;
-		for (const match of textarea.value.matchAll(/\[Image #(\d+)\]/g)) {
+		for (const match of textarea.value.matchAll(atomicMarkerPattern)) {
 			const start = match.index ?? 0;
 			const end = start + match[0].length;
 			if (caret > start && caret < end) {
@@ -408,8 +445,8 @@ function enforceLowercaseInput(textarea: HTMLTextAreaElement) {
 		const pastedForCheck = clipboard.getData('text/plain') || '';
 		imagePathPattern.lastIndex = 0;
 		const looksLikeImagePath = imagePathPattern.test(pastedForCheck);
-		if (hasImageFile || looksLikeImagePath) {
-			// Do not lowercase or prevent here — the dedicated image paste listener will handle and prevent.
+		if (hasImageFile || looksLikeImagePath || shouldCollapsePaste(pastedForCheck)) {
+			// Do not lowercase or prevent here — the dedicated image/collapse paste listeners handle these.
 			return;
 		}
 
@@ -822,7 +859,7 @@ function findImageMarkerDeleteRange(
 	const isDel = event.key === 'Delete';
 	const isWordMod = event.ctrlKey || event.altKey;
 
-	for (const match of text.matchAll(/\[Image #(\d+)\]/g)) {
+	for (const match of text.matchAll(atomicMarkerPattern)) {
 		const start = match.index ?? 0;
 		const end = start + match[0].length;
 		
@@ -855,8 +892,8 @@ function handleImageMarkerArrowKey(textarea: HTMLTextAreaElement, event: Keyboar
 
 	const caret = textarea.selectionStart ?? 0;
 	const isWordMod = event.ctrlKey || event.altKey;
-	
-	for (const match of textarea.value.matchAll(/\[Image #(\d+)\]/g)) {
+
+	for (const match of textarea.value.matchAll(atomicMarkerPattern)) {
 		const start = match.index ?? 0;
 		const end = start + match[0].length;
 		
@@ -919,6 +956,12 @@ function setupImagePaste(
 			.map((item) => item.getAsFile())
 			.filter((file): file is File => file !== null);
 
+		// Large text-only pastes belong to the collapse handler, even when they
+		// happen to contain image paths somewhere inside.
+		if (imageFiles.length === 0 && shouldCollapsePaste(pastedText)) {
+			return;
+		}
+
 		const textWithMarkers = replaceImagePathsWithMarkers(pastedText, registerPath);
 		const hasImagePath = textWithMarkers !== pastedText;
 
@@ -937,6 +980,33 @@ function setupImagePaste(
 		// cursor lands right after the token ready to type — same as @path mentions.
 		const insertWithSpacing = insertValue.endsWith(']') ? insertValue + ' ' : insertValue;
 		insertTextAtSelection(textarea, insertWithSpacing);
+	});
+}
+
+function setupPasteCollapse(textarea: HTMLTextAreaElement, registerPaste: (content: string) => string) {
+	textarea.addEventListener('paste', (event: ClipboardEvent) => {
+		const clipboardData = event.clipboardData;
+		if (!clipboardData) {
+			return;
+		}
+
+		// Real image files are the image handler's job.
+		const hasImageFile = Array.from(clipboardData.items).some(
+			(item) => item.kind === 'file' && item.type.startsWith('image/')
+		);
+		if (hasImageFile) {
+			return;
+		}
+
+		const pastedText = clipboardData.getData('text/plain');
+		if (!shouldCollapsePaste(pastedText)) {
+			return;
+		}
+
+		event.preventDefault();
+		const marker = registerPaste(pastedText);
+		// Trailing space so the cursor lands ready to keep typing, like @mentions.
+		insertTextAtSelection(textarea, marker + ' ');
 	});
 }
 
@@ -971,7 +1041,7 @@ function updatePromptImageHighlight(
   highlight.scrollLeft = textarea.scrollLeft;
 }
 
-type TokenKind = 'image' | 'mention' | 'mention-folder' | 'misspelled' | 'plain';
+type TokenKind = 'image' | 'mention' | 'mention-folder' | 'paste-code' | 'paste-text' | 'misspelled' | 'plain';
 
 function buildPromptHighlightNodes(text: string, selStart: number = -1, selEnd: number = -1, spellIssues: SpellIssue[] = []): Node[] {
   if (!text) {
@@ -989,6 +1059,11 @@ function buildPromptHighlightNodes(text: string, selStart: number = -1, selEnd: 
   for (const match of text.matchAll(/\[Image #(\d+)\]/g)) {
     tokens.push({ start: match.index ?? 0, end: (match.index ?? 0) + match[0].length, kind: 'image' });
   }
+  // Collapsed-paste markers: [Code #1 +22 lines] (green) / [Text #2 +5 lines] (fuchsia)
+  for (const match of text.matchAll(/\[(Code|Text) #\d+ \+\d+ lines?\]/g)) {
+    const kind: TokenKind = match[1] === 'Code' ? 'paste-code' : 'paste-text';
+    tokens.push({ start: match.index ?? 0, end: (match.index ?? 0) + match[0].length, kind });
+  }
   // @mention: '@' followed by any non-whitespace chars, must be preceded by whitespace or start of string
   for (const match of text.matchAll(/(?<=^|\s)@\S+/g)) {
     const kind: TokenKind = match[0].endsWith('/') ? 'mention-folder' : 'mention';
@@ -1001,7 +1076,7 @@ function buildPromptHighlightNodes(text: string, selStart: number = -1, selEnd: 
     }
   }
   // Image/mention tokens take priority over misspelled ones when ranges collide.
-  const tokenPriority: Record<TokenKind, number> = { image: 0, mention: 0, 'mention-folder': 0, misspelled: 1, plain: 2 };
+  const tokenPriority: Record<TokenKind, number> = { image: 0, mention: 0, 'mention-folder': 0, 'paste-code': 0, 'paste-text': 0, misspelled: 1, plain: 2 };
   tokens.sort((a, b) => a.start - b.start || tokenPriority[a.kind] - tokenPriority[b.kind]);
 
   for (const token of tokens) {
@@ -1047,6 +1122,8 @@ function appendSegment(
   const cssClass = kind === 'image' ? 'prompt-image-marker'
                  : kind === 'mention' ? 'prompt-mention'
                  : kind === 'mention-folder' ? 'prompt-mention-folder'
+                 : kind === 'paste-code' ? 'prompt-paste-marker prompt-paste-code'
+                 : kind === 'paste-text' ? 'prompt-paste-marker prompt-paste-text'
                  : kind === 'misspelled' ? 'prompt-misspelled'
                  : 'plain';
 
