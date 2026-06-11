@@ -139,6 +139,11 @@ export class CliHubViewProvider implements vscode.WebviewViewProvider, vscode.Di
 				return;
 			}
 
+			if (message.type === 'workspace.listSkills') {
+				await this._handleWorkspaceListSkills(webviewView.webview, message);
+				return;
+			}
+
 			if (message.type === 'cli.create' && message.agent && allowedAgents.has(message.agent)) {
 				if (!(await this._confirmAgentLaunch(message.agent, 'panel'))) {
 					return;
@@ -191,6 +196,54 @@ export class CliHubViewProvider implements vscode.WebviewViewProvider, vscode.Di
 		);
 
 		return choice === guard.confirmLabel;
+	}
+
+	private async _handleWorkspaceListSkills(webview: vscode.Webview, message: CliHubMessage) {
+		if (typeof message.id !== 'string') {
+			return;
+		}
+
+		// A skill is a directory under one of these roots containing a SKILL.md.
+		// Only the folder name is surfaced; .agents takes precedence on duplicates.
+		const skillRoots = ['.agents/skills', '.claude/skills'];
+		const names = new Set<string>();
+		const workspaceFolder = vscode.workspace.workspaceFolders?.[0];
+
+		if (workspaceFolder) {
+			for (const root of skillRoots) {
+				const rootUri = vscode.Uri.joinPath(workspaceFolder.uri, ...root.split('/'));
+				let entries: Array<[string, vscode.FileType]>;
+				try {
+					entries = await vscode.workspace.fs.readDirectory(rootUri);
+				} catch {
+					continue; // root doesn't exist — normal
+				}
+
+				const checks = entries
+					.filter(([name, type]) => type === vscode.FileType.Directory && !name.startsWith('.'))
+					.map(async ([name]) => {
+						try {
+							const manifest = vscode.Uri.joinPath(rootUri, name, 'SKILL.md');
+							const stat = await vscode.workspace.fs.stat(manifest);
+							return stat.type === vscode.FileType.File ? name : undefined;
+						} catch {
+							return undefined;
+						}
+					});
+
+				for (const name of await Promise.all(checks)) {
+					if (name) {
+						names.add(name);
+					}
+				}
+			}
+		}
+
+		await webview.postMessage({
+			type: 'workspace.skills',
+			id: message.id,
+			skills: [...names].sort(),
+		});
 	}
 
 	private async _handleWorkspaceListFiles(webview: vscode.Webview, message: CliHubMessage) {

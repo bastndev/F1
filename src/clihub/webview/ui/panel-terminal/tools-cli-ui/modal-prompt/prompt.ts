@@ -69,6 +69,7 @@ type PromptContext = {
 	translatePrompt?: (request: PromptTranslateRequest) => Promise<PromptTranslateResult>;
 	preparePromptWithAttachments?: (text: string, attachments: ImageAttachment[]) => Promise<string>;
 	requestWorkspaceFiles?: () => Promise<FileMentionEntry[]>;
+	requestWorkspaceSkills?: () => Promise<string[]>;
 	requestSpellcheck?: (text: string, strict: boolean) => Promise<SpellIssue[]>;
 };
 
@@ -299,6 +300,13 @@ function initPromptTabs(host: HTMLElement, context: PromptContext, hasActiveSess
 		// original verbatim content (never lowercased, never translated).
 		textToSend = expandPasteMarkers(textToSend, pasteAttachments);
 
+		// Selected skill chips ride along as an explicit instruction. Appended
+		// post-translation (already English) so it never hits the translator.
+		if (selectedSkills.size > 0) {
+			const names = [...selectedSkills].map((name) => `"${name}"`).join(', ');
+			textToSend += `\n\nUse the following skill${selectedSkills.size === 1 ? '' : 's'}: ${names}.`;
+		}
+
 		const result = processPrompt(textToSend, {
 			close: ctx.close,
 			sendToActiveSession: ctx.sendToActiveSession,
@@ -325,8 +333,11 @@ function initPromptTabs(host: HTMLElement, context: PromptContext, hasActiveSess
 		textarea.focus();
 	});
 
+	// Skills the user toggles on travel with the prompt as an explicit instruction.
+	const selectedSkills = new Set<string>();
+
 	if (hasActiveSession) {
-		initSkillsChips(host);
+		initSkillsChips(host, context, selectedSkills);
 		const tools = initToolbarActions(
 			host,
 			() => translateState.enabled,
@@ -568,16 +579,52 @@ function enforceLowercaseInput(textarea: HTMLTextAreaElement) {
 	});
 }
 
-function initSkillsChips(host: HTMLElement) {
-	const chips = host.querySelectorAll<HTMLButtonElement>('.prompt-tool-btn');
+// Populate the Skills row with the skills installed in the workspace
+// (.agents/skills/* and .claude/skills/*, folders containing a SKILL.md —
+// scanned host-side). The row only appears when at least one skill exists.
+function initSkillsChips(host: HTMLElement, context: PromptContext, selectedSkills: Set<string>) {
+	const row = host.querySelector<HTMLElement>('.prompt-skills');
+	const chipsHost = host.querySelector<HTMLElement>('#skillChips');
+	if (!row || !chipsHost || !context.requestWorkspaceSkills) {
+		return;
+	}
 
-	chips.forEach((chip) => {
-		chip.addEventListener('click', () => {
-					chip.classList.toggle('selected');
+	void context.requestWorkspaceSkills().then((skills) => {
+		if (!row.isConnected) {
+			return;
+		}
 
-			// Optional: if you want only one skill active at a time, uncomment below
-			// chips.forEach(c => c !== chip && c.classList.remove('selected'));
-		});
+		chipsHost.replaceChildren();
+
+		// No skills installed: show an inert dashed "+" placeholder.
+		// TODO(future): wire this to a skill install/create flow after the refactor.
+		if (!skills.length) {
+			const addChip = document.createElement('button');
+			addChip.className = 'prompt-tool-btn prompt-skill-add';
+			addChip.textContent = '+';
+			addChip.title = 'Add skills — coming soon';
+			addChip.setAttribute('aria-disabled', 'true');
+			chipsHost.append(addChip);
+			row.hidden = false;
+			return;
+		}
+
+		for (const name of skills) {
+			const chip = document.createElement('button');
+			chip.className = 'prompt-tool-btn';
+			chip.dataset.skill = name;
+			chip.textContent = name;
+			chip.title = `Ask the CLI to use its "${name}" skill`;
+			chip.addEventListener('click', () => {
+				if (chip.classList.toggle('selected')) {
+					selectedSkills.add(name);
+				} else {
+					selectedSkills.delete(name);
+				}
+			});
+			chipsHost.append(chip);
+		}
+		row.hidden = false;
 	});
 }
 
