@@ -131,6 +131,20 @@ export function renderMarkdownLite(markdown: string): string {
 		}
 		flushTable();
 
+		// Placeholder where untranslated source code was removed.
+		const codeHere = trimmed.match(/^\[\[code-here:(\d+)\]\]$/);
+		if (codeHere) {
+			flushAll();
+			html.push(
+				`<div class="md-code-here" role="note">` +
+				`<i class="ti ti-code" aria-hidden="true"></i>` +
+				`<span class="md-code-here-label">code here</span>` +
+				`<span class="md-code-here-num">#${codeHere[1]}</span>` +
+				`</div>`
+			);
+			continue;
+		}
+
 		if (!trimmed) {
 			flushAll();
 			continue;

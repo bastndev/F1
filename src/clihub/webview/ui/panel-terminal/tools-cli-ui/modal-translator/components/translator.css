@@ -400,6 +400,34 @@
 	color: var(--vscode-foreground);
 }
 
+/* "code here" placeholder — marks untranslated source code */
+.translator-text .md-code-here {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	margin: 4px 0 12px;
+	padding: 9px 12px;
+	border: 1px dashed color-mix(in srgb, var(--agent-accent, #AFA9EC) 35%, transparent);
+	border-radius: 8px;
+	background: color-mix(in srgb, var(--agent-accent, #AFA9EC) 5%, transparent);
+	color: var(--vscode-descriptionForeground);
+	font-family: 'JetBrains Mono', ui-monospace, monospace;
+	font-size: 11px;
+	letter-spacing: 0.05em;
+	user-select: none;
+}
+
+.translator-text .md-code-here i {
+	color: var(--agent-accent, #AFA9EC);
+	font-size: 14px;
+}
+
+.translator-text .md-code-here-num {
+	margin-left: auto;
+	color: var(--agent-accent, #AFA9EC);
+	font-weight: 600;
+}
+
 /* Tree / architecture diagrams — verbatim, framed by a fine accent line */
 .translator-text .md-pre.md-tree {
 	background: transparent;

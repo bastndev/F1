@@ -11,10 +11,12 @@
  *                tables). Rule lines become `---`, noise is dropped.
  *   - diagram  → tree diagrams kept verbatim (paths must not be translated);
  *                the modal renders them as a monospace block.
+ *   - code     → fenced or detected source code. Never translated; the modal
+ *                shows a numbered "code here" placeholder instead.
  */
 
 export type TerminalSegment = {
-	kind: 'prose' | 'diagram';
+	kind: 'prose' | 'diagram' | 'code';
 	content: string;
 };
 
@@ -26,6 +28,7 @@ type LineKind =
 	| 'table-content'
 	| 'tree'
 	| 'pipes'
+	| 'code'
 	| 'prose';
 
 // Lines made purely of frame characters and whitespace.
@@ -67,6 +70,103 @@ function classifyLine(trimmed: string): LineKind {
 	return 'prose';
 }
 
+/**
+ * Heuristic: does this line read like source code rather than prose?
+ * Conservative on purpose \u2014 a paragraph of English must never match.
+ */
+function looksLikeCode(line: string): boolean {
+	const trimmed = line.trim();
+	if (!trimmed) {
+		return false;
+	}
+
+	let score = 0;
+	// Strong signals
+	if (/^\s*[}\])];?,?$/.test(trimmed)) {
+		score += 3;
+	}
+	if (/[;{]\s*$/.test(trimmed)) {
+		score += 2;
+	}
+	if (/^(?:import|export|from|const|let|var|function|async|await|class|interface|enum|type|def|fn|pub|impl|struct|public|private|protected|static|void|elif|namespace|using|package|require)\b/.test(trimmed)) {
+		score += 2;
+	}
+	if (/=>|::|===|!==|&&|\|\||\+=|-=|\*=|<\/|\/>/.test(trimmed)) {
+		score += 2;
+	}
+	if (/^\s*(?:\/\/|\/\*|\*\/|\*\s|<!--)/.test(trimmed)) {
+		score += 2;
+	}
+	// Weak signals
+	if (/^[\w$.]+\s*\([^)]*\)[;,]?$/.test(trimmed)) {
+		score += 1;
+	}
+	if (/^[\w$.[\]'"]+\s*[:=]\s*\S/.test(trimmed) && !/\s(?:is|are|was|the|a|an)\s/i.test(trimmed)) {
+		score += 1;
+	}
+	if (/^\s{2,}|\t/.test(line)) {
+		score += 1;
+	}
+
+	return score >= 2;
+}
+
+/**
+ * Overrides line kinds with 'code' for fenced blocks and for contiguous
+ * runs of code-looking lines (at least two, blanks allowed inside).
+ */
+function markCodeLines(lines: string[], kinds: LineKind[]): void {
+	// Pass 1: ``` fences \u2014 everything between (and including) is code.
+	let inFence = false;
+	for (let i = 0; i < lines.length; i += 1) {
+		if (lines[i].trim().startsWith('```')) {
+			kinds[i] = 'code';
+			inFence = !inFence;
+			continue;
+		}
+		if (inFence) {
+			kinds[i] = 'code';
+		}
+	}
+
+	// Pass 2: bare code runs inside prose regions.
+	let runStart = -1;
+	let codeLineCount = 0;
+
+	const closeRun = (end: number) => {
+		if (runStart >= 0 && codeLineCount >= 2) {
+			for (let i = runStart; i < end; i += 1) {
+				if (kinds[i] === 'prose' || (kinds[i] === 'blank' && i > runStart)) {
+					kinds[i] = 'code';
+				}
+			}
+		}
+		runStart = -1;
+		codeLineCount = 0;
+	};
+
+	for (let i = 0; i < lines.length; i += 1) {
+		if (kinds[i] === 'prose' && looksLikeCode(lines[i])) {
+			if (runStart < 0) {
+				runStart = i;
+			}
+			codeLineCount += 1;
+			continue;
+		}
+		// Blanks inside a run stay pending; anything else ends it.
+		if (kinds[i] === 'blank' && runStart >= 0) {
+			continue;
+		}
+		closeRun(i);
+	}
+	closeRun(lines.length);
+
+	// Trailing blanks that were absorbed into a run revert to blanks.
+	for (let i = lines.length - 1; i >= 0 && kinds[i] === 'code' && !lines[i].trim(); i -= 1) {
+		kinds[i] = 'blank';
+	}
+}
+
 export function segmentTerminalSelection(raw: string): TerminalSegment[] {
 	const lines = raw
 		.replace(/\u00a0/g, ' ')
@@ -75,11 +175,12 @@ export function segmentTerminalSelection(raw: string): TerminalSegment[] {
 		.map((line) => line.replace(/\s+$/, ''));
 
 	const kinds = lines.map((line) => classifyLine(line.trim()));
+	markCodeLines(lines, kinds);
 
 	const segments: TerminalSegment[] = [];
 	let prose: string[] = [];
 	let block: string[] = [];
-	let blockKind: 'tree' | 'table' | null = null;
+	let blockKind: 'tree' | 'table' | 'code' | null = null;
 
 	const flushProse = () => {
 		const cleaned = cleanProse(prose);
@@ -93,9 +194,12 @@ export function segmentTerminalSelection(raw: string): TerminalSegment[] {
 		if (!blockKind) {
 			return;
 		}
-		if (blockKind === 'tree') {
+		if (blockKind === 'tree' || blockKind === 'code') {
 			flushProse();
-			segments.push({ kind: 'diagram', content: block.join('\n') });
+			segments.push({
+				kind: blockKind === 'tree' ? 'diagram' : 'code',
+				content: block.join('\n'),
+			});
 		} else {
 			// Tables stay in the prose stream as pipe markdown — their cell
 			// text is regular language that should be translated.
@@ -130,7 +234,12 @@ export function segmentTerminalSelection(raw: string): TerminalSegment[] {
 					const upcoming = nextRelevant(i);
 					const continues = blockKind === 'table'
 						? upcoming === 'table-border' || upcoming === 'table-content'
-						: upcoming === 'tree' || upcoming === 'pipes';
+						: blockKind === 'code'
+							? upcoming === 'code'
+							: upcoming === 'tree' || upcoming === 'pipes';
+					if (continues && blockKind === 'code') {
+						block.push(line);
+					}
 					if (!continues) {
 						flushBlock();
 					}
@@ -145,7 +254,7 @@ export function segmentTerminalSelection(raw: string): TerminalSegment[] {
 					block.push(line);
 					break;
 				}
-				if (blockKind === 'tree') {
+				if (blockKind) {
 					flushBlock();
 				}
 				prose.push('---');
@@ -161,7 +270,7 @@ export function segmentTerminalSelection(raw: string): TerminalSegment[] {
 			}
 
 			case 'tree': {
-				if (blockKind === 'table') {
+				if (blockKind && blockKind !== 'tree') {
 					flushBlock();
 				}
 				blockKind = 'tree';
@@ -169,9 +278,18 @@ export function segmentTerminalSelection(raw: string): TerminalSegment[] {
 				break;
 			}
 
+			case 'code': {
+				if (blockKind && blockKind !== 'code') {
+					flushBlock();
+				}
+				blockKind = 'code';
+				block.push(line);
+				break;
+			}
+
 			case 'table-border':
 			case 'table-content': {
-				if (blockKind === 'tree') {
+				if (blockKind && blockKind !== 'table') {
 					flushBlock();
 				}
 				blockKind = 'table';

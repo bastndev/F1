@@ -115,11 +115,22 @@ function initializeTranslator(host: HTMLElement, context: ToolContext) {
 			const renderedParts: string[] = [];
 			const copyParts: string[] = [];
 			let provider: string | undefined;
+			let codeCount = 0;
 
 			for (const segment of segments) {
 				if (segment.kind === 'diagram') {
 					renderedParts.push(`\`\`\`tree\n${segment.content}\n\`\`\``);
 					copyParts.push(segment.content);
+					continue;
+				}
+
+				if (segment.kind === 'code') {
+					// Code never goes to translation. It collapses into a numbered
+					// "code here" placeholder — kept in English so a future voice
+					// feature can read it without translation tricks.
+					codeCount += 1;
+					renderedParts.push(`[[code-here:${codeCount}]]`);
+					copyParts.push(`[code here #${codeCount}]`);
 					continue;
 				}
 
