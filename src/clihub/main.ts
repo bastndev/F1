@@ -149,6 +149,17 @@ export class CliHubViewProvider implements vscode.WebviewViewProvider, vscode.Di
 				return;
 			}
 
+			if (message.type === 'clipboard.read' && typeof message.id === 'string') {
+				let text = '';
+				try {
+					text = await vscode.env.clipboard.readText();
+				} catch (error) {
+					console.error('Error reading clipboard:', error);
+				}
+				await webviewView.webview.postMessage({ type: 'clipboard.text', id: message.id, text });
+				return;
+			}
+
 			if (message.type === 'prompt.prepare') {
 				await this._handlePromptPrepare(webviewView.webview, message);
 				return;
