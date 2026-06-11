@@ -48,6 +48,19 @@ const imagePathPattern =
 // Used by delete/arrow/caret handling so all marker types behave as single units.
 const atomicMarkerPattern = /\[(?:Image|Code|Text) #\d+[^\]]*\]/g;
 
+// Draft state per CLI session, surviving modal close/Esc (a too-easy accident
+// while typing). Lives in module scope: the webview JS context persists while
+// the panel is open, and entries are keyed by session id so a draft dies with
+// its session and can never resurface in another CLI.
+type PromptDraft = {
+	text: string;
+	imageAttachments: ImageAttachment[];
+	nextImageAttachmentId: number;
+	pasteAttachments: PasteAttachment[];
+	nextPasteAttachmentId: number;
+};
+const promptDrafts = new Map<string, PromptDraft>();
+
 type PromptContext = {
 	close: () => void;
 	getActiveSessionId?: () => string | undefined;
@@ -113,14 +126,41 @@ function initPromptTabs(host: HTMLElement, context: PromptContext, hasActiveSess
 		}
 	}
 
-	// Image attachments state (lives while this modal instance is mounted)
-	let imageAttachments: ImageAttachment[] = [];
-	let nextImageAttachmentId = 1;
+	// Restore the draft for this session, if the modal was closed mid-typing.
+	const draftKey = context.getActiveSessionId?.();
+	const savedDraft = draftKey ? promptDrafts.get(draftKey) : undefined;
+
+	// Image attachments state (survives modal close via the session draft)
+	let imageAttachments: ImageAttachment[] = savedDraft?.imageAttachments ?? [];
+	let nextImageAttachmentId = savedDraft?.nextImageAttachmentId ?? 1;
 
 	// Collapsed-paste state — large pasted blocks live here verbatim while the
 	// textarea only shows their [Code/Text #N +X lines] marker.
-	const pasteAttachments: PasteAttachment[] = [];
-	let nextPasteAttachmentId = 1;
+	const pasteAttachments: PasteAttachment[] = savedDraft?.pasteAttachments ?? [];
+	let nextPasteAttachmentId = savedDraft?.nextPasteAttachmentId ?? 1;
+
+	if (savedDraft?.text) {
+		textarea.value = savedDraft.text;
+	}
+
+	const saveDraft = () => {
+		if (!draftKey) {
+			return;
+		}
+		promptDrafts.set(draftKey, {
+			text: textarea.value,
+			imageAttachments,
+			nextImageAttachmentId,
+			pasteAttachments,
+			nextPasteAttachmentId,
+		});
+	};
+	textarea.addEventListener('input', saveDraft);
+
+	// Custom undo/redo: programmatic value writes (lowercase enforcement,
+	// marker insertion) wipe the browser's native undo stack, so Ctrl+Z needs
+	// its own history.
+	setupUndoHistory(textarea);
 
 	const registerPasteAttachment = (content: string): string => {
 		const id = nextPasteAttachmentId++;
@@ -268,6 +308,11 @@ function initPromptTabs(host: HTMLElement, context: PromptContext, hasActiveSess
 		if (result.status === 'no-session') {
 			showNoSessionMessage(hostEl);
 		}
+
+		// Sent successfully — the draft has served its purpose.
+		if (result.status === 'sent' && draftKey) {
+			promptDrafts.delete(draftKey);
+		}
 	}
 
 	// Single tab — set placeholder once
@@ -412,6 +457,61 @@ function initPromptTabs(host: HTMLElement, context: PromptContext, hasActiveSess
 	requestAnimationFrame(() => {
 		adjustHeight();
 		renderHighlight();
+	});
+}
+
+// Snapshot-based undo/redo (Ctrl+Z / Ctrl+Shift+Z or Ctrl+Y). Every input
+// event — typing, paste collapse, marker insertion/deletion — pushes a
+// snapshot; restoring replays value + caret and re-dispatches 'input' so the
+// highlight, char count, draft and run-button state all stay in sync.
+function setupUndoHistory(textarea: HTMLTextAreaElement) {
+	type Snapshot = { value: string; start: number; end: number };
+	const history: Snapshot[] = [
+		{ value: textarea.value, start: textarea.value.length, end: textarea.value.length },
+	];
+	let index = 0;
+	let isRestoring = false;
+	const maxEntries = 200;
+
+	textarea.addEventListener('input', () => {
+		if (isRestoring || history[index]?.value === textarea.value) {
+			return;
+		}
+		history.splice(index + 1);
+		history.push({
+			value: textarea.value,
+			start: textarea.selectionStart ?? textarea.value.length,
+			end: textarea.selectionEnd ?? textarea.value.length,
+		});
+		if (history.length > maxEntries) {
+			history.shift();
+		}
+		index = history.length - 1;
+	});
+
+	const restore = (snapshot: Snapshot) => {
+		isRestoring = true;
+		textarea.value = snapshot.value;
+		textarea.setSelectionRange(snapshot.start, snapshot.end);
+		textarea.dispatchEvent(new Event('input', { bubbles: true }));
+		isRestoring = false;
+	};
+
+	textarea.addEventListener('keydown', (e) => {
+		if (!(e.ctrlKey || e.metaKey) || e.altKey) {
+			return;
+		}
+		const key = e.key.toLowerCase();
+		if (key !== 'z' && key !== 'y') {
+			return;
+		}
+		e.preventDefault();
+		const isRedo = key === 'y' || (key === 'z' && e.shiftKey);
+		if (isRedo && index < history.length - 1) {
+			restore(history[++index]);
+		} else if (!isRedo && index > 0) {
+			restore(history[--index]);
+		}
 	});
 }
 
