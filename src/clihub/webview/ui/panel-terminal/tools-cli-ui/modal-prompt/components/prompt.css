@@ -661,6 +661,32 @@
   flex-wrap: wrap;
 }
 
+/* display:flex above would defeat the hidden attribute's UA display:none */
+.prompt-skills[hidden] {
+  display: none;
+}
+
+/* Empty state: inert dashed "+" placeholder, tinted with the CLI accent.
+   TODO(future): becomes the entry point of the skill install/create flow. */
+.prompt-skill-add {
+  border-style: dashed;
+  border-color: color-mix(in srgb, var(--agent-accent, #534AB7) 45%, transparent);
+  color: var(--agent-accent, #AFA9EC);
+  background: color-mix(in srgb, var(--agent-accent, #534AB7) 6%, transparent);
+  min-width: 30px;
+  font-size: 13px;
+  line-height: 1;
+  cursor: default;
+}
+
+.prompt-skill-add:hover {
+  /* Inert for now — keep the resting look, no interactive affordance */
+  border-style: dashed;
+  border-color: color-mix(in srgb, var(--agent-accent, #534AB7) 45%, transparent);
+  color: var(--agent-accent, #AFA9EC);
+  background: color-mix(in srgb, var(--agent-accent, #534AB7) 6%, transparent);
+}
+
 .prompt-skills-label {
   font-size: 11px;
   font-weight: 600;

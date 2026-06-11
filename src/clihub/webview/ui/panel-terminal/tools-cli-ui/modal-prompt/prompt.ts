@@ -590,11 +590,25 @@ function initSkillsChips(host: HTMLElement, context: PromptContext, selectedSkil
 	}
 
 	void context.requestWorkspaceSkills().then((skills) => {
-		if (!skills.length || !row.isConnected) {
+		if (!row.isConnected) {
 			return;
 		}
 
 		chipsHost.replaceChildren();
+
+		// No skills installed: show an inert dashed "+" placeholder.
+		// TODO(future): wire this to a skill install/create flow after the refactor.
+		if (!skills.length) {
+			const addChip = document.createElement('button');
+			addChip.className = 'prompt-tool-btn prompt-skill-add';
+			addChip.textContent = '+';
+			addChip.title = 'Add skills — coming soon';
+			addChip.setAttribute('aria-disabled', 'true');
+			chipsHost.append(addChip);
+			row.hidden = false;
+			return;
+		}
+
 		for (const name of skills) {
 			const chip = document.createElement('button');
 			chip.className = 'prompt-tool-btn';
