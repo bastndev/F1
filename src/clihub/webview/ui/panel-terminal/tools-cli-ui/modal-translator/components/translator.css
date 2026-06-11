@@ -647,56 +647,6 @@
 	opacity: 0.18;
 }
 
-/* ── Voice selector ──────────────────────────────────────────────── */
-.voice-label {
-	font-size: 10px;
-	color: var(--vscode-descriptionForeground);
-	opacity: 0.55;
-	font-family: 'JetBrains Mono', monospace;
-	flex-shrink: 0;
-}
-
-.voice-name {
-	font-size: 11px;
-	font-weight: 600;
-	color: #c97a3a; /* warm tone for Nova voice */
-	background: rgba(201, 122, 58, 0.1);
-	padding: 2px 8px;
-	border-radius: 4px;
-	font-family: 'JetBrains Mono', monospace;
-}
-
-.voice-selector {
-	display: flex;
-	gap: 3px;
-}
-
-.voice-chip {
-	display: flex;
-	align-items: center;
-	padding: 3px 8px;
-	background: var(--vscode-input-background);
-	border: 0.5px solid var(--vscode-editorGroup-border);
-	border-radius: 6px;
-	cursor: pointer;
-	transition: all 0.15s ease;
-	font-family: 'JetBrains Mono', monospace;
-	font-size: 10px;
-	color: var(--vscode-descriptionForeground);
-	white-space: nowrap;
-}
-
-.voice-chip:hover:not(.active) {
-	border-color: color-mix(in srgb, var(--agent-accent, #AFA9EC) 40%, var(--vscode-editorGroup-border));
-	color: var(--agent-accent, #AFA9EC);
-}
-
-.voice-chip.active {
-	border-color: rgba(175, 169, 236, 0.45);
-	color: var(--agent-accent, #AFA9EC);
-	background: color-mix(in srgb, var(--agent-accent, #AFA9EC) 8%, var(--vscode-input-background));
-}
-
 /* ── Audio spectrum — lives inside the Listen button, same slot ──── */
 .translator-spectrum {
 	position: absolute;
@@ -818,11 +768,5 @@
 
 .agent-shell[data-agent] .lang-option.active {
 	background: var(--agent-accent);
-}
-
-.agent-shell[data-agent] .voice-chip.active {
-	border-color: color-mix(in srgb, var(--agent-accent) 45%, transparent);
-	color: var(--agent-accent);
-	background: color-mix(in srgb, var(--agent-accent) 8%, var(--vscode-input-background));
 }
 
