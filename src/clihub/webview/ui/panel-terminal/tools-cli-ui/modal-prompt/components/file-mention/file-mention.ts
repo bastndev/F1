@@ -1,5 +1,6 @@
 import fileMentionCss from './file-mention.css';
 import type { FileMentionEntry, FileMentionRequest } from '../../../../../../core/tools-cli-core/prompt/file-mention';
+import { fuzzyMatch } from '../../../../../../core/tools-cli-core/prompt/fuzzy-match';
 
 const stylesId = 'cli-file-mention-styles';
 
@@ -77,63 +78,112 @@ export function mountFileMentionPicker(
 		});
 	};
 
+	/**
+	 * Wrap the matched characters of a name in highlight tags so the user
+	 * sees *why* an entry surfaced (e.g. "test-pro" lighting up inside
+	 * "test-del-projecto.ts"). Built with text nodes — names come from the
+	 * filesystem and must never be parsed as HTML.
+	 */
+	const buildNameSpan = (name: string, positions: number[]): HTMLSpanElement => {
+		const span = document.createElement('span');
+		span.className = 'fm-name';
+
+		let cursor = 0;
+		for (let i = 0; i < positions.length; ) {
+			// Coalesce consecutive positions into one highlight run.
+			let runEnd = i;
+			while (runEnd + 1 < positions.length && positions[runEnd + 1] === positions[runEnd] + 1) {
+				runEnd++;
+			}
+			const start = positions[i];
+			const end = positions[runEnd] + 1;
+
+			if (start > cursor) {
+				span.append(name.slice(cursor, start));
+			}
+			const mark = document.createElement('b');
+			mark.className = 'fm-match';
+			mark.textContent = name.slice(start, end);
+			span.append(mark);
+
+			cursor = end;
+			i = runEnd + 1;
+		}
+		if (cursor < name.length) {
+			span.append(name.slice(cursor));
+		}
+
+		return span;
+	};
+
 	const renderItems = (items: FileMentionEntry[], filter: string) => {
 		if (!dropdown) { return; }
 		const list = dropdown.querySelector<HTMLElement>('.fm-list');
 		if (!list) { return; }
 
-		// Relevance-first sort: name starts-with query > name contains query > path contains query.
-		// Within each tier: directories before files, then alphabetical.
-		const lc = filter.toLowerCase();
+		// Fuzzy subsequence ranking (quick-open style): "test-pro" matches
+		// "test-del-projecto.ts". Name matches always outrank path-only
+		// matches; within a tie, directories first, then alphabetical.
+		const query = filter.trim();
+		const nameMatchBonus = 1000;
 
-		/** 0 = name starts with query (best), 1 = name contains query, 2 = only path matches */
-		const relevance = (e: FileMentionEntry): number => {
-			const nameLc = e.name.toLowerCase();
-			if (nameLc.startsWith(lc)) { return 0; }
-			if (nameLc.includes(lc))   { return 1; }
-			return 2;
+		type ScoredEntry = { entry: FileMentionEntry; score: number; namePositions: number[] };
+
+		const scoreEntry = (entry: FileMentionEntry): ScoredEntry | undefined => {
+			if (!query) {
+				return { entry, score: 0, namePositions: [] };
+			}
+			const nameMatch = fuzzyMatch(query, entry.name);
+			if (nameMatch) {
+				return { entry, score: nameMatch.score + nameMatchBonus, namePositions: nameMatch.positions };
+			}
+			const pathMatch = fuzzyMatch(query, entry.path);
+			if (pathMatch) {
+				return { entry, score: pathMatch.score, namePositions: [] };
+			}
+			return undefined;
 		};
 
-		const filtered = items
-			.filter(e => {
-				const haystack = `${e.name} ${e.path}`.toLowerCase();
-				return haystack.includes(lc);
-			})
+		const scored = items
+			.map(scoreEntry)
+			.filter((s): s is ScoredEntry => s !== undefined)
 			.sort((a, b) => {
-				const ra = relevance(a);
-				const rb = relevance(b);
-				if (ra !== rb) { return ra - rb; }
-				// Within same relevance tier: directories first, then alphabetical
-				if (a.isDirectory !== b.isDirectory) { return a.isDirectory ? -1 : 1; }
-				return a.name.localeCompare(b.name);
+				if (a.score !== b.score) { return b.score - a.score; }
+				if (a.entry.isDirectory !== b.entry.isDirectory) { return a.entry.isDirectory ? -1 : 1; }
+				return a.entry.name.localeCompare(b.entry.name);
 			});
 
-		entries = filtered;
+		entries = scored.map((s) => s.entry);
 		activeIndex = 0;
 
-		if (filtered.length === 0) {
-			list.innerHTML = `<div class="fm-empty">No files found</div>`;
+		list.replaceChildren();
+
+		if (scored.length === 0) {
+			const empty = document.createElement('div');
+			empty.className = 'fm-empty';
+			empty.textContent = 'No files found';
+			list.append(empty);
 			return;
 		}
 
-		list.innerHTML = '';
-		filtered.forEach((entry, i) => {
+		scored.forEach(({ entry, namePositions }, i) => {
 			const item = document.createElement('div');
 			item.className = 'fm-item' + (i === 0 ? ' active' : '');
 			item.dataset.index = String(i);
 
-			const iconClass = entry.isDirectory ? 'folder' : 'file';
-			const icon = entry.isDirectory ? '📁' : '📄';
+			const iconEl = document.createElement('span');
+			iconEl.className = `fm-icon ${entry.isDirectory ? 'folder' : 'file'}`;
+			iconEl.textContent = entry.isDirectory ? '📁' : '📄';
+
 			// show relative path without the filename (parent dir)
 			const dir = entry.path.includes('/')
 				? entry.path.slice(0, entry.path.lastIndexOf('/')) || '.'
 				: '.';
+			const pathEl = document.createElement('span');
+			pathEl.className = 'fm-path';
+			pathEl.textContent = dir;
 
-			item.innerHTML = `
-				<span class="fm-icon ${iconClass}">${icon}</span>
-				<span class="fm-name">${entry.name}</span>
-				<span class="fm-path">${dir}</span>
-			`;
+			item.append(iconEl, buildNameSpan(entry.name, namePositions), pathEl);
 
 			item.addEventListener('mousedown', (e) => {
 				e.preventDefault();
