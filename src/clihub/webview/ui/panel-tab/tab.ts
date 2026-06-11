@@ -142,7 +142,7 @@ export const createTabController = (options: TabControllerOptions) => {
 			document.body.append(toast);
 		}
 
-		toast.textContent = enabled ? 'Prompt filter enabled' : 'Prompt filter disabled';
+		toast.textContent = enabled ? 'Prompt filter enabled ✔' : 'Prompt filter disabled ✖';
 		toast.classList.toggle('is-enabled', enabled);
 		toast.classList.toggle('is-disabled', !enabled);
 		toast.classList.add('is-visible');
