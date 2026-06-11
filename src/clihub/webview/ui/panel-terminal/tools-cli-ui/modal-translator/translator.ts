@@ -73,6 +73,17 @@ function initializeTranslator(host: HTMLElement, context: ToolContext) {
 	// not the rendered markdown's flattened textContent.
 	let copyText = '';
 
+	// Copy/Listen start disabled (gray) and only light up — softly, via the
+	// button transition — once there is a translation result to act on.
+	const enableResultActions = () => {
+		if (copyBtn) {
+			copyBtn.disabled = false;
+		}
+		if (speakBtn) {
+			speakBtn.disabled = false;
+		}
+	};
+
 	const performTranslation = async () => {
 		const extracted = extractTextToTranslate(context);
 		if (!extracted) {
@@ -144,11 +155,14 @@ function initializeTranslator(host: HTMLElement, context: ToolContext) {
 			copyText = copyParts.join('\n\n');
 			revealText(textEl, renderedParts.join('\n\n'));
 			setStatus(provider ? `translated · ${provider.toLowerCase()}` : 'translated');
+			enableResultActions();
 		} catch (err) {
 			console.error('[Translator] EN->ES failed:', err);
 			copyText = extracted;
 			revealText(textEl, extracted);
 			setStatus('translation failed');
+			// The original text is on screen — copying/listening still makes sense.
+			enableResultActions();
 			// Failed attempts may be transient (rate limit, network) — allow retry.
 			if (translateBtn) {
 				translateBtn.disabled = false;

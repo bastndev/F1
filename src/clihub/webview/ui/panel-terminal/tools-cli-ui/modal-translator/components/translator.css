@@ -502,13 +502,25 @@
 	font-size: 11px;
 	font-weight: 500;
 	cursor: pointer;
-	transition: all 0.15s ease;
+	/* opacity/color ease slower so re-enabling after a translation fades in softly */
+	transition: all 0.15s ease, opacity 0.55s ease, color 0.45s ease, border-color 0.45s ease;
 	font-family: var(--vscode-font-family);
 	letter-spacing: 0.02em;
 }
 
 .translator-action-btn i {
 	font-size: 13px;
+}
+
+.translator-action-btn:disabled,
+.translator-action-btn:disabled:hover {
+	border-color: var(--vscode-editorGroup-border);
+	color: var(--vscode-descriptionForeground);
+	background: var(--vscode-input-background);
+	opacity: 0.4;
+	cursor: not-allowed;
+	animation: none;
+	box-shadow: none;
 }
 
 .translator-action-btn:hover {
@@ -540,18 +552,17 @@
 	background: color-mix(in srgb, var(--agent-accent, #AFA9EC) 12%, var(--vscode-input-background));
 }
 
+/* ID styles above outrank the shared :disabled rule — restate the gray state */
 #translateBtn:disabled,
 #translateBtn:disabled:hover {
 	border-color: var(--vscode-editorGroup-border);
 	color: var(--vscode-descriptionForeground);
 	background: var(--vscode-input-background);
-	opacity: 0.45;
-	cursor: not-allowed;
 	animation: none;
 	box-shadow: none;
 }
 
-/* Icon-only copy button at the far right of the controls row */
+/* Icon-only copy button */
 .translator-copy {
 	padding: 5px 7px;
 	justify-content: center;
@@ -566,7 +577,7 @@
 	transition: transform 0.2s cubic-bezier(0.34, 1.4, 0.64, 1);
 }
 
-.translator-copy:hover svg {
+.translator-copy:hover:not(:disabled) svg {
 	transform: scale(1.12) rotate(-4deg);
 }
 
