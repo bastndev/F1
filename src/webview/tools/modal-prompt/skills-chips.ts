@@ -1,0 +1,158 @@
+/**
+ * Skills row: chips for the skills installed in the workspace
+ * (.agents/skills/* and .claude/skills/*, deduplicated by name, scanned
+ * host-side). The row only appears when at least one skill exists.
+ *
+ * ONE aggregate [Skills #N] token in the textarea represents the selection.
+ * The ordered `selected` array is authoritative; the token is purely visual.
+ * Chips show numbered badges (#1, #2) that update as selection order changes.
+ * A footer legend "skills: #1 cavecrew · #2 nido" appears when any are active.
+ */
+import { buildSkillsToken, type WorkspaceSkill } from '../../../shared/prompt';
+import type { PromptContext } from './prompt-context';
+
+// The active CLI decides which skills folder a route should prefer. Same
+// label source updateFooterModel uses.
+export function isClaudeSession(): boolean {
+	const label = document.getElementById('cli-terminal-label')?.textContent ?? '';
+	return label.toLowerCase().includes('claude');
+}
+
+export function initSkillsChips(
+	host: HTMLElement,
+	context: PromptContext,
+	textarea: HTMLTextAreaElement,
+	onSelectionChange: (selected: WorkspaceSkill[]) => void
+) {
+	const row = host.querySelector<HTMLElement>('.prompt-skills');
+	const chipsHost = host.querySelector<HTMLElement>('#skillChips');
+	if (!row || !chipsHost || !context.requestWorkspaceSkills) {
+		return;
+	}
+
+	void context.requestWorkspaceSkills().then((skills) => {
+		if (!row.isConnected) {
+			return;
+		}
+
+		chipsHost.replaceChildren();
+
+		// No skills installed: show an inert dashed "+" placeholder.
+		if (!skills.length) {
+			const addChip = document.createElement('button');
+			addChip.className = 'prompt-tool-btn prompt-skill-add';
+			addChip.textContent = '+';
+			addChip.title = 'Add skills — coming soon';
+			addChip.setAttribute('aria-disabled', 'true');
+			chipsHost.append(addChip);
+			row.hidden = false;
+			return;
+		}
+
+		const selected: WorkspaceSkill[] = [];
+		let updatingToken = false;
+
+		const updateToken = () => {
+			updatingToken = true;
+			try {
+				// Match compact formats (/skill, /skills #N) and legacy bracket format
+				const hasToken = /\/skills #\d+|\/skill(?!s)|\[Skills? #[^\]]+\]/.test(textarea.value);
+
+				if (selected.length === 0) {
+					if (hasToken) {
+						textarea.value = textarea.value
+							.replace(/\/skills #\d+ ?|\/skill(?!s) ?|\[Skills? #[^\]]+\] ?/g, '')
+							.trimStart();
+						textarea.dispatchEvent(new Event('input', { bubbles: true }));
+					}
+				} else {
+					const newToken = buildSkillsToken(selected.length);
+					if (hasToken) {
+						textarea.value = textarea.value
+							.replace(/\/skills #\d+|\/skill(?!s)|\[Skills? #[^\]]+\]/g, newToken);
+					} else {
+						const current = textarea.value;
+						textarea.value = current ? `${newToken} ${current}` : newToken;
+					}
+					textarea.dispatchEvent(new Event('input', { bubbles: true }));
+				}
+
+				onSelectionChange([...selected]);
+			} finally {
+				updatingToken = false;
+			}
+		};
+
+		const syncBadges = () => {
+			for (const chip of Array.from(chipsHost!.querySelectorAll<HTMLButtonElement>('[data-skill]'))) {
+				const name = chip.dataset.skill!;
+				const idx = selected.findIndex((s) => s.name === name);
+				const badge = chip.querySelector<HTMLElement>('.skill-badge');
+				chip.classList.toggle('selected', idx >= 0);
+				if (badge) {
+					badge.textContent = idx >= 0 ? `#${idx + 1}` : '';
+				}
+			}
+		};
+
+		const sync = () => {
+			syncBadges();
+		};
+
+		for (const skill of skills) {
+			const chip = document.createElement('button');
+			chip.className = 'prompt-tool-btn prompt-skill-chip';
+			chip.dataset.skill = skill.name;
+			chip.title = `Ask the CLI to use its "${skill.name}" skill`;
+
+			const label = document.createElement('span');
+			label.className = 'skill-label';
+			label.textContent = skill.name;
+
+			const badge = document.createElement('span');
+			badge.className = 'skill-badge';
+			badge.setAttribute('aria-hidden', 'true');
+
+			chip.append(label, badge);
+
+			chip.addEventListener('click', () => {
+				const idx = selected.findIndex((s) => s.name === skill.name);
+				if (idx >= 0) {
+					selected.splice(idx, 1);
+				} else {
+					selected.push(skill);
+				}
+				updateToken();
+				sync();
+				textarea.focus();
+			});
+
+			chipsHost.append(chip);
+		}
+
+		row.hidden = false;
+		sync();
+
+		// Strip any stale skills token from a restored draft — the token
+		// doesn't encode skill names, so selection can't be reconstructed.
+		if (/\/skills #\d+|\/skill(?!s)|\[Skills? #[^\]]+\]/.test(textarea.value)) {
+			textarea.value = textarea.value
+				.replace(/\/skills #\d+ ?|\/skill(?!s) ?|\[Skills? #[^\]]+\] ?/g, '')
+				.trimStart();
+			textarea.dispatchEvent(new Event('input', { bubbles: true }));
+		}
+
+		// When the user manually deletes the token, clear the chip selection
+		// so the UI stays in sync with what the textarea contains.
+		textarea.addEventListener('input', () => {
+			if (updatingToken) {
+				return;
+			}
+			if (selected.length > 0 && !/\/skills #\d+|\/skill(?!s)/.test(textarea.value)) {
+				selected.length = 0;
+				onSelectionChange([]);
+				sync();
+			}
+		});
+	});
+}

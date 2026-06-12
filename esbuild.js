@@ -45,24 +45,22 @@ const collectDirectories = (rootDir) => {
 	return directories;
 };
 
-const copyCliHubAssets = () => {
-	const outDir = path.join('dist', 'clihub');
+const copyWebviewAssets = () => {
+	const outDir = path.join('dist', 'webview');
 
-	fs.mkdirSync(outDir, { recursive: true });
-	fs.copyFileSync(path.join('src', 'clihub', 'index.html'), path.join(outDir, 'index.html'));
-	fs.copyFileSync(path.join('src', 'clihub', 'global.css'), path.join(outDir, 'global.css'));
-	copyDirectoryAssets(path.join('src', 'clihub', 'assets'), path.join(outDir, 'assets'));
-	copyDirectoryAssets(path.join('src', 'clihub', 'webview'), path.join(outDir, 'webview'));
+	// Every non-TS file under src/webview keeps its relative path in
+	// dist/webview (HTML, CSS, SVG icons). xterm.css ships under vendor/.
+	copyDirectoryAssets(path.join('src', 'webview'), outDir);
 	copyXtermAssets(outDir);
 };
 
-const watchCliHubAssets = () => {
-	const assetRoot = path.join('src', 'clihub');
+const watchWebviewAssets = () => {
+	const assetRoot = path.join('src', 'webview');
 	let copyTimer;
 
 	const scheduleCopy = () => {
 		clearTimeout(copyTimer);
-		copyTimer = setTimeout(copyCliHubAssets, 50);
+		copyTimer = setTimeout(copyWebviewAssets, 50);
 	};
 
 	for (const directory of collectDirectories(assetRoot)) {
@@ -100,13 +98,13 @@ const esbuildProblemMatcherPlugin = {
 	},
 };
 
-const cliHubAssetsPlugin = {
-	name: 'clihub-assets',
+const webviewAssetsPlugin = {
+	name: 'webview-assets',
 
 	setup(build) {
 		build.onEnd((result) => {
 			if (result.errors.length === 0) {
-				copyCliHubAssets();
+				copyWebviewAssets();
 			}
 		});
 	},
@@ -127,13 +125,13 @@ async function main() {
 		external: ['vscode', 'node-pty', 'cspell-trie-lib', '@cspell/dict-es-es'],
 		logLevel: 'silent',
 		plugins: [
-			cliHubAssetsPlugin,
+			webviewAssetsPlugin,
 			esbuildProblemMatcherPlugin,
 		],
 	});
-	const webviewCtx = await esbuild.context({
+	const terminalCtx = await esbuild.context({
 		entryPoints: [
-			'src/clihub/webview/ui/panel-terminal/terminal.ts'
+			'src/webview/panel-terminal/terminal.ts'
 		],
 		bundle: true,
 		format: 'iife',
@@ -141,7 +139,7 @@ async function main() {
 		sourcemap: !production,
 		sourcesContent: false,
 		platform: 'browser',
-		outfile: 'dist/clihub/webview/webview.js',
+		outfile: 'dist/webview/terminal.js',
 		loader: {
 			'.css': 'text',
 			'.html': 'text',
@@ -153,7 +151,7 @@ async function main() {
 	});
 	const launcherCtx = await esbuild.context({
 		entryPoints: [
-			'src/clihub/index.ts'
+			'src/webview/launcher/index.ts'
 		],
 		bundle: true,
 		format: 'iife',
@@ -161,7 +159,7 @@ async function main() {
 		sourcemap: !production,
 		sourcesContent: false,
 		platform: 'browser',
-		outfile: 'dist/clihub/index.js',
+		outfile: 'dist/webview/launcher/index.js',
 		logLevel: 'silent',
 		plugins: [
 			esbuildProblemMatcherPlugin,
@@ -169,7 +167,7 @@ async function main() {
 	});
 	const ptyHostCtx = await esbuild.context({
 		entryPoints: [
-			'src/clihub/webview/core/terminal-cli/pty-host.ts'
+			'src/host/terminal-cli/pty-host.ts'
 		],
 		bundle: true,
 		format: 'cjs',
@@ -177,7 +175,7 @@ async function main() {
 		sourcemap: !production,
 		sourcesContent: false,
 		platform: 'node',
-		outfile: 'dist/clihub/webview/core/terminal-cli/pty-host.js',
+		outfile: 'dist/host/pty-host.js',
 		external: ['node-pty'],
 		logLevel: 'silent',
 		plugins: [
@@ -187,17 +185,17 @@ async function main() {
 
 	if (watch) {
 		await extensionCtx.watch();
-		await webviewCtx.watch();
+		await terminalCtx.watch();
 		await launcherCtx.watch();
 		await ptyHostCtx.watch();
-		watchCliHubAssets();
+		watchWebviewAssets();
 	} else {
 		await extensionCtx.rebuild();
-		await webviewCtx.rebuild();
+		await terminalCtx.rebuild();
 		await launcherCtx.rebuild();
 		await ptyHostCtx.rebuild();
 		await extensionCtx.dispose();
-		await webviewCtx.dispose();
+		await terminalCtx.dispose();
 		await launcherCtx.dispose();
 		await ptyHostCtx.dispose();
 	}

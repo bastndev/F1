@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import { CliHubViewProvider } from './clihub/main';
+import { CliHubViewProvider } from './host/main';
 
 export function activate(context: vscode.ExtensionContext) {
 	const cliHubProvider = new CliHubViewProvider(context.extensionUri, context);
