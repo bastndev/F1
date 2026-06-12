@@ -1,6 +1,6 @@
 /**
  * Phase 2 webview HTML: the terminal layout shown once an agent is chosen.
- * Panel markup ships as static files under dist/webview/{panel-tab,
+ * Panel markup ships as static files under dist/clihub/webview/{panel-tab,
  * panel-terminal}; this stitches them into the page with CSP, styles, and
  * the agent icon payload the terminal script reads.
  */
@@ -48,6 +48,7 @@ const readPanelFile = (extensionUri: vscode.Uri, panel: PanelFile, extension: 'h
 	const fileUri = vscode.Uri.joinPath(
 		extensionUri,
 		'dist',
+		'clihub',
 		'webview',
 		panel.dir,
 		`${panel.name}.${extension}`

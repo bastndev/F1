@@ -46,16 +46,16 @@ const collectDirectories = (rootDir) => {
 };
 
 const copyWebviewAssets = () => {
-	const outDir = path.join('dist', 'webview');
+	const outDir = path.join('dist', 'clihub', 'webview');
 
-	// Every non-TS file under src/webview keeps its relative path in
-	// dist/webview (HTML, CSS, SVG icons). xterm.css ships under vendor/.
-	copyDirectoryAssets(path.join('src', 'webview'), outDir);
+	// Every non-TS file under src/clihub/webview keeps its relative path in
+	// dist/clihub/webview (HTML, CSS, SVG icons). xterm.css ships under vendor/.
+	copyDirectoryAssets(path.join('src', 'clihub', 'webview'), outDir);
 	copyXtermAssets(outDir);
 };
 
 const watchWebviewAssets = () => {
-	const assetRoot = path.join('src', 'webview');
+	const assetRoot = path.join('src', 'clihub', 'webview');
 	let copyTimer;
 
 	const scheduleCopy = () => {
@@ -131,7 +131,7 @@ async function main() {
 	});
 	const terminalCtx = await esbuild.context({
 		entryPoints: [
-			'src/webview/panel-terminal/terminal.ts'
+			'src/clihub/webview/panel-terminal/terminal.ts'
 		],
 		bundle: true,
 		format: 'iife',
@@ -139,7 +139,7 @@ async function main() {
 		sourcemap: !production,
 		sourcesContent: false,
 		platform: 'browser',
-		outfile: 'dist/webview/terminal.js',
+		outfile: 'dist/clihub/webview/terminal.js',
 		loader: {
 			'.css': 'text',
 			'.html': 'text',
@@ -151,7 +151,7 @@ async function main() {
 	});
 	const launcherCtx = await esbuild.context({
 		entryPoints: [
-			'src/webview/launcher/index.ts'
+			'src/clihub/webview/launcher/index.ts'
 		],
 		bundle: true,
 		format: 'iife',
@@ -159,7 +159,7 @@ async function main() {
 		sourcemap: !production,
 		sourcesContent: false,
 		platform: 'browser',
-		outfile: 'dist/webview/launcher/index.js',
+		outfile: 'dist/clihub/webview/launcher/index.js',
 		logLevel: 'silent',
 		plugins: [
 			esbuildProblemMatcherPlugin,
@@ -167,7 +167,7 @@ async function main() {
 	});
 	const ptyHostCtx = await esbuild.context({
 		entryPoints: [
-			'src/host/terminal-cli/pty-host.ts'
+			'src/clihub/host/terminal-cli/pty-host.ts'
 		],
 		bundle: true,
 		format: 'cjs',
@@ -175,7 +175,7 @@ async function main() {
 		sourcemap: !production,
 		sourcesContent: false,
 		platform: 'node',
-		outfile: 'dist/host/pty-host.js',
+		outfile: 'dist/clihub/host/pty-host.js',
 		external: ['node-pty'],
 		logLevel: 'silent',
 		plugins: [

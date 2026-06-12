@@ -82,8 +82,7 @@
     "watch:esbuild": "node esbuild.js --watch",
     "watch:tsc": "tsc --noEmit --watch --project tsconfig.json",
     "check-types": "tsc --noEmit",
-    "lint": "eslint src",
-    "test": "bun test"
+    "lint": "eslint src"
   },
   "devDependencies": {
     "@types/node": "25.9.1",
