@@ -17,13 +17,13 @@ export {
 	restoreSkillTokens,
 } from './attachments/markers';
 
-// Workspace skills: [Skill #name] tokens in the textarea, expanded on send
-// into instructions with the SKILL.md route resolved for the active CLI.
+// Workspace skills: one aggregate [Skills #N] token in the textarea, expanded
+// on send into instructions with each SKILL.md route resolved for the active CLI.
 export {
-	skillTokenPattern,
-	buildSkillToken,
+	skillsTokenPattern,
+	buildSkillsToken,
 	resolveSkillPath,
-	expandSkillTokens,
+	expandSkillsToken,
 } from './skills';
 export type { WorkspaceSkill, SkillRoot } from './skills';
 export type { ImageAttachment } from './attachments/types';

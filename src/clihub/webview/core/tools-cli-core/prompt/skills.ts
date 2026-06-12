@@ -1,8 +1,10 @@
 /**
- * Workspace skills support for the prompt chat, mirroring the [Image #N]
- * token system: clicking a skill chip inserts an atomic "[Skill #name]"
- * token in the textarea, and on send each token expands into an explicit
- * instruction with the SKILL.md route resolved for the active CLI.
+ * Workspace skills support for the prompt chat. Selected skills are
+ * represented by ONE compact aggregate token in the textarea — "[Skills #2]"
+ * — whose count updates in place as chips toggle. The token is purely a
+ * visual indicator: the ordered chip selection is authoritative, and on send
+ * it expands into an explicit instruction with each SKILL.md route resolved
+ * for the active CLI.
  *
  * A skill is a folder containing a SKILL.md under one of two roots:
  *   .claude/skills/  — Claude Code's native location
@@ -24,10 +26,12 @@ export const skillRootDirs: Record<SkillRoot, string> = {
 	claude: '.claude/skills',
 };
 
-export const skillTokenPattern = /\[Skill #([^\]]+)\]/g;
+// Matches the compact tokens (/skill singular, /skills #N plural) and legacy
+// bracket shapes so old drafts still clean up correctly.
+export const skillsTokenPattern = /\/skills #\d+|\/skill(?!s)|\[Skills? #[^\]]+\]/g;
 
-export function buildSkillToken(name: string): string {
-	return `[Skill #${name}]`;
+export function buildSkillsToken(count: number): string {
+	return count === 1 ? '/skill' : `/skills #${count}`;
 }
 
 /** Relative SKILL.md route, preferring the copy the active CLI reads natively. */
@@ -38,52 +42,23 @@ export function resolveSkillPath(skill: WorkspaceSkill, preferClaude: boolean): 
 }
 
 /**
- * Expand [Skill #name] tokens into CLI-readable instructions.
- *
- * Tokens leading the prompt (the chip-click default) collapse into one
- * explicit header sentence; tokens used mid-sentence become an inline
- * reference at their position. Unknown names are left untouched so a stale
- * draft never corrupts the prompt. Always called after translation — the
- * generated English must never go through the translator.
+ * Strip the visual token(s) and prepend the real instruction, listing the
+ * selected skills in selection order with their resolved SKILL.md routes.
+ * Always called after translation — the generated English must never go
+ * through the translator.
  */
-export function expandSkillTokens(text: string, skills: WorkspaceSkill[], preferClaude: boolean): string {
-	if (!skills.length) {
-		return text;
+export function expandSkillsToken(text: string, selected: WorkspaceSkill[], preferClaude: boolean): string {
+	const cleaned = text.replace(/\/skills #\d+ ?|\/skill(?!s) ?|\[Skills? #[^\]]+\] ?/g, '').trimStart();
+
+	if (!selected.length) {
+		return cleaned;
 	}
 
-	const byName = new Map(skills.map((skill) => [skill.name, skill]));
+	const header = selected.length === 1
+		? `Use the "${selected[0].name}" skill (read ${resolveSkillPath(selected[0], preferClaude)}).`
+		: `Use these skills: ${selected
+				.map((skill) => `"${skill.name}" (read ${resolveSkillPath(skill, preferClaude)})`)
+				.join(', ')}.`;
 
-	// Peel known tokens off the start of the prompt.
-	const leading: WorkspaceSkill[] = [];
-	let rest = text;
-	for (;;) {
-		const match = /^\s*\[Skill #([^\]]+)\]/.exec(rest);
-		const skill = match ? byName.get(match[1]) : undefined;
-		if (!match || !skill) {
-			break;
-		}
-		leading.push(skill);
-		rest = rest.slice(match[0].length);
-	}
-	rest = rest.trimStart();
-
-	// Remaining tokens read naturally in place: «use [Skill #x] for…» becomes
-	// «use "x" (.agents/skills/x/SKILL.md) for…».
-	rest = rest.replace(skillTokenPattern, (token, name: string) => {
-		const skill = byName.get(name);
-		return skill ? `"${skill.name}" (${resolveSkillPath(skill, preferClaude)})` : token;
-	});
-
-	if (!leading.length) {
-		return rest;
-	}
-
-	const references = leading.map(
-		(skill) => `"${skill.name}" (read ${resolveSkillPath(skill, preferClaude)})`
-	);
-	const header = leading.length === 1
-		? `Use the "${leading[0].name}" skill (read ${resolveSkillPath(leading[0], preferClaude)}).`
-		: `Use these skills: ${references.join(', ')}.`;
-
-	return rest ? `${header}\n\n${rest}` : header;
+	return cleaned ? `${header}\n\n${cleaned}` : header;
 }

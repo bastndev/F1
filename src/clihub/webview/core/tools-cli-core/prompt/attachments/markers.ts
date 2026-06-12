@@ -1,5 +1,5 @@
 import { pasteMarkerPattern } from './pastes';
-import { skillTokenPattern } from '../skills';
+import { skillsTokenPattern } from '../skills';
 
 export const imageMarkerPattern = /\[Image #(\d+)\]/g;
 
@@ -16,7 +16,7 @@ export function stripPromptTokens(text: string): string {
 	return text
 		.replace(imageMarkerPattern, '')
 		.replace(pasteMarkerPattern, '')
-		.replace(skillTokenPattern, '')
+		.replace(skillsTokenPattern, '')
 		.replace(mentionTokenPattern, '');
 }
 
@@ -25,11 +25,11 @@ export interface ProtectedSkillToken {
 	placeholder: string;
 }
 
-/** Shield [Skill #name] tokens from translation, mirroring protectImageMarkers. */
+/** Shield [Skills #N] aggregate tokens from translation, mirroring protectImageMarkers. */
 export function protectSkillTokens(text: string): { text: string; tokens: ProtectedSkillToken[] } {
 	const tokens: ProtectedSkillToken[] = [];
 	let index = 0;
-	const protectedText = text.replace(skillTokenPattern, (token) => {
+	const protectedText = text.replace(skillsTokenPattern, (token) => {
 		const placeholder = `ZXQCLIHUBSKL${index++}QXZ`;
 		tokens.push({ token, placeholder });
 		return placeholder;

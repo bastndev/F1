@@ -24,8 +24,8 @@ import {
 	protectMentions,
 	restoreMentions,
 	type WorkspaceSkill,
-	buildSkillToken,
-	expandSkillTokens,
+	buildSkillsToken,
+	expandSkillsToken,
 	protectSkillTokens,
 	restoreSkillTokens,
 } from '../../../../core/tools-cli-core/prompt';
@@ -52,7 +52,7 @@ const imagePathPattern =
 // Every atomic token in the textarea: [Image #N], [Code #N +X lines],
 // [Text #N +X lines], [Skill #name]. Used by delete/arrow/caret handling so
 // all marker types behave as single units.
-const atomicMarkerPattern = /\[(?:Image|Code|Text) #\d+[^\]]*\]|\[Skill #[^\]]+\]/g;
+const atomicMarkerPattern = /\[(?:Image|Code|Text) #\d+[^\]]*\]|\/skills #\d+|\/skill(?!s)/g;
 
 // Budget for the *effective* typed text — markers and @mentions are free, and
 // large pastes collapse into markers, so this only constrains hand-typed prose.
@@ -311,13 +311,11 @@ function initPromptTabs(host: HTMLElement, context: PromptContext, hasActiveSess
 			}
 		}
 
-		// [Skill #name] tokens expand into explicit instructions with the
-		// SKILL.md route resolved for the active CLI (.claude/skills for
-		// Claude, .agents/skills for the rest, falling back to wherever the
-		// skill exists). Done post-translation — the generated text is already
-		// English — and before paste expansion so pasted content that happens
-		// to contain a token-looking string can never be expanded.
-		textToSend = expandSkillTokens(textToSend, workspaceSkills, isClaudeSession());
+		// The [Skills #N] aggregate token expands into explicit instructions
+		// with each SKILL.md route resolved for the active CLI (.claude/skills
+		// for Claude, .agents/skills for the rest). Done post-translation —
+		// the generated text is already English — and before paste expansion.
+		textToSend = expandSkillsToken(textToSend, selectedSkills, isClaudeSession());
 
 		// Collapsed pastes leave the textarea as markers; the CLI gets the
 		// original verbatim content (never lowercased, never translated).
@@ -349,14 +347,14 @@ function initPromptTabs(host: HTMLElement, context: PromptContext, hasActiveSess
 		textarea.focus();
 	});
 
-	// Workspace skills, kept for send-time path resolution. The textarea is the
-	// source of truth for *selection*: a chip is "on" while its [Skill #name]
-	// token is present in the text.
-	let workspaceSkills: WorkspaceSkill[] = [];
+	// Ordered selection of skills — updated as the user toggles chips. The
+	// textarea holds only the aggregate [Skills #N] count token; the actual
+	// WorkspaceSkill objects live here and drive the send-time expansion.
+	let selectedSkills: WorkspaceSkill[] = [];
 
 	if (hasActiveSession) {
-		initSkillsChips(host, context, textarea, (skills) => {
-			workspaceSkills = skills;
+		initSkillsChips(host, context, textarea, (selection) => {
+			selectedSkills = selection;
 		});
 		const tools = initToolbarActions(
 			host,
@@ -606,39 +604,19 @@ function isClaudeSession(): boolean {
 	return label.toLowerCase().includes('claude');
 }
 
-// Insert the skill token at the start of the prompt (where instructions land
-// hardest) or remove it everywhere — clicking the chip toggles between both.
-function toggleSkillToken(textarea: HTMLTextAreaElement, name: string) {
-	const token = buildSkillToken(name);
-	const caret = textarea.selectionStart ?? textarea.value.length;
-
-	if (textarea.value.includes(token)) {
-		// Remove every occurrence, eating one following space when present.
-		const newValue = textarea.value.split(token + ' ').join('').split(token).join('');
-		textarea.value = newValue;
-		const pos = Math.min(caret, newValue.length);
-		textarea.setSelectionRange(pos, pos);
-	} else {
-		const prefix = token + ' ';
-		textarea.value = prefix + textarea.value;
-		const pos = caret + prefix.length;
-		textarea.setSelectionRange(pos, pos);
-	}
-
-	textarea.focus();
-	textarea.dispatchEvent(new Event('input', { bubbles: true }));
-}
-
 // Populate the Skills row with the skills installed in the workspace
-// (.agents/skills/* and .claude/skills/*, folders containing a SKILL.md —
-// scanned host-side, deduplicated by name). The row only appears when at
-// least one skill exists. Chips mirror the [Skill #name] tokens in the
-// textarea: clicking toggles the token, deleting the token unselects the chip.
+// (.agents/skills/* and .claude/skills/*, deduplicated by name, scanned
+// host-side). The row only appears when at least one skill exists.
+//
+// ONE aggregate [Skills #N] token in the textarea represents the selection.
+// The ordered `selected` array is authoritative; the token is purely visual.
+// Chips show numbered badges (#1, #2) that update as selection order changes.
+// A footer legend "skills: #1 cavecrew · #2 nido" appears when any are active.
 function initSkillsChips(
 	host: HTMLElement,
 	context: PromptContext,
 	textarea: HTMLTextAreaElement,
-	onSkillsLoaded: (skills: WorkspaceSkill[]) => void
+	onSelectionChange: (selected: WorkspaceSkill[]) => void
 ) {
 	const row = host.querySelector<HTMLElement>('.prompt-skills');
 	const chipsHost = host.querySelector<HTMLElement>('#skillChips');
@@ -651,11 +629,9 @@ function initSkillsChips(
 			return;
 		}
 
-		onSkillsLoaded(skills);
 		chipsHost.replaceChildren();
 
 		// No skills installed: show an inert dashed "+" placeholder.
-		// TODO(future): wire this to a skill install/create flow after the refactor.
 		if (!skills.length) {
 			const addChip = document.createElement('button');
 			addChip.className = 'prompt-tool-btn prompt-skill-add';
@@ -667,28 +643,111 @@ function initSkillsChips(
 			return;
 		}
 
-		const chipByName = new Map<string, HTMLButtonElement>();
-		const syncChips = () => {
-			for (const [name, chip] of chipByName) {
-				chip.classList.toggle('selected', textarea.value.includes(buildSkillToken(name)));
+		const selected: WorkspaceSkill[] = [];
+		let updatingToken = false;
+
+		const updateToken = () => {
+			updatingToken = true;
+			try {
+				// Match compact formats (/skill, /skills #N) and legacy bracket format
+				const hasToken = /\/skills #\d+|\/skill(?!s)|\[Skills? #[^\]]+\]/.test(textarea.value);
+
+				if (selected.length === 0) {
+					if (hasToken) {
+						textarea.value = textarea.value
+							.replace(/\/skills #\d+ ?|\/skill(?!s) ?|\[Skills? #[^\]]+\] ?/g, '')
+							.trimStart();
+						textarea.dispatchEvent(new Event('input', { bubbles: true }));
+					}
+				} else {
+					const newToken = buildSkillsToken(selected.length);
+					if (hasToken) {
+						textarea.value = textarea.value
+							.replace(/\/skills #\d+|\/skill(?!s)|\[Skills? #[^\]]+\]/g, newToken);
+					} else {
+						const current = textarea.value;
+						textarea.value = current ? `${newToken} ${current}` : newToken;
+					}
+					textarea.dispatchEvent(new Event('input', { bubbles: true }));
+				}
+
+				onSelectionChange([...selected]);
+			} finally {
+				updatingToken = false;
 			}
+		};
+
+		const syncBadges = () => {
+			for (const chip of Array.from(chipsHost!.querySelectorAll<HTMLButtonElement>('[data-skill]'))) {
+				const name = chip.dataset.skill!;
+				const idx = selected.findIndex((s) => s.name === name);
+				const badge = chip.querySelector<HTMLElement>('.skill-badge');
+				chip.classList.toggle('selected', idx >= 0);
+				if (badge) {
+					badge.textContent = idx >= 0 ? `#${idx + 1}` : '';
+				}
+			}
+		};
+
+		const sync = () => {
+			syncBadges();
 		};
 
 		for (const skill of skills) {
 			const chip = document.createElement('button');
-			chip.className = 'prompt-tool-btn';
+			chip.className = 'prompt-tool-btn prompt-skill-chip';
 			chip.dataset.skill = skill.name;
-			chip.textContent = skill.name;
 			chip.title = `Ask the CLI to use its "${skill.name}" skill`;
-			chip.addEventListener('click', () => toggleSkillToken(textarea, skill.name));
-			chipByName.set(skill.name, chip);
+
+			const label = document.createElement('span');
+			label.className = 'skill-label';
+			label.textContent = skill.name;
+
+			const badge = document.createElement('span');
+			badge.className = 'skill-badge';
+			badge.setAttribute('aria-hidden', 'true');
+
+			chip.append(label, badge);
+
+			chip.addEventListener('click', () => {
+				const idx = selected.findIndex((s) => s.name === skill.name);
+				if (idx >= 0) {
+					selected.splice(idx, 1);
+				} else {
+					selected.push(skill);
+				}
+				updateToken();
+				sync();
+				textarea.focus();
+			});
+
 			chipsHost.append(chip);
 		}
-		row.hidden = false;
 
-		// Reflect tokens already present (restored drafts) and keep mirroring.
-		textarea.addEventListener('input', syncChips);
-		syncChips();
+		row.hidden = false;
+		sync();
+
+		// Strip any stale skills token from a restored draft — the token
+		// doesn't encode skill names, so selection can't be reconstructed.
+		if (/\/skills #\d+|\/skill(?!s)|\[Skills? #[^\]]+\]/.test(textarea.value)) {
+			textarea.value = textarea.value
+				.replace(/\/skills #\d+ ?|\/skill(?!s) ?|\[Skills? #[^\]]+\] ?/g, '')
+				.trimStart();
+			textarea.dispatchEvent(new Event('input', { bubbles: true }));
+		}
+
+		// When the user manually deletes the token, clear the chip selection
+		// so the UI stays in sync with what the textarea contains.
+		textarea.addEventListener('input', () => {
+			if (updatingToken) {
+				return;
+			}
+			if (selected.length > 0 && !/\/skills #\d+|\/skill(?!s)/.test(textarea.value)) {
+				selected.length = 0;
+				onSelectionChange([]);
+				sync();
+			}
+		});
 	});
 }
 
@@ -1284,8 +1343,8 @@ function buildPromptHighlightNodes(text: string, selStart: number = -1, selEnd: 
     const kind: TokenKind = match[1] === 'Code' ? 'paste-code' : 'paste-text';
     tokens.push({ start: match.index ?? 0, end: (match.index ?? 0) + match[0].length, kind });
   }
-  // Skill tokens: [Skill #cavecrew] — expanded into a skill instruction on send.
-  for (const match of text.matchAll(/\[Skill #[^\]]+\]/g)) {
+  // Skill token: /skill (×1) or /skills #N (×N) — expanded into skill instructions on send.
+  for (const match of text.matchAll(/\/skills #\d+|\/skill(?!s)/g)) {
     tokens.push({ start: match.index ?? 0, end: (match.index ?? 0) + match[0].length, kind: 'skill' });
   }
   // @mention: '@' followed by any non-whitespace chars, must be preceded by whitespace or start of string
