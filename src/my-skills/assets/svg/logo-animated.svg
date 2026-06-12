@@ -1,0 +1,181 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" fill="none" viewBox="80 80 864 864">
+    <style>
+        /* CURVAS DE TIEMPO PREMIUM (Eases modernizados) */
+        :root {
+            --cb-premium: cubic-bezier(0.25, 1, 0.5, 1);
+            --cb-snap: cubic-bezier(0.76, 0, 0.24, 1);
+        }
+
+        /* RAYOS: Movimiento ambiental casi estático, pulso elegante */
+        .logo-rays {
+            transform-box: view-box;
+            transform-origin: 512px 512px;
+            animation: modern-rays 16s ease-in-out infinite;
+        }
+
+        /* NÚCLEO: Estabilidad absoluta con un micro-pulso de escala invertido */
+        .logo-core {
+            transform-box: view-box;
+            transform-origin: 512px 512px;
+            animation: modern-core 8s var(--cb-premium) infinite;
+        }
+
+        /* LETRA: Desplazamiento lineal minimalista (sin sombras pesadas) */
+        .logo-letter {
+            transform-box: fill-box;
+            transform-origin: center;
+            animation: modern-letter 4s ease-in-out infinite;
+        }
+
+        /* GLOW: Atenuado para un look mate y elegante */
+        .logo-glow {
+            transform-box: fill-box;
+            transform-origin: center;
+            animation: modern-glow 8s ease-in-out infinite;
+            opacity: 0.15;
+        }
+
+        /* ANILLO: Giros controlados por intervalos (estilo maquinaria de precisión) */
+        .logo-ring {
+            stroke-dasharray: 60 30; /* Guiones más largos y limpios */
+            transform-box: view-box;
+            transform-origin: 512px 512px;
+            animation: modern-ring 9s var(--cb-snap) infinite;
+        }
+
+        /* REGLAS DE ANIMACIÓN */
+        @keyframes modern-rays {
+            0%, 100% {
+                transform: rotate(0deg);
+                opacity: 0.35;
+            }
+            50% {
+                transform: rotate(4deg);
+                opacity: 0.75;
+            }
+        }
+
+        @keyframes modern-core {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(0.98); }
+        }
+
+        @keyframes modern-letter {
+            0%, 100% {
+                transform: translateY(3px);
+                opacity: 0.85;
+            }
+            50% {
+                transform: translateY(-3px);
+                opacity: 0.95;
+            }
+        }
+
+        @keyframes modern-glow {
+            0%, 100% { transform: scale(1); opacity: 0.15; }
+            50% { transform: scale(1.15); opacity: 0.35; }
+        }
+
+        /* Giro por cuartos con pausas secas */
+        @keyframes modern-ring {
+            0%, 20% {
+                transform: rotate(0deg);
+                stroke-dashoffset: 0;
+            }
+            33%, 53% {
+                transform: rotate(90deg);
+                stroke-dashoffset: -45;
+            }
+            66%, 86% {
+                transform: rotate(180deg);
+                stroke-dashoffset: -90;
+            }
+            100% {
+                transform: rotate(360deg);
+                stroke-dashoffset: -180;
+            }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .logo-rays, .logo-core, .logo-letter, .logo-glow, .logo-ring {
+                animation: none;
+            }
+        }
+    </style>
+
+    <defs>
+        <mask id="cutout">
+            <path fill="#fff" d="M0 0h1024v1024H0z"/>
+            <circle cx="512" cy="512" r="135" fill="#000"/>
+        </mask>
+
+        <radialGradient id="glowGradient">
+            <stop offset="0%" stop-color="#ffffff" stop-opacity="0.9"/>
+            <stop offset="50%" stop-color="#cfd4ff" stop-opacity="0.2"/>
+            <stop offset="100%" stop-color="#000000" stop-opacity="0"/>
+        </radialGradient>
+    </defs>
+
+    <!-- Rayos externos -->
+    <g class="logo-rays" fill="#eaeaea" mask="url(#cutout)">
+        <rect width="30" height="360" x="497" y="80" rx="4"/>
+        <rect width="30" height="360" x="497" y="80" rx="4" transform="rotate(10 512 512)"/>
+        <rect width="30" height="360" x="497" y="80" rx="4" transform="rotate(20 512 512)"/>
+        <rect width="30" height="360" x="497" y="80" rx="4" transform="rotate(30 512 512)"/>
+        <rect width="30" height="360" x="497" y="80" rx="4" transform="rotate(40 512 512)"/>
+        <rect width="30" height="360" x="497" y="80" rx="4" transform="rotate(50 512 512)"/>
+        <rect width="30" height="360" x="497" y="80" rx="4" transform="rotate(60 512 512)"/>
+        <rect width="30" height="360" x="497" y="80" rx="4" transform="rotate(70 512 512)"/>
+        <rect width="30" height="360" x="497" y="80" rx="4" transform="rotate(80 512 512)"/>
+        <rect width="30" height="360" x="497" y="80" rx="4" transform="rotate(90 512 512)"/>
+        <rect width="30" height="360" x="497" y="80" rx="4" transform="rotate(100 512 512)"/>
+        <rect width="30" height="360" x="497" y="80" rx="4" transform="rotate(110 512 512)"/>
+        <rect width="30" height="360" x="497" y="80" rx="4" transform="rotate(120 512 512)"/>
+        <rect width="30" height="360" x="497" y="80" rx="4" transform="rotate(130 512 512)"/>
+        <rect width="30" height="360" x="497" y="80" rx="4" transform="rotate(140 512 512)"/>
+        <rect width="30" height="360" x="497" y="80" rx="4" transform="rotate(150 512 512)"/>
+        <rect width="30" height="360" x="497" y="80" rx="4" transform="rotate(160 512 512)"/>
+        <rect width="30" height="360" x="497" y="80" rx="4" transform="rotate(170 512 512)"/>
+        <rect width="30" height="360" x="497" y="80" rx="4" transform="rotate(180 512 512)"/>
+        <rect width="30" height="360" x="497" y="80" rx="4" transform="rotate(190 512 512)"/>
+        <rect width="30" height="360" x="497" y="80" rx="4" transform="rotate(200 512 512)"/>
+        <rect width="30" height="360" x="497" y="80" rx="4" transform="rotate(210 512 512)"/>
+        <rect width="30" height="360" x="497" y="80" rx="4" transform="rotate(220 512 512)"/>
+        <rect width="30" height="360" x="497" y="80" rx="4" transform="rotate(230 512 512)"/>
+        <rect width="30" height="360" x="497" y="80" rx="4" transform="rotate(240 512 512)"/>
+        <rect width="30" height="360" x="497" y="80" rx="4" transform="rotate(250 512 512)"/>
+        <rect width="30" height="360" x="497" y="80" rx="4" transform="rotate(260 512 512)"/>
+        <rect width="30" height="360" x="497" y="80" rx="4" transform="rotate(270 512 512)"/>
+        <rect width="30" height="360" x="497" y="80" rx="4" transform="rotate(280 512 512)"/>
+        <rect width="30" height="360" x="497" y="80" rx="4" transform="rotate(290 512 512)"/>
+        <rect width="30" height="360" x="497" y="80" rx="4" transform="rotate(300 512 512)"/>
+        <rect width="30" height="360" x="497" y="80" rx="4" transform="rotate(310 512 512)"/>
+        <rect width="30" height="360" x="497" y="80" rx="4" transform="rotate(320 512 512)"/>
+        <rect width="30" height="360" x="497" y="80" rx="4" transform="rotate(330 512 512)"/>
+        <rect width="30" height="360" x="497" y="80" rx="4" transform="rotate(340 512 512)"/>
+        <rect width="30" height="360" x="497" y="80" rx="4" transform="rotate(350 512 512)"/>
+    </g>
+
+    <!-- Bloque Central -->
+    <g class="logo-core">
+        <circle cx="512" cy="512" r="158" fill="url(#glowGradient)" class="logo-glow"/>
+
+        <circle
+            cx="512"
+            cy="512"
+            r="148"
+            stroke="#ffffff"
+            stroke-width="3"
+            fill="none"
+            class="logo-ring"
+        />
+
+        <circle cx="512" cy="512" r="135" fill="#000"/>
+
+        <path
+            class="logo-letter"
+            fill="#ffffff"
+            d="M433 620V428h41l38 76 38-76h41v192h-43V501l-28 57h-16l-28-57v119z"
+        />
+    </g>
+</svg>

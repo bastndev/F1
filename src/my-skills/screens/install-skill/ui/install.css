@@ -1,0 +1,736 @@
+#install-panel.panel {
+	align-items: stretch;
+	justify-content: stretch;
+}
+
+.install-surface {
+	--install-bg: var(--vscode-sideBar-background, var(--vscode-editor-background, #1e1e1e));
+	--install-accent: var(--vscode-focusBorder, #0078d4);
+	--install-fg: var(--vscode-foreground, #cccccc);
+	--install-muted: var(--vscode-descriptionForeground, #888888);
+	--install-border: color-mix(in srgb, var(--install-fg) 10%, transparent);
+	--install-hover-bg: var(--vscode-list-hoverBackground, color-mix(in srgb, var(--install-fg) 6%, transparent));
+	--install-input-bg: var(--vscode-input-background, color-mix(in srgb, var(--install-fg) 7%, transparent));
+
+	display: flex;
+	flex-direction: column;
+	width: 100%;
+	height: 100%;
+	overflow: hidden;
+	background: var(--install-bg);
+	box-sizing: border-box;
+}
+
+.install-header {
+	flex: 0 0 auto;
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+	padding: 12px 12px 0;
+}
+
+.install-search-box {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	width: 100%;
+	box-sizing: border-box;
+	padding: 0 10px;
+	height: 32px;
+	background: var(--install-input-bg);
+	border: 1px solid var(--install-border);
+	border-radius: 7px;
+	cursor: text;
+	transition: border-color 0.18s ease, box-shadow 0.18s ease;
+}
+
+.install-search-box:hover {
+	border-color: color-mix(in srgb, var(--install-fg) 18%, transparent);
+}
+
+.install-search-box:focus-within {
+	border-color: var(--install-accent);
+	box-shadow: 0 0 0 1px color-mix(in srgb, var(--install-accent) 25%, transparent);
+}
+
+.install-search-icon {
+	flex: 0 0 auto;
+	width: 13px;
+	height: 13px;
+	color: var(--install-muted);
+	transition: color 0.18s ease;
+}
+
+.install-search-box:focus-within .install-search-icon {
+	color: var(--install-accent);
+}
+
+.install-search-input {
+	flex: 1;
+	min-width: 0;
+	padding: 0;
+	background: transparent;
+	border: none;
+	outline: none;
+	color: var(--vscode-input-foreground, var(--install-fg));
+	font-family: var(--vscode-font-family);
+	font-size: 13px;
+	-webkit-appearance: none;
+	appearance: none;
+}
+
+.install-search-input::placeholder {
+	color: var(--install-muted);
+}
+
+.install-search-input::-webkit-search-cancel-button {
+	-webkit-appearance: none;
+}
+
+.install-search-clear {
+	flex: 0 0 20px;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 20px;
+	height: 20px;
+	padding: 0;
+	background: transparent;
+	border: none;
+	border-radius: 4px;
+	color: color-mix(in srgb, var(--install-muted) 82%, transparent);
+	cursor: pointer;
+	opacity: 0.78;
+	transition: opacity 0.14s ease, color 0.14s ease, background 0.14s ease;
+}
+
+.install-search-clear[hidden] {
+	display: none;
+}
+
+.install-search-clear svg {
+	width: 13px;
+	height: 13px;
+}
+
+.install-search-clear:hover {
+	color: var(--install-fg);
+	background: color-mix(in srgb, var(--install-fg) 9%, transparent);
+	opacity: 1;
+}
+
+.install-search-clear:focus-visible {
+	outline: 1px solid var(--install-accent);
+	outline-offset: 1px;
+	color: var(--install-accent);
+	opacity: 1;
+}
+
+.install-filters {
+	display: flex;
+	align-items: center;
+	gap: 2px;
+	padding: 0;
+	border-bottom: 1px solid var(--install-border);
+}
+
+.install-filter {
+	display: inline-flex;
+	align-items: center;
+	gap: 5px;
+	flex: 0 0 auto;
+	height: 26px;
+	padding: 5px 8px;
+	box-sizing: border-box;
+	background: transparent;
+	border: none;
+	border-radius: 5px;
+	color: var(--install-muted);
+	font-family: var(--vscode-font-family);
+	font-size: 12px;
+	font-weight: 500;
+	cursor: pointer;
+	white-space: nowrap;
+	transition: color 0.16s ease, background 0.16s ease;
+}
+
+#install-filter-all {
+	width: 66px;
+}
+
+#install-filter-trending {
+	width: 98px;
+}
+
+#install-filter-official {
+	width: 76px;
+}
+
+.install-filter:hover {
+	color: var(--install-fg);
+	background: color-mix(in srgb, var(--install-fg) 8%, transparent);
+}
+
+.install-filter.active {
+	color: var(--install-accent);
+	font-weight: 600;
+	background: color-mix(in srgb, var(--install-accent) 12%, transparent);
+}
+
+#install-filter-trending.active[data-trending-mode="flame"] {
+	color: #ff5f00;
+	background: color-mix(in srgb, #ff5f00 14%, transparent);
+}
+
+#install-filter-trending.active[data-trending-mode="flame"]:hover {
+	color: #ff5f00;
+	background: color-mix(in srgb, #ff5f00 18%, transparent);
+}
+
+.install-filter:focus-visible {
+	outline: 1px solid var(--install-accent);
+	outline-offset: 2px;
+}
+
+.install-filter-count {
+	font-size: 11px;
+	font-weight: 400;
+	color: color-mix(in srgb, var(--install-muted) 70%, transparent);
+}
+
+.install-filter.active .install-filter-count {
+	color: color-mix(in srgb, var(--install-accent) 80%, var(--install-muted));
+}
+
+.install-filter-label {
+	display: inline-block;
+	transform-origin: 50% 60%;
+}
+
+.install-filter-mode-slot {
+	position: relative;
+	display: grid;
+	place-items: center;
+	flex: 0 0 28px;
+	width: 28px;
+	height: 16px;
+}
+
+.install-filter-badge,
+.install-filter-flame {
+	grid-area: 1 / 1;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	flex: 0 0 28px;
+	width: 28px;
+	height: 16px;
+	box-sizing: border-box;
+	transform-origin: 50% 60%;
+	transform: translateY(0) scale(1);
+	transition:
+		opacity 0.28s cubic-bezier(0.2, 0.8, 0.2, 1),
+		transform 0.34s cubic-bezier(0.2, 0.8, 0.2, 1),
+		filter 0.34s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.install-filter-badge {
+	font-size: 10px;
+	line-height: 16px;
+	font-weight: 700;
+	padding: 0 5px;
+	background: color-mix(in srgb, var(--install-accent) 18%, transparent);
+	color: var(--install-accent);
+	border-radius: 999px;
+}
+
+.install-filter-flame {
+	color: #ff5f00;
+	filter: drop-shadow(0 0 0 transparent);
+}
+
+.install-filter-flame svg {
+	width: 14px;
+	height: 14px;
+	flex: 0 0 auto;
+}
+
+#install-filter-trending[data-trending-mode="24h"] .install-filter-badge,
+#install-filter-trending[data-trending-mode="flame"] .install-filter-flame {
+	opacity: 1;
+	pointer-events: auto;
+	transform: translateY(0) scale(1);
+}
+
+#install-filter-trending[data-trending-mode="24h"] .install-filter-flame,
+#install-filter-trending[data-trending-mode="flame"] .install-filter-badge {
+	opacity: 0;
+	pointer-events: none;
+	transform: translateY(3px) scale(0.82);
+}
+
+#install-filter-trending:not(.is-preview-locked)[data-trending-mode="24h"] .install-filter-mode-slot:hover .install-filter-badge,
+#install-filter-trending:not(.is-preview-locked)[data-trending-mode="24h"] .install-filter-mode-slot:focus-visible .install-filter-badge,
+#install-filter-trending:not(.is-preview-locked)[data-trending-mode="flame"] .install-filter-mode-slot:hover .install-filter-flame,
+#install-filter-trending:not(.is-preview-locked)[data-trending-mode="flame"] .install-filter-mode-slot:focus-visible .install-filter-flame {
+	opacity: 0;
+	pointer-events: none;
+	transform: translateY(-3px) scale(0.86);
+}
+
+#install-filter-trending:not(.is-preview-locked)[data-trending-mode="24h"] .install-filter-mode-slot:hover .install-filter-flame,
+#install-filter-trending:not(.is-preview-locked)[data-trending-mode="24h"] .install-filter-mode-slot:focus-visible .install-filter-flame,
+#install-filter-trending:not(.is-preview-locked)[data-trending-mode="flame"] .install-filter-mode-slot:hover .install-filter-badge,
+#install-filter-trending:not(.is-preview-locked)[data-trending-mode="flame"] .install-filter-mode-slot:focus-visible .install-filter-badge {
+	opacity: 1;
+	pointer-events: auto;
+	transform: translateY(0) scale(1.06);
+}
+
+#install-filter-trending:not(.is-preview-locked) .install-filter-mode-slot:hover .install-filter-flame,
+#install-filter-trending:not(.is-preview-locked) .install-filter-mode-slot:focus-visible .install-filter-flame {
+	filter: drop-shadow(0 0 7px color-mix(in srgb, #ff5f00 55%, transparent));
+}
+
+#install-filter-trending.is-switching .install-filter-label {
+	animation: install-trending-label-switch 0.46s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+#install-filter-trending.is-switching[data-trending-mode="flame"][data-previous-trending-mode="24h"] .install-filter-badge,
+#install-filter-trending.is-switching[data-trending-mode="24h"][data-previous-trending-mode="flame"] .install-filter-flame {
+	animation: install-mode-exit-down-3d 0.32s cubic-bezier(0.33, 1, 0.68, 1) both;
+}
+
+#install-filter-trending.is-switching[data-trending-mode="flame"][data-previous-trending-mode="24h"] .install-filter-flame,
+#install-filter-trending.is-switching[data-trending-mode="24h"][data-previous-trending-mode="flame"] .install-filter-badge {
+	animation: install-mode-enter-up-3d 0.42s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+@keyframes install-mode-exit-down-3d {
+	0% {
+		opacity: 1;
+		transform: translateY(0) scale(1) rotateX(0deg);
+		filter: blur(0);
+	}
+	100% {
+		opacity: 0;
+		transform: translateY(9px) scale(0.72) rotateX(-58deg);
+		filter: blur(1.5px);
+	}
+}
+
+@keyframes install-mode-enter-up-3d {
+	0% {
+		opacity: 0;
+		transform: translateY(10px) scale(0.76) rotateX(58deg);
+		filter: blur(1.5px);
+	}
+	62% {
+		opacity: 1;
+		transform: translateY(-1px) scale(1.08) rotateX(0deg);
+		filter: blur(0);
+	}
+	100% {
+		opacity: 1;
+		transform: translateY(0) scale(1) rotateX(0deg);
+		filter: blur(0);
+	}
+}
+
+@keyframes install-trending-label-switch {
+	0% {
+		transform: translateY(0) scale(1);
+		opacity: 1;
+	}
+	42% {
+		transform: translateY(2px) scale(0.96);
+		opacity: 0.72;
+	}
+	100% {
+		transform: translateY(0) scale(1);
+		opacity: 1;
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.install-filter-badge,
+	.install-filter-flame,
+	.install-filter-label {
+		animation: none !important;
+		transition: none;
+	}
+}
+
+.install-panel {
+	display: flex;
+	flex-direction: column;
+	flex: 1;
+	overflow: hidden;
+	min-height: 0;
+}
+
+.install-panel[hidden] {
+	display: none;
+}
+
+.install-panel--official {
+	justify-content: center;
+	align-items: center;
+}
+
+.install-list {
+	flex: 1;
+	overflow-y: auto;
+	margin: 0;
+	padding: 6px 0 12px;
+	list-style: none;
+	scrollbar-width: thin;
+	scrollbar-color: color-mix(in srgb, var(--install-fg) 18%, transparent) transparent;
+}
+
+.install-list::-webkit-scrollbar {
+	width: 4px;
+}
+
+.install-list::-webkit-scrollbar-track {
+	background: transparent;
+}
+
+.install-list::-webkit-scrollbar-thumb {
+	background: color-mix(in srgb, var(--install-fg) 18%, transparent);
+	border-radius: 4px;
+}
+
+.install-status {
+	padding: 18px 12px;
+	color: var(--install-muted);
+	font-size: 12px;
+	line-height: 1.4;
+}
+
+.install-status[hidden] {
+	display: none;
+}
+
+.install-status--loading {
+	flex: 1;
+	display: flex;
+	flex-direction: column;
+	min-height: 0;
+	padding: 12px 0 0;
+	overflow: hidden;
+}
+
+.install-loading-label {
+	padding: 0 12px 8px;
+	color: color-mix(in srgb, var(--install-muted) 82%, transparent);
+	font-size: 12px;
+}
+
+.install-skeleton-list {
+	flex: 1;
+	display: flex;
+	flex-direction: column;
+	padding: 0 0 12px;
+	overflow: hidden;
+}
+
+.install-skeleton-row {
+	--skeleton-delay: calc(var(--skeleton-index) * 95ms);
+
+	position: relative;
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	min-height: 45px;
+	padding: 7px 12px;
+	box-sizing: border-box;
+	overflow: hidden;
+	opacity: 0.52;
+	animation: install-skeleton-row-wave 2.35s ease-in-out var(--skeleton-delay) infinite;
+}
+
+.install-skeleton-rank,
+.install-skeleton-name,
+.install-skeleton-source,
+.install-skeleton-meta {
+	display: block;
+	border-radius: 3px;
+	background: color-mix(in srgb, var(--install-fg) 8%, transparent);
+	animation: install-skeleton-bar-breathe 2.35s ease-in-out var(--skeleton-delay) infinite;
+}
+
+.install-skeleton-rank {
+	flex: 0 0 22px;
+	width: 22px;
+	height: 10px;
+}
+
+.install-skeleton-copy {
+	flex: 1;
+	min-width: 0;
+	display: flex;
+	flex-direction: column;
+	gap: 6px;
+}
+
+.install-skeleton-name {
+	width: min(128px, 72%);
+	height: 11px;
+}
+
+.install-skeleton-row:nth-child(3n + 1) .install-skeleton-name {
+	width: min(112px, 64%);
+}
+
+.install-skeleton-row:nth-child(4n + 2) .install-skeleton-name {
+	width: min(150px, 78%);
+}
+
+.install-skeleton-source {
+	width: min(108px, 58%);
+	height: 8px;
+	opacity: 0.72;
+}
+
+.install-skeleton-row:nth-child(2n) .install-skeleton-source {
+	width: min(92px, 50%);
+}
+
+.install-skeleton-meta {
+	flex: 0 0 44px;
+	width: 44px;
+	height: 9px;
+	opacity: 0.72;
+}
+
+.install-list-footer {
+	list-style: none;
+}
+
+.install-list-loader {
+	padding: 0;
+	pointer-events: none;
+}
+
+.install-list-sentinel {
+	height: 18px;
+}
+
+.install-item {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	padding: 7px 12px;
+	cursor: pointer;
+	transition: background 0.14s ease;
+}
+
+.install-item:hover {
+	background: var(--install-hover-bg);
+}
+
+.install-item:hover .install-downloads,
+.install-item:focus-within .install-downloads,
+.install-item--busy .install-downloads {
+	opacity: 0;
+	pointer-events: none;
+}
+
+.install-item:hover .install-btn,
+.install-item:focus-within .install-btn,
+.install-item--busy .install-btn {
+	opacity: 1;
+}
+
+.install-rank {
+	flex: 0 0 22px;
+	text-align: right;
+	font-size: 11px;
+	font-weight: 500;
+	color: color-mix(in srgb, var(--install-muted) 60%, transparent);
+	font-variant-numeric: tabular-nums;
+	user-select: none;
+}
+
+.install-info {
+	flex: 1;
+	min-width: 0;
+	display: flex;
+	flex-direction: column;
+	gap: 2px;
+}
+
+.install-name {
+	font-size: 13px;
+	font-weight: 600;
+	color: var(--install-fg);
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	font-family: var(--vscode-editor-font-family, 'Menlo', 'Courier New', monospace);
+}
+
+.install-source {
+	font-size: 11px;
+	color: var(--install-muted);
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	font-family: var(--vscode-font-family);
+}
+
+.install-meta {
+	flex: 0 0 76px;
+	display: grid;
+	grid-template-areas: 'slot';
+	align-items: center;
+	justify-items: end;
+	min-width: 76px;
+}
+
+.install-downloads {
+	grid-area: slot;
+	display: inline-flex;
+	align-items: center;
+	gap: 3px;
+	font-size: 11px;
+	font-weight: 500;
+	color: var(--install-muted);
+	white-space: nowrap;
+	font-variant-numeric: tabular-nums;
+	transition: opacity 0.14s ease;
+}
+
+.install-downloads svg {
+	width: 11px;
+	height: 11px;
+	flex: 0 0 auto;
+	opacity: 0.7;
+}
+
+.install-btn {
+	grid-area: slot;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	height: 24px;
+	min-width: 68px;
+	padding: 0 10px;
+	background: color-mix(in srgb, var(--install-accent) 15%, transparent);
+	color: var(--install-accent);
+	border: 1px solid color-mix(in srgb, var(--install-accent) 35%, transparent);
+	border-radius: 5px;
+	font-family: var(--vscode-font-family);
+	font-size: 11px;
+	font-weight: 600;
+	cursor: pointer;
+	opacity: 0;
+	transition: opacity 0.14s ease, background 0.14s ease, border-color 0.14s ease;
+}
+
+.install-btn:not(.install-btn--busy):hover {
+	background: color-mix(in srgb, var(--install-accent) 28%, transparent);
+	border-color: color-mix(in srgb, var(--install-accent) 60%, transparent);
+}
+
+.install-btn:disabled {
+	cursor: default;
+	opacity: 1;
+	padding: 0 6px;
+}
+
+.install-btn--busy {
+	background:
+		linear-gradient(
+			110deg,
+			color-mix(in srgb, var(--install-accent) 72%, transparent) 0%,
+			var(--install-accent) 36%,
+			color-mix(in srgb, var(--vscode-button-foreground, #ffffff) 86%, var(--install-accent)) 50%,
+			var(--install-accent) 64%,
+			color-mix(in srgb, var(--install-accent) 72%, transparent) 100%
+		);
+	background-size: 300% 100%;
+	background-position: 150% 0;
+	-webkit-background-clip: text;
+	background-clip: text;
+	color: transparent;
+	animation: install-busy-shine 1.8s linear infinite;
+}
+
+.install-btn:focus-visible {
+	outline: 1px solid var(--install-accent);
+	outline-offset: 2px;
+	opacity: 1;
+}
+
+.install-btn:active {
+	transform: scale(0.97);
+}
+
+@keyframes install-busy-shine {
+	from {
+		background-position: 150% 0;
+	}
+
+	to {
+		background-position: -150% 0;
+	}
+}
+
+@keyframes install-skeleton-row-wave {
+	0% {
+		opacity: 0.36;
+	}
+
+	18% {
+		opacity: 0.92;
+	}
+
+	42% {
+		opacity: 0.56;
+	}
+
+	100% {
+		opacity: 0.36;
+	}
+}
+
+@keyframes install-skeleton-bar-breathe {
+	0%,
+	100% {
+		background: color-mix(in srgb, var(--install-fg) 7%, transparent);
+	}
+
+	18% {
+		background: color-mix(in srgb, var(--install-fg) 15%, transparent);
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.install-search-box,
+	.install-filter,
+	.install-item,
+	.install-btn,
+	.install-search-clear {
+		transition: none;
+	}
+
+	.install-item:hover .install-downloads,
+	.install-item:hover .install-btn {
+		transition: none;
+	}
+
+	.install-btn--busy {
+		animation: none;
+		color: var(--install-accent);
+	}
+
+	.install-skeleton-row,
+	.install-skeleton-rank,
+	.install-skeleton-name,
+	.install-skeleton-source,
+	.install-skeleton-meta {
+		animation: none;
+	}
+}

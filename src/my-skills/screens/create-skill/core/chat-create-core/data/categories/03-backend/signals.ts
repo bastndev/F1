@@ -1,0 +1,16 @@
+export const backendSignals = [
+	'backend',
+	'back-end',
+	'api',
+	'server',
+	'node',
+	'nodejs',
+	'express',
+	'fastify',
+	'nest',
+	'nestjs',
+	'fastapi',
+	'python',
+	'auth',
+	'oauth',
+];

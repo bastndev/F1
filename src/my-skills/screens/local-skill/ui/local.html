@@ -1,0 +1,55 @@
+<div class="local-surface">
+
+	<div class="local-header">
+		<div class="local-stats" id="local-stats">
+			<div class="local-stat">
+				<span class="local-stat-value" id="stat-total">0</span>
+				<span class="local-stat-label">installed</span>
+			</div>
+			<div class="local-stat-divider"></div>
+			<div class="local-stat">
+				<span class="local-stat-value local-stat-value--active" id="stat-active">0</span>
+				<span class="local-stat-label">active</span>
+			</div>
+			<div class="local-stat-divider"></div>
+			<div class="local-stat">
+				<span class="local-stat-value local-stat-value--disabled" id="stat-disabled">0</span>
+				<span class="local-stat-label">disabled</span>
+			</div>
+		</div>
+	</div>
+
+	<div class="local-list-toolbar">
+		<div class="local-section-tabs">
+			<span class="local-section-tab local-section-tab--active" id="local-workspace-tab" title="{{LOCAL_WORKSPACE_NAME}}">{{LOCAL_WORKSPACE_NAME}}</span>
+			<span class="local-section-tab" id="local-saved-tab">Saved</span>
+		</div>
+		<button class="local-sort-btn" id="local-sort-btn" type="button" aria-label="Sort skills">
+			<svg viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+				<path d="M2 4.5h12M4 8h8M6 11.5h4"/>
+			</svg>
+			<span class="local-sort-label" id="local-sort-label">A–Z</span>
+		</button>
+	</div>
+
+	<ul id="local-list" class="local-list" role="list" aria-label="Installed skills" aria-live="polite">
+		<!-- Injected by local.ts -->
+	</ul>
+
+	<div id="local-empty" class="local-empty" hidden>
+		<div class="local-empty-icon-wrap">
+			<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+				<path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
+				<path d="M3.27 6.96 12 12.01l8.73-5.05M12 22.08V12"/>
+			</svg>
+		</div>
+		<span class="local-empty-title">No skills installed</span>
+		<span class="local-empty-subtitle">Create a skill for this workspace or install one from the marketplace.</span>
+		<div class="local-empty-actions">
+			<button class="local-empty-cta local-empty-cta--create" id="local-goto-create" type="button">← Create skills</button>
+			<span class="local-empty-separator">or</span>
+			<button class="local-empty-cta local-empty-cta--install" id="local-goto-install" type="button">Install skills →</button>
+		</div>
+	</div>
+
+</div>

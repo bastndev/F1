@@ -1,0 +1,73 @@
+<div class="create-chat-nav" data-create-chat-nav>
+	<button class="create-chat-back" type="button" aria-label="Close" data-create-chat-back>
+		<svg viewBox="0 0 16 16" focusable="false" aria-hidden="true">
+			<path d="M4 4l8 8M12 4l-8 8" />
+		</svg>
+	</button>
+	<div class="create-chat-template-toggle is-fast-active" aria-label="Template Mode" id="template-toggle-container">
+		<div class="create-chat-template-slider"></div>
+		<button type="button" class="create-chat-template-btn" data-create-chat-template="base">Base</button>
+		<button type="button" class="create-chat-template-btn is-active" data-create-chat-template="fast">Fast</button>
+		<!-- TODO: Implementar la generación con IA en el futuro
+		<button type="button" class="create-chat-template-btn" data-create-chat-template="ai" disabled title="Coming soon">AI</button>
+		-->
+	</div>
+	<span class="create-chat-version">BETA</span>
+</div>
+
+<div class="create-chat-target-bar" aria-label="Create skill destination">
+	<span class="create-chat-target-label">Create in</span>
+	<button class="create-chat-target" type="button" aria-label="Create in .agents skills" aria-pressed="false"
+		data-create-chat-target="agents">
+		<span class="create-chat-target-icon" aria-hidden="true">
+			<svg viewBox="0 0 16 16" focusable="false">
+				<path d="M3.5 4.5h3l1 1h5v6h-9z" />
+				<path d="M5.5 8h5" />
+				<path d="M8 6.75V9.25" />
+			</svg>
+		</span>
+		<span>.agents/</span>
+	</button>
+	<button class="create-chat-target" type="button" aria-label="Create in .claude skills" aria-pressed="false"
+		data-create-chat-target="claude">
+		<span class="create-chat-target-icon" aria-hidden="true">
+			<svg viewBox="0 0 16 16" focusable="false">
+				<path d="M3.5 4.5h3l1 1h5v6h-9z" />
+				<path d="M5.5 8h5" />
+				<path d="M6.25 9.75h3.5" />
+			</svg>
+		</span>
+		<span>.claude/</span>
+	</button>
+</div>
+
+<div class="create-chat" aria-label="Create skill chat" data-create-chat>
+	<textarea class="create-chat-input" rows="2" placeholder="Create a new skill..." maxlength="1536"
+		data-create-chat-input></textarea>
+	<div class="create-chat-toolbar">
+		<button class="create-chat-mode" type="button" aria-label="Switch chat mode" data-create-chat-mode-toggle>
+			<span class="create-chat-mode-icon" aria-hidden="true" data-create-chat-mode-icon>
+				<svg viewBox="0 0 16 16" focusable="false">
+					<path d="m4.25 10.75-.75 2.75 2.75-.75 6.25-6.25-2-2z" />
+					<path d="m9.5 5.5 2 2" />
+				</svg>
+			</span>
+			<span data-create-chat-mode-label>Create</span>
+		</button>
+
+		<span class="create-chat-counter" data-create-chat-counter>
+			<span class="create-chat-counter-words" data-create-chat-counter-words></span>
+			<span class="create-chat-counter-separator"> · </span>
+			<span class="create-chat-counter-chars" data-create-chat-counter-chars></span>
+		</span>
+
+		<div class="create-chat-actions">
+			<button class="create-chat-send" type="button" aria-label="Send message" data-create-chat-send>
+				<svg viewBox="0 0 16 16" focusable="false">
+					<path d="M8 12.5v-9" />
+					<path d="M4.5 7 8 3.5 11.5 7" />
+				</svg>
+			</button>
+		</div>
+	</div>
+</div>
