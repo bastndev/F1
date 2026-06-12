@@ -24,7 +24,7 @@ export const mountTranslatorPanel = (host: HTMLElement, context: ToolContext) =>
 	ensureStyles();
 
 	const template = document.createElement('template');
-	template.innerHTML = translatorHtml.trim();
+	template.innerHTML = (translatorHtml as unknown as string).trim();
 	host.replaceChildren(template.content.cloneNode(true));
 
 	const closeBtn = host.querySelector<HTMLButtonElement>('#closeTranslatorBtn');

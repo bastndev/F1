@@ -91,7 +91,7 @@ export const mountPromptPanel = (host: HTMLElement, context: PromptContext = { c
 	ensureStyles();
 
 	const template = document.createElement('template');
-	template.innerHTML = promptHtml.trim();
+	template.innerHTML = (promptHtml as unknown as string).trim();
 	host.replaceChildren(template.content.cloneNode(true));
 
 	const closeBtn = host.querySelector<HTMLButtonElement>('#closePromptBtn');
