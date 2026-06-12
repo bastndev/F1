@@ -23,7 +23,7 @@ import {
 	type AgentLaunchExtensionMode,
 	type AgentLaunchGuardMessage,
 	type AgentLaunchSource
-} from './webview/ui/panel-terminal/agent-safety/agent-launch-guard';
+} from './webview/ui/panel-terminal/agents/agent-launch-guard';
 
 type CliHubMessage = {
 	type?: string;
