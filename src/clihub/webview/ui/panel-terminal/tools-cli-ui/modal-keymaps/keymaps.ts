@@ -18,6 +18,6 @@ export const mountKeymapsPanel = (host: HTMLElement) => {
 	ensureStyles();
 
 	const template = document.createElement('template');
-	template.innerHTML = keysHtml.trim();
+	template.innerHTML = (keysHtml as unknown as string).trim();
 	host.replaceChildren(template.content.cloneNode(true));
 };

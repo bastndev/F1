@@ -1,7 +1,7 @@
 import { FitAddon } from '@xterm/addon-fit';
 import { Terminal } from '@xterm/xterm';
 import { createTabController, type CliAgentIcon, type CliAgentOption, type CliSessionSummary } from '../panel-tab/tab';
-import { createCliCreateMessage, type AgentLaunchGuardMessage } from './agent-safety/agent-launch-guard';
+import { createCliCreateMessage, type AgentLaunchGuardMessage } from './agents/agent-launch-guard';
 import { createToolsController } from './tools-cli-ui/tools';
 import { detectModelName } from '../../core/terminal-cli/model-detect';
 import type { ImageAttachment, PromptTranslateRequest, PromptTranslateResult, FileMentionEntry, SpellIssue, WorkspaceSkill } from '../../core/tools-cli-core/prompt';
