@@ -93,7 +93,7 @@ function initializeTranslator(host: HTMLElement, context: ToolContext) {
 		if (!extracted) {
 			if (textEl) {
 				textEl.classList.remove('is-rendered');
-				textEl.textContent = 'Select text in the terminal to translate it to Spanish.';
+				textEl.textContent = 'Select or copy text in the terminal to translate it to Spanish.';
 				textEl.classList.add('placeholder');
 			}
 			return;
@@ -193,7 +193,7 @@ function initializeTranslator(host: HTMLElement, context: ToolContext) {
 			textEl.textContent = extracted;
 			textEl.classList.add('placeholder');
 		} else {
-			textEl.textContent = 'Select text in the terminal to translate it to Spanish.';
+			textEl.textContent = 'Select or copy text in the terminal to translate it to Spanish.';
 			textEl.classList.add('placeholder');
 		}
 	}

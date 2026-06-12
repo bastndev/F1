@@ -1,6 +1,6 @@
 import { mountKeymapsPanel } from './modal-keymaps/keymaps';
 import { mountPromptPanel } from './modal-prompt/prompt';
-import type { ImageAttachment, PromptTranslateRequest, PromptTranslateResult, FileMentionEntry, SpellIssue } from '../../../core/tools-cli-core/prompt';
+import type { ImageAttachment, PromptTranslateRequest, PromptTranslateResult, FileMentionEntry, SpellIssue, WorkspaceSkill } from '../../../core/tools-cli-core/prompt';
 import type { VoiceState } from '../../../core/tools-cli-core/modal-voice/voice-types';
 import { mountTranslatorPanel } from './modal-translator/translator';
 
@@ -15,7 +15,7 @@ export type ToolContext = {
 	getTerminalSelection?: () => string;
 	preparePromptWithAttachments?: (text: string, attachments: ImageAttachment[]) => Promise<string>;
 	requestWorkspaceFiles?: () => Promise<FileMentionEntry[]>;
-	requestWorkspaceSkills?: () => Promise<string[]>;
+	requestWorkspaceSkills?: () => Promise<WorkspaceSkill[]>;
 	requestSpellcheck?: (text: string, strict: boolean) => Promise<SpellIssue[]>;
 	speakText?: (text: string) => void;
 	stopSpeech?: () => void;
@@ -33,7 +33,7 @@ export type ToolsControllerOptions = {
 	getTerminalSelection?: () => string;
 	preparePromptWithAttachments?: (text: string, attachments: ImageAttachment[]) => Promise<string>;
 	requestWorkspaceFiles?: () => Promise<FileMentionEntry[]>;
-	requestWorkspaceSkills?: () => Promise<string[]>;
+	requestWorkspaceSkills?: () => Promise<WorkspaceSkill[]>;
 	requestSpellcheck?: (text: string, strict: boolean) => Promise<SpellIssue[]>;
 	speakText?: (text: string) => void;
 	stopSpeech?: () => void;
@@ -160,5 +160,5 @@ const toolMounts: Record<ToolId, ToolMount> = {
 		}
 	};
 
-	return { open, toggle, close };
+	return { open, toggle, close, isOpen: () => currentTool !== null, getOpenTool: () => currentTool };
 };

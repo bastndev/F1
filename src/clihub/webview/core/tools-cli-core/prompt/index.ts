@@ -13,7 +13,19 @@ export {
 	stripPromptTokens,
 	protectMentions,
 	restoreMentions,
+	protectSkillTokens,
+	restoreSkillTokens,
 } from './attachments/markers';
+
+// Workspace skills: one aggregate [Skills #N] token in the textarea, expanded
+// on send into instructions with each SKILL.md route resolved for the active CLI.
+export {
+	skillsTokenPattern,
+	buildSkillsToken,
+	resolveSkillPath,
+	expandSkillsToken,
+} from './skills';
+export type { WorkspaceSkill, SkillRoot } from './skills';
 export type { ImageAttachment } from './attachments/types';
 export { isImageAttachment } from './attachments/types';
 export { buildPromptTextWithImages } from './attachments/prepare';
