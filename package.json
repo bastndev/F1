@@ -72,7 +72,7 @@
         {
           "id": "myskills-activity",
           "title": "My Skills",
-          "icon": "src/my-skills/assets/svg/logo.svg"
+          "icon": "$(symbol-event)"
         }
       ],
       "panel": [
@@ -89,7 +89,7 @@
           "type": "webview",
           "id": "myskills-panel",
           "name": "My Skills",
-          "icon": "src/my-skills/assets/svg/logo.svg"
+          "icon": "$(symbol-event)"
         }
       ],
       "cliHubContainer": [
