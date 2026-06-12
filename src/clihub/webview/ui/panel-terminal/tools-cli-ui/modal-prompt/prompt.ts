@@ -23,6 +23,11 @@ import {
 	stripPromptTokens,
 	protectMentions,
 	restoreMentions,
+	type WorkspaceSkill,
+	buildSkillsToken,
+	expandSkillsToken,
+	protectSkillTokens,
+	restoreSkillTokens,
 } from '../../../../core/tools-cli-core/prompt';
 import { mountFileMentionPicker } from './components/file-mention/file-mention';
 
@@ -44,9 +49,10 @@ const ensureStyles = () => {
 const imagePathPattern =
 	/(?:"([^"\r\n]+\.(?:png|jpe?g|gif|webp|bmp|svg|tiff?))"|'([^'\r\n]+\.(?:png|jpe?g|gif|webp|bmp|svg|tiff?))'|((?:~|\/)[^\r\n\t"'<>]*?\.(?:png|jpe?g|gif|webp|bmp|svg|tiff?)))/gi;
 
-// Every atomic token in the textarea: [Image #N], [Code #N +X lines], [Text #N +X lines].
-// Used by delete/arrow/caret handling so all marker types behave as single units.
-const atomicMarkerPattern = /\[(?:Image|Code|Text) #\d+[^\]]*\]/g;
+// Every atomic token in the textarea: [Image #N], [Code #N +X lines],
+// [Text #N +X lines], [Skill #name]. Used by delete/arrow/caret handling so
+// all marker types behave as single units.
+const atomicMarkerPattern = /\[(?:Image|Code|Text) #\d+[^\]]*\]|\/skills #\d+|\/skill(?!s)/g;
 
 // Budget for the *effective* typed text — markers and @mentions are free, and
 // large pastes collapse into markers, so this only constrains hand-typed prose.
@@ -77,7 +83,7 @@ type PromptContext = {
 	translatePrompt?: (request: PromptTranslateRequest) => Promise<PromptTranslateResult>;
 	preparePromptWithAttachments?: (text: string, attachments: ImageAttachment[]) => Promise<string>;
 	requestWorkspaceFiles?: () => Promise<FileMentionEntry[]>;
-	requestWorkspaceSkills?: () => Promise<string[]>;
+	requestWorkspaceSkills?: () => Promise<WorkspaceSkill[]>;
 	requestSpellcheck?: (text: string, strict: boolean) => Promise<SpellIssue[]>;
 };
 
@@ -269,15 +275,16 @@ function initPromptTabs(host: HTMLElement, context: PromptContext, hasActiveSess
 				runBtn.innerHTML = '<i class="ti ti-sparkles" aria-hidden="true"></i><span>Translating…</span>';
 			}
 			try {
-				// Image markers, paste markers AND @mention routes must survive
-				// translation untouched — they also shrink the payload the
-				// translator has to process, so requests are faster and safer.
+				// Image markers, paste markers, skill tokens AND @mention routes
+				// must survive translation untouched — they also shrink the payload
+				// the translator has to process, so requests are faster and safer.
 				const { text: imageProtected, markers } = protectImageMarkers(textToSend);
 				const { text: pasteProtected, markers: pasteMarkers } = protectPasteMarkers(imageProtected);
-				const { text: protectedText, mentions } = protectMentions(pasteProtected);
+				const { text: skillProtected, tokens: skillTokens } = protectSkillTokens(pasteProtected);
+				const { text: protectedText, mentions } = protectMentions(skillProtected);
 				const result = await translatePromptText(protectedText, ctx);
 				const translated = result.text
-					? restoreImageMarkers(restorePasteMarkers(restoreMentions(result.text, mentions), pasteMarkers), markers)
+					? restoreImageMarkers(restorePasteMarkers(restoreSkillTokens(restoreMentions(result.text, mentions), skillTokens), pasteMarkers), markers)
 					: '';
 				if (translated && translated !== textToSend.trim()) {
 					textToSend = translated;
@@ -304,16 +311,15 @@ function initPromptTabs(host: HTMLElement, context: PromptContext, hasActiveSess
 			}
 		}
 
+		// The [Skills #N] aggregate token expands into explicit instructions
+		// with each SKILL.md route resolved for the active CLI (.claude/skills
+		// for Claude, .agents/skills for the rest). Done post-translation —
+		// the generated text is already English — and before paste expansion.
+		textToSend = expandSkillsToken(textToSend, selectedSkills, isClaudeSession());
+
 		// Collapsed pastes leave the textarea as markers; the CLI gets the
 		// original verbatim content (never lowercased, never translated).
 		textToSend = expandPasteMarkers(textToSend, pasteAttachments);
-
-		// Selected skill chips ride along as an explicit instruction. Appended
-		// post-translation (already English) so it never hits the translator.
-		if (selectedSkills.size > 0) {
-			const names = [...selectedSkills].map((name) => `"${name}"`).join(', ');
-			textToSend += `\n\nUse the following skill${selectedSkills.size === 1 ? '' : 's'}: ${names}.`;
-		}
 
 		const result = processPrompt(textToSend, {
 			close: ctx.close,
@@ -341,11 +347,15 @@ function initPromptTabs(host: HTMLElement, context: PromptContext, hasActiveSess
 		textarea.focus();
 	});
 
-	// Skills the user toggles on travel with the prompt as an explicit instruction.
-	const selectedSkills = new Set<string>();
+	// Ordered selection of skills — updated as the user toggles chips. The
+	// textarea holds only the aggregate [Skills #N] count token; the actual
+	// WorkspaceSkill objects live here and drive the send-time expansion.
+	let selectedSkills: WorkspaceSkill[] = [];
 
 	if (hasActiveSession) {
-		initSkillsChips(host, context, selectedSkills);
+		initSkillsChips(host, context, textarea, (selection) => {
+			selectedSkills = selection;
+		});
 		const tools = initToolbarActions(
 			host,
 			() => translateState.enabled,
@@ -587,10 +597,27 @@ function enforceLowercaseInput(textarea: HTMLTextAreaElement) {
 	});
 }
 
+// The active CLI decides which skills folder a route should prefer. Same
+// label source updateFooterModel uses.
+function isClaudeSession(): boolean {
+	const label = document.getElementById('cli-terminal-label')?.textContent ?? '';
+	return label.toLowerCase().includes('claude');
+}
+
 // Populate the Skills row with the skills installed in the workspace
-// (.agents/skills/* and .claude/skills/*, folders containing a SKILL.md —
-// scanned host-side). The row only appears when at least one skill exists.
-function initSkillsChips(host: HTMLElement, context: PromptContext, selectedSkills: Set<string>) {
+// (.agents/skills/* and .claude/skills/*, deduplicated by name, scanned
+// host-side). The row only appears when at least one skill exists.
+//
+// ONE aggregate [Skills #N] token in the textarea represents the selection.
+// The ordered `selected` array is authoritative; the token is purely visual.
+// Chips show numbered badges (#1, #2) that update as selection order changes.
+// A footer legend "skills: #1 cavecrew · #2 nido" appears when any are active.
+function initSkillsChips(
+	host: HTMLElement,
+	context: PromptContext,
+	textarea: HTMLTextAreaElement,
+	onSelectionChange: (selected: WorkspaceSkill[]) => void
+) {
 	const row = host.querySelector<HTMLElement>('.prompt-skills');
 	const chipsHost = host.querySelector<HTMLElement>('#skillChips');
 	if (!row || !chipsHost || !context.requestWorkspaceSkills) {
@@ -605,7 +632,6 @@ function initSkillsChips(host: HTMLElement, context: PromptContext, selectedSkil
 		chipsHost.replaceChildren();
 
 		// No skills installed: show an inert dashed "+" placeholder.
-		// TODO(future): wire this to a skill install/create flow after the refactor.
 		if (!skills.length) {
 			const addChip = document.createElement('button');
 			addChip.className = 'prompt-tool-btn prompt-skill-add';
@@ -617,22 +643,111 @@ function initSkillsChips(host: HTMLElement, context: PromptContext, selectedSkil
 			return;
 		}
 
-		for (const name of skills) {
-			const chip = document.createElement('button');
-			chip.className = 'prompt-tool-btn';
-			chip.dataset.skill = name;
-			chip.textContent = name;
-			chip.title = `Ask the CLI to use its "${name}" skill`;
-			chip.addEventListener('click', () => {
-				if (chip.classList.toggle('selected')) {
-					selectedSkills.add(name);
+		const selected: WorkspaceSkill[] = [];
+		let updatingToken = false;
+
+		const updateToken = () => {
+			updatingToken = true;
+			try {
+				// Match compact formats (/skill, /skills #N) and legacy bracket format
+				const hasToken = /\/skills #\d+|\/skill(?!s)|\[Skills? #[^\]]+\]/.test(textarea.value);
+
+				if (selected.length === 0) {
+					if (hasToken) {
+						textarea.value = textarea.value
+							.replace(/\/skills #\d+ ?|\/skill(?!s) ?|\[Skills? #[^\]]+\] ?/g, '')
+							.trimStart();
+						textarea.dispatchEvent(new Event('input', { bubbles: true }));
+					}
 				} else {
-					selectedSkills.delete(name);
+					const newToken = buildSkillsToken(selected.length);
+					if (hasToken) {
+						textarea.value = textarea.value
+							.replace(/\/skills #\d+|\/skill(?!s)|\[Skills? #[^\]]+\]/g, newToken);
+					} else {
+						const current = textarea.value;
+						textarea.value = current ? `${newToken} ${current}` : newToken;
+					}
+					textarea.dispatchEvent(new Event('input', { bubbles: true }));
 				}
+
+				onSelectionChange([...selected]);
+			} finally {
+				updatingToken = false;
+			}
+		};
+
+		const syncBadges = () => {
+			for (const chip of Array.from(chipsHost!.querySelectorAll<HTMLButtonElement>('[data-skill]'))) {
+				const name = chip.dataset.skill!;
+				const idx = selected.findIndex((s) => s.name === name);
+				const badge = chip.querySelector<HTMLElement>('.skill-badge');
+				chip.classList.toggle('selected', idx >= 0);
+				if (badge) {
+					badge.textContent = idx >= 0 ? `#${idx + 1}` : '';
+				}
+			}
+		};
+
+		const sync = () => {
+			syncBadges();
+		};
+
+		for (const skill of skills) {
+			const chip = document.createElement('button');
+			chip.className = 'prompt-tool-btn prompt-skill-chip';
+			chip.dataset.skill = skill.name;
+			chip.title = `Ask the CLI to use its "${skill.name}" skill`;
+
+			const label = document.createElement('span');
+			label.className = 'skill-label';
+			label.textContent = skill.name;
+
+			const badge = document.createElement('span');
+			badge.className = 'skill-badge';
+			badge.setAttribute('aria-hidden', 'true');
+
+			chip.append(label, badge);
+
+			chip.addEventListener('click', () => {
+				const idx = selected.findIndex((s) => s.name === skill.name);
+				if (idx >= 0) {
+					selected.splice(idx, 1);
+				} else {
+					selected.push(skill);
+				}
+				updateToken();
+				sync();
+				textarea.focus();
 			});
+
 			chipsHost.append(chip);
 		}
+
 		row.hidden = false;
+		sync();
+
+		// Strip any stale skills token from a restored draft — the token
+		// doesn't encode skill names, so selection can't be reconstructed.
+		if (/\/skills #\d+|\/skill(?!s)|\[Skills? #[^\]]+\]/.test(textarea.value)) {
+			textarea.value = textarea.value
+				.replace(/\/skills #\d+ ?|\/skill(?!s) ?|\[Skills? #[^\]]+\] ?/g, '')
+				.trimStart();
+			textarea.dispatchEvent(new Event('input', { bubbles: true }));
+		}
+
+		// When the user manually deletes the token, clear the chip selection
+		// so the UI stays in sync with what the textarea contains.
+		textarea.addEventListener('input', () => {
+			if (updatingToken) {
+				return;
+			}
+			if (selected.length > 0 && !/\/skills #\d+|\/skill(?!s)/.test(textarea.value)) {
+				selected.length = 0;
+				onSelectionChange([]);
+				sync();
+			}
+		});
 	});
 }
 
@@ -1205,7 +1320,7 @@ function updatePromptImageHighlight(
   highlight.scrollLeft = textarea.scrollLeft;
 }
 
-type TokenKind = 'image' | 'mention' | 'mention-folder' | 'paste-code' | 'paste-text' | 'misspelled' | 'plain';
+type TokenKind = 'image' | 'mention' | 'mention-folder' | 'paste-code' | 'paste-text' | 'skill' | 'misspelled' | 'plain';
 
 function buildPromptHighlightNodes(text: string, selStart: number = -1, selEnd: number = -1, spellIssues: SpellIssue[] = []): Node[] {
   if (!text) {
@@ -1228,6 +1343,10 @@ function buildPromptHighlightNodes(text: string, selStart: number = -1, selEnd: 
     const kind: TokenKind = match[1] === 'Code' ? 'paste-code' : 'paste-text';
     tokens.push({ start: match.index ?? 0, end: (match.index ?? 0) + match[0].length, kind });
   }
+  // Skill token: /skill (×1) or /skills #N (×N) — expanded into skill instructions on send.
+  for (const match of text.matchAll(/\/skills #\d+|\/skill(?!s)/g)) {
+    tokens.push({ start: match.index ?? 0, end: (match.index ?? 0) + match[0].length, kind: 'skill' });
+  }
   // @mention: '@' followed by any non-whitespace chars, must be preceded by whitespace or start of string
   for (const match of text.matchAll(/(?<=^|\s)@\S+/g)) {
     const kind: TokenKind = match[0].endsWith('/') ? 'mention-folder' : 'mention';
@@ -1240,7 +1359,7 @@ function buildPromptHighlightNodes(text: string, selStart: number = -1, selEnd: 
     }
   }
   // Image/mention tokens take priority over misspelled ones when ranges collide.
-  const tokenPriority: Record<TokenKind, number> = { image: 0, mention: 0, 'mention-folder': 0, 'paste-code': 0, 'paste-text': 0, misspelled: 1, plain: 2 };
+  const tokenPriority: Record<TokenKind, number> = { image: 0, mention: 0, 'mention-folder': 0, 'paste-code': 0, 'paste-text': 0, skill: 0, misspelled: 1, plain: 2 };
   tokens.sort((a, b) => a.start - b.start || tokenPriority[a.kind] - tokenPriority[b.kind]);
 
   for (const token of tokens) {
@@ -1288,6 +1407,7 @@ function appendSegment(
                  : kind === 'mention-folder' ? 'prompt-mention-folder'
                  : kind === 'paste-code' ? 'prompt-paste-marker prompt-paste-code'
                  : kind === 'paste-text' ? 'prompt-paste-marker prompt-paste-text'
+                 : kind === 'skill' ? 'prompt-paste-marker prompt-skill-marker'
                  : kind === 'misspelled' ? 'prompt-misspelled'
                  : 'plain';
 

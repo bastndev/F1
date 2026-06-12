@@ -4,7 +4,7 @@ import { createTabController, type CliAgentIcon, type CliAgentOption, type CliSe
 import { createCliCreateMessage, type AgentLaunchGuardMessage } from './agent-safety/agent-launch-guard';
 import { createToolsController } from './tools-cli-ui/tools';
 import { detectModelName } from '../../core/terminal-cli/model-detect';
-import type { ImageAttachment, PromptTranslateRequest, PromptTranslateResult, FileMentionEntry, SpellIssue } from '../../core/tools-cli-core/prompt';
+import type { ImageAttachment, PromptTranslateRequest, PromptTranslateResult, FileMentionEntry, SpellIssue, WorkspaceSkill } from '../../core/tools-cli-core/prompt';
 import type { VoiceState } from '../../core/tools-cli-core/modal-voice/voice-types';
 
 type VsCodeApi = {
@@ -49,7 +49,7 @@ type ServerMessage =
 	| { type: 'prompt.prepareError'; id: string; message: string }
 	| { type: 'prompt.spellResult'; id: string; issues: SpellIssue[] }
 	| { type: 'workspace.files'; id: string; files: FileMentionEntry[] }
-	| { type: 'workspace.skills'; id: string; skills: string[] }
+	| { type: 'workspace.skills'; id: string; skills: WorkspaceSkill[] }
 	| { type: 'voice.state'; state: VoiceState; message?: string }
 	| { type: 'clipboard.text'; id: string; text: string };
 
@@ -310,10 +310,10 @@ const requestWorkspaceFiles = (): Promise<FileMentionEntry[]> => {
 	});
 };
 
-const pendingWorkspaceSkills = new Map<string, (skills: string[]) => void>();
+const pendingWorkspaceSkills = new Map<string, (skills: WorkspaceSkill[]) => void>();
 let nextWorkspaceSkillsId = 1;
 
-const requestWorkspaceSkills = (): Promise<string[]> => {
+const requestWorkspaceSkills = (): Promise<WorkspaceSkill[]> => {
 	const id = `ws-skills-${nextWorkspaceSkillsId++}`;
 	return new Promise((resolve) => {
 		const timeout = window.setTimeout(() => {
