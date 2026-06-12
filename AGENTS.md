@@ -31,6 +31,8 @@ F1 is a VS Code extension providing a **CLI Hub** panel that lets users launch a
 - `src/clihub/` — everything belonging to the CLI Hub feature (this extension).
 - `src/my-skill/` — placeholder for a future second extension. Do not mix CLI Hub code into it.
 
+Each product exposes one **front door** that is the only file importable from outside its folder: `src/clihub/clihub.ts` (host-side exports only — never re-export webview code there) and `src/my-skill/my-skills.ts`. `src/extension.ts` imports exclusively through these.
+
 Inside `src/clihub/` the code is split by **where it runs**:
 
 - `src/clihub/host/` — extension-host (Node.js) code: the webview provider (`main.ts`), HTML builders (`launcher-html.ts`, `webview-html.ts`, `webview-assets.ts`), session manager + pty host, workspace queries, translation/spellcheck/voice/attachment services.
