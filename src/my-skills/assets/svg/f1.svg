@@ -1,6 +1,1 @@
-<svg width="100%" viewBox="0 0 680 680" role="img" xmlns="http://www.w3.org/2000/svg" style="">
-  <title style="fill:rgb(0, 0, 0);stroke:none;color:rgb(0, 0, 0);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:&quot;Anthropic Sans&quot;, -apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto">Lightning bolt</title>
-  <desc style="fill:rgb(0, 0, 0);stroke:none;color:rgb(0, 0, 0);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:&quot;Anthropic Sans&quot;, -apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto">A wide bold lightning bolt with no background.</desc>
-
-  <path d="&#10;    M 410 120&#10;    L 270 370&#10;    L 350 370&#10;    L 290 560&#10;    L 460 300&#10;    L 375 300&#10;    L 470 120&#10;    Z&#10;  " fill="#EAEAEA" style="fill:rgb(234, 234, 234);stroke:none;color:rgb(0, 0, 0);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:&quot;Anthropic Sans&quot;, -apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto"/>
-</svg>
+<svg xmlns="http://www.w3.org/2000/svg" width="100%" viewBox="0 0 512 512"><path fill="#fff" d="M320 32 140 240h95l-55 240 200-270H280l90-178Z"/></svg>
