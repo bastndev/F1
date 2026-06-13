@@ -6,6 +6,7 @@ import { cliAgents, getCliAgent } from '../../shared/agents';
 import { ensureCliInstalled } from './installation';
 import type {
 	CliSessionSnapshot,
+	CustomCliLaunch,
 	InboundPtyHostEvent,
 	InboundWebviewMessage,
 	PtyHostCommand
@@ -96,12 +97,20 @@ export class CliSessionManager implements vscode.Disposable {
 			return;
 		}
 
+		this.createSessionFromCommand(agent.label, agent.command, agent.args);
+	}
+
+	public createCustomSession(customCli: CustomCliLaunch) {
+		this.createSessionFromCommand(customCli.label, customCli.command, customCli.args);
+	}
+
+	private createSessionFromCommand(label: string, command: string, args: string[]) {
 		const id = `cli-${this.nextSessionId++}`;
 		const cwd = getWorkspaceCwd();
 		const session: CliSession = {
 			id,
-			label: agent.label,
-			commandLine: buildCommandLine(agent.command, agent.args),
+			label,
+			commandLine: buildCommandLine(command, args),
 			cwd,
 			status: 'running',
 			createdAt: Date.now(),
@@ -117,7 +126,7 @@ export class CliSessionManager implements vscode.Disposable {
 		this.postState();
 
 		try {
-			this.startPtyHost(session, agent.command, agent.args);
+			this.startPtyHost(session, command, args);
 		} catch (error) {
 			session.status = 'error';
 			const message = error instanceof Error ? error.message : String(error);

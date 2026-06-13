@@ -26,9 +26,13 @@ export const skillRootDirs: Record<SkillRoot, string> = {
 	claude: '.claude/skills',
 };
 
-// Matches the compact tokens (/skill singular, /skills #N plural) and legacy
-// bracket shapes so old drafts still clean up correctly.
-export const skillsTokenPattern = /\/skills #\d+|\/skill(?!s)|\[Skills? #[^\]]+\]/g;
+// Matches standalone compact tokens (/skill, /skills #N) and legacy bracket
+// shapes so old drafts still clean up correctly. The compact token must be at
+// the start of text or after whitespace, and end before whitespace/end-of-text;
+// quoted text like `"/skill"` must remain plain user text.
+export const skillsTokenPattern = /(?<=^|\s)(?:\/skills #\d+|\/skill(?!s))(?=$|\s)|\[Skills? #[^\]]+\]/g;
+export const skillsTokenPresencePattern = /(?<=^|\s)(?:\/skills #\d+|\/skill(?!s))(?=$|\s)|\[Skills? #[^\]]+\]/;
+export const skillsTokenWithOptionalTrailingSpacePattern = /(?<=^|\s)(?:\/skills #\d+|\/skill(?!s)) ?|\[Skills? #[^\]]+\] ?/g;
 
 export function buildSkillsToken(count: number): string {
 	return count === 1 ? '/skill' : `/skills #${count}`;
@@ -48,7 +52,7 @@ export function resolveSkillPath(skill: WorkspaceSkill, preferClaude: boolean): 
  * through the translator.
  */
 export function expandSkillsToken(text: string, selected: WorkspaceSkill[], preferClaude: boolean): string {
-	const cleaned = text.replace(/\/skills #\d+ ?|\/skill(?!s) ?|\[Skills? #[^\]]+\] ?/g, '').trimStart();
+	const cleaned = text.replace(skillsTokenWithOptionalTrailingSpacePattern, '').trimStart();
 
 	if (!selected.length) {
 		return cleaned;

@@ -3,6 +3,7 @@ import type { FileMentionEntry, FileMentionRequest } from '../../../../../shared
 import { fuzzyMatch } from '../../../../../shared/prompt/fuzzy-match';
 
 const stylesId = 'cli-file-mention-styles';
+const mentionAliasMap = new Map<string, string>();
 
 const ensureStyles = () => {
 	if (document.getElementById(stylesId)) { return; }
@@ -10,6 +11,36 @@ const ensureStyles = () => {
 	s.id = stylesId;
 	s.textContent = fileMentionCss;
 	document.head.append(s);
+};
+
+export function resolveFileMentionAliases(text: string): string {
+	return text.replace(/(?<=^|\s)@\S+/g, (mention) => {
+		const realPath = mentionAliasMap.get(mention);
+		if (realPath) {
+			return `@${realPath}`;
+		}
+
+		if (mention.startsWith('@~/')) {
+			return `@${mention.slice(3)}`;
+		}
+
+		return mention;
+	});
+}
+
+const getEntryDisplayPath = (entry: FileMentionEntry) => entry.displayPath || entry.path;
+
+const getEntryRealPath = (entry: FileMentionEntry) => {
+	return entry.isDirectory && !entry.path.endsWith('/') ? `${entry.path}/` : entry.path;
+};
+
+const getEntryInsertPath = (entry: FileMentionEntry) => {
+	const displayPath = getEntryDisplayPath(entry);
+	return entry.isDirectory && !displayPath.endsWith('/') ? `${displayPath}/` : displayPath;
+};
+
+const registerMentionAlias = (entry: FileMentionEntry) => {
+	mentionAliasMap.set(`@${getEntryInsertPath(entry)}`, getEntryRealPath(entry));
 };
 
 export function mountFileMentionPicker(
@@ -141,6 +172,10 @@ export function mountFileMentionPicker(
 			if (nameMatch) {
 				return { entry, score: nameMatch.score + nameMatchBonus, namePositions: nameMatch.positions };
 			}
+			const displayPathMatch = entry.displayPath ? fuzzyMatch(query, entry.displayPath) : undefined;
+			if (displayPathMatch) {
+				return { entry, score: displayPathMatch.score, namePositions: [] };
+			}
 			const pathMatch = fuzzyMatch(query, entry.path);
 			if (pathMatch) {
 				return { entry, score: pathMatch.score, namePositions: [] };
@@ -179,7 +214,8 @@ export function mountFileMentionPicker(
 			iconEl.className = `fm-icon ${entry.isDirectory ? 'folder' : 'file'}`;
 			iconEl.textContent = entry.isDirectory ? '📁' : '📄';
 
-			// show relative path without the filename (parent dir)
+			// Show the real parent path for disambiguation; the inserted token
+			// stays compact via displayPath.
 			const dir = entry.path.includes('/')
 				? entry.path.slice(0, entry.path.lastIndexOf('/')) || '.'
 				: '.';
@@ -213,12 +249,14 @@ export function mountFileMentionPicker(
 	};
 
 	const selectEntry = (entry: FileMentionEntry) => {
-		// Replace "@query" in textarea with "@path " (trailing space for natural flow).
-		// Insert the workspace-relative path — the basename alone is ambiguous for
-		// same-named files in different directories and doesn't resolve for the CLI.
+		// Replace "@query" in textarea with a compact "@~/name " alias.
+		// The real workspace-relative path is kept in mentionAliasMap and restored
+		// just before sending to the CLI.
 		const before = textarea.value.slice(0, mentionStart);
 		const after = textarea.value.slice(mentionStart + 1 + currentQuery.length);
-		const insert = entry.isDirectory ? `@${entry.path}/ ` : `@${entry.path} `;
+		const insertPath = getEntryInsertPath(entry);
+		const insert = `@${insertPath} `;
+		registerMentionAlias(entry);
 		const newValue = before + insert + after;
 		const pos = before.length + insert.length;
 
@@ -261,6 +299,7 @@ export function mountFileMentionPicker(
 		if (!cachedEntries) {
 			// First time for this prompt panel instance: fetch from host (expensive findFiles)
 			cachedEntries = await requestFiles(query);
+			cachedEntries.forEach(registerMentionAlias);
 		}
 
 		renderItems(cachedEntries!, query);

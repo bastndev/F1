@@ -60,14 +60,6 @@ export const cliInstallers: CliInstaller[] = [
 		}
 	},
 	{
-		label: 'Amp',
-		command: 'amp',
-		install: {
-			unix: 'curl -fsSL https://ampcode.com/install.sh | bash',
-			windows: 'powershell -c "irm https://ampcode.com/install.ps1 | iex"'
-		}
-	},
-	{
 		label: 'Kiro CLI',
 		command: 'kiro-cli',
 		install: {

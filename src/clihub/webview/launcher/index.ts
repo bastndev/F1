@@ -3,7 +3,7 @@ import { getAgentSlug as resolveAgentSlug } from '../../shared/agents';
 type VsCodeApi = {
 	getState: () => unknown;
 	setState: (state: LauncherState) => void;
-	postMessage: (message: { type: 'openAgent'; agent: string }) => void;
+	postMessage: (message: { type: 'openAgent'; agent: string } | { type: 'customCli.open'; source: 'launcher' }) => void;
 };
 
 type LauncherModel = {
@@ -30,6 +30,7 @@ type LauncherState = {
 declare const acquireVsCodeApi: () => VsCodeApi;
 
 const vscode = acquireVsCodeApi();
+const customCliLabel = 'Custom CLI';
 
 const isLauncherModel = (value: unknown): value is LauncherModel => {
 	if (!value || typeof value !== 'object') {
@@ -92,6 +93,7 @@ let currentIndex = typeof persistedState?.currentIndex === 'number'
 	? persistedState.currentIndex
 	: 0;
 let selectedModel: LauncherModel | undefined = models.find((model) => model.label === persistedState?.selectedAgent) || models[currentIndex] || models[0];
+let selectedCustomCli = false;
 let paletteOpen = true;
 let invalidInputTimer: ReturnType<typeof setTimeout> | undefined;
 
@@ -156,7 +158,8 @@ const renderSecondarySuggestions = (matches: LauncherMatch[]) => {
 
 const syncPreviewIndicator = () => {
 	for (const option of Array.from(agentIconPalette.querySelectorAll<HTMLElement>('.agent-icon-option'))) {
-		option.classList.toggle('is-preview', option.dataset.agent === selectedModel?.label);
+		const isCustomOption = option.dataset.customCli === 'true';
+		option.classList.toggle('is-preview', isCustomOption ? selectedCustomCli : option.dataset.agent === selectedModel?.label);
 	}
 };
 
@@ -179,14 +182,17 @@ const showInvalidInput = () => {
 
 const setSelectedModel = (model: LauncherModel | undefined, isSearchResult: boolean, matches: LauncherMatch[] = []) => {
 	if (!model) {
+		selectedCustomCli = false;
 		document.body.removeAttribute('data-agent');
 		return;
 	}
 
+	selectedCustomCli = false;
 	selectedModel = model;
 	textElement.textContent = model.label;
 	inputContainer.classList.toggle('has-selection', isSearchResult);
 	textElement.classList.toggle('selected-model', isSearchResult);
+	textElement.classList.remove('custom-cli-preview');
 	renderSecondarySuggestions(isSearchResult ? matches : []);
 	syncPreviewIndicator();
 	saveLauncherState();
@@ -206,14 +212,29 @@ const setSelectedModel = (model: LauncherModel | undefined, isSearchResult: bool
 };
 
 const setNoMatch = () => {
+	selectedCustomCli = false;
 	selectedModel = undefined;
 	document.body.removeAttribute('data-agent');
 	textElement.textContent = 'No matching CLI';
 	inputContainer.classList.remove('has-selection');
 	textElement.classList.remove('selected-model');
+	textElement.classList.remove('custom-cli-preview');
 	renderSecondarySuggestions([]);
 	syncPreviewIndicator();
 	showInvalidInput();
+	saveLauncherState();
+};
+
+const setCustomCliPreview = () => {
+	selectedCustomCli = true;
+	selectedModel = undefined;
+	document.body.removeAttribute('data-agent');
+	textElement.textContent = customCliLabel;
+	inputContainer.classList.add('has-selection');
+	textElement.classList.remove('selected-model');
+	textElement.classList.add('custom-cli-preview');
+	renderSecondarySuggestions([]);
+	syncPreviewIndicator();
 	saveLauncherState();
 };
 
@@ -229,13 +250,78 @@ const openModel = (model: LauncherModel | undefined) => {
 	});
 };
 
+const openCustomCli = () => {
+	vscode.postMessage({ type: 'customCli.open', source: 'launcher' });
+};
+
 const openSelectedModel = () => {
+	if (selectedCustomCli) {
+		openCustomCli();
+		return;
+	}
+
 	if (!selectedModel) {
 		showInvalidInput();
 		return;
 	}
 
 	openModel(selectedModel);
+};
+
+const getPaletteOptions = () => {
+	return Array.from(agentIconPalette.querySelectorAll<HTMLButtonElement>('.agent-icon-option'));
+};
+
+const getPaletteModels = () => {
+	const paletteModels = [...models];
+	const kiroIndex = paletteModels.findIndex((model) => model.label === 'Kiro CLI');
+	if (kiroIndex < 0) {
+		return paletteModels;
+	}
+
+	const [kiroModel] = paletteModels.splice(kiroIndex, 1);
+	paletteModels.push(kiroModel);
+	return paletteModels;
+};
+
+const handlePaletteOptionKeydown = (
+	event: KeyboardEvent,
+	option: HTMLButtonElement,
+	activate: () => void
+) => {
+	const options = getPaletteOptions();
+	const index = options.indexOf(option);
+
+	if (event.key === 'Tab') {
+		event.preventDefault();
+		setPaletteOpen(false);
+		cliInput.focus();
+		return;
+	}
+
+	if (event.key === 'Enter' || event.key === ' ') {
+		event.preventDefault();
+		activate();
+		return;
+	}
+
+	if (event.key === 'Escape') {
+		event.preventDefault();
+		setPaletteOpen(false);
+		cliInput.focus();
+		return;
+	}
+
+	if (event.key === 'ArrowRight' || event.key === 'ArrowDown') {
+		event.preventDefault();
+		options[(index + 1) % options.length]?.focus();
+		return;
+	}
+
+	if (event.key === 'ArrowLeft' || event.key === 'ArrowUp') {
+		event.preventDefault();
+		options[(index - 1 + options.length) % options.length]?.focus();
+	}
 };
 
 const setPaletteOpen = (isOpen: boolean, shouldFocus = false, shouldAnimate = true) => {
@@ -272,7 +358,7 @@ const setPaletteOpen = (isOpen: boolean, shouldFocus = false, shouldAnimate = tr
 const renderIconPalette = () => {
 	agentIconPalette.replaceChildren();
 
-	for (const model of models) {
+	for (const model of getPaletteModels()) {
 		const option = document.createElement('button');
 		option.className = 'agent-icon-option';
 		option.classList.toggle('is-installed', model.installed);
@@ -301,44 +387,28 @@ const renderIconPalette = () => {
 			const matches = [{ model, score: 100 }];
 			setSelectedModel(model, true, matches);
 		});
-		option.addEventListener('keydown', (event) => {
-			const options = Array.from(agentIconPalette.querySelectorAll<HTMLButtonElement>('.agent-icon-option'));
-			const index = options.indexOf(option);
-
-			if (event.key === 'Tab') {
-				event.preventDefault();
-				setPaletteOpen(false);
-				cliInput.focus();
-				return;
-			}
-
-			if (event.key === 'Enter' || event.key === ' ') {
-				event.preventDefault();
-				openModel(model);
-				return;
-			}
-
-			if (event.key === 'Escape') {
-				event.preventDefault();
-				setPaletteOpen(false);
-				cliInput.focus();
-				return;
-			}
-
-			if (event.key === 'ArrowRight' || event.key === 'ArrowDown') {
-				event.preventDefault();
-				options[(index + 1) % options.length]?.focus();
-				return;
-			}
-
-			if (event.key === 'ArrowLeft' || event.key === 'ArrowUp') {
-				event.preventDefault();
-				options[(index - 1 + options.length) % options.length]?.focus();
-			}
-		});
+		option.addEventListener('keydown', (event) => handlePaletteOptionKeydown(event, option, () => openModel(model)));
 
 		agentIconPalette.append(option);
 	}
+
+	const customOption = document.createElement('button');
+	customOption.className = 'agent-icon-option agent-icon-option--custom is-installed';
+	customOption.type = 'button';
+	customOption.tabIndex = -1;
+	customOption.dataset.customCli = 'true';
+	customOption.title = `Open ${customCliLabel}`;
+	customOption.setAttribute('aria-label', customOption.title);
+
+	const plus = document.createElement('span');
+	plus.className = 'agent-icon-plus';
+	plus.textContent = '+';
+
+	customOption.append(plus);
+	customOption.addEventListener('click', openCustomCli);
+	customOption.addEventListener('focus', setCustomCliPreview);
+	customOption.addEventListener('keydown', (event) => handlePaletteOptionKeydown(event, customOption, openCustomCli));
+	agentIconPalette.append(customOption);
 };
 
 cliInput.focus();

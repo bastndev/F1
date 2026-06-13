@@ -37,12 +37,17 @@ type TerminalView = {
 declare const acquireVsCodeApi: () => VsCodeApi;
 
 const vscode = acquireVsCodeApi();
+const customCliIconLabel = '__custom-cli__';
 const sessions = new Map<string, CliSession>();
 const terminals = new Map<string, TerminalView>();
 const visualSleepSessionThreshold = 3;
 const maxWebviewBufferLength = 240000;
 const promptFilterClickMoveThreshold = 6;
 const clipboardPollIntervalMs = 800;
+const defaultSubmitDelayMs = 150;
+const slowPasteSubmitDelayMs = 750;
+const routeSubmitDelayMs = 450;
+const routeSubmitSecondEnterDelayMs = 350;
 let activeSessionId: string | undefined;
 let pendingTabSwitchSessionId: string | undefined;
 let isPromptFilterEnabled = false;
@@ -78,6 +83,9 @@ const parseAgentIcons = () => {
 };
 
 const agentIcons = parseAgentIcons();
+const getAgentIcon = (label: string) => {
+	return agentIcons.get(label) ?? agentIcons.get(customCliIconLabel);
+};
 const layoutRight = document.querySelector<HTMLElement>('.layout-right');
 const terminalStack = document.getElementById('cli-terminal-stack') as HTMLDivElement;
 const terminalLabel = document.getElementById('cli-terminal-label') as HTMLDivElement;
@@ -151,6 +159,22 @@ const switchSessionByOffset = (offset: 1 | -1) => {
 	pendingTabSwitchSessionId = nextSessionId;
 	vscode.postMessage({ type: 'cli.switch', sessionId: nextSessionId });
 	return true;
+};
+
+const hasRouteMention = (text: string) => /(^|\s)@\S+/.test(text);
+
+const getSubmitDelayMs = (agentSlug: string, text: string) => {
+	const hasFileMention = hasRouteMention(text);
+
+	if (agentSlug === 'copilot') {
+		return slowPasteSubmitDelayMs;
+	}
+
+	if (hasFileMention) {
+		return routeSubmitDelayMs;
+	}
+
+	return defaultSubmitDelayMs;
 };
 
 // ── Host round-trips ─────────────────────────────────────────────────
@@ -321,11 +345,22 @@ const toolsController = layoutRight
 				if (options?.submit) {
 					// Enter must arrive as its own write or TUI CLIs treat it as part
 					// of the paste. Copilot digests pastes noticeably slower than the
-					// rest, so it gets a longer pause before the keypress.
-					const delay = getAgentSlug(session.label) === 'copilot' ? 750 : 150;
-					setTimeout(() => {
+					// rest. Route mentions are special in most CLI TUIs: the first
+					// Enter commits/accepts the @file/@folder context, the next one
+					// submits the completed prompt.
+					const agentSlug = getAgentSlug(session.label);
+					const delay = getSubmitDelayMs(agentSlug, text);
+					const enterData = view?.terminal.modes.sendFocusMode ? '\x1b[I\r' : '\r';
+					const needsRouteSubmitConfirm = hasRouteMention(text);
+					const postEnter = () => {
 						if (sessions.get(sessionId)?.status === 'running') {
-							vscode.postMessage({ type: 'cli.input', sessionId, data: '\r' });
+							vscode.postMessage({ type: 'cli.input', sessionId, data: enterData });
+						}
+					};
+					setTimeout(() => {
+						postEnter();
+						if (needsRouteSubmitConfirm) {
+							setTimeout(postEnter, routeSubmitSecondEnterDelayMs);
 						}
 					}, delay);
 				}
@@ -364,11 +399,12 @@ const copyToTranslate = createCopyToTranslateWatcher({
 });
 
 const tabController = createTabController({
-	getAgentIcon: (label) => agentIcons.get(label),
+	getAgentIcon,
 	onCreate: (agent) => vscode.postMessage(createCliCreateMessage(agent, {
 		source: 'panel',
 		extensionMode: 'unknown'
 	})),
+	onCreateCustomCli: () => vscode.postMessage({ type: 'customCli.open', source: 'panel' }),
 	onCycleSession: (offset) => {
 		switchSessionByOffset(offset);
 	},
@@ -382,6 +418,9 @@ const tabController = createTabController({
 	},
 	onPromptFilterChange: (enabled) => {
 		isPromptFilterEnabled = enabled;
+		if (!enabled && activeSessionId) {
+			terminals.get(activeSessionId)?.terminal.focus();
+		}
 	},
 	getOpenToolModal: () => toolsController?.getOpenTool() ?? null
 });

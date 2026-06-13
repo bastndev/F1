@@ -22,7 +22,7 @@ There is no test suite. To debug the extension, press **F5** in VS Code (uses `.
 
 ## Architecture
 
-F1 is a VS Code extension providing a **CLI Hub** panel that lets users launch and manage multiple AI coding CLI tools (Claude Code, Codex CLI, OpenCode, Copilot, Cursor, Amp, Kiro, Kilo Code, Grok, Antigravity) in embedded xterm.js terminals.
+F1 is a VS Code extension providing a **CLI Hub** panel that lets users launch and manage multiple AI coding CLI tools (Claude Code, Codex CLI, OpenCode, Copilot, Cursor, Kiro, Kilo Code, Grok, Antigravity) in embedded xterm.js terminals.
 
 ### Repository layout
 

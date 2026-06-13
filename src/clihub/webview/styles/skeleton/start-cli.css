@@ -331,7 +331,6 @@
 .cli-boot-skeleton[data-agent="antigravity"] { --skeleton-accent: #51f334; }   /* verde */
 .cli-boot-skeleton[data-agent="copilot"]     { --skeleton-accent: #9ca3af; }
 .cli-boot-skeleton[data-agent="cursor"]      { --skeleton-accent: #e5e7eb; }
-.cli-boot-skeleton[data-agent="amp"]         { --skeleton-accent: #ff7022; }
 
 
 /* =================================================================

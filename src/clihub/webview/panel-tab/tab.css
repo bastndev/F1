@@ -244,6 +244,17 @@
 	line-height: 1;
 }
 
+.agent-picker-option--custom {
+	margin-top: 5px;
+	border-top-color: var(--vscode-editorGroup-border, rgba(128, 128, 128, 0.18));
+	color: var(--vscode-textLink-foreground, var(--vscode-foreground));
+}
+
+.agent-picker-option-custom-icon {
+	font-size: 14px;
+	font-weight: 600;
+}
+
 .vscode-dark .agent-picker-option.has-dark-icon .agent-picker-option-icon {
 	filter: invert(1) brightness(1.22) contrast(0.92);
 }
@@ -456,11 +467,11 @@
 }
 
 .agent-tools-toast {
-	position: fixed;
+	position: absolute;
 	left: 50%;
 	bottom: 14px;
 	z-index: 2000;
-	max-width: calc(100vw - 28px);
+	max-width: calc(100% - 28px);
 	padding: 4px 12px;
 	border: 1px solid var(--vscode-editorGroup-border, rgba(128, 128, 128, 0.28));
 	border-radius: 6px;

@@ -21,6 +21,8 @@ export {
 // on send into instructions with each SKILL.md route resolved for the active CLI.
 export {
 	skillsTokenPattern,
+	skillsTokenPresencePattern,
+	skillsTokenWithOptionalTrailingSpacePattern,
 	buildSkillsToken,
 	resolveSkillPath,
 	expandSkillsToken,

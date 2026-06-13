@@ -25,6 +25,7 @@ export const getLauncherWebviewHtml = async (
 
 	const styleUri = webview.asWebviewUri(stylePath);
 	const scriptUri = getWebviewAssetUriString(webview, extensionUri, 'launcher', 'index.js');
+	const logoUri = webview.asWebviewUri(vscode.Uri.joinPath(extensionUri, 'src', 'shared', 'assets', 'logo.svg')).toString();
 	const nonce = getNonce();
 	const contentSecurityPolicy = [
 		"default-src 'none'",
@@ -50,6 +51,7 @@ export const getLauncherWebviewHtml = async (
 	let html = fs.readFileSync(htmlPath.fsPath, 'utf8');
 	html = html.replace('${styleUri}', styleUri.toString());
 	html = html.replace('${scriptUri}', scriptUri);
+	html = html.replace('${logoUri}', logoUri);
 	html = html.replace('${contentSecurityPolicy}', contentSecurityPolicy);
 	html = html.replace(/\$\{nonce\}/g, nonce);
 	html = html.replace('${cliModels}', serializeJsonForHtmlScript(launcherModels));

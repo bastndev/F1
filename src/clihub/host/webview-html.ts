@@ -30,6 +30,8 @@ type PanelFile = {
 	name: string;
 };
 
+const customCliIconLabel = '__custom-cli__';
+
 const panels: PanelFile[] = [
 	{ dir: 'panel-tab', name: 'tab' },
 	{ dir: 'panel-terminal', name: 'terminal' }
@@ -92,6 +94,12 @@ export const getAgentWebviewHtml = (
 		darkIcon: agent.darkIcon === true,
 		lightIcon: agent.lightIcon === true
 	}));
+	agentIcons.push({
+		label: customCliIconLabel,
+		icon: webview.asWebviewUri(vscode.Uri.joinPath(extensionUri, 'src', 'shared', 'assets', 'logo.svg')).toString(),
+		darkIcon: false,
+		lightIcon: false
+	});
 
 	return getCliHubWebviewHtml({
 		extensionUri,

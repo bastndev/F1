@@ -9,6 +9,7 @@ import {
 	collectImageMarkerIds,
 	isImageAttachment,
 	shouldCollapsePaste,
+	skillsTokenPattern,
 	type ImageAttachment
 } from '../../../shared/prompt';
 
@@ -20,7 +21,10 @@ export const imagePathPattern =
 // Every atomic token in the textarea: [Image #N], [Code #N +X lines],
 // [Text #N +X lines], [Skill #name]. Used by delete/arrow/caret handling so
 // all marker types behave as single units.
-export const atomicMarkerPattern = /\[(?:Image|Code|Text) #\d+[^\]]*\]|\/skills #\d+|\/skill(?!s)/g;
+export const atomicMarkerPattern = new RegExp(
+	String.raw`\[(?:Image|Code|Text) #\d+[^\]]*\]|${skillsTokenPattern.source}`,
+	'g'
+);
 
 export function replaceImagePathsWithMarkers(text: string, register: (path: string) => string): string {
 	if (!text) {

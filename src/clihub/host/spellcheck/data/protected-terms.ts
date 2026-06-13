@@ -12,7 +12,7 @@ export const PROTECTED_TERMS = new Set<string>([
 
 	// CLI Hub agents and local product terms
 	'f1', 'clihub', 'opencode', 'codex', 'claude', 'claudecode', 'copilot',
-	'antigravity', 'grok', 'kiro', 'kilo', 'kilocode', 'amp',
+	'antigravity', 'grok', 'kiro', 'kilo', 'kilocode',
 	'pty', 'xterm', 'webview', 'vscode', 'cursor', 'windsurf', 'trae',
 
 	// Tools & platforms

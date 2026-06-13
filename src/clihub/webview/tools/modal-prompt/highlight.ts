@@ -7,7 +7,7 @@
  * textarea is transparent (text + bg) so the overlay content shows, but the
  * caret is still rendered by the textarea on top (using caret-color).
  */
-import type { SpellIssue } from '../../../shared/prompt';
+import { skillsTokenPattern, type SpellIssue } from '../../../shared/prompt';
 
 export function updatePromptImageHighlight(
 	wrap: HTMLElement,
@@ -33,7 +33,7 @@ export function updatePromptImageHighlight(
 	highlight.scrollLeft = textarea.scrollLeft;
 }
 
-type TokenKind = 'image' | 'mention' | 'mention-folder' | 'paste-code' | 'paste-text' | 'skill' | 'misspelled' | 'plain';
+type TokenKind = 'image' | 'mention' | 'mention-folder' | 'paste-code' | 'paste-text' | 'skill' | 'numbered-list' | 'misspelled' | 'plain';
 
 function buildPromptHighlightNodes(text: string, selStart: number = -1, selEnd: number = -1, spellIssues: SpellIssue[] = []): Node[] {
 	if (!text) {
@@ -57,8 +57,14 @@ function buildPromptHighlightNodes(text: string, selStart: number = -1, selEnd: 
 		tokens.push({ start: match.index ?? 0, end: (match.index ?? 0) + match[0].length, kind });
 	}
 	// Skill token: /skill (×1) or /skills #N (×N) — expanded into skill instructions on send.
-	for (const match of text.matchAll(/\/skills #\d+|\/skill(?!s)/g)) {
+	for (const match of text.matchAll(skillsTokenPattern)) {
 		tokens.push({ start: match.index ?? 0, end: (match.index ?? 0) + match[0].length, kind: 'skill' });
+	}
+	// Numbered-list prefixes: 1. / 2. / 3. at the start of a line.
+	for (const match of text.matchAll(/(^|\n)(\d+\.)/g)) {
+		const prefixOffset = match[1].length;
+		const start = (match.index ?? 0) + prefixOffset;
+		tokens.push({ start, end: start + match[2].length, kind: 'numbered-list' });
 	}
 	// @mention: '@' followed by any non-whitespace chars, must be preceded by whitespace or start of string
 	for (const match of text.matchAll(/(?<=^|\s)@\S+/g)) {
@@ -72,7 +78,7 @@ function buildPromptHighlightNodes(text: string, selStart: number = -1, selEnd: 
 		}
 	}
 	// Image/mention tokens take priority over misspelled ones when ranges collide.
-	const tokenPriority: Record<TokenKind, number> = { image: 0, mention: 0, 'mention-folder': 0, 'paste-code': 0, 'paste-text': 0, skill: 0, misspelled: 1, plain: 2 };
+	const tokenPriority: Record<TokenKind, number> = { image: 0, mention: 0, 'mention-folder': 0, 'paste-code': 0, 'paste-text': 0, skill: 0, 'numbered-list': 0, misspelled: 1, plain: 2 };
 	tokens.sort((a, b) => a.start - b.start || tokenPriority[a.kind] - tokenPriority[b.kind]);
 
 	for (const token of tokens) {
@@ -121,6 +127,7 @@ function appendSegment(
 				   : kind === 'paste-code' ? 'prompt-paste-marker prompt-paste-code'
 				   : kind === 'paste-text' ? 'prompt-paste-marker prompt-paste-text'
 				   : kind === 'skill' ? 'prompt-paste-marker prompt-skill-marker'
+				   : kind === 'numbered-list' ? 'prompt-numbered-list'
 				   : kind === 'misspelled' ? 'prompt-misspelled'
 				   : 'plain';
 

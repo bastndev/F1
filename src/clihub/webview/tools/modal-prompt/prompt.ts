@@ -22,7 +22,7 @@ import {
 	protectSkillTokens,
 	restoreSkillTokens,
 } from '../../../shared/prompt';
-import { mountFileMentionPicker } from './components/file-mention/file-mention';
+import { mountFileMentionPicker, resolveFileMentionAliases } from './components/file-mention/file-mention';
 import type { PromptContext } from './prompt-context';
 import { setupUndoHistory } from './textarea-history';
 import { enforceLowercaseInput } from './lowercase-input';
@@ -63,6 +63,9 @@ const ensureStyles = () => {
 const promptCharLimit = 5000;
 const promptCharWarn = 3500;
 const promptCharDanger = 4500;
+const routePromptCloseDelayMs = 1200;
+
+const hasRouteMention = (text: string) => /(^|\s)@\S+/.test(text);
 
 // Draft state per CLI session, surviving modal close/Esc (a too-easy accident
 // while typing). Lives in module scope: the webview JS context persists while
@@ -143,6 +146,7 @@ function initPromptTabs(host: HTMLElement, context: PromptContext, hasActiveSess
 	// textarea only shows their [Code/Text #N +X lines] marker.
 	const pasteAttachments: PasteAttachment[] = savedDraft?.pasteAttachments ?? [];
 	let nextPasteAttachmentId = savedDraft?.nextPasteAttachmentId ?? 1;
+	let sendInFlight = false;
 
 	if (savedDraft?.text) {
 		textarea.value = savedDraft.text;
@@ -246,18 +250,34 @@ function initPromptTabs(host: HTMLElement, context: PromptContext, hasActiveSess
 		ctx: PromptContext,
 		currentAttachments: ImageAttachment[]
 	) {
+		if (sendInFlight) {
+			return;
+		}
+
 		if (!ctx.sendToActiveSession) {
 			showNoSessionMessage(hostEl);
 			return;
 		}
+
+		sendInFlight = true;
+		const runBtn = hostEl.querySelector<HTMLButtonElement>('#runBtn');
+		const savedRunBtnHtml = runBtn?.innerHTML;
+		const restoreRunButton = () => {
+			if (!runBtn || savedRunBtnHtml === undefined) {
+				return;
+			}
+
+			runBtn.classList.remove('is-translating');
+			runBtn.innerHTML = savedRunBtnHtml;
+			const trimmed = ta.value.trim();
+			runBtn.disabled = !(trimmed.length >= 6 || trimmed.includes(' ')) || !ctx.getActiveSessionId?.();
+		};
 
 		let textToSend = ta.value;
 
 		// Auto-translate (ES → EN) when the toggle is active.
 		// The textarea keeps the original text; the CLI receives the translation.
 		if (translateState.enabled && ctx.translatePrompt) {
-			const runBtn = hostEl.querySelector<HTMLButtonElement>('#runBtn');
-			const savedBtnHtml = runBtn?.innerHTML;
 			setTranslating(true);
 			if (runBtn) {
 				runBtn.classList.add('is-translating');
@@ -283,11 +303,7 @@ function initPromptTabs(host: HTMLElement, context: PromptContext, hasActiveSess
 				console.error('[Prompt] Auto-translate failed:', err);
 			} finally {
 				setTranslating(false);
-				if (runBtn && savedBtnHtml !== undefined) {
-					runBtn.innerHTML = savedBtnHtml;
-					const trimmed = ta.value.trim();
-					runBtn.disabled = !(trimmed.length >= 6 || trimmed.includes(' ')) || !ctx.getActiveSessionId?.();
-				}
+				restoreRunButton();
 			}
 		}
 
@@ -311,14 +327,31 @@ function initPromptTabs(host: HTMLElement, context: PromptContext, hasActiveSess
 		// original verbatim content (never lowercased, never translated).
 		textToSend = expandPasteMarkers(textToSend, pasteAttachments);
 
+		// The textarea can show compact @~/ aliases; restore the actual
+		// workspace-relative @path right before sending to the CLI.
+		textToSend = resolveFileMentionAliases(textToSend);
+		const shouldDelayClose = hasRouteMention(textToSend);
+		if (shouldDelayClose && runBtn) {
+			runBtn.classList.add('is-translating');
+			runBtn.disabled = true;
+			runBtn.innerHTML = '<i class="ti ti-loader-2" aria-hidden="true"></i><span>Sending…</span>';
+		}
+
 		const result = processPrompt(textToSend, {
-			close: ctx.close,
+			close: shouldDelayClose ? () => window.setTimeout(ctx.close, routePromptCloseDelayMs) : ctx.close,
 			sendToActiveSession: ctx.sendToActiveSession,
 			getActiveSessionId: ctx.getActiveSessionId,
 		});
 
 		if (result.status === 'no-session') {
+			sendInFlight = false;
+			restoreRunButton();
 			showNoSessionMessage(hostEl);
+		}
+
+		if (result.status === 'empty') {
+			sendInFlight = false;
+			restoreRunButton();
 		}
 
 		// Sent successfully — the draft has served its purpose.
