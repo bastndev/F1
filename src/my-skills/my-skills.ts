@@ -1082,7 +1082,7 @@ export class MySkillsViewProvider implements vscode.WebviewViewProvider {
 
 			const scriptUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, 'dist', 'webview.js'));
 			const createScriptUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, 'dist', 'create-skill.js'));
-			const createLogoUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, 'src', 'my-skills', 'assets', 'svg', 'f1.svg'));
+			const createLogoUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, 'src', 'my-skills', 'assets', 'svg', 'logo-animated.svg'));
 			const globalUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, 'src', 'my-skills', 'view', 'styles', 'global.css'));
 			const localStyleUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, 'src', 'my-skills', 'screens', 'local-skill', 'ui', 'local.css'));
 			const installStyleUri  = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, 'src', 'my-skills', 'screens', 'install-skill', 'ui', 'install.css'));
@@ -1153,7 +1153,7 @@ export class MySkillsViewProvider implements vscode.WebviewViewProvider {
 		);
 
 		this._supportPanel = panel;
-		panel.iconPath = vscode.Uri.joinPath(this._extensionUri, 'src', 'my-skills', 'assets', 'svg', 'f1.svg');
+		panel.iconPath = vscode.Uri.joinPath(this._extensionUri, 'src', 'my-skills', 'assets', 'svg', 'logo.svg');
 		panel.webview.html = this._getCreateSkillSupportHtml(panel.webview, getNonce());
 		panel.onDidDispose(() => {
 			this._supportPanel = undefined;
@@ -1173,7 +1173,7 @@ export class MySkillsViewProvider implements vscode.WebviewViewProvider {
 
 		const supportStyleUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, 'src', 'my-skills', 'screens', 'create-skill', 'support', 'support.css'));
 		const supportScriptUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, 'dist', 'create-skill-support.js'));
-		const supportLogoUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, 'src', 'my-skills', 'assets', 'svg', 'f1.svg'));
+		const supportLogoUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, 'src', 'my-skills', 'assets', 'svg', 'logo-animated.svg'));
 		const authorImageUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, 'src', 'my-skills', 'assets', 'images', 'support', 'author.webp'));
 		const p1ImageUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, 'src', 'my-skills', 'assets', 'images', 'support', 'panels', 'p1.webp'));
 		const p2ImageUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, 'src', 'my-skills', 'assets', 'images', 'support', 'panels', 'p2.webp'));
