@@ -208,7 +208,7 @@ export class CliHubViewProvider implements vscode.WebviewViewProvider, vscode.Di
 	private async _promptForCustomCliLaunch() {
 		const command = await vscode.window.showInputBox({
 			title: 'Open Custom CLI',
-			prompt: 'Installed CLI command only.',
+			prompt: 'Type an installed CLI command. &',
 			placeHolder: 'qwen',
 			ignoreFocusOut: true,
 			validateInput: validateCustomCliCommandInput
