@@ -30,6 +30,26 @@ export function initSkillsChips(
 		return;
 	}
 
+	const createAddChip = () => {
+		const addChip = document.createElement('button');
+		addChip.type = 'button';
+		addChip.className = 'prompt-tool-btn prompt-skill-add';
+		addChip.textContent = '+';
+		addChip.setAttribute('aria-label', 'Create a skill');
+
+		if (context.openCreateSkill) {
+			addChip.addEventListener('click', () => {
+				context.openCreateSkill?.();
+				context.close();
+			});
+		} else {
+			addChip.disabled = true;
+			addChip.setAttribute('aria-disabled', 'true');
+		}
+
+		return addChip;
+	};
+
 	void context.requestWorkspaceSkills().then((skills) => {
 		if (!row.isConnected) {
 			return;
@@ -37,14 +57,9 @@ export function initSkillsChips(
 
 		chipsHost.replaceChildren();
 
-		// No skills installed: show an inert dashed "+" placeholder.
+		// No skills installed: offer the CREATE flow directly.
 		if (!skills.length) {
-			const addChip = document.createElement('button');
-			addChip.className = 'prompt-tool-btn prompt-skill-add';
-			addChip.textContent = '+';
-			addChip.title = 'Add skills — coming soon';
-			addChip.setAttribute('aria-disabled', 'true');
-			chipsHost.append(addChip);
+			chipsHost.append(createAddChip());
 			row.hidden = false;
 			return;
 		}

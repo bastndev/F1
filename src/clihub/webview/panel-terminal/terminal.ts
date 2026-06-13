@@ -334,6 +334,7 @@ const toolsController = layoutRight
 			preparePromptWithAttachments,
 			requestWorkspaceFiles: () => workspaceFilesRpc.request(),
 			requestWorkspaceSkills: () => workspaceSkillsRpc.request(),
+			openCreateSkill: () => vscode.postMessage({ type: 'mySkills.openCreate' }),
 			requestSpellcheck: (text: string, strict: boolean) => spellcheckRpc.request(text, strict),
 			speakText,
 			stopSpeech,

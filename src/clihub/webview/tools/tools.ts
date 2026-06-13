@@ -16,6 +16,7 @@ export type ToolContext = {
 	preparePromptWithAttachments?: (text: string, attachments: ImageAttachment[]) => Promise<string>;
 	requestWorkspaceFiles?: () => Promise<FileMentionEntry[]>;
 	requestWorkspaceSkills?: () => Promise<WorkspaceSkill[]>;
+	openCreateSkill?: () => void;
 	requestSpellcheck?: (text: string, strict: boolean) => Promise<SpellIssue[]>;
 	speakText?: (text: string) => void;
 	stopSpeech?: () => void;
@@ -23,7 +24,8 @@ export type ToolContext = {
 	onVoiceState?: (listener: (state: VoiceState, message?: string) => void) => () => void;
 };
 
-type ToolMount = (host: HTMLElement, context: ToolContext) => void;
+type ToolCleanup = () => void;
+type ToolMount = (host: HTMLElement, context: ToolContext) => void | ToolCleanup;
 export type ToolsControllerOptions = {
 	container: HTMLElement;
 	getActiveSessionId?: () => string | undefined;
@@ -34,6 +36,7 @@ export type ToolsControllerOptions = {
 	preparePromptWithAttachments?: (text: string, attachments: ImageAttachment[]) => Promise<string>;
 	requestWorkspaceFiles?: () => Promise<FileMentionEntry[]>;
 	requestWorkspaceSkills?: () => Promise<WorkspaceSkill[]>;
+	openCreateSkill?: () => void;
 	requestSpellcheck?: (text: string, strict: boolean) => Promise<SpellIssue[]>;
 	speakText?: (text: string) => void;
 	stopSpeech?: () => void;
@@ -67,6 +70,7 @@ const toolMounts: Record<ToolId, ToolMount> = {
 		preparePromptWithAttachments,
 		requestWorkspaceFiles,
 		requestWorkspaceSkills,
+		openCreateSkill,
 		requestSpellcheck,
 		speakText,
 		stopSpeech,
@@ -75,9 +79,17 @@ const toolMounts: Record<ToolId, ToolMount> = {
 	}: ToolsControllerOptions) => {
 		let activeModal: HTMLElement | null = null;
 		let currentTool: ToolId | null = null;
+		let activeCleanup: ToolCleanup | null = null;
 	
 		const close = () => {
 			document.removeEventListener('keydown', handleKeyDown);
+			const closingTool = currentTool;
+			activeCleanup?.();
+			activeCleanup = null;
+			if (closingTool === 'translate') {
+				stopSpeech?.();
+			}
+			activeModal?.replaceChildren();
 			activeModal?.remove();
 			activeModal = null;
 			currentTool = null;
@@ -129,7 +141,7 @@ const toolMounts: Record<ToolId, ToolMount> = {
 				event.stopPropagation();
 			});
 	
-				toolMounts[tool](host, {
+				const cleanup = toolMounts[tool](host, {
 					close,
 					getActiveSessionId,
 					getActiveModelName,
@@ -139,12 +151,14 @@ const toolMounts: Record<ToolId, ToolMount> = {
 					preparePromptWithAttachments,
 					requestWorkspaceFiles,
 					requestWorkspaceSkills,
+					openCreateSkill,
 					requestSpellcheck,
 					speakText,
 					stopSpeech,
 					queryVoiceState,
 					onVoiceState
 				});
+				activeCleanup = typeof cleanup === 'function' ? cleanup : null;
 
 		container.append(modal);
 		document.addEventListener('keydown', handleKeyDown);

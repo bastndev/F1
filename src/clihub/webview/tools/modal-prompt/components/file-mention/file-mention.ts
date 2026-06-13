@@ -126,10 +126,14 @@ export function mountFileMentionPicker(
 		// matches; within a tie, directories first, then alphabetical.
 		const query = filter.trim();
 		const nameMatchBonus = 1000;
+		const allowVscode = query.startsWith('.');
 
 		type ScoredEntry = { entry: FileMentionEntry; score: number; namePositions: number[] };
 
 		const scoreEntry = (entry: FileMentionEntry): ScoredEntry | undefined => {
+			if (!allowVscode && isVscodePath(entry.path)) {
+				return undefined;
+			}
 			if (!query) {
 				return { entry, score: 0, namePositions: [] };
 			}
@@ -192,6 +196,10 @@ export function mountFileMentionPicker(
 
 			list.appendChild(item);
 		});
+	};
+
+	const isVscodePath = (entryPath: string): boolean => {
+		return entryPath === '.vscode' || entryPath.startsWith('.vscode/');
 	};
 
 	const updateActive = () => {

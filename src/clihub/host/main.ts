@@ -25,6 +25,8 @@ import {
 	type AgentLaunchSource
 } from '../shared/agent-launch-guard';
 
+const maxVoiceTextChars = 4000;
+
 export class CliHubViewProvider implements vscode.WebviewViewProvider, vscode.Disposable {
 	public static readonly viewType = 'f1.cliHub';
 	private readonly sessionManager = new CliSessionManager();
@@ -138,6 +140,11 @@ export class CliHubViewProvider implements vscode.WebviewViewProvider, vscode.Di
 				return;
 			}
 
+			if (message.type === 'mySkills.openCreate') {
+				await vscode.commands.executeCommand('f1.mySkills.openCreate');
+				return;
+			}
+
 			if (message.type === 'cli.create' && message.agent && allowedAgents.has(message.agent)) {
 				if (!(await this._confirmAgentLaunch(message.agent, 'panel'))) {
 					return;
@@ -198,7 +205,7 @@ export class CliHubViewProvider implements vscode.WebviewViewProvider, vscode.Di
 	}
 
 	private async _handleVoiceSpeak(webview: vscode.Webview, message: InboundWebviewMessage) {
-		const text = typeof message.text === 'string' ? message.text.trim() : '';
+		const text = typeof message.text === 'string' ? message.text.trim().slice(0, maxVoiceTextChars) : '';
 		if (!text) {
 			return;
 		}
@@ -218,6 +225,7 @@ export class CliHubViewProvider implements vscode.WebviewViewProvider, vscode.Di
 		};
 
 		try {
+			stopVoicePlayback(false);
 			await post('preparing');
 			// Reuses ATM's piper engine/voice when installed; downloads into
 			// F1's globalStorage (with a progress notification) otherwise.

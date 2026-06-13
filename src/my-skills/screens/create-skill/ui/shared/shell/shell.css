@@ -1,0 +1,1069 @@
+@import '../../chat-create/category/category.css';
+
+#create-panel.panel {
+  align-items: stretch;
+  justify-content: stretch;
+}
+
+.create-skill-surface {
+  --create-bg: var(
+    --vscode-sideBar-background,
+    var(--vscode-editor-background, #1e1e1e)
+  );
+  --create-accent: var(--vscode-focusBorder, #0078d4);
+  --create-dot-active: color-mix(
+    in srgb,
+    var(--create-accent) 72%,
+    transparent
+  );
+  --create-glow: color-mix(in srgb, var(--create-accent) 14%, transparent);
+  --create-glow-x: 50%;
+  --create-glow-y: 50%;
+  --create-content-width: min(100%, 420px);
+  --create-dock-bottom: 14px;
+  --create-chat-height: 104px;
+  --create-chat-target-height: 30px;
+  --create-chat-target-gap: 10px;
+  --create-logo-size: min(92px, 32vw);
+  position: relative;
+  isolation: isolate;
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 100%;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 14px;
+  padding: 14px;
+  overflow: hidden;
+  background: var(--create-bg);
+  contain: paint;
+  font-family: var(--myskills-ui-font);
+}
+
+.create-skill-surface.is-search-mode {
+  --create-search-accent: #2ea043;
+  --create-accent: var(--create-search-accent);
+  --create-bg: var(
+    --vscode-sideBar-background,
+    var(--vscode-editor-background, #1e1e1e)
+  );
+  --create-dot-active: color-mix(
+    in srgb,
+    var(--create-search-accent) 72%,
+    transparent
+  );
+  --create-search-chat-reserve: 132px;
+  grid-template-rows: auto minmax(0, 1fr);
+}
+
+.create-skill-surface.is-design-mode {
+  --create-design-accent: #d946ef;
+  --create-accent: var(--create-design-accent);
+  --create-bg: var(
+    --vscode-sideBar-background,
+    var(--vscode-editor-background, #1e1e1e)
+  );
+  --create-dot-active: color-mix(
+    in srgb,
+    var(--create-design-accent) 72%,
+    transparent
+  );
+  --create-glow: color-mix(
+    in srgb,
+    var(--create-design-accent) 18%,
+    transparent
+  );
+  grid-template-rows: auto minmax(0, 1fr);
+  align-items: start;
+  overflow-y: auto;
+  scrollbar-width: none;
+}
+
+.create-skill-surface.is-create-chat-screen {
+  grid-template-rows: minmax(0, 1fr);
+  align-items: stretch;
+  gap: 14px;
+  padding-bottom: calc(
+    var(--create-dock-bottom) +
+    var(--create-chat-height) +
+    var(--create-chat-target-height) +
+    var(--create-chat-target-gap)
+  );
+}
+
+.create-skill-surface.is-create-chat-screen.is-claude-target {
+  --create-accent: #f59e0b;
+  --create-dot-active: color-mix(in srgb, #f59e0b 72%, transparent);
+  --create-glow: color-mix(in srgb, #d97706 18%, transparent);
+}
+
+.create-skill-surface.is-design-mode::-webkit-scrollbar {
+  display: none;
+}
+
+.create-skill-surface.is-design-summary {
+  overflow-y: hidden;
+}
+
+/* ::before is used only by the CSS-only fallback path (not needed when canvas is active) */
+.create-skill-surface::before {
+  content: "";
+  position: absolute;
+  inset: auto -12px -12% -12px;
+  z-index: 0;
+  height: 42%;
+  pointer-events: none;
+  background: radial-gradient(
+      circle,
+      var(--create-dot-active) 1px,
+      transparent 1.7px
+    )
+    0 0 / 12px 12px;
+  mask-image: linear-gradient(
+    0deg,
+    transparent 0%,
+    #000 20%,
+    #000 78%,
+    transparent 100%
+  );
+  -webkit-mask-image: linear-gradient(
+    0deg,
+    transparent 0%,
+    #000 20%,
+    #000 78%,
+    transparent 100%
+  );
+  opacity: 0;
+  transform: translateY(46%);
+  will-change: opacity, transform;
+}
+
+/* Canvas bloom element — sits behind all content */
+.create-search-bloom-canvas {
+  position: absolute !important;
+  inset: 0 !important;
+  z-index: 0 !important;
+  pointer-events: none !important;
+}
+
+.create-skill-surface::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  background:
+    radial-gradient(
+      90px circle at var(--create-glow-x) var(--create-glow-y),
+      var(--create-glow) 0%,
+      transparent 70%
+    ),
+    radial-gradient(circle, var(--create-dot-active) 1px, transparent 1.5px) 0
+      0 / 12px 12px;
+  mask-image: radial-gradient(
+    84px circle at var(--create-glow-x) var(--create-glow-y),
+    #000 0%,
+    transparent 78%
+  );
+  -webkit-mask-image: radial-gradient(
+    84px circle at var(--create-glow-x) var(--create-glow-y),
+    #000 0%,
+    transparent 78%
+  );
+  opacity: 0;
+  transition: opacity 0.18s ease;
+  will-change: opacity;
+}
+
+.create-skill-surface.is-pointer-active::after {
+  opacity: 1;
+}
+
+.create-skill-surface > * {
+  position: relative;
+  z-index: 1;
+}
+
+.create-skill-surface h1 {
+  margin: 0;
+  color: var(--vscode-foreground);
+  font-family: var(--myskills-ui-font);
+  font-size: 17px;
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: 0;
+}
+
+.create-main {
+  width: var(--create-content-width);
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  padding-block: 4px;
+}
+
+.create-skill-surface.is-search-mode .create-main {
+  align-self: stretch;
+  padding-block: 4px var(--create-search-chat-reserve);
+}
+
+.create-skill-surface.is-design-mode .create-main {
+  align-self: start;
+  justify-content: flex-start;
+  padding-block: 14px 24px;
+}
+
+.create-skill-surface.is-design-mode
+  .create-mode-panel[data-create-mode-panel="design"] {
+  width: calc(100% + 20px);
+  margin-inline: -10px;
+}
+
+.create-hero {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.create-hero-logo {
+  width: var(--create-logo-size);
+  height: var(--create-logo-size);
+  aspect-ratio: 1;
+  display: block;
+  margin-bottom: 0;
+  object-fit: contain;
+  filter: drop-shadow(0 18px 28px color-mix(in srgb, #000000 30%, transparent));
+  animation: create-logo-float 4.8s ease-in-out infinite;
+  user-select: none;
+}
+
+.create-skill-surface.is-search-mode .create-hero {
+  display: none;
+}
+
+.create-skill-surface.is-create-chat-screen .create-help-card,
+.create-skill-surface.is-create-chat-screen .create-main {
+  display: none;
+}
+
+.create-flow-status {
+  width: var(--create-content-width);
+  max-width: calc(100% - 28px);
+  display: none;
+  grid-template-columns: 1fr;
+  gap: 10px;
+}
+
+.create-skill-surface.is-create-chat-screen .create-flow-status {
+  position: absolute;
+  left: 50%;
+  top: calc(50% - 54px);
+  display: grid;
+  transform: translate(-50%, -50%);
+}
+
+.create-skill-surface.is-name-prompt-open .create-flow-status,
+.create-skill-surface.is-name-prompt-open .create-chat-nav {
+  visibility: hidden;
+}
+
+.create-flow-card {
+  position: relative;
+  min-height: 58px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  box-sizing: border-box;
+  width: 100%;
+  overflow: hidden;
+  padding: 9px 12px;
+  color: var(--vscode-foreground);
+  background: color-mix(in srgb, var(--create-bg) 86%, #000000 14%);
+  border: 1px solid
+    color-mix(in srgb, var(--vscode-foreground, #cccccc) 12%, transparent);
+  border-radius: 8px;
+  font-family: var(--myskills-ui-font);
+}
+
+.create-flow-card.is-done {
+  color: color-mix(in srgb, var(--vscode-foreground, #cccccc) 56%, transparent);
+  background: color-mix(in srgb, var(--create-bg) 90%, #000000 10%);
+  border-color: color-mix(
+    in srgb,
+    var(--vscode-foreground, #cccccc) 8%,
+    transparent
+  );
+}
+
+.create-flow-card.is-active {
+  background:
+    linear-gradient(
+      90deg,
+      color-mix(in srgb, var(--create-accent) 18%, transparent) 0%,
+      color-mix(in srgb, var(--create-accent) 7%, transparent) 42%,
+      transparent 100%
+    ),
+    color-mix(in srgb, var(--create-bg) 84%, #000000 16%);
+  border-color: color-mix(in srgb, var(--create-accent) 68%, transparent);
+  box-shadow:
+    0 0 0 1px color-mix(in srgb, var(--create-accent) 12%, transparent),
+    0 10px 24px color-mix(in srgb, var(--create-accent) 8%, transparent);
+}
+
+.create-flow-card.is-active::before {
+  content: "";
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 3px;
+  background: var(--create-accent);
+}
+
+.create-flow-icon {
+  flex: 0 0 auto;
+  width: 30px;
+  height: 30px;
+  display: grid;
+  place-items: center;
+  color: color-mix(in srgb, var(--vscode-foreground, #cccccc) 54%, transparent);
+  background: color-mix(
+    in srgb,
+    var(--vscode-foreground, #cccccc) 7%,
+    transparent
+  );
+  border-radius: 7px;
+}
+
+.create-flow-card.is-active .create-flow-icon {
+  color: var(--create-accent);
+  background: color-mix(in srgb, var(--create-accent) 16%, transparent);
+}
+
+.create-flow-icon svg,
+.create-flow-check svg {
+  width: 15px;
+  height: 15px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.create-flow-copy {
+  min-width: 0;
+  display: grid;
+  gap: 3px;
+}
+
+.create-flow-label,
+.create-flow-value {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.create-flow-label {
+  font-size: 13px;
+  font-weight: 800;
+  line-height: 1.15;
+}
+
+.create-flow-value {
+  color: color-mix(
+    in srgb,
+    var(--vscode-descriptionForeground, var(--vscode-foreground, #cccccc)) 72%,
+    transparent
+  );
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1.25;
+}
+
+.create-flow-card.is-done .create-flow-label,
+.create-flow-card.is-done .create-flow-value {
+  color: color-mix(in srgb, var(--vscode-foreground, #cccccc) 46%, transparent);
+}
+
+.create-flow-check {
+  flex: 0 0 auto;
+  width: 15.5px;
+  height: 15.5px;
+  margin-left: auto;
+  display: grid;
+  place-items: center;
+  color: color-mix(in srgb, #2ea043 88%, #ffffff 12%);
+  border: 1px solid color-mix(in srgb, #2ea043 58%, transparent);
+  border-radius: 999px;
+}
+
+.create-flow-check svg {
+  width: 11px;
+  height: 11px;
+}
+
+.create-flow-edit {
+  flex: 0 0 auto;
+  width: 15.5px;
+  height: 15.5px;
+  margin-left: auto;
+  display: none;
+  place-items: center;
+  color: var(--create-accent);
+  background: color-mix(in srgb, var(--create-accent) 16%, transparent);
+  border: 1px solid color-mix(in srgb, var(--create-accent) 40%, transparent);
+  border-radius: 999px;
+  cursor: pointer;
+}
+
+.create-flow-edit svg {
+  width: 11px;
+  height: 11px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.create-flow-card.is-done:hover .create-flow-check {
+  display: none;
+}
+
+.create-flow-card.is-done:hover .create-flow-edit {
+  display: grid;
+}
+
+.create-flow-card:not(.is-done):not(.is-loading) .create-flow-check,
+.create-flow-card:not(.is-active) .create-flow-caret,
+.create-flow-card.is-loading .create-flow-caret {
+  display: none;
+}
+
+.create-flow-card.is-active:not(.is-loading) .create-flow-check {
+  display: none;
+}
+
+.create-flow-card.is-loading .create-flow-check {
+  display: grid;
+  background: color-mix(in srgb, var(--create-accent) 16%, transparent);
+  border-color: color-mix(in srgb, var(--create-accent) 40%, transparent);
+  color: var(--create-accent);
+}
+
+.create-flow-card.is-loading .create-flow-check svg {
+  display: none;
+}
+
+.create-flow-card.is-loading .create-flow-check::before {
+  content: "";
+  width: 9px;
+  height: 9px;
+  box-sizing: border-box;
+  border: 2px solid color-mix(in srgb, currentColor 28%, transparent);
+  border-top-color: currentColor;
+  border-radius: 999px;
+  animation: create-flow-spin 0.8s linear infinite;
+}
+
+@keyframes create-flow-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.create-flow-caret {
+  flex: 0 0 auto;
+  width: 8px;
+  height: 8px;
+  margin-left: auto;
+  border-top: 1.5px solid var(--create-accent);
+  border-right: 1.5px solid var(--create-accent);
+  transform: rotate(45deg);
+}
+
+.create-skill-surface.is-design-mode .create-help-card,
+.create-skill-surface.is-design-mode .create-hero {
+  display: none;
+}
+
+.create-mode-panel {
+  width: 100%;
+  position: relative;
+}
+
+.create-mode-panel[hidden] {
+  display: none;
+}
+
+.create-mode-content {
+  display: grid;
+  gap: 14px;
+}
+
+.create-mode-copy {
+  display: grid;
+  gap: 7px;
+  text-align: center;
+  cursor: default;
+}
+
+.create-mode-copy p {
+  max-width: 220px;
+  margin: 0 auto;
+  color: color-mix(
+    in srgb,
+    var(--vscode-descriptionForeground, var(--vscode-foreground, #cccccc)) 78%,
+    transparent
+  );
+  font-size: 13px;
+  font-weight: 400;
+  line-height: 1.35;
+}
+
+.create-help-card {
+  width: var(--create-content-width);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 40px;
+  box-sizing: border-box;
+  padding: 7px 8px 7px 12px;
+  color: var(--vscode-foreground);
+  background: color-mix(in srgb, var(--create-bg) 76%, transparent);
+  border: 1px solid
+    color-mix(in srgb, var(--vscode-foreground, #cccccc) 16%, transparent);
+  border-radius: 8px;
+  box-shadow: 0 10px 30px color-mix(in srgb, #000000 18%, transparent);
+  backdrop-filter: blur(12px) saturate(130%);
+  -webkit-backdrop-filter: blur(12px) saturate(130%);
+  font-size: 13px;
+  font-weight: 600;
+  font-family: var(--myskills-ui-font);
+}
+
+.create-help-button {
+  flex: 0 0 auto;
+  min-height: 28px;
+  padding: 0 10px;
+  color: var(--vscode-button-secondaryForeground, var(--vscode-foreground));
+  background: color-mix(in srgb, var(--create-bg) 62%, transparent);
+  border: 1px solid
+    color-mix(in srgb, var(--vscode-foreground, #cccccc) 18%, transparent);
+  border-radius: 7px;
+  font-family: var(--myskills-ui-font);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition:
+    border-color 0.16s ease,
+    background 0.16s ease,
+    color 0.16s ease;
+}
+
+.create-help-button:hover {
+  color: var(--vscode-button-foreground, #ffffff);
+  background: var(--create-accent);
+  border-color: var(--create-accent);
+}
+
+.create-help-button:focus-visible {
+  outline: 1px solid var(--create-accent);
+  outline-offset: 2px;
+}
+
+.create-design-nav {
+  width: calc(var(--create-content-width) + 26px);
+  margin-inline: -13px;
+  display: none;
+  grid-template-columns: 32px minmax(120px, 166px) minmax(48px, auto);
+  align-items: start;
+  justify-content: center;
+  column-gap: 10px;
+}
+
+.create-design-back {
+  width: 32px;
+  min-height: 32px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  padding: 0;
+  color: var(--vscode-icon-foreground, var(--vscode-foreground, #ffffff));
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 7px;
+  font-family: var(--myskills-ui-font);
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1;
+  cursor: pointer;
+  transition:
+    color 0.16s ease,
+    background 0.16s ease,
+    border-color 0.16s ease,
+    box-shadow 0.16s ease;
+}
+
+.create-design-back.is-close {
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.create-design-progress-wrap {
+  min-width: 0;
+  display: grid;
+  gap: 9px;
+  justify-items: center;
+}
+
+.create-design-progress-label {
+  color: color-mix(
+    in srgb,
+    var(--create-accent) 78%,
+    var(--vscode-foreground, #cccccc)
+  );
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  line-height: 32px;
+  text-transform: uppercase;
+}
+
+.create-design-skip {
+  min-height: 32px;
+  padding: 0 7px;
+  color: var(--vscode-icon-foreground, var(--vscode-foreground, #ffffff));
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 7px;
+  font-family: var(--myskills-ui-font);
+  font-size: 11px;
+  font-weight: 800;
+  line-height: 1;
+  cursor: pointer;
+  transition:
+    color 0.16s ease,
+    background 0.16s ease,
+    border-color 0.16s ease,
+    transform 0.16s ease;
+}
+
+.create-design-skip:hover,
+.create-design-skip.is-selected {
+  color: color-mix(
+    in srgb,
+    var(--create-accent) 84%,
+    var(--vscode-foreground, #cccccc)
+  );
+  background: linear-gradient(
+    135deg,
+    color-mix(in srgb, var(--create-accent) 20%, transparent),
+    color-mix(in srgb, var(--create-accent) 7%, transparent)
+  );
+  border-color: color-mix(in srgb, var(--create-accent) 42%, transparent);
+  box-shadow: 0 0 14px color-mix(in srgb, var(--create-accent) 12%, transparent);
+}
+
+.create-design-skip:hover {
+  transform: none;
+}
+
+.create-design-skip:focus-visible {
+  outline: 1px solid var(--create-accent);
+  outline-offset: 2px;
+}
+
+.create-design-back:hover {
+  color: color-mix(
+    in srgb,
+    var(--create-design-back-accent, var(--create-accent)) 88%,
+    #ffffff 12%
+  );
+  background: linear-gradient(
+    135deg,
+    color-mix(
+      in srgb,
+      var(--create-design-back-accent, var(--create-accent)) 20%,
+      transparent
+    ),
+    color-mix(
+      in srgb,
+      var(--create-design-back-accent, var(--create-accent)) 7%,
+      transparent
+    )
+  );
+  border-color: color-mix(
+    in srgb,
+    var(--create-design-back-accent, var(--create-accent)) 42%,
+    transparent
+  );
+  box-shadow: 0 0 14px
+    color-mix(
+      in srgb,
+      var(--create-design-back-accent, var(--create-accent)) 12%,
+      transparent
+    );
+}
+
+.create-design-back:focus-visible {
+  outline: 1px solid var(--create-design-back-accent, var(--create-accent));
+  outline-offset: 2px;
+}
+
+.create-design-back svg {
+  width: 15px;
+  height: 15px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.create-design-progress {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  width: 100%;
+  min-width: 0;
+}
+
+.create-design-progress-step {
+  height: 4px;
+  background: color-mix(
+    in srgb,
+    var(--vscode-foreground, #cccccc) 14%,
+    transparent
+  );
+  border-radius: 999px;
+}
+
+.create-design-progress-step.is-active {
+  background: var(--create-accent);
+  box-shadow: 0 0 12px color-mix(in srgb, var(--create-accent) 42%, transparent);
+}
+
+.create-skill-surface.is-design-mode .create-design-nav {
+  display: grid;
+}
+
+@media (max-height: 760px) {
+  .create-skill-surface {
+    gap: 10px;
+    padding: 10px 14px;
+    overflow-y: auto;
+  }
+
+  .create-skill-surface.is-create-chat-screen {
+    padding-bottom: calc(
+      var(--create-dock-bottom) +
+      var(--create-chat-height) +
+      var(--create-chat-target-height) +
+      var(--create-chat-target-gap)
+    );
+  }
+
+  .create-main {
+    gap: 10px;
+    padding-block: 0;
+  }
+
+  .create-hero-logo {
+    --create-logo-size: min(76px, 28vw);
+  }
+
+  .create-mode-content {
+    gap: 10px;
+  }
+
+  .create-chat {
+    gap: 10px;
+    min-height: 92px;
+    padding-top: 12px;
+  }
+}
+
+@media (max-width: 240px) {
+  .create-help-card {
+    align-items: stretch;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .create-help-button {
+    width: 100%;
+  }
+}
+/* ─── Loading Screen ─── */
+
+@keyframes create-loading-spin {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes create-loading-panel-in {
+  from {
+    opacity: 0;
+    transform: translateY(calc(-8% + 20px));
+  }
+  to {
+    opacity: 1;
+    transform: translateY(-8%);
+  }
+}
+
+@keyframes create-loading-pulse {
+  0%   { transform: scale(1); opacity: 0.55; }
+  100% { transform: scale(2.4); opacity: 0; }
+}
+
+@keyframes create-loading-fade-bar {
+  from { opacity: 0; height: 0; }
+  to   { opacity: 0.65; height: 60%; }
+}
+
+@keyframes create-loading-shimmer {
+  0%   { background-position: -200% center; }
+  100% { background-position:  200% center; }
+}
+
+@keyframes create-loading-check-in {
+  0%   { opacity: 0; transform: scale(0.3) rotate(-30deg); }
+  60%  { transform: scale(1.15) rotate(4deg); }
+  100% { opacity: 1; transform: scale(1) rotate(0); }
+}
+
+@keyframes create-loading-done-bg {
+  from { opacity: 0; transform: scale(0); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+/* ─── Screen ─── */
+
+.create-loading-screen {
+  position: absolute;
+  inset: 0;
+  z-index: 999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--create-bg);
+  color: var(--vscode-foreground);
+  opacity: 1;
+  transition: opacity 0.4s ease;
+}
+
+.create-loading-screen[hidden] {
+  display: none;
+}
+
+/* ─── Panel ─── */
+
+.create-loading-panel {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 40px;
+  width: 100%;
+  max-width: 320px;
+  transform: translateY(-8%);
+  animation: create-loading-panel-in 0.55s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* ─── Steps list ─── */
+
+.create-loading-steps {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  width: fit-content;
+  position: relative;
+}
+
+/* Vertical connector line */
+.create-loading-steps::before {
+  content: "";
+  position: absolute;
+  left: 11px; /* center of 24px indicator */
+  top: 28px;
+  bottom: 28px;
+  width: 1px;
+  background: linear-gradient(
+    to bottom,
+    color-mix(in srgb, var(--create-accent) 28%, transparent),
+    color-mix(in srgb, var(--create-accent) 8%,  transparent)
+  );
+}
+
+/* ─── Single step ─── */
+
+.create-loading-step {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 10px 0;
+  opacity: 0.22;
+  transform: translateX(-14px);
+  position: relative;
+  transition:
+    opacity   0.45s cubic-bezier(0.22, 1, 0.36, 1),
+    transform 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* Stagger reveal so later steps appear after earlier ones */
+.create-loading-step:nth-child(1) { transition-delay: 0.04s; }
+.create-loading-step:nth-child(2) { transition-delay: 0.09s; }
+.create-loading-step:nth-child(3) { transition-delay: 0.14s; }
+.create-loading-step:nth-child(4) { transition-delay: 0.19s; }
+
+.create-loading-step.is-active,
+.create-loading-step.is-done {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+/* Removed colored left accent bar as requested by user */
+
+/* ─── Indicator ─── */
+
+.create-loading-indicator {
+  position: relative;
+  width: 24px;
+  height: 24px;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+}
+
+/* Expanding pulse ring on active step */
+.create-loading-indicator::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 1.5px solid var(--create-accent);
+  opacity: 0;
+  pointer-events: none;
+}
+
+.create-loading-step.is-active .create-loading-indicator::after {
+  animation: create-loading-pulse 1.6s cubic-bezier(0.25, 0.46, 0.45, 0.94) infinite;
+}
+
+/* ─── Spinner ─── */
+
+.create-loading-spinner {
+  position: absolute;
+  inset: 0;
+  display: block;
+  opacity: 0;
+  transition: opacity 0.25s ease;
+}
+
+.create-loading-spinner::before,
+.create-loading-spinner::after {
+  content: "";
+  position: absolute;
+  border-radius: 50%;
+  border: 1.5px solid transparent;
+}
+
+/* Outer ring */
+.create-loading-spinner::before {
+  inset: 0;
+  border-top-color: var(--create-accent);
+  border-right-color: color-mix(in srgb, var(--create-accent) 18%, transparent);
+  animation: create-loading-spin 0.85s cubic-bezier(0.5, 0, 0.5, 1) infinite;
+}
+
+/* Inner ring — slower, reverse */
+.create-loading-spinner::after {
+  inset: 5px;
+  border-bottom-color: color-mix(in srgb, var(--create-accent) 55%, transparent);
+  border-left-color:   color-mix(in srgb, var(--create-accent) 22%, transparent);
+  animation: create-loading-spin 1.4s linear infinite reverse;
+}
+
+.create-loading-step.is-active .create-loading-spinner {
+  opacity: 1;
+}
+
+/* ─── Check mark ─── */
+
+/* Soft green halo behind the check */
+.create-loading-indicator::before {
+  content: "";
+  position: absolute;
+  inset: 3px;
+  border-radius: 50%;
+  background: color-mix(in srgb, #3fb950 14%, transparent);
+  opacity: 0;
+  transform: scale(0);
+}
+
+.create-loading-step.is-done .create-loading-indicator::before {
+  animation: create-loading-done-bg 0.35s cubic-bezier(0.22, 1, 0.36, 1) 0.05s both;
+}
+
+.create-loading-check {
+  position: relative;
+  width: 12px;
+  height: 12px;
+  color: #3fb950;
+  opacity: 0;
+  display: none;
+  filter: drop-shadow(0 0 5px color-mix(in srgb, #3fb950 50%, transparent));
+}
+
+.create-loading-step.is-done .create-loading-check {
+  display: block;
+  animation: create-loading-check-in 0.4s cubic-bezier(0.22, 1, 0.36, 1) 0.08s both;
+}
+
+.create-loading-step.is-done .create-loading-spinner {
+  display: none;
+}
+
+/* ─── Step text ─── */
+
+.create-loading-text {
+  font-size: 12.5px;
+  font-weight: 400;
+  letter-spacing: 0.25px;
+  color: var(--vscode-foreground);
+  transition: color 0.3s ease;
+  line-height: 1;
+}
+
+/* Subtle shimmer sweep on the active label */
+.create-loading-step.is-active .create-loading-text {
+  font-weight: 500;
+  background: linear-gradient(
+    90deg,
+    var(--vscode-foreground) 0%,
+    color-mix(in srgb, var(--vscode-foreground) 50%, white) 48%,
+    var(--vscode-foreground) 56%,
+    var(--vscode-foreground) 100%
+  );
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: create-loading-shimmer 2.4s linear infinite;
+}
+
+.create-loading-step.is-done .create-loading-text {
+  color: color-mix(in srgb, var(--vscode-foreground) 42%, transparent);
+  font-weight: 400;
+}
+@keyframes create-loading-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}

@@ -165,6 +165,54 @@ async function main() {
 			esbuildProblemMatcherPlugin,
 		],
 	});
+	const mySkillsWebviewCtx = await esbuild.context({
+		entryPoints: [
+			'src/my-skills/view/index.ts'
+		],
+		bundle: true,
+		format: 'iife',
+		minify: production,
+		sourcemap: !production,
+		sourcesContent: false,
+		platform: 'browser',
+		outfile: 'dist/webview.js',
+		logLevel: 'silent',
+		plugins: [
+			esbuildProblemMatcherPlugin,
+		],
+	});
+	const mySkillsCreateSkillCtx = await esbuild.context({
+		entryPoints: [
+			'src/my-skills/screens/create-skill/ui/index.ts'
+		],
+		bundle: true,
+		format: 'iife',
+		minify: production,
+		sourcemap: !production,
+		sourcesContent: false,
+		platform: 'browser',
+		outfile: 'dist/create-skill.js',
+		logLevel: 'silent',
+		plugins: [
+			esbuildProblemMatcherPlugin,
+		],
+	});
+	const mySkillsCreateSkillSupportCtx = await esbuild.context({
+		entryPoints: [
+			'src/my-skills/screens/create-skill/support/support.ts'
+		],
+		bundle: true,
+		format: 'iife',
+		minify: production,
+		sourcemap: !production,
+		sourcesContent: false,
+		platform: 'browser',
+		outfile: 'dist/create-skill-support.js',
+		logLevel: 'silent',
+		plugins: [
+			esbuildProblemMatcherPlugin,
+		],
+	});
 	const ptyHostCtx = await esbuild.context({
 		entryPoints: [
 			'src/clihub/host/terminal-cli/pty-host.ts'
@@ -187,16 +235,25 @@ async function main() {
 		await extensionCtx.watch();
 		await terminalCtx.watch();
 		await launcherCtx.watch();
+		await mySkillsWebviewCtx.watch();
+		await mySkillsCreateSkillCtx.watch();
+		await mySkillsCreateSkillSupportCtx.watch();
 		await ptyHostCtx.watch();
 		watchWebviewAssets();
 	} else {
 		await extensionCtx.rebuild();
 		await terminalCtx.rebuild();
 		await launcherCtx.rebuild();
+		await mySkillsWebviewCtx.rebuild();
+		await mySkillsCreateSkillCtx.rebuild();
+		await mySkillsCreateSkillSupportCtx.rebuild();
 		await ptyHostCtx.rebuild();
 		await extensionCtx.dispose();
 		await terminalCtx.dispose();
 		await launcherCtx.dispose();
+		await mySkillsWebviewCtx.dispose();
+		await mySkillsCreateSkillCtx.dispose();
+		await mySkillsCreateSkillSupportCtx.dispose();
 		await ptyHostCtx.dispose();
 	}
 }

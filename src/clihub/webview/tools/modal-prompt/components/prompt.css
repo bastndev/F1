@@ -717,10 +717,10 @@
   display: none;
 }
 
-/* Empty state: inert dashed "+" placeholder, tinted with the CLI accent.
+/* Add-skill entry point: dashed "+" button, tinted with the CLI accent.
    The base chip's 0.5px border renders dashes invisibly — this needs a full
    1px dashed border to show the dots at rest, plus a squarer shape.
-   TODO(future): becomes the entry point of the skill install/create flow. */
+   Opens the My Skills CREATE surface. */
 .prompt-skill-add,
 .prompt-skill-add:hover {
   border: 1px dashed color-mix(in srgb, var(--agent-accent, #534AB7) 65%, transparent);
@@ -733,7 +733,22 @@
   justify-content: center;
   font-size: 14px;
   line-height: 1;
-  cursor: default;
+  cursor: pointer;
+}
+
+.prompt-skill-add:disabled,
+.prompt-skill-add[aria-disabled="true"] {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.prompt-tool-btn.prompt-skill-add:hover,
+.agent-shell[data-agent] .prompt-tool-btn.prompt-skill-add:hover {
+  border: 1px dashed color-mix(in srgb, var(--agent-accent, #534AB7) 65%, transparent);
+  color: var(--agent-accent, #AFA9EC);
+  background: color-mix(in srgb, var(--agent-accent, #534AB7) 6%, transparent);
+  box-shadow: none;
+  transform: none;
 }
 
 .prompt-skills-label {

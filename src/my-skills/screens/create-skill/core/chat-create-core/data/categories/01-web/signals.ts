@@ -1,0 +1,18 @@
+export const webSignals = [
+	'web',
+	'frontend',
+	'front-end',
+	'website',
+	'app',
+	'react',
+	'next',
+	'nextjs',
+	'vue',
+	'astro',
+	'svelte',
+	'angular',
+	'html',
+	'css',
+	'javascript',
+	'typescript',
+];

@@ -1,0 +1,637 @@
+.search-mode-content {
+	width: 100%;
+	min-height: 210px;
+	align-content: center;
+	place-items: stretch;
+}
+
+.create-search-results[data-create-search-kind="publisher"] {
+	min-height: 0;
+}
+
+/* =============================================
+   EMPTY STATE
+   ============================================= */
+
+.create-search-state {
+	display: grid;
+	place-items: center;
+	align-content: center;
+	gap: 0;
+	min-height: 210px;
+	color: color-mix(in srgb, var(--vscode-descriptionForeground, var(--vscode-foreground, #cccccc)) 74%, transparent);
+	text-align: center;
+	position: relative;
+	transform: translateY(-6px);
+}
+
+.create-search-state[hidden],
+.create-search-results[hidden],
+.create-search-status[hidden] {
+	display: none;
+}
+
+/* Decorative outer glow ring behind the icon */
+.create-search-state::before {
+	content: "";
+	position: absolute;
+	top: calc(50% - 60px);
+	left: 50%;
+	width: 96px;
+	height: 96px;
+	border: 1px solid color-mix(in srgb, var(--create-accent) 16%, transparent);
+	border-radius: 50%;
+	transform: translate(-50%, -50%);
+}
+
+/* Icon wrapper */
+.create-search-state-icon {
+	width: 48px;
+	height: 48px;
+	display: grid;
+	place-items: center;
+	margin-bottom: 20px;
+	color: var(--create-accent);
+	background: color-mix(in srgb, var(--create-accent) 12%, transparent);
+	border: 1px solid color-mix(in srgb, var(--create-accent) 32%, transparent);
+	border-radius: 12px;
+	position: relative;
+	box-shadow:
+		0 0 24px color-mix(in srgb, var(--create-accent) 14%, transparent),
+		0 0 48px color-mix(in srgb, var(--create-accent) 6%, transparent);
+}
+
+/* Inner decorative rings */
+.create-search-state-icon::before,
+.create-search-state-icon::after {
+	content: "";
+	position: absolute;
+	inset: -6px;
+	border: 1px solid color-mix(in srgb, var(--create-accent) 18%, transparent);
+	border-radius: 16px;
+}
+
+.create-search-state-icon::after {
+	inset: -12px;
+	border-radius: 20px;
+	border-color: color-mix(in srgb, var(--create-accent) 10%, transparent);
+}
+
+.create-search-state-icon svg {
+	width: 22px;
+	height: 22px;
+	fill: none;
+	stroke: currentColor;
+	stroke-width: 1.5;
+	stroke-linecap: round;
+	stroke-linejoin: round;
+}
+
+.create-search-state h2,
+.create-search-summary h2 {
+	margin: 0;
+	color: var(--vscode-foreground);
+	font-family: var(--myskills-ui-font);
+	font-size: 15px;
+	font-weight: 700;
+	line-height: 1.2;
+	letter-spacing: 0;
+}
+
+.create-search-state p {
+	max-width: 220px;
+	margin: 5px 0 0;
+	font-size: 12px;
+	line-height: 1.35;
+}
+
+/* =============================================
+   RESULTS
+   ============================================= */
+
+.create-search-results {
+	display: grid;
+	gap: 20px;
+	width: 100%;
+	min-height: 0;
+}
+
+.create-search-summary {
+	display: grid;
+	justify-items: start;
+	gap: 8px;
+	text-align: left;
+}
+
+.create-search-kicker {
+	display: block;
+	justify-self: start;
+	margin-bottom: 3px;
+	color: var(--create-accent);
+	font-size: 10px;
+	font-weight: 800;
+	letter-spacing: 0;
+	text-transform: uppercase;
+}
+
+/* Tech chips */
+.create-search-techs {
+	display: flex;
+	justify-content: flex-start;
+	flex-wrap: wrap;
+	gap: 6px;
+	max-width: 100%;
+	min-height: 18px;
+}
+
+.create-search-tech {
+	max-width: 92px;
+	padding: 3px 6px;
+	overflow: hidden;
+	color: color-mix(in srgb, var(--create-accent) 88%, var(--vscode-foreground, #cccccc));
+	background: color-mix(in srgb, var(--create-accent) 11%, transparent);
+	border: 1px solid color-mix(in srgb, var(--create-accent) 24%, transparent);
+	border-radius: 999px;
+	font-size: 10px;
+	font-weight: 700;
+	line-height: 1;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.create-search-tech--skeleton {
+	width: 58px;
+	height: 18px;
+	box-sizing: border-box;
+	color: transparent;
+}
+
+.create-search-tech--skeleton:nth-child(2) {
+	width: 36px;
+}
+
+.create-search-tech--skeleton:nth-child(3) {
+	width: 48px;
+}
+
+/* Status (loading / error / info banner) */
+.create-search-status {
+	padding: 10px;
+	color: color-mix(in srgb, var(--vscode-descriptionForeground, var(--vscode-foreground, #cccccc)) 78%, transparent);
+	background: color-mix(in srgb, var(--create-bg) 84%, #000000 16%);
+	border: 1px solid color-mix(in srgb, var(--vscode-foreground, #cccccc) 10%, transparent);
+	border-radius: 8px;
+	font-size: 12px;
+	line-height: 1.35;
+}
+
+.create-search-status--loading {
+	min-height: 52px;
+	box-sizing: border-box;
+	display: flex;
+	align-items: center;
+}
+
+/* Retry button inside error status */
+.create-search-retry {
+	margin-left: 8px;
+	padding: 3px 10px;
+	color: var(--create-accent);
+	background: color-mix(in srgb, var(--create-accent) 15%, transparent);
+	border: 1px solid color-mix(in srgb, var(--create-accent) 35%, transparent);
+	border-radius: 4px;
+	font-family: var(--myskills-ui-font);
+	font-size: 11px;
+	font-weight: 700;
+	cursor: pointer;
+	transition: background 0.16s ease, border-color 0.16s ease;
+}
+
+.create-search-retry:hover {
+	background: color-mix(in srgb, var(--create-accent) 28%, transparent);
+	border-color: color-mix(in srgb, var(--create-accent) 55%, transparent);
+}
+
+.create-search-retry:focus-visible {
+	outline: 1px solid var(--create-accent);
+	outline-offset: 2px;
+}
+
+/* Card list */
+.create-search-list {
+	display: grid;
+	gap: 8px;
+	min-height: 352px;
+	align-content: start;
+}
+
+.create-search-results[data-create-search-kind="publisher"] .create-search-card {
+	height: 64px;
+	min-height: 64px;
+}
+
+.create-search-page-indicator,
+.create-search-page-button {
+	min-height: 18px;
+	box-sizing: border-box;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	padding: 0 6px;
+	border-radius: 999px;
+	font-family: var(--myskills-ui-font);
+	font-size: 10px;
+	font-weight: 800;
+	line-height: 1;
+}
+
+.create-search-page-indicator {
+	min-width: 10px;
+	padding-inline: 2px;
+	color: var(--create-accent);
+	opacity: var(--search-page-alpha, 0.45);
+	cursor: default;
+}
+
+.create-search-page-actions {
+	display: inline-flex;
+	align-items: center;
+	justify-content: flex-start;
+	gap: 2px;
+	width: 52px;
+	min-height: 18px;
+}
+
+.create-search-page-actions[hidden] {
+	display: none;
+}
+
+.create-search-page-button {
+	min-width: 24px;
+	color: var(--create-accent);
+	background: color-mix(in srgb, var(--create-accent) 12%, transparent);
+	border: 1px solid color-mix(in srgb, var(--create-accent) 28%, transparent);
+	cursor: pointer;
+	transition: background 0.16s ease, border-color 0.16s ease, color 0.16s ease, transform 0.16s ease;
+}
+
+.create-search-page-actions[data-create-search-page-state="start"] .create-search-page-button--more,
+.create-search-page-actions[data-create-search-page-state="end"] .create-search-page-button--back {
+	min-width: 40px;
+}
+
+.create-search-page-actions[data-create-search-page-state="middle"] .create-search-page-button--back {
+	border-top-right-radius: 3px;
+	border-bottom-right-radius: 3px;
+}
+
+.create-search-page-actions[data-create-search-page-state="middle"] .create-search-page-button--more {
+	border-top-left-radius: 3px;
+	border-bottom-left-radius: 3px;
+}
+
+.create-search-page-button[hidden] {
+	display: none;
+}
+
+.create-search-page-button--more:hover {
+	background: color-mix(in srgb, var(--create-accent) 20%, transparent);
+	border-color: color-mix(in srgb, var(--create-accent) 46%, transparent);
+	transform: translateY(-1px);
+}
+
+.create-search-page-button--back:hover {
+	color: var(--vscode-focusBorder, #0078d4);
+	background: color-mix(in srgb, var(--vscode-focusBorder, #0078d4) 18%, transparent);
+	border-color: color-mix(in srgb, var(--vscode-focusBorder, #0078d4) 42%, transparent);
+	transform: translateY(-1px);
+}
+
+.create-search-page-button:focus-visible {
+	outline: 1px solid var(--create-accent);
+	outline-offset: 2px;
+}
+
+.create-search-page-button--back:focus-visible {
+	outline-color: var(--vscode-focusBorder, #0078d4);
+}
+
+/* Individual result card */
+.create-search-card {
+	position: relative;
+	display: grid;
+	grid-template-columns: 30px minmax(0, 1fr) auto;
+	align-items: center;
+	gap: 10px;
+	min-height: 52px;
+	box-sizing: border-box;
+	padding: 8px 9px;
+	color: var(--vscode-foreground);
+	background: color-mix(in srgb, var(--create-bg) 84%, #000000 16%);
+	border: 1px solid color-mix(in srgb, var(--vscode-foreground, #cccccc) 12%, transparent);
+	border-radius: 8px;
+	transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+	cursor: default;
+}
+
+/* Card icon */
+.create-search-card-icon {
+	width: 30px;
+	height: 30px;
+	display: grid;
+	place-items: center;
+	color: var(--create-accent);
+	background: color-mix(in srgb, var(--create-accent) 13%, transparent);
+	border-radius: 7px;
+	transition: transform 0.2s ease, background 0.2s ease;
+}
+
+.create-search-card-icon svg {
+	width: 15px;
+	height: 15px;
+	fill: none;
+	stroke: currentColor;
+	stroke-width: 1.45;
+	stroke-linecap: round;
+	stroke-linejoin: round;
+}
+
+/* Card text area */
+.create-search-card-copy {
+	min-width: 0;
+	display: grid;
+	gap: 3px;
+}
+
+.create-search-card-title,
+.create-search-card-source,
+.create-search-card-reason {
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.create-search-card-title {
+	font-family: var(--myskills-mono-font);
+	font-size: 12px;
+	font-weight: 800;
+	line-height: 1.2;
+}
+
+.create-search-card-source,
+.create-search-card-reason {
+	color: color-mix(in srgb, var(--vscode-descriptionForeground, var(--vscode-foreground, #cccccc)) 68%, transparent);
+	font-size: 11px;
+	line-height: 1.2;
+}
+
+/* Install button */
+.create-search-install {
+	min-width: 68px;
+	min-height: 26px;
+	padding: 0 10px;
+	color: var(--create-accent);
+	background: color-mix(in srgb, var(--create-accent) 15%, transparent);
+	border: 1px solid color-mix(in srgb, var(--create-accent) 35%, transparent);
+	border-radius: 6px;
+	font-family: var(--myskills-ui-font);
+	font-size: 11px;
+	font-weight: 700;
+	cursor: pointer;
+	transition: background 0.16s ease, border-color 0.16s ease, transform 0.16s ease, box-shadow 0.16s ease;
+}
+
+.create-search-install:not(.create-search-install--busy):hover {
+	background: color-mix(in srgb, var(--create-accent) 28%, transparent);
+	border-color: color-mix(in srgb, var(--create-accent) 60%, transparent);
+	transform: translateY(-1px);
+	box-shadow: 0 0 0 1px color-mix(in srgb, var(--create-accent) 10%, transparent);
+}
+
+.create-search-install:disabled {
+	cursor: default;
+	transform: none;
+	box-shadow: none;
+}
+
+.create-search-install--busy {
+	background:
+		linear-gradient(
+			110deg,
+			color-mix(in srgb, var(--create-accent) 72%, transparent) 0%,
+			var(--create-accent) 36%,
+			color-mix(in srgb, var(--vscode-button-foreground, #ffffff) 86%, var(--create-accent)) 50%,
+			var(--create-accent) 64%,
+			color-mix(in srgb, var(--create-accent) 72%, transparent) 100%
+		);
+	background-size: 300% 100%;
+	background-position: 150% 0;
+	-webkit-background-clip: text;
+	background-clip: text;
+	color: transparent;
+}
+
+.create-search-install:focus-visible {
+	outline: 1px solid var(--create-accent);
+	outline-offset: 2px;
+}
+
+/* =============================================
+   SKELETON LOADING CARDS
+   ============================================= */
+
+.create-search-card--skeleton {
+	grid-template-columns: 30px minmax(0, 1fr) 68px;
+	min-height: 64px;
+	pointer-events: none;
+}
+
+.create-search-card--skeleton .create-search-card-icon {
+	color: color-mix(in srgb, var(--create-accent) 52%, transparent);
+	background: color-mix(in srgb, var(--create-accent) 11%, transparent);
+}
+
+.create-search-card--skeleton .create-search-card-icon::before {
+	content: "";
+	width: 15px;
+	height: 15px;
+	border-radius: 4px;
+	background: currentColor;
+	opacity: 0.38;
+}
+
+.skeleton-line {
+	height: 10px;
+	border-radius: 4px;
+	background: color-mix(in srgb, var(--vscode-foreground, #cccccc) 10%, transparent);
+}
+
+.skeleton-line--title {
+	width: var(--skeleton-title-width, 58%);
+}
+
+.skeleton-line--source {
+	width: var(--skeleton-source-width, 68%);
+	height: 8px;
+}
+
+.skeleton-line--reason {
+	width: var(--skeleton-reason-width, 78%);
+	height: 8px;
+}
+
+.create-search-install--skeleton {
+	width: 68px;
+	min-height: 30px;
+	padding: 0;
+	border-color: color-mix(in srgb, var(--create-accent) 22%, transparent);
+	background: color-mix(in srgb, var(--create-accent) 17%, transparent);
+}
+
+/* =============================================
+   ANIMATIONS — no-preference only
+   ============================================= */
+
+@media (prefers-reduced-motion: no-preference) {
+	/* --- Empty state --- */
+
+	.create-search-state::before {
+		animation: searchRingPulse 3.2s ease-in-out infinite;
+	}
+
+	.create-search-state-icon {
+		animation: searchIconPulse 2.8s ease-in-out infinite;
+	}
+
+	.create-search-state-icon::before {
+		animation: searchRingSpin 8s linear infinite;
+	}
+
+	.create-search-state-icon::after {
+		animation: searchRingSpin 12s linear infinite reverse;
+	}
+
+	/* --- Results entrance --- */
+
+	.create-search-card--enter,
+	.create-search-card--skeleton {
+		animation: searchCardSlideUp 0.45s ease both;
+	}
+
+	/* --- Card hover --- */
+
+	.create-search-card:hover {
+		transform: translateY(-2px);
+		border-color: color-mix(in srgb, var(--create-accent) 28%, transparent);
+		box-shadow:
+			0 4px 14px rgba(0, 0, 0, 0.18),
+			0 0 0 1px color-mix(in srgb, var(--create-accent) 8%, transparent);
+	}
+
+	.create-search-card:hover .create-search-card-icon {
+		transform: scale(1.06);
+		background: color-mix(in srgb, var(--create-accent) 19%, transparent);
+	}
+
+	/* --- Skeleton shimmer --- */
+
+	.create-search-card--skeleton .create-search-card-icon {
+		animation: searchSkeletonPulse 1.6s ease-in-out infinite;
+	}
+
+	.skeleton-line,
+	.create-search-tech--skeleton,
+	.create-search-install--skeleton {
+		animation: searchSkeletonPulse 1.6s ease-in-out infinite;
+	}
+
+	.create-search-install--busy {
+		animation: searchInstallBusyShine 1.8s linear infinite;
+	}
+}
+
+/* =============================================
+   KEYFRAMES
+   ============================================= */
+
+@keyframes searchCardSlideUp {
+	from {
+		opacity: 0;
+		transform: translateY(12px);
+	}
+	to {
+		opacity: 1;
+		transform: translateY(0);
+	}
+}
+
+@keyframes searchIconPulse {
+	0%, 100% {
+		transform: scale(1);
+	}
+	50% {
+		transform: scale(1.05);
+	}
+}
+
+@keyframes searchRingPulse {
+	0%, 100% {
+		opacity: 0.4;
+		transform: translate(-50%, -50%) scale(1);
+	}
+	50% {
+		opacity: 0.75;
+		transform: translate(-50%, -50%) scale(1.06);
+	}
+}
+
+@keyframes searchRingSpin {
+	from {
+		transform: rotate(0deg);
+	}
+	to {
+		transform: rotate(360deg);
+	}
+}
+
+@keyframes searchSkeletonPulse {
+	0%, 100% {
+		opacity: 0.3;
+	}
+	50% {
+		opacity: 0.65;
+	}
+}
+
+@keyframes searchInstallBusyShine {
+	from {
+		background-position: 150% 0;
+	}
+	to {
+		background-position: -150% 0;
+	}
+}
+
+/* =============================================
+   RESPONSIVE
+   ============================================= */
+
+@media (max-width: 260px) {
+	.create-search-summary {
+		display: grid;
+	}
+
+	.create-search-techs {
+		justify-content: flex-start;
+		max-width: 100%;
+	}
+
+	.create-search-card {
+		grid-template-columns: 28px minmax(0, 1fr);
+	}
+
+	.create-search-install {
+		grid-column: 2;
+		width: fit-content;
+	}
+}
