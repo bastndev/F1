@@ -22,7 +22,7 @@ import {
 	protectSkillTokens,
 	restoreSkillTokens,
 } from '../../../shared/prompt';
-import { mountFileMentionPicker } from './components/file-mention/file-mention';
+import { mountFileMentionPicker, resolveFileMentionAliases } from './components/file-mention/file-mention';
 import type { PromptContext } from './prompt-context';
 import { setupUndoHistory } from './textarea-history';
 import { enforceLowercaseInput } from './lowercase-input';
@@ -310,6 +310,10 @@ function initPromptTabs(host: HTMLElement, context: PromptContext, hasActiveSess
 		// Collapsed pastes leave the textarea as markers; the CLI gets the
 		// original verbatim content (never lowercased, never translated).
 		textToSend = expandPasteMarkers(textToSend, pasteAttachments);
+
+		// The textarea can show compact @~/ aliases; restore the actual
+		// workspace-relative @path right before sending to the CLI.
+		textToSend = resolveFileMentionAliases(textToSend);
 
 		const result = processPrompt(textToSend, {
 			close: ctx.close,

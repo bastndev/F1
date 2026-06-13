@@ -575,6 +575,12 @@
   font-weight: 600;
 }
 
+/* Numbered-list prefixes — keep the structure visible but quiet. */
+.prompt-textarea-highlight .prompt-numbered-list {
+  color: color-mix(in srgb, var(--vscode-input-foreground) 45%, transparent);
+  font-weight: 500;
+}
+
 /* Numbered badge on selected skill chips ("#1", "#2") */
 .prompt-skill-chip .skill-badge {
   display: none;

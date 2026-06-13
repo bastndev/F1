@@ -8,6 +8,32 @@ import * as vscode from 'vscode';
 import type { SkillRoot, WorkspaceSkill } from '../shared/prompt';
 import type { InboundWebviewMessage } from '../shared/protocol';
 
+const visibleRootDotfiles = new Set([
+	'.babelrc',
+	'.browserslistrc',
+	'.dockerignore',
+	'.editorconfig',
+	'.env.example',
+	'.env.local.example',
+	'.eslintignore',
+	'.eslintrc',
+	'.eslintrc.cjs',
+	'.eslintrc.js',
+	'.eslintrc.json',
+	'.gitattributes',
+	'.gitignore',
+	'.npmignore',
+	'.npmrc',
+	'.prettierignore',
+	'.prettierrc',
+	'.prettierrc.cjs',
+	'.prettierrc.js',
+	'.prettierrc.json',
+	'.stylelintignore',
+	'.stylelintrc',
+	'.vscodeignore',
+]);
+
 export const handleWorkspaceListSkills = async (webview: vscode.Webview, message: InboundWebviewMessage) => {
 	if (typeof message.id !== 'string') {
 		return;
@@ -88,6 +114,7 @@ export const handleWorkspaceListFiles = async (webview: vscode.Webview, message:
 			return {
 				name,
 				path: relativePath,
+				displayPath: getMentionDisplayPath(relativePath),
 				isDirectory
 			};
 		}).filter(entry => isMentionVisiblePath(entry.path));
@@ -111,6 +138,7 @@ export const handleWorkspaceListFiles = async (webview: vscode.Webview, message:
 			allEntries.push({
 				name: path.basename(dir),
 				path: dir,
+				displayPath: getMentionDisplayPath(dir),
 				isDirectory: true
 			});
 		});
@@ -132,5 +160,19 @@ export const handleWorkspaceListFiles = async (webview: vscode.Webview, message:
 
 function isMentionVisiblePath(relativePath: string): boolean {
 	const segments = relativePath.split('/').filter(Boolean);
-	return segments.every(segment => !segment.startsWith('.') || segment === '.vscode');
+	if (segments.length === 0) {
+		return false;
+	}
+
+	return segments.every((segment, index) => {
+		if (!segment.startsWith('.')) {
+			return true;
+		}
+
+		return index === segments.length - 1 && visibleRootDotfiles.has(segment);
+	});
+}
+
+function getMentionDisplayPath(relativePath: string): string {
+	return `~/${path.basename(relativePath)}`;
 }

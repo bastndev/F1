@@ -326,7 +326,9 @@ const toolsController = layoutRight
 					// Enter must arrive as its own write or TUI CLIs treat it as part
 					// of the paste. Copilot digests pastes noticeably slower than the
 					// rest, so it gets a longer pause before the keypress.
-					const delay = getAgentSlug(session.label) === 'copilot' ? 750 : 150;
+					const agentSlug = getAgentSlug(session.label);
+					const hasFileMention = /(^|\s)@\S+/.test(text);
+					const delay = agentSlug === 'copilot' || (agentSlug === 'kiro' && hasFileMention) ? 750 : 150;
 					setTimeout(() => {
 						if (sessions.get(sessionId)?.status === 'running') {
 							vscode.postMessage({ type: 'cli.input', sessionId, data: '\r' });
