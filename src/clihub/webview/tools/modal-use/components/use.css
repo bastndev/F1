@@ -3,6 +3,7 @@
 	max-height: min(360px, calc(100vh - 32px));
 	display: flex;
 	flex-direction: column;
+	position: relative;
 	box-sizing: border-box;
 	border: 1px solid var(--vscode-editorGroup-border, rgba(128, 128, 128, 0.35));
 	border-radius: 8px;
@@ -13,6 +14,25 @@
 	text-transform: none;
 	box-shadow: 0 14px 44px rgba(0, 0, 0, 0.45);
 	overflow: hidden;
+}
+
+.use-modal::before {
+	content: '';
+	position: absolute;
+	top: 0;
+	left: 0;
+	right: 0;
+	height: 1px;
+	background: linear-gradient(
+		90deg,
+		transparent 0%,
+		var(--agent-accent, #AFA9EC) 32%,
+		color-mix(in srgb, var(--agent-accent, #AFA9EC) 65%, white) 68%,
+		transparent 100%
+	);
+	opacity: 0.55;
+	z-index: 10;
+	pointer-events: none;
 }
 
 .use-header {
