@@ -90,7 +90,7 @@ export const handleWorkspaceListFiles = async (webview: vscode.Webview, message:
 				path: relativePath,
 				isDirectory
 			};
-		});
+		}).filter(entry => isMentionVisiblePath(entry.path));
 
 		// If we also want directories, we could get unique directory paths from the files list
 		const dirs = new Set<string>();
@@ -129,3 +129,8 @@ export const handleWorkspaceListFiles = async (webview: vscode.Webview, message:
 		});
 	}
 };
+
+function isMentionVisiblePath(relativePath: string): boolean {
+	const segments = relativePath.split('/').filter(Boolean);
+	return segments.every(segment => !segment.startsWith('.') || segment === '.vscode');
+}
