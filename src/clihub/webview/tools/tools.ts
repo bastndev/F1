@@ -22,6 +22,7 @@ export type ToolContext = {
 	getActiveModelName?: () => string | undefined;
 	getUsageSnapshot?: () => CliUsageSnapshot | undefined;
 	requestUsage?: () => Promise<CliUsageSnapshot>;
+	dismissUsageView?: () => void;
 	sendToActiveSession?: (text: string, options?: { paste?: boolean; submit?: boolean }) => void;
 	translatePrompt?: (request: PromptTranslateRequest) => Promise<PromptTranslateResult>;
 	getTerminalSelection?: () => string;
@@ -45,6 +46,7 @@ export type ToolsControllerOptions = {
 	getActiveModelName?: () => string | undefined;
 	getUsageSnapshot?: () => CliUsageSnapshot | undefined;
 	requestUsage?: () => Promise<CliUsageSnapshot>;
+	dismissUsageView?: () => void;
 	sendToActiveSession?: (text: string, options?: { paste?: boolean; submit?: boolean }) => void;
 	translatePrompt?: (request: PromptTranslateRequest) => Promise<PromptTranslateResult>;
 	getTerminalSelection?: () => string;
@@ -83,6 +85,7 @@ export const createToolsController = ({
 	getActiveModelName,
 	getUsageSnapshot,
 	requestUsage,
+	dismissUsageView,
 	sendToActiveSession,
 	translatePrompt,
 	getTerminalSelection,
@@ -169,6 +172,7 @@ export const createToolsController = ({
 			getActiveModelName,
 			getUsageSnapshot,
 			requestUsage,
+			dismissUsageView,
 			sendToActiveSession,
 			translatePrompt,
 			getTerminalSelection,

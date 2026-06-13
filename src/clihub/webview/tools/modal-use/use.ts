@@ -157,13 +157,27 @@ const renderUseState = (host: HTMLElement, context: ToolContext) => {
 
 export const mountUsePanel = (host: HTMLElement, context: ToolContext) => {
 	ensureStyles();
+	let shouldDismissCliUsageView = false;
+	let didDismissCliUsageView = false;
 
 	const template = document.createElement('template');
 	template.innerHTML = (useHtml as unknown as string).trim();
 	host.replaceChildren(template.content.cloneNode(true));
 
+	const dismissCliUsageView = () => {
+		if (!shouldDismissCliUsageView || didDismissCliUsageView) {
+			return;
+		}
+
+		didDismissCliUsageView = true;
+		context.dismissUsageView?.();
+	};
+
 	const closeBtn = host.querySelector<HTMLButtonElement>('#closeUseBtn');
-	closeBtn?.addEventListener('click', () => context.close());
+	closeBtn?.addEventListener('click', () => {
+		dismissCliUsageView();
+		context.close();
+	});
 
 	const refreshBtn = host.querySelector<HTMLButtonElement>('#useRefreshBtn');
 	refreshBtn?.addEventListener('click', () => {
@@ -172,10 +186,12 @@ export const mountUsePanel = (host: HTMLElement, context: ToolContext) => {
 			return;
 		}
 
+		shouldDismissCliUsageView = true;
 		setRefreshState(host, true);
 		void context.requestUsage()
 			.then((snapshot) => renderUsageSnapshot(host, snapshot))
 			.catch((error) => {
+				shouldDismissCliUsageView = false;
 				const message = error instanceof Error ? error.message : 'Usage refresh failed.';
 				renderUsageMessage(host, 'Refresh failed', message);
 			})
@@ -185,5 +201,8 @@ export const mountUsePanel = (host: HTMLElement, context: ToolContext) => {
 	renderUseState(host, context);
 	renderUsageSnapshot(host, context.getUsageSnapshot?.());
 	const interval = window.setInterval(() => renderUseState(host, context), refreshIntervalMs);
-	return () => window.clearInterval(interval);
+	return () => {
+		window.clearInterval(interval);
+		dismissCliUsageView();
+	};
 };

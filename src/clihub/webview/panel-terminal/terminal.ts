@@ -50,6 +50,7 @@ const routeSubmitDelayMs = 450;
 const routeSubmitSecondEnterDelayMs = 350;
 const usageRequestSettleDelayMs = 900;
 const usageRequestTimeoutMs = 7000;
+const usageDismissSecondEscapeDelayMs = 80;
 const usageCommandsByAgentSlug: Record<string, string> = {
 	kiro: '/usage'
 };
@@ -276,6 +277,29 @@ const requestActiveUsage = () => new Promise<CliUsageSnapshot>((resolve, reject)
 	vscode.postMessage({ type: 'cli.input', sessionId: session.id, data });
 });
 
+const dismissActiveUsageView = () => {
+	if (!activeSessionId) {
+		return;
+	}
+
+	const sessionId = activeSessionId;
+	const session = sessions.get(sessionId);
+	if (session?.status !== 'running') {
+		return;
+	}
+
+	const view = terminals.get(sessionId);
+	const data = view?.terminal.modes.sendFocusMode ? '\x1b[I\x1b' : '\x1b';
+	const postEscape = () => {
+		if (sessions.get(sessionId)?.status === 'running') {
+			vscode.postMessage({ type: 'cli.input', sessionId, data });
+		}
+	};
+
+	postEscape();
+	window.setTimeout(postEscape, usageDismissSecondEscapeDelayMs);
+};
+
 // ── Host round-trips ─────────────────────────────────────────────────
 // One RPC channel per request/response message pair; see host-rpc.ts.
 
@@ -428,6 +452,7 @@ const toolsController = layoutRight
 				return usageSnapshots.get(activeSessionId);
 			},
 			requestUsage: requestActiveUsage,
+			dismissUsageView: dismissActiveUsageView,
 			sendToActiveSession: (text: string, options?: { paste?: boolean; submit?: boolean }) => {
 				if (!activeSessionId) {
 					return;
