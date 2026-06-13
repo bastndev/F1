@@ -654,16 +654,16 @@
   color: var(--vscode-input-foreground);
 }
 
-/* @file-mention tokens — blue, matching VS Code link / variable colour */
+/* @file-mention tokens — strong blue for compact @~/file aliases */
 .prompt-textarea-highlight .prompt-mention {
-  color: var(--vscode-textLink-foreground, #58a6ff);
+  color: #2563eb;
   font-weight: 500;
 }
 
-/* @folder-mention tokens — yellow (ends with /) */
+/* @folder-mention tokens — light blue (ends with /) */
 .prompt-textarea-highlight .prompt-mention-folder {
-  color: #e8c25a;
-  font-weight: 500;
+  color: #7dd3fc;
+  font-weight: 600;
 }
 
 /* When a mention is (partially) selected, the selection colour wins */
