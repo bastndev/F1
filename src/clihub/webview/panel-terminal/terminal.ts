@@ -46,8 +46,8 @@ const promptFilterClickMoveThreshold = 6;
 const clipboardPollIntervalMs = 800;
 const defaultSubmitDelayMs = 150;
 const slowPasteSubmitDelayMs = 750;
-const kiroFileMentionSubmitDelayMs = 2200;
-const routeSubmitSecondEnterDelayMs = 650;
+const routeSubmitDelayMs = 450;
+const routeSubmitSecondEnterDelayMs = 350;
 let activeSessionId: string | undefined;
 let pendingTabSwitchSessionId: string | undefined;
 let isPromptFilterEnabled = false;
@@ -170,12 +170,8 @@ const getSubmitDelayMs = (agentSlug: string, text: string) => {
 		return slowPasteSubmitDelayMs;
 	}
 
-	if (agentSlug === 'kiro' && hasFileMention) {
-		return kiroFileMentionSubmitDelayMs;
-	}
-
 	if (hasFileMention) {
-		return slowPasteSubmitDelayMs;
+		return routeSubmitDelayMs;
 	}
 
 	return defaultSubmitDelayMs;
