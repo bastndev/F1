@@ -144,6 +144,8 @@ export const createToolsController = ({
 		const host = document.createElement('div');
 		applyStyles(host, {
 			display: 'flex',
+			alignItems: 'center',
+			justifyContent: 'center',
 			width: 'min(580px, calc(100% - 32px))',
 			maxHeight: 'calc(100% - 32px)',
 			boxSizing: 'border-box'
