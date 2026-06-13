@@ -111,12 +111,12 @@ body {
 
 	.logo-bolt {
 		position: absolute;
-		top: 1px;
-		right: 57px;
-		color: var(--accent-color);
+		top: -1px;
+		right: 55px;
+		width: 14px;
+		height: 16px;
+		object-fit: contain;
 		filter: drop-shadow(0 0 5px var(--accent-color));
-		font-size: 13px;
-		line-height: 1;
 		animation: pulseGlow 2.5s ease-in-out;
 	}
 
