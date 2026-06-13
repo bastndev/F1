@@ -189,6 +189,9 @@ export class CliHubViewProvider implements vscode.WebviewViewProvider, vscode.Di
 		if (!guard) {
 			return true;
 		}
+		if (!this.sessionManager.hasRunningSessionForAgent(agentLabel)) {
+			return true;
+		}
 
 		const choice = await vscode.window.showWarningMessage(
 			guard.message,
