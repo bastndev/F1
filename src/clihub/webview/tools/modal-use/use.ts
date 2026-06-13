@@ -110,13 +110,17 @@ const renderUsageSnapshot = (host: HTMLElement, snapshot: CliUsageSnapshot | und
 
 const setRefreshState = (host: HTMLElement, isLoading: boolean) => {
 	const button = host.querySelector<HTMLButtonElement>('#useRefreshBtn');
-	if (!button) {
-		return;
+	const usageCard = host.querySelector<HTMLElement>('.use-usage-card');
+	if (button) {
+		button.disabled = isLoading;
+		button.classList.toggle('is-loading', isLoading);
+		setText(host, '#useRefreshLabel', isLoading ? 'Loading' : 'Refresh');
 	}
 
-	button.disabled = isLoading;
-	button.classList.toggle('is-loading', isLoading);
-	setText(host, '#useRefreshLabel', isLoading ? 'Loading' : 'Refresh');
+	if (usageCard) {
+		usageCard.classList.toggle('is-loading', isLoading);
+		usageCard.setAttribute('aria-busy', String(isLoading));
+	}
 };
 
 const setStatusDot = (host: HTMLElement, status: string) => {
@@ -159,6 +163,8 @@ export const mountUsePanel = (host: HTMLElement, context: ToolContext) => {
 	ensureStyles();
 	let shouldDismissCliUsageView = false;
 	let didDismissCliUsageView = false;
+	let isRefreshingUsage = false;
+	let isDisposed = false;
 
 	const template = document.createElement('template');
 	template.innerHTML = (useHtml as unknown as string).trim();
@@ -179,29 +185,59 @@ export const mountUsePanel = (host: HTMLElement, context: ToolContext) => {
 		context.close();
 	});
 
-	const refreshBtn = host.querySelector<HTMLButtonElement>('#useRefreshBtn');
-	refreshBtn?.addEventListener('click', () => {
+	const refreshUsage = () => {
+		if (isDisposed || isRefreshingUsage) {
+			return;
+		}
+
 		if (!context.requestUsage) {
 			renderUsageMessage(host, 'Not configured', getActiveAgentLabel());
 			return;
 		}
 
+		const commandLabel = getUsageCommandLabel(getActiveAgentLabel());
+		if (commandLabel === 'not configured') {
+			renderUsageMessage(host, 'Not configured', getActiveAgentLabel());
+			return;
+		}
+
+		isRefreshingUsage = true;
 		shouldDismissCliUsageView = true;
+		renderUsageMessage(host, 'Loading usage', commandLabel);
 		setRefreshState(host, true);
 		void context.requestUsage()
-			.then((snapshot) => renderUsageSnapshot(host, snapshot))
+			.then((snapshot) => {
+				if (!isDisposed) {
+					renderUsageSnapshot(host, snapshot);
+				}
+			})
 			.catch((error) => {
 				shouldDismissCliUsageView = false;
+				if (isDisposed) {
+					return;
+				}
 				const message = error instanceof Error ? error.message : 'Usage refresh failed.';
 				renderUsageMessage(host, 'Refresh failed', message);
 			})
-			.finally(() => setRefreshState(host, false));
-	});
+			.finally(() => {
+				isRefreshingUsage = false;
+				if (!isDisposed) {
+					setRefreshState(host, false);
+				}
+			});
+	};
+
+	const refreshBtn = host.querySelector<HTMLButtonElement>('#useRefreshBtn');
+	refreshBtn?.addEventListener('click', refreshUsage);
 
 	renderUseState(host, context);
 	renderUsageSnapshot(host, context.getUsageSnapshot?.());
+	if (getUsageCommandLabel(getActiveAgentLabel()) !== 'not configured') {
+		window.setTimeout(refreshUsage, 0);
+	}
 	const interval = window.setInterval(() => renderUseState(host, context), refreshIntervalMs);
 	return () => {
+		isDisposed = true;
 		window.clearInterval(interval);
 		dismissCliUsageView();
 	};

@@ -129,6 +129,10 @@
 	border: 1px solid var(--vscode-editorGroup-border, rgba(128, 128, 128, 0.24));
 	border-radius: 4px;
 	padding: 4px 8px;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	gap: 6px;
 	background: var(--vscode-toolbar-hoverBackground, rgba(128, 128, 128, 0.1));
 	color: var(--vscode-foreground);
 	font-family: var(--vscode-font-family);
@@ -147,6 +151,16 @@
 .use-refresh-btn:disabled {
 	cursor: default;
 	opacity: 0.62;
+}
+
+.use-refresh-btn.is-loading::before {
+	content: '';
+	width: 8px;
+	height: 8px;
+	border: 1px solid color-mix(in srgb, var(--agent-accent, var(--vscode-focusBorder, #3b82f6)) 34%, transparent);
+	border-top-color: var(--agent-accent, var(--vscode-focusBorder, #3b82f6));
+	border-radius: 999px;
+	animation: use-spin 700ms linear infinite;
 }
 
 .use-status-card {
@@ -230,11 +244,30 @@
 
 .use-usage-card {
 	min-width: 0;
+	position: relative;
+	overflow: hidden;
 	border: 1px solid var(--vscode-editorGroup-border, rgba(128, 128, 128, 0.24));
 	border-radius: 6px;
 	padding: 10px;
 	box-sizing: border-box;
 	background: var(--vscode-input-background, rgba(128, 128, 128, 0.08));
+}
+
+.use-usage-card.is-loading::after {
+	content: '';
+	position: absolute;
+	inset: 0;
+	background: linear-gradient(
+		110deg,
+		transparent 0%,
+		transparent 28%,
+		color-mix(in srgb, var(--agent-accent, var(--vscode-focusBorder, #3b82f6)) 18%, transparent) 48%,
+		transparent 68%,
+		transparent 100%
+	);
+	transform: translateX(-100%);
+	animation: use-loading-sweep 1100ms ease-in-out infinite;
+	pointer-events: none;
 }
 
 .use-usage-message {
@@ -338,6 +371,18 @@
 	font-size: 11px;
 	font-weight: 600;
 	line-height: 1.25;
+}
+
+@keyframes use-spin {
+	to {
+		transform: rotate(360deg);
+	}
+}
+
+@keyframes use-loading-sweep {
+	to {
+		transform: translateX(100%);
+	}
 }
 
 @media (max-width: 520px) {
