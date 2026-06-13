@@ -26,7 +26,6 @@ export const cliAgents: CliAgent[] = [
 	{ label: 'Antigravity CLI', command: 'agy', args: [], slug: 'antigravity', aliases: ['antigravity', 'antigravity cli', 'agy', 'an', 'ant'], iconFile: 'Antigravity_cli.svg' },
 	{ label: 'Copilot CLI', command: 'copilot', args: [], slug: 'copilot', aliases: ['github copilot', 'copilot', 'copilot cli'], iconFile: 'github-copilot.svg', darkIcon: true },
 	{ label: 'Cursor', command: 'cursor', args: ['agent'], slug: 'cursor', aliases: ['cursor'], iconFile: 'cursor.svg', darkIcon: true },
-	{ label: 'Amp', command: 'amp', args: [], slug: 'amp', aliases: ['amp'], iconFile: 'amp.svg' },
 	{ label: 'Kiro CLI', command: 'kiro-cli', args: [], slug: 'kiro', aliases: ['kiro', 'kiro cli'], iconFile: 'kiro.svg' },
 	{ label: 'Kilo Code', command: 'kilo', args: [], slug: 'kilocode', aliases: ['kilo', 'kilo code', 'code', 'k'], iconFile: 'kilocode.svg', darkIcon: true },
 	{ label: 'Grok', command: 'grok', args: [], slug: 'grok', aliases: ['grok'], iconFile: 'grok.svg', darkIcon: true }

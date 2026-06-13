@@ -44,11 +44,6 @@
 	--agent-accent: #9ca3af;
 }
 
-.agent-shell[data-agent="amp"] {
-	--amp: #ff7022;
-	--agent-accent: #ff7022;
-}
-
 .agent-shell[data-agent="cursor"] {
 	--cursor: #e5e7eb;
 	--agent-accent: #e5e7eb;

@@ -67,12 +67,6 @@ body[data-agent="copilot"] {
 	--selection-color: #9ca3af;
 }
 
-body[data-agent="amp"] {
-	--accent-color: #ff7022;
-	--input-border-left: #ff7022;
-	--selection-color: #ff7022;
-}
-
 body[data-agent="cursor"] {
 	--accent-color: #e5e7eb;
 	--input-border-left: #e5e7eb;
