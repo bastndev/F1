@@ -1,6 +1,9 @@
 .vscode/**
 .vscode-test/**
 src/**
+!src/shared/
+!src/shared/**/
+!src/shared/assets/*.svg
 !src/my-skills/
 !src/my-skills/**/
 !src/my-skills/**/*.html
