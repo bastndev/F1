@@ -269,6 +269,7 @@ export const createTabController = (options: TabControllerOptions) => {
 		} else {
 			createButtonLabel.textContent = currentSessionCount >= 3 && currentSessionCount <= 9 ? String(currentSessionCount) : '+';
 		}
+		sessionList.classList.toggle('is-alt-close-mode', isAltPressed);
 	};
 
 	const updateCreateButtonLabel = (sessionCount: number) => {
@@ -366,6 +367,19 @@ export const createTabController = (options: TabControllerOptions) => {
 	});
 
 	createButton.addEventListener('mouseleave', () => {
+		updateCreateButtonVisuals();
+	});
+
+	sessionList.addEventListener('mouseenter', (event) => {
+		isAltPressed = event.altKey;
+		updateCreateButtonVisuals();
+	});
+
+	sessionList.addEventListener('mousemove', (event) => {
+		if (event.altKey === isAltPressed) {
+			return;
+		}
+		isAltPressed = event.altKey;
 		updateCreateButtonVisuals();
 	});
 
@@ -654,15 +668,19 @@ export const createTabController = (options: TabControllerOptions) => {
 				}
 			});
 
-			const switchSession = () => {
+			const switchSession = (event?: MouseEvent | KeyboardEvent) => {
 				dismissToolModal();
+				if (event?.altKey || isAltPressed) {
+					options.onClose(session.id);
+					return;
+				}
 				options.onSwitch(session.id);
 			};
 			item.addEventListener('click', switchSession);
 			item.addEventListener('keydown', (event) => {
 				if (event.key === 'Enter' || event.key === ' ') {
 					event.preventDefault();
-					switchSession();
+					switchSession(event);
 				}
 			});
 

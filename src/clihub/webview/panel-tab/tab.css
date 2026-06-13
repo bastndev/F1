@@ -867,6 +867,39 @@
 		transform: translateY(-1px);
 	}
 
+	.agent-session-list.is-alt-close-mode .agent-session-item:hover {
+		cursor: pointer;
+	}
+
+	.agent-session-list.is-alt-close-mode .agent-session-item:hover .agent-session-icon-frame {
+		border-color: #ef4444;
+		background: color-mix(in srgb, #ef4444 20%, var(--vscode-input-background, rgba(128, 128, 128, 0.08)));
+		box-shadow:
+			0 5px 14px rgba(0, 0, 0, 0.34),
+			0 0 0 1px #ef4444,
+			0 0 0 5px color-mix(in srgb, #ef4444 18%, transparent);
+	}
+
+	.agent-session-list.is-alt-close-mode .agent-session-item:hover .agent-session-icon-image {
+		opacity: 0.28;
+		transform: scale(0.82);
+	}
+
+	.agent-session-list.is-alt-close-mode .agent-session-item:hover .agent-session-icon-frame::before {
+		content: 'x';
+		position: absolute;
+		inset: 0;
+		z-index: 3;
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		color: #fecaca;
+		font-size: 18px;
+		font-weight: 700;
+		line-height: 1;
+		text-shadow: 0 1px 4px rgba(0, 0, 0, 0.42);
+	}
+
 	/* === Active state - more visible "new selection" effect === */
 	.agent-session-item.is-active .agent-session-icon-frame {
 		border: 1.5px solid var(--vscode-focusBorder, var(--vscode-textLink-foreground));
