@@ -78,7 +78,6 @@ const renderUseState = (host: HTMLElement, context: ToolContext) => {
 	setText(host, '#useAgentName', agent);
 	setText(host, '#useStatusValue', status);
 	setText(host, '#useOpenFor', formatOpenDuration(context.getActiveSessionCreatedAt?.()));
-	setText(host, '#useTokensLeft', '—');
 	setStatusDot(host, status);
 };
 
