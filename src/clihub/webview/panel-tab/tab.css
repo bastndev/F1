@@ -467,11 +467,11 @@
 }
 
 .agent-tools-toast {
-	position: fixed;
+	position: absolute;
 	left: 50%;
 	bottom: 14px;
 	z-index: 2000;
-	max-width: calc(100vw - 28px);
+	max-width: calc(100% - 28px);
 	padding: 4px 12px;
 	border: 1px solid var(--vscode-editorGroup-border, rgba(128, 128, 128, 0.28));
 	border-radius: 6px;

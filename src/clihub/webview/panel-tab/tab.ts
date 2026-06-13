@@ -142,7 +142,10 @@ export const createTabController = (options: TabControllerOptions) => {
 			toast.className = 'agent-tools-toast';
 			toast.setAttribute('role', 'status');
 			toast.setAttribute('aria-live', 'polite');
-			document.body.append(toast);
+		}
+		const toastHost = document.querySelector<HTMLElement>('.layout-right') ?? document.body;
+		if (toast.parentElement !== toastHost) {
+			toastHost.append(toast);
 		}
 
 		toast.textContent = enabled ? 'Prompt filter enabled ✔' : 'Prompt filter disabled ✖';
