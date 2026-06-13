@@ -443,8 +443,8 @@ export function isVoiceSpeaking(): boolean {
 		|| (playerProcess !== undefined && !playerProcess.killed);
 }
 
-export function stopVoicePlayback(): void {
-	stoppedByUser = true;
+export function stopVoicePlayback(markStoppedByUser = true): void {
+	stoppedByUser = markStoppedByUser;
 	try {
 		if (piperProcess && playerProcess) {
 			piperProcess.stdout?.unpipe(playerProcess.stdin ?? undefined);
@@ -483,7 +483,7 @@ export async function playSpanishText(
 		throw new Error('No text provided');
 	}
 
-	stopVoicePlayback();
+	stopVoicePlayback(false);
 
 	if (!(await fileExists(resources.piperPath))) {
 		throw new Error(`Piper executable not found at: ${resources.piperPath}`);

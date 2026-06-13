@@ -8,6 +8,7 @@ import { renderMarkdownLite } from './markdown-lite';
 import { segmentTerminalSelection } from './terminal-text';
 
 const stylesId = 'cli-translator-panel-styles';
+const maxVoiceTextChars = 4000;
 
 const ensureStyles = () => {
 	if (document.getElementById(stylesId)) {
@@ -32,7 +33,7 @@ export const mountTranslatorPanel = (host: HTMLElement, context: ToolContext) =>
 		closeBtn.addEventListener('click', () => context.close());
 	}
 
-	initializeTranslator(host, context);
+	return initializeTranslator(host, context);
 };
 
 function initializeTranslator(host: HTMLElement, context: ToolContext) {
@@ -231,6 +232,7 @@ function initializeTranslator(host: HTMLElement, context: ToolContext) {
 	}
 
 	if (speakBtn && spectrum) {
+		let disposeVoiceState: (() => void) | undefined;
 		// Real playback runs in the extension host (Piper TTS, sharing the ATM
 		// extension's downloaded engine/voice). The button mirrors broadcast
 		// voice.state events: CSS swaps the idle label for the animated bars
@@ -252,7 +254,7 @@ function initializeTranslator(host: HTMLElement, context: ToolContext) {
 			}
 		};
 
-		context.onVoiceState?.(applyVoiceState);
+		disposeVoiceState = context.onVoiceState?.(applyVoiceState);
 		// Playback may still be running from a previous open — resync.
 		context.queryVoiceState?.();
 
@@ -266,10 +268,22 @@ function initializeTranslator(host: HTMLElement, context: ToolContext) {
 			// code chips speak as "code here #N" (kept in English on purpose).
 			const value = textEl?.textContent?.trim();
 			if (value && context.speakText) {
-				context.speakText(value);
+				const speakValue = value.length > maxVoiceTextChars
+					? value.slice(0, maxVoiceTextChars).trimEnd()
+					: value;
+				if (speakValue.length < value.length) {
+					setStatus('voice · shortened');
+				}
+				context.speakText(speakValue);
 			}
 		});
+
+		return () => {
+			disposeVoiceState?.();
+		};
 	}
+
+	return undefined;
 }
 
 function extractTextToTranslate(context: ToolContext): string {
