@@ -25,6 +25,7 @@ export type CliToolId = 'translate' | 'keymaps' | 'prompt';
 type TabControllerOptions = {
 	getAgentIcon: (label: string) => CliAgentIcon | undefined;
 	onCreate: (agent: string) => void;
+	onCreateCustomCli: () => void;
 	onCycleSession: (offset: 1 | -1) => void;
 	onSwitch: (sessionId: string) => void;
 	onClose: (sessionId: string) => void;
@@ -244,6 +245,13 @@ export const createTabController = (options: TabControllerOptions) => {
 		}
 	};
 
+	const openCustomCli = () => {
+		dismissToolModal();
+		setAgentMenuOpen(false);
+		agentButton.focus();
+		options.onCreateCustomCli();
+	};
+
 	const closeActiveSession = () => {
 		if (currentActiveSessionId) {
 			dismissToolModal();
@@ -377,6 +385,10 @@ export const createTabController = (options: TabControllerOptions) => {
 		const optionButton = event.target instanceof HTMLElement
 			? event.target.closest<HTMLButtonElement>('.agent-picker-option')
 			: undefined;
+		if (optionButton?.dataset.customCli === 'true') {
+			openCustomCli();
+			return;
+		}
 		if (optionButton?.dataset.agentLabel) {
 			selectAgent(optionButton.dataset.agentLabel);
 		}
@@ -393,6 +405,11 @@ export const createTabController = (options: TabControllerOptions) => {
 			const optionButton = event.target instanceof HTMLElement
 				? event.target.closest<HTMLButtonElement>('.agent-picker-option')
 				: undefined;
+			if (optionButton?.dataset.customCli === 'true') {
+				event.preventDefault();
+				openCustomCli();
+				return;
+			}
 			if (optionButton?.dataset.agentLabel) {
 				event.preventDefault();
 				selectAgent(optionButton.dataset.agentLabel);
@@ -517,6 +534,24 @@ export const createTabController = (options: TabControllerOptions) => {
 			option.append(text);
 			agentMenu.append(option);
 		}
+
+		const customOption = document.createElement('button');
+		customOption.className = 'agent-picker-option agent-picker-option--custom';
+		customOption.type = 'button';
+		customOption.role = 'option';
+		customOption.dataset.customCli = 'true';
+		customOption.setAttribute('aria-selected', 'false');
+
+		const customIcon = document.createElement('span');
+		customIcon.className = 'agent-picker-option-fallback agent-picker-option-custom-icon';
+		customIcon.textContent = '+';
+		customOption.append(customIcon);
+
+		const customText = document.createElement('span');
+		customText.className = 'agent-picker-option-label';
+		customText.textContent = 'Custom CLI';
+		customOption.append(customText);
+		agentMenu.append(customOption);
 
 		if (agents.some((agent) => agent.label === previousValue)) {
 			currentAgentLabel = previousValue;

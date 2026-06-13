@@ -292,6 +292,22 @@ body {
 	pointer-events: none;
 }
 
+.agent-icon-option--custom {
+	color: var(--accent-color);
+}
+
+.agent-icon-plus {
+	width: 24px;
+	height: 24px;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	font-size: 22px;
+	font-weight: 500;
+	line-height: 1;
+	pointer-events: none;
+}
+
 .agent-icon-status {
 	position: absolute;
 	right: 5px;

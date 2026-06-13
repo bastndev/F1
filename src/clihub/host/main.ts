@@ -8,6 +8,7 @@ import { getLauncherWebviewHtml } from './launcher-html';
 import { getWebviewAssetUri } from './webview-assets';
 import { handleWorkspaceListFiles, handleWorkspaceListSkills } from './workspace';
 import { translatePromptToEnglish } from './translation/host-prompt-translator';
+import { resolveCustomCliLaunch, validateCustomCliCommandInput } from './terminal-cli/custom-cli';
 import {
 	ensureSpanishVoice,
 	playSpanishText,
@@ -18,7 +19,7 @@ import {
 import type { VoiceState } from '../shared/voice/voice-types';
 import { checkText as spellCheckText, warmSpellchecker } from './spellcheck/host-spellcheck';
 import { preparePromptForCLI } from './attachments/host-preparer';
-import type { InboundWebviewMessage } from '../shared/protocol';
+import type { CustomCliLaunch, InboundWebviewMessage } from '../shared/protocol';
 import {
 	getAgentLaunchGuardMessage,
 	type AgentLaunchExtensionMode,
@@ -32,6 +33,7 @@ export class CliHubViewProvider implements vscode.WebviewViewProvider, vscode.Di
 	private readonly sessionManager = new CliSessionManager();
 	private readonly launcherStateSessionId = crypto.randomBytes(16).toString('hex');
 	private pendingInitialAgent?: string;
+	private pendingInitialCustomCli?: CustomCliLaunch;
 	private activePromptTranslation?: AbortController;
 	private voiceRequestSeq = 0;
 
@@ -74,11 +76,30 @@ export class CliHubViewProvider implements vscode.WebviewViewProvider, vscode.Di
 				return;
 			}
 
+			if (message.type === 'customCli.open') {
+				const customCli = await this._promptForCustomCliLaunch();
+				if (!customCli) {
+					return;
+				}
+
+				if (message.source === 'launcher') {
+					this.pendingInitialAgent = undefined;
+					this.pendingInitialCustomCli = customCli;
+					webviewView.webview.html = this._getAgentHtmlForWebview(webviewView.webview, customCli.label);
+				} else {
+					this.sessionManager.createCustomSession(customCli);
+				}
+				return;
+			}
+
 			if (message.type === 'cli.ready') {
 				this.sessionManager.attach(webviewView.webview);
 				warmSpellchecker();
 
-				if (this.pendingInitialAgent) {
+				if (this.pendingInitialCustomCli) {
+					this.sessionManager.createCustomSession(this.pendingInitialCustomCli);
+					this.pendingInitialCustomCli = undefined;
+				} else if (this.pendingInitialAgent) {
 					void this.sessionManager.createSession(this.pendingInitialAgent);
 					this.pendingInitialAgent = undefined;
 				} else {
@@ -179,6 +200,28 @@ export class CliHubViewProvider implements vscode.WebviewViewProvider, vscode.Di
 		}
 
 		return 'unknown';
+	}
+
+	private async _promptForCustomCliLaunch() {
+		const command = await vscode.window.showInputBox({
+			title: 'Open Custom CLI',
+			prompt: 'Enter one installed CLI command name. Arguments and shell syntax are blocked.',
+			placeHolder: 'qwen',
+			ignoreFocusOut: true,
+			validateInput: validateCustomCliCommandInput
+		});
+
+		if (command === undefined) {
+			return undefined;
+		}
+
+		const result = await resolveCustomCliLaunch(command);
+		if (!result.ok) {
+			void vscode.window.showWarningMessage(result.message);
+			return undefined;
+		}
+
+		return result.launch;
 	}
 
 	private async _confirmAgentLaunch(agentLabel: string, source: AgentLaunchSource) {

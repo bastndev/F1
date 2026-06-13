@@ -369,6 +369,7 @@ const tabController = createTabController({
 		source: 'panel',
 		extensionMode: 'unknown'
 	})),
+	onCreateCustomCli: () => vscode.postMessage({ type: 'customCli.open', source: 'panel' }),
 	onCycleSession: (offset) => {
 		switchSessionByOffset(offset);
 	},
