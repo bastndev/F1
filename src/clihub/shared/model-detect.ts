@@ -8,12 +8,12 @@
  * ("sonnet", "pro") can't match, and on no match we return undefined so the UI
  * shows nothing rather than a guess.
  *
- * Menu listings are excluded: a CLI's model-picker (e.g. Claude's "/model")
- * prints every available model into the buffer, so "last match wins" would
- * report whatever sits at the bottom of the menu (haiku) even when the user
- * just browsed and pressed Esc. A tight cluster of 3+ DIFFERENT model names
- * is treated as a listing and ignored; explicit confirmations ("set model to
- * fable 5 …") are exempt and always win over menu noise.
+ * Menu listings are excluded two ways: (1) when an agent has stable picker
+ * markers (Claude's "select model" header + "esc to cancel" footer), every
+ * non-confirmation match between them is dropped — this catches pickers whose
+ * wrapped descriptions push items past the cluster gap; (2) as a fallback, a
+ * tight cluster of 3+ DIFFERENT model names is treated as a listing. Explicit
+ * confirmations ("set model to fable 5 …") survive both filters.
  */
 
 type ModelPattern = {
@@ -36,6 +36,12 @@ const agentPatterns: Record<string, ModelPattern[]> = {
 		{
 			pattern: new RegExp(`\\bset model to\\s+(?:claude-)?${claudeFamily}[-\\s](\\d+)(?:[-.](\\d+))?\\b`, 'gi'),
 			format: (m) => (m[3] ? `${m[1]} ${m[2]}.${m[3]}` : `${m[1]} ${m[2]}`),
+			confirmation: true,
+		},
+		// Model menu active item checkmark: "> 6. opus 4.7 ✔"
+		{
+			pattern: new RegExp(`\\b${claudeFamily}\\s+(\\d+(?:\\.\\d+)?)\\s*✔`, 'gi'),
+			format: (m) => `${m[1]} ${m[2]}`,
 			confirmation: true,
 		},
 		// Full model ids: claude-opus-4-8, claude-sonnet-4-6, claude-fable-5
@@ -67,6 +73,17 @@ const agentPatterns: Record<string, ModelPattern[]> = {
 	],
 };
 
+type MenuMarkerPair = { start: RegExp; end: RegExp };
+
+// Stable text markers that bracket an interactive model picker. Anything
+// between a start/end pair is menu chrome, never the active model.
+const agentMenuMarkers: Record<string, MenuMarkerPair> = {
+	claude: {
+		start: /\bselect model\b/i,
+		end: /\besc\s+to\s+cancel\b/i,
+	},
+};
+
 // OSC, CSI, and bare escape sequences — terminal buffers are full of them and
 // they can split a model id ("gpt-\x1b[1m5.1") or hide one inside a title.
 const stripAnsi = (value: string): string =>
@@ -87,6 +104,25 @@ type ModelMatch = {
 	index: number;
 	value: string;
 	confirmation: boolean;
+};
+
+const withGlobalFlag = (re: RegExp): RegExp =>
+	re.flags.includes('g') ? re : new RegExp(re.source, re.flags + 'g');
+
+const findMenuRanges = (text: string, markers: MenuMarkerPair): Array<[number, number]> => {
+	const starts = Array.from(text.matchAll(withGlobalFlag(markers.start)), (m) => m.index ?? 0);
+	const ends = Array.from(text.matchAll(withGlobalFlag(markers.end)), (m) => (m.index ?? 0) + m[0].length);
+
+	const ranges: Array<[number, number]> = [];
+	let endIdx = 0;
+	for (const start of starts) {
+		while (endIdx < ends.length && ends[endIdx] <= start) {
+			endIdx++;
+		}
+		ranges.push([start, endIdx < ends.length ? ends[endIdx] : text.length]);
+		endIdx++;
+	}
+	return ranges;
 };
 
 /**
@@ -146,7 +182,14 @@ export function detectModelName(agentSlug: string, rawBuffer: string): string | 
 	}
 
 	matches.sort((a, b) => a.index - b.index);
-	const surviving = excludeMenuListings(matches);
+
+	const menuMarkers = agentMenuMarkers[agentSlug];
+	const menuRanges = menuMarkers ? findMenuRanges(text, menuMarkers) : [];
+	const insideMenu = (index: number) =>
+		menuRanges.some(([start, end]) => index >= start && index < end);
+	const filtered = matches.filter((m) => m.confirmation || !insideMenu(m.index));
+
+	const surviving = excludeMenuListings(filtered);
 
 	return surviving.length > 0 ? surviving[surviving.length - 1].value : undefined;
 }
