@@ -10,6 +10,7 @@ export function activate(context: vscode.ExtensionContext) {
 		cliHubProvider,
 		vscode.window.registerWebviewViewProvider(CliHubViewProvider.viewType, cliHubProvider),
 		mySkillsProvider,
+		vscode.commands.registerCommand('f1.mySkills.openCreate', () => mySkillsProvider.openCreateView()),
 		vscode.window.registerWebviewViewProvider(
 			MySkillsViewProvider.viewType,
 			mySkillsProvider,

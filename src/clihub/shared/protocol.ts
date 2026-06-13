@@ -48,6 +48,7 @@ export type WebviewToHostMessage =
 	| { type: 'prompt.spellcheck'; id: string; text: string; strict: boolean }
 	| { type: 'workspace.listFiles'; id: string }
 	| { type: 'workspace.listSkills'; id: string }
+	| { type: 'mySkills.openCreate' }
 	| { type: 'voice.speak'; text: string }
 	| { type: 'voice.stop' }
 	| { type: 'voice.query' }

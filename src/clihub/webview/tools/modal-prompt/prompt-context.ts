@@ -17,5 +17,6 @@ export type PromptContext = {
 	preparePromptWithAttachments?: (text: string, attachments: ImageAttachment[]) => Promise<string>;
 	requestWorkspaceFiles?: () => Promise<FileMentionEntry[]>;
 	requestWorkspaceSkills?: () => Promise<WorkspaceSkill[]>;
+	openCreateSkill?: () => void;
 	requestSpellcheck?: (text: string, strict: boolean) => Promise<SpellIssue[]>;
 };

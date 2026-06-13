@@ -123,6 +123,13 @@ export class MySkillsViewProvider implements vscode.WebviewViewProvider {
 		return this._context.globalStorageUri;
 	}
 
+	public async openCreateView() {
+		await vscode.commands.executeCommand('workbench.view.extension.myskills-activity');
+		await vscode.commands.executeCommand(`${MySkillsViewProvider.viewType}.focus`);
+		this._view?.show(false);
+		await this._view?.webview.postMessage({ type: 'switch-tab', target: 'create-panel' });
+	}
+
 	public resolveWebviewView(
 		webviewView: vscode.WebviewView,
 		_context: vscode.WebviewViewResolveContext,

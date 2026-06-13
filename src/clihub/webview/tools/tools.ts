@@ -16,6 +16,7 @@ export type ToolContext = {
 	preparePromptWithAttachments?: (text: string, attachments: ImageAttachment[]) => Promise<string>;
 	requestWorkspaceFiles?: () => Promise<FileMentionEntry[]>;
 	requestWorkspaceSkills?: () => Promise<WorkspaceSkill[]>;
+	openCreateSkill?: () => void;
 	requestSpellcheck?: (text: string, strict: boolean) => Promise<SpellIssue[]>;
 	speakText?: (text: string) => void;
 	stopSpeech?: () => void;
@@ -34,6 +35,7 @@ export type ToolsControllerOptions = {
 	preparePromptWithAttachments?: (text: string, attachments: ImageAttachment[]) => Promise<string>;
 	requestWorkspaceFiles?: () => Promise<FileMentionEntry[]>;
 	requestWorkspaceSkills?: () => Promise<WorkspaceSkill[]>;
+	openCreateSkill?: () => void;
 	requestSpellcheck?: (text: string, strict: boolean) => Promise<SpellIssue[]>;
 	speakText?: (text: string) => void;
 	stopSpeech?: () => void;
@@ -67,6 +69,7 @@ const toolMounts: Record<ToolId, ToolMount> = {
 		preparePromptWithAttachments,
 		requestWorkspaceFiles,
 		requestWorkspaceSkills,
+		openCreateSkill,
 		requestSpellcheck,
 		speakText,
 		stopSpeech,
@@ -139,6 +142,7 @@ const toolMounts: Record<ToolId, ToolMount> = {
 					preparePromptWithAttachments,
 					requestWorkspaceFiles,
 					requestWorkspaceSkills,
+					openCreateSkill,
 					requestSpellcheck,
 					speakText,
 					stopSpeech,

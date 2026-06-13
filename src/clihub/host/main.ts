@@ -138,6 +138,11 @@ export class CliHubViewProvider implements vscode.WebviewViewProvider, vscode.Di
 				return;
 			}
 
+			if (message.type === 'mySkills.openCreate') {
+				await vscode.commands.executeCommand('f1.mySkills.openCreate');
+				return;
+			}
+
 			if (message.type === 'cli.create' && message.agent && allowedAgents.has(message.agent)) {
 				if (!(await this._confirmAgentLaunch(message.agent, 'panel'))) {
 					return;
