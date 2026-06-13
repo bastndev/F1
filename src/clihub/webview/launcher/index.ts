@@ -192,6 +192,7 @@ const setSelectedModel = (model: LauncherModel | undefined, isSearchResult: bool
 	textElement.textContent = model.label;
 	inputContainer.classList.toggle('has-selection', isSearchResult);
 	textElement.classList.toggle('selected-model', isSearchResult);
+	textElement.classList.remove('custom-cli-preview');
 	renderSecondarySuggestions(isSearchResult ? matches : []);
 	syncPreviewIndicator();
 	saveLauncherState();
@@ -217,6 +218,7 @@ const setNoMatch = () => {
 	textElement.textContent = 'No matching CLI';
 	inputContainer.classList.remove('has-selection');
 	textElement.classList.remove('selected-model');
+	textElement.classList.remove('custom-cli-preview');
 	renderSecondarySuggestions([]);
 	syncPreviewIndicator();
 	showInvalidInput();
@@ -229,7 +231,8 @@ const setCustomCliPreview = () => {
 	document.body.removeAttribute('data-agent');
 	textElement.textContent = customCliLabel;
 	inputContainer.classList.add('has-selection');
-	textElement.classList.add('selected-model');
+	textElement.classList.remove('selected-model');
+	textElement.classList.add('custom-cli-preview');
 	renderSecondarySuggestions([]);
 	syncPreviewIndicator();
 	saveLauncherState();
