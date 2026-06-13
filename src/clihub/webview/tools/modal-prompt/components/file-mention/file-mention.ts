@@ -4,6 +4,7 @@ import { fuzzyMatch } from '../../../../../shared/prompt/fuzzy-match';
 
 const stylesId = 'cli-file-mention-styles';
 const mentionAliasMap = new Map<string, string>();
+const maxVisibleItems = 40;
 
 const ensureStyles = () => {
 	if (document.getElementById(stylesId)) { return; }
@@ -59,6 +60,14 @@ export function mountFileMentionPicker(
 	// Cache full workspace list for the lifetime of this prompt panel mount.
 	// Avoids hammering the host with findFiles on every keystroke after "@".
 	let cachedEntries: FileMentionEntry[] | null = null;
+	let filterTimer: number | undefined;
+
+	void requestFiles('').then((files) => {
+		if (!cachedEntries) {
+			cachedEntries = files;
+			files.forEach(registerMentionAlias);
+		}
+	});
 
 	// Portal target: we append the dropdown here (instead of the small textarea wrap)
 	// so it can float freely in the upper area of the whole modal without being
@@ -192,12 +201,13 @@ export function mountFileMentionPicker(
 				return a.entry.name.localeCompare(b.entry.name);
 			});
 
-		entries = scored.map((s) => s.entry);
+		const visible = scored.slice(0, maxVisibleItems);
+		entries = visible.map((s) => s.entry);
 		activeIndex = 0;
 
 		list.replaceChildren();
 
-		if (scored.length === 0) {
+		if (visible.length === 0) {
 			const empty = document.createElement('div');
 			empty.className = 'fm-empty';
 			empty.textContent = 'No files found';
@@ -205,7 +215,7 @@ export function mountFileMentionPicker(
 			return;
 		}
 
-		scored.forEach(({ entry, namePositions }, i) => {
+		visible.forEach(({ entry, namePositions }, i) => {
 			const item = document.createElement('div');
 			item.className = 'fm-item' + (i === 0 ? ' active' : '');
 			item.dataset.index = String(i);
@@ -270,6 +280,7 @@ export function mountFileMentionPicker(
 	};
 
 	const closeDropdown = () => {
+		window.clearTimeout(filterTimer);
 		dropdown?.remove();
 		dropdown = null;
 		mentionStart = -1;
@@ -411,12 +422,16 @@ export function mountFileMentionPicker(
 		}
 
 		if (atPos === -1) {
+			window.clearTimeout(filterTimer);
 			if (dropdown) { closeDropdown(); }
 			return;
 		}
 
 		mentionStart = atPos;
 		currentQuery = value.slice(atPos + 1, caret);
-		void openDropdown(currentQuery);
+		window.clearTimeout(filterTimer);
+		filterTimer = window.setTimeout(() => {
+			void openDropdown(currentQuery);
+		}, 50);
 	});
 }
