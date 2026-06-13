@@ -14,6 +14,7 @@ const claudeModels: Array<{ id: string; label: string }> = [
 	{ id: 'claude-opus-4-7', label: 'opus 4.7' },
 	{ id: 'claude-opus-4-6', label: 'opus 4.6' },
 	{ id: 'claude-sonnet-4-6', label: 'sonnet 4.6' },
+	{ id: 'claude-haiku-4-5', label: 'haiku 4.5' },
 ];
 
 export function updateFooterModel(host: HTMLElement, context: PromptContext, hasActiveSession: boolean) {
