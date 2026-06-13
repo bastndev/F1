@@ -10,6 +10,7 @@ export type ToolId = 'translate' | 'keymaps' | 'prompt' | 'use';
 export type ToolContext = {
 	close: () => void;
 	getActiveSessionId?: () => string | undefined;
+	getActiveSessionCreatedAt?: () => number | undefined;
 	getActiveModelName?: () => string | undefined;
 	sendToActiveSession?: (text: string, options?: { paste?: boolean; submit?: boolean }) => void;
 	translatePrompt?: (request: PromptTranslateRequest) => Promise<PromptTranslateResult>;
@@ -30,6 +31,7 @@ type ToolMount = (host: HTMLElement, context: ToolContext) => void | ToolCleanup
 export type ToolsControllerOptions = {
 	container: HTMLElement;
 	getActiveSessionId?: () => string | undefined;
+	getActiveSessionCreatedAt?: () => number | undefined;
 	getActiveModelName?: () => string | undefined;
 	sendToActiveSession?: (text: string, options?: { paste?: boolean; submit?: boolean }) => void;
 	translatePrompt?: (request: PromptTranslateRequest) => Promise<PromptTranslateResult>;
@@ -65,6 +67,7 @@ const toolMounts: Record<ToolId, ToolMount> = {
 	export const createToolsController = ({
 		container,
 		getActiveSessionId,
+		getActiveSessionCreatedAt,
 		getActiveModelName,
 		sendToActiveSession,
 		translatePrompt,
@@ -146,6 +149,7 @@ const toolMounts: Record<ToolId, ToolMount> = {
 				const cleanup = toolMounts[tool](host, {
 					close,
 					getActiveSessionId,
+					getActiveSessionCreatedAt,
 					getActiveModelName,
 					sendToActiveSession,
 					translatePrompt,

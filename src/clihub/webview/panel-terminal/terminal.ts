@@ -306,6 +306,12 @@ const toolsController = layoutRight
 	? createToolsController({
 			container: layoutRight,
 			getActiveSessionId: () => activeSessionId,
+			getActiveSessionCreatedAt: () => {
+				if (!activeSessionId) {
+					return undefined;
+				}
+				return sessions.get(activeSessionId)?.createdAt;
+			},
 			getActiveModelName: () => {
 				if (!activeSessionId) {
 					return undefined;

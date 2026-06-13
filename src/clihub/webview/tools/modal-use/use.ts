@@ -3,7 +3,7 @@ import useHtml from './components/use.html';
 import type { ToolContext } from '../tools';
 
 const stylesId = 'cli-use-panel-styles';
-const refreshIntervalMs = 700;
+const refreshIntervalMs = 1000;
 
 const ensureStyles = () => {
 	if (document.getElementById(stylesId)) {
@@ -56,21 +56,29 @@ const setStatusDot = (host: HTMLElement, status: string) => {
 	dot.classList.toggle('is-error', status === 'error');
 };
 
+const formatOpenDuration = (createdAt: number | undefined) => {
+	if (!createdAt) {
+		return '--:--:--';
+	}
+
+	const totalSeconds = Math.max(0, Math.floor((Date.now() - createdAt) / 1000));
+	const hours = Math.floor(totalSeconds / 3600);
+	const minutes = Math.floor((totalSeconds % 3600) / 60);
+	const seconds = totalSeconds % 60;
+
+	return [hours, minutes, seconds]
+		.map((part) => String(part).padStart(2, '0'))
+		.join(':');
+};
+
 const renderUseState = (host: HTMLElement, context: ToolContext) => {
 	const agent = getText('cli-terminal-label', 'CLI');
-	const command = getText('cli-terminal-badge', 'none');
-	const { status, workspace } = getStatusParts();
-	const sessionId = context.getActiveSessionId?.() ?? 'none';
-	const modelName = context.getActiveModelName?.() ?? 'unknown';
-	const filterEnabled = document.querySelector<HTMLInputElement>('#cli-prompt-filter-toggle')?.checked === true;
+	const { status } = getStatusParts();
 
 	setText(host, '#useAgentName', agent);
 	setText(host, '#useStatusValue', status);
-	setText(host, '#useSessionId', sessionId === 'none' ? sessionId : sessionId.slice(0, 8));
-	setText(host, '#useModelName', modelName);
-	setText(host, '#useWorkspace', workspace);
-	setText(host, '#useCommand', command);
-	setText(host, '#useFilterState', filterEnabled ? 'on' : 'off');
+	setText(host, '#useOpenFor', formatOpenDuration(context.getActiveSessionCreatedAt?.()));
+	setText(host, '#useTokensLeft', '—');
 	setStatusDot(host, status);
 };
 
