@@ -44,6 +44,10 @@ const visualSleepSessionThreshold = 3;
 const maxWebviewBufferLength = 240000;
 const promptFilterClickMoveThreshold = 6;
 const clipboardPollIntervalMs = 800;
+const defaultSubmitDelayMs = 150;
+const slowPasteSubmitDelayMs = 750;
+const kiroFileMentionSubmitDelayMs = 2200;
+const routeSubmitSecondEnterDelayMs = 650;
 let activeSessionId: string | undefined;
 let pendingTabSwitchSessionId: string | undefined;
 let isPromptFilterEnabled = false;
@@ -155,6 +159,26 @@ const switchSessionByOffset = (offset: 1 | -1) => {
 	pendingTabSwitchSessionId = nextSessionId;
 	vscode.postMessage({ type: 'cli.switch', sessionId: nextSessionId });
 	return true;
+};
+
+const hasRouteMention = (text: string) => /(^|\s)@\S+/.test(text);
+
+const getSubmitDelayMs = (agentSlug: string, text: string) => {
+	const hasFileMention = hasRouteMention(text);
+
+	if (agentSlug === 'copilot') {
+		return slowPasteSubmitDelayMs;
+	}
+
+	if (agentSlug === 'kiro' && hasFileMention) {
+		return kiroFileMentionSubmitDelayMs;
+	}
+
+	if (hasFileMention) {
+		return slowPasteSubmitDelayMs;
+	}
+
+	return defaultSubmitDelayMs;
 };
 
 // ── Host round-trips ─────────────────────────────────────────────────
@@ -325,13 +349,22 @@ const toolsController = layoutRight
 				if (options?.submit) {
 					// Enter must arrive as its own write or TUI CLIs treat it as part
 					// of the paste. Copilot digests pastes noticeably slower than the
-					// rest, so it gets a longer pause before the keypress.
+					// rest. Route mentions are special in most CLI TUIs: the first
+					// Enter commits/accepts the @file/@folder context, the next one
+					// submits the completed prompt.
 					const agentSlug = getAgentSlug(session.label);
-					const hasFileMention = /(^|\s)@\S+/.test(text);
-					const delay = agentSlug === 'copilot' || (agentSlug === 'kiro' && hasFileMention) ? 750 : 150;
-					setTimeout(() => {
+					const delay = getSubmitDelayMs(agentSlug, text);
+					const enterData = view?.terminal.modes.sendFocusMode ? '\x1b[I\r' : '\r';
+					const needsRouteSubmitConfirm = hasRouteMention(text);
+					const postEnter = () => {
 						if (sessions.get(sessionId)?.status === 'running') {
-							vscode.postMessage({ type: 'cli.input', sessionId, data: '\r' });
+							vscode.postMessage({ type: 'cli.input', sessionId, data: enterData });
+						}
+					};
+					setTimeout(() => {
+						postEnter();
+						if (needsRouteSubmitConfirm) {
+							setTimeout(postEnter, routeSubmitSecondEnterDelayMs);
 						}
 					}, delay);
 				}
