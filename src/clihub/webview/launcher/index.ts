@@ -389,11 +389,7 @@ const renderIconPalette = () => {
 	plus.className = 'agent-icon-plus';
 	plus.textContent = '+';
 
-	const status = document.createElement('span');
-	status.className = 'agent-icon-status';
-	status.textContent = 'Custom';
-
-	customOption.append(plus, status);
+	customOption.append(plus);
 	customOption.addEventListener('click', openCustomCli);
 	customOption.addEventListener('focus', setCustomCliPreview);
 	customOption.addEventListener('keydown', (event) => handlePaletteOptionKeydown(event, customOption, openCustomCli));
