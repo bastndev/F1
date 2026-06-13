@@ -37,6 +37,7 @@ type TerminalView = {
 declare const acquireVsCodeApi: () => VsCodeApi;
 
 const vscode = acquireVsCodeApi();
+const customCliIconLabel = '__custom-cli__';
 const sessions = new Map<string, CliSession>();
 const terminals = new Map<string, TerminalView>();
 const visualSleepSessionThreshold = 3;
@@ -78,6 +79,9 @@ const parseAgentIcons = () => {
 };
 
 const agentIcons = parseAgentIcons();
+const getAgentIcon = (label: string) => {
+	return agentIcons.get(label) ?? agentIcons.get(customCliIconLabel);
+};
 const layoutRight = document.querySelector<HTMLElement>('.layout-right');
 const terminalStack = document.getElementById('cli-terminal-stack') as HTMLDivElement;
 const terminalLabel = document.getElementById('cli-terminal-label') as HTMLDivElement;
@@ -364,7 +368,7 @@ const copyToTranslate = createCopyToTranslateWatcher({
 });
 
 const tabController = createTabController({
-	getAgentIcon: (label) => agentIcons.get(label),
+	getAgentIcon,
 	onCreate: (agent) => vscode.postMessage(createCliCreateMessage(agent, {
 		source: 'panel',
 		extensionMode: 'unknown'

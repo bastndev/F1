@@ -49,7 +49,10 @@ export class CliHubViewProvider implements vscode.WebviewViewProvider, vscode.Di
 	) {
 		webviewView.webview.options = {
 			enableScripts: true,
-			localResourceRoots: [getWebviewAssetUri(this._extensionUri)]
+			localResourceRoots: [
+				getWebviewAssetUri(this._extensionUri),
+				vscode.Uri.joinPath(this._extensionUri, 'src', 'shared', 'assets')
+			]
 		};
 
 		webviewView.webview.html = await this._getHtmlForWebview(webviewView.webview);
