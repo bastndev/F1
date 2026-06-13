@@ -297,6 +297,11 @@ export const createTabController = (options: TabControllerOptions) => {
 		if (matchesShortcut(event, 'togglePromptFilter')) {
 			if (consumeShortcut(event, 'togglePromptFilter')) {
 				togglePromptFilter();
+				if (isPromptFilterEnabled) {
+					options.onOpenTool?.('prompt');
+				} else {
+					dismissToolModal();
+				}
 				return true;
 			}
 		}

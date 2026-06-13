@@ -387,6 +387,9 @@ const tabController = createTabController({
 	},
 	onPromptFilterChange: (enabled) => {
 		isPromptFilterEnabled = enabled;
+		if (!enabled && activeSessionId) {
+			terminals.get(activeSessionId)?.terminal.focus();
+		}
 	},
 	getOpenToolModal: () => toolsController?.getOpenTool() ?? null
 });
