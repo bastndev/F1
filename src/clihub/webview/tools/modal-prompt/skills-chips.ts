@@ -8,7 +8,13 @@
  * Chips show numbered badges (#1, #2) that update as selection order changes.
  * A footer legend "skills: #1 cavecrew · #2 nido" appears when any are active.
  */
-import { buildSkillsToken, type WorkspaceSkill } from '../../../shared/prompt';
+import {
+	buildSkillsToken,
+	skillsTokenPattern,
+	skillsTokenPresencePattern,
+	skillsTokenWithOptionalTrailingSpacePattern,
+	type WorkspaceSkill
+} from '../../../shared/prompt';
 import type { PromptContext } from './prompt-context';
 
 // The active CLI decides which skills folder a route should prefer. Same
@@ -71,12 +77,12 @@ export function initSkillsChips(
 			updatingToken = true;
 			try {
 				// Match compact formats (/skill, /skills #N) and legacy bracket format
-				const hasToken = /\/skills #\d+|\/skill(?!s)|\[Skills? #[^\]]+\]/.test(textarea.value);
+				const hasToken = skillsTokenPresencePattern.test(textarea.value);
 
 				if (selected.length === 0) {
 					if (hasToken) {
 						textarea.value = textarea.value
-							.replace(/\/skills #\d+ ?|\/skill(?!s) ?|\[Skills? #[^\]]+\] ?/g, '')
+							.replace(skillsTokenWithOptionalTrailingSpacePattern, '')
 							.trimStart();
 						textarea.dispatchEvent(new Event('input', { bubbles: true }));
 					}
@@ -84,11 +90,12 @@ export function initSkillsChips(
 					const newToken = buildSkillsToken(selected.length);
 					if (hasToken) {
 						textarea.value = textarea.value
-							.replace(/\/skills #\d+|\/skill(?!s)|\[Skills? #[^\]]+\]/g, newToken);
+							.replace(skillsTokenPattern, newToken);
 					} else {
 						const current = textarea.value;
-						textarea.value = current ? `${newToken} ${current}` : newToken;
+						textarea.value = current ? `${newToken} ${current}` : `${newToken} `;
 					}
+					textarea.setSelectionRange(textarea.value.length, textarea.value.length);
 					textarea.dispatchEvent(new Event('input', { bubbles: true }));
 				}
 
@@ -150,9 +157,9 @@ export function initSkillsChips(
 
 		// Strip any stale skills token from a restored draft — the token
 		// doesn't encode skill names, so selection can't be reconstructed.
-		if (/\/skills #\d+|\/skill(?!s)|\[Skills? #[^\]]+\]/.test(textarea.value)) {
+		if (skillsTokenPresencePattern.test(textarea.value)) {
 			textarea.value = textarea.value
-				.replace(/\/skills #\d+ ?|\/skill(?!s) ?|\[Skills? #[^\]]+\] ?/g, '')
+				.replace(skillsTokenWithOptionalTrailingSpacePattern, '')
 				.trimStart();
 			textarea.dispatchEvent(new Event('input', { bubbles: true }));
 		}
@@ -163,7 +170,7 @@ export function initSkillsChips(
 			if (updatingToken) {
 				return;
 			}
-			if (selected.length > 0 && !/\/skills #\d+|\/skill(?!s)/.test(textarea.value)) {
+			if (selected.length > 0 && !skillsTokenPresencePattern.test(textarea.value)) {
 				selected.length = 0;
 				onSelectionChange([]);
 				sync();

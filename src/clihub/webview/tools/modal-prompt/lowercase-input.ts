@@ -7,6 +7,16 @@
 import { shouldCollapsePaste } from '../../../shared/prompt';
 import { imagePathPattern } from './attachments-ui';
 
+const isSentenceStartAfterPrefix = (value: string, start: number, end: number) => {
+	const before = value.slice(0, start);
+	const after = value.slice(end);
+	const noWordAfterSelection = after.trimStart() === after;
+	const isAbsoluteStart = start === 0 && before === '';
+	const isAfterLeadingSkillToken = /^(?:\/skills #\d+|\/skill(?!s))\s+$/.test(before);
+
+	return noWordAfterSelection && (isAbsoluteStart || isAfterLeadingSkillToken);
+};
+
 export function enforceLowercaseInput(textarea: HTMLTextAreaElement) {
 	textarea.addEventListener('keydown', (e) => {
 		if (e.key.length === 1 && /[a-zA-Z]/.test(e.key)) {
@@ -20,8 +30,9 @@ export function enforceLowercaseInput(textarea: HTMLTextAreaElement) {
 			if (e.shiftKey) {
 				char = e.key.toUpperCase();
 			} else {
-				// Auto-capitalize first character; force lowercase elsewhere (defeats Caps Lock)
-				const isFirstChar = start === 0 && textarea.value.slice(0, start) === '' && textarea.value.slice(end).trimStart() === textarea.value.slice(end);
+				// Auto-capitalize the first user-written character; a leading
+				// /skill token is only a prefix and should not force lowercase.
+				const isFirstChar = isSentenceStartAfterPrefix(textarea.value, start, end);
 				char = isFirstChar ? e.key.toUpperCase() : e.key.toLowerCase();
 			}
 			textarea.value = textarea.value.slice(0, start) + char + textarea.value.slice(end);

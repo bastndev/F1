@@ -7,7 +7,7 @@
  * textarea is transparent (text + bg) so the overlay content shows, but the
  * caret is still rendered by the textarea on top (using caret-color).
  */
-import type { SpellIssue } from '../../../shared/prompt';
+import { skillsTokenPattern, type SpellIssue } from '../../../shared/prompt';
 
 export function updatePromptImageHighlight(
 	wrap: HTMLElement,
@@ -57,7 +57,7 @@ function buildPromptHighlightNodes(text: string, selStart: number = -1, selEnd: 
 		tokens.push({ start: match.index ?? 0, end: (match.index ?? 0) + match[0].length, kind });
 	}
 	// Skill token: /skill (×1) or /skills #N (×N) — expanded into skill instructions on send.
-	for (const match of text.matchAll(/\/skills #\d+|\/skill(?!s)/g)) {
+	for (const match of text.matchAll(skillsTokenPattern)) {
 		tokens.push({ start: match.index ?? 0, end: (match.index ?? 0) + match[0].length, kind: 'skill' });
 	}
 	// Numbered-list prefixes: 1. / 2. / 3. at the start of a line.
