@@ -42,6 +42,27 @@ const setHidden = (host: HTMLElement, selector: string, hidden: boolean) => {
 
 const stripAnsi = (value: string) => value.replace(/\x1b\[[0-9;?]*[ -/]*[@-~]/g, '');
 
+type UsageAgentKind = 'claude' | 'kiro';
+
+type UsageBar = {
+	label: string;
+	percent: number;
+	detail?: string;
+};
+
+type UsageMetric = {
+	label: string;
+	value: string;
+};
+
+type ParsedUsage = {
+	title: string;
+	summary: string;
+	bars: UsageBar[];
+	metrics: UsageMetric[];
+	note?: string;
+};
+
 const getStatusParts = () => {
 	const statusLine = getText('cli-terminal-status', 'No active session');
 	const separator = ' - ';
@@ -58,20 +79,96 @@ const getStatusParts = () => {
 
 const getActiveAgentLabel = () => getText('cli-terminal-label', 'CLI');
 
+const getUsageAgentKind = (agentLabel: string): UsageAgentKind | undefined => {
+	const lower = agentLabel.toLowerCase();
+	if (lower.includes('claude')) {
+		return 'claude';
+	}
+	if (lower.includes('kiro')) {
+		return 'kiro';
+	}
+	return undefined;
+};
+
 const getUsageCommandLabel = (agentLabel: string) => (
-	agentLabel.toLowerCase().includes('kiro') ? '/usage' : 'not configured'
+	getUsageAgentKind(agentLabel) ? '/usage' : 'not configured'
 );
 
-const parseKiroUsage = (raw: string) => {
+const clampPercent = (value: number) => (
+	Number.isFinite(value) ? Math.max(0, Math.min(100, value)) : 0
+);
+
+const parsePercent = (value: string | undefined) => clampPercent(Number(value ?? NaN));
+
+const formatPercent = (value: number) => `${clampPercent(value).toFixed(1)}%`;
+
+const getSection = (text: string, start: RegExp, end: RegExp) => {
+	const startMatch = start.exec(text);
+	if (!startMatch) {
+		return '';
+	}
+
+	const rest = text.slice(startMatch.index + startMatch[0].length);
+	const endMatch = end.exec(rest);
+	return (endMatch ? rest.slice(0, endMatch.index) : rest).trim();
+};
+
+const parseKiroUsage = (raw: string): ParsedUsage => {
 	const text = stripAnsi(raw);
-	const plan = text.match(/resets on\s+[0-9-]+\s*\|\s*([^\r\n]+)/i)?.[1]?.trim() ?? 'kiro';
+	const plan = text.match(/resets on\s+[0-9-]+\s*\|\s*([^\r\n]+)/i)?.[1]?.trim() ?? 'Kiro usage';
 	const reset = text.match(/resets on\s+([0-9-]+)/i)?.[1]?.trim() ?? 'unknown';
 	const credits = text.match(/credits\s*\(([^)]+)\)/i)?.[1]?.trim() ?? 'unknown';
-	const percentValue = Number(text.match(/(\d+(?:\.\d+)?)\s*%/)?.[1] ?? NaN);
-	const percent = Number.isFinite(percentValue) ? Math.max(0, Math.min(100, percentValue)) : 0;
+	const percent = parsePercent(text.match(/(\d+(?:\.\d+)?)\s*%/)?.[1]);
 	const overages = text.match(/overages:\s*([^\r\n]+)/i)?.[1]?.trim() ?? 'unknown';
 
-	return { plan, reset, credits, percent, overages };
+	return {
+		title: plan,
+		summary: formatPercent(percent),
+		bars: [
+			{ label: 'Usage', percent, detail: `resets ${reset}` }
+		],
+		metrics: [
+			{ label: 'credits', value: credits },
+			{ label: 'resets', value: reset },
+			{ label: 'overages', value: overages }
+		],
+		note: 'This CLI currently reports a single usage window.'
+	};
+};
+
+const parseClaudeUsage = (raw: string): ParsedUsage => {
+	const text = stripAnsi(raw);
+	const sessionSection = getSection(text, /current session/i, /current week|what's contributing|usage credits|$|est\. to cancel/i);
+	const weekSection = getSection(text, /current week[^\r\n]*/i, /what's contributing|usage credits|$|est\. to cancel/i);
+	const sessionPercent = parsePercent(sessionSection.match(/(\d+(?:\.\d+)?)\s*%\s*used/i)?.[1]);
+	const weekPercent = parsePercent(weekSection.match(/(\d+(?:\.\d+)?)\s*%\s*used/i)?.[1]);
+	const sessionReset = sessionSection.match(/resets\s+([^\r\n]+)/i)?.[1]?.trim() ?? 'unknown';
+	const weekReset = weekSection.match(/resets\s+([^\r\n]+)/i)?.[1]?.trim() ?? 'unknown';
+
+	return {
+		title: 'Claude usage',
+		summary: `${formatPercent(weekPercent)} week`,
+		bars: [
+			{ label: 'Current session', percent: sessionPercent, detail: `resets ${sessionReset}` },
+			{ label: 'Current week', percent: weekPercent, detail: `resets ${weekReset}` }
+		],
+		metrics: [
+			{ label: 'session', value: `${formatPercent(sessionPercent)} used` },
+			{ label: 'session reset', value: sessionReset },
+			{ label: 'week reset', value: weekReset }
+		]
+	};
+};
+
+const parseUsage = (snapshot: CliUsageSnapshot): ParsedUsage | undefined => {
+	const kind = getUsageAgentKind(snapshot.agentLabel);
+	if (kind === 'claude') {
+		return parseClaudeUsage(snapshot.raw);
+	}
+	if (kind === 'kiro') {
+		return parseKiroUsage(snapshot.raw);
+	}
+	return undefined;
 };
 
 const renderUsageMessage = (host: HTMLElement, title: string, detail: string) => {
@@ -81,6 +178,57 @@ const renderUsageMessage = (host: HTMLElement, title: string, detail: string) =>
 	setText(host, '#useUsageMessageDetail', detail);
 };
 
+const createUsageBar = (bar: UsageBar) => {
+	const item = document.createElement('div');
+	item.className = 'use-usage-bar-item';
+
+	const header = document.createElement('div');
+	header.className = 'use-usage-bar-head';
+
+	const label = document.createElement('strong');
+	label.textContent = bar.label;
+	label.title = bar.label;
+
+	const value = document.createElement('span');
+	value.textContent = `${formatPercent(bar.percent)} used`;
+	value.title = value.textContent;
+
+	header.append(label, value);
+
+	const track = document.createElement('div');
+	track.className = 'use-usage-bar';
+	track.setAttribute('aria-hidden', 'true');
+
+	const fill = document.createElement('span');
+	fill.style.width = `${clampPercent(bar.percent)}%`;
+	track.append(fill);
+
+	item.append(header, track);
+
+	if (bar.detail) {
+		const detail = document.createElement('div');
+		detail.className = 'use-usage-bar-detail';
+		detail.textContent = bar.detail;
+		detail.title = bar.detail;
+		item.append(detail);
+	}
+
+	return item;
+};
+
+const createUsageMetric = (metric: UsageMetric) => {
+	const item = document.createElement('div');
+	const label = document.createElement('span');
+	const value = document.createElement('strong');
+
+	label.textContent = metric.label;
+	value.textContent = metric.value;
+	value.title = metric.value;
+	item.append(label, value);
+
+	return item;
+};
+
 const renderUsageSnapshot = (host: HTMLElement, snapshot: CliUsageSnapshot | undefined) => {
 	if (!snapshot) {
 		const agent = getActiveAgentLabel();
@@ -88,23 +236,32 @@ const renderUsageSnapshot = (host: HTMLElement, snapshot: CliUsageSnapshot | und
 		return;
 	}
 
-	if (!snapshot.agentLabel.toLowerCase().includes('kiro')) {
+	const parsed = parseUsage(snapshot);
+	if (!parsed) {
 		renderUsageMessage(host, 'Not configured', snapshot.agentLabel);
 		return;
 	}
 
-	const parsed = parseKiroUsage(snapshot.raw);
 	setHidden(host, '#useUsageMessage', true);
 	setHidden(host, '#useUsageResult', false);
-	setText(host, '#useUsagePlan', parsed.plan);
-	setText(host, '#useUsageCredits', parsed.credits);
-	setText(host, '#useUsagePercent', `${parsed.percent.toFixed(1)}%`);
-	setText(host, '#useUsageReset', parsed.reset);
-	setText(host, '#useUsageOverages', parsed.overages);
+	setText(host, '#useUsageTitle', parsed.title);
+	setText(host, '#useUsageSummary', parsed.summary);
 
-	const bar = host.querySelector<HTMLElement>('#useUsageBar');
-	if (bar) {
-		bar.style.width = `${parsed.percent}%`;
+	const bars = host.querySelector<HTMLElement>('#useUsageBars');
+	if (bars) {
+		bars.replaceChildren(...parsed.bars.map(createUsageBar));
+	}
+
+	const note = host.querySelector<HTMLElement>('#useUsageNote');
+	if (note) {
+		note.hidden = !parsed.note;
+		note.textContent = parsed.note ?? '';
+		note.title = parsed.note ?? '';
+	}
+
+	const meta = host.querySelector<HTMLElement>('#useUsageMeta');
+	if (meta) {
+		meta.replaceChildren(...parsed.metrics.map(createUsageMetric));
 	}
 };
 

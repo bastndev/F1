@@ -295,7 +295,7 @@
 	min-width: 0;
 	display: flex;
 	flex-direction: column;
-	gap: 8px;
+	gap: 10px;
 }
 
 .use-usage-result[hidden],
@@ -327,11 +327,75 @@
 	font-family: var(--vscode-editor-font-family, ui-monospace, monospace);
 }
 
+.use-usage-bars {
+	min-width: 0;
+	display: flex;
+	flex-direction: column;
+	gap: 9px;
+}
+
+.use-usage-bar-item {
+	min-width: 0;
+	display: flex;
+	flex-direction: column;
+	gap: 5px;
+}
+
+.use-usage-bar-head {
+	min-width: 0;
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 10px;
+}
+
+.use-usage-bar-head strong,
+.use-usage-bar-head span {
+	min-width: 0;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+	font-size: 11px;
+	line-height: 1.2;
+}
+
+.use-usage-bar-head strong {
+	color: var(--vscode-foreground);
+	font-weight: 600;
+}
+
+.use-usage-bar-head span,
+.use-usage-bar-detail,
+.use-usage-note {
+	color: var(--vscode-descriptionForeground, rgba(128, 128, 128, 0.72));
+	font-family: var(--vscode-editor-font-family, ui-monospace, monospace);
+}
+
+.use-usage-bar-detail,
+.use-usage-note {
+	min-width: 0;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+	font-size: 10px;
+	line-height: 1.25;
+}
+
+.use-usage-note {
+	border-top: 1px solid var(--vscode-editorGroup-border, rgba(128, 128, 128, 0.16));
+	padding-top: 2px;
+	color: color-mix(in srgb, var(--vscode-descriptionForeground, rgba(128, 128, 128, 0.72)) 82%, transparent);
+}
+
+.use-usage-note[hidden] {
+	display: none;
+}
+
 .use-usage-bar {
-	height: 8px;
+	height: 7px;
 	border-radius: 999px;
 	overflow: hidden;
-	background: var(--vscode-editorGroup-border, rgba(128, 128, 128, 0.18));
+	background: color-mix(in srgb, var(--vscode-editorGroup-border, rgba(128, 128, 128, 0.18)) 82%, transparent);
 }
 
 .use-usage-bar span {
@@ -339,7 +403,13 @@
 	width: 0%;
 	height: 100%;
 	border-radius: inherit;
-	background: linear-gradient(90deg, #f472b6, #c084fc);
+	background: linear-gradient(
+		90deg,
+		color-mix(in srgb, var(--agent-accent, #AFA9EC) 70%, #ffffff 18%),
+		var(--agent-accent, #AFA9EC),
+		color-mix(in srgb, var(--agent-accent, #AFA9EC) 72%, #000000 16%)
+	);
+	box-shadow: 0 0 12px color-mix(in srgb, var(--agent-accent, #AFA9EC) 34%, transparent);
 	transition: width 180ms ease;
 }
 

@@ -52,6 +52,7 @@ const usageRequestSettleDelayMs = 900;
 const usageRequestTimeoutMs = 7000;
 const usageDismissSecondEscapeDelayMs = 80;
 const usageCommandsByAgentSlug: Record<string, string> = {
+	claude: '/usage',
 	kiro: '/usage'
 };
 let activeSessionId: string | undefined;
