@@ -479,10 +479,9 @@
 }
 
 /* === Image marker highlighting for the prompt chat ===
-   We use an overlay div (.prompt-textarea-highlight) behind the textarea
-   so we can style substrings like [Image #1] with a distinct bg + rounded border.
-   The textarea text is made transparent (caret stays visible) so the highlighted
-   version in the overlay shows through.
+   The textarea paints regular text and the real caret. The highlight overlay
+   floats above it only for token styling, so textarea-native wrapping cannot
+   move the visible caret behind long wrapped text.
    Only a little rounded border as requested ("solo un poco").
    Mode aware: white bg + dark text in dark mode; black bg + light text in light mode.
 */
@@ -508,9 +507,10 @@
   word-break: normal;
   overflow: hidden;
   pointer-events: none;
-  z-index: 0;
-  color: var(--vscode-input-foreground);
-  /* highlight only paints the text (plain + markers), no bg/border here - provided by wrap */
+  z-index: 2;
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+  /* Plain mirrored text stays invisible; token spans opt back into their original styling. */
   background: transparent;
   border: none;
   border-radius: 0;
@@ -519,7 +519,7 @@
 }
 
 .prompt-textarea {
-  color: transparent; /* regular text is drawn by the highlight overlay; caret remains */
+  color: var(--vscode-input-foreground);
   caret-color: var(--vscode-input-foreground);
   background: transparent;
   border: none;
@@ -527,6 +527,18 @@
   position: relative;
   z-index: 1;
   /* padding, font etc still come from the base .prompt-textarea rule above */
+}
+
+.prompt-textarea-highlight .prompt-image-marker,
+.prompt-textarea-highlight .prompt-paste-code,
+.prompt-textarea-highlight .prompt-paste-text,
+.prompt-textarea-highlight .prompt-skill-marker,
+.prompt-textarea-highlight .prompt-numbered-list,
+.prompt-textarea-highlight .prompt-mention,
+.prompt-textarea-highlight .prompt-mention-folder,
+.prompt-textarea-highlight .selected,
+.prompt-textarea-highlight .selected span {
+  -webkit-text-fill-color: currentColor;
 }
 
 .prompt-textarea-highlight .prompt-image-marker {
