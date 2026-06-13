@@ -149,7 +149,7 @@ const renderUseState = (host: HTMLElement, context: ToolContext) => {
 	const agent = getText('cli-terminal-label', 'CLI');
 	const { status } = getStatusParts();
 
-	setText(host, '#useAgentName', agent);
+	setText(host, '#useModalTitle', agent);
 	setText(host, '#useStatusValue', status);
 	setText(host, '#useOpenFor', formatOpenDuration(context.getActiveSessionCreatedAt?.()));
 	setStatusDot(host, status);

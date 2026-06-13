@@ -10,6 +10,7 @@
 	color: var(--vscode-foreground);
 	font-family: var(--vscode-font-family);
 	font-size: 13px;
+	text-transform: none;
 	box-shadow: 0 14px 44px rgba(0, 0, 0, 0.45);
 	overflow: hidden;
 }
