@@ -741,8 +741,9 @@
 
 	.agent-tools-popover {
 		z-index: 100;
-		top: 37px;
+		top: 46px;
 		right: 10px;
+		padding: 7px 0;
 	}
 
 	.agent-picker-menu {

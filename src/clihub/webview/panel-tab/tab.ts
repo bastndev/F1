@@ -20,7 +20,7 @@ export type CliSessionSummary = {
 
 import { consumeShortcut, matchesShortcut } from '../keymaps';
 
-export type CliToolId = 'translate' | 'keymaps' | 'prompt';
+export type CliToolId = 'translate' | 'keymaps' | 'prompt' | 'use';
 
 type TabControllerOptions = {
 	getAgentIcon: (label: string) => CliAgentIcon | undefined;
@@ -326,6 +326,12 @@ export const createTabController = (options: TabControllerOptions) => {
 				return true;
 			}
 		}
+		if (matchesShortcut(event, 'openUse')) {
+			if (consumeShortcut(event, 'openUse')) {
+				options.onOpenTool?.('use');
+				return true;
+			}
+		}
 
 		const action = getShortcutAction(event);
 		if (!action) {
@@ -456,7 +462,7 @@ export const createTabController = (options: TabControllerOptions) => {
 		const target = event.target instanceof HTMLElement ? event.target : null;
 		const toolButton = target?.closest<HTMLButtonElement>('[data-tool]');
 		const tool = toolButton?.dataset.tool;
-		if (tool === 'translate' || tool === 'keymaps' || tool === 'prompt') {
+		if (tool === 'translate' || tool === 'keymaps' || tool === 'prompt' || tool === 'use') {
 			setToolsPopoverOpen(false);
 			options.onOpenTool?.(tool);
 		}

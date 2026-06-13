@@ -3,8 +3,9 @@ import { mountPromptPanel } from './modal-prompt/prompt';
 import type { ImageAttachment, PromptTranslateRequest, PromptTranslateResult, FileMentionEntry, SpellIssue, WorkspaceSkill } from '../../shared/prompt';
 import type { VoiceState } from '../../shared/voice/voice-types';
 import { mountTranslatorPanel } from './modal-translator/translator';
+import { mountUsePanel } from './modal-use/use';
 
-export type ToolId = 'translate' | 'keymaps' | 'prompt';
+export type ToolId = 'translate' | 'keymaps' | 'prompt' | 'use';
 
 export type ToolContext = {
 	close: () => void;
@@ -57,7 +58,8 @@ const applyStyles = (element: HTMLElement, styles: Partial<CSSStyleDeclaration>)
 const toolMounts: Record<ToolId, ToolMount> = {
 	keymaps: mountKeymapsPanel,
 	prompt: mountPromptPanel,
-	translate: mountTranslatorPanel
+	translate: mountTranslatorPanel,
+	use: mountUsePanel
 };
 
 	export const createToolsController = ({
