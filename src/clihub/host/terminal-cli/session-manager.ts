@@ -128,6 +128,17 @@ export class CliSessionManager implements vscode.Disposable {
 		}
 	}
 
+	public hasRunningSessionForAgent(agentLabel: string) {
+		const expectedLabel = getCliAgent(agentLabel)?.label || agentLabel;
+		for (const session of this.sessions.values()) {
+			if (session.label === expectedLabel && session.status === 'running' && !session.closing) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+
 	private startPtyHost(session: CliSession, command: string, args: string[]) {
 		const host = childProcess.spawn(process.env.CLIHUB_NODE_PATH || 'node', [getPtyHostPath()], {
 			cwd: session.cwd,
