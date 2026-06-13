@@ -7,11 +7,21 @@ import { mountUsePanel } from './modal-use/use';
 
 export type ToolId = 'translate' | 'keymaps' | 'prompt' | 'use';
 
+export type CliUsageSnapshot = {
+	sessionId: string;
+	agentLabel: string;
+	command: string;
+	raw: string;
+	requestedAt: number;
+};
+
 export type ToolContext = {
 	close: () => void;
 	getActiveSessionId?: () => string | undefined;
 	getActiveSessionCreatedAt?: () => number | undefined;
 	getActiveModelName?: () => string | undefined;
+	getUsageSnapshot?: () => CliUsageSnapshot | undefined;
+	requestUsage?: () => Promise<CliUsageSnapshot>;
 	sendToActiveSession?: (text: string, options?: { paste?: boolean; submit?: boolean }) => void;
 	translatePrompt?: (request: PromptTranslateRequest) => Promise<PromptTranslateResult>;
 	getTerminalSelection?: () => string;
@@ -33,6 +43,8 @@ export type ToolsControllerOptions = {
 	getActiveSessionId?: () => string | undefined;
 	getActiveSessionCreatedAt?: () => number | undefined;
 	getActiveModelName?: () => string | undefined;
+	getUsageSnapshot?: () => CliUsageSnapshot | undefined;
+	requestUsage?: () => Promise<CliUsageSnapshot>;
 	sendToActiveSession?: (text: string, options?: { paste?: boolean; submit?: boolean }) => void;
 	translatePrompt?: (request: PromptTranslateRequest) => Promise<PromptTranslateResult>;
 	getTerminalSelection?: () => string;
@@ -64,107 +76,111 @@ const toolMounts: Record<ToolId, ToolMount> = {
 	use: mountUsePanel
 };
 
-	export const createToolsController = ({
-		container,
-		getActiveSessionId,
-		getActiveSessionCreatedAt,
-		getActiveModelName,
-		sendToActiveSession,
-		translatePrompt,
-		getTerminalSelection,
-		preparePromptWithAttachments,
-		requestWorkspaceFiles,
-		requestWorkspaceSkills,
-		openCreateSkill,
-		requestSpellcheck,
-		speakText,
-		stopSpeech,
-		queryVoiceState,
-		onVoiceState
-	}: ToolsControllerOptions) => {
-		let activeModal: HTMLElement | null = null;
-		let currentTool: ToolId | null = null;
-		let activeCleanup: ToolCleanup | null = null;
-	
-		const close = () => {
-			document.removeEventListener('keydown', handleKeyDown);
-			const closingTool = currentTool;
-			activeCleanup?.();
-			activeCleanup = null;
-			if (closingTool === 'translate') {
-				stopSpeech?.();
-			}
-			activeModal?.replaceChildren();
-			activeModal?.remove();
-			activeModal = null;
-			currentTool = null;
-		};
-	
-		const handleKeyDown = (event: KeyboardEvent) => {
-			if (event.key === 'Escape') {
-				event.preventDefault();
+export const createToolsController = ({
+	container,
+	getActiveSessionId,
+	getActiveSessionCreatedAt,
+	getActiveModelName,
+	getUsageSnapshot,
+	requestUsage,
+	sendToActiveSession,
+	translatePrompt,
+	getTerminalSelection,
+	preparePromptWithAttachments,
+	requestWorkspaceFiles,
+	requestWorkspaceSkills,
+	openCreateSkill,
+	requestSpellcheck,
+	speakText,
+	stopSpeech,
+	queryVoiceState,
+	onVoiceState
+}: ToolsControllerOptions) => {
+	let activeModal: HTMLElement | null = null;
+	let currentTool: ToolId | null = null;
+	let activeCleanup: ToolCleanup | null = null;
+
+	const close = () => {
+		document.removeEventListener('keydown', handleKeyDown);
+		const closingTool = currentTool;
+		activeCleanup?.();
+		activeCleanup = null;
+		if (closingTool === 'translate') {
+			stopSpeech?.();
+		}
+		activeModal?.replaceChildren();
+		activeModal?.remove();
+		activeModal = null;
+		currentTool = null;
+	};
+
+	const handleKeyDown = (event: KeyboardEvent) => {
+		if (event.key === 'Escape') {
+			event.preventDefault();
+			close();
+		}
+	};
+
+	const open = (tool: ToolId) => {
+		close();
+
+		const modal = document.createElement('div');
+		modal.id = modalId;
+		modal.setAttribute('role', 'dialog');
+		modal.setAttribute('aria-modal', 'true');
+		modal.setAttribute('aria-label', tool);
+
+		applyStyles(modal, {
+			position: 'absolute',
+			inset: '0',
+			zIndex: '1000',
+			display: 'flex',
+			alignItems: 'center',
+			justifyContent: 'center',
+			background: 'rgba(0, 0, 0, 0.38)',
+			backdropFilter: 'blur(16px)'
+		});
+
+		const host = document.createElement('div');
+		applyStyles(host, {
+			display: 'flex',
+			width: 'min(580px, calc(100% - 32px))',
+			maxHeight: 'calc(100% - 32px)',
+			boxSizing: 'border-box'
+		});
+		modal.append(host);
+
+		modal.addEventListener('click', (event) => {
+			if (event.target === modal && tool === 'keymaps') {
 				close();
 			}
-		};
-	
-		const open = (tool: ToolId) => {
-			close();
-	
-			const modal = document.createElement('div');
-			modal.id = modalId;
-			modal.setAttribute('role', 'dialog');
-			modal.setAttribute('aria-modal', 'true');
-			modal.setAttribute('aria-label', tool);
-	
-			applyStyles(modal, {
-				position: 'absolute',
-				inset: '0',
-				zIndex: '1000',
-				display: 'flex',
-				alignItems: 'center',
-				justifyContent: 'center',
-				background: 'rgba(0, 0, 0, 0.38)',
-				backdropFilter: 'blur(16px)'
-			});
-	
-			const host = document.createElement('div');
-			applyStyles(host, {
-				display: 'flex',
-				width: 'min(580px, calc(100% - 32px))',
-				maxHeight: 'calc(100% - 32px)',
-				boxSizing: 'border-box'
-			});
-			modal.append(host);
-	
-			modal.addEventListener('click', (event) => {
-				if (event.target === modal && tool === 'keymaps') {
-					close();
-				}
-			});
-	
-			host.addEventListener('click', (event) => {
-				event.stopPropagation();
-			});
-	
-				const cleanup = toolMounts[tool](host, {
-					close,
-					getActiveSessionId,
-					getActiveSessionCreatedAt,
-					getActiveModelName,
-					sendToActiveSession,
-					translatePrompt,
-					getTerminalSelection,
-					preparePromptWithAttachments,
-					requestWorkspaceFiles,
-					requestWorkspaceSkills,
-					openCreateSkill,
-					requestSpellcheck,
-					speakText,
-					stopSpeech,
-					queryVoiceState,
-					onVoiceState
-				});
-				activeCleanup = typeof cleanup === 'function' ? cleanup : null;
+		});
+
+		host.addEventListener('click', (event) => {
+			event.stopPropagation();
+		});
+
+		const cleanup = toolMounts[tool](host, {
+			close,
+			getActiveSessionId,
+			getActiveSessionCreatedAt,
+			getActiveModelName,
+			getUsageSnapshot,
+			requestUsage,
+			sendToActiveSession,
+			translatePrompt,
+			getTerminalSelection,
+			preparePromptWithAttachments,
+			requestWorkspaceFiles,
+			requestWorkspaceSkills,
+			openCreateSkill,
+			requestSpellcheck,
+			speakText,
+			stopSpeech,
+			queryVoiceState,
+			onVoiceState
+		});
+		activeCleanup = typeof cleanup === 'function' ? cleanup : null;
 
 		container.append(modal);
 		document.addEventListener('keydown', handleKeyDown);

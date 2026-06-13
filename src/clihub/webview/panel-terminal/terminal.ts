@@ -3,7 +3,7 @@ import { Terminal } from '@xterm/xterm';
 import { createTabController, type CliAgentIcon } from '../panel-tab/tab';
 import { createCliCreateMessage } from '../../shared/agent-launch-guard';
 import { getAgentSlug as resolveAgentSlug } from '../../shared/agents';
-import { createToolsController } from '../tools/tools';
+import { createToolsController, type CliUsageSnapshot } from '../tools/tools';
 import { detectModelName } from '../../shared/model-detect';
 import { createRpcChannel } from './host-rpc';
 import { createBootSkeletons } from './boot-skeleton';
@@ -48,9 +48,25 @@ const defaultSubmitDelayMs = 150;
 const slowPasteSubmitDelayMs = 750;
 const routeSubmitDelayMs = 450;
 const routeSubmitSecondEnterDelayMs = 350;
+const usageRequestSettleDelayMs = 900;
+const usageRequestTimeoutMs = 7000;
+const usageCommandsByAgentSlug: Record<string, string> = {
+	kiro: '/usage'
+};
 let activeSessionId: string | undefined;
 let pendingTabSwitchSessionId: string | undefined;
 let isPromptFilterEnabled = false;
+const usageSnapshots = new Map<string, CliUsageSnapshot>();
+let pendingUsageRequest: {
+	sessionId: string;
+	agentLabel: string;
+	command: string;
+	startBufferLength: number;
+	resolve: (snapshot: CliUsageSnapshot) => void;
+	reject: (reason?: unknown) => void;
+	settleTimer?: number;
+	timeoutTimer?: number;
+} | undefined;
 
 const isAgentIcon = (value: unknown): value is CliAgentIcon => {
 	if (!value || typeof value !== 'object') {
@@ -176,6 +192,89 @@ const getSubmitDelayMs = (agentSlug: string, text: string) => {
 
 	return defaultSubmitDelayMs;
 };
+
+const getUsageCommandForAgent = (agentLabel: string) => {
+	const slug = resolveAgentSlug(agentLabel) ?? 'default';
+	return usageCommandsByAgentSlug[slug];
+};
+
+const clearPendingUsageRequest = () => {
+	if (!pendingUsageRequest) {
+		return;
+	}
+
+	window.clearTimeout(pendingUsageRequest.settleTimer);
+	window.clearTimeout(pendingUsageRequest.timeoutTimer);
+	pendingUsageRequest = undefined;
+};
+
+const resolvePendingUsageRequest = () => {
+	const request = pendingUsageRequest;
+	if (!request) {
+		return;
+	}
+
+	const session = sessions.get(request.sessionId);
+	const raw = session?.buffer.slice(request.startBufferLength) ?? '';
+	const snapshot: CliUsageSnapshot = {
+		sessionId: request.sessionId,
+		agentLabel: request.agentLabel,
+		command: request.command,
+		raw,
+		requestedAt: Date.now()
+	};
+
+	usageSnapshots.set(request.sessionId, snapshot);
+	clearPendingUsageRequest();
+	request.resolve(snapshot);
+};
+
+const schedulePendingUsageSettle = (sessionId: string) => {
+	if (!pendingUsageRequest || pendingUsageRequest.sessionId !== sessionId) {
+		return;
+	}
+
+	window.clearTimeout(pendingUsageRequest.settleTimer);
+	pendingUsageRequest.settleTimer = window.setTimeout(resolvePendingUsageRequest, usageRequestSettleDelayMs);
+};
+
+const requestActiveUsage = () => new Promise<CliUsageSnapshot>((resolve, reject) => {
+	if (!activeSessionId) {
+		reject(new Error('No active CLI session.'));
+		return;
+	}
+
+	const session = sessions.get(activeSessionId);
+	if (!session || session.status !== 'running') {
+		reject(new Error('The active CLI session is not running.'));
+		return;
+	}
+
+	const command = getUsageCommandForAgent(session.label);
+	if (!command) {
+		reject(new Error(`Usage command is not configured for ${session.label}.`));
+		return;
+	}
+
+	if (pendingUsageRequest) {
+		pendingUsageRequest.reject(new Error('Usage refresh was superseded.'));
+		clearPendingUsageRequest();
+	}
+
+	const view = terminals.get(session.id);
+	const data = view?.terminal.modes.sendFocusMode ? `\x1b[I${command}\r` : `${command}\r`;
+	pendingUsageRequest = {
+		sessionId: session.id,
+		agentLabel: session.label,
+		command,
+		startBufferLength: session.buffer.length,
+		resolve,
+		reject,
+		timeoutTimer: window.setTimeout(resolvePendingUsageRequest, usageRequestTimeoutMs)
+	};
+
+	vscode.postMessage({ type: 'cli.input', sessionId: session.id, data });
+});
 
 // ── Host round-trips ─────────────────────────────────────────────────
 // One RPC channel per request/response message pair; see host-rpc.ts.
@@ -322,6 +421,13 @@ const toolsController = layoutRight
 				}
 				return detectModelName(getAgentSlug(session.label), session.buffer);
 			},
+			getUsageSnapshot: () => {
+				if (!activeSessionId) {
+					return undefined;
+				}
+				return usageSnapshots.get(activeSessionId);
+			},
+			requestUsage: requestActiveUsage,
 			sendToActiveSession: (text: string, options?: { paste?: boolean; submit?: boolean }) => {
 				if (!activeSessionId) {
 					return;
@@ -678,6 +784,15 @@ const syncState = (message: Extract<ServerMessage, { type: 'cli.state' }>) => {
 
 	removeClosedTerminals(openSessionIds);
 	sleepInactiveTerminals(visualSleepEnabled, openSessionIds);
+	for (const sessionId of [...usageSnapshots.keys()]) {
+		if (!openSessionIds.has(sessionId)) {
+			usageSnapshots.delete(sessionId);
+		}
+	}
+	if (pendingUsageRequest && !openSessionIds.has(pendingUsageRequest.sessionId)) {
+		pendingUsageRequest.reject(new Error('Usage refresh session was closed.'));
+		clearPendingUsageRequest();
+	}
 
 	// If a session entered error/exited state before producing output, don't leave skeleton hanging
 	for (const [sessionId, session] of sessions) {
@@ -694,6 +809,7 @@ const handleOutput = (message: Extract<ServerMessage, { type: 'cli.output' }>) =
 	const session = sessions.get(message.sessionId);
 	if (session) {
 		appendToSessionBuffer(session, message.data);
+		schedulePendingUsageSettle(message.sessionId);
 	}
 
 	let restoredFromBuffer = false;

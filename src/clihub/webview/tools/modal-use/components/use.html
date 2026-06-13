@@ -25,7 +25,42 @@
 		</section>
 
 		<section class="use-section">
-			<div class="use-section-title">Use</div>
+			<div class="use-section-row">
+				<div class="use-section-title">Use</div>
+				<button class="use-refresh-btn" id="useRefreshBtn" type="button">
+					<span id="useRefreshLabel">Refresh</span>
+				</button>
+			</div>
+			<div class="use-usage-card">
+				<div class="use-usage-message" id="useUsageMessage">
+					<strong id="useUsageMessageTitle">No usage data</strong>
+					<span id="useUsageMessageDetail">-</span>
+				</div>
+
+				<div class="use-usage-result" id="useUsageResult" hidden>
+					<div class="use-usage-head">
+						<strong id="useUsagePlan">kiro</strong>
+						<span id="useUsagePercent">0.0%</span>
+					</div>
+					<div class="use-usage-bar" aria-hidden="true">
+						<span id="useUsageBar"></span>
+					</div>
+					<div class="use-usage-grid">
+						<div>
+							<span>credits</span>
+							<strong id="useUsageCredits">unknown</strong>
+						</div>
+						<div>
+							<span>resets</span>
+							<strong id="useUsageReset">unknown</strong>
+						</div>
+						<div>
+							<span>overages</span>
+							<strong id="useUsageOverages">unknown</strong>
+						</div>
+					</div>
+				</div>
+			</div>
 		</section>
 	</div>
 </div>

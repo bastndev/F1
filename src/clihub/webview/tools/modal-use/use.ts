@@ -1,6 +1,6 @@
 import useStyles from './components/use.css';
 import useHtml from './components/use.html';
-import type { ToolContext } from '../tools';
+import type { CliUsageSnapshot, ToolContext } from '../tools';
 
 const stylesId = 'cli-use-panel-styles';
 const refreshIntervalMs = 1000;
@@ -31,6 +31,17 @@ const setText = (host: HTMLElement, selector: string, value: string) => {
 	element.title = value;
 };
 
+const setHidden = (host: HTMLElement, selector: string, hidden: boolean) => {
+	const element = host.querySelector<HTMLElement>(selector);
+	if (!element) {
+		return;
+	}
+
+	element.hidden = hidden;
+};
+
+const stripAnsi = (value: string) => value.replace(/\x1b\[[0-9;?]*[ -/]*[@-~]/g, '');
+
 const getStatusParts = () => {
 	const statusLine = getText('cli-terminal-status', 'No active session');
 	const separator = ' - ';
@@ -43,6 +54,69 @@ const getStatusParts = () => {
 		status: status || 'unknown',
 		workspace: workspaceParts.join(separator) || 'none',
 	};
+};
+
+const getActiveAgentLabel = () => getText('cli-terminal-label', 'CLI');
+
+const getUsageCommandLabel = (agentLabel: string) => (
+	agentLabel.toLowerCase().includes('kiro') ? '/usage' : 'not configured'
+);
+
+const parseKiroUsage = (raw: string) => {
+	const text = stripAnsi(raw);
+	const plan = text.match(/resets on\s+[0-9-]+\s*\|\s*([^\r\n]+)/i)?.[1]?.trim() ?? 'kiro';
+	const reset = text.match(/resets on\s+([0-9-]+)/i)?.[1]?.trim() ?? 'unknown';
+	const credits = text.match(/credits\s*\(([^)]+)\)/i)?.[1]?.trim() ?? 'unknown';
+	const percentValue = Number(text.match(/(\d+(?:\.\d+)?)\s*%/)?.[1] ?? NaN);
+	const percent = Number.isFinite(percentValue) ? Math.max(0, Math.min(100, percentValue)) : 0;
+	const overages = text.match(/overages:\s*([^\r\n]+)/i)?.[1]?.trim() ?? 'unknown';
+
+	return { plan, reset, credits, percent, overages };
+};
+
+const renderUsageMessage = (host: HTMLElement, title: string, detail: string) => {
+	setHidden(host, '#useUsageResult', true);
+	setHidden(host, '#useUsageMessage', false);
+	setText(host, '#useUsageMessageTitle', title);
+	setText(host, '#useUsageMessageDetail', detail);
+};
+
+const renderUsageSnapshot = (host: HTMLElement, snapshot: CliUsageSnapshot | undefined) => {
+	if (!snapshot) {
+		const agent = getActiveAgentLabel();
+		renderUsageMessage(host, 'No usage data', getUsageCommandLabel(agent));
+		return;
+	}
+
+	if (!snapshot.agentLabel.toLowerCase().includes('kiro')) {
+		renderUsageMessage(host, 'Not configured', snapshot.agentLabel);
+		return;
+	}
+
+	const parsed = parseKiroUsage(snapshot.raw);
+	setHidden(host, '#useUsageMessage', true);
+	setHidden(host, '#useUsageResult', false);
+	setText(host, '#useUsagePlan', parsed.plan);
+	setText(host, '#useUsageCredits', parsed.credits);
+	setText(host, '#useUsagePercent', `${parsed.percent.toFixed(1)}%`);
+	setText(host, '#useUsageReset', parsed.reset);
+	setText(host, '#useUsageOverages', parsed.overages);
+
+	const bar = host.querySelector<HTMLElement>('#useUsageBar');
+	if (bar) {
+		bar.style.width = `${parsed.percent}%`;
+	}
+};
+
+const setRefreshState = (host: HTMLElement, isLoading: boolean) => {
+	const button = host.querySelector<HTMLButtonElement>('#useRefreshBtn');
+	if (!button) {
+		return;
+	}
+
+	button.disabled = isLoading;
+	button.classList.toggle('is-loading', isLoading);
+	setText(host, '#useRefreshLabel', isLoading ? 'Loading' : 'Refresh');
 };
 
 const setStatusDot = (host: HTMLElement, status: string) => {
@@ -91,7 +165,25 @@ export const mountUsePanel = (host: HTMLElement, context: ToolContext) => {
 	const closeBtn = host.querySelector<HTMLButtonElement>('#closeUseBtn');
 	closeBtn?.addEventListener('click', () => context.close());
 
+	const refreshBtn = host.querySelector<HTMLButtonElement>('#useRefreshBtn');
+	refreshBtn?.addEventListener('click', () => {
+		if (!context.requestUsage) {
+			renderUsageMessage(host, 'Not configured', getActiveAgentLabel());
+			return;
+		}
+
+		setRefreshState(host, true);
+		void context.requestUsage()
+			.then((snapshot) => renderUsageSnapshot(host, snapshot))
+			.catch((error) => {
+				const message = error instanceof Error ? error.message : 'Usage refresh failed.';
+				renderUsageMessage(host, 'Refresh failed', message);
+			})
+			.finally(() => setRefreshState(host, false));
+	});
+
 	renderUseState(host, context);
+	renderUsageSnapshot(host, context.getUsageSnapshot?.());
 	const interval = window.setInterval(() => renderUseState(host, context), refreshIntervalMs);
 	return () => window.clearInterval(interval);
 };
