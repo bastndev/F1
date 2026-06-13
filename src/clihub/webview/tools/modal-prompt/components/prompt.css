@@ -479,9 +479,16 @@
 }
 
 /* === Image marker highlighting for the prompt chat ===
-   The textarea paints regular text and the real caret. The highlight overlay
-   floats above it only for token styling, so textarea-native wrapping cannot
-   move the visible caret behind long wrapped text.
+   The overlay (.prompt-textarea-highlight) paints ALL visible content — plain
+   text, token badges and the misspelling squiggles — so they always share one
+   text layout and can never drift apart. The textarea sits on top with
+   transparent text; only its caret is visible (caret-color).
+
+   The one thing that can desync the two layers is the scrollbar: the textarea
+   (overflow-y:auto) narrows when a scrollbar appears, the overlay
+   (overflow:hidden) does not. `scrollbar-gutter: stable` on BOTH reserves the
+   gutter permanently, so their content width is identical scrolled or not and
+   the caret tracks the overlay text exactly.
    Only a little rounded border as requested ("solo un poco").
    Mode aware: white bg + dark text in dark mode; black bg + light text in light mode.
 */
@@ -506,11 +513,13 @@
   overflow-wrap: break-word;
   word-break: normal;
   overflow: hidden;
+  /* Reserve the scrollbar gutter so this matches the textarea's content width
+     whether or not the textarea is scrolling (keeps wrapping identical). */
+  scrollbar-gutter: stable;
   pointer-events: none;
-  z-index: 2;
-  color: transparent;
-  -webkit-text-fill-color: transparent;
-  /* Plain mirrored text stays invisible; token spans opt back into their original styling. */
+  z-index: 0;
+  /* The overlay paints the real, visible text (plain + token spans). */
+  color: var(--vscode-input-foreground);
   background: transparent;
   border: none;
   border-radius: 0;
@@ -519,26 +528,18 @@
 }
 
 .prompt-textarea {
-  color: var(--vscode-input-foreground);
+  /* Text is drawn by the overlay below; the textarea contributes only the
+     caret (caret-color) so it can never paint a second, misaligned copy. */
+  color: transparent;
   caret-color: var(--vscode-input-foreground);
   background: transparent;
   border: none;
   border-radius: 0;
   position: relative;
   z-index: 1;
+  /* Match the overlay's reserved gutter so both layers wrap at the same width. */
+  scrollbar-gutter: stable;
   /* padding, font etc still come from the base .prompt-textarea rule above */
-}
-
-.prompt-textarea-highlight .prompt-image-marker,
-.prompt-textarea-highlight .prompt-paste-code,
-.prompt-textarea-highlight .prompt-paste-text,
-.prompt-textarea-highlight .prompt-skill-marker,
-.prompt-textarea-highlight .prompt-numbered-list,
-.prompt-textarea-highlight .prompt-mention,
-.prompt-textarea-highlight .prompt-mention-folder,
-.prompt-textarea-highlight .selected,
-.prompt-textarea-highlight .selected span {
-  -webkit-text-fill-color: currentColor;
 }
 
 .prompt-textarea-highlight .prompt-image-marker {
