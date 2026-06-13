@@ -35,7 +35,6 @@ export function initSkillsChips(
 		addChip.type = 'button';
 		addChip.className = 'prompt-tool-btn prompt-skill-add';
 		addChip.textContent = '+';
-		addChip.title = context.openCreateSkill ? 'Create a skill' : 'Create skill is unavailable';
 		addChip.setAttribute('aria-label', 'Create a skill');
 
 		if (context.openCreateSkill) {
@@ -146,7 +145,6 @@ export function initSkillsChips(
 			chipsHost.append(chip);
 		}
 
-		chipsHost.append(createAddChip());
 		row.hidden = false;
 		sync();
 
