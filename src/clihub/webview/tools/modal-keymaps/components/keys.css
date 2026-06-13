@@ -3,6 +3,7 @@
 	max-height: min(560px, calc(100vh - 32px));
 	display: flex;
 	flex-direction: column;
+	position: relative;
 	box-sizing: border-box;
 	border: 1px solid var(--vscode-editorGroup-border, rgba(128, 128, 128, 0.35));
 	border-radius: 8px;
@@ -14,11 +15,38 @@
 	overflow: hidden;
 }
 
+.keymaps-modal::before {
+	content: '';
+	position: absolute;
+	top: 0;
+	left: 0;
+	right: 0;
+	height: 1px;
+	background: linear-gradient(
+		90deg,
+		transparent 0%,
+		var(--vscode-focusBorder, var(--vscode-textLink-foreground, #007acc)) 32%,
+		color-mix(in srgb, var(--vscode-focusBorder, var(--vscode-textLink-foreground, #007acc)) 65%, white) 68%,
+		transparent 100%
+	);
+	opacity: 0.62;
+	z-index: 10;
+	pointer-events: none;
+}
+
 /* Styles  keymap */
 .keymaps-header {
 	flex: 0 0 auto;
 	padding: 16px 20px 12px;
+	display: flex;
+	align-items: flex-start;
+	justify-content: space-between;
+	gap: 16px;
 	border-bottom: 1px solid var(--vscode-editorGroup-border, rgba(128, 128, 128, 0.2));
+}
+
+.keymaps-header-copy {
+	min-width: 0;
 }
 
 .keymaps-title {
@@ -32,6 +60,26 @@
 	color: var(--vscode-descriptionForeground, rgba(128, 128, 128, 0.72));
 	font-size: 11px;
 	line-height: 1.35;
+}
+
+.keymaps-close-btn {
+	flex: 0 0 auto;
+	border: none;
+	border-radius: 4px;
+	padding: 3px 6px;
+	background: transparent;
+	color: var(--vscode-descriptionForeground, rgba(128, 128, 128, 0.72));
+	font-family: var(--vscode-editor-font-family, ui-monospace, monospace);
+	font-size: 11px;
+	line-height: 1;
+	cursor: pointer;
+}
+
+.keymaps-close-btn:hover,
+.keymaps-close-btn:focus-visible {
+	background: var(--vscode-toolbar-hoverBackground, rgba(128, 128, 128, 0.14));
+	color: var(--vscode-foreground);
+	outline: none;
 }
 
 .keymaps-content {
