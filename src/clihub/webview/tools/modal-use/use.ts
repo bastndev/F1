@@ -42,7 +42,7 @@ const setHidden = (host: HTMLElement, selector: string, hidden: boolean) => {
 
 const stripAnsi = (value: string) => value.replace(/\x1b\[[0-9;?]*[ -/]*[@-~]/g, '');
 
-type UsageAgentKind = 'claude' | 'codex' | 'kiro';
+type UsageAgentKind = 'antigravity' | 'claude' | 'codex' | 'kiro';
 
 type UsageBar = {
 	label: string;
@@ -82,6 +82,9 @@ const getActiveAgentLabel = () => getText('cli-terminal-label', 'CLI');
 
 const getUsageAgentKind = (agentLabel: string): UsageAgentKind | undefined => {
 	const lower = agentLabel.toLowerCase();
+	if (lower.includes('antigravity')) {
+		return 'antigravity';
+	}
 	if (lower.includes('claude')) {
 		return 'claude';
 	}
@@ -173,9 +176,9 @@ const getCleanLine = (line: string) => line
 	.replace(/\s+/g, ' ')
 	.trim();
 
-const stripCodexVisualBar = (line: string) => line
-	.replace(/\[[\s█▓▒░#=+\-.]{3,}\]/g, ' ')
-	.replace(/[█▓▒░]{3,}/g, ' ')
+const stripUsageVisualBar = (line: string) => line
+	.replace(/\[[\s█▓▒░#=+\-.▏▎▍▌▋▊▉■□▁▂▃▄▅▆▇━─]{3,}\]/g, ' ')
+	.replace(/[█▓▒░▏▎▍▌▋▊▉■□▁▂▃▄▅▆▇]{3,}/g, ' ')
 	.replace(/\s+/g, ' ')
 	.trim();
 
@@ -186,9 +189,83 @@ const titleCase = (value: string) => value
 
 const parseCompactNumber = (value: string) => Number(value.replace(/[,_\s]/g, ''));
 
+const getAntigravityGroupLabel = (value: string) => titleCase(value)
+	.replace(/\bAnd\b/g, 'and')
+	.replace(/\bGpt\b/g, 'GPT');
+
+const getAntigravityMetricLabel = (label: string) => {
+	const normalized = label
+		.toLowerCase()
+		.replace(/\s+models\b/g, '')
+		.replace(/\s+and\s+/g, '/')
+		.trim();
+	return `${normalized || label.toLowerCase()} refresh`;
+};
+
+const parseAntigravityUsage = (raw: string): ParsedUsage => {
+	const text = stripAnsi(raw);
+	const lines = text.split(/\r?\n/).map(getCleanLine).filter(Boolean);
+	const bars: UsageBar[] = [];
+	let groupLabel = 'Weekly limit';
+
+	for (let index = 0; index < lines.length; index += 1) {
+		const cleanLine = stripUsageVisualBar(lines[index]);
+		if (!cleanLine) {
+			continue;
+		}
+
+		if (/models?$/i.test(cleanLine) && !/models within/i.test(cleanLine)) {
+			groupLabel = getAntigravityGroupLabel(cleanLine);
+			continue;
+		}
+
+		const remainingMatch = cleanLine.match(/(\d+(?:\.\d+)?)\s*%\s*(remaining|left)/i);
+		if (!remainingMatch) {
+			continue;
+		}
+
+		const previousLinePercent = stripUsageVisualBar(lines[index - 1] ?? '')
+			.match(/(\d+(?:\.\d+)?)\s*%/)?.[1];
+		const remaining = parsePercent(previousLinePercent ?? remainingMatch[1]);
+		const refresh = cleanLine.match(/refreshes?\s+in\s+([^·\r\n]+)/i)?.[1]?.trim();
+		const detail = [
+			`${formatPercent(remaining)} remaining`,
+			refresh ? `refreshes in ${refresh}` : undefined
+		].filter((part): part is string => !!part).join(' - ');
+
+		bars.push({
+			label: groupLabel,
+			percent: 100 - remaining,
+			detail,
+			reset: refresh
+		});
+	}
+
+	const metrics = bars
+		.filter((bar) => !!bar.reset)
+		.map((bar): UsageMetric => ({
+			label: getAntigravityMetricLabel(bar.label),
+			value: bar.reset ?? 'unknown'
+		}))
+		.slice(0, 3);
+
+	return {
+		title: 'Antigravity usage',
+		summary: bars.length === 1 ? '1 weekly group' : bars.length > 1 ? `${bars.length} weekly groups` : '/usage',
+		bars: bars.length > 0 ? bars : [
+			{ label: 'Weekly limit', percent: 0, detail: 'No usage percentage found in /usage output' }
+		],
+		metrics: metrics.length > 0 ? metrics : [
+			{ label: 'command', value: '/usage' },
+			{ label: 'usage', value: bars.length > 0 ? 'detected' : 'not reported' },
+			{ label: 'source', value: 'Antigravity CLI' }
+		]
+	};
+};
+
 const getCodexResetDetail = (lines: string[], startIndex: number) => {
 	for (const line of lines.slice(startIndex + 1, startIndex + 3)) {
-		if (/\d+(?:\.\d+)?\s*%\s*(?:used|remaining|left)?/i.test(stripCodexVisualBar(line))) {
+		if (/\d+(?:\.\d+)?\s*%\s*(?:used|remaining|left)?/i.test(stripUsageVisualBar(line))) {
 			return undefined;
 		}
 
@@ -206,7 +283,7 @@ const getCodexPercentBars = (text: string): UsageBar[] => {
 
 	for (let index = 0; index < lines.length; index += 1) {
 		const line = lines[index];
-		const cleanLine = stripCodexVisualBar(line);
+		const cleanLine = stripUsageVisualBar(line);
 		const percentMatch = cleanLine.match(/(\d+(?:\.\d+)?)\s*%\s*(used|remaining|left)?/i);
 		if (!percentMatch) {
 			continue;
@@ -308,6 +385,9 @@ const parseCodexUsage = (raw: string): ParsedUsage => {
 
 const parseUsage = (snapshot: CliUsageSnapshot): ParsedUsage | undefined => {
 	const kind = getUsageAgentKind(snapshot.agentLabel);
+	if (kind === 'antigravity') {
+		return parseAntigravityUsage(snapshot.raw);
+	}
 	if (kind === 'claude') {
 		return parseClaudeUsage(snapshot.raw);
 	}

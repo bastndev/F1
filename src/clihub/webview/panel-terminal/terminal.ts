@@ -53,6 +53,7 @@ const usageRequestTimeoutMs = 7000;
 const usageDismissSecondEscapeDelayMs = 80;
 const codexUsageSubmitDelayMs = 150;
 const usageCommandsByAgentSlug: Record<string, string> = {
+	antigravity: '/usage',
 	claude: '/usage',
 	codex: '/status',
 	kiro: '/usage'
