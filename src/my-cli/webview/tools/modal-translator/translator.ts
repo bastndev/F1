@@ -2,13 +2,18 @@ import translatorStyles from './components/translator.css';
 import translatorHtml from './components/translator.html';
 import loadingStyles from '../../styles/skeleton/translator-loading.css';
 import type { ToolContext } from '../tools';
-import type { VoiceState } from '../../../shared/voice/voice-types';
+import type { VoiceProgress, VoiceState } from '../../../shared/voice/voice-types';
 import { translateEnToSpanish } from './browser-terminal-translator';
 import { renderMarkdownLite } from './markdown-lite';
 import { segmentTerminalSelection } from './terminal-text';
 
 const stylesId = 'cli-translator-panel-styles';
-const maxVoiceTextChars = 4000;
+const maxVoiceChunkChars = 900;
+
+type TranslatorVoiceChunk = {
+	text: string;
+	elements: HTMLElement[];
+};
 
 const ensureStyles = () => {
 	if (document.getElementById(stylesId)) {
@@ -20,6 +25,151 @@ const ensureStyles = () => {
 	style.textContent = `${translatorStyles}\n${loadingStyles}`;
 	document.head.append(style);
 };
+
+function normalizeSpeechText(text: string): string {
+	return text.replace(/\s+/g, ' ').trim();
+}
+
+function splitLongSpeechSegment(segment: string): string[] {
+	const chunks: string[] = [];
+	let current = '';
+
+	for (const part of segment.match(/\s+|\S+/g) ?? []) {
+		if (part.length > maxVoiceChunkChars) {
+			if (current.trim()) {
+				chunks.push(current.trim());
+			}
+			current = '';
+			for (let index = 0; index < part.length; index += maxVoiceChunkChars) {
+				chunks.push(part.slice(index, index + maxVoiceChunkChars));
+			}
+			continue;
+		}
+
+		if (current && current.length + part.length > maxVoiceChunkChars) {
+			chunks.push(current.trim());
+			current = part.trimStart();
+			continue;
+		}
+
+		current += part;
+	}
+
+	if (current.trim()) {
+		chunks.push(current.trim());
+	}
+
+	return chunks;
+}
+
+function splitSpeechText(text: string): string[] {
+	const clean = normalizeSpeechText(text);
+	if (!clean) {
+		return [];
+	}
+	if (clean.length <= maxVoiceChunkChars) {
+		return [clean];
+	}
+
+	const chunks: string[] = [];
+	let current = '';
+	const flush = () => {
+		if (current.trim()) {
+			chunks.push(current.trim());
+			current = '';
+		}
+	};
+
+	const sentences = clean.match(/[^.!?。！？]+[.!?。！？]+["')\]]*|[^.!?。！？]+$/g) ?? [clean];
+	for (const sentence of sentences) {
+		const piece = sentence.trim();
+		if (!piece) {
+			continue;
+		}
+		if (piece.length > maxVoiceChunkChars) {
+			flush();
+			chunks.push(...splitLongSpeechSegment(piece));
+			continue;
+		}
+
+		const next = current ? `${current} ${piece}` : piece;
+		if (next.length > maxVoiceChunkChars) {
+			flush();
+			current = piece;
+		} else {
+			current = next;
+		}
+	}
+
+	flush();
+	return chunks;
+}
+
+function buildVoiceChunks(textEl: HTMLElement): TranslatorVoiceChunk[] {
+	const renderedBlocks = Array.from(textEl.children)
+		.filter((element): element is HTMLElement => element instanceof HTMLElement);
+	const sourceBlocks = renderedBlocks.length ? renderedBlocks : [textEl];
+	const chunks: TranslatorVoiceChunk[] = [];
+	let currentText = '';
+	let currentElements: HTMLElement[] = [];
+
+	const flush = () => {
+		if (currentText.trim()) {
+			chunks.push({ text: currentText.trim(), elements: currentElements });
+		}
+		currentText = '';
+		currentElements = [];
+	};
+
+	for (const element of sourceBlocks) {
+		const text = normalizeSpeechText(element.textContent || '');
+		if (!text) {
+			continue;
+		}
+
+		if (text.length > maxVoiceChunkChars) {
+			flush();
+			for (const piece of splitSpeechText(text)) {
+				chunks.push({ text: piece, elements: [element] });
+			}
+			continue;
+		}
+
+		const next = currentText ? `${currentText}\n\n${text}` : text;
+		if (next.length > maxVoiceChunkChars) {
+			flush();
+			currentText = text;
+			currentElements = [element];
+		} else {
+			currentText = next;
+			currentElements.push(element);
+		}
+	}
+
+	flush();
+	return chunks;
+}
+
+function clearVoiceHighlights(chunks: TranslatorVoiceChunk[]): void {
+	for (const chunk of chunks) {
+		for (const element of chunk.elements) {
+			element.classList.remove('is-voice-active');
+		}
+	}
+}
+
+function setActiveVoiceChunk(chunks: TranslatorVoiceChunk[], index: number): void {
+	clearVoiceHighlights(chunks);
+	const chunk = chunks[index];
+	if (!chunk) {
+		return;
+	}
+
+	for (const element of chunk.elements) {
+		element.classList.add('is-voice-active');
+	}
+	chunk.elements[0]?.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+}
 
 export const mountTranslatorPanel = (host: HTMLElement, context: ToolContext) => {
 	ensureStyles();
@@ -38,6 +188,10 @@ export const mountTranslatorPanel = (host: HTMLElement, context: ToolContext) =>
 
 function initializeTranslator(host: HTMLElement, context: ToolContext) {
 	const speakBtn = host.querySelector<HTMLButtonElement>('#speakBtn');
+	const voiceControl = host.querySelector<HTMLElement>('#voiceControl');
+	const voiceExtraBtn = host.querySelector<HTMLButtonElement>('#voiceExtraBtn');
+	const speakIdleIcon = host.querySelector<HTMLElement>('#speakBtn .speak-idle i');
+	const speakIdleLabel = host.querySelector<HTMLElement>('#speakBtn .speak-idle span');
 	const spectrum = host.querySelector<HTMLElement>('#audioSpectrum');
 	const copyBtn = host.querySelector<HTMLButtonElement>('#copyBtn');
 	const translateBtn = host.querySelector<HTMLButtonElement>('#translateBtn');
@@ -74,6 +228,8 @@ function initializeTranslator(host: HTMLElement, context: ToolContext) {
 	// Raw text behind whatever is on screen — the Copy button copies this,
 	// not the rendered markdown's flattened textContent.
 	let copyText = '';
+	let resultStatus = statusEl?.textContent || 'ready';
+	let activeVoiceChunks: TranslatorVoiceChunk[] = [];
 
 	// Copy/Listen start disabled (gray) and only light up — softly, via the
 	// button transition — once there is a translation result to act on.
@@ -97,6 +253,8 @@ function initializeTranslator(host: HTMLElement, context: ToolContext) {
 				textEl.textContent = 'Select or copy text in the terminal to translate it to Spanish.';
 				textEl.classList.add('placeholder');
 			}
+			resultStatus = 'ready';
+			setStatus(resultStatus);
 			return;
 		}
 
@@ -114,6 +272,8 @@ function initializeTranslator(host: HTMLElement, context: ToolContext) {
 		if (translateBtn) {
 			translateBtn.disabled = true;
 		}
+		clearVoiceHighlights(activeVoiceChunks);
+		activeVoiceChunks = [];
 		modalEl.classList.add('is-translating');
 		textEl.classList.remove('placeholder', 'is-rendered');
 		textEl.replaceChildren(buildSkeleton(lockedHeight));
@@ -159,13 +319,15 @@ function initializeTranslator(host: HTMLElement, context: ToolContext) {
 
 			copyText = copyParts.join('\n\n');
 			revealText(textEl, renderedParts.join('\n\n'));
-			setStatus(provider ? `translated · ${provider.toLowerCase()}` : 'translated');
+			resultStatus = provider ? `translated · ${provider.toLowerCase()}` : 'translated';
+			setStatus(resultStatus);
 			enableResultActions();
 		} catch (err) {
 			console.error('[Translator] EN->ES failed:', err);
 			copyText = extracted;
 			revealText(textEl, extracted);
-			setStatus('translation failed');
+			resultStatus = 'translation failed';
+			setStatus(resultStatus);
 			// The original text is on screen — copying/listening still makes sense.
 			enableResultActions();
 			// Failed attempts may be transient (rate limit, network) — allow retry.
@@ -187,6 +349,8 @@ function initializeTranslator(host: HTMLElement, context: ToolContext) {
 	}
 
 	let isSpeaking = false;
+	let isPaused = false;
+	let isPreparingVoice = false;
 	const extracted = extractTextToTranslate(context);
 	if (textEl) {
 		if (extracted) {
@@ -237,19 +401,53 @@ function initializeTranslator(host: HTMLElement, context: ToolContext) {
 		// extension's downloaded engine/voice). The button mirrors broadcast
 		// voice.state events: CSS swaps the idle label for the animated bars
 		// (and a stop glyph on hover) while actually speaking.
-		const applyVoiceState = (state: VoiceState, message?: string) => {
+		const applyVoiceState = (state: VoiceState, message?: string, progress?: VoiceProgress) => {
 			isSpeaking = state === 'speaking';
+			isPaused = state === 'paused';
+			isPreparingVoice = state === 'preparing';
 			speakBtn.classList.toggle('speaking', isSpeaking);
-			speakBtn.classList.toggle('is-preparing', state === 'preparing');
+			speakBtn.classList.toggle('is-paused', isPaused);
+			speakBtn.classList.toggle('is-preparing', isPreparingVoice);
+			voiceControl?.classList.toggle('is-speaking', isSpeaking);
+			voiceControl?.classList.toggle('is-paused', isPaused);
+			voiceControl?.classList.toggle('is-preparing', isPreparingVoice);
 			// Stay disabled until something was translated, except while a
-			// playback from a previous open is running (so it can be stopped).
-			speakBtn.disabled = state === 'preparing' || (!hasResult && !isSpeaking);
+			// playback from a previous open is running (so it can be controlled).
+			speakBtn.disabled = isPreparingVoice || (!hasResult && !isSpeaking && !isPaused);
 
-			const label = state === 'preparing' ? 'Preparing voice…' : isSpeaking ? 'Stop' : 'Listen';
+			if (speakIdleLabel) {
+				speakIdleLabel.textContent = isPreparingVoice ? 'Preparing' : isPaused ? 'Resume' : 'Listen';
+			}
+			if (speakIdleIcon) {
+				speakIdleIcon.className = isPaused ? 'ti ti-player-play-filled' : 'ti ti-volume-2';
+			}
+
+			const label = isPreparingVoice ? 'Preparing voice…' : isSpeaking ? 'Pause' : isPaused ? 'Resume' : 'Listen';
 			speakBtn.title = label;
 			speakBtn.setAttribute('aria-label', label);
 
+			if (voiceExtraBtn) {
+				voiceExtraBtn.disabled = !(isSpeaking || isPaused);
+				voiceExtraBtn.title = 'Stop voice';
+				voiceExtraBtn.setAttribute('aria-label', 'Stop voice');
+			}
+
+			if ((isPreparingVoice || isSpeaking || isPaused) && progress) {
+				setActiveVoiceChunk(activeVoiceChunks, progress.chunkIndex);
+				if (progress.chunkCount > 1) {
+					const progressLabel = `voice ${progress.chunkIndex + 1}/${progress.chunkCount}`;
+					setStatus(isPaused ? `paused · ${progressLabel}` : progressLabel);
+				}
+			}
+			if (isPaused && !progress) {
+				setStatus('paused');
+			}
+			if (state === 'idle') {
+				clearVoiceHighlights(activeVoiceChunks);
+				setStatus(resultStatus);
+			}
 			if (state === 'error') {
+				clearVoiceHighlights(activeVoiceChunks);
 				setStatus(message ? `voice · ${message.toLowerCase()}` : 'voice error');
 			}
 		};
@@ -259,27 +457,36 @@ function initializeTranslator(host: HTMLElement, context: ToolContext) {
 		context.queryVoiceState?.();
 
 		speakBtn.addEventListener('click', () => {
-			if (isSpeaking) {
-				context.stopSpeech?.();
+			if (isPaused) {
+				context.resumeSpeech?.();
 				return;
 			}
 
-			// Read what is on screen: rendered text flattens markdown and the
-			// code chips speak as "code here #N" (kept in English on purpose).
-			const value = textEl?.textContent?.trim();
-			if (value && context.speakText) {
-				const speakValue = value.length > maxVoiceTextChars
-					? value.slice(0, maxVoiceTextChars).trimEnd()
-					: value;
-				if (speakValue.length < value.length) {
-					setStatus('voice · shortened');
+			if (isSpeaking) {
+				context.pauseSpeech?.();
+				return;
+			}
+
+			if (textEl && context.speakText) {
+				clearVoiceHighlights(activeVoiceChunks);
+				activeVoiceChunks = buildVoiceChunks(textEl);
+				const chunks = activeVoiceChunks.map((chunk) => chunk.text);
+				const value = chunks.join('\n\n');
+				if (value) {
+					context.speakText(value, { chunks });
 				}
-				context.speakText(speakValue);
+			}
+		});
+
+		voiceExtraBtn?.addEventListener('click', () => {
+			if (isSpeaking || isPaused) {
+				context.stopSpeech?.();
 			}
 		});
 
 		return () => {
 			disposeVoiceState?.();
+			clearVoiceHighlights(activeVoiceChunks);
 		};
 	}
 
