@@ -48,6 +48,7 @@ type UsageBar = {
 	label: string;
 	percent: number;
 	detail?: string;
+	reset?: string;
 };
 
 type UsageMetric = {
@@ -185,11 +186,26 @@ const titleCase = (value: string) => value
 
 const parseCompactNumber = (value: string) => Number(value.replace(/[,_\s]/g, ''));
 
+const getCodexResetDetail = (lines: string[], startIndex: number) => {
+	for (const line of lines.slice(startIndex + 1, startIndex + 3)) {
+		if (/\d+(?:\.\d+)?\s*%\s*(?:used|remaining|left)?/i.test(stripCodexVisualBar(line))) {
+			return undefined;
+		}
+
+		const reset = line.match(/\(?\s*resets\s+([^)]+?)\s*\)?$/i)?.[1]?.trim();
+		if (reset) {
+			return reset;
+		}
+	}
+	return undefined;
+};
+
 const getCodexPercentBars = (text: string): UsageBar[] => {
 	const lines = text.split(/\r?\n/).map(getCleanLine).filter(Boolean);
 	const bars: UsageBar[] = [];
 
-	for (const line of lines) {
+	for (let index = 0; index < lines.length; index += 1) {
+		const line = lines[index];
 		const cleanLine = stripCodexVisualBar(line);
 		const percentMatch = cleanLine.match(/(\d+(?:\.\d+)?)\s*%\s*(used|remaining|left)?/i);
 		if (!percentMatch) {
@@ -205,14 +221,21 @@ const getCodexPercentBars = (text: string): UsageBar[] => {
 			.replace(/[:•·-]+$/g, '')
 			.trim();
 		const label = labelSource ? titleCase(labelSource) : 'Status';
-		const detail = mode === 'remaining' || mode === 'left'
-			? `${formatPercent(rawPercent)} ${mode}`
-			: undefined;
+		const reset = getCodexResetDetail(lines, index);
+		const details = [
+			mode === 'remaining' || mode === 'left' ? `${formatPercent(rawPercent)} ${mode}` : undefined,
+			reset ? `resets ${reset}` : undefined
+		].filter((detail): detail is string => !!detail);
 
-		bars.push({ label, percent, detail });
+		bars.push({ label, percent, detail: details.join(' - ') || undefined, reset });
 	}
 
 	return bars.slice(0, 2);
+};
+
+const getCodexResetMetricLabel = (label: string) => {
+	const cleanLabel = label.toLowerCase().replace(/\s+limit\b/, '').trim();
+	return `${cleanLabel || label.toLowerCase()} reset`;
 };
 
 const getCodexTokenBar = (text: string): UsageBar | undefined => {
@@ -254,7 +277,14 @@ const parseCodexUsage = (raw: string): ParsedUsage => {
 		bars.push(tokenBar);
 	}
 
+	const resetMetrics = bars
+		.filter((bar) => !!bar.reset)
+		.map((bar): UsageMetric => ({
+			label: getCodexResetMetricLabel(bar.label),
+			value: bar.reset ?? 'unknown'
+		}));
 	const metrics = [
+		...resetMetrics,
 		getCodexMetric(text, 'model', /\bmodel\s*[:=]\s*([^\r\n]+)/i),
 		getCodexMetric(text, 'approval', /\bapproval(?:s)?\s*[:=]\s*([^\r\n]+)/i),
 		getCodexMetric(text, 'sandbox', /\bsandbox\s*[:=]\s*([^\r\n]+)/i)
