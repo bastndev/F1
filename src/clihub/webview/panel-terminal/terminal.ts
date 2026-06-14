@@ -51,8 +51,10 @@ const routeSubmitSecondEnterDelayMs = 350;
 const usageRequestSettleDelayMs = 900;
 const usageRequestTimeoutMs = 7000;
 const usageDismissSecondEscapeDelayMs = 80;
+const codexUsageSubmitDelayMs = 150;
 const usageCommandsByAgentSlug: Record<string, string> = {
 	claude: '/usage',
+	codex: '/status',
 	kiro: '/usage'
 };
 let activeSessionId: string | undefined;
@@ -200,6 +202,10 @@ const getUsageCommandForAgent = (agentLabel: string) => {
 	return usageCommandsByAgentSlug[slug];
 };
 
+const getUsageInputData = (view: TerminalView | undefined, data: string) => (
+	view?.terminal.modes.sendFocusMode ? `\x1b[I${data}` : data
+);
+
 const clearPendingUsageRequest = () => {
 	if (!pendingUsageRequest) {
 		return;
@@ -264,7 +270,7 @@ const requestActiveUsage = () => new Promise<CliUsageSnapshot>((resolve, reject)
 	}
 
 	const view = terminals.get(session.id);
-	const data = view?.terminal.modes.sendFocusMode ? `\x1b[I${command}\r` : `${command}\r`;
+	const agentSlug = getAgentSlug(session.label);
 	pendingUsageRequest = {
 		sessionId: session.id,
 		agentLabel: session.label,
@@ -275,7 +281,29 @@ const requestActiveUsage = () => new Promise<CliUsageSnapshot>((resolve, reject)
 		timeoutTimer: window.setTimeout(resolvePendingUsageRequest, usageRequestTimeoutMs)
 	};
 
-	vscode.postMessage({ type: 'cli.input', sessionId: session.id, data });
+	if (agentSlug === 'codex') {
+		vscode.postMessage({
+			type: 'cli.input',
+			sessionId: session.id,
+			data: getUsageInputData(view, command)
+		});
+		window.setTimeout(() => {
+			if (sessions.get(session.id)?.status === 'running') {
+				vscode.postMessage({
+					type: 'cli.input',
+					sessionId: session.id,
+					data: getUsageInputData(view, '\r')
+				});
+			}
+		}, codexUsageSubmitDelayMs);
+		return;
+	}
+
+	vscode.postMessage({
+		type: 'cli.input',
+		sessionId: session.id,
+		data: getUsageInputData(view, `${command}\r`)
+	});
 });
 
 const dismissActiveUsageView = () => {

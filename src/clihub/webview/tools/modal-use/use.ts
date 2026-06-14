@@ -42,7 +42,7 @@ const setHidden = (host: HTMLElement, selector: string, hidden: boolean) => {
 
 const stripAnsi = (value: string) => value.replace(/\x1b\[[0-9;?]*[ -/]*[@-~]/g, '');
 
-type UsageAgentKind = 'claude' | 'kiro';
+type UsageAgentKind = 'claude' | 'codex' | 'kiro';
 
 type UsageBar = {
 	label: string;
@@ -84,15 +84,22 @@ const getUsageAgentKind = (agentLabel: string): UsageAgentKind | undefined => {
 	if (lower.includes('claude')) {
 		return 'claude';
 	}
+	if (lower.includes('codex')) {
+		return 'codex';
+	}
 	if (lower.includes('kiro')) {
 		return 'kiro';
 	}
 	return undefined;
 };
 
-const getUsageCommandLabel = (agentLabel: string) => (
-	getUsageAgentKind(agentLabel) ? '/usage' : 'not configured'
-);
+const getUsageCommandLabel = (agentLabel: string) => {
+	const kind = getUsageAgentKind(agentLabel);
+	if (kind === 'codex') {
+		return '/status';
+	}
+	return kind ? '/usage' : 'not configured';
+};
 
 const clampPercent = (value: number) => (
 	Number.isFinite(value) ? Math.max(0, Math.min(100, value)) : 0
@@ -160,10 +167,116 @@ const parseClaudeUsage = (raw: string): ParsedUsage => {
 	};
 };
 
+const getCleanLine = (line: string) => line
+	.replace(/[│┃║|]/g, ' ')
+	.replace(/\s+/g, ' ')
+	.trim();
+
+const titleCase = (value: string) => value
+	.replace(/[_-]+/g, ' ')
+	.replace(/\b\w/g, (char) => char.toUpperCase())
+	.trim();
+
+const parseCompactNumber = (value: string) => Number(value.replace(/[,_\s]/g, ''));
+
+const getCodexPercentBars = (text: string): UsageBar[] => {
+	const lines = text.split(/\r?\n/).map(getCleanLine).filter(Boolean);
+	const bars: UsageBar[] = [];
+
+	for (const line of lines) {
+		const percentMatch = line.match(/(\d+(?:\.\d+)?)\s*%\s*(used|remaining|left)?/i);
+		if (!percentMatch) {
+			continue;
+		}
+
+		const rawPercent = parsePercent(percentMatch[1]);
+		const mode = percentMatch[2]?.toLowerCase();
+		const percent = mode === 'remaining' || mode === 'left' ? 100 - rawPercent : rawPercent;
+		const labelSource = line
+			.replace(percentMatch[0], '')
+			.replace(/\b(used|remaining|left)\b/gi, '')
+			.replace(/[:•·-]+$/g, '')
+			.trim();
+		const label = labelSource ? titleCase(labelSource) : 'Status';
+		const detail = mode === 'remaining' || mode === 'left'
+			? `${formatPercent(rawPercent)} ${mode}`
+			: undefined;
+
+		bars.push({ label, percent, detail });
+	}
+
+	return bars.slice(0, 2);
+};
+
+const getCodexTokenBar = (text: string): UsageBar | undefined => {
+	const tokenLine = text
+		.split(/\r?\n/)
+		.map(getCleanLine)
+		.find((line) => /(token|context|usage)/i.test(line) && /(?:\d[\d,_\s]*)\s*(?:\/|of)\s*(?:\d[\d,_\s]*)/i.test(line));
+	const match = tokenLine?.match(/(\d[\d,_\s]*)\s*(?:\/|of)\s*(\d[\d,_\s]*)/i);
+	if (!match) {
+		return undefined;
+	}
+
+	const used = parseCompactNumber(match[1]);
+	const total = parseCompactNumber(match[2]);
+	if (!Number.isFinite(used) || !Number.isFinite(total) || total <= 0) {
+		return undefined;
+	}
+
+	return {
+		label: /context/i.test(tokenLine ?? '') ? 'Context' : 'Tokens',
+		percent: clampPercent((used / total) * 100),
+		detail: `${match[1].trim()} of ${match[2].trim()}`
+	};
+};
+
+const getCodexMetric = (text: string, label: string, pattern: RegExp): UsageMetric | undefined => {
+	const value = text.match(pattern)?.[1]?.trim();
+	if (!value) {
+		return undefined;
+	}
+	return { label, value };
+};
+
+const parseCodexUsage = (raw: string): ParsedUsage => {
+	const text = stripAnsi(raw);
+	const bars = getCodexPercentBars(text);
+	const tokenBar = bars.length === 0 ? getCodexTokenBar(text) : undefined;
+	if (tokenBar) {
+		bars.push(tokenBar);
+	}
+
+	const metrics = [
+		getCodexMetric(text, 'model', /\bmodel\s*[:=]\s*([^\r\n]+)/i),
+		getCodexMetric(text, 'approval', /\bapproval(?:s)?\s*[:=]\s*([^\r\n]+)/i),
+		getCodexMetric(text, 'sandbox', /\bsandbox\s*[:=]\s*([^\r\n]+)/i)
+	].filter((metric): metric is UsageMetric => !!metric).slice(0, 3);
+
+	return {
+		title: 'Codex status',
+		summary: bars[0] ? `${formatPercent(bars[0].percent)} used` : '/status',
+		bars: bars.length > 0 ? bars : [
+			{ label: 'Status', percent: 0, detail: 'No usage percentage found in /status output' }
+		],
+		metrics: metrics.length > 0 ? metrics : [
+			{ label: 'command', value: '/status' },
+			{ label: 'usage', value: bars.length > 0 ? 'detected' : 'not reported' },
+			{ label: 'source', value: 'Codex CLI' }
+		],
+		note: bars.length > 1
+			? undefined
+			: 'Codex status output may expose one usage window or only environment status.'
+	};
+};
+
 const parseUsage = (snapshot: CliUsageSnapshot): ParsedUsage | undefined => {
 	const kind = getUsageAgentKind(snapshot.agentLabel);
 	if (kind === 'claude') {
 		return parseClaudeUsage(snapshot.raw);
+	}
+	if (kind === 'codex') {
+		return parseCodexUsage(snapshot.raw);
 	}
 	if (kind === 'kiro') {
 		return parseKiroUsage(snapshot.raw);
