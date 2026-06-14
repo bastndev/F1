@@ -8,7 +8,7 @@ import type { CliUsageSnapshot } from '../../tools';
 import type { ParsedUsage, UsageAgentKind } from '../usage-types';
 import { isAntigravityBusy, parseAntigravityUsage } from './antigravity';
 import { parseClaudeUsage } from './claude';
-import { parseCodexUsage } from './codex';
+import { codexUsageIsInline, isCodexBusy, parseCodexUsage } from './codex';
 import { isKiroBusy, parseKiroUsage } from './kiro';
 
 // Rejection reason used when an "idle-only" CLI is busy: the usage command is
@@ -26,6 +26,21 @@ export const isUsageAgentBusy = (agentLabel: string, screenText: string): boolea
 	}
 	if (kind === 'antigravity') {
 		return isAntigravityBusy(screenText);
+	}
+	if (kind === 'codex') {
+		return isCodexBusy(screenText);
+	}
+	return false;
+};
+
+// Whether the CLI renders usage as inline transcript text (Codex) rather than
+// a transient overlay. Inline views must NOT be dismissed with Esc on close —
+// for Codex that Esc opens its backtrack/edit-previous pager. Overlay CLIs
+// (Claude/Kiro/Antigravity) return false and keep the Esc dismiss.
+export const isUsageViewInline = (agentLabel: string): boolean => {
+	const kind = getUsageAgentKind(agentLabel);
+	if (kind === 'codex') {
+		return codexUsageIsInline;
 	}
 	return false;
 };
