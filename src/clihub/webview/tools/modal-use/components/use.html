@@ -1,0 +1,52 @@
+<div class="use-modal">
+	<div class="use-header">
+		<div class="use-title-group">
+			<div class="use-title" id="useModalTitle">CLI</div>
+		</div>
+		<button class="use-close-btn" id="closeUseBtn" type="button" aria-label="Close" title="Close (Esc)">esc</button>
+	</div>
+
+	<div class="use-divider"></div>
+
+	<div class="use-content">
+		<section class="use-section">
+			<div class="use-section-title">Status</div>
+			<div class="use-status-card">
+				<span class="use-status-dot" id="useStatusDot" aria-hidden="true"></span>
+				<div class="use-status-copy">
+					<strong class="use-status-value" id="useStatusValue">No active session</strong>
+				</div>
+				<div class="use-status-time">
+					<span class="use-field-label">Open for</span>
+					<strong class="use-field-value use-field-value-large" id="useOpenFor">--:--:--</strong>
+				</div>
+			</div>
+		</section>
+
+		<section class="use-section">
+			<div class="use-section-row">
+				<div class="use-section-title">Use</div>
+				<button class="use-refresh-btn" id="useRefreshBtn" type="button">
+					<span id="useRefreshLabel">Refresh</span>
+				</button>
+			</div>
+			<div class="use-usage-card">
+				<div class="use-usage-message" id="useUsageMessage">
+					<div class="use-empty-face" aria-hidden="true"></div>
+					<strong id="useUsageMessageTitle">No usage data</strong>
+					<span id="useUsageMessageDetail">-</span>
+				</div>
+
+				<div class="use-usage-result" id="useUsageResult" hidden>
+					<div class="use-usage-head">
+						<strong id="useUsageTitle">Usage</strong>
+						<span id="useUsageSummary">0.0%</span>
+					</div>
+					<div class="use-usage-bars" id="useUsageBars"></div>
+					<div class="use-usage-note" id="useUsageNote" hidden></div>
+					<div class="use-usage-grid" id="useUsageMeta"></div>
+				</div>
+			</div>
+		</section>
+	</div>
+</div>

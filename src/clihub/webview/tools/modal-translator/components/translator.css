@@ -5,6 +5,7 @@
 .translator-modal {
 	width: 100%;
 	max-height: 100%;
+	min-height: 0;
 	display: flex;
 	flex-direction: column;
 	box-sizing: border-box;
@@ -193,8 +194,10 @@
 
 /* ── Body ────────────────────────────────────────────────────────── */
 .translator-body {
-	flex: 0 1 auto;
+	flex: 1 1 auto;
+	min-height: 0;
 	overflow-y: auto;
+	overscroll-behavior: contain;
 	padding: 16px 18px;
 	scrollbar-width: thin;
 	scrollbar-color: rgba(175, 169, 236, 0.2) transparent;
@@ -748,4 +751,3 @@
 	border-color: color-mix(in srgb, var(--agent-accent) 25%, transparent);
 	color: var(--agent-accent);
 }
-

@@ -105,6 +105,17 @@
 	display: flex;
 }
 
+/* Prevent ugly focus rings (yellow/orange outlines in many themes) on the
+   terminal area. We use Terminal.focus() on the xterm instance for proper
+   input activation; the internal helper textarea is styled by xterm to be
+   invisible. These rules are defensive in case a container div ever receives
+   focus directly (e.g. from tool modal close or other keyboard flows). */
+.cli-terminal-pane:focus,
+.cli-terminal-pane:focus-visible {
+	outline: none !important;
+	box-shadow: none;
+}
+
 @media (max-width: 640px), (orientation: portrait) {
 	.layout-right {
 		min-height: 0;

@@ -3,7 +3,7 @@ import { Terminal } from '@xterm/xterm';
 import { createTabController, type CliAgentIcon } from '../panel-tab/tab';
 import { createCliCreateMessage } from '../../shared/agent-launch-guard';
 import { getAgentSlug as resolveAgentSlug } from '../../shared/agents';
-import { createToolsController } from '../tools/tools';
+import { createToolsController, type CliUsageSnapshot } from '../tools/tools';
 import { detectModelName } from '../../shared/model-detect';
 import { createRpcChannel } from './host-rpc';
 import { createBootSkeletons } from './boot-skeleton';
@@ -48,9 +48,30 @@ const defaultSubmitDelayMs = 150;
 const slowPasteSubmitDelayMs = 750;
 const routeSubmitDelayMs = 450;
 const routeSubmitSecondEnterDelayMs = 350;
+const usageRequestSettleDelayMs = 900;
+const usageRequestTimeoutMs = 7000;
+const usageDismissSecondEscapeDelayMs = 80;
+const codexUsageSubmitDelayMs = 150;
+const usageCommandsByAgentSlug: Record<string, string> = {
+	antigravity: '/usage',
+	claude: '/usage',
+	codex: '/status',
+	kiro: '/usage'
+};
 let activeSessionId: string | undefined;
 let pendingTabSwitchSessionId: string | undefined;
 let isPromptFilterEnabled = false;
+const usageSnapshots = new Map<string, CliUsageSnapshot>();
+let pendingUsageRequest: {
+	sessionId: string;
+	agentLabel: string;
+	command: string;
+	startBufferLength: number;
+	resolve: (snapshot: CliUsageSnapshot) => void;
+	reject: (reason?: unknown) => void;
+	settleTimer?: number;
+	timeoutTimer?: number;
+} | undefined;
 
 const isAgentIcon = (value: unknown): value is CliAgentIcon => {
 	if (!value || typeof value !== 'object') {
@@ -175,6 +196,138 @@ const getSubmitDelayMs = (agentSlug: string, text: string) => {
 	}
 
 	return defaultSubmitDelayMs;
+};
+
+const getUsageCommandForAgent = (agentLabel: string) => {
+	const slug = resolveAgentSlug(agentLabel) ?? 'default';
+	return usageCommandsByAgentSlug[slug];
+};
+
+const getUsageInputData = (view: TerminalView | undefined, data: string) => (
+	view?.terminal.modes.sendFocusMode ? `\x1b[I${data}` : data
+);
+
+const clearPendingUsageRequest = () => {
+	if (!pendingUsageRequest) {
+		return;
+	}
+
+	window.clearTimeout(pendingUsageRequest.settleTimer);
+	window.clearTimeout(pendingUsageRequest.timeoutTimer);
+	pendingUsageRequest = undefined;
+};
+
+const resolvePendingUsageRequest = () => {
+	const request = pendingUsageRequest;
+	if (!request) {
+		return;
+	}
+
+	const session = sessions.get(request.sessionId);
+	const raw = session?.buffer.slice(request.startBufferLength) ?? '';
+	const snapshot: CliUsageSnapshot = {
+		sessionId: request.sessionId,
+		agentLabel: request.agentLabel,
+		command: request.command,
+		raw,
+		requestedAt: Date.now()
+	};
+
+	usageSnapshots.set(request.sessionId, snapshot);
+	clearPendingUsageRequest();
+	request.resolve(snapshot);
+};
+
+const schedulePendingUsageSettle = (sessionId: string) => {
+	if (!pendingUsageRequest || pendingUsageRequest.sessionId !== sessionId) {
+		return;
+	}
+
+	window.clearTimeout(pendingUsageRequest.settleTimer);
+	pendingUsageRequest.settleTimer = window.setTimeout(resolvePendingUsageRequest, usageRequestSettleDelayMs);
+};
+
+const requestActiveUsage = () => new Promise<CliUsageSnapshot>((resolve, reject) => {
+	if (!activeSessionId) {
+		reject(new Error('No active CLI session.'));
+		return;
+	}
+
+	const session = sessions.get(activeSessionId);
+	if (!session || session.status !== 'running') {
+		reject(new Error('The active CLI session is not running.'));
+		return;
+	}
+
+	const command = getUsageCommandForAgent(session.label);
+	if (!command) {
+		reject(new Error(`Usage command is not configured for ${session.label}.`));
+		return;
+	}
+
+	if (pendingUsageRequest) {
+		pendingUsageRequest.reject(new Error('Usage refresh was superseded.'));
+		clearPendingUsageRequest();
+	}
+
+	const view = terminals.get(session.id);
+	const agentSlug = getAgentSlug(session.label);
+	pendingUsageRequest = {
+		sessionId: session.id,
+		agentLabel: session.label,
+		command,
+		startBufferLength: session.buffer.length,
+		resolve,
+		reject,
+		timeoutTimer: window.setTimeout(resolvePendingUsageRequest, usageRequestTimeoutMs)
+	};
+
+	if (agentSlug === 'codex') {
+		vscode.postMessage({
+			type: 'cli.input',
+			sessionId: session.id,
+			data: getUsageInputData(view, command)
+		});
+		window.setTimeout(() => {
+			if (sessions.get(session.id)?.status === 'running') {
+				vscode.postMessage({
+					type: 'cli.input',
+					sessionId: session.id,
+					data: getUsageInputData(view, '\r')
+				});
+			}
+		}, codexUsageSubmitDelayMs);
+		return;
+	}
+
+	vscode.postMessage({
+		type: 'cli.input',
+		sessionId: session.id,
+		data: getUsageInputData(view, `${command}\r`)
+	});
+});
+
+const dismissActiveUsageView = () => {
+	if (!activeSessionId) {
+		return;
+	}
+
+	const sessionId = activeSessionId;
+	const session = sessions.get(sessionId);
+	if (session?.status !== 'running') {
+		return;
+	}
+
+	const view = terminals.get(sessionId);
+	const data = view?.terminal.modes.sendFocusMode ? '\x1b[I\x1b' : '\x1b';
+	const postEscape = () => {
+		if (sessions.get(sessionId)?.status === 'running') {
+			vscode.postMessage({ type: 'cli.input', sessionId, data });
+		}
+	};
+
+	postEscape();
+	window.setTimeout(postEscape, usageDismissSecondEscapeDelayMs);
 };
 
 // ── Host round-trips ─────────────────────────────────────────────────
@@ -306,6 +459,12 @@ const toolsController = layoutRight
 	? createToolsController({
 			container: layoutRight,
 			getActiveSessionId: () => activeSessionId,
+			getActiveSessionCreatedAt: () => {
+				if (!activeSessionId) {
+					return undefined;
+				}
+				return sessions.get(activeSessionId)?.createdAt;
+			},
 			getActiveModelName: () => {
 				if (!activeSessionId) {
 					return undefined;
@@ -316,6 +475,14 @@ const toolsController = layoutRight
 				}
 				return detectModelName(getAgentSlug(session.label), session.buffer);
 			},
+			getUsageSnapshot: () => {
+				if (!activeSessionId) {
+					return undefined;
+				}
+				return usageSnapshots.get(activeSessionId);
+			},
+			requestUsage: requestActiveUsage,
+			dismissUsageView: dismissActiveUsageView,
 			sendToActiveSession: (text: string, options?: { paste?: boolean; submit?: boolean }) => {
 				if (!activeSessionId) {
 					return;
@@ -381,6 +548,20 @@ const toolsController = layoutRight
 				// TUI CLIs never produce an xterm selection — fall back to the
 				// text they copied (captured via OSC 52 or the clipboard watch).
 				return selection || copyToTranslate.getLastCopiedText();
+			},
+			refocusTerminal: () => {
+				if (activeSessionId) {
+					const view = terminals.get(activeSessionId);
+					if (view?.terminal) {
+						// Use the real xterm instance focus — it moves input focus to the
+						// internal helper textarea (which is hidden and has no visible ring).
+						view.terminal.focus();
+						return;
+					}
+				}
+				// Fallback (very rare): at least put focus near the terminal area.
+				const activePane = document.querySelector<HTMLElement>('.cli-terminal-pane.is-active');
+				activePane?.focus();
 			}
 		})
 	: undefined;
@@ -672,6 +853,15 @@ const syncState = (message: Extract<ServerMessage, { type: 'cli.state' }>) => {
 
 	removeClosedTerminals(openSessionIds);
 	sleepInactiveTerminals(visualSleepEnabled, openSessionIds);
+	for (const sessionId of [...usageSnapshots.keys()]) {
+		if (!openSessionIds.has(sessionId)) {
+			usageSnapshots.delete(sessionId);
+		}
+	}
+	if (pendingUsageRequest && !openSessionIds.has(pendingUsageRequest.sessionId)) {
+		pendingUsageRequest.reject(new Error('Usage refresh session was closed.'));
+		clearPendingUsageRequest();
+	}
 
 	// If a session entered error/exited state before producing output, don't leave skeleton hanging
 	for (const [sessionId, session] of sessions) {
@@ -688,6 +878,7 @@ const handleOutput = (message: Extract<ServerMessage, { type: 'cli.output' }>) =
 	const session = sessions.get(message.sessionId);
 	if (session) {
 		appendToSessionBuffer(session, message.data);
+		schedulePendingUsageSettle(message.sessionId);
 	}
 
 	let restoredFromBuffer = false;

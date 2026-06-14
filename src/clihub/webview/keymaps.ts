@@ -22,7 +22,8 @@ export type ShortcutId =
   | 'closeLauncherPalette' // launcher only
   | 'openPrompt'           // opens the Prompt tool modal
   | 'openTranslate'        // opens the Translate tool modal
-  | 'openKeymaps';         // opens the Keymaps tool modal
+  | 'openKeymaps'          // opens the Keymaps tool modal
+  | 'openUse';             // opens the Status/use tool modal
 
 export interface ShortcutDefinition {
   id: ShortcutId;
@@ -217,6 +218,13 @@ export const shortcuts: ShortcutDefinition[] = [
   {
     id: 'openKeymaps',
     label: 'Open Keymaps tool',
+    contexts: ['terminal'],
+    description: 'Shift + F4',
+    match: shiftFKey(4),
+  },
+  {
+    id: 'openUse',
+    label: 'Open Status/use tool',
     contexts: ['terminal'],
     description: 'Shift + F3',
     match: shiftFKey(3),
