@@ -8,7 +8,7 @@
  */
 import type { AgentLaunchGuardMessage } from './agent-launch-guard';
 import type { ImageAttachment, FileMentionEntry, SpellIssue, WorkspaceSkill } from './prompt';
-import type { VoiceState } from './voice/voice-types';
+import type { VoiceProgress, VoiceState } from './voice/voice-types';
 
 export type CliSessionStatus = 'running' | 'exited' | 'error';
 
@@ -56,7 +56,9 @@ export type WebviewToHostMessage =
 	| { type: 'workspace.listFiles'; id: string }
 	| { type: 'workspace.listSkills'; id: string }
 	| { type: 'mySkills.openCreate' }
-	| { type: 'voice.speak'; text: string }
+	| { type: 'voice.speak'; text: string; chunks?: string[] }
+	| { type: 'voice.pause' }
+	| { type: 'voice.resume' }
 	| { type: 'voice.stop' }
 	| { type: 'voice.query' }
 	| { type: 'clipboard.read'; id: string };
@@ -78,7 +80,7 @@ export type HostToWebviewMessage =
 	| { type: 'prompt.spellResult'; id: string; issues: SpellIssue[] }
 	| { type: 'workspace.files'; id: string; files: FileMentionEntry[] }
 	| { type: 'workspace.skills'; id: string; skills: WorkspaceSkill[] }
-	| { type: 'voice.state'; state: VoiceState; message?: string }
+	| { type: 'voice.state'; state: VoiceState; message?: string; progress?: VoiceProgress }
 	| { type: 'clipboard.text'; id: string; text: string };
 
 /**
@@ -93,6 +95,7 @@ export type InboundWebviewMessage = {
 	source?: string;
 	id?: string;
 	text?: string;
+	chunks?: unknown;
 	from?: string;
 	to?: string;
 	attachments?: ImageAttachment[];

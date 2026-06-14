@@ -48,19 +48,30 @@
         <path d="M4.012 16.737a2.005 2.005 0 0 1 -1.012 -1.737v-10c0 -1.1 .9 -2 2 -2h10c.75 0 1.158 .385 1.5 1" />
       </svg>
     </button>
-    <button class="translator-action-btn translator-speak" id="speakBtn" title="Listen" aria-label="Listen" disabled>
-      <span class="speak-idle">
-        <i class="ti ti-volume-2" aria-hidden="true"></i>
-        <span>Listen</span>
-      </span>
-      <span class="speak-stop" aria-hidden="true">
-        <i class="ti ti-player-stop-filled"></i>
-      </span>
-      <div class="translator-spectrum" id="audioSpectrum" aria-hidden="true">
-        <div class="bar"></div><div class="bar"></div><div class="bar"></div>
-        <div class="bar"></div><div class="bar"></div><div class="bar"></div>
-      </div>
-    </button>
+    <div class="translator-voice-control" id="voiceControl">
+      <button class="translator-action-btn translator-speak" id="speakBtn" title="Listen" aria-label="Listen" disabled>
+        <span class="speak-idle">
+          <i class="ti ti-volume-2" aria-hidden="true"></i>
+          <span>Listen</span>
+        </span>
+        <span class="speak-stop" aria-hidden="true">
+          <i class="ti ti-player-pause-filled"></i>
+          <span>Pause</span>
+        </span>
+        <div class="translator-spectrum" id="audioSpectrum" aria-hidden="true">
+          <div class="bar"></div><div class="bar"></div><div class="bar"></div>
+          <div class="bar"></div><div class="bar"></div><div class="bar"></div>
+        </div>
+      </button>
+      <button class="translator-action-btn translator-voice-extra" id="voiceExtraBtn" title="Stop voice" aria-label="Stop voice" disabled>
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+          stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+          class="icon icon-tabler icons-tabler-outline icon-tabler-player-stop" aria-hidden="true">
+          <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+          <path d="M5 7a2 2 0 0 1 2 -2h10a2 2 0 0 1 2 2v10a2 2 0 0 1 -2 2h-10a2 2 0 0 1 -2 -2l0 -10" />
+        </svg>
+      </button>
+    </div>
     <div class="translator-controls-right">
       <button class="translator-action-btn" id="translateBtn">
         <i class="ti ti-language" aria-hidden="true"></i>

@@ -14,9 +14,9 @@ import {
 	playSpanishText,
 	stopVoicePlayback,
 	isVoiceSpeaking,
-	wasVoiceStoppedByUser
+	type VoiceResources
 } from './voice/host-voice-tts';
-import type { VoiceState } from '../shared/voice/voice-types';
+import type { VoiceProgress, VoiceState } from '../shared/voice/voice-types';
 import { checkText as spellCheckText, warmSpellchecker } from './spellcheck/host-spellcheck';
 import { preparePromptForCLI } from './attachments/host-preparer';
 import type { CustomCliLaunch, InboundWebviewMessage } from '../shared/protocol';
@@ -26,7 +26,129 @@ import {
 	type AgentLaunchSource
 } from '../shared/agent-launch-guard';
 
-const maxVoiceTextChars = 4000;
+const maxVoiceTotalChars = 60000;
+const maxVoiceChunkChars = 1400;
+const maxVoiceChunks = 120;
+
+type ActiveVoiceSession = {
+	chunks: string[];
+	index: number;
+	state: VoiceState;
+	resources?: VoiceResources;
+};
+
+function normalizeVoiceText(text: string): string {
+	return text
+		.replace(/\r\n?/g, '\n')
+		.replace(/[ \t]+/g, ' ')
+		.replace(/\n{3,}/g, '\n\n')
+		.trim();
+}
+
+function splitLongVoiceSegment(segment: string, maxChars: number): string[] {
+	const chunks: string[] = [];
+	let current = '';
+
+	for (const part of segment.match(/\s+|\S+/g) ?? []) {
+		if (part.length > maxChars) {
+			if (current.trim()) {
+				chunks.push(current.trim());
+			}
+			current = '';
+			for (let index = 0; index < part.length; index += maxChars) {
+				chunks.push(part.slice(index, index + maxChars));
+			}
+			continue;
+		}
+
+		if (current && current.length + part.length > maxChars) {
+			chunks.push(current.trim());
+			current = part.trimStart();
+			continue;
+		}
+
+		current += part;
+	}
+
+	if (current.trim()) {
+		chunks.push(current.trim());
+	}
+
+	return chunks;
+}
+
+function splitVoiceText(text: string, maxChars: number): string[] {
+	const clean = normalizeVoiceText(text);
+	if (!clean) {
+		return [];
+	}
+	if (clean.length <= maxChars) {
+		return [clean];
+	}
+
+	const chunks: string[] = [];
+	let current = '';
+	const flush = () => {
+		if (current.trim()) {
+			chunks.push(current.trim());
+			current = '';
+		}
+	};
+
+	const paragraphs = clean.split(/\n{2,}/);
+	for (const paragraph of paragraphs) {
+		const sentences = paragraph.match(/[^.!?。！？]+[.!?。！？]+["')\]]*|[^.!?。！？]+$/g) ?? [paragraph];
+		for (const sentence of sentences) {
+			const piece = sentence.trim();
+			if (!piece) {
+				continue;
+			}
+			if (piece.length > maxChars) {
+				flush();
+				chunks.push(...splitLongVoiceSegment(piece, maxChars));
+				continue;
+			}
+			const next = current ? `${current} ${piece}` : piece;
+			if (next.length > maxChars) {
+				flush();
+				current = piece;
+			} else {
+				current = next;
+			}
+		}
+		flush();
+	}
+
+	return chunks;
+}
+
+function normalizeVoiceChunks(message: InboundWebviewMessage): string[] {
+	const rawChunks = Array.isArray(message.chunks)
+		? message.chunks.filter((chunk): chunk is string => typeof chunk === 'string')
+		: (typeof message.text === 'string' ? [message.text] : []);
+
+	const chunks: string[] = [];
+	let totalChars = 0;
+
+	for (const raw of rawChunks) {
+		for (const piece of splitVoiceText(raw, maxVoiceChunkChars)) {
+			const remaining = maxVoiceTotalChars - totalChars;
+			if (remaining <= 0 || chunks.length >= maxVoiceChunks) {
+				return chunks;
+			}
+
+			const value = piece.length > remaining ? piece.slice(0, remaining).trimEnd() : piece;
+			if (!value) {
+				continue;
+			}
+
+			chunks.push(value);
+			totalChars += value.length;
+		}
+	}
+
+	return chunks;
+}
 
 export class MyCliViewProvider implements vscode.WebviewViewProvider, vscode.Disposable {
 	public static readonly viewType = 'f1.myCli';
@@ -35,6 +157,7 @@ export class MyCliViewProvider implements vscode.WebviewViewProvider, vscode.Dis
 	private pendingInitialAgent?: string;
 	private pendingInitialCustomCli?: CustomCliLaunch;
 	private activePromptTranslation?: AbortController;
+	private activeVoiceSession?: ActiveVoiceSession;
 	private voiceRequestSeq = 0;
 
 	constructor(
@@ -122,14 +245,23 @@ export class MyCliViewProvider implements vscode.WebviewViewProvider, vscode.Dis
 				return;
 			}
 
+			if (message.type === 'voice.pause') {
+				await this._handleVoicePause(webviewView.webview);
+				return;
+			}
+
+			if (message.type === 'voice.resume') {
+				await this._handleVoiceResume(webviewView.webview);
+				return;
+			}
+
 			if (message.type === 'voice.stop') {
-				stopVoicePlayback();
-				// The active playback promise resolves and posts 'idle'.
+				await this._handleVoiceStop(webviewView.webview);
 				return;
 			}
 
 			if (message.type === 'voice.query') {
-				await this._postVoiceState(webviewView.webview, isVoiceSpeaking() ? 'speaking' : 'idle');
+				await this._postCurrentVoiceState(webviewView.webview);
 				return;
 			}
 
@@ -249,13 +381,44 @@ export class MyCliViewProvider implements vscode.WebviewViewProvider, vscode.Dis
 		return choice === guard.confirmLabel;
 	}
 
-	private async _postVoiceState(webview: vscode.Webview, state: VoiceState, detail?: string) {
-		await webview.postMessage({ type: 'voice.state', state, message: detail });
+	private async _postVoiceState(
+		webview: vscode.Webview,
+		state: VoiceState,
+		detail?: string,
+		progress?: VoiceProgress
+	) {
+		await webview.postMessage({ type: 'voice.state', state, message: detail, progress });
+	}
+
+	private _voiceProgress(session: ActiveVoiceSession): VoiceProgress {
+		return {
+			chunkIndex: Math.min(session.index, Math.max(0, session.chunks.length - 1)),
+			chunkCount: session.chunks.length
+		};
+	}
+
+	private _voiceChunkLabel(session: ActiveVoiceSession): string | undefined {
+		const progress = this._voiceProgress(session);
+		return progress.chunkCount > 1 ? `voice ${progress.chunkIndex + 1}/${progress.chunkCount}` : undefined;
+	}
+
+	private _isVoiceRunActive(session: ActiveVoiceSession, seq: number): boolean {
+		return this.activeVoiceSession === session && seq === this.voiceRequestSeq;
+	}
+
+	private async _postCurrentVoiceState(webview: vscode.Webview) {
+		const session = this.activeVoiceSession;
+		if (session) {
+			await this._postVoiceState(webview, session.state, this._voiceChunkLabel(session), this._voiceProgress(session));
+			return;
+		}
+
+		await this._postVoiceState(webview, isVoiceSpeaking() ? 'speaking' : 'idle');
 	}
 
 	private async _handleVoiceSpeak(webview: vscode.Webview, message: InboundWebviewMessage) {
-		const text = typeof message.text === 'string' ? message.text.trim().slice(0, maxVoiceTextChars) : '';
-		if (!text) {
+		const chunks = normalizeVoiceChunks(message);
+		if (!chunks.length) {
 			return;
 		}
 
@@ -267,32 +430,102 @@ export class MyCliViewProvider implements vscode.WebviewViewProvider, vscode.Dis
 		// A newer speak request supersedes this one; only the latest may
 		// report state, otherwise its 'idle' would overwrite 'speaking'.
 		const seq = ++this.voiceRequestSeq;
-		const post = async (state: VoiceState, detail?: string) => {
-			if (seq === this.voiceRequestSeq) {
-				await this._postVoiceState(webview, state, detail);
+		stopVoicePlayback(false);
+		const session: ActiveVoiceSession = {
+			chunks,
+			index: 0,
+			state: 'preparing'
+		};
+		this.activeVoiceSession = session;
+
+		await this._runVoiceSession(webview, session, seq);
+	}
+
+	private async _handleVoicePause(webview: vscode.Webview) {
+		const session = this.activeVoiceSession;
+		if (!session || (session.state !== 'preparing' && session.state !== 'speaking')) {
+			return;
+		}
+
+		this.voiceRequestSeq += 1;
+		session.state = 'paused';
+		stopVoicePlayback();
+		await this._postVoiceState(webview, 'paused', this._voiceChunkLabel(session), this._voiceProgress(session));
+	}
+
+	private async _handleVoiceResume(webview: vscode.Webview) {
+		const session = this.activeVoiceSession;
+		if (!session || session.state !== 'paused') {
+			return;
+		}
+
+		const seq = ++this.voiceRequestSeq;
+		await this._runVoiceSession(webview, session, seq);
+	}
+
+	private async _handleVoiceStop(webview: vscode.Webview) {
+		this.voiceRequestSeq += 1;
+		this.activeVoiceSession = undefined;
+		stopVoicePlayback();
+		await this._postVoiceState(webview, 'idle');
+	}
+
+	private async _runVoiceSession(webview: vscode.Webview, session: ActiveVoiceSession, seq: number) {
+		const post = async (state: VoiceState) => {
+			if (this._isVoiceRunActive(session, seq)) {
+				await this._postVoiceState(webview, state, this._voiceChunkLabel(session), this._voiceProgress(session));
 			}
 		};
 
 		try {
-			stopVoicePlayback(false);
+			if (!this._extensionContext) {
+				this.activeVoiceSession = undefined;
+				await this._postVoiceState(webview, 'error', 'Voice unavailable: no extension context.');
+				return;
+			}
+
+			session.state = 'preparing';
 			await post('preparing');
 			// Reuses ATM's piper engine/voice when installed; downloads into
 			// F1's globalStorage (with a progress notification) otherwise.
-			const resources = await ensureSpanishVoice(this._extensionContext);
-			// 'preparing' holds through synthesis; 'speaking' fires only once
-			// the first audio bytes flow, so the UI animates with the sound.
-			await playSpanishText(resources, text, () => {
-				void post('speaking');
-			});
-			await post('idle');
-		} catch (error) {
-			if (wasVoiceStoppedByUser()) {
-				await post('idle');
+			session.resources ??= await ensureSpanishVoice(this._extensionContext);
+
+			for (let index = session.index; index < session.chunks.length; index += 1) {
+				if (!this._isVoiceRunActive(session, seq)) {
+					return;
+				}
+
+				session.index = index;
+				session.state = 'preparing';
+				await post('preparing');
+				// 'preparing' holds through synthesis; 'speaking' fires only once
+				// the first audio bytes flow, so the UI animates with the sound.
+				await playSpanishText(session.resources, session.chunks[index], () => {
+					if (!this._isVoiceRunActive(session, seq)) {
+						return;
+					}
+					session.state = 'speaking';
+					void post('speaking');
+				});
+			}
+
+			if (!this._isVoiceRunActive(session, seq)) {
 				return;
 			}
+
+			this.activeVoiceSession = undefined;
+			session.state = 'idle';
+			await this._postVoiceState(webview, 'idle');
+		} catch (error) {
+			if (!this._isVoiceRunActive(session, seq)) {
+				return;
+			}
+
+			this.activeVoiceSession = undefined;
+			session.state = 'error';
 			const detail = error instanceof Error ? error.message : 'Voice playback failed.';
 			console.error('[f1-voice] Playback error:', error);
-			await post('error', detail);
+			await this._postVoiceState(webview, 'error', detail);
 		}
 	}
 
