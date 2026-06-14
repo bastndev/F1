@@ -456,7 +456,7 @@
 .prompt-textarea {
   width: 100%;
   min-height: 100px;
-  max-height: min(520px, calc(100vh - 330px));
+  max-height: min(620px, calc(100vh - 300px));
   overflow-y: auto;
   background: var(--vscode-input-background);
   border: 0.5px solid var(--vscode-editorGroup-border);
