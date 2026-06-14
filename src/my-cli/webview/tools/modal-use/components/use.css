@@ -327,6 +327,30 @@
 	overflow: hidden;
 }
 
+/* Busy state: the dots form a lightning bolt instead of the neutral face —
+   a down-left stroke, a short notch to the right, then down-left to the tip. */
+.use-usage-message.is-working .use-empty-face::before {
+	background:
+		radial-gradient(circle at 43px 6px, var(--use-empty-dot-strong) 0 2px, transparent 2.2px),
+		radial-gradient(circle at 38px 11px, var(--use-empty-dot-strong) 0 2px, transparent 2.2px),
+		radial-gradient(circle at 33px 17px, var(--use-empty-dot-strong) 0 2px, transparent 2.2px),
+		radial-gradient(circle at 28px 22px, var(--use-empty-dot-strong) 0 2px, transparent 2.2px),
+		radial-gradient(circle at 34px 22px, var(--use-empty-dot-strong) 0 2px, transparent 2.2px),
+		radial-gradient(circle at 40px 22px, var(--use-empty-dot-strong) 0 2px, transparent 2.2px),
+		radial-gradient(circle at 36px 28px, var(--use-empty-dot-strong) 0 2px, transparent 2.2px),
+		radial-gradient(circle at 31px 35px, var(--use-empty-dot-strong) 0 2px, transparent 2.2px),
+		radial-gradient(circle at 26px 42px, var(--use-empty-dot-strong) 0 2px, transparent 2.2px),
+		radial-gradient(circle, var(--use-empty-dot) 0 1.2px, transparent 1.4px);
+	background-size:
+		100% 100%, 100% 100%, 100% 100%, 100% 100%, 100% 100%,
+		100% 100%, 100% 100%, 100% 100%, 100% 100%, 8px 8px;
+}
+
+/* "<coding />" reads better in a mono/code face. */
+.use-usage-message.is-working strong {
+	font-family: var(--vscode-editor-font-family, ui-monospace, monospace);
+}
+
 .use-usage-message.is-working .use-empty-face::after {
 	content: '';
 	position: absolute;

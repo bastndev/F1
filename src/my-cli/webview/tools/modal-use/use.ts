@@ -100,7 +100,7 @@ const renderUnsupportedUsage = (host: HTMLElement, animate = false) => {
 const renderBusyUsage = (host: HTMLElement, animate = false) => {
 	renderUsageMessage(
 		host,
-		'In progress',
+		'<coding />',
 		'This CLI is working — press Refresh once the task finishes.',
 		{ empty: true, working: true, animate }
 	);
