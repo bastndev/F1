@@ -1,6 +1,6 @@
 /**
  * Phase 1 webview HTML: the launcher (fuzzy-search agent picker). The static
- * template ships at dist/clihub/webview/launcher/index.html; this fills in URIs,
+ * template ships at dist/my-cli/webview/launcher/index.html; this fills in URIs,
  * CSP, and the agent models (with installed-state) it renders.
  */
 import * as fs from 'fs';

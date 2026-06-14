@@ -11,7 +11,7 @@ export const PROTECTED_TERMS = new Set<string>([
 	'socket', 'axios', 'fetch', 'cors', 'jwt', 'oauth',
 
 	// CLI Hub agents and local product terms
-	'f1', 'clihub', 'opencode', 'codex', 'claude', 'claudecode', 'copilot',
+	'f1', 'mycli', 'opencode', 'codex', 'claude', 'claudecode', 'copilot',
 	'antigravity', 'grok', 'kiro', 'kilo', 'kilocode',
 	'pty', 'xterm', 'webview', 'vscode', 'cursor', 'windsurf', 'trae',
 
@@ -55,7 +55,7 @@ export const PROTECTED_TERMS = new Set<string>([
 	'return', 'throw', 'try', 'catch', 'finally', 'switch', 'case', 'break',
 
 	// Local technical terms that should not be over-corrected by the dictionary.
-	'autocorrect', 'typo', 'lynxjs', 'testear', 'codigo', 'prompt', 'code', 'bug', 'palito', 'mouse', 'click', 'harry', 'potter', 'ctrl','enter' , 'alt', 'skills', 'skill', '.agents', 'agents','prompts', 'refactorizacion', 'tokens'
+	'autocorrect', 'typo', 'lynxjs', 'testear', 'codigo', 'prompt', 'code', 'bug', 'palito', 'mouse', 'click', 'harry', 'potter', 'ctrl','enter' , 'alt', 'skills', 'skill', '.agents', 'agents','prompts', 'refactorizacion', 'tokens','toggle'
 ]);
 
 export function isProtectedTerm(word: string): boolean {

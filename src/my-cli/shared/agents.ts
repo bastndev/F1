@@ -2,8 +2,8 @@
  * Single registry for every CLI agent the hub can launch.
  *
  * Adding an agent: add one entry here, drop its SVG into
- * src/clihub/webview/assets/icons-cli/, and (optionally) add an installer entry in
- * src/clihub/host/terminal-cli/cli-installers.ts.
+ * src/my-cli/webview/assets/icons-cli/, and (optionally) add an installer entry in
+ * src/my-cli/host/terminal-cli/cli-installers.ts.
  */
 export type CliAgent = {
 	label: string;

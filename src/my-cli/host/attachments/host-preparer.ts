@@ -2,7 +2,7 @@ import * as vscode from 'vscode';
 import type { ImageAttachment } from '../../shared/prompt/attachments/types';
 import { buildPromptTextWithImages } from '../../shared/prompt/attachments/prepare';
 
-const IMAGE_DIR_NAME = 'clihub-images';
+const IMAGE_DIR_NAME = 'my-cli-images';
 
 export async function preparePromptForCLI(
 	text: string,
