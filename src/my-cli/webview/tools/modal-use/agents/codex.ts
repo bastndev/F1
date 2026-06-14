@@ -11,6 +11,12 @@ import type { ParsedUsage, UsageBar, UsageMetric } from '../usage-types';
 // backtrack / edit-previous-message pager instead of closing anything.
 export const codexUsageIsInline = true;
 
+// Defensive guard: although Codex's /status works mid-task, we still treat it
+// as idle-only so the <coding /> busy card shows instead of injecting while it
+// works. Marker: the "working (… · esc to interrupt)" spinner during a task.
+export const isCodexBusy = (screenText: string): boolean =>
+	/esc to interrupt/i.test(screenText);
+
 const parseCompactNumber = (value: string) => Number(value.replace(/[,_\s]/g, ''));
 
 const getCodexResetDetail = (lines: string[], startIndex: number) => {

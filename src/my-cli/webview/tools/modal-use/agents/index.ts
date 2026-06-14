@@ -8,7 +8,7 @@ import type { CliUsageSnapshot } from '../../tools';
 import type { ParsedUsage, UsageAgentKind } from '../usage-types';
 import { isAntigravityBusy, parseAntigravityUsage } from './antigravity';
 import { parseClaudeUsage } from './claude';
-import { codexUsageIsInline, parseCodexUsage } from './codex';
+import { codexUsageIsInline, isCodexBusy, parseCodexUsage } from './codex';
 import { isKiroBusy, parseKiroUsage } from './kiro';
 
 // Rejection reason used when an "idle-only" CLI is busy: the usage command is
@@ -26,6 +26,9 @@ export const isUsageAgentBusy = (agentLabel: string, screenText: string): boolea
 	}
 	if (kind === 'antigravity') {
 		return isAntigravityBusy(screenText);
+	}
+	if (kind === 'codex') {
+		return isCodexBusy(screenText);
 	}
 	return false;
 };
