@@ -200,7 +200,7 @@ const createUsageBar = (bar: UsageBar) => {
 	track.setAttribute('aria-hidden', 'true');
 
 	const fill = document.createElement('span');
-	fill.style.width = `${clampPercent(bar.percent)}%`;
+	fill.style.width = '0%';
 	track.append(fill);
 
 	item.append(header, track);
@@ -243,6 +243,7 @@ const renderUsageSnapshot = (host: HTMLElement, snapshot: CliUsageSnapshot | und
 	}
 
 	setHidden(host, '#useUsageMessage', true);
+	const result = host.querySelector<HTMLElement>('#useUsageResult');
 	setHidden(host, '#useUsageResult', false);
 	setText(host, '#useUsageTitle', parsed.title);
 	setText(host, '#useUsageSummary', parsed.summary);
@@ -262,6 +263,26 @@ const renderUsageSnapshot = (host: HTMLElement, snapshot: CliUsageSnapshot | und
 	const meta = host.querySelector<HTMLElement>('#useUsageMeta');
 	if (meta) {
 		meta.replaceChildren(...parsed.metrics.map(createUsageMetric));
+	}
+
+	// Nice appear transition + animated bar fills (prevents jarring pop-in)
+	if (result) {
+		result.style.opacity = '0';
+		requestAnimationFrame(() => {
+			result.style.opacity = '1';
+		});
+	}
+
+	// Trigger the width transitions on the freshly created bars
+	if (bars) {
+		requestAnimationFrame(() => {
+			const fills = bars.querySelectorAll<HTMLElement>('.use-usage-bar span');
+			parsed.bars.forEach((bar, i) => {
+				if (fills[i]) {
+					fills[i].style.width = `${clampPercent(bar.percent)}%`;
+				}
+			});
+		});
 	}
 };
 
@@ -360,7 +381,11 @@ export const mountUsePanel = (host: HTMLElement, context: ToolContext) => {
 
 		isRefreshingUsage = true;
 		shouldDismissCliUsageView = true;
-		renderUsageMessage(host, 'Loading usage', commandLabel);
+
+		// No text in the card during loading — rely on the button ("Loading" + spinner)
+		// and the card's sweep animation + reserved min-height for visual feedback.
+		setHidden(host, '#useUsageMessage', true);
+		setHidden(host, '#useUsageResult', true);
 		setRefreshState(host, true);
 		void context.requestUsage()
 			.then((snapshot) => {
