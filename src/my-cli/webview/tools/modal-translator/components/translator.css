@@ -208,7 +208,7 @@
 	line-height: 1.7;
 	white-space: pre-wrap;
 	overflow-wrap: anywhere;
-	color: #ffffff;
+	color: var(--vscode-foreground);
 }
 
 .translator-text.placeholder {
