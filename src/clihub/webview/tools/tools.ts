@@ -35,6 +35,7 @@ export type ToolContext = {
 	stopSpeech?: () => void;
 	queryVoiceState?: () => void;
 	onVoiceState?: (listener: (state: VoiceState, message?: string) => void) => () => void;
+	refocusTerminal?: () => void;
 };
 
 type ToolCleanup = () => void;
@@ -59,6 +60,7 @@ export type ToolsControllerOptions = {
 	stopSpeech?: () => void;
 	queryVoiceState?: () => void;
 	onVoiceState?: (listener: (state: VoiceState, message?: string) => void) => () => void;
+	refocusTerminal?: () => void;
 };
 
 const modalId = 'cli-tools-modal';
@@ -97,14 +99,15 @@ export const createToolsController = ({
 	speakText,
 	stopSpeech,
 	queryVoiceState,
-	onVoiceState
+	onVoiceState,
+	refocusTerminal
 }: ToolsControllerOptions) => {
 	let activeModal: HTMLElement | null = null;
 	let currentTool: ToolId | null = null;
 	let activeCleanup: ToolCleanup | null = null;
 
 	const close = () => {
-		document.removeEventListener('keydown', handleKeyDown);
+		document.removeEventListener('keydown', handleKeyDown, true);
 		const closingTool = currentTool;
 		activeCleanup?.();
 		activeCleanup = null;
@@ -115,11 +118,19 @@ export const createToolsController = ({
 		activeModal?.remove();
 		activeModal = null;
 		currentTool = null;
+
+		// Return focus using the host-provided function (uses real Terminal.focus()
+		// on the xterm instance so input works and no visible focus ring appears
+		// on a container div).
+		requestAnimationFrame(() => {
+			refocusTerminal?.();
+		});
 	};
 
 	const handleKeyDown = (event: KeyboardEvent) => {
 		if (event.key === 'Escape') {
 			event.preventDefault();
+			event.stopPropagation();
 			close();
 		}
 	};
@@ -141,7 +152,8 @@ export const createToolsController = ({
 			alignItems: 'center',
 			justifyContent: 'center',
 			background: 'rgba(0, 0, 0, 0.38)',
-			backdropFilter: 'blur(16px)'
+			backdropFilter: 'blur(16px)',
+			outline: 'none'
 		});
 
 		const host = document.createElement('div');
@@ -184,12 +196,25 @@ export const createToolsController = ({
 			speakText,
 			stopSpeech,
 			queryVoiceState,
-			onVoiceState
+			onVoiceState,
+			refocusTerminal
 		});
 		activeCleanup = typeof cleanup === 'function' ? cleanup : null;
 
 		container.append(modal);
-		document.addEventListener('keydown', handleKeyDown);
+
+		// Make the dialog focusable and move focus into it. This is the key fix for
+		// "Esc does not close on first open": the xterm underneath would otherwise
+		// keep focus and swallow (or turn into terminal input) the Escape key before
+		// our document listener could see it. Focusing the modal ensures the event
+		// targets something inside the overlay.
+		modal.tabIndex = -1;
+		// Focus after paint so the content (close button etc.) is ready.
+		requestAnimationFrame(() => modal.focus());
+
+		// Capture phase + stopPropagation so Escape is intercepted even if the
+		// terminal still has some internal key handling.
+		document.addEventListener('keydown', handleKeyDown, true);
 		activeModal = modal;
 		currentTool = tool;
 	};

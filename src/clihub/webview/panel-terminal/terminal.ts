@@ -519,6 +519,20 @@ const toolsController = layoutRight
 				// TUI CLIs never produce an xterm selection — fall back to the
 				// text they copied (captured via OSC 52 or the clipboard watch).
 				return selection || copyToTranslate.getLastCopiedText();
+			},
+			refocusTerminal: () => {
+				if (activeSessionId) {
+					const view = terminals.get(activeSessionId);
+					if (view?.terminal) {
+						// Use the real xterm instance focus — it moves input focus to the
+						// internal helper textarea (which is hidden and has no visible ring).
+						view.terminal.focus();
+						return;
+					}
+				}
+				// Fallback (very rare): at least put focus near the terminal area.
+				const activePane = document.querySelector<HTMLElement>('.cli-terminal-pane.is-active');
+				activePane?.focus();
 			}
 		})
 	: undefined;
