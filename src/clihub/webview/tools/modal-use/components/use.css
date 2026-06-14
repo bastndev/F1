@@ -276,7 +276,48 @@
 	display: flex;
 	flex-direction: column;
 	justify-content: center;
+	align-items: flex-start;
 	gap: 4px;
+}
+
+.use-usage-message.is-empty-state {
+	align-items: center;
+	gap: 9px;
+	padding: 4px 18px;
+	text-align: center;
+}
+
+.use-empty-face {
+	--use-empty-dot: color-mix(in srgb, var(--vscode-descriptionForeground, rgba(128, 128, 128, 0.72)) 44%, transparent);
+	--use-empty-dot-strong: color-mix(in srgb, var(--vscode-descriptionForeground, rgba(128, 128, 128, 0.72)) 72%, transparent);
+	display: none;
+	position: relative;
+	width: 72px;
+	height: 46px;
+	flex: 0 0 auto;
+	opacity: 0.82;
+}
+
+.use-empty-face::before {
+	content: '';
+	position: absolute;
+	inset: 0;
+	background:
+		radial-gradient(circle at 22px 17px, var(--use-empty-dot-strong) 0 2px, transparent 2.2px),
+		radial-gradient(circle at 50px 17px, var(--use-empty-dot-strong) 0 2px, transparent 2.2px),
+		radial-gradient(circle at 28px 32px, var(--use-empty-dot-strong) 0 1.8px, transparent 2px),
+		radial-gradient(circle at 36px 35px, var(--use-empty-dot-strong) 0 1.8px, transparent 2px),
+		radial-gradient(circle at 44px 32px, var(--use-empty-dot-strong) 0 1.8px, transparent 2px),
+		radial-gradient(circle, var(--use-empty-dot) 0 1.2px, transparent 1.4px);
+	background-size: 100% 100%, 100% 100%, 100% 100%, 100% 100%, 100% 100%, 8px 8px;
+}
+
+.use-usage-message.is-empty-state .use-empty-face {
+	display: block;
+}
+
+.use-usage-message.is-refreshing-empty .use-empty-face {
+	animation: use-empty-nudge 520ms ease;
 }
 
 .use-usage-message strong {
@@ -290,6 +331,11 @@
 	font-family: var(--vscode-editor-font-family, ui-monospace, monospace);
 	font-size: 11px;
 	line-height: 1.25;
+}
+
+.use-usage-message.is-empty-state span {
+	max-width: 320px;
+	font-family: var(--vscode-font-family);
 }
 
 .use-usage-result {
@@ -455,6 +501,21 @@
 @keyframes use-loading-sweep {
 	to {
 		transform: translateX(100%);
+	}
+}
+
+@keyframes use-empty-nudge {
+	0%,
+	100% {
+		transform: translateY(0);
+	}
+
+	35% {
+		transform: translateY(-2px);
+	}
+
+	70% {
+		transform: translateY(1px);
 	}
 }
 

@@ -400,11 +400,37 @@ const parseUsage = (snapshot: CliUsageSnapshot): ParsedUsage | undefined => {
 	return undefined;
 };
 
-const renderUsageMessage = (host: HTMLElement, title: string, detail: string) => {
+const triggerEmptyRefreshAnimation = (host: HTMLElement) => {
+	const message = host.querySelector<HTMLElement>('#useUsageMessage');
+	if (!message) {
+		return;
+	}
+
+	message.classList.remove('is-refreshing-empty');
+	void message.offsetWidth;
+	message.classList.add('is-refreshing-empty');
+	window.setTimeout(() => message.classList.remove('is-refreshing-empty'), 560);
+};
+
+const renderUsageMessage = (host: HTMLElement, title: string, detail: string, options?: { empty?: boolean; animate?: boolean }) => {
 	setHidden(host, '#useUsageResult', true);
 	setHidden(host, '#useUsageMessage', false);
+	const message = host.querySelector<HTMLElement>('#useUsageMessage');
+	message?.classList.toggle('is-empty-state', options?.empty === true);
 	setText(host, '#useUsageMessageTitle', title);
 	setText(host, '#useUsageMessageDetail', detail);
+	if (options?.animate) {
+		triggerEmptyRefreshAnimation(host);
+	}
+};
+
+const renderUnsupportedUsage = (host: HTMLElement, animate = false) => {
+	renderUsageMessage(
+		host,
+		'Not available yet',
+		'This CLI does not expose usage data here yet.',
+		{ empty: true, animate }
+	);
 };
 
 const createUsageBar = (bar: UsageBar) => {
@@ -461,13 +487,17 @@ const createUsageMetric = (metric: UsageMetric) => {
 const renderUsageSnapshot = (host: HTMLElement, snapshot: CliUsageSnapshot | undefined) => {
 	if (!snapshot) {
 		const agent = getActiveAgentLabel();
+		if (getUsageCommandLabel(agent) === 'not configured') {
+			renderUnsupportedUsage(host);
+			return;
+		}
 		renderUsageMessage(host, 'No usage data', getUsageCommandLabel(agent));
 		return;
 	}
 
 	const parsed = parseUsage(snapshot);
 	if (!parsed) {
-		renderUsageMessage(host, 'Not configured', snapshot.agentLabel);
+		renderUnsupportedUsage(host);
 		return;
 	}
 
@@ -601,13 +631,13 @@ export const mountUsePanel = (host: HTMLElement, context: ToolContext) => {
 		}
 
 		if (!context.requestUsage) {
-			renderUsageMessage(host, 'Not configured', getActiveAgentLabel());
+			renderUnsupportedUsage(host, true);
 			return;
 		}
 
 		const commandLabel = getUsageCommandLabel(getActiveAgentLabel());
 		if (commandLabel === 'not configured') {
-			renderUsageMessage(host, 'Not configured', getActiveAgentLabel());
+			renderUnsupportedUsage(host, true);
 			return;
 		}
 
