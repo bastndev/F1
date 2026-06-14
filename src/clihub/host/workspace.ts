@@ -8,6 +8,15 @@ import * as vscode from 'vscode';
 import type { SkillRoot, WorkspaceSkill } from '../shared/prompt';
 import type { InboundWebviewMessage } from '../shared/protocol';
 
+type GitignoreRule = {
+	negated: boolean;
+	directoryOnly: boolean;
+	anchored: boolean;
+	hasSlash: boolean;
+	regexSource: string;
+	segmentRegex?: RegExp;
+};
+
 const visibleRootDotfiles = new Set([
 	'.babelrc',
 	'.browserslistrc',
@@ -99,6 +108,7 @@ export const handleWorkspaceListFiles = async (webview: vscode.Webview, message:
 		// Find files excluding common ignored directories
 		const uris = await vscode.workspace.findFiles('**/*', '{**/node_modules/**,**/.git/**,**/dist/**,**/out/**}', 1000);
 		const workspaceFolder = vscode.workspace.workspaceFolders?.[0];
+		const gitignoreRules = await getWorkspaceGitignoreRules(workspaceFolder);
 
 		const files = uris.map(uri => {
 			const isDirectory = false; // findFiles only returns files
@@ -117,7 +127,7 @@ export const handleWorkspaceListFiles = async (webview: vscode.Webview, message:
 				displayPath: getMentionDisplayPath(relativePath),
 				isDirectory
 			};
-		}).filter(entry => isMentionVisiblePath(entry.path));
+		}).filter(entry => isMentionVisiblePath(entry.path) && !isGitignoredPath(entry.path, entry.isDirectory, gitignoreRules));
 
 		// If we also want directories, we could get unique directory paths from the files list
 		const dirs = new Set<string>();
@@ -135,6 +145,10 @@ export const handleWorkspaceListFiles = async (webview: vscode.Webview, message:
 
 		const allEntries = [...files];
 		dirs.forEach(dir => {
+			if (isGitignoredPath(dir, true, gitignoreRules)) {
+				return;
+			}
+
 			allEntries.push({
 				name: path.basename(dir),
 				path: dir,
@@ -171,6 +185,159 @@ function isMentionVisiblePath(relativePath: string): boolean {
 
 		return index === segments.length - 1 && visibleRootDotfiles.has(segment);
 	});
+}
+
+async function getWorkspaceGitignoreRules(workspaceFolder: vscode.WorkspaceFolder | undefined): Promise<GitignoreRule[]> {
+	if (!workspaceFolder) {
+		return [];
+	}
+
+	try {
+		const gitignoreUri = vscode.Uri.joinPath(workspaceFolder.uri, '.gitignore');
+		const content = Buffer.from(await vscode.workspace.fs.readFile(gitignoreUri)).toString('utf8');
+		return parseGitignoreRules(content);
+	} catch {
+		return [];
+	}
+}
+
+function parseGitignoreRules(content: string): GitignoreRule[] {
+	return content
+		.split(/\r?\n/)
+		.map(parseGitignoreRule)
+		.filter((rule): rule is GitignoreRule => Boolean(rule));
+}
+
+function parseGitignoreRule(line: string): GitignoreRule | undefined {
+	let pattern = line.replace(/\s+$/, '');
+	if (!pattern) {
+		return undefined;
+	}
+
+	if (pattern.startsWith('\\#')) {
+		pattern = pattern.slice(1);
+	} else if (pattern.startsWith('#')) {
+		return undefined;
+	}
+
+	let negated = false;
+	if (pattern.startsWith('\\!')) {
+		pattern = pattern.slice(1);
+	} else if (pattern.startsWith('!')) {
+		negated = true;
+		pattern = pattern.slice(1);
+	}
+
+	const anchored = pattern.startsWith('/');
+	pattern = pattern.replace(/^\/+/, '');
+
+	const directoryOnly = pattern.endsWith('/');
+	pattern = pattern.replace(/\/+$/, '');
+	if (!pattern) {
+		return undefined;
+	}
+
+	const hasSlash = pattern.includes('/');
+	const regexSource = gitignoreGlobToRegexSource(pattern);
+
+	return {
+		negated,
+		directoryOnly,
+		anchored,
+		hasSlash,
+		regexSource,
+		segmentRegex: hasSlash ? undefined : new RegExp(`^${regexSource}$`),
+	};
+}
+
+function isGitignoredPath(relativePath: string, isDirectory: boolean, rules: GitignoreRule[]): boolean {
+	if (rules.length === 0) {
+		return false;
+	}
+
+	const normalizedPath = normalizeRelativePath(relativePath);
+	if (!normalizedPath) {
+		return false;
+	}
+
+	let ignored = false;
+	for (const rule of rules) {
+		if (matchesGitignoreRule(rule, normalizedPath, isDirectory)) {
+			ignored = !rule.negated;
+		}
+	}
+
+	return ignored;
+}
+
+function matchesGitignoreRule(rule: GitignoreRule, relativePath: string, isDirectory: boolean): boolean {
+	if (!rule.hasSlash && rule.segmentRegex) {
+		const segments = relativePath.split('/').filter(Boolean);
+		if (rule.anchored) {
+			const [rootSegment] = segments;
+			if (!rootSegment || !rule.segmentRegex.test(rootSegment)) {
+				return false;
+			}
+
+			if (!rule.directoryOnly) {
+				return true;
+			}
+
+			return isDirectory || segments.length > 1;
+		}
+
+		return segments.some((segment, index) => {
+			if (!rule.segmentRegex?.test(segment)) {
+				return false;
+			}
+
+			if (!rule.directoryOnly) {
+				return true;
+			}
+
+			return isDirectory || index < segments.length - 1;
+		});
+	}
+
+	const matchPrefix = rule.anchored ? '^' : '(?:^|/)';
+	return new RegExp(`${matchPrefix}${rule.regexSource}(?:/.*)?$`).test(relativePath);
+}
+
+function normalizeRelativePath(relativePath: string): string {
+	return relativePath.replace(/\\/g, '/').replace(/^\/+/, '').replace(/\/+$/, '');
+}
+
+function gitignoreGlobToRegexSource(pattern: string): string {
+	let source = '';
+
+	for (let index = 0; index < pattern.length; index += 1) {
+		const char = pattern[index];
+
+		if (char === '*') {
+			const isDoubleStar = pattern[index + 1] === '*';
+			if (isDoubleStar) {
+				const consumesSlash = pattern[index + 2] === '/';
+				source += consumesSlash ? '(?:.*\\/)?' : '.*';
+				index += consumesSlash ? 2 : 1;
+			} else {
+				source += '[^/]*';
+			}
+			continue;
+		}
+
+		if (char === '?') {
+			source += '[^/]';
+			continue;
+		}
+
+		source += escapeRegexChar(char);
+	}
+
+	return source;
+}
+
+function escapeRegexChar(char: string): string {
+	return /[|\\{}()[\]^$+?.]/.test(char) ? `\\${char}` : char;
 }
 
 function getMentionDisplayPath(relativePath: string): string {
