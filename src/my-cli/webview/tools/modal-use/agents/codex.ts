@@ -5,6 +5,12 @@
 import { stripAnsi, parsePercent, formatPercent, clampPercent, getCleanLine, stripUsageVisualBar, titleCase } from '../usage-utils';
 import type { ParsedUsage, UsageBar, UsageMetric } from '../usage-types';
 
+// Codex prints /status as inline transcript text, NOT a dismissable overlay.
+// So the Use modal must NOT send Esc on close (see isUsageViewInline in the
+// registry): with prior conversation, Esc drops the user into Codex's
+// backtrack / edit-previous-message pager instead of closing anything.
+export const codexUsageIsInline = true;
+
 const parseCompactNumber = (value: string) => Number(value.replace(/[,_\s]/g, ''));
 
 const getCodexResetDetail = (lines: string[], startIndex: number) => {
@@ -28,6 +34,12 @@ const getCodexPercentBars = (text: string): UsageBar[] => {
 	for (let index = 0; index < lines.length; index += 1) {
 		const line = lines[index];
 		const cleanLine = stripUsageVisualBar(line);
+		// Skip Codex's "context window" line: it's not a quota limit and its
+		// "% left" doesn't track the token counts, so it mirrored the 5h limit
+		// and read as a duplicate bar. Only the real rate limits stay.
+		if (/context\s*window/i.test(cleanLine)) {
+			continue;
+		}
 		const percentMatch = cleanLine.match(/(\d+(?:\.\d+)?)\s*%\s*(used|remaining|left)?/i);
 		if (!percentMatch) {
 			continue;
@@ -51,6 +63,8 @@ const getCodexPercentBars = (text: string): UsageBar[] => {
 		bars.push({ label, percent, detail: details.join(' - ') || undefined, reset });
 	}
 
+	// The two Codex rate limits (5h + Weekly); the context window is filtered
+	// out above, so this stays at both even after a conversation starts.
 	return bars.slice(0, 2);
 };
 

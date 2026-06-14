@@ -4,7 +4,7 @@ import { createTabController, type CliAgentIcon } from '../panel-tab/tab';
 import { createCliCreateMessage } from '../../shared/agent-launch-guard';
 import { getAgentSlug as resolveAgentSlug } from '../../shared/agents';
 import { createToolsController, type CliUsageSnapshot } from '../tools/tools';
-import { USAGE_BUSY_ERROR, isUsageAgentBusy } from '../tools/modal-use/agents';
+import { USAGE_BUSY_ERROR, isUsageAgentBusy, isUsageViewInline } from '../tools/modal-use/agents';
 import { detectModelName } from '../../shared/model-detect';
 import { createRpcChannel } from './host-rpc';
 import { createBootSkeletons } from './boot-skeleton';
@@ -346,6 +346,13 @@ const dismissActiveUsageView = () => {
 	const sessionId = activeSessionId;
 	const session = sessions.get(sessionId);
 	if (session?.status !== 'running') {
+		return;
+	}
+
+	// Codex renders /status as inline transcript text — there's no overlay to
+	// close. Sending Esc would instead open Codex's backtrack/edit-previous
+	// pager whenever prior conversation exists, trapping the user. Skip dismiss.
+	if (isUsageViewInline(session.label)) {
 		return;
 	}
 
