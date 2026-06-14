@@ -716,7 +716,7 @@
 }
 
 .translator-speak.speaking:hover .translator-spectrum {
-	opacity: 0.18;
+	opacity: 0;
 }
 
 /* ── Audio spectrum — lives inside the Listen button, same slot ──── */
