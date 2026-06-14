@@ -4,6 +4,14 @@
 import { stripAnsi, parsePercent, formatPercent, getCleanLine, stripUsageVisualBar, titleCase } from '../usage-utils';
 import type { ParsedUsage, UsageBar, UsageMetric } from '../usage-types';
 
+// Antigravity is idle-only: injecting /usage mid-task corrupts the input
+// AND the running spinner redraws duplicate the captured usage rows. Detect
+// the working state from the live terminal screen and skip injection.
+// Markers while busy: the "working..." spinner and the "esc to cancel" status
+// bar shown during a cancellable task.
+export const isAntigravityBusy = (screenText: string): boolean =>
+	/working\.{3}|esc to cancel/i.test(screenText);
+
 const getAntigravityGroupLabel = (value: string) => titleCase(value)
 	.replace(/\bAnd\b/g, 'and')
 	.replace(/\bGpt\b/g, 'GPT');

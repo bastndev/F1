@@ -6,7 +6,7 @@
  */
 import type { CliUsageSnapshot } from '../../tools';
 import type { ParsedUsage, UsageAgentKind } from '../usage-types';
-import { parseAntigravityUsage } from './antigravity';
+import { isAntigravityBusy, parseAntigravityUsage } from './antigravity';
 import { parseClaudeUsage } from './claude';
 import { parseCodexUsage } from './codex';
 import { isKiroBusy, parseKiroUsage } from './kiro';
@@ -23,6 +23,9 @@ export const isUsageAgentBusy = (agentLabel: string, screenText: string): boolea
 	const kind = getUsageAgentKind(agentLabel);
 	if (kind === 'kiro') {
 		return isKiroBusy(screenText);
+	}
+	if (kind === 'antigravity') {
+		return isAntigravityBusy(screenText);
 	}
 	return false;
 };
