@@ -203,14 +203,21 @@ export const createToolsController = ({
 
 		container.append(modal);
 
-		// Make the dialog focusable and move focus into it. This is the key fix for
-		// "Esc does not close on first open": the xterm underneath would otherwise
-		// keep focus and swallow (or turn into terminal input) the Escape key before
-		// our document listener could see it. Focusing the modal ensures the event
-		// targets something inside the overlay.
 		modal.tabIndex = -1;
-		// Focus after paint so the content (close button etc.) is ready.
-		requestAnimationFrame(() => modal.focus());
+
+		// Focus strategy on open:
+		// - For the Prompt modal (the "chat"), explicitly focus the textarea so the
+		//   cursor is ready for immediate typing.
+		// - For other tools, focus the dialog container itself (helps Esc trapping
+		//   and keeps focus inside the overlay instead of the terminal underneath).
+		requestAnimationFrame(() => {
+			const promptInput = host.querySelector<HTMLTextAreaElement>('#promptInput');
+			if (promptInput && !promptInput.disabled) {
+				promptInput.focus();
+			} else {
+				modal.focus();
+			}
+		});
 
 		// Capture phase + stopPropagation so Escape is intercepted even if the
 		// terminal still has some internal key handling.
