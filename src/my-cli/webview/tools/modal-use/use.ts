@@ -3,7 +3,7 @@ import useHtml from './components/use.html';
 import type { CliUsageSnapshot, ToolContext } from '../tools';
 import type { UsageBar, UsageMetric } from './usage-types';
 import { clampPercent, formatPercent } from './usage-utils';
-import { getUsageCommandLabel, parseUsage } from './agents';
+import { USAGE_BUSY_ERROR, getUsageCommandLabel, parseUsage } from './agents';
 
 const stylesId = 'cli-use-panel-styles';
 const refreshIntervalMs = 1000;
@@ -71,11 +71,14 @@ const triggerEmptyRefreshAnimation = (host: HTMLElement) => {
 	window.setTimeout(() => message.classList.remove('is-refreshing-empty'), 560);
 };
 
-const renderUsageMessage = (host: HTMLElement, title: string, detail: string, options?: { empty?: boolean; animate?: boolean }) => {
+const renderUsageMessage = (host: HTMLElement, title: string, detail: string, options?: { empty?: boolean; animate?: boolean; working?: boolean }) => {
 	setHidden(host, '#useUsageResult', true);
 	setHidden(host, '#useUsageMessage', false);
 	const message = host.querySelector<HTMLElement>('#useUsageMessage');
 	message?.classList.toggle('is-empty-state', options?.empty === true);
+	// is-working keeps the square face but sweeps an animated "ray" across the
+	// dots — every other message state clears it.
+	message?.classList.toggle('is-working', options?.working === true);
 	setText(host, '#useUsageMessageTitle', title);
 	setText(host, '#useUsageMessageDetail', detail);
 	if (options?.animate) {
@@ -89,6 +92,17 @@ const renderUnsupportedUsage = (host: HTMLElement, animate = false) => {
 		'Not available yet',
 		'This CLI does not expose usage data here yet.',
 		{ empty: true, animate }
+	);
+};
+
+// Shown when an idle-only CLI (e.g. Kiro) is mid-task: same square face as the
+// empty state, different text, and a moving ray. No usage command was sent.
+const renderBusyUsage = (host: HTMLElement, animate = false) => {
+	renderUsageMessage(
+		host,
+		'In progress',
+		'This CLI is working — press Refresh once the task finishes.',
+		{ empty: true, working: true, animate }
 	);
 };
 
@@ -315,8 +329,15 @@ export const mountUsePanel = (host: HTMLElement, context: ToolContext) => {
 				}
 			})
 			.catch((error) => {
+				// Nothing was injected for any rejection, so never dismiss a view.
 				shouldDismissCliUsageView = false;
 				if (isDisposed) {
+					return;
+				}
+				// Busy is not a failure: the CLI is mid-task, so show the
+				// in-progress card and let the user Refresh when it's done.
+				if (error instanceof Error && error.message === USAGE_BUSY_ERROR) {
+					renderBusyUsage(host, true);
 					return;
 				}
 				const message = error instanceof Error ? error.message : 'Usage refresh failed.';

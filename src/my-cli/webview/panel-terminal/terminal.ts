@@ -4,6 +4,7 @@ import { createTabController, type CliAgentIcon } from '../panel-tab/tab';
 import { createCliCreateMessage } from '../../shared/agent-launch-guard';
 import { getAgentSlug as resolveAgentSlug } from '../../shared/agents';
 import { createToolsController, type CliUsageSnapshot } from '../tools/tools';
+import { USAGE_BUSY_ERROR, isUsageAgentBusy } from '../tools/modal-use/agents';
 import { detectModelName } from '../../shared/model-detect';
 import { createRpcChannel } from './host-rpc';
 import { createBootSkeletons } from './boot-skeleton';
@@ -207,6 +208,27 @@ const getUsageInputData = (view: TerminalView | undefined, data: string) => (
 	view?.terminal.modes.sendFocusMode ? `\x1b[I${data}` : data
 );
 
+// The current visible terminal screen as plain text (no ANSI). Used to detect
+// whether a CLI is mid-task before injecting its usage command — the live
+// viewport reflects the present state, unlike the append-only session buffer.
+const readTerminalScreenText = (view: TerminalView | undefined): string => {
+	const terminal = view?.terminal;
+	const buffer = terminal?.buffer.active;
+	if (!terminal || !buffer) {
+		return '';
+	}
+
+	const lines: string[] = [];
+	const end = buffer.baseY + terminal.rows;
+	for (let row = buffer.baseY; row < end; row += 1) {
+		const line = buffer.getLine(row);
+		if (line) {
+			lines.push(line.translateToString(true));
+		}
+	}
+	return lines.join('\n');
+};
+
 const clearPendingUsageRequest = () => {
 	if (!pendingUsageRequest) {
 		return;
@@ -265,12 +287,21 @@ const requestActiveUsage = () => new Promise<CliUsageSnapshot>((resolve, reject)
 		return;
 	}
 
+	const view = terminals.get(session.id);
+
+	// Idle-only CLIs (e.g. Kiro) corrupt their input if the usage command is
+	// injected mid-task. Bail before sending anything; the modal renders an
+	// in-progress card instead. Nothing is typed into the session.
+	if (isUsageAgentBusy(session.label, readTerminalScreenText(view))) {
+		reject(new Error(USAGE_BUSY_ERROR));
+		return;
+	}
+
 	if (pendingUsageRequest) {
 		pendingUsageRequest.reject(new Error('Usage refresh was superseded.'));
 		clearPendingUsageRequest();
 	}
 
-	const view = terminals.get(session.id);
 	const agentSlug = getAgentSlug(session.label);
 	pendingUsageRequest = {
 		sessionId: session.id,

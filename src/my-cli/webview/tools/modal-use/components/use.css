@@ -320,6 +320,29 @@
 	animation: use-empty-nudge 520ms ease;
 }
 
+/* In-progress (idle-only CLI is busy): the dotted square face stays put while
+   a single "ray" of light sweeps across it on a loop. Only the ray moves. */
+.use-usage-message.is-working .use-empty-face {
+	display: block;
+	overflow: hidden;
+}
+
+.use-usage-message.is-working .use-empty-face::after {
+	content: '';
+	position: absolute;
+	inset: 0;
+	background: linear-gradient(
+		105deg,
+		transparent 42%,
+		color-mix(in srgb, var(--vscode-foreground, #fff) 70%, transparent) 50%,
+		transparent 58%
+	);
+	background-size: 260% 100%;
+	background-repeat: no-repeat;
+	mix-blend-mode: screen;
+	animation: use-working-ray 1.2s linear infinite;
+}
+
 .use-usage-message strong {
 	color: var(--vscode-foreground);
 	font-size: 12px;
@@ -501,6 +524,16 @@
 @keyframes use-loading-sweep {
 	to {
 		transform: translateX(100%);
+	}
+}
+
+@keyframes use-working-ray {
+	from {
+		background-position: 175% 0;
+	}
+
+	to {
+		background-position: -75% 0;
 	}
 }
 

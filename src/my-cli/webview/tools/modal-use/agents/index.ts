@@ -9,7 +9,23 @@ import type { ParsedUsage, UsageAgentKind } from '../usage-types';
 import { parseAntigravityUsage } from './antigravity';
 import { parseClaudeUsage } from './claude';
 import { parseCodexUsage } from './codex';
-import { parseKiroUsage } from './kiro';
+import { isKiroBusy, parseKiroUsage } from './kiro';
+
+// Rejection reason used when an "idle-only" CLI is busy: the usage command is
+// NOT injected (avoids corrupting the input), and the modal shows an
+// in-progress card instead of a failure.
+export const USAGE_BUSY_ERROR = 'usage-busy';
+
+// Whether the active CLI can't accept its usage command right now because it
+// is mid-task. Only "idle-only" agents (currently Kiro) report busy; every
+// other CLI is always ready, so this returns false for them.
+export const isUsageAgentBusy = (agentLabel: string, screenText: string): boolean => {
+	const kind = getUsageAgentKind(agentLabel);
+	if (kind === 'kiro') {
+		return isKiroBusy(screenText);
+	}
+	return false;
+};
 
 export const getUsageAgentKind = (agentLabel: string): UsageAgentKind | undefined => {
 	const lower = agentLabel.toLowerCase();
