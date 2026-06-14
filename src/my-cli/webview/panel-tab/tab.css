@@ -395,7 +395,7 @@
 	background: var(--vscode-list-hoverBackground, rgba(128, 128, 128, 0.14));
 }
 
-.agent-tools-toggle:focus-within {
+.agent-tools-toggle:has(.agent-tools-toggle-input:focus-visible) {
 	outline: 1px solid var(--vscode-focusBorder, var(--vscode-textLink-foreground));
 	outline-offset: 2px;
 }
