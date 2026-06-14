@@ -219,15 +219,15 @@ export const shortcuts: ShortcutDefinition[] = [
     id: 'openKeymaps',
     label: 'Open Keymaps tool',
     contexts: ['terminal'],
-    description: 'Shift + F3',
-    match: shiftFKey(3),
+    description: 'Shift + F4',
+    match: shiftFKey(4),
   },
   {
     id: 'openUse',
     label: 'Open Status/use tool',
     contexts: ['terminal'],
-    description: 'Shift + F4',
-    match: shiftFKey(4),
+    description: 'Shift + F3',
+    match: shiftFKey(3),
   },
 
   {
