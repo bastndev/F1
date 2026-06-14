@@ -1,6 +1,6 @@
 /**
  * Helpers shared by the launcher- and terminal-phase HTML builders: webview
- * asset URIs (everything ships under dist/clihub/webview), CSP nonces, and safe JSON
+ * asset URIs (everything ships under dist/my-cli/webview), CSP nonces, and safe JSON
  * embedding into inline <script> tags.
  */
 import * as crypto from 'crypto';
@@ -8,7 +8,7 @@ import * as path from 'path';
 import * as vscode from 'vscode';
 
 export const getWebviewAssetUri = (extensionUri: vscode.Uri, ...paths: string[]) => {
-	return vscode.Uri.joinPath(extensionUri, 'dist', 'clihub', 'webview', ...paths);
+	return vscode.Uri.joinPath(extensionUri, 'dist', 'my-cli', 'webview', ...paths);
 };
 
 export const getWebviewAssetUriString = (

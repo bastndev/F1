@@ -62,7 +62,7 @@ const getProjectLabel = (cwd: string) => {
 };
 
 const promptFilterToastId = 'cli-prompt-filter-toast';
-const promptFilterStorageKey = 'clihub.promptFilter.enabled';
+const promptFilterStorageKey = 'my-cli.promptFilter.enabled';
 
 const readPromptFilterPreference = () => {
 	try {

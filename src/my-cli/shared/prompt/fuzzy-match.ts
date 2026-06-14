@@ -3,7 +3,7 @@
  * quick-open style: every query character must appear in the target in
  * order, but not contiguously — "test-pro" matches "test-del-projecto.ts".
  * Pure logic (no DOM) so any picker UI can reuse it; the component under
- * src/clihub/webview/tools owns rendering, per the shared/webview split.
+ * src/my-cli/webview/tools owns rendering, per the shared/webview split.
  */
 
 export type FuzzyMatch = {

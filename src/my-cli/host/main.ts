@@ -28,8 +28,8 @@ import {
 
 const maxVoiceTextChars = 4000;
 
-export class CliHubViewProvider implements vscode.WebviewViewProvider, vscode.Disposable {
-	public static readonly viewType = 'f1.cliHub';
+export class MyCliViewProvider implements vscode.WebviewViewProvider, vscode.Disposable {
+	public static readonly viewType = 'f1.myCli';
 	private readonly sessionManager = new CliSessionManager();
 	private readonly launcherStateSessionId = crypto.randomBytes(16).toString('hex');
 	private pendingInitialAgent?: string;

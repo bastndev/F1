@@ -1,6 +1,6 @@
 /**
  * Phase 2 webview HTML: the terminal layout shown once an agent is chosen.
- * Panel markup ships as static files under dist/clihub/webview/{panel-tab,
+ * Panel markup ships as static files under dist/my-cli/webview/{panel-tab,
  * panel-terminal}; this stitches them into the page with CSP, styles, and
  * the agent icon payload the terminal script reads.
  */
@@ -14,7 +14,7 @@ import {
 	serializeJsonForHtmlScript
 } from './webview-assets';
 
-type CliHubWebviewOptions = {
+type MyCliWebviewOptions = {
 	extensionUri: vscode.Uri;
 	cspSource: string;
 	nonce: string;
@@ -50,7 +50,7 @@ const readPanelFile = (extensionUri: vscode.Uri, panel: PanelFile, extension: 'h
 	const fileUri = vscode.Uri.joinPath(
 		extensionUri,
 		'dist',
-		'clihub',
+		'my-cli',
 		'webview',
 		panel.dir,
 		`${panel.name}.${extension}`
@@ -67,7 +67,7 @@ const readPanelHtml = (extensionUri: vscode.Uri, panel: PanelFile) => {
 	}
 };
 
-const replacePlaceholders = (value: string, options: CliHubWebviewOptions) => {
+const replacePlaceholders = (value: string, options: MyCliWebviewOptions) => {
 	return value
 		.replace(/\$\{selectedAgent\}/g, escapeHtml(options.selectedAgent))
 		.replace(/\$\{workspacePath\}/g, escapeHtml(options.workspacePath));
@@ -101,7 +101,7 @@ export const getAgentWebviewHtml = (
 		lightIcon: false
 	});
 
-	return getCliHubWebviewHtml({
+	return getMyCliWebviewHtml({
 		extensionUri,
 		cspSource: webview.cspSource,
 		nonce,
@@ -113,7 +113,7 @@ export const getAgentWebviewHtml = (
 	});
 };
 
-function getCliHubWebviewHtml(options: CliHubWebviewOptions) {
+function getMyCliWebviewHtml(options: MyCliWebviewOptions) {
 	const styleLinks = options.styleUris
 		.map((styleUri) => `<link href="${escapeHtml(styleUri)}" rel="stylesheet">`)
 		.join('\n\t');

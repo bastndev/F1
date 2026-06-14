@@ -23,7 +23,7 @@ type CliSession = Omit<CliSessionSnapshot, 'buffer'> & {
 	closing?: boolean;
 };
 
-type CliHubMessageResult = 'closed-last-session' | undefined;
+type MyCliMessageResult = 'closed-last-session' | undefined;
 
 const maxBufferLength = 240000;
 
@@ -59,7 +59,7 @@ const buildCommandLine = (command: string, args: string[]) => {
 };
 
 const getPtyHostPath = () => {
-	return path.join(__dirname, 'clihub', 'host', 'pty-host.js');
+	return path.join(__dirname, 'my-cli', 'host', 'pty-host.js');
 };
 
 export class CliSessionManager implements vscode.Disposable {
@@ -238,7 +238,7 @@ export class CliSessionManager implements vscode.Disposable {
 		this.postState();
 	}
 
-	public handleMessage(message: InboundWebviewMessage): CliHubMessageResult {
+	public handleMessage(message: InboundWebviewMessage): MyCliMessageResult {
 		switch (message.type) {
 			case 'cli.create':
 				if (message.agent) {
@@ -344,7 +344,7 @@ export class CliSessionManager implements vscode.Disposable {
 		this.sendPtyHostCommand(session, { type: 'resize', cols: session.cols, rows: session.rows });
 	}
 
-	private closeSession(sessionId: string): CliHubMessageResult {
+	private closeSession(sessionId: string): MyCliMessageResult {
 		const session = this.sessions.get(sessionId);
 		if (!session) {
 			return undefined;

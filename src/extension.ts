@@ -1,14 +1,14 @@
 import * as vscode from 'vscode';
-import { CliHubViewProvider } from './clihub/clihub';
+import { MyCliViewProvider } from './my-cli/my-cli';
 import { MySkillsViewProvider } from './my-skills/my-skills';
 
 export function activate(context: vscode.ExtensionContext) {
-	const cliHubProvider = new CliHubViewProvider(context.extensionUri, context);
+	const myCliProvider = new MyCliViewProvider(context.extensionUri, context);
 	const mySkillsProvider = new MySkillsViewProvider(context);
 
 	context.subscriptions.push(
-		cliHubProvider,
-		vscode.window.registerWebviewViewProvider(CliHubViewProvider.viewType, cliHubProvider),
+		myCliProvider,
+		vscode.window.registerWebviewViewProvider(MyCliViewProvider.viewType, myCliProvider),
 		mySkillsProvider,
 		vscode.commands.registerCommand('f1.mySkills.openCreate', () => mySkillsProvider.openCreateView()),
 		vscode.window.registerWebviewViewProvider(

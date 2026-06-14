@@ -46,16 +46,16 @@ const collectDirectories = (rootDir) => {
 };
 
 const copyWebviewAssets = () => {
-	const outDir = path.join('dist', 'clihub', 'webview');
+	const outDir = path.join('dist', 'my-cli', 'webview');
 
-	// Every non-TS file under src/clihub/webview keeps its relative path in
-	// dist/clihub/webview (HTML, CSS, SVG icons). xterm.css ships under vendor/.
-	copyDirectoryAssets(path.join('src', 'clihub', 'webview'), outDir);
+	// Every non-TS file under src/my-cli/webview keeps its relative path in
+	// dist/my-cli/webview (HTML, CSS, SVG icons). xterm.css ships under vendor/.
+	copyDirectoryAssets(path.join('src', 'my-cli', 'webview'), outDir);
 	copyXtermAssets(outDir);
 };
 
 const watchWebviewAssets = () => {
-	const assetRoot = path.join('src', 'clihub', 'webview');
+	const assetRoot = path.join('src', 'my-cli', 'webview');
 	let copyTimer;
 
 	const scheduleCopy = () => {
@@ -131,7 +131,7 @@ async function main() {
 	});
 	const terminalCtx = await esbuild.context({
 		entryPoints: [
-			'src/clihub/webview/panel-terminal/terminal.ts'
+			'src/my-cli/webview/panel-terminal/terminal.ts'
 		],
 		bundle: true,
 		format: 'iife',
@@ -139,7 +139,7 @@ async function main() {
 		sourcemap: !production,
 		sourcesContent: false,
 		platform: 'browser',
-		outfile: 'dist/clihub/webview/terminal.js',
+		outfile: 'dist/my-cli/webview/terminal.js',
 		loader: {
 			'.css': 'text',
 			'.html': 'text',
@@ -151,7 +151,7 @@ async function main() {
 	});
 	const launcherCtx = await esbuild.context({
 		entryPoints: [
-			'src/clihub/webview/launcher/index.ts'
+			'src/my-cli/webview/launcher/index.ts'
 		],
 		bundle: true,
 		format: 'iife',
@@ -159,7 +159,7 @@ async function main() {
 		sourcemap: !production,
 		sourcesContent: false,
 		platform: 'browser',
-		outfile: 'dist/clihub/webview/launcher/index.js',
+		outfile: 'dist/my-cli/webview/launcher/index.js',
 		logLevel: 'silent',
 		plugins: [
 			esbuildProblemMatcherPlugin,
@@ -215,7 +215,7 @@ async function main() {
 	});
 	const ptyHostCtx = await esbuild.context({
 		entryPoints: [
-			'src/clihub/host/terminal-cli/pty-host.ts'
+			'src/my-cli/host/terminal-cli/pty-host.ts'
 		],
 		bundle: true,
 		format: 'cjs',
@@ -223,7 +223,7 @@ async function main() {
 		sourcemap: !production,
 		sourcesContent: false,
 		platform: 'node',
-		outfile: 'dist/clihub/host/pty-host.js',
+		outfile: 'dist/my-cli/host/pty-host.js',
 		external: ['node-pty'],
 		logLevel: 'silent',
 		plugins: [

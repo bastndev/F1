@@ -11,7 +11,7 @@ export const PROTECTED_TERMS = new Set<string>([
 	'socket', 'axios', 'fetch', 'cors', 'jwt', 'oauth',
 
 	// CLI Hub agents and local product terms
-	'f1', 'clihub', 'opencode', 'codex', 'claude', 'claudecode', 'copilot',
+	'f1', 'mycli', 'opencode', 'codex', 'claude', 'claudecode', 'copilot',
 	'antigravity', 'grok', 'kiro', 'kilo', 'kilocode',
 	'pty', 'xterm', 'webview', 'vscode', 'cursor', 'windsurf', 'trae',
 
