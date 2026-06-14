@@ -16,6 +16,7 @@
 /* Main container */
 .prompt-modal {
   width: min(500px, calc(100vw - 32px));
+  min-height: 0;
   background: var(--vscode-editor-background);
   border: 1px solid var(--vscode-editorGroup-border);
   border-radius: 14px;
@@ -442,7 +443,10 @@
 /* Body */
 .prompt-body {
   padding: 16px 20px;
-  flex: 0 0 auto;
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: hidden;
+  overscroll-behavior: contain;
 }
 
 .prompt-textarea-wrap {

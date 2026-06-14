@@ -162,6 +162,7 @@ export const createToolsController = ({
 			alignItems: 'center',
 			justifyContent: 'center',
 			width: 'min(580px, calc(100% - 32px))',
+			height: 'calc(100% - 32px)',
 			maxHeight: 'calc(100% - 32px)',
 			boxSizing: 'border-box'
 		});
