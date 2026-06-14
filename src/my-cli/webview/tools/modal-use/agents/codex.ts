@@ -19,6 +19,16 @@ export const isCodexBusy = (screenText: string): boolean =>
 
 const parseCompactNumber = (value: string) => Number(value.replace(/[,_\s]/g, ''));
 
+// Codex prints reset times in 24h ("21:23", "16:17 on 18 jun"). Rewrite the
+// HH:MM part to a friendlier 12h clock ("9:23 pm", "4:17 pm on 18 jun").
+const to12HourClock = (value: string): string =>
+	value.replace(/\b([01]?\d|2[0-3]):([0-5]\d)\b/g, (_match, hours: string, minutes: string) => {
+		const hour = Number(hours);
+		const period = hour < 12 ? 'am' : 'pm';
+		const hour12 = hour % 12 === 0 ? 12 : hour % 12;
+		return `${hour12}:${minutes} ${period}`;
+	});
+
 const getCodexResetDetail = (lines: string[], startIndex: number) => {
 	for (const line of lines.slice(startIndex + 1, startIndex + 3)) {
 		if (/\d+(?:\.\d+)?\s*%\s*(?:used|remaining|left)?/i.test(stripUsageVisualBar(line))) {
@@ -27,7 +37,7 @@ const getCodexResetDetail = (lines: string[], startIndex: number) => {
 
 		const reset = line.match(/\(?\s*resets\s+([^)]+?)\s*\)?$/i)?.[1]?.trim();
 		if (reset) {
-			return reset;
+			return to12HourClock(reset);
 		}
 	}
 	return undefined;
