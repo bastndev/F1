@@ -536,8 +536,4 @@
 	.use-status-time {
 		align-items: flex-start;
 	}
-
-	.use-usage-grid {
-		grid-template-columns: 1fr;
-	}
 }
