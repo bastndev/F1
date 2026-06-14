@@ -57,7 +57,7 @@ type UsageMetric = {
 
 type ParsedUsage = {
 	title: string;
-	summary: string;
+	summary?: string;
 	bars: UsageBar[];
 	metrics: UsageMetric[];
 	note?: string;
@@ -172,6 +172,12 @@ const getCleanLine = (line: string) => line
 	.replace(/\s+/g, ' ')
 	.trim();
 
+const stripCodexVisualBar = (line: string) => line
+	.replace(/\[[\s█▓▒░#=+\-.]{3,}\]/g, ' ')
+	.replace(/[█▓▒░]{3,}/g, ' ')
+	.replace(/\s+/g, ' ')
+	.trim();
+
 const titleCase = (value: string) => value
 	.replace(/[_-]+/g, ' ')
 	.replace(/\b\w/g, (char) => char.toUpperCase())
@@ -184,7 +190,8 @@ const getCodexPercentBars = (text: string): UsageBar[] => {
 	const bars: UsageBar[] = [];
 
 	for (const line of lines) {
-		const percentMatch = line.match(/(\d+(?:\.\d+)?)\s*%\s*(used|remaining|left)?/i);
+		const cleanLine = stripCodexVisualBar(line);
+		const percentMatch = cleanLine.match(/(\d+(?:\.\d+)?)\s*%\s*(used|remaining|left)?/i);
 		if (!percentMatch) {
 			continue;
 		}
@@ -192,7 +199,7 @@ const getCodexPercentBars = (text: string): UsageBar[] => {
 		const rawPercent = parsePercent(percentMatch[1]);
 		const mode = percentMatch[2]?.toLowerCase();
 		const percent = mode === 'remaining' || mode === 'left' ? 100 - rawPercent : rawPercent;
-		const labelSource = line
+		const labelSource = cleanLine
 			.replace(percentMatch[0], '')
 			.replace(/\b(used|remaining|left)\b/gi, '')
 			.replace(/[:•·-]+$/g, '')
@@ -255,7 +262,6 @@ const parseCodexUsage = (raw: string): ParsedUsage => {
 
 	return {
 		title: 'Codex status',
-		summary: bars[0] ? `${formatPercent(bars[0].percent)} used` : '/status',
 		bars: bars.length > 0 ? bars : [
 			{ label: 'Status', percent: 0, detail: 'No usage percentage found in /status output' }
 		],
@@ -359,7 +365,10 @@ const renderUsageSnapshot = (host: HTMLElement, snapshot: CliUsageSnapshot | und
 	const result = host.querySelector<HTMLElement>('#useUsageResult');
 	setHidden(host, '#useUsageResult', false);
 	setText(host, '#useUsageTitle', parsed.title);
-	setText(host, '#useUsageSummary', parsed.summary);
+	setHidden(host, '#useUsageSummary', !parsed.summary);
+	if (parsed.summary) {
+		setText(host, '#useUsageSummary', parsed.summary);
+	}
 
 	const bars = host.querySelector<HTMLElement>('#useUsageBars');
 	if (bars) {
