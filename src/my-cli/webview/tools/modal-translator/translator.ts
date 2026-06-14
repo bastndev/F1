@@ -188,6 +188,10 @@ export const mountTranslatorPanel = (host: HTMLElement, context: ToolContext) =>
 
 function initializeTranslator(host: HTMLElement, context: ToolContext) {
 	const speakBtn = host.querySelector<HTMLButtonElement>('#speakBtn');
+	const voiceControl = host.querySelector<HTMLElement>('#voiceControl');
+	const voiceExtraBtn = host.querySelector<HTMLButtonElement>('#voiceExtraBtn');
+	const speakIdleIcon = host.querySelector<HTMLElement>('#speakBtn .speak-idle i');
+	const speakIdleLabel = host.querySelector<HTMLElement>('#speakBtn .speak-idle span');
 	const spectrum = host.querySelector<HTMLElement>('#audioSpectrum');
 	const copyBtn = host.querySelector<HTMLButtonElement>('#copyBtn');
 	const translateBtn = host.querySelector<HTMLButtonElement>('#translateBtn');
@@ -345,6 +349,8 @@ function initializeTranslator(host: HTMLElement, context: ToolContext) {
 	}
 
 	let isSpeaking = false;
+	let isPaused = false;
+	let isPreparingVoice = false;
 	const extracted = extractTextToTranslate(context);
 	if (textEl) {
 		if (extracted) {
@@ -397,21 +403,45 @@ function initializeTranslator(host: HTMLElement, context: ToolContext) {
 		// (and a stop glyph on hover) while actually speaking.
 		const applyVoiceState = (state: VoiceState, message?: string, progress?: VoiceProgress) => {
 			isSpeaking = state === 'speaking';
+			isPaused = state === 'paused';
+			isPreparingVoice = state === 'preparing';
 			speakBtn.classList.toggle('speaking', isSpeaking);
-			speakBtn.classList.toggle('is-preparing', state === 'preparing');
+			speakBtn.classList.toggle('is-paused', isPaused);
+			speakBtn.classList.toggle('is-preparing', isPreparingVoice);
+			voiceControl?.classList.toggle('is-speaking', isSpeaking);
+			voiceControl?.classList.toggle('is-paused', isPaused);
+			voiceControl?.classList.toggle('is-preparing', isPreparingVoice);
 			// Stay disabled until something was translated, except while a
-			// playback from a previous open is running (so it can be stopped).
-			speakBtn.disabled = state === 'preparing' || (!hasResult && !isSpeaking);
+			// playback from a previous open is running (so it can be controlled).
+			speakBtn.disabled = isPreparingVoice || (!hasResult && !isSpeaking && !isPaused);
 
-			const label = state === 'preparing' ? 'Preparing voice…' : isSpeaking ? 'Stop' : 'Listen';
+			if (speakIdleLabel) {
+				speakIdleLabel.textContent = isPreparingVoice ? 'Preparing' : isPaused ? 'Resume' : 'Listen';
+			}
+			if (speakIdleIcon) {
+				speakIdleIcon.className = isPaused ? 'ti ti-player-play-filled' : 'ti ti-volume-2';
+			}
+
+			const label = isPreparingVoice ? 'Preparing voice…' : isSpeaking ? 'Stop' : isPaused ? 'Resume' : 'Listen';
 			speakBtn.title = label;
 			speakBtn.setAttribute('aria-label', label);
 
-			if ((state === 'preparing' || state === 'speaking') && progress) {
+			if (voiceExtraBtn) {
+				const extraLabel = isPaused ? 'Stop voice' : 'Pause voice';
+				voiceExtraBtn.disabled = !(isSpeaking || isPaused);
+				voiceExtraBtn.title = extraLabel;
+				voiceExtraBtn.setAttribute('aria-label', extraLabel);
+			}
+
+			if ((isPreparingVoice || isSpeaking || isPaused) && progress) {
 				setActiveVoiceChunk(activeVoiceChunks, progress.chunkIndex);
 				if (progress.chunkCount > 1) {
-					setStatus(`voice ${progress.chunkIndex + 1}/${progress.chunkCount}`);
+					const progressLabel = `voice ${progress.chunkIndex + 1}/${progress.chunkCount}`;
+					setStatus(isPaused ? `paused · ${progressLabel}` : progressLabel);
 				}
+			}
+			if (isPaused && !progress) {
+				setStatus('paused');
 			}
 			if (state === 'idle') {
 				clearVoiceHighlights(activeVoiceChunks);
@@ -428,6 +458,11 @@ function initializeTranslator(host: HTMLElement, context: ToolContext) {
 		context.queryVoiceState?.();
 
 		speakBtn.addEventListener('click', () => {
+			if (isPaused) {
+				context.resumeSpeech?.();
+				return;
+			}
+
 			if (isSpeaking) {
 				context.stopSpeech?.();
 				return;
@@ -441,6 +476,16 @@ function initializeTranslator(host: HTMLElement, context: ToolContext) {
 				if (value) {
 					context.speakText(value, { chunks });
 				}
+			}
+		});
+
+		voiceExtraBtn?.addEventListener('click', () => {
+			if (isPaused) {
+				context.stopSpeech?.();
+				return;
+			}
+			if (isSpeaking) {
+				context.pauseSpeech?.();
 			}
 		});
 

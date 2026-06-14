@@ -32,6 +32,8 @@ export type ToolContext = {
 	openCreateSkill?: () => void;
 	requestSpellcheck?: (text: string, strict: boolean) => Promise<SpellIssue[]>;
 	speakText?: (text: string, options?: { chunks?: string[] }) => void;
+	pauseSpeech?: () => void;
+	resumeSpeech?: () => void;
 	stopSpeech?: () => void;
 	queryVoiceState?: () => void;
 	onVoiceState?: (listener: (state: VoiceState, message?: string, progress?: VoiceProgress) => void) => () => void;
@@ -57,6 +59,8 @@ export type ToolsControllerOptions = {
 	openCreateSkill?: () => void;
 	requestSpellcheck?: (text: string, strict: boolean) => Promise<SpellIssue[]>;
 	speakText?: (text: string, options?: { chunks?: string[] }) => void;
+	pauseSpeech?: () => void;
+	resumeSpeech?: () => void;
 	stopSpeech?: () => void;
 	queryVoiceState?: () => void;
 	onVoiceState?: (listener: (state: VoiceState, message?: string, progress?: VoiceProgress) => void) => () => void;
@@ -97,6 +101,8 @@ export const createToolsController = ({
 	openCreateSkill,
 	requestSpellcheck,
 	speakText,
+	pauseSpeech,
+	resumeSpeech,
 	stopSpeech,
 	queryVoiceState,
 	onVoiceState,
@@ -195,6 +201,8 @@ export const createToolsController = ({
 			openCreateSkill,
 			requestSpellcheck,
 			speakText,
+			pauseSpeech,
+			resumeSpeech,
 			stopSpeech,
 			queryVoiceState,
 			onVoiceState,

@@ -408,6 +408,14 @@ const stopSpeech = () => {
 	vscode.postMessage({ type: 'voice.stop' });
 };
 
+const pauseSpeech = () => {
+	vscode.postMessage({ type: 'voice.pause' });
+};
+
+const resumeSpeech = () => {
+	vscode.postMessage({ type: 'voice.resume' });
+};
+
 const queryVoiceState = () => {
 	vscode.postMessage({ type: 'voice.query' });
 };
@@ -539,6 +547,8 @@ const toolsController = layoutRight
 			openCreateSkill: () => vscode.postMessage({ type: 'mySkills.openCreate' }),
 			requestSpellcheck: (text: string, strict: boolean) => spellcheckRpc.request(text, strict),
 			speakText,
+			pauseSpeech,
+			resumeSpeech,
 			stopSpeech,
 			queryVoiceState,
 			onVoiceState,

@@ -57,6 +57,8 @@ export type WebviewToHostMessage =
 	| { type: 'workspace.listSkills'; id: string }
 	| { type: 'mySkills.openCreate' }
 	| { type: 'voice.speak'; text: string; chunks?: string[] }
+	| { type: 'voice.pause' }
+	| { type: 'voice.resume' }
 	| { type: 'voice.stop' }
 	| { type: 'voice.query' }
 	| { type: 'clipboard.read'; id: string };

@@ -550,6 +550,12 @@
 	to { stroke-dashoffset: 0; }
 }
 
+.translator-voice-control {
+	display: inline-flex;
+	align-items: stretch;
+	position: relative;
+}
+
 .translator-speak {
 	border-color: rgba(93, 202, 165, 0.2);
 	color: #5DCAA5;
@@ -563,6 +569,14 @@
 	border-color: rgba(93, 202, 165, 0.5);
 	background: rgba(93, 202, 165, 0.06);
 	color: #5DCAA5;
+}
+
+.translator-voice-control.is-speaking:hover .translator-speak,
+.translator-voice-control.is-speaking:focus-within .translator-speak,
+.translator-voice-control.is-paused:hover .translator-speak,
+.translator-voice-control.is-paused:focus-within .translator-speak {
+	border-top-right-radius: 0;
+	border-bottom-right-radius: 0;
 }
 
 .translator-speak .speak-idle {
@@ -593,6 +607,68 @@
 	border-color: rgba(93, 202, 165, 0.5);
 	background: rgba(93, 202, 165, 0.07);
 	box-shadow: 0 0 0 3px rgba(93, 202, 165, 0.08);
+}
+
+.translator-speak.is-paused {
+	border-color: rgba(93, 202, 165, 0.42);
+	background: rgba(93, 202, 165, 0.06);
+	box-shadow: 0 0 0 3px rgba(93, 202, 165, 0.06);
+}
+
+.translator-voice-extra {
+	width: 0;
+	min-width: 0;
+	padding-left: 0;
+	padding-right: 0;
+	gap: 0;
+	opacity: 0;
+	overflow: hidden;
+	pointer-events: none;
+	transform: scaleX(0.72);
+	transform-origin: left center;
+	justify-content: center;
+	border-left: none;
+	border-top-left-radius: 0;
+	border-bottom-left-radius: 0;
+	border-color: rgba(93, 202, 165, 0.32);
+	color: #5DCAA5;
+	background: rgba(93, 202, 165, 0.06);
+	transition: width 0.18s ease, padding 0.18s ease, opacity 0.14s ease, transform 0.18s ease;
+}
+
+.translator-voice-extra i {
+	font-size: 12px;
+}
+
+.translator-voice-extra .voice-extra-stop {
+	display: none;
+}
+
+.translator-voice-control.is-paused .voice-extra-pause {
+	display: none;
+}
+
+.translator-voice-control.is-paused .voice-extra-stop {
+	display: block;
+}
+
+.translator-voice-control.is-speaking:hover .translator-voice-extra,
+.translator-voice-control.is-speaking:focus-within .translator-voice-extra,
+.translator-voice-control.is-paused:hover .translator-voice-extra,
+.translator-voice-control.is-paused:focus-within .translator-voice-extra {
+	width: 30px;
+	padding-left: 8px;
+	padding-right: 8px;
+	opacity: 1;
+	pointer-events: auto;
+	transform: scaleX(1);
+}
+
+.translator-voice-control.is-speaking:hover .translator-voice-extra:hover,
+.translator-voice-control.is-paused:hover .translator-voice-extra:hover {
+	background: rgba(93, 202, 165, 0.1);
+	border-color: rgba(93, 202, 165, 0.55);
+	color: #5DCAA5;
 }
 
 /* Host is resolving the voice and synthesizing audio — pulse like the
