@@ -586,7 +586,7 @@
 	transition: opacity 0.18s ease, transform 0.22s ease;
 }
 
-/* Stop glyph revealed on hover while audio is playing */
+/* Pause glyph revealed on hover while audio is playing */
 .translator-speak .speak-stop {
 	position: absolute;
 	inset: 0;
@@ -636,20 +636,11 @@
 	transition: width 0.18s ease, padding 0.18s ease, opacity 0.14s ease, transform 0.18s ease;
 }
 
-.translator-voice-extra i {
-	font-size: 12px;
-}
-
-.translator-voice-extra .voice-extra-stop {
-	display: none;
-}
-
-.translator-voice-control.is-paused .voice-extra-pause {
-	display: none;
-}
-
-.translator-voice-control.is-paused .voice-extra-stop {
+.translator-voice-extra svg {
+	width: 14px;
+	height: 14px;
 	display: block;
+	transition: color 0.16s ease, transform 0.16s ease;
 }
 
 .translator-voice-control.is-speaking:hover .translator-voice-extra,
@@ -666,9 +657,14 @@
 
 .translator-voice-control.is-speaking:hover .translator-voice-extra:hover,
 .translator-voice-control.is-paused:hover .translator-voice-extra:hover {
-	background: rgba(93, 202, 165, 0.1);
-	border-color: rgba(93, 202, 165, 0.55);
-	color: #5DCAA5;
+	background: rgba(248, 113, 113, 0.08);
+	border-color: rgba(248, 113, 113, 0.45);
+	color: var(--vscode-errorForeground, #f87171);
+}
+
+.translator-voice-control.is-speaking:hover .translator-voice-extra:hover svg,
+.translator-voice-control.is-paused:hover .translator-voice-extra:hover svg {
+	transform: scale(1.08);
 }
 
 /* Host is resolving the voice and synthesizing audio — pulse like the

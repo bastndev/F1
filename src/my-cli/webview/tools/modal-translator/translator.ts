@@ -422,15 +422,14 @@ function initializeTranslator(host: HTMLElement, context: ToolContext) {
 				speakIdleIcon.className = isPaused ? 'ti ti-player-play-filled' : 'ti ti-volume-2';
 			}
 
-			const label = isPreparingVoice ? 'Preparing voice…' : isSpeaking ? 'Stop' : isPaused ? 'Resume' : 'Listen';
+			const label = isPreparingVoice ? 'Preparing voice…' : isSpeaking ? 'Pause' : isPaused ? 'Resume' : 'Listen';
 			speakBtn.title = label;
 			speakBtn.setAttribute('aria-label', label);
 
 			if (voiceExtraBtn) {
-				const extraLabel = isPaused ? 'Stop voice' : 'Pause voice';
 				voiceExtraBtn.disabled = !(isSpeaking || isPaused);
-				voiceExtraBtn.title = extraLabel;
-				voiceExtraBtn.setAttribute('aria-label', extraLabel);
+				voiceExtraBtn.title = 'Stop voice';
+				voiceExtraBtn.setAttribute('aria-label', 'Stop voice');
 			}
 
 			if ((isPreparingVoice || isSpeaking || isPaused) && progress) {
@@ -464,7 +463,7 @@ function initializeTranslator(host: HTMLElement, context: ToolContext) {
 			}
 
 			if (isSpeaking) {
-				context.stopSpeech?.();
+				context.pauseSpeech?.();
 				return;
 			}
 
@@ -480,12 +479,8 @@ function initializeTranslator(host: HTMLElement, context: ToolContext) {
 		});
 
 		voiceExtraBtn?.addEventListener('click', () => {
-			if (isPaused) {
+			if (isSpeaking || isPaused) {
 				context.stopSpeech?.();
-				return;
-			}
-			if (isSpeaking) {
-				context.pauseSpeech?.();
 			}
 		});
 
