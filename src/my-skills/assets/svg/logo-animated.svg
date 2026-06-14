@@ -1,0 +1,202 @@
+<svg width="512" height="580" viewBox="88 -16 390 494" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bolt-animated-grad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#ffc44d"/>
+      <stop offset="48%" stop-color="#ffae24"/>
+      <stop offset="100%" stop-color="#fd8f12"/>
+    </linearGradient>
+    <linearGradient id="bolt-flash-grad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#ffffff"/>
+      <stop offset="42%" stop-color="#fff1a7"/>
+      <stop offset="100%" stop-color="#ffab2a"/>
+    </linearGradient>
+    <filter id="bolt-blue-glow" x="-45%" y="-45%" width="190%" height="190%">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="7" result="blur"/>
+      <feColorMatrix in="blur" type="matrix" values="0 0 0 0 0 0 0 0 0 0.56 0 0 0 0 1 0 0 0 0.9 0" result="blue"/>
+      <feMerge>
+        <feMergeNode in="blue"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    <filter id="bolt-hot-glow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="4" result="orangeBlur"/>
+      <feColorMatrix in="orangeBlur" type="matrix" values="1 0 0 0 1 0 0.55 0 0 0.38 0 0 0.08 0 0 0 0 0 0.85 0" result="orange"/>
+      <feMerge>
+        <feMergeNode in="orange"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    <style>
+      .bolt-wrap {
+        transform-box: fill-box;
+        transform-origin: center;
+        animation: bolt-breath 2.8s ease-in-out infinite;
+      }
+
+      .bolt-shadow {
+        animation: bolt-shadow-jolt 2.8s steps(1, end) infinite;
+      }
+
+      .bolt-core {
+        animation: bolt-core-jolt 2.8s steps(1, end) infinite;
+      }
+
+      .bolt-flash {
+        animation: bolt-flash 2.8s linear infinite;
+        opacity: 0;
+      }
+
+      .spark {
+        fill: none;
+        stroke: #1aa8ff;
+        stroke-width: 8;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+        stroke-dasharray: 70;
+        stroke-dashoffset: 70;
+        opacity: 0;
+        filter: url(#bolt-blue-glow);
+        animation: spark-strike 2.8s ease-out infinite;
+      }
+
+      .spark-hot {
+        stroke: #ffd15a;
+        stroke-width: 5;
+        animation-delay: 0.08s;
+      }
+
+      .spark-two {
+        animation-delay: 0.14s;
+      }
+
+      .spark-three {
+        animation-delay: 1.55s;
+      }
+
+      @keyframes bolt-breath {
+        0%, 100% {
+          transform: scale(1);
+        }
+
+        48% {
+          transform: scale(1.015);
+        }
+
+        51% {
+          transform: scale(0.992) rotate(-1deg);
+        }
+
+        53% {
+          transform: scale(1.035) rotate(1deg);
+        }
+
+        56% {
+          transform: scale(1);
+        }
+      }
+
+      @keyframes bolt-shadow-jolt {
+        0%, 49%, 57%, 100% {
+          transform: translate(14px, 10px);
+          opacity: 0.95;
+        }
+
+        50% {
+          transform: translate(22px, 8px);
+          opacity: 1;
+        }
+
+        52% {
+          transform: translate(9px, 14px);
+          opacity: 0.82;
+        }
+
+        54% {
+          transform: translate(17px, 7px);
+          opacity: 1;
+        }
+      }
+
+      @keyframes bolt-core-jolt {
+        0%, 49%, 57%, 100% {
+          transform: translate(0, 0);
+        }
+
+        50% {
+          transform: translate(4px, -3px);
+        }
+
+        52% {
+          transform: translate(-3px, 4px);
+        }
+
+        54% {
+          transform: translate(2px, -2px);
+        }
+      }
+
+      @keyframes bolt-flash {
+        0%, 45%, 58%, 100% {
+          opacity: 0;
+        }
+
+        49% {
+          opacity: 0.25;
+        }
+
+        51% {
+          opacity: 0.82;
+        }
+
+        54% {
+          opacity: 0.18;
+        }
+      }
+
+      @keyframes spark-strike {
+        0%, 45%, 100% {
+          opacity: 0;
+          stroke-dashoffset: 70;
+        }
+
+        49% {
+          opacity: 0;
+        }
+
+        51% {
+          opacity: 1;
+          stroke-dashoffset: 0;
+        }
+
+        57% {
+          opacity: 0;
+          stroke-dashoffset: -42;
+        }
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        .bolt-wrap,
+        .bolt-shadow,
+        .bolt-core,
+        .bolt-flash,
+        .spark {
+          animation: none;
+        }
+
+        .bolt-flash,
+        .spark {
+          opacity: 0;
+        }
+      }
+    </style>
+  </defs>
+  <g class="bolt-wrap">
+    <path class="bolt-shadow" filter="url(#bolt-blue-glow)" fill="#0090ff" d="M268 -2 L412 -2 L326 160 L466 160 L176 474 L246 248 L106 248 Z"/>
+    <path class="bolt-core" filter="url(#bolt-hot-glow)" fill="url(#bolt-animated-grad)" d="M254 -12 L398 -12 L312 148 L452 148 L162 460 L232 236 L92 236 Z"/>
+    <path class="bolt-flash" fill="url(#bolt-flash-grad)" d="M254 -12 L398 -12 L312 148 L452 148 L162 460 L232 236 L92 236 Z"/>
+    <path class="spark spark-one" d="M392 28 L356 84 L382 82 L336 142"/>
+    <path class="spark spark-hot" d="M222 250 L188 306 L212 303 L174 358"/>
+    <path class="spark spark-two" d="M438 162 L404 206 L428 204 L384 258"/>
+    <path class="spark spark-three" d="M126 212 L158 166 L137 169 L177 112"/>
+  </g>
+</svg>

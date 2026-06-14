@@ -1,0 +1,310 @@
+.install-header-row {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	width: 100%;
+}
+
+.install-header-row .install-search-box {
+	flex: 1;
+	min-width: 0;
+}
+
+.install-refine-btn {
+	flex: 0 0 34px;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 34px;
+	height: 32px;
+	padding: 0;
+	background: color-mix(in srgb, var(--install-fg) 7%, transparent);
+	border: 1px solid var(--install-border);
+	border-radius: 7px;
+	color: var(--install-muted);
+	cursor: pointer;
+	transition: color 0.16s ease, background 0.16s ease, border-color 0.16s ease, box-shadow 0.16s ease;
+}
+
+.install-refine-btn:hover {
+	color: var(--install-fg);
+	background: var(--install-input-bg);
+	border-color: color-mix(in srgb, var(--install-fg) 18%, transparent);
+}
+
+.install-refine-btn:focus-visible {
+	outline: 1px solid var(--install-accent);
+	outline-offset: 1px;
+	border-color: var(--install-accent);
+	box-shadow: 0 0 0 1px color-mix(in srgb, var(--install-accent) 25%, transparent);
+	color: var(--install-accent);
+}
+
+.install-refine-btn--active {
+	color: var(--install-accent);
+	background: color-mix(in srgb, var(--install-accent) 14%, transparent);
+	border-color: color-mix(in srgb, var(--install-accent) 32%, transparent);
+}
+
+.install-refine-btn svg {
+	width: 15px;
+	height: 15px;
+	flex: 0 0 auto;
+}
+
+.install-refine-bar {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 5px;
+	padding: 4px 0 2px;
+	min-height: 0;
+}
+
+.install-refine-bar[hidden] {
+	display: none;
+}
+
+.install-refine-active-chip {
+	display: inline-flex;
+	align-items: center;
+	gap: 3px;
+	height: 22px;
+	padding: 0 4px 0 7px;
+	background: color-mix(in srgb, var(--install-accent) 16%, transparent);
+	border: 1px solid color-mix(in srgb, var(--install-accent) 28%, transparent);
+	border-radius: 5px;
+	font-family: var(--vscode-font-family);
+	font-size: 11px;
+	font-weight: 500;
+	color: var(--install-accent);
+	white-space: nowrap;
+}
+
+.install-refine-active-chip-label {
+	display: inline-block;
+}
+
+.install-refine-active-chip-remove {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 16px;
+	height: 16px;
+	padding: 0;
+	background: transparent;
+	border: none;
+	border-radius: 3px;
+	color: color-mix(in srgb, var(--install-accent) 70%, transparent);
+	cursor: pointer;
+	transition: color 0.14s ease, background 0.14s ease;
+}
+
+.install-refine-active-chip-remove:hover {
+	color: var(--install-fg);
+	background: color-mix(in srgb, var(--install-fg) 18%, transparent);
+}
+
+.install-refine-active-chip-remove:focus-visible {
+	outline: 1px solid var(--install-accent);
+	outline-offset: 1px;
+}
+
+.install-refine-clear-all {
+	flex: 0 0 auto;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	height: 22px;
+	padding: 0 8px;
+	background: transparent;
+	border: 1px solid transparent;
+	border-radius: 5px;
+	color: var(--install-muted);
+	font-family: var(--vscode-font-family);
+	font-size: 11px;
+	cursor: pointer;
+	transition: color 0.14s ease, background 0.14s ease;
+}
+
+.install-refine-clear-all:hover {
+	color: var(--install-fg);
+	background: color-mix(in srgb, var(--install-fg) 8%, transparent);
+}
+
+.install-refine-clear-all:focus-visible {
+	outline: 1px solid var(--install-accent);
+	outline-offset: 1px;
+	color: var(--install-accent);
+}
+
+.install-refine-panel {
+	overflow: hidden;
+	padding: 0;
+	border-bottom: 1px solid var(--install-border);
+	animation: install-refine-panel-in 0.2s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.install-refine-panel[hidden] {
+	display: none;
+}
+
+.install-refine-panel-inner {
+	display: flex;
+	flex-direction: column;
+	gap: 0;
+	padding: 6px 0 8px;
+}
+
+.install-refine-breadcrumb {
+	display: flex;
+	align-items: center;
+	gap: 2px;
+	padding: 0 0 7px;
+	flex-wrap: wrap;
+}
+
+.install-refine-breadcrumb-crumb {
+	display: inline-flex;
+	align-items: center;
+	height: 20px;
+	padding: 0 5px;
+	background: transparent;
+	border: none;
+	border-radius: 4px;
+	color: var(--install-muted);
+	font-family: var(--vscode-font-family);
+	font-size: 11px;
+	font-weight: 500;
+	cursor: pointer;
+	transition: color 0.14s ease, background 0.14s ease;
+}
+
+.install-refine-breadcrumb-crumb:hover {
+	color: var(--install-fg);
+	background: color-mix(in srgb, var(--install-fg) 6%, transparent);
+}
+
+.install-refine-breadcrumb-crumb:focus-visible {
+	outline: 1px solid var(--install-accent);
+	outline-offset: 1px;
+}
+
+.install-refine-breadcrumb--active {
+	color: var(--install-accent);
+	font-weight: 600;
+	background: color-mix(in srgb, var(--install-accent) 10%, transparent);
+}
+
+.install-refine-breadcrumb--active:hover {
+	color: var(--install-accent);
+	background: color-mix(in srgb, var(--install-accent) 16%, transparent);
+}
+
+.install-refine-breadcrumb-sep {
+	display: inline-block;
+	color: color-mix(in srgb, var(--install-muted) 48%, transparent);
+	font-size: 13px;
+	line-height: 1;
+	margin: 0 1px;
+	user-select: none;
+}
+
+.install-refine-chips {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 5px;
+}
+
+.install-refine-chip {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	height: 26px;
+	padding: 0 10px;
+	background: color-mix(in srgb, var(--install-fg) 6%, transparent);
+	border: 1px solid color-mix(in srgb, var(--install-fg) 10%, transparent);
+	border-radius: 6px;
+	color: var(--install-fg);
+	font-family: var(--vscode-font-family);
+	font-size: 12px;
+	font-weight: 500;
+	cursor: pointer;
+	white-space: nowrap;
+	transition: background 0.14s ease, border-color 0.14s ease, color 0.14s ease, transform 0.12s ease;
+}
+
+.install-refine-chip:hover {
+	background: color-mix(in srgb, var(--install-fg) 12%, transparent);
+	border-color: color-mix(in srgb, var(--install-fg) 22%, transparent);
+}
+
+.install-refine-chip:focus-visible {
+	outline: 1px solid var(--install-accent);
+	outline-offset: 2px;
+}
+
+.install-refine-chip:active {
+	transform: scale(0.97);
+}
+
+.install-refine-chip--selected {
+	background: color-mix(in srgb, var(--install-accent) 18%, transparent);
+	border-color: color-mix(in srgb, var(--install-accent) 40%, transparent);
+	color: var(--install-accent);
+	font-weight: 600;
+}
+
+.install-refine-chip--selected:hover {
+	background: color-mix(in srgb, var(--install-accent) 26%, transparent);
+	border-color: color-mix(in srgb, var(--install-accent) 55%, transparent);
+}
+
+.install-refine-chip--has-children::after {
+	content: '\203A';
+	display: inline-block;
+	margin-left: 3px;
+	font-size: 12px;
+	font-weight: 600;
+	opacity: 0.5;
+	line-height: 1;
+}
+
+.install-refine-chip--selected.install-refine-chip--has-children::after {
+	opacity: 0.7;
+}
+
+.install-refine-empty {
+	display: inline-block;
+	color: var(--install-muted);
+	font-family: var(--vscode-font-family);
+	font-size: 11px;
+	padding: 4px 0;
+	opacity: 0.7;
+}
+
+@keyframes install-refine-panel-in {
+	from {
+		opacity: 0;
+		max-height: 0;
+	}
+
+	to {
+		opacity: 1;
+		max-height: 200px;
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.install-refine-panel {
+		animation: none;
+	}
+
+	.install-refine-chip,
+	.install-refine-btn,
+	.install-refine-active-chip-remove,
+	.install-refine-clear-all,
+	.install-refine-breadcrumb-crumb {
+		transition: none;
+	}
+}

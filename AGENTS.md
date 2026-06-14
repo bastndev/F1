@@ -22,54 +22,71 @@ There is no test suite. To debug the extension, press **F5** in VS Code (uses `.
 
 ## Architecture
 
-F1 is a VS Code extension providing a **CLI Hub** panel that lets users launch and manage multiple AI coding CLI tools (Claude Code, Codex CLI, OpenCode, Copilot, Cursor, Amp, Kiro, Kilo Code, Grok, Antigravity) in embedded xterm.js terminals.
+F1 is a VS Code extension providing a **CLI Hub** panel that lets users launch and manage multiple AI coding CLI tools (Claude Code, Codex CLI, OpenCode, Copilot, Cursor, Kiro, Kilo Code, Grok, Antigravity) in embedded xterm.js terminals.
+
+### Repository layout
+
+`src/` hosts two products side by side — keep them separate:
+
+- `src/clihub/` — everything belonging to the CLI Hub feature (this extension).
+- `src/my-skill/` — placeholder for a future second extension. Do not mix CLI Hub code into it.
+
+Each product exposes one **front door** that is the only file importable from outside its folder: `src/clihub/clihub.ts` (host-side exports only — never re-export webview code there) and `src/my-skill/my-skills.ts`. `src/extension.ts` imports exclusively through these.
+
+Inside `src/clihub/` the code is split by **where it runs**:
+
+- `src/clihub/host/` — extension-host (Node.js) code: the webview provider (`main.ts`), HTML builders (`launcher-html.ts`, `webview-html.ts`, `webview-assets.ts`), session manager + pty host, workspace queries, translation/spellcheck/voice/attachment services.
+- `src/clihub/webview/` — browser code: the launcher (`launcher/`), the terminal panel (`panel-terminal/`, `panel-tab/`), the tools modals (`tools/`), styles and SVG assets.
+- `src/clihub/shared/` — code imported from both sides: the message protocol (`protocol.ts`), the CLI agent registry (`agents.ts`), prompt/token logic (`prompt/`), launch-guard, model detection, voice/translation types, UI strings (`ui-strings.ts`).
+
+Host code must never be imported from `webview/**` and vice versa; `shared/**` must not import `vscode` or touch the DOM at module scope (types and pure logic only).
 
 ### Four build targets (esbuild.js)
 
 | Entry point | Output | Platform |
 |---|---|---|
 | `src/extension.ts` | `dist/extension.js` | Node.js / CJS |
-| `src/clihub/index.ts` | `dist/clihub/index.js` | Browser / IIFE |
-| `src/clihub/webview/ui/panel-terminal/terminal.ts` | `dist/clihub/webview/webview.js` | Browser / IIFE |
-| `src/clihub/webview/core/terminal-cli/pty-host.ts` | `dist/clihub/webview/core/terminal-cli/pty-host.js` | Node.js / CJS |
+| `src/clihub/webview/launcher/index.ts` | `dist/clihub/webview/launcher/index.js` | Browser / IIFE |
+| `src/clihub/webview/panel-terminal/terminal.ts` | `dist/clihub/webview/terminal.js` | Browser / IIFE |
+| `src/clihub/host/terminal-cli/pty-host.ts` | `dist/clihub/host/pty-host.js` | Node.js / CJS |
 
-`node-pty` and `vscode` are always external. Non-TS assets (HTML, CSS, SVG) are copied from `src/clihub/` into `dist/clihub/` by the build script — they are not bundled. CSS/HTML files imported inside `terminal.ts` and the modal UI files use esbuild's `text` loader so they bundle as strings.
+`node-pty` and `vscode` are always external. Non-TS assets (HTML, CSS, SVG) are copied from `src/clihub/webview/` into `dist/clihub/webview/` by the build script — they are not bundled. CSS/HTML files imported inside the terminal bundle (modal UI files) use esbuild's `text` loader so they bundle as strings.
 
 ### Two-phase webview
 
-**Phase 1 – Launcher** (`src/clihub/index.ts` + `src/clihub/index.html`):
+**Phase 1 – Launcher** (`src/clihub/webview/launcher/index.ts` + `index.html`, host side `src/clihub/host/launcher-html.ts`):
 The initial webview renders a fuzzy-search launcher to pick which CLI to open. State is persisted via `vscode.getState()`/`setState()`. On selection, a `{ type: 'openAgent', agent }` message is posted to the extension host.
 
-**Phase 2 – Terminal** (`src/clihub/webview/ui/panel-terminal/terminal.ts`):
-Once an agent is chosen, `CliHubViewProvider` replaces `webviewView.webview.html` entirely with the terminal layout (built by `src/clihub/webview/webview.ts`). From this point, `terminal.ts` drives xterm.js instances and exchanges typed messages with the host.
+**Phase 2 – Terminal** (`src/clihub/webview/panel-terminal/terminal.ts`, host side `src/clihub/host/webview-html.ts`):
+Once an agent is chosen, `CliHubViewProvider` replaces `webviewView.webview.html` entirely with the terminal layout. From this point, `terminal.ts` drives xterm.js instances and exchanges typed messages with the host. Its supporting modules live alongside it: `host-rpc.ts` (request/response channels), `boot-skeleton.ts`, `copy-to-translate.ts`, `terminal-theme.ts`.
 
 ### PTY host subprocess
 
-`CliSessionManager` (`src/clihub/webview/core/terminal-cli/session-manager.ts`) runs in the extension host. For each CLI session it spawns `dist/clihub/webview/core/terminal-cli/pty-host.js` as a Node.js child process with IPC stdio. The pty-host process owns the `node-pty` instance and relays `output`, `exit`, and `error` messages back over IPC. This keeps the native `node-pty` module out of the renderer process and out of the main extension bundle.
+`CliSessionManager` (`src/clihub/host/terminal-cli/session-manager.ts`) runs in the extension host. For each CLI session it spawns `dist/clihub/host/pty-host.js` as a Node.js child process with IPC stdio. The pty-host process owns the `node-pty` instance and relays `output`, `exit`, and `error` messages back over IPC. This keeps the native `node-pty` module out of the renderer process and out of the main extension bundle. The pty-host must be spawned with system `node` (Electron-as-Node segfaults with node-pty).
 
 ### Message protocol
 
-All communication crosses two boundaries:
+All message contracts live in **`src/clihub/shared/protocol.ts`** — both sides of each boundary import from it:
 
-- **Extension host ↔ webview**: `webview.postMessage()` / `window.addEventListener('message')`. Message types are prefixed: `cli.*`, `prompt.*`, `workspace.*`.
-- **Extension host ↔ pty-host**: Node.js IPC (`process.send` / `host.on('message')`). Types: `start`, `input`, `resize`, `kill`, `ready`, `output`, `exit`, `error`.
+- **Extension host ↔ webview**: `webview.postMessage()` / `window.addEventListener('message')`. `WebviewToHostMessage` / `HostToWebviewMessage`; types are prefixed `cli.*`, `prompt.*`, `workspace.*`, `voice.*`, `clipboard.*`.
+- **Extension host ↔ pty-host**: Node.js IPC. `PtyHostCommand` (`start`, `input`, `resize`, `kill`) / `PtyHostEvent` (`ready`, `output`, `exit`, `error`).
+
+`cli.state` snapshots include a session's terminal buffer only the first time that session is announced to the current webview; afterwards the webview maintains its own copy from incremental `cli.output` messages.
 
 ### Tools panel
 
-The terminal panel has a right-side tools area (`src/clihub/webview/ui/panel-terminal/tools-cli-ui/`) with three modals:
+The terminal panel has a right-side tools area (`src/clihub/webview/tools/`) with three modals:
 
-- **Prompt** – rich textarea with @-file mention picker, image paste support, autocorrect, and ES→EN translation before sending to the CLI.
-- **Translator** – standalone translation modal; uses selection from the active terminal.
-- **Keymaps** – keyboard shortcut reference.
+- **Prompt** (`modal-prompt/`) – rich textarea with @-file mention picker, image paste support, collapsed pastes, skills chips, live spell-marking, and ES→EN translation before sending to the CLI. `prompt.ts` orchestrates; the concerns live in sibling modules (`attachments-ui.ts`, `highlight.ts`, `skills-chips.ts`, `footer-model.ts`, `lowercase-input.ts`, `textarea-history.ts`, `session-state.ts`).
+- **Translator** (`modal-translator/`) – standalone translation modal; uses selection from the active terminal (webview-side providers in `browser-terminal-translator.ts`).
+- **Keymaps** (`modal-keymaps/`) – keyboard shortcut reference.
 
-Translation is handled in the extension host (`src/clihub/webview/core/tools-cli-core/modal-translation/host-prompt-translator.ts`) using MyMemory and Google Translate (no API key required) with an in-memory cache and per-provider rate-limit cooldown.
+Prompt translation is handled in the extension host (`src/clihub/host/translation/host-prompt-translator.ts`) using MyMemory and Google Translate (no API key required) with an in-memory cache and per-provider rate-limit cooldown.
 
-Image attachments are saved to `context.globalStorageUri/clihub-images/` by `src/clihub/webview/core/tools-cli-core/prompt/attachments/host-preparer.ts` before the final text is sent to the CLI.
+Image attachments are saved to `context.globalStorageUri/clihub-images/` by `src/clihub/host/attachments/host-preparer.ts` before the final text is sent to the CLI.
 
 ### Adding a new CLI agent
 
-1. Add an entry to `cliAgents` in `src/clihub/webview/core/terminal-cli/agents.ts`.
-2. Add the matching entry to `launcherAgents` in `src/clihub/main.ts`.
-3. Add the SVG icon to `src/clihub/assets/icons-cli/`.
-4. Optionally add an installer entry in `src/clihub/webview/core/terminal-cli/data/cli-installers.ts`.
-5. Add the slug mapping in both `getAgentSlug` functions (`src/clihub/index.ts` and `src/clihub/webview/ui/panel-terminal/terminal.ts`).
+1. Add one entry to the registry in `src/clihub/shared/agents.ts` (label, command, args, slug, aliases, icon file).
+2. Add the SVG icon to `src/clihub/webview/assets/icons-cli/`.
+3. Optionally add an installer entry in `src/clihub/host/terminal-cli/cli-installers.ts`.

@@ -1,0 +1,1077 @@
+.design-md-screen {
+	width: 100%;
+	color: var(--vscode-foreground);
+}
+
+.design-md-panel {
+	display: flex;
+	flex-direction: column;
+	gap: 20px;
+	width: 100%;
+}
+
+.design-md-panel[hidden] {
+	display: none;
+}
+
+@keyframes design-panel-heading-in {
+	from {
+		opacity: 0;
+		filter: blur(2px);
+		transform: translateY(6px);
+	}
+	to {
+		opacity: 1;
+		filter: blur(0);
+		transform: translateY(0);
+	}
+}
+
+@keyframes design-option-card-in {
+	from {
+		opacity: 0;
+		filter: blur(2px);
+		transform: translateY(10px) scale(0.982);
+	}
+	to {
+		opacity: 1;
+		filter: blur(0);
+		transform: translateY(0) scale(1);
+	}
+}
+
+.design-md-panel.is-entering .design-md-heading {
+	animation: design-panel-heading-in 0.34s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.design-md-panel.is-entering .design-md-option {
+	animation: design-option-card-in 0.46s cubic-bezier(0.16, 1, 0.3, 1) calc(var(--design-option-delay, 0ms) + 0.04s) both;
+}
+
+.design-md-panel.is-entering .design-md-file-row {
+	animation: design-option-card-in 0.42s cubic-bezier(0.16, 1, 0.3, 1) 0.12s both;
+}
+
+.design-md-panel.is-entering .design-md-create {
+	animation: design-option-card-in 0.42s cubic-bezier(0.16, 1, 0.3, 1) 0.18s both;
+}
+
+.design-md-heading {
+	display: grid;
+	gap: 6px;
+	text-align: center;
+}
+
+.design-md-heading h1 {
+	margin: 0;
+	font-size: 19px;
+	line-height: 1.18;
+}
+
+.design-md-heading p {
+	max-width: 260px;
+	margin: 0 auto;
+	color: color-mix(in srgb, var(--vscode-descriptionForeground, var(--vscode-foreground, #cccccc)) 78%, transparent);
+	font-size: 13px;
+	line-height: 1.45;
+}
+
+.design-md-options {
+	display: grid;
+	grid-template-columns: 1fr;
+	gap: 8px;
+	width: 100%;
+}
+
+.design-md-summary .design-md-collage,
+.design-md-summary .design-md-create,
+.design-md-summary .design-md-file-row {
+	width: calc(100% - 28px);
+	margin-inline: auto;
+}
+
+.design-md-option {
+	position: relative;
+	min-height: 70px;
+	display: grid;
+	grid-template-columns: auto minmax(58px, 30%) minmax(0, 1fr);
+	align-items: stretch;
+	width: 100%;
+	overflow: hidden;
+	color: var(--vscode-foreground);
+	background:
+		linear-gradient(180deg, color-mix(in srgb, var(--vscode-foreground, #cccccc) 3%, transparent), transparent 54%),
+		color-mix(in srgb, var(--create-bg) 90%, #000000 10%);
+	border: 1px solid color-mix(in srgb, var(--vscode-foreground, #cccccc) 10%, transparent);
+	border-radius: 8px;
+	font-family: var(--myskills-ui-font);
+	text-align: left;
+	cursor: pointer;
+	box-shadow: inset 0 1px 0 color-mix(in srgb, #ffffff 5%, transparent);
+	transition: border-color 0.18s ease, background 0.18s ease, box-shadow 0.18s ease, transform 0.18s ease;
+}
+
+.design-md-option--color {
+	grid-template-columns: 1fr;
+	gap: 0;
+	min-height: 0;
+	padding: 0;
+	background: color-mix(in srgb, var(--create-bg) 92%, #000000 8%);
+}
+
+.design-md-option--typography {
+	grid-template-columns: 1fr;
+	min-height: 128px;
+	padding: 0;
+	background: color-mix(in srgb, var(--create-bg) 92%, #000000 8%);
+}
+
+.design-md-option--style {
+	grid-template-columns: 1fr;
+	min-height: 118px;
+	padding: 0;
+	background: color-mix(in srgb, var(--create-bg) 92%, #000000 8%);
+}
+
+.design-md-option:hover {
+	background:
+		linear-gradient(180deg, color-mix(in srgb, var(--create-accent) 5%, transparent), transparent 56%),
+		color-mix(in srgb, var(--create-bg) 85%, #000000 15%);
+	border-color: color-mix(in srgb, var(--create-accent) 38%, transparent);
+	box-shadow:
+		inset 0 1px 0 color-mix(in srgb, #ffffff 7%, transparent),
+		0 8px 20px color-mix(in srgb, #000000 18%, transparent);
+	transform: translateY(-1px);
+}
+
+.design-md-option.is-selected {
+	background:
+		linear-gradient(180deg, color-mix(in srgb, var(--create-accent) 8%, transparent), transparent 58%),
+		color-mix(in srgb, var(--create-bg) 88%, #000000 12%);
+	border-color: color-mix(in srgb, var(--create-accent) 58%, transparent);
+	box-shadow:
+		inset 0 1px 0 color-mix(in srgb, #ffffff 8%, transparent),
+		0 0 0 1px color-mix(in srgb, var(--create-accent) 16%, transparent),
+		0 10px 24px color-mix(in srgb, var(--create-accent) 10%, transparent);
+}
+
+.design-md-option:focus-visible {
+	outline: 1px solid var(--create-accent);
+	outline-offset: 2px;
+}
+
+.design-md-option-id {
+	width: 34px;
+	display: grid;
+	place-items: center;
+	color: color-mix(in srgb, var(--create-accent) 82%, var(--vscode-foreground, #cccccc));
+	background: color-mix(in srgb, var(--create-accent) 9%, transparent);
+	font-family: var(--myskills-mono-font);
+	font-size: 11px;
+	font-weight: 800;
+}
+
+.design-md-option--color .design-md-option-id {
+	display: none;
+}
+
+.design-md-option--typography .design-md-option-id {
+	display: none;
+}
+
+.design-md-option--style .design-md-option-id {
+	display: none;
+}
+
+.design-md-color-card {
+	min-width: 0;
+	display: grid;
+	overflow: hidden;
+	border-radius: 7px 7px 0 0;
+}
+
+.design-md-color-card-head {
+	min-height: 32px;
+	display: flex;
+	align-items: flex-start;
+	justify-content: space-between;
+	gap: 12px;
+	padding: 10px 14px 11px;
+	color: #ffffff;
+}
+
+.design-md-color-card-head span:first-child {
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+	font-size: 13px;
+	font-weight: 760;
+	line-height: 1.1;
+}
+
+.design-md-color-card-head span:last-child {
+	flex: 0 0 auto;
+	color: rgba(255, 255, 255, 0.68);
+	font-family: var(--myskills-mono-font);
+	font-size: 10px;
+	font-weight: 720;
+}
+
+.design-md-color-card-palette {
+	display: flex;
+	height: 34px;
+}
+
+.design-md-color-card-palette span {
+	flex: 1;
+	min-width: 0;
+}
+
+.design-md-option--color .design-md-option-copy {
+	padding: 10px 12px 11px;
+}
+
+.design-md-option--color .design-md-option-copy span:first-child {
+	color: color-mix(in srgb, var(--vscode-descriptionForeground, var(--vscode-foreground, #cccccc)) 82%, transparent);
+	font-size: 12px;
+	font-weight: 600;
+}
+
+.design-md-option-copy {
+	min-width: 0;
+	display: grid;
+	align-content: center;
+	gap: 4px;
+	padding: 10px;
+}
+
+.design-md-option-copy span:first-child {
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+	font-size: 13px;
+	font-weight: 800;
+	line-height: 1.1;
+}
+
+.design-md-option-copy span:last-child {
+	overflow: hidden;
+	text-overflow: ellipsis;
+	color: color-mix(in srgb, var(--vscode-descriptionForeground, var(--vscode-foreground, #cccccc)) 72%, transparent);
+	font-size: 12px;
+	line-height: 1.25;
+}
+
+.design-md-type-card {
+	min-width: 0;
+	display: grid;
+	grid-template-columns: minmax(0, 1.45fr) 1px minmax(58px, 0.58fr);
+	align-items: center;
+	column-gap: 14px;
+	width: 100%;
+	box-sizing: border-box;
+	padding: 12px 14px;
+}
+
+.design-md-type-details {
+	min-width: 0;
+	display: grid;
+	align-content: start;
+	gap: 8px;
+}
+
+.design-md-type-title {
+	min-width: 0;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+	color: color-mix(in srgb, var(--create-accent) 82%, var(--vscode-foreground, #cccccc));
+	font-size: 13px;
+	font-weight: 760;
+	letter-spacing: 0;
+	line-height: 1.2;
+}
+
+.design-md-option--typography.is-selected .design-md-type-title {
+	color: color-mix(in srgb, var(--create-accent) 82%, var(--vscode-foreground, #cccccc));
+}
+
+.design-md-type-weights {
+	display: grid;
+	gap: 3px;
+}
+
+.design-md-type-weight {
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+	color: color-mix(in srgb, var(--vscode-descriptionForeground, var(--vscode-foreground, #cccccc)) 74%, transparent);
+	border: 1px solid transparent;
+	border-radius: 6px;
+	padding: 4px 8px;
+	font-size: 12px;
+	line-height: 1.15;
+	cursor: pointer;
+	transition: color 0.16s ease, background 0.16s ease, border-color 0.16s ease;
+}
+
+.design-md-type-weight:hover,
+.design-md-type-weight.is-previewed {
+	color: var(--vscode-foreground);
+	background: color-mix(in srgb, var(--create-accent) 8%, transparent);
+	border-color: color-mix(in srgb, var(--create-accent) 24%, transparent);
+}
+
+.design-md-option--typography.is-selected .design-md-type-weight.is-previewed {
+	color: color-mix(in srgb, var(--create-accent) 86%, #ffffff 14%);
+	background: color-mix(in srgb, var(--create-accent) 13%, transparent);
+	border-color: color-mix(in srgb, var(--create-accent) 42%, transparent);
+}
+
+.design-md-type-divider {
+	align-self: stretch;
+	display: block;
+	width: 1px;
+	min-height: 76px;
+	background: linear-gradient(
+		180deg,
+		transparent,
+		color-mix(in srgb, var(--vscode-foreground, #cccccc) 18%, transparent) 20%,
+		color-mix(in srgb, var(--vscode-foreground, #cccccc) 26%, transparent) 50%,
+		color-mix(in srgb, var(--vscode-foreground, #cccccc) 18%, transparent) 80%,
+		transparent
+	);
+}
+
+.design-md-type-preview {
+	min-width: 0;
+	min-height: 74px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	color: var(--vscode-foreground);
+	background: transparent;
+	border: 0;
+	border-radius: 0;
+}
+
+.design-md-type-preview-lg {
+	font-size: 40px;
+	font-weight: inherit;
+	line-height: 0.9;
+	transition: font-weight 0.2s ease, transform 0.2s ease, color 0.2s ease;
+}
+
+.design-md-type-preview.is-weight-changing .design-md-type-preview-lg {
+	animation: design-type-weight-change 0.26s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes design-type-weight-change {
+	0% {
+		opacity: 0.62;
+		transform: translateY(2px) scale(0.94);
+	}
+	55% {
+		opacity: 1;
+		transform: translateY(-1px) scale(1.035);
+	}
+	100% {
+		opacity: 1;
+		transform: translateY(0) scale(1);
+	}
+}
+
+.design-md-option--typography.is-selected .design-md-type-preview {
+	color: color-mix(in srgb, var(--create-accent) 78%, var(--vscode-foreground, #cccccc));
+	box-shadow: none;
+}
+
+.design-md-style-card {
+	min-width: 0;
+	display: grid;
+	grid-template-columns: minmax(0, 1fr) 68px;
+	align-items: stretch;
+	gap: 12px;
+	width: 100%;
+	box-sizing: border-box;
+	padding: 13px;
+}
+
+.design-md-style-copy {
+	min-width: 0;
+	display: grid;
+	align-content: center;
+	gap: 6px;
+}
+
+.design-md-style-title {
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+	color: var(--vscode-foreground);
+	font-size: 14px;
+	font-weight: 760;
+	line-height: 1.1;
+}
+
+.design-md-style-description {
+	display: -webkit-box;
+	overflow: hidden;
+	color: color-mix(in srgb, var(--vscode-descriptionForeground, var(--vscode-foreground, #cccccc)) 78%, transparent);
+	font-size: 12px;
+	line-height: 1.25;
+	-webkit-box-orient: vertical;
+	-webkit-line-clamp: 2;
+	line-clamp: 2;
+}
+
+.design-md-style-reference {
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+	color: color-mix(in srgb, var(--create-accent) 70%, var(--vscode-foreground, #cccccc));
+	font-size: 11px;
+	font-weight: 700;
+	letter-spacing: 0;
+}
+
+.design-md-style-mark {
+	align-self: center;
+	display: grid;
+	place-items: center;
+	min-width: 0;
+	min-height: 68px;
+	color: var(--create-accent);
+	background:
+		linear-gradient(180deg, color-mix(in srgb, var(--create-accent) 7%, transparent), transparent 62%),
+		color-mix(in srgb, var(--create-bg) 84%, #000000 16%);
+	border: 1px solid color-mix(in srgb, var(--create-accent) 20%, transparent);
+	border-radius: 8px;
+	font-size: 24px;
+	font-weight: 800;
+}
+
+.design-md-style-mark::before {
+	content: "";
+	display: block;
+	width: 36px;
+	height: 36px;
+	border: 1px solid color-mix(in srgb, var(--create-accent) 70%, transparent);
+	border-radius: 8px;
+}
+
+.design-md-style-mark--bento::before {
+	background:
+		linear-gradient(var(--create-accent) 0 0) 8px 8px / 10px 10px no-repeat,
+		linear-gradient(color-mix(in srgb, var(--create-accent) 62%, transparent) 0 0) 22px 8px / 8px 18px no-repeat,
+		linear-gradient(color-mix(in srgb, var(--create-accent) 42%, transparent) 0 0) 8px 22px / 10px 8px no-repeat;
+}
+
+.design-md-style-mark--neumorphism::before {
+	border-color: color-mix(in srgb, var(--create-accent) 28%, transparent);
+	background:
+		radial-gradient(circle at 30% 28%, color-mix(in srgb, #ffffff 18%, transparent) 0 5px, transparent 6px),
+		linear-gradient(145deg, color-mix(in srgb, #ffffff 14%, transparent), color-mix(in srgb, #000000 18%, transparent)),
+		color-mix(in srgb, var(--create-accent) 10%, transparent);
+	box-shadow:
+		-5px -5px 10px color-mix(in srgb, #ffffff 9%, transparent),
+		5px 5px 12px color-mix(in srgb, #000000 42%, transparent),
+		inset 2px 2px 5px color-mix(in srgb, #ffffff 8%, transparent),
+		inset -3px -3px 6px color-mix(in srgb, #000000 22%, transparent);
+}
+
+.design-md-style-mark--artistic::before {
+	border-radius: 13px 4px 12px;
+	background:
+		radial-gradient(circle at 70% 28%, var(--create-accent) 0 5px, transparent 6px),
+		linear-gradient(135deg, color-mix(in srgb, var(--create-accent) 72%, transparent), transparent);
+}
+
+.design-md-style-mark--minimalistic::before {
+	background:
+		linear-gradient(var(--create-accent) 0 0) 10px 9px / 18px 2px no-repeat,
+		linear-gradient(color-mix(in srgb, var(--create-accent) 54%, transparent) 0 0) 10px 18px / 13px 2px no-repeat,
+		linear-gradient(color-mix(in srgb, var(--create-accent) 34%, transparent) 0 0) 10px 27px / 18px 2px no-repeat;
+}
+
+.design-md-style-mark--perspective::before {
+	transform: perspective(70px) rotateX(12deg) rotateY(-16deg);
+	background:
+		linear-gradient(135deg, color-mix(in srgb, var(--create-accent) 64%, transparent), transparent),
+		color-mix(in srgb, var(--vscode-foreground, #cccccc) 10%, transparent);
+}
+
+.design-md-style-mark--premium::before {
+	background:
+		linear-gradient(var(--create-accent) 0 0) 8px 11px / 22px 2px no-repeat,
+		linear-gradient(color-mix(in srgb, var(--create-accent) 54%, #ffffff) 0 0) 11px 18px / 16px 2px no-repeat,
+		linear-gradient(135deg, color-mix(in srgb, var(--create-accent) 30%, transparent), transparent);
+}
+
+.design-md-style-mark--refined::before {
+	background:
+		linear-gradient(var(--create-accent) 0 0) 9px 10px / 20px 2px no-repeat,
+		linear-gradient(color-mix(in srgb, var(--create-accent) 50%, transparent) 0 0) 9px 18px / 16px 2px no-repeat,
+		linear-gradient(color-mix(in srgb, var(--create-accent) 34%, transparent) 0 0) 9px 26px / 20px 2px no-repeat;
+}
+
+.design-md-style-mark--neobrutalism::before {
+	border-radius: 2px;
+	background:
+		linear-gradient(90deg, var(--create-accent) 0 45%, transparent 46%),
+		color-mix(in srgb, var(--vscode-foreground, #cccccc) 12%, transparent);
+}
+
+.design-md-style-mark--glassmorphism::before {
+	border-color: color-mix(in srgb, #ffffff 24%, transparent);
+	background:
+		linear-gradient(135deg, color-mix(in srgb, #ffffff 30%, transparent), transparent 45%),
+		linear-gradient(color-mix(in srgb, var(--create-accent) 28%, transparent) 0 0) 8px 10px / 22px 16px no-repeat,
+		linear-gradient(color-mix(in srgb, #ffffff 18%, transparent) 0 0) 14px 17px / 18px 13px no-repeat,
+		color-mix(in srgb, var(--create-accent) 12%, transparent);
+	box-shadow:
+		inset 0 0 0 1px color-mix(in srgb, #ffffff 20%, transparent),
+		0 8px 18px color-mix(in srgb, #000000 28%, transparent);
+}
+
+.design-md-style-mark--liquid-glass::before {
+	border-radius: 14px 10px 15px 9px;
+	border-color: color-mix(in srgb, #ffffff 26%, transparent);
+	background:
+		radial-gradient(circle at 72% 24%, color-mix(in srgb, #ffffff 46%, transparent) 0 7px, transparent 8px),
+		radial-gradient(circle at 34% 70%, color-mix(in srgb, var(--create-accent) 26%, transparent) 0 11px, transparent 12px),
+		linear-gradient(135deg, color-mix(in srgb, #ffffff 24%, transparent), color-mix(in srgb, var(--create-accent) 20%, transparent)),
+		color-mix(in srgb, var(--create-accent) 10%, transparent);
+	box-shadow:
+		inset 0 0 0 1px color-mix(in srgb, #ffffff 22%, transparent),
+		inset -9px -11px 18px color-mix(in srgb, var(--create-accent) 18%, transparent),
+		0 0 16px color-mix(in srgb, var(--create-accent) 18%, transparent);
+}
+
+.design-md-style-mark--shadcn::before {
+	background:
+		linear-gradient(var(--create-accent) 0 0) 8px 10px / 22px 2px no-repeat,
+		linear-gradient(var(--create-accent) 0 0) 8px 18px / 14px 2px no-repeat,
+		linear-gradient(var(--create-accent) 0 0) 8px 26px / 20px 2px no-repeat;
+}
+
+.design-md-style-mark--cafe::before {
+	border-radius: 999px 999px 12px 12px;
+	background:
+		radial-gradient(circle at 50% 36%, color-mix(in srgb, var(--create-accent) 72%, transparent), transparent 52%),
+		linear-gradient(180deg, transparent 0 62%, var(--create-accent) 63% 68%, transparent 69%);
+}
+
+.design-md-style-mark--pacman::before {
+	background:
+		conic-gradient(from 45deg, var(--create-accent) 0deg 270deg, transparent 270deg 360deg) 6px 10px / 16px 16px no-repeat,
+		radial-gradient(circle, var(--create-accent) 0 2px, transparent 3px) 24px 17px / 6px 6px no-repeat,
+		radial-gradient(circle, var(--create-accent) 0 2px, transparent 3px) 32px 17px / 6px 6px no-repeat;
+}
+
+.design-md-style-mark--dashboard::before {
+	background:
+		linear-gradient(var(--create-accent) 0 0) 8px 18px / 4px 10px no-repeat,
+		linear-gradient(color-mix(in srgb, var(--create-accent) 70%, transparent) 0 0) 16px 12px / 4px 16px no-repeat,
+		linear-gradient(color-mix(in srgb, var(--create-accent) 40%, transparent) 0 0) 24px 8px / 4px 20px no-repeat,
+		linear-gradient(color-mix(in srgb, var(--create-accent) 50%, transparent) 0 0) 6px 29px / 24px 2px no-repeat;
+}
+
+.design-md-style-mark--matrix::before {
+	background:
+		radial-gradient(circle, var(--create-accent) 0 1.5px, transparent 2px) 10px 8px / 4px 4px no-repeat,
+		radial-gradient(circle, var(--create-accent) 0 1.5px, transparent 2px) 10px 16px / 4px 4px no-repeat,
+		radial-gradient(circle, var(--create-accent) 0 1.5px, transparent 2px) 10px 24px / 4px 4px no-repeat,
+		radial-gradient(circle, var(--create-accent) 0 1.5px, transparent 2px) 18px 12px / 4px 4px no-repeat,
+		radial-gradient(circle, var(--create-accent) 0 1.5px, transparent 2px) 18px 20px / 4px 4px no-repeat,
+		radial-gradient(circle, var(--create-accent) 0 1.5px, transparent 2px) 18px 28px / 4px 4px no-repeat,
+		radial-gradient(circle, var(--create-accent) 0 1.5px, transparent 2px) 26px 6px / 4px 4px no-repeat,
+		radial-gradient(circle, var(--create-accent) 0 1.5px, transparent 2px) 26px 14px / 4px 4px no-repeat,
+		radial-gradient(circle, var(--create-accent) 0 1.5px, transparent 2px) 26px 22px / 4px 4px no-repeat;
+}
+
+.design-md-style-mark--80s::before {
+	background:
+		linear-gradient(var(--create-accent) 0 0) 12px 6px / 12px 2px no-repeat,
+		linear-gradient(var(--create-accent) 0 0) 10px 8px / 16px 2px no-repeat,
+		linear-gradient(var(--create-accent) 0 0) 10px 10px / 16px 2px no-repeat,
+		linear-gradient(var(--create-accent) 0 0) 12px 12px / 12px 2px no-repeat,
+		linear-gradient(var(--create-accent) 0 0) 6px 18px / 24px 1.5px no-repeat,
+		linear-gradient(var(--create-accent) 0 0) 10px 22px / 16px 1px no-repeat,
+		linear-gradient(var(--create-accent) 0 0) 14px 26px / 8px 1px no-repeat;
+}
+
+.design-md-style-mark--school::before {
+	background:
+		linear-gradient(color-mix(in srgb, var(--create-accent) 80%, #f85149) 0 0) 12px 6px / 1.5px 24px no-repeat,
+		linear-gradient(color-mix(in srgb, var(--create-accent) 60%, transparent) 0 0) 8px 10px / 20px 1.5px no-repeat,
+		linear-gradient(color-mix(in srgb, var(--create-accent) 60%, transparent) 0 0) 8px 16px / 20px 1.5px no-repeat,
+		linear-gradient(color-mix(in srgb, var(--create-accent) 60%, transparent) 0 0) 8px 22px / 20px 1.5px no-repeat,
+		linear-gradient(color-mix(in srgb, var(--create-accent) 60%, transparent) 0 0) 8px 28px / 20px 1.5px no-repeat;
+}
+
+/* ─── Collage Stack ─── */
+
+.design-md-collage {
+	position: relative;
+	width: 100%;
+	height: 296px;
+	perspective: 900px;
+}
+
+.design-md-collage-card {
+	position: absolute;
+	left: 50%;
+	top: 50%;
+	width: calc(100% - 8px);
+	height: 216px;
+	display: grid;
+	grid-template-rows: auto 1fr auto;
+	background:
+		linear-gradient(180deg, color-mix(in srgb, var(--create-accent) 6%, transparent), transparent 50%),
+		color-mix(in srgb, var(--create-bg) 92%, #000000 8%);
+	border: 1px solid color-mix(in srgb, var(--vscode-foreground, #cccccc) 13%, transparent);
+	border-radius: 14px;
+	overflow: hidden;
+	cursor: pointer;
+	font-family: var(--myskills-ui-font);
+	text-align: left;
+	color: var(--vscode-foreground);
+	transform-origin: center center;
+	transition:
+		transform 0.5s cubic-bezier(0.23, 1, 0.32, 1),
+		box-shadow 0.5s cubic-bezier(0.23, 1, 0.32, 1),
+		border-color 0.3s ease,
+		opacity 0.4s ease;
+}
+
+.design-md-collage-card:focus-visible {
+	outline: 1px solid var(--create-accent);
+	outline-offset: 2px;
+}
+
+/* ── Depth 0 = back (peeks bottom-left) ── */
+.design-md-collage-card[data-collage-depth="0"] {
+	z-index: 1;
+	transform: translate(-50%, -50%) rotate(-5deg) scale(0.88) translate(-14px, 22px);
+	opacity: 0.72;
+	background:
+		linear-gradient(180deg, color-mix(in srgb, #888888 8%, transparent), transparent 50%),
+		color-mix(in srgb, var(--create-bg) 82%, #3a3a42 18%);
+	border-color: color-mix(in srgb, #999999 18%, transparent);
+	box-shadow: 0 4px 14px rgba(0, 0, 0, 0.22);
+}
+
+/* ── Depth 1 = middle (peeks top-right) ── */
+.design-md-collage-card[data-collage-depth="1"] {
+	z-index: 2;
+	transform: translate(-50%, -50%) rotate(3.5deg) scale(0.93) translate(10px, -14px);
+	opacity: 0.82;
+	background:
+		linear-gradient(180deg, color-mix(in srgb, #aaaaaa 6%, transparent), transparent 50%),
+		color-mix(in srgb, var(--create-bg) 86%, #48484f 14%);
+	border-color: color-mix(in srgb, #aaaaaa 16%, transparent);
+	box-shadow: 0 6px 20px rgba(0, 0, 0, 0.26);
+}
+
+/* ── Depth 2 = front ── */
+.design-md-collage-card[data-collage-depth="2"] {
+	z-index: 3;
+	transform: translate(-50%, -50%) rotate(0deg) scale(1);
+	opacity: 1;
+	border-color: color-mix(in srgb, var(--create-accent) 44%, transparent);
+	box-shadow:
+		0 0 0 1px color-mix(in srgb, var(--create-accent) 12%, transparent),
+		0 14px 36px color-mix(in srgb, var(--create-accent) 14%, transparent);
+}
+
+.design-md-collage-card.is-skipped {
+	background:
+		linear-gradient(180deg, color-mix(in srgb, var(--vscode-foreground, #cccccc) 3%, transparent), transparent 52%),
+		color-mix(in srgb, var(--create-bg) 91%, #000000 9%);
+	border-style: dashed;
+}
+
+.design-md-collage-card.is-skipped[data-collage-depth="2"] {
+	border-color: color-mix(in srgb, var(--vscode-foreground, #cccccc) 24%, transparent);
+	box-shadow:
+		0 0 0 1px color-mix(in srgb, var(--vscode-foreground, #cccccc) 7%, transparent),
+		0 12px 28px color-mix(in srgb, #000000 24%, transparent);
+}
+
+/* ── Subtle rear-card side pulses from create button hover ── */
+@keyframes design-collage-back-side-pulse {
+	0%, 100% {
+		transform: translate(-50%, -50%) rotate(-5deg) scale(0.88) translate(-14px, 22px);
+	}
+	50% {
+		transform: translate(-50%, -50%) rotate(-5deg) scale(0.88) translate(-20px, 22px);
+	}
+}
+
+@keyframes design-collage-middle-side-pulse {
+	0%, 100% {
+		transform: translate(-50%, -50%) rotate(3.5deg) scale(0.93) translate(10px, -14px);
+	}
+	50% {
+		transform: translate(-50%, -50%) rotate(3.5deg) scale(0.93) translate(16px, -14px);
+	}
+}
+
+.design-md-summary:has(.design-md-create:hover) .design-md-collage-card[data-collage-depth="0"] {
+	animation: design-collage-back-side-pulse 0.32s ease-in-out 4 both;
+}
+
+.design-md-summary:has(.design-md-create:hover) .design-md-collage-card[data-collage-depth="1"] {
+	animation: design-collage-middle-side-pulse 0.32s ease-in-out 0.04s 4 both;
+}
+
+/* ── Individual card press ── */
+.design-md-collage-card:active {
+	transform: translate(-50%, -50%) scale(0.96) !important;
+	transition-duration: 0.12s !important;
+}
+
+/* ── Entrance animation ── */
+@keyframes collageCardIn {
+	0% {
+		opacity: 0;
+		transform: translate(-50%, 60%) rotate(8deg) scale(0.7);
+	}
+	100% {
+		opacity: var(--collage-end-opacity, 1);
+		transform: var(--collage-end-transform);
+	}
+}
+
+.design-md-summary.is-entering .design-md-collage-card[data-collage-depth="0"] {
+	--collage-end-opacity: 0.72;
+	--collage-end-transform: translate(-50%, -50%) rotate(-5deg) scale(0.88) translate(-14px, 22px);
+	animation: collageCardIn 0.6s cubic-bezier(0.23, 1, 0.32, 1) 0.05s both;
+}
+
+.design-md-summary.is-entering .design-md-collage-card[data-collage-depth="1"] {
+	--collage-end-opacity: 0.82;
+	--collage-end-transform: translate(-50%, -50%) rotate(3.5deg) scale(0.93) translate(10px, -14px);
+	animation: collageCardIn 0.6s cubic-bezier(0.23, 1, 0.32, 1) 0.15s both;
+}
+
+.design-md-summary.is-entering .design-md-collage-card[data-collage-depth="2"] {
+	--collage-end-opacity: 1;
+	--collage-end-transform: translate(-50%, -50%) rotate(0deg) scale(1);
+	animation: collageCardIn 0.6s cubic-bezier(0.23, 1, 0.32, 1) 0.28s both;
+}
+
+/* ── Badge ── */
+.design-md-collage-badge {
+	padding: 10px 14px 0;
+	color: color-mix(in srgb, var(--create-accent) 82%, var(--vscode-foreground, #cccccc));
+	font-family: var(--myskills-mono-font);
+	font-size: 10px;
+	font-weight: 800;
+	letter-spacing: 0.08em;
+	text-transform: uppercase;
+}
+
+.design-md-collage-card.is-skipped .design-md-collage-badge {
+	color: color-mix(in srgb, var(--vscode-descriptionForeground, var(--vscode-foreground, #cccccc)) 88%, transparent);
+}
+
+/* ── Visual preview ── */
+.design-md-collage-visual {
+	display: grid;
+	place-items: center;
+	min-height: 0;
+	padding: 8px 14px;
+	overflow: hidden;
+}
+
+/* ── Color visual ── */
+.design-md-collage-color-strip {
+	width: 100%;
+	height: 42px;
+	border-radius: 8px;
+	transition: background 0.3s ease;
+}
+
+.design-md-collage-palette {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(0, 1fr));
+	width: 100%;
+	height: 18px;
+	margin-top: 6px;
+	border-radius: 4px;
+	overflow: hidden;
+}
+
+.design-md-collage-palette span {
+	min-width: 0;
+	transition: transform 0.2s ease;
+}
+
+.design-md-collage-card:hover .design-md-collage-palette span {
+	transform: scaleY(1.3);
+}
+
+/* ── Typography visual ── */
+.design-md-collage-type-sample {
+	font-size: 56px;
+	line-height: 1;
+	color: var(--vscode-foreground);
+	opacity: 0.92;
+	transition: transform 0.3s cubic-bezier(0.23, 1, 0.32, 1), opacity 0.3s ease;
+}
+
+.design-md-collage-card:hover .design-md-collage-type-sample {
+	transform: scale(1.08);
+	opacity: 1;
+}
+
+/* ── Style visual (reuses style-mark classes) ── */
+.design-md-collage-visual .design-md-style-mark {
+	min-height: 0;
+	width: 64px;
+	height: 64px;
+	font-size: 28px;
+	border-radius: 14px;
+	transition: transform 0.35s cubic-bezier(0.23, 1, 0.32, 1), box-shadow 0.3s ease;
+}
+
+.design-md-collage-visual .design-md-style-mark::before {
+	width: 44px;
+	height: 44px;
+	border-radius: 10px;
+}
+
+.design-md-collage-card:hover .design-md-style-mark {
+	transform: scale(1.1) rotate(-3deg);
+	box-shadow: 0 6px 18px color-mix(in srgb, var(--create-accent) 22%, transparent);
+}
+
+.design-md-collage-skipped {
+	display: grid;
+	place-items: center;
+	width: 100%;
+	min-height: 74px;
+	color: color-mix(in srgb, var(--vscode-descriptionForeground, var(--vscode-foreground, #cccccc)) 82%, transparent);
+	background:
+		linear-gradient(135deg, color-mix(in srgb, var(--vscode-foreground, #cccccc) 7%, transparent) 0 25%, transparent 25% 50%, color-mix(in srgb, var(--vscode-foreground, #cccccc) 7%, transparent) 50% 75%, transparent 75%),
+		color-mix(in srgb, var(--create-bg) 86%, #000000 14%);
+	background-size: 16px 16px;
+	border: 1px dashed color-mix(in srgb, var(--vscode-foreground, #cccccc) 20%, transparent);
+	border-radius: 10px;
+	font-family: var(--myskills-mono-font);
+	font-size: 11px;
+	font-weight: 800;
+	letter-spacing: 0.06em;
+	text-transform: uppercase;
+	text-align: center;
+}
+
+/* ── Card name ── */
+.design-md-collage-name {
+	padding: 0 14px 12px;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+	font-size: 16px;
+	font-weight: 850;
+	line-height: 1.2;
+}
+
+/* ── File indicator row ── */
+.design-md-file-row {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	padding: 10px 14px;
+	background: color-mix(in srgb, var(--create-bg) 88%, #000000 12%);
+	border: 1px solid color-mix(in srgb, var(--vscode-foreground, #cccccc) 10%, transparent);
+	border-radius: 10px;
+}
+
+.design-md-file-dot {
+	width: 8px;
+	height: 8px;
+	border-radius: 50%;
+	background: var(--vscode-testing-iconPassed, #3fb950);
+	box-shadow: 0 0 6px color-mix(in srgb, var(--vscode-testing-iconPassed, #3fb950) 50%, transparent);
+	animation: fileDotPulse 2s ease-in-out infinite;
+}
+
+@keyframes fileDotPulse {
+	0%, 100% { opacity: 1; box-shadow: 0 0 6px color-mix(in srgb, var(--vscode-testing-iconPassed, #3fb950) 50%, transparent); }
+	50% { opacity: 0.6; box-shadow: 0 0 2px color-mix(in srgb, var(--vscode-testing-iconPassed, #3fb950) 30%, transparent); }
+}
+
+.design-md-file-label {
+	font-size: 13px;
+	font-weight: 850;
+}
+
+.design-md-file-status {
+	margin-left: auto;
+	color: var(--vscode-testing-iconPassed, #3fb950);
+	font-family: var(--myskills-mono-font);
+	font-size: 10px;
+	font-weight: 800;
+	letter-spacing: 0.06em;
+	text-transform: uppercase;
+}
+
+.design-md-screen.is-design-error .design-md-file-row {
+	border-color: color-mix(in srgb, var(--vscode-errorForeground, #f85149) 48%, transparent);
+}
+
+.design-md-screen.is-design-error .design-md-file-dot {
+	background: var(--vscode-errorForeground, #f85149);
+	box-shadow: 0 0 6px color-mix(in srgb, var(--vscode-errorForeground, #f85149) 50%, transparent);
+	animation: none;
+}
+
+.design-md-screen.is-design-error .design-md-file-status {
+	color: var(--vscode-errorForeground, #f85149);
+}
+
+.design-md-screen.is-design-created .design-md-file-dot {
+	background: var(--vscode-testing-iconPassed, #3fb950);
+	box-shadow: 0 0 6px color-mix(in srgb, var(--vscode-testing-iconPassed, #3fb950) 50%, transparent);
+	animation: none;
+}
+
+.design-md-screen.is-design-created .design-md-file-status {
+	color: var(--vscode-testing-iconPassed, #3fb950);
+}
+
+.design-md-create {
+	position: relative;
+	min-height: 54px;
+	width: 100%;
+	color: var(--vscode-foreground);
+	background:
+		radial-gradient(circle at 78% 28%, color-mix(in srgb, var(--create-accent) 24%, transparent), transparent 40%),
+		color-mix(in srgb, var(--create-accent) 12%, transparent);
+	border: 1px solid color-mix(in srgb, var(--create-accent) 32%, transparent);
+	border-radius: 12px;
+	font-family: var(--myskills-ui-font);
+	font-size: 14px;
+	font-weight: 850;
+	cursor: pointer;
+	overflow: hidden;
+	box-shadow:
+		0 0 0 1px color-mix(in srgb, var(--create-accent) 10%, transparent),
+		0 12px 28px color-mix(in srgb, var(--create-accent) 14%, transparent);
+	transition: transform 0.25s cubic-bezier(0.23, 1, 0.32, 1), box-shadow 0.3s ease, border-color 0.3s ease, background 0.3s ease;
+}
+
+.design-md-create::before {
+	content: "";
+	position: absolute;
+	inset: 0;
+	background: linear-gradient(105deg, transparent 38%, color-mix(in srgb, #ffffff 12%, transparent) 48%, transparent 58%);
+	animation: createShimmer 3.5s ease-in-out infinite;
+	pointer-events: none;
+}
+
+@keyframes createShimmer {
+	0%, 100% { transform: translateX(-120%); }
+	50% { transform: translateX(120%); }
+}
+
+.design-md-create:hover {
+	color: color-mix(in srgb, var(--create-accent) 86%, #ffffff 14%);
+	background:
+		radial-gradient(circle at 78% 28%, color-mix(in srgb, var(--create-accent) 30%, transparent), transparent 40%),
+		color-mix(in srgb, var(--create-accent) 16%, transparent);
+	border-color: color-mix(in srgb, var(--create-accent) 50%, transparent);
+	transform: translateY(-1px);
+	box-shadow:
+		0 0 0 1px color-mix(in srgb, var(--create-accent) 14%, transparent),
+		0 16px 34px color-mix(in srgb, var(--create-accent) 20%, transparent);
+}
+
+.design-md-create:active {
+	transform: scale(0.97);
+	transition-duration: 0.1s;
+}
+
+.design-md-create:focus-visible {
+	outline: 1px solid var(--create-accent);
+	outline-offset: 2px;
+}
+
+.design-md-create:disabled,
+.design-md-create:disabled:hover {
+	color: color-mix(in srgb, var(--vscode-descriptionForeground, var(--vscode-foreground, #cccccc)) 72%, transparent);
+	background: color-mix(in srgb, var(--create-bg) 88%, #000000 12%);
+	border-color: color-mix(in srgb, var(--vscode-foreground, #cccccc) 12%, transparent);
+	cursor: not-allowed;
+	transform: none;
+	box-shadow: none;
+}
+
+.design-md-create:disabled::before {
+	animation: none;
+	opacity: 0;
+}
+
+@media (min-width: 360px) {
+	.design-md-options {
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+	}
+
+	.design-md-option {
+		grid-template-columns: 1fr;
+		min-height: 118px;
+	}
+
+	.design-md-options--colors {
+		grid-template-columns: 1fr;
+	}
+
+	.design-md-options--typography {
+		grid-template-columns: 1fr;
+	}
+
+	.design-md-option-id {
+		position: absolute;
+		inset: 8px auto auto 8px;
+		width: auto;
+		padding: 3px 6px;
+		border-radius: 5px;
+	}
+
+	.design-md-color-card,
+	.design-md-style-mark {
+		min-height: 62px;
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.design-md-panel.is-entering .design-md-heading,
+	.design-md-panel.is-entering .design-md-option,
+	.design-md-panel.is-entering .design-md-file-row,
+	.design-md-panel.is-entering .design-md-create,
+	.design-md-type-preview.is-weight-changing .design-md-type-preview-lg,
+	.design-md-summary.is-entering .design-md-collage-card,
+	.design-md-summary:has(.design-md-create:hover) .design-md-collage-card[data-collage-depth="0"],
+	.design-md-summary:has(.design-md-create:hover) .design-md-collage-card[data-collage-depth="1"] {
+		animation: none;
+	}
+
+	.design-md-option,
+	.design-md-collage-card,
+	.design-md-collage-type-sample,
+	.design-md-collage-palette span,
+	.design-md-type-weight,
+	.design-md-type-preview-lg,
+	.design-md-style-mark,
+	.design-md-create {
+		transition-duration: 0.01ms;
+	}
+
+	.design-md-file-dot,
+	.design-md-create::before {
+		animation: none;
+	}
+}

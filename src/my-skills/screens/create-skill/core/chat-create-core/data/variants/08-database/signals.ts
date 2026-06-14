@@ -1,0 +1,15 @@
+export const databaseVariantSignals = [
+	'schema',
+	'model',
+	'models',
+	'prisma',
+	'supabase',
+	'postgres',
+	'postgresql',
+	'mongo',
+	'mongodb',
+	'sql',
+	'nosql',
+	'migration',
+	'migrations',
+];

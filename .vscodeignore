@@ -1,6 +1,16 @@
 .vscode/**
 .vscode-test/**
 src/**
+!src/shared/
+!src/shared/**/
+!src/shared/assets/*.svg
+!src/my-skills/
+!src/my-skills/**/
+!src/my-skills/**/*.html
+!src/my-skills/**/*.css
+!src/my-skills/**/*.svg
+!src/my-skills/**/*.png
+!src/my-skills/**/*.webp
 .gitignore
 .yarnrc
 vsc-extension-quickstart.md

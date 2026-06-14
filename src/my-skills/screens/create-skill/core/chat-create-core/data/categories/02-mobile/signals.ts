@@ -1,0 +1,15 @@
+export const mobileSignals = [
+	'mobile',
+	'app',
+	'ios',
+	'android',
+	'react-native',
+	'react native',
+	'flutter',
+	'expo',
+	'swift',
+	'lynx',
+	'lynxjs',
+	'lynx js',
+	'native',
+];

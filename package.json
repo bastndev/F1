@@ -10,14 +10,26 @@
     "vscode": "^1.75.0"
   },
   "categories": [
-    "Other"
+    "Other",
+    "AI",
+    "Snippets",
+    "Visualization"
   ],
   "keywords": [
     "F1 Quick Switch",
     "productivity",
     "keys maps",
     "toggle",
-    "f1"
+    "f1",
+    "My Skills",
+    "Skills",
+    "agent",
+    "AGENTS.md",
+    "CLAUDE.md",
+    "DESIGN.md",
+    "agents",
+    "claude",
+    "marketplace"
   ],
   "icon": "icon.png",
   "galleryBanner": {
@@ -56,6 +68,13 @@
       }
     ],
     "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "myskills-activity",
+          "title": "My Skills",
+          "icon": "$(symbol-event)"
+        }
+      ],
       "panel": [
         {
           "id": "cliHubContainer",
@@ -65,6 +84,14 @@
       ]
     },
     "views": {
+      "myskills-activity": [
+        {
+          "type": "webview",
+          "id": "myskills-panel",
+          "name": "My Skills",
+          "icon": "$(symbol-event)"
+        }
+      ],
       "cliHubContainer": [
         {
           "type": "webview",

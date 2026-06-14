@@ -1,0 +1,431 @@
+:root {
+	--bg-color: var(--vscode-editor-background);
+	--text-color: var(--vscode-editor-foreground);
+	--font-family: var(--vscode-font-family);
+	--input-bg: var(--vscode-input-background, rgba(128, 128, 128, 0.1)); /* Fondo que se adapta a ambos temas */
+	--accent-color: var(--vscode-textLink-foreground, #4daafc); /* Color de acento dinámico del tema */
+	--input-border-left: var(--accent-color); /* Borde que sigue el tema */
+	--selection-color: var(--input-border-left);
+}
+
+/* -- -- --  - Color Tab -> */
+body.has-agent-palette {
+	--accent-color: #e2b719;
+	--input-border-left: #e2b719;
+	--selection-color: #e2b719;
+}
+
+/* =================================================================
+   Agent accent colors — reused from skeleton
+   Applied when a specific CLI is selected or previewed
+   ================================================================= */
+body[data-agent="grok"] {
+	--accent-color: #e5e7eb;
+	--input-border-left: #e5e7eb;
+	--selection-color: #e5e7eb;
+}
+
+body[data-agent="claude"] {
+	--accent-color: #e29d7f;
+	--input-border-left: #e29d7f;
+	--selection-color: #e29d7f;
+}
+
+body[data-agent="codex"] {
+	--accent-color: #1cd1e5;
+	--input-border-left: #1cd1e5;
+	--selection-color: #1cd1e5;
+}
+
+body[data-agent="opencode"] {
+	--accent-color: #9ca3af;
+	--input-border-left: #9ca3af;
+	--selection-color: #9ca3af;
+}
+
+body[data-agent="kilocode"] {
+	--accent-color: #e8d36b;
+	--input-border-left: #e8d36b;
+	--selection-color: #e8d36b;
+}
+
+body[data-agent="kiro"] {
+	--accent-color: #ae5ffd;
+	--input-border-left: #ae5ffd;
+	--selection-color: #ae5ffd;
+}
+
+body[data-agent="antigravity"] {
+	--accent-color: #51f334;
+	--input-border-left: #51f334;
+	--selection-color: #51f334;
+}
+
+body[data-agent="copilot"] {
+	--accent-color: #9ca3af;
+	--input-border-left: #9ca3af;
+	--selection-color: #9ca3af;
+}
+
+body[data-agent="cursor"] {
+	--accent-color: #e5e7eb;
+	--input-border-left: #e5e7eb;
+	--selection-color: #e5e7eb;
+}
+
+
+body {
+	display: flex;
+	justify-content: center;
+	align-items: center; /* Centrado vertical y horizontal como en la imagen 2 */
+	height: 100vh;
+	margin: 0;
+	font-family: var(--font-family);
+	color: var(--text-color);
+	background-color: var(--vscode-sideBar-background, var(--vscode-editor-background));
+	/* text-transform: lowercase; */
+}
+
+/* CLI Hub */
+.container {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	width: 100%;
+	max-width: 650px; /* Ancho similar al de la imagen */
+	padding: 0 20px;
+}
+
+	.logo {
+		position: relative;
+		font-family: monospace;
+		font-size: 12px;
+		line-height: 1.2;
+	color: var(--text-color); /* Se adapta al tema (negro en claro, blanco en oscuro) */
+	margin-bottom: 0.5rem; /* Margen reducido para acercarlo al chat */
+	white-space: pre;
+	text-align: center;
+	user-select: none;
+		-webkit-user-select: none;
+	}
+
+	.logo-bolt {
+		position: absolute;
+		top: -1px;
+		right: 55px;
+		width: 14px;
+		height: 16px;
+		object-fit: contain;
+		filter: drop-shadow(0 0 5px var(--accent-color));
+		animation: pulseGlow 2.5s ease-in-out;
+	}
+
+/* --- --- TXT Hub -> */
+.hub-text {
+	color: var(--accent-color);
+	filter: drop-shadow(0 0 4px var(--accent-color));
+	animation: pulseGlow 2.5s ease-in-out;
+}
+
+.input-container {
+	width: 100%;
+	min-width: 0;
+	background-color: var(--input-bg);
+	border-left: 2px solid var(--input-border-left);
+	display: flex;
+	flex-direction: column;
+	padding: 14px 18px;
+	box-sizing: border-box;
+	overflow: hidden;
+	transition: background-color 160ms ease, border-left-color 160ms ease;
+}
+
+.input-container.has-selection {
+	background:
+		linear-gradient(
+			to right,
+			color-mix(in srgb, var(--selection-color) 14%, transparent) 0%,
+			color-mix(in srgb, var(--selection-color) 8%, transparent) 42%,
+			transparent 100%
+		),
+		var(--input-bg);
+}
+
+.input-container.has-input-error {
+	border-left-color: var(--vscode-inputValidation-errorBorder, var(--vscode-errorForeground, #f48771));
+	background-color: var(--vscode-inputValidation-errorBackground, color-mix(in srgb, var(--vscode-errorForeground, #f48771) 10%, var(--input-bg)));
+}
+
+.input-wrapper {
+	width: 100%;
+	display: flex;
+	align-items: center;
+}
+
+.input-wrapper input {
+	width: 100%;
+	background: transparent;
+	border: none;
+	color: var(--vscode-input-foreground, var(--text-color)); /* Texto del input adaptable */
+	font-size: 14px;
+	font-family: var(--font-family);
+	outline: none;
+}
+
+.input-wrapper input::placeholder {
+	color: var(--vscode-input-placeholderForeground, rgba(128, 128, 128, 0.8));
+}
+
+.input-footer {
+	margin-top: 14px;
+	font-size: 13px;
+	color: var(--vscode-descriptionForeground, rgba(128, 128, 128, 0.8)); /* Texto secundario adaptable */
+	white-space: nowrap;
+	overflow: hidden;
+	display: flex;
+	align-items: center;
+	gap: 2px;
+}
+
+.input-footer .highlight {
+	color: var(--accent-color);
+}
+
+.input-footer[role="button"] {
+	cursor: pointer;
+}
+
+.input-footer[role="button"]:focus-visible {
+	outline: 1px solid var(--accent-color);
+	outline-offset: 3px;
+}
+
+.agent-icon-palette {
+	width: 100%;
+	max-height: 0;
+	margin-top: 0;
+	display: grid;
+	grid-template-columns: repeat(10, minmax(34px, 1fr));
+	gap: 6px;
+	overflow: hidden;
+	opacity: 0;
+	transform: translateY(-4px);
+	transition: max-height 180ms ease, margin-top 180ms ease, opacity 140ms ease, transform 180ms ease;
+}
+
+.agent-icon-palette.is-open {
+	max-height: 64px;
+	margin-top: 10px;
+	overflow: visible;
+	opacity: 1;
+	transform: translateY(0);
+}
+
+.agent-icon-option {
+	position: relative;
+	min-width: 0;
+	height: 42px;
+	border: 1px solid transparent;
+	border-radius: 6px;
+	padding: 7px;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	background: color-mix(in srgb, var(--vscode-input-background, rgba(128, 128, 128, 0.1)) 84%, transparent);
+	color: var(--text-color);
+	cursor: pointer;
+	transition: background-color 140ms ease, border-color 140ms ease, opacity 140ms ease, transform 140ms ease;
+}
+
+.agent-icon-option:hover {
+	z-index: 1;
+	border-color: color-mix(in srgb, var(--accent-color) 46%, transparent);
+	background: color-mix(in srgb, var(--accent-color) 12%, var(--vscode-input-background, rgba(128, 128, 128, 0.1)));
+	outline: none;
+	transform: translateY(-1px);
+}
+
+.agent-icon-option:focus-visible {
+	border-color: color-mix(in srgb, var(--accent-color) 54%, transparent);
+	outline: 1px solid var(--accent-color);
+	outline-offset: 1px;
+}
+
+.agent-icon-option.is-missing {
+	opacity: 0.52;
+}
+
+.agent-icon-option.is-missing .agent-icon-image {
+	filter: grayscale(1) saturate(0) opacity(0.72);
+}
+
+/*  Color icon dark and light */
+.vscode-dark .agent-icon-option.has-dark-icon:not(.is-missing) .agent-icon-image {
+	filter: invert(1) brightness(1.22) contrast(0.92);
+}
+
+.vscode-dark .agent-icon-option.has-dark-icon.is-missing .agent-icon-image {
+	filter: grayscale(1) invert(1) brightness(0.72) opacity(0.48);
+}
+
+.vscode-high-contrast .agent-icon-option.has-dark-icon:not(.is-missing) .agent-icon-image {
+	filter: invert(1) brightness(1.42) contrast(1.08);
+}
+
+.vscode-high-contrast .agent-icon-option.has-dark-icon.is-missing .agent-icon-image {
+	filter: grayscale(1) invert(1) brightness(0.86) opacity(0.62);
+}
+
+.vscode-light .agent-icon-option.has-light-icon:not(.is-missing) .agent-icon-image {
+	filter: invert(1) brightness(0.42) contrast(1.45);
+}
+
+.vscode-light .agent-icon-option.has-light-icon.is-missing .agent-icon-image {
+	filter: grayscale(1) invert(1) brightness(0.36) opacity(0.52);
+}
+
+.agent-icon-image {
+	width: 24px;
+	height: 24px;
+	display: block;
+	object-fit: contain;
+	pointer-events: none;
+}
+
+.agent-icon-option--custom {
+	border-color: color-mix(in srgb, var(--vscode-descriptionForeground, rgba(128, 128, 128, 0.8)) 52%, transparent);
+	border-style: dashed;
+	background: transparent;
+	color: var(--vscode-descriptionForeground, var(--text-color));
+}
+
+.agent-icon-option--custom:hover,
+.agent-icon-option--custom:focus-visible,
+.agent-icon-option--custom.is-preview {
+	border-color: var(--accent-color);
+	background: color-mix(in srgb, var(--accent-color) 9%, transparent);
+	color: var(--accent-color);
+	box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--accent-color) 24%, transparent);
+}
+
+.agent-icon-plus {
+	width: 24px;
+	height: 24px;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	font-size: 22px;
+	font-weight: 500;
+	line-height: 1;
+	pointer-events: none;
+}
+
+.agent-icon-status {
+	position: absolute;
+	right: 5px;
+	bottom: 5px;
+	width: 6px;
+	height: 6px;
+	border-radius: 999px;
+	background: #2fd67b;
+	font-size: 0;
+	box-shadow: 0 0 0 1px var(--bg-color);
+}
+
+.agent-icon-option.is-missing .agent-icon-status {
+	background: var(--vscode-descriptionForeground, rgba(128, 128, 128, 0.8));
+}
+
+.agent-icon-option.is-preview .agent-icon-status {
+	background: var(--accent-color);
+	box-shadow:
+		0 0 0 1px var(--bg-color),
+		0 0 8px color-mix(in srgb, var(--accent-color) 70%, transparent);
+}
+
+.selected-model {
+	background-color: color-mix(in srgb, var(--vscode-testing-iconPassed, #73c991) 20%, transparent);
+	border-radius: 5px;
+	color: var(--vscode-testing-iconPassed, #73c991);
+	padding: 1px 4px;
+}
+
+.custom-cli-preview {
+	color: var(--vscode-testing-iconPassed, #73c991);
+}
+
+.secondary-suggestions {
+	color: var(--vscode-descriptionForeground, rgba(128, 128, 128, 0.8));
+	opacity: 0.62;
+	flex: 1 1 auto;
+	min-width: 0;
+	overflow: hidden;
+	display: flex;
+	align-items: center;
+	gap: 1px; /* balanced spacing - not too tight, not too loose */
+}
+
+.secondary-model {
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	flex-shrink: 1;
+	min-width: 0;
+}
+
+/* Make the last secondary suggestion truncate more aggressively if needed */
+.secondary-suggestions .secondary-model:last-child {
+	max-width: 110px; /* Prevents long names from causing horizontal jump */
+}
+
+.secondary-separator {
+	padding: 0 7px;
+	opacity: 0.7;
+}
+
+.secondary-model {
+	font-size: inherit;
+}
+
+.animated-text {
+	transition: opacity 0.4s ease-in-out;
+}
+
+.shortcuts {
+	width: 100%;
+	text-align: right;
+	font-size: 12px;
+	color: var(--vscode-descriptionForeground, rgba(128, 128, 128, 0.8));
+	margin-top: 10px;
+}
+
+.shortcuts strong {
+	color: var(--text-color);
+	font-weight: normal;
+}
+
+.workspace-path {
+	position: absolute;
+	bottom: 12px;
+	left: 16px;
+	font-family: var(--vscode-editor-font-family, monospace);
+	font-size: 12px;
+	color: var(--vscode-descriptionForeground, rgba(128, 128, 128, 0.8));
+	opacity: 0.6;
+}
+
+/* --- --- -- Animation -> */
+@keyframes pulseGlow {
+	0%, 100% { filter: drop-shadow(0 0 3px var(--accent-color)); }
+	50% { filter: drop-shadow(0 0 8px var(--accent-color)) brightness(1.2); }
+}
+
+@media (max-width: 560px) {
+	.agent-icon-palette {
+		grid-template-columns: repeat(5, minmax(34px, 1fr));
+	}
+
+	.agent-icon-palette.is-open {
+		max-height: 116px;
+	}
+}

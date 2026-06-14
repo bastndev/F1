@@ -1,0 +1,66 @@
+.trending-surface {
+	display: flex;
+	flex: 1;
+	min-height: 0;
+	width: 100%;
+}
+
+.trending-mode-panel {
+	display: flex;
+	flex: 1;
+	min-height: 0;
+	width: 100%;
+}
+
+.trending-mode-panel[hidden] {
+	display: none;
+}
+
+.trending-placeholder {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 100%;
+	min-height: 160px;
+	padding: 20px 12px;
+	box-sizing: border-box;
+	color: var(--install-muted);
+	font-family: var(--vscode-font-family);
+	font-size: 12px;
+}
+
+.install-downloads--flame {
+	gap: 4px;
+	color: var(--install-muted);
+}
+
+.install-downloads--flame svg {
+	opacity: 0.72;
+}
+
+.install-flame-mark {
+	display: inline-block;
+	width: 20px;
+	height: 20px;
+	margin-bottom: 5px;
+	background: url("./flame/assets/flame.svg") center / contain no-repeat;
+	filter: drop-shadow(0 0 5px color-mix(in srgb, #ff5f00 55%, transparent));
+	animation: install-flame-burn 1.45s ease-in-out infinite;
+}
+
+@keyframes install-flame-burn {
+	0%, 100% {
+		opacity: 0.78;
+		transform: translateY(0) scale(0.96);
+	}
+	45% {
+		opacity: 1;
+		transform: translateY(-1px) scale(1.08);
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.install-flame-mark {
+		animation: none;
+	}
+}

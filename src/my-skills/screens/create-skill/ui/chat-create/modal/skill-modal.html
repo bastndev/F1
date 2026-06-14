@@ -1,0 +1,63 @@
+<div class="skill-modal-overlay" data-name-prompt-overlay>
+	<div class="skill-modal-panel" data-name-prompt-panel>
+		<div class="skill-modal-accent-bar"></div>
+
+		<div class="skill-modal-header">
+			<div class="skill-modal-icon" aria-hidden="true">
+				<svg viewBox="0 0 16 16" focusable="false">
+					<path d="M4 2.5h5.25L12 5.25v8.25H4z" />
+					<path d="M9 2.75V5.5h2.75" />
+					<path d="M6.5 8h3M6.5 10h3M6.5 12h1.5" />
+				</svg>
+			</div>
+			<h2 class="skill-modal-title">Name your skill</h2>
+			<p class="skill-modal-subtitle">Choose a unique identifier for your new skill</p>
+		</div>
+
+		<div class="skill-modal-body">
+			<label class="skill-modal-field" for="name-prompt-input">
+				<span class="skill-modal-field-icon" aria-hidden="true">
+					<svg viewBox="0 0 16 16" focusable="false">
+						<circle cx="7" cy="7" r="4.25" />
+						<path d="m10.25 10.25 3 3" />
+					</svg>
+				</span>
+				<input
+					id="name-prompt-input"
+					class="skill-modal-input"
+					type="text"
+					placeholder="my-skill-name"
+					autocomplete="off"
+					spellcheck="false"
+					aria-label="Skill name"
+					maxlength="30"
+					data-name-prompt-input
+				>
+			</label>
+			<div class="skill-modal-path-preview" data-name-prompt-path-preview>
+				<span class="skill-modal-path-segment" data-name-prompt-path-target>.agents</span>
+				<span class="skill-modal-path-sep">/</span>
+				<span class="skill-modal-path-segment">skills</span>
+				<span class="skill-modal-path-sep">/</span>
+				<span class="skill-modal-path-name" data-name-prompt-path-name>skill-name</span>
+			</div>
+			<div class="skill-modal-hint" data-name-prompt-hint>
+				<span class="skill-modal-hint-icon" aria-hidden="true" data-name-prompt-hint-icon></span>
+				<span class="skill-modal-hint-text" data-name-prompt-hint-text>lowercase, numbers, hyphens</span>
+				<span class="skill-modal-hint-counter" data-name-prompt-hint-counter></span>
+			</div>
+		</div>
+
+		<div class="skill-modal-footer">
+			<button class="skill-modal-cancel" type="button" data-name-prompt-cancel>Cancel</button>
+			<button class="skill-modal-confirm" type="button" disabled data-name-prompt-confirm aria-disabled="true">
+				<span class="skill-modal-confirm-text">Create</span>
+				<span class="skill-modal-confirm-icon" aria-hidden="true">
+					<svg viewBox="0 0 16 16" focusable="false">
+						<path d="M3.5 8.25 6.4 11 12.5 5" />
+					</svg>
+				</span>
+			</button>
+		</div>
+	</div>
+</div>

@@ -1,0 +1,344 @@
+.official-surface {
+	display: flex;
+	flex-direction: column;
+	box-sizing: border-box;
+	height: 100%;
+	width: 100%;
+	min-height: 0;
+	overflow: hidden;
+}
+
+.official-view {
+	display: flex;
+	flex-direction: column;
+	box-sizing: border-box;
+	width: 100%;
+	height: 100%;
+	min-height: 0;
+	flex: 1;
+}
+
+.official-view[hidden] {
+	display: none !important;
+}
+
+#official-grid-view {
+	overflow-y: auto;
+	padding: 12px 16px 12px 12px;
+	scrollbar-width: none;
+}
+
+#official-grid-view::-webkit-scrollbar {
+	display: none;
+}
+
+#official-list-view {
+	overflow: hidden;
+	padding: 0;
+}
+
+.official-grid {
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(86px, 1fr));
+	gap: 8px;
+	width: 100%;
+	position: relative;
+}
+
+.official-card {
+	position: relative;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	gap: 7px;
+	min-width: 0;
+	min-height: 104px;
+	padding: 10px 8px;
+	box-sizing: border-box;
+	border-radius: 8px;
+	background: color-mix(in srgb, var(--install-fg) 4%, transparent);
+	border: 1px solid var(--install-border);
+	color: var(--install-fg);
+	font-family: var(--vscode-font-family);
+	cursor: pointer;
+	overflow: hidden;
+	opacity: 1;
+	transform: none;
+	transition: background 0.16s ease, border-color 0.16s ease, transform 0.16s ease;
+}
+
+.official-grid--animate .official-card {
+	opacity: 0;
+	transform: translateY(12px) scale(0.94);
+}
+
+.official-grid--animate .official-card {
+	animation: official-card-enter 0.72s cubic-bezier(0.16, 1, 0.3, 1) both;
+	animation-delay: calc(var(--card-pair-index, 0) * 82ms + var(--card-lane-index, 0) * 18ms);
+}
+
+.official-card::before {
+	content: '';
+	position: absolute;
+	inset: -1px;
+	border-radius: inherit;
+	padding: 1px;
+	background: radial-gradient(
+		circle 76px at var(--mouse-x, -100px) var(--mouse-y, -100px),
+		color-mix(in srgb, var(--install-accent) 80%, transparent),
+		transparent 100%
+	);
+	-webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+	mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+	-webkit-mask-composite: xor;
+	mask-composite: exclude;
+	pointer-events: none;
+	opacity: 0;
+	transition: opacity 0.2s ease;
+	z-index: 2;
+}
+
+.official-card::after {
+	content: '';
+	position: absolute;
+	inset: 0;
+	border-radius: inherit;
+	background: radial-gradient(
+		circle 76px at var(--mouse-x, -100px) var(--mouse-y, -100px),
+		color-mix(in srgb, var(--install-accent) 16%, transparent),
+		transparent 100%
+	);
+	opacity: 0;
+	pointer-events: none;
+	transition: opacity 0.2s ease;
+	z-index: 1;
+}
+
+.official-grid:hover .official-card::before,
+.official-grid:hover .official-card::after {
+	opacity: 1;
+}
+
+.official-card:hover {
+	background: color-mix(in srgb, var(--install-fg) 7%, transparent);
+	border-color: color-mix(in srgb, var(--install-accent) 32%, var(--install-border));
+}
+
+.official-card:focus-visible {
+	outline: 1px solid var(--install-accent);
+	outline-offset: 2px;
+}
+
+.official-card:active {
+	transform: scale(0.98);
+}
+
+.official-card-icon-shell {
+	position: relative;
+	z-index: 3;
+	display: grid;
+	place-items: center;
+	width: 34px;
+	height: 34px;
+	border-radius: 8px;
+	background: color-mix(in srgb, var(--install-fg) 6%, transparent);
+}
+
+.official-card-icon,
+.official-list-hero-logo {
+	grid-area: 1 / 1;
+	width: 24px;
+	height: 24px;
+	object-fit: contain;
+	filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.18));
+	z-index: 2;
+}
+
+.official-card-initials,
+.official-list-initials {
+	grid-area: 1 / 1;
+	color: color-mix(in srgb, var(--install-accent) 85%, var(--install-fg));
+	font-family: var(--vscode-editor-font-family, 'Menlo', 'Courier New', monospace);
+	font-size: 12px;
+	font-weight: 700;
+	letter-spacing: 0;
+}
+
+.official-card-title {
+	position: relative;
+	z-index: 3;
+	width: 100%;
+	font-size: 12px;
+	font-weight: 600;
+	line-height: 1.2;
+	text-align: center;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+.official-card-meta {
+	position: relative;
+	z-index: 3;
+	width: 100%;
+	color: var(--install-muted);
+	font-size: 11px;
+	line-height: 1.2;
+	text-align: center;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	transition: color 0.22s ease;
+}
+
+.official-card-meta--pending {
+	color: color-mix(in srgb, var(--install-fg) 10%, transparent);
+	animation: official-meta-pulse 2s ease-in-out infinite;
+}
+
+.official-list-header {
+	display: flex;
+	align-items: center;
+	padding: 10px 12px 0;
+	flex: 0 0 auto;
+}
+
+.official-back-btn {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	background: transparent;
+	border: none;
+	color: var(--install-muted);
+	font-family: var(--vscode-font-family);
+	font-size: 12px;
+	font-weight: 500;
+	cursor: pointer;
+	padding: 5px 7px;
+	border-radius: 5px;
+	margin-left: -7px;
+	transition: background 0.15s ease, color 0.15s ease;
+}
+
+.official-back-btn:hover {
+	color: var(--install-accent);
+	background: color-mix(in srgb, var(--install-fg) 7%, transparent);
+}
+
+.official-back-btn:focus-visible {
+	color: var(--install-accent);
+	outline: 1px solid var(--install-accent);
+	outline-offset: 2px;
+}
+
+.official-list-hero {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	padding: 10px 12px 12px;
+	flex: 0 0 auto;
+	border-bottom: 1px solid var(--install-border);
+}
+
+.official-list-logo-shell {
+	display: grid;
+	place-items: center;
+	flex: 0 0 38px;
+	width: 38px;
+	height: 38px;
+	border-radius: 8px;
+	background: color-mix(in srgb, var(--install-fg) 6%, transparent);
+	border: 1px solid var(--install-border);
+}
+
+.official-list-hero-logo[hidden] {
+	display: none;
+}
+
+.official-list-heading {
+	min-width: 0;
+	display: flex;
+	flex-direction: column;
+	gap: 2px;
+}
+
+.official-list-hero-title {
+	margin: 0;
+	font-family: var(--vscode-editor-font-family, 'Menlo', 'Courier New', monospace);
+	font-size: 16px;
+	line-height: 1.2;
+	font-weight: 600;
+	color: var(--install-fg);
+	letter-spacing: 0;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+.official-list-meta {
+	margin: 0;
+	color: var(--install-muted);
+	font-size: 12px;
+	line-height: 1.25;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+.official-skill-list {
+	padding-top: 4px;
+}
+
+@media (max-width: 260px) {
+	.official-grid {
+		grid-template-columns: repeat(auto-fill, minmax(72px, 1fr));
+	}
+
+	.official-card {
+		min-height: 92px;
+		padding-inline: 6px;
+	}
+}
+
+@keyframes official-card-enter {
+	from {
+		opacity: 0;
+		transform: translateY(12px) scale(0.94);
+	}
+	58% {
+		opacity: 1;
+		transform: translateY(-2px) scale(1.012);
+	}
+	to {
+		opacity: 1;
+		transform: translateY(0) scale(1);
+	}
+}
+
+@keyframes official-meta-pulse {
+	0%, 100% {
+		opacity: 0.45;
+	}
+	50% {
+		opacity: 1;
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.official-card,
+	.official-card::before,
+	.official-card::after {
+		transition: none;
+	}
+
+	.official-grid--animate .official-card {
+		animation: none;
+		opacity: 1;
+		transform: none;
+	}
+
+	.official-card-meta--pending {
+		animation: none;
+	}
+}
