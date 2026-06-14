@@ -1,8 +1,26 @@
 /**
- * Shared types for the Use modal: the UsageAgent interface that every CLI
- * adapter implements, plus the parsed usage shape (bars / metrics) the
- * renderer consumes.
- *
- * TODO: move ParsedUsage / UsageBar / UsageMetric / UsageAgent here.
+ * Shared types for the Use modal: the parsed usage shape (bars / metrics)
+ * the renderer consumes, plus the agent-kind discriminator.
  */
-export {};
+
+export type UsageAgentKind = 'antigravity' | 'claude' | 'codex' | 'kiro';
+
+export type UsageBar = {
+	label: string;
+	percent: number;
+	detail?: string;
+	reset?: string;
+};
+
+export type UsageMetric = {
+	label: string;
+	value: string;
+};
+
+export type ParsedUsage = {
+	title: string;
+	summary?: string;
+	bars: UsageBar[];
+	metrics: UsageMetric[];
+	note?: string;
+};
