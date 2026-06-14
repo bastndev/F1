@@ -16,7 +16,7 @@ import {
 	isVoiceSpeaking,
 	wasVoiceStoppedByUser
 } from './voice/host-voice-tts';
-import type { VoiceState } from '../shared/voice/voice-types';
+import type { VoiceProgress, VoiceState } from '../shared/voice/voice-types';
 import { checkText as spellCheckText, warmSpellchecker } from './spellcheck/host-spellcheck';
 import { preparePromptForCLI } from './attachments/host-preparer';
 import type { CustomCliLaunch, InboundWebviewMessage } from '../shared/protocol';
@@ -26,7 +26,122 @@ import {
 	type AgentLaunchSource
 } from '../shared/agent-launch-guard';
 
-const maxVoiceTextChars = 4000;
+const maxVoiceTotalChars = 60000;
+const maxVoiceChunkChars = 1400;
+const maxVoiceChunks = 120;
+
+function normalizeVoiceText(text: string): string {
+	return text
+		.replace(/\r\n?/g, '\n')
+		.replace(/[ \t]+/g, ' ')
+		.replace(/\n{3,}/g, '\n\n')
+		.trim();
+}
+
+function splitLongVoiceSegment(segment: string, maxChars: number): string[] {
+	const chunks: string[] = [];
+	let current = '';
+
+	for (const part of segment.match(/\s+|\S+/g) ?? []) {
+		if (part.length > maxChars) {
+			if (current.trim()) {
+				chunks.push(current.trim());
+			}
+			current = '';
+			for (let index = 0; index < part.length; index += maxChars) {
+				chunks.push(part.slice(index, index + maxChars));
+			}
+			continue;
+		}
+
+		if (current && current.length + part.length > maxChars) {
+			chunks.push(current.trim());
+			current = part.trimStart();
+			continue;
+		}
+
+		current += part;
+	}
+
+	if (current.trim()) {
+		chunks.push(current.trim());
+	}
+
+	return chunks;
+}
+
+function splitVoiceText(text: string, maxChars: number): string[] {
+	const clean = normalizeVoiceText(text);
+	if (!clean) {
+		return [];
+	}
+	if (clean.length <= maxChars) {
+		return [clean];
+	}
+
+	const chunks: string[] = [];
+	let current = '';
+	const flush = () => {
+		if (current.trim()) {
+			chunks.push(current.trim());
+			current = '';
+		}
+	};
+
+	const paragraphs = clean.split(/\n{2,}/);
+	for (const paragraph of paragraphs) {
+		const sentences = paragraph.match(/[^.!?。！？]+[.!?。！？]+["')\]]*|[^.!?。！？]+$/g) ?? [paragraph];
+		for (const sentence of sentences) {
+			const piece = sentence.trim();
+			if (!piece) {
+				continue;
+			}
+			if (piece.length > maxChars) {
+				flush();
+				chunks.push(...splitLongVoiceSegment(piece, maxChars));
+				continue;
+			}
+			const next = current ? `${current} ${piece}` : piece;
+			if (next.length > maxChars) {
+				flush();
+				current = piece;
+			} else {
+				current = next;
+			}
+		}
+		flush();
+	}
+
+	return chunks;
+}
+
+function normalizeVoiceChunks(message: InboundWebviewMessage): string[] {
+	const rawChunks = Array.isArray(message.chunks)
+		? message.chunks.filter((chunk): chunk is string => typeof chunk === 'string')
+		: (typeof message.text === 'string' ? [message.text] : []);
+
+	const chunks: string[] = [];
+	let totalChars = 0;
+
+	for (const raw of rawChunks) {
+		for (const piece of splitVoiceText(raw, maxVoiceChunkChars)) {
+			const remaining = maxVoiceTotalChars - totalChars;
+			if (remaining <= 0 || chunks.length >= maxVoiceChunks) {
+				return chunks;
+			}
+
+			const value = piece.length > remaining ? piece.slice(0, remaining).trimEnd() : piece;
+			if (!value) {
+				continue;
+			}
+
+			chunks.push(value);
+			totalChars += value.length;
+		}
+	}
+
+	return chunks;
+}
 
 export class MyCliViewProvider implements vscode.WebviewViewProvider, vscode.Disposable {
 	public static readonly viewType = 'f1.myCli';
@@ -249,13 +364,18 @@ export class MyCliViewProvider implements vscode.WebviewViewProvider, vscode.Dis
 		return choice === guard.confirmLabel;
 	}
 
-	private async _postVoiceState(webview: vscode.Webview, state: VoiceState, detail?: string) {
-		await webview.postMessage({ type: 'voice.state', state, message: detail });
+	private async _postVoiceState(
+		webview: vscode.Webview,
+		state: VoiceState,
+		detail?: string,
+		progress?: VoiceProgress
+	) {
+		await webview.postMessage({ type: 'voice.state', state, message: detail, progress });
 	}
 
 	private async _handleVoiceSpeak(webview: vscode.Webview, message: InboundWebviewMessage) {
-		const text = typeof message.text === 'string' ? message.text.trim().slice(0, maxVoiceTextChars) : '';
-		if (!text) {
+		const chunks = normalizeVoiceChunks(message);
+		if (!chunks.length) {
 			return;
 		}
 
@@ -267,23 +387,34 @@ export class MyCliViewProvider implements vscode.WebviewViewProvider, vscode.Dis
 		// A newer speak request supersedes this one; only the latest may
 		// report state, otherwise its 'idle' would overwrite 'speaking'.
 		const seq = ++this.voiceRequestSeq;
-		const post = async (state: VoiceState, detail?: string) => {
+		const post = async (state: VoiceState, detail?: string, progress?: VoiceProgress) => {
 			if (seq === this.voiceRequestSeq) {
-				await this._postVoiceState(webview, state, detail);
+				await this._postVoiceState(webview, state, detail, progress);
 			}
 		};
 
 		try {
 			stopVoicePlayback(false);
-			await post('preparing');
+			const chunkCount = chunks.length;
+			const chunkLabel = (index: number) => chunkCount > 1 ? `voice ${index + 1}/${chunkCount}` : undefined;
+			await post('preparing', chunkLabel(0), { chunkIndex: 0, chunkCount });
 			// Reuses ATM's piper engine/voice when installed; downloads into
 			// F1's globalStorage (with a progress notification) otherwise.
 			const resources = await ensureSpanishVoice(this._extensionContext);
-			// 'preparing' holds through synthesis; 'speaking' fires only once
-			// the first audio bytes flow, so the UI animates with the sound.
-			await playSpanishText(resources, text, () => {
-				void post('speaking');
-			});
+
+			for (let index = 0; index < chunkCount; index += 1) {
+				if (seq !== this.voiceRequestSeq || wasVoiceStoppedByUser()) {
+					break;
+				}
+
+				const progress = { chunkIndex: index, chunkCount };
+				await post('preparing', chunkLabel(index), progress);
+				// 'preparing' holds through synthesis; 'speaking' fires only once
+				// the first audio bytes flow, so the UI animates with the sound.
+				await playSpanishText(resources, chunks[index], () => {
+					void post('speaking', chunkLabel(index), progress);
+				});
+			}
 			await post('idle');
 		} catch (error) {
 			if (wasVoiceStoppedByUser()) {

@@ -10,7 +10,7 @@ import { createBootSkeletons } from './boot-skeleton';
 import { createCopyToTranslateWatcher } from './copy-to-translate';
 import { getTerminalFontFamily, getTerminalTheme } from './terminal-theme';
 import type { ImageAttachment, PromptTranslateRequest, PromptTranslateResult, FileMentionEntry, SpellIssue, WorkspaceSkill } from '../../shared/prompt';
-import type { VoiceState } from '../../shared/voice/voice-types';
+import type { VoiceProgress, VoiceState } from '../../shared/voice/voice-types';
 import type {
 	CliSessionSnapshot,
 	HostToWebviewMessage,
@@ -398,10 +398,10 @@ const spellcheckRpc = createRpcChannel<[string, boolean], SpellIssue[]>({
 
 // Voice playback runs in the extension host (Piper TTS, shared with the ATM
 // extension). The webview fires commands and mirrors broadcast state.
-let voiceStateListener: ((state: VoiceState, message?: string) => void) | undefined;
+let voiceStateListener: ((state: VoiceState, message?: string, progress?: VoiceProgress) => void) | undefined;
 
-const speakText = (text: string) => {
-	vscode.postMessage({ type: 'voice.speak', text });
+const speakText = (text: string, options?: { chunks?: string[] }) => {
+	vscode.postMessage({ type: 'voice.speak', text, chunks: options?.chunks });
 };
 
 const stopSpeech = () => {
@@ -412,7 +412,7 @@ const queryVoiceState = () => {
 	vscode.postMessage({ type: 'voice.query' });
 };
 
-const onVoiceState = (listener: (state: VoiceState, message?: string) => void) => {
+const onVoiceState = (listener: (state: VoiceState, message?: string, progress?: VoiceProgress) => void) => {
 	voiceStateListener = listener;
 	return () => {
 		if (voiceStateListener === listener) {
@@ -919,7 +919,7 @@ window.addEventListener('message', (event: MessageEvent<ServerMessage>) => {
 	}
 
 	if (message.type === 'voice.state') {
-		voiceStateListener?.(message.state, message.message);
+		voiceStateListener?.(message.state, message.message, message.progress);
 		return;
 	}
 

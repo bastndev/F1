@@ -1,7 +1,7 @@
 import { mountKeymapsPanel } from './modal-keymaps/keymaps';
 import { mountPromptPanel } from './modal-prompt/prompt';
 import type { ImageAttachment, PromptTranslateRequest, PromptTranslateResult, FileMentionEntry, SpellIssue, WorkspaceSkill } from '../../shared/prompt';
-import type { VoiceState } from '../../shared/voice/voice-types';
+import type { VoiceProgress, VoiceState } from '../../shared/voice/voice-types';
 import { mountTranslatorPanel } from './modal-translator/translator';
 import { mountUsePanel } from './modal-use/use';
 
@@ -31,10 +31,10 @@ export type ToolContext = {
 	requestWorkspaceSkills?: () => Promise<WorkspaceSkill[]>;
 	openCreateSkill?: () => void;
 	requestSpellcheck?: (text: string, strict: boolean) => Promise<SpellIssue[]>;
-	speakText?: (text: string) => void;
+	speakText?: (text: string, options?: { chunks?: string[] }) => void;
 	stopSpeech?: () => void;
 	queryVoiceState?: () => void;
-	onVoiceState?: (listener: (state: VoiceState, message?: string) => void) => () => void;
+	onVoiceState?: (listener: (state: VoiceState, message?: string, progress?: VoiceProgress) => void) => () => void;
 	refocusTerminal?: () => void;
 };
 
@@ -56,10 +56,10 @@ export type ToolsControllerOptions = {
 	requestWorkspaceSkills?: () => Promise<WorkspaceSkill[]>;
 	openCreateSkill?: () => void;
 	requestSpellcheck?: (text: string, strict: boolean) => Promise<SpellIssue[]>;
-	speakText?: (text: string) => void;
+	speakText?: (text: string, options?: { chunks?: string[] }) => void;
 	stopSpeech?: () => void;
 	queryVoiceState?: () => void;
-	onVoiceState?: (listener: (state: VoiceState, message?: string) => void) => () => void;
+	onVoiceState?: (listener: (state: VoiceState, message?: string, progress?: VoiceProgress) => void) => () => void;
 	refocusTerminal?: () => void;
 };
 

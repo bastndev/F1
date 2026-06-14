@@ -403,6 +403,34 @@
 	border-bottom: 0.5px solid color-mix(in srgb, var(--agent-accent, #AFA9EC) 45%, transparent);
 }
 
+.translator-text.is-voice-active,
+.translator-text .is-voice-active {
+	position: relative;
+	border-radius: 6px;
+	background: rgba(93, 202, 165, 0.075);
+	box-shadow: inset 2px 0 0 rgba(93, 202, 165, 0.85);
+	transition: background 160ms ease, box-shadow 160ms ease;
+}
+
+.translator-text .is-voice-active::after {
+	content: '';
+	position: absolute;
+	top: 8px;
+	right: 8px;
+	width: 5px;
+	height: 5px;
+	border-radius: 50%;
+	background: #5DCAA5;
+	opacity: 0.7;
+	animation: voice-active-pulse 1.35s ease-in-out infinite;
+	pointer-events: none;
+}
+
+@keyframes voice-active-pulse {
+	0%, 100% { opacity: 0.35; transform: scale(0.82); }
+	50% { opacity: 0.95; transform: scale(1); }
+}
+
 .translator-text strong {
 	color: var(--vscode-foreground);
 	font-weight: 600;
