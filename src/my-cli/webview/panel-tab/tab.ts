@@ -487,6 +487,7 @@ export const createTabController = (options: TabControllerOptions) => {
 
 	memoryToggle.addEventListener('change', () => {
 		setMemoryEnabled(memoryToggle.checked);
+		setToolsPopoverOpen(false);
 	});
 
 	toolsPopover.addEventListener('click', (event) => {
