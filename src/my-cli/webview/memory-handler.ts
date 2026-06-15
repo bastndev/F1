@@ -1,18 +1,22 @@
 /**
  * Webview-side "My Memory" handler.
- * Drives the brain button's state and exchanges messages with the host. All
- * native dialogs/notifications (install prompt, progress) live on the host —
- * this side only reflects state and forwards intent.
+ * Drives the brain button's colour from the host snapshot:
+ *   🟢 fresh   = graph up to date     → not clickable (nothing to do)
+ *   🟡 stale   = project changed / not built yet → click to build
+ *   🟡 setup   = graphify not installed → click to set it up
+ *   🔴 missing = .f1/ deleted or broken → click to rebuild
+ *   ⏳ loading = a build/install is in flight
+ * All native dialogs/notifications live on the host.
  */
 
-import type { MemorySnapshot, MemoryBuildResult } from '../shared/memory-types';
+import type { MemorySnapshot } from '../shared/memory-types';
 
 const MEMORY_ACTION_BUTTON_ID = 'cli-memory-action-button';
 
-type MemoryUIState = 'ready' | 'loading' | 'error' | 'success' | 'missing-toolchain';
+type MemoryUIState = 'loading' | 'fresh' | 'stale' | 'setup' | 'missing';
 
 let currentSnapshot: MemorySnapshot | undefined;
-let currentUIState: MemoryUIState = 'ready';
+let currentUIState: MemoryUIState = 'fresh';
 let pendingRequestId: string | undefined;
 let postToHost: (msg: any) => void = () => {};
 let forceDisableCb: (() => void) | undefined;
@@ -29,29 +33,31 @@ const setButtonState = (state: MemoryUIState) => {
 	}
 
 	currentUIState = state;
-	button.disabled = state === 'loading';
-	button.classList.remove('is-loading', 'is-error', 'is-success', 'is-missing-python');
+	// Green "up to date" is intentionally not clickable — nothing to do.
+	button.disabled = state === 'loading' || state === 'fresh';
+	button.classList.remove('is-loading', 'is-fresh', 'is-stale', 'is-error');
 
 	switch (state) {
 		case 'loading':
 			button.classList.add('is-loading');
 			button.title = 'Working… (building project context)';
 			break;
-		case 'error':
+		case 'fresh':
+			button.classList.add('is-fresh');
+			button.title = 'Project memory is up to date.';
+			break;
+		case 'stale':
+			button.classList.add('is-stale');
+			button.title = 'Project changed — click to update memory.';
+			break;
+		case 'setup':
+			button.classList.add('is-stale');
+			button.title = 'Click to set up graphify and build project memory.';
+			break;
+		case 'missing':
 			button.classList.add('is-error');
-			button.title = 'Project memory missing or incomplete. Click to rebuild.';
+			button.title = 'Project memory missing — click to rebuild.';
 			break;
-		case 'success':
-			button.classList.add('is-success');
-			button.title = 'Memory updated. Ready to use.';
-			setTimeout(() => setButtonState('ready'), 2000);
-			break;
-		case 'missing-toolchain':
-			button.classList.add('is-missing-python');
-			button.title = 'graphify not installed. Click to set up.';
-			break;
-		default:
-			button.title = 'Update My Memory (build project graph)';
 	}
 };
 
@@ -64,7 +70,7 @@ export const initMemoryHandler = (postMessage: (msg: any) => void) => {
 	}
 
 	button.addEventListener('click', () => {
-		if (currentUIState === 'loading') {
+		if (button.disabled || currentUIState === 'loading') {
 			return;
 		}
 		requestRebuild();
@@ -78,16 +84,15 @@ export const onMemoryForceDisable = (cb: () => void) => {
 	forceDisableCb = cb;
 };
 
-/** Called by tab.ts when the My Memory toggle flips, so the host can sync. */
-export const notifyMemoryToggle = (enabled: boolean) => {
+/**
+ * Called by tab.ts when the toggle flips. `restore` means we're re-syncing an
+ * already-on toggle after a reload — the host should enable + watch but NOT
+ * auto-build.
+ */
+export const notifyMemoryToggle = (enabled: boolean, restore = false) => {
 	const id = generateRequestId();
-	if (enabled) {
-		// Turning ON kicks off a build (host installs graphify first if needed),
-		// so track this id and show the spinner right away.
-		pendingRequestId = id;
-		setButtonState('loading');
-	}
-	postToHost({ type: 'memory.getSnapshot', id, enabled });
+	pendingRequestId = enabled ? id : undefined;
+	postToHost({ type: 'memory.getSnapshot', id, enabled, restore });
 };
 
 const requestRebuild = () => {
@@ -104,6 +109,11 @@ export const handleMemoryMessage = (msg: any) => {
 	switch (msg.type) {
 		case 'memory.snapshot':
 			currentSnapshot = msg.snapshot as MemorySnapshot;
+			// A snapshot carrying our pending id means that operation resolved
+			// without a build (enable-with-existing-graph, or a reload restore).
+			if (msg.id === pendingRequestId) {
+				pendingRequestId = undefined;
+			}
 			updateButtonAppearance();
 			break;
 
@@ -123,33 +133,17 @@ export const handleMemoryMessage = (msg: any) => {
 			break;
 
 		case 'memory.buildComplete':
-			if (msg.id === pendingRequestId) {
-				const result: MemoryBuildResult = msg.result;
-				pendingRequestId = undefined;
-				if (result.success) {
-					setButtonState('success');
-				} else {
-					// A failed build speaks through the host's notification. The button
-					// reflects the real .f1/ state — red only if .f1/ is truly missing,
-					// never just because a build errored.
-					currentUIState = 'ready';
-					querySnapshot();
-				}
-			}
-			break;
-
 		case 'memory.buildError':
 			if (msg.id === pendingRequestId) {
+				// Result is reported by the host's native notification; the button
+				// just re-reads the real .f1/ state.
 				pendingRequestId = undefined;
-				currentUIState = 'ready';
 				querySnapshot();
 			}
 			break;
 
 		case 'memory.disabled':
-			// Host cancelled/failed the install — turn the toggle off + drop button.
 			pendingRequestId = undefined;
-			currentUIState = 'ready';
 			forceDisableCb?.();
 			break;
 	}
@@ -159,8 +153,8 @@ const updateButtonAppearance = () => {
 	if (!currentSnapshot) {
 		return;
 	}
-	// Don't stomp an in-flight build or the brief success flash.
-	if (currentUIState === 'loading' || currentUIState === 'success') {
+	// A build/install we triggered is still in flight — let it own the button.
+	if (pendingRequestId !== undefined) {
 		return;
 	}
 
@@ -170,13 +164,13 @@ const updateButtonAppearance = () => {
 			setButtonState('loading');
 			break;
 		case 'missing-toolchain':
-			setButtonState('missing-toolchain');
+			setButtonState('setup');
 			break;
 		case 'error':
-			setButtonState('error');
+			setButtonState('missing');
 			break;
 		case 'ready':
-			setButtonState('ready');
+			setButtonState(currentSnapshot.hasGraphJson && !currentSnapshot.stale ? 'fresh' : 'stale');
 			break;
 	}
 };

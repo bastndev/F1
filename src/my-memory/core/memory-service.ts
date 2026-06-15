@@ -15,8 +15,8 @@
 
 import * as fs from 'fs';
 import * as path from 'path';
-import { MEMORY_CONFIG_FILE, MEMORY_DIR, MEMORY_GRAPH_FILE, MEMORY_MAP_FILE } from './memory-paths';
-import { scanProject } from '../tier1-map/scan-project';
+import { CLAUDE_FILE, HUB_FILE, MEMORY_CONFIG_FILE, MEMORY_DIR, MEMORY_GRAPH_FILE, MEMORY_MAP_FILE } from './memory-paths';
+import { newestSourceMtime, scanProject } from '../tier1-map/scan-project';
 import { writeProjectMap } from '../tier1-map/write-project-map';
 import { syncAllInstructionFiles, syncInstructionFileForSlug } from '../tier1-map/sync-instructions';
 import { detectToolchain, installToolchain, type ProgressFn, type ToolchainStatus } from '../tier2-graph/toolchain';
@@ -58,6 +58,8 @@ export class MemoryService {
 		const hasDir = fs.existsSync(memoryDir);
 		const hasGraphify = this.hasToolchain();
 		const projectMapMd = hasDir && fs.existsSync(path.join(memoryDir, MEMORY_MAP_FILE));
+		const graphPath = path.join(memoryDir, MEMORY_GRAPH_FILE);
+		const hasGraphJson = hasDir && fs.existsSync(graphPath);
 
 		let status: MemorySnapshot['status'];
 		if (!hasGraphify) {
@@ -73,9 +75,10 @@ export class MemoryService {
 			status,
 			projectPath: root,
 			lastUpdated: hasDir ? this.getLastModified(memoryDir) : undefined,
-			hasGraphJson: hasDir && fs.existsSync(path.join(memoryDir, MEMORY_GRAPH_FILE)),
+			hasGraphJson,
 			projectMapMd,
-			hasGraphify
+			hasGraphify,
+			stale: hasGraphJson ? this.isStale(root, graphPath) : false
 		};
 	}
 
@@ -141,6 +144,7 @@ export class MemoryService {
 			options.onProgress?.('Writing project map…');
 			writeProjectMap(root, scanProject(root), { hasGraph: graphJsonCreated });
 			const filesUpdated = syncAllInstructionFiles(root);
+			this.markBuilt(root);
 
 			return {
 				success: true,
@@ -179,6 +183,47 @@ export class MemoryService {
 	private getLastModified(dir: string): number {
 		try {
 			return fs.statSync(dir).mtimeMs;
+		} catch {
+			return 0;
+		}
+	}
+
+	/** True if any source file changed since the last successful build. */
+	private isStale(root: string, graphPath: string): boolean {
+		let reference = this.readLastBuilt(root);
+		if (!reference) {
+			try {
+				reference = fs.statSync(graphPath).mtimeMs;
+			} catch {
+				return false;
+			}
+		}
+		// Our own generated wiring files aren't "source" — ignore them.
+		const ignore = new Set<string>([HUB_FILE, CLAUDE_FILE]);
+		return newestSourceMtime(root, reference, ignore) > reference;
+	}
+
+	/** Record the build time in memory.json so staleness survives reloads. */
+	private markBuilt(root: string): void {
+		try {
+			const configPath = path.join(root, MEMORY_DIR, MEMORY_CONFIG_FILE);
+			let config: Record<string, unknown> = {};
+			try {
+				config = JSON.parse(fs.readFileSync(configPath, 'utf8'));
+			} catch {
+				config = {};
+			}
+			config.lastBuilt = Date.now();
+			fs.writeFileSync(configPath, JSON.stringify(config, null, 2) + '\n', 'utf8');
+		} catch {
+			// best-effort
+		}
+	}
+
+	private readLastBuilt(root: string): number {
+		try {
+			const config = JSON.parse(fs.readFileSync(path.join(root, MEMORY_DIR, MEMORY_CONFIG_FILE), 'utf8'));
+			return typeof config.lastBuilt === 'number' ? config.lastBuilt : 0;
 		} catch {
 			return 0;
 		}

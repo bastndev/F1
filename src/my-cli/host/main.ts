@@ -161,6 +161,9 @@ export class MyCliViewProvider implements vscode.WebviewViewProvider, vscode.Dis
 	private activePromptTranslation?: AbortController;
 	private activeVoiceSession?: ActiveVoiceSession;
 	private voiceRequestSeq = 0;
+	private _activeWebview?: vscode.Webview;
+	private _memoryWatcher?: vscode.FileSystemWatcher;
+	private _memoryWatchTimer?: ReturnType<typeof setTimeout>;
 
 	constructor(
 		private readonly _extensionUri: vscode.Uri,
@@ -172,6 +175,7 @@ export class MyCliViewProvider implements vscode.WebviewViewProvider, vscode.Dis
 		context: vscode.WebviewViewResolveContext,
 		_token: vscode.CancellationToken,
 	) {
+		this._activeWebview = webviewView.webview;
 		webviewView.webview.options = {
 			enableScripts: true,
 			localResourceRoots: [
@@ -183,6 +187,8 @@ export class MyCliViewProvider implements vscode.WebviewViewProvider, vscode.Dis
 		webviewView.webview.html = await this._getHtmlForWebview(webviewView.webview);
 		webviewView.onDidDispose(() => {
 			this.sessionManager.detach();
+			this._disposeMemoryWatcher();
+			this._activeWebview = undefined;
 		});
 		webviewView.webview.onDidReceiveMessage(async (message: InboundWebviewMessage) => {
 			if (message.type === 'openAgent' && message.agent && allowedAgents.has(message.agent)) {
@@ -334,6 +340,7 @@ export class MyCliViewProvider implements vscode.WebviewViewProvider, vscode.Dis
 	public dispose() {
 		this.activePromptTranslation?.abort();
 		stopVoicePlayback();
+		this._disposeMemoryWatcher();
 		this.sessionManager.dispose();
 	}
 
@@ -644,6 +651,52 @@ export class MyCliViewProvider implements vscode.WebviewViewProvider, vscode.Dis
 		return vscode.workspace.workspaceFolders?.[0]?.uri.fsPath;
 	}
 
+	/** Watch the workspace so the button turns yellow when files change. */
+	private _ensureMemoryWatcher(): void {
+		if (this._memoryWatcher) {
+			return;
+		}
+		const folder = vscode.workspace.workspaceFolders?.[0];
+		if (!folder) {
+			return;
+		}
+		const watcher = vscode.workspace.createFileSystemWatcher(new vscode.RelativePattern(folder, '**/*'));
+		const onEvent = (uri: vscode.Uri) => this._onMemoryFsEvent(uri);
+		watcher.onDidCreate(onEvent);
+		watcher.onDidChange(onEvent);
+		watcher.onDidDelete(onEvent);
+		this._memoryWatcher = watcher;
+	}
+
+	private _disposeMemoryWatcher(): void {
+		if (this._memoryWatchTimer) {
+			clearTimeout(this._memoryWatchTimer);
+			this._memoryWatchTimer = undefined;
+		}
+		this._memoryWatcher?.dispose();
+		this._memoryWatcher = undefined;
+	}
+
+	/** Debounced: a relevant file changed → push a fresh snapshot to the button. */
+	private _onMemoryFsEvent(uri: vscode.Uri): void {
+		const p = uri.fsPath.replace(/\\/g, '/');
+		// Note: we do NOT skip .f1/ here — deleting it must flip the button to red.
+		if (/\/(node_modules|\.git|dist|out|build|coverage|\.next|\.cache|graphify-out)\//.test(p)) {
+			return;
+		}
+		if (this._memoryWatchTimer) {
+			clearTimeout(this._memoryWatchTimer);
+		}
+		this._memoryWatchTimer = setTimeout(() => {
+			const root = this._getMemoryWorkspaceRoot();
+			const webview = this._activeWebview;
+			if (!root || !webview) {
+				return;
+			}
+			void webview.postMessage({ type: 'memory.snapshot', id: 'watch', snapshot: this.memoryService.getSnapshot(root) });
+		}, 600);
+	}
+
 	/** When My Memory is on, point the launching CLI's instructions file at .f1/. */
 	private _memoryOnLaunch(agentLabel: string): void {
 		if (!this.memoryService.isEnabled()) {
@@ -655,16 +708,25 @@ export class MyCliViewProvider implements vscode.WebviewViewProvider, vscode.Dis
 	private async _handleMemoryGetSnapshot(webview: vscode.Webview, message: InboundWebviewMessage) {
 		const id = message.id as string;
 		const root = this._getMemoryWorkspaceRoot();
+		this._activeWebview = webview;
 
-		// A toggle flip rides along on getSnapshot (memory-handler.notifyMemoryToggle).
+		// A toggle flip (or a reload re-sync) rides along on getSnapshot.
 		if (typeof message.enabled === 'boolean') {
-			const turningOn = message.enabled && !this.memoryService.isEnabled();
 			this.memoryService.setEnabled(message.enabled);
-			// Toggling ON ensures graphify is installed, then builds .f1/.
-			if (turningOn) {
-				await this._ensureMemoryBuilt(webview, id, { incremental: false });
-				return;
+			if (message.enabled) {
+				this._ensureMemoryWatcher();
+				// A genuine user toggle-on with no graph yet → build now. A `restore`
+				// (reload of an already-on toggle) only re-enables + watches.
+				const userInitiated = !message.restore;
+				if (userInitiated && !this.memoryService.getSnapshot(root).hasGraphJson) {
+					await this._ensureMemoryBuilt(webview, id, { incremental: false });
+					return;
+				}
+			} else {
+				this._disposeMemoryWatcher();
 			}
+		} else if (this.memoryService.isEnabled()) {
+			this._ensureMemoryWatcher();
 		}
 
 		const snapshot = this.memoryService.getSnapshot(root);

@@ -16,7 +16,8 @@ const IGNORED_DIRS = new Set([
 	'.next',
 	'.cache',
 	'.git',
-	'.f1'
+	'.f1',
+	'graphify-out'
 ]);
 
 export type ProjectScan = {
@@ -68,4 +69,59 @@ export const scanProject = (root: string): ProjectScan => {
 		dependencies: objectKeys(pkg?.dependencies),
 		topLevelFolders: listTopLevelFolders(root)
 	};
+};
+
+const MAX_WALK = 20000;
+
+/**
+ * Newest modification time (ms) among source files under `root`, skipping
+ * ignored dirs, dotfiles, and `ignoreFiles` (our own generated outputs). Pass
+ * `since` to short-circuit: returns as soon as a file newer than `since` is
+ * found, which keeps the "is the graph stale?" check cheap once anything has
+ * changed.
+ */
+export const newestSourceMtime = (root: string, since = 0, ignoreFiles: Set<string> = new Set<string>()): number => {
+	let newest = 0;
+	let visited = 0;
+	const stack: string[] = [root];
+
+	while (stack.length) {
+		const dir = stack.pop() as string;
+		let entries: fs.Dirent[];
+		try {
+			entries = fs.readdirSync(dir, { withFileTypes: true });
+		} catch {
+			continue;
+		}
+
+		for (const entry of entries) {
+			if (entry.name.startsWith('.') || IGNORED_DIRS.has(entry.name)) {
+				continue;
+			}
+			const full = path.join(dir, entry.name);
+			if (entry.isDirectory()) {
+				stack.push(full);
+				continue;
+			}
+			if (!entry.isFile() || ignoreFiles.has(entry.name)) {
+				continue;
+			}
+			if (++visited > MAX_WALK) {
+				return newest;
+			}
+			try {
+				const mtime = fs.statSync(full).mtimeMs;
+				if (mtime > newest) {
+					newest = mtime;
+				}
+				if (since && mtime > since) {
+					return mtime;
+				}
+			} catch {
+				// unreadable file — skip
+			}
+		}
+	}
+
+	return newest;
 };

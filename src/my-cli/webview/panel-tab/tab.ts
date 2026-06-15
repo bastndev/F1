@@ -513,6 +513,11 @@ export const createTabController = (options: TabControllerOptions) => {
 
 	setPromptFilterEnabled(isPromptFilterEnabled, false);
 	setMemoryEnabled(isMemoryEnabled, false);
+	if (isMemoryEnabled) {
+		// Re-sync an already-on toggle to the host after a reload: enable + watch,
+		// without forcing a rebuild.
+		notifyMemoryToggle(true, true);
+	}
 
 	document.addEventListener('click', () => {
 		closeFloatingPanels();

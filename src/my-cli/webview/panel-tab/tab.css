@@ -112,6 +112,23 @@
 	color: white;
 }
 
+/* Up to date — green and intentionally not clickable (nothing to do). */
+.agent-new-button.is-fresh {
+	background: #10b981;
+	color: white;
+}
+
+.agent-new-button.is-fresh:disabled {
+	opacity: 1;
+	cursor: default;
+}
+
+/* Project changed / needs build — yellow, clickable. */
+.agent-new-button.is-stale {
+	background: #eab308;
+	color: white;
+}
+
 @keyframes pulse-loading {
 	0%, 100% {
 		opacity: 1;

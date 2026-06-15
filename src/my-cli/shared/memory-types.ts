@@ -14,6 +14,8 @@ export type MemorySnapshot = {
 	projectMapMd?: boolean;
 	/** Whether the graphify toolchain is installed on this machine. */
 	hasGraphify?: boolean;
+	/** Project files changed since the last build → graph is out of date. */
+	stale?: boolean;
 	error?: string;
 };
 

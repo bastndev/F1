@@ -63,7 +63,7 @@ export type WebviewToHostMessage =
 	| { type: 'voice.stop' }
 	| { type: 'voice.query' }
 	| { type: 'clipboard.read'; id: string }
-	| { type: 'memory.getSnapshot'; id: string; enabled?: boolean }
+	| { type: 'memory.getSnapshot'; id: string; enabled?: boolean; restore?: boolean }
 	| { type: 'memory.rebuild'; id: string };
 
 /** Extension host → webview. */
@@ -116,6 +116,7 @@ export type InboundWebviewMessage = {
 	installPython?: boolean;
 	overwrite?: boolean;
 	enabled?: boolean;
+	restore?: boolean;
 };
 
 /** Extension host → pty-host child process (Node IPC). */
