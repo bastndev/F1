@@ -660,9 +660,10 @@ export class MyCliViewProvider implements vscode.WebviewViewProvider, vscode.Dis
 		if (typeof message.enabled === 'boolean') {
 			const turningOn = message.enabled && !this.memoryService.isEnabled();
 			this.memoryService.setEnabled(message.enabled);
-			// Toggling ON builds .f1/ immediately (config + map + instruction sync).
+			// Toggling ON ensures graphify is installed, then builds .f1/.
 			if (turningOn) {
-				this.memoryService.ensureForWorkspace(root);
+				await this._ensureMemoryBuilt(webview, id, { incremental: false });
+				return;
 			}
 		}
 
@@ -671,26 +672,64 @@ export class MyCliViewProvider implements vscode.WebviewViewProvider, vscode.Dis
 	}
 
 	private async _handleMemoryRebuild(webview: vscode.Webview, message: InboundWebviewMessage) {
-		const id = message.id as string;
-		const root = this._getMemoryWorkspaceRoot();
+		await this._ensureMemoryBuilt(webview, message.id as string, { incremental: true });
+	}
 
+	/**
+	 * Shared build path for the toggle and the brain button. Ensures the graphify
+	 * toolchain is present (offering a one-time native install if not), then
+	 * builds the graph + syncs instruction files inside a progress notification.
+	 * If the toolchain is missing and the user cancels — or the install fails —
+	 * the feature is turned back OFF and the webview drops the button.
+	 */
+	private async _ensureMemoryBuilt(webview: vscode.Webview, id: string, opts: { incremental: boolean }) {
+		const root = this._getMemoryWorkspaceRoot();
 		if (!root) {
 			await webview.postMessage({ type: 'memory.buildError', id, error: 'Open a folder to build project memory.' });
 			vscode.window.showWarningMessage('My Memory: open a folder before building project context.');
+			await this._memoryDisable(webview);
 			return;
 		}
 
-		await webview.postMessage({ type: 'memory.buildStart', id });
+		if (!this.memoryService.hasToolchain()) {
+			const choice = await vscode.window.showInformationMessage(
+				'My Memory needs the "graphify" engine (Python + graphify) to build your project graph. This is a one-time setup on this machine.',
+				'Install',
+				'Cancel'
+			);
+			if (choice !== 'Install') {
+				await this._memoryDisable(webview);
+				return;
+			}
 
-		// Tier 1 is pure TypeScript and fast, but wrap it in a native progress
-		// notification so the user gets the same feedback we'll keep for Tier 2.
+			try {
+				await webview.postMessage({ type: 'memory.buildStart', id });
+				await vscode.window.withProgress(
+					{ location: vscode.ProgressLocation.Notification, title: 'My Memory: installing graphify…', cancellable: false },
+					async (progress) => this.memoryService.installToolchain((msg) => {
+						progress.report({ message: msg });
+						void webview.postMessage({ type: 'memory.buildProgress', id, message: msg });
+					})
+				);
+			} catch (installError) {
+				const err = installError instanceof Error ? installError.message : String(installError);
+				await webview.postMessage({ type: 'memory.buildError', id, error: err });
+				vscode.window.showErrorMessage(`My Memory: graphify install failed. ${err}`);
+				await this._memoryDisable(webview);
+				return;
+			}
+		}
+
+		await webview.postMessage({ type: 'memory.buildStart', id });
 		const result = await vscode.window.withProgress(
-			{
-				location: vscode.ProgressLocation.Notification,
-				title: 'My Memory: updating project context…',
-				cancellable: false,
-			},
-			async () => this.memoryService.rebuild(root)
+			{ location: vscode.ProgressLocation.Notification, title: 'My Memory: building project context…', cancellable: false },
+			async (progress) => this.memoryService.rebuild(root, {
+				incremental: opts.incremental,
+				onProgress: (msg) => {
+					progress.report({ message: msg });
+					void webview.postMessage({ type: 'memory.buildProgress', id, message: msg });
+				}
+			})
 		);
 
 		if (result.success) {
@@ -700,6 +739,12 @@ export class MyCliViewProvider implements vscode.WebviewViewProvider, vscode.Dis
 			await webview.postMessage({ type: 'memory.buildError', id, error: result.error || result.message });
 			vscode.window.showErrorMessage(`My Memory failed: ${result.error || result.message}`);
 		}
+	}
+
+	/** Turn the feature OFF and tell the webview to drop the brain button. */
+	private async _memoryDisable(webview: vscode.Webview) {
+		this.memoryService.setEnabled(false);
+		await webview.postMessage({ type: 'memory.disabled' });
 	}
 
 	private async _postPromptTranslationError(webview: vscode.Webview, id: string, message: string) {

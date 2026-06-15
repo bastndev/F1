@@ -63,7 +63,7 @@ export type WebviewToHostMessage =
 	| { type: 'voice.stop' }
 	| { type: 'voice.query' }
 	| { type: 'clipboard.read'; id: string }
-	| { type: 'memory.getSnapshot'; id: string }
+	| { type: 'memory.getSnapshot'; id: string; enabled?: boolean }
 	| { type: 'memory.rebuild'; id: string };
 
 /** Extension host → webview. */
@@ -89,7 +89,8 @@ export type HostToWebviewMessage =
 	| { type: 'memory.buildStart'; id: string }
 	| { type: 'memory.buildProgress'; id: string; message: string }
 	| { type: 'memory.buildComplete'; id: string; result: MemoryBuildResult }
-	| { type: 'memory.buildError'; id: string; error: string };
+	| { type: 'memory.buildError'; id: string; error: string }
+	| { type: 'memory.disabled'; reason?: string };
 
 /**
  * Loosely-typed inbound view of WebviewToHostMessage. Webview messages cross

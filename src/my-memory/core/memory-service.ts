@@ -1,14 +1,16 @@
 /**
- * "My Memory" orchestrator (Tier 1 — pure TypeScript, no Python).
+ * "My Memory" orchestrator.
  *
- * Tier 1 keeps a committed `.f1/` folder with a lightweight project map and
- * points each CLI's instructions file at it, so a launched agent starts with
- * project context for minimal tokens instead of re-analyzing the codebase.
+ * Keeps a committed `.f1/` folder with project context and points each CLI's
+ * instructions file at it, so a launched agent starts with project context for
+ * minimal tokens instead of re-analyzing the codebase.
  *
- * Tier 2 (graphify) will later add a real dependency graph as an OPTIONAL
- * depth upgrade — this service never depends on it and never fails because of it.
+ * The content engine is **graphify** (Tier 2): a real, local, free code graph.
+ * The pure-TS wiring (Tier 1) owns `.f1/`, writes the human-readable map, and
+ * syncs the instruction files — graphify can't do that. They work together.
  *
- * Node-only (`fs`/`path`); no `vscode`, so the host passes the workspace root in.
+ * Node-only (`fs`/`path`/`child_process`); no `vscode`, so the host passes the
+ * workspace root in and drives all UI (notifications, progress).
  */
 
 import * as fs from 'fs';
@@ -17,6 +19,8 @@ import { MEMORY_CONFIG_FILE, MEMORY_DIR, MEMORY_GRAPH_FILE, MEMORY_MAP_FILE } fr
 import { scanProject } from '../tier1-map/scan-project';
 import { writeProjectMap } from '../tier1-map/write-project-map';
 import { syncAllInstructionFiles, syncInstructionFileForSlug } from '../tier1-map/sync-instructions';
+import { detectToolchain, installToolchain, type ProgressFn, type ToolchainStatus } from '../tier2-graph/toolchain';
+import { runGraphify } from '../tier2-graph/graphify-runner';
 import type { MemorySnapshot, MemoryBuildResult } from '../../my-cli/shared/memory-types';
 
 export class MemoryService {
@@ -30,6 +34,20 @@ export class MemoryService {
 		this.enabled = value;
 	}
 
+	/** Is the graphify toolchain already installed on this machine? */
+	public hasToolchain(): boolean {
+		return detectToolchain().hasGraphify;
+	}
+
+	public detectToolchain(): ToolchainStatus {
+		return detectToolchain();
+	}
+
+	/** Install uv (if needed) + graphify. Throws on failure (host shows it). */
+	public async installToolchain(onProgress?: ProgressFn): Promise<void> {
+		await installToolchain(onProgress);
+	}
+
 	/** Current state of `.f1/` for the snapshot the webview button reads. */
 	public getSnapshot(root: string | undefined): MemorySnapshot {
 		if (!root) {
@@ -38,41 +56,33 @@ export class MemoryService {
 
 		const memoryDir = path.join(root, MEMORY_DIR);
 		const hasDir = fs.existsSync(memoryDir);
+		const hasGraphify = this.hasToolchain();
+		const projectMapMd = hasDir && fs.existsSync(path.join(memoryDir, MEMORY_MAP_FILE));
+
+		let status: MemorySnapshot['status'];
+		if (!hasGraphify) {
+			status = 'missing-toolchain';
+		} else if (hasDir && projectMapMd) {
+			status = 'ready';
+		} else {
+			status = 'error';
+		}
 
 		return {
 			enabled: this.enabled,
-			status: 'ready',
+			status,
 			projectPath: root,
 			lastUpdated: hasDir ? this.getLastModified(memoryDir) : undefined,
 			hasGraphJson: hasDir && fs.existsSync(path.join(memoryDir, MEMORY_GRAPH_FILE)),
-			projectMapMd: hasDir && fs.existsSync(path.join(memoryDir, MEMORY_MAP_FILE))
+			projectMapMd,
+			hasGraphify
 		};
 	}
 
 	/**
-	 * Build `.f1/` if absent (config + map) and sync every instruction file.
-	 * Called when the toggle flips ON — never overwrites an existing map.
-	 */
-	public ensureForWorkspace(root: string | undefined): void {
-		if (!this.enabled || !root) {
-			return;
-		}
-		try {
-			this.ensureConfig(root);
-			const mapPath = path.join(root, MEMORY_DIR, MEMORY_MAP_FILE);
-			if (!fs.existsSync(mapPath)) {
-				writeProjectMap(root, scanProject(root));
-			}
-			syncAllInstructionFiles(root);
-		} catch (error) {
-			console.error('[my-memory] ensureForWorkspace failed:', error);
-		}
-	}
-
-	/**
-	 * Called right before a CLI session starts. Ensures `.f1/` exists and points
-	 * the launching CLI's instructions file at the map. Never throws — a memory
-	 * failure must not block launching the CLI.
+	 * Called right before a CLI session starts. Keeps the launching CLI's
+	 * instructions file pointed at `.f1/` (cheap, pure-TS — never runs graphify,
+	 * so it can't block the launch). Never throws.
 	 */
 	public onLaunch(root: string | undefined, slug: string | undefined): void {
 		if (!this.enabled || !root) {
@@ -91,11 +101,15 @@ export class MemoryService {
 	}
 
 	/**
-	 * Full refresh triggered by the brain button: re-scan the project, rewrite
-	 * the map, and re-sync all instruction files. Pure TypeScript — always
-	 * succeeds (best-effort), so the button never gets stuck.
+	 * Full build, triggered by the toggle turning on or the brain button: run
+	 * graphify, copy its graph into `.f1/`, rewrite the map, and re-sync the
+	 * instruction files. Assumes the toolchain is present (the host installs it
+	 * first). `incremental` re-extracts only changed files.
 	 */
-	public rebuild(root: string | undefined): MemoryBuildResult {
+	public async rebuild(
+		root: string | undefined,
+		options: { incremental?: boolean; onProgress?: ProgressFn } = {}
+	): Promise<MemoryBuildResult> {
 		const startTime = Date.now();
 
 		if (!root) {
@@ -104,7 +118,28 @@ export class MemoryService {
 
 		try {
 			this.ensureConfig(root);
-			writeProjectMap(root, scanProject(root));
+
+			let graphJsonCreated = false;
+			try {
+				const graph = await runGraphify(root, { incremental: options.incremental, onProgress: options.onProgress });
+				graphJsonCreated = graph.graphJsonCreated;
+			} catch (graphError) {
+				// graphify is installed but extraction failed. Keep the wiring valid
+				// (write a map + sync) so the instruction files don't dangle, and
+				// surface the failure to the host for a notification.
+				writeProjectMap(root, scanProject(root), { hasGraph: false });
+				const filesUpdated = syncAllInstructionFiles(root);
+				return {
+					success: false,
+					message: 'Graph build failed',
+					error: graphError instanceof Error ? graphError.message : String(graphError),
+					durationMs: Date.now() - startTime,
+					filesUpdated
+				};
+			}
+
+			options.onProgress?.('Writing project map…');
+			writeProjectMap(root, scanProject(root), { hasGraph: graphJsonCreated });
 			const filesUpdated = syncAllInstructionFiles(root);
 
 			return {
@@ -112,7 +147,7 @@ export class MemoryService {
 				message: 'Memory updated',
 				durationMs: Date.now() - startTime,
 				projectMapEnriched: true,
-				graphJsonCreated: false,
+				graphJsonCreated,
 				filesUpdated
 			};
 		} catch (error) {

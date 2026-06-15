@@ -19,7 +19,7 @@ export type CliSessionSummary = {
 };
 
 import { consumeShortcut, matchesShortcut } from '../keymaps';
-import { notifyMemoryToggle } from '../memory-handler';
+import { notifyMemoryToggle, onMemoryForceDisable } from '../memory-handler';
 
 export type CliToolId = 'translate' | 'keymaps' | 'prompt' | 'use';
 
@@ -137,6 +137,10 @@ export const createTabController = (options: TabControllerOptions) => {
 			notifyMemoryToggle(enabled);
 		}
 	};
+
+	// If the host backs out (graphify install cancelled or failed) it tells us
+	// to turn the feature back off and drop the button.
+	onMemoryForceDisable(() => setMemoryEnabled(false, false));
 
 	const setAgentMenuOpen = (isOpen: boolean) => {
 		isAgentMenuOpen = isOpen;
