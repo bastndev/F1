@@ -3,7 +3,7 @@
  * Importable from both host and webview (no vscode, no DOM).
  */
 
-export type MemoryStatus = 'ready' | 'building' | 'installing' | 'missing-toolchain' | 'error';
+export type MemoryStatus = 'ready' | 'missing-toolchain' | 'error';
 
 export type MemorySnapshot = {
 	enabled: boolean;

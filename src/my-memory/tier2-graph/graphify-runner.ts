@@ -17,10 +17,10 @@ import { detectToolchain, resolveGraphifyInvocation, run, type ProgressFn } from
 // `graphify update .` re-extracts CODE files only — explicitly "no LLM needed",
 // so it's fully local and free. We deliberately avoid `graphify extract .`: that
 // is the heavier AST + semantic-LLM path that demands an API key for any
-// docs/images in the repo ("no LLM API key found"). `--force` lets a rebuild
-// shrink the graph after code is deleted.
-const FULL_ARGS = ['update', '.', '--force'];
-const INCREMENTAL_ARGS = ['update', '.'];
+// docs/images in the repo ("no LLM API key found"). `--force` makes an explicit
+// rebuild authoritative — graphify otherwise refuses to overwrite when the graph
+// would shrink (after deleting code, or recovering a deleted .f1/ over a stale cache).
+const BUILD_ARGS = ['update', '.', '--force'];
 
 const GRAPHIFY_OUT_DIR = 'graphify-out';
 const OUT_GRAPH = 'graph.json';
@@ -30,11 +30,11 @@ export type GraphResult = { graphJsonCreated: boolean; reportCreated: boolean };
 
 export const runGraphify = async (
 	root: string,
-	opts: { incremental?: boolean; onProgress?: ProgressFn } = {}
+	opts: { onProgress?: ProgressFn } = {}
 ): Promise<GraphResult> => {
 	const status = detectToolchain();
 	const { cmd, prefix } = resolveGraphifyInvocation(status);
-	const args = [...prefix, ...(opts.incremental ? INCREMENTAL_ARGS : FULL_ARGS)];
+	const args = [...prefix, ...BUILD_ARGS];
 
 	opts.onProgress?.('Building code graph with graphify (local, no API)…');
 	await run(cmd, args, { cwd: root, onProgress: opts.onProgress });

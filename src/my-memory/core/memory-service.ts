@@ -107,11 +107,11 @@ export class MemoryService {
 	 * Full build, triggered by the toggle turning on or the brain button: run
 	 * graphify, copy its graph into `.f1/`, rewrite the map, and re-sync the
 	 * instruction files. Assumes the toolchain is present (the host installs it
-	 * first). `incremental` re-extracts only changed files.
+	 * first); always an authoritative `--force` rebuild of the code graph.
 	 */
 	public async rebuild(
 		root: string | undefined,
-		options: { incremental?: boolean; onProgress?: ProgressFn } = {}
+		options: { onProgress?: ProgressFn } = {}
 	): Promise<MemoryBuildResult> {
 		const startTime = Date.now();
 
@@ -124,7 +124,7 @@ export class MemoryService {
 
 			let graphJsonCreated = false;
 			try {
-				const graph = await runGraphify(root, { incremental: options.incremental, onProgress: options.onProgress });
+				const graph = await runGraphify(root, { onProgress: options.onProgress });
 				graphJsonCreated = graph.graphJsonCreated;
 			} catch (graphError) {
 				// graphify is installed but extraction failed. Keep the wiring valid

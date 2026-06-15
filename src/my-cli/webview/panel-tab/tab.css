@@ -97,18 +97,8 @@
 	animation: pulse-loading 1.5s infinite;
 }
 
-.agent-new-button.is-success {
-	background: #10b981;
-	color: white;
-}
-
 .agent-new-button.is-error {
 	background: #ef4444;
-	color: white;
-}
-
-.agent-new-button.is-missing-python {
-	background: #f59e0b;
 	color: white;
 }
 

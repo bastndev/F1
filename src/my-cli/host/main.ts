@@ -719,7 +719,7 @@ export class MyCliViewProvider implements vscode.WebviewViewProvider, vscode.Dis
 				// (reload of an already-on toggle) only re-enables + watches.
 				const userInitiated = !message.restore;
 				if (userInitiated && !this.memoryService.getSnapshot(root).hasGraphJson) {
-					await this._ensureMemoryBuilt(webview, id, { incremental: false });
+					await this._ensureMemoryBuilt(webview, id);
 					return;
 				}
 			} else {
@@ -734,7 +734,7 @@ export class MyCliViewProvider implements vscode.WebviewViewProvider, vscode.Dis
 	}
 
 	private async _handleMemoryRebuild(webview: vscode.Webview, message: InboundWebviewMessage) {
-		await this._ensureMemoryBuilt(webview, message.id as string, { incremental: true });
+		await this._ensureMemoryBuilt(webview, message.id as string);
 	}
 
 	/**
@@ -744,7 +744,7 @@ export class MyCliViewProvider implements vscode.WebviewViewProvider, vscode.Dis
 	 * If the toolchain is missing and the user cancels — or the install fails —
 	 * the feature is turned back OFF and the webview drops the button.
 	 */
-	private async _ensureMemoryBuilt(webview: vscode.Webview, id: string, opts: { incremental: boolean }) {
+	private async _ensureMemoryBuilt(webview: vscode.Webview, id: string) {
 		const root = this._getMemoryWorkspaceRoot();
 		if (!root) {
 			await webview.postMessage({ type: 'memory.buildError', id, error: 'Open a folder to build project memory.' });
@@ -786,7 +786,6 @@ export class MyCliViewProvider implements vscode.WebviewViewProvider, vscode.Dis
 		const result = await vscode.window.withProgress(
 			{ location: vscode.ProgressLocation.Notification, title: 'My Memory: building project context…', cancellable: false },
 			async (progress) => this.memoryService.rebuild(root, {
-				incremental: opts.incremental,
 				onProgress: (msg) => {
 					progress.report({ message: msg });
 					void webview.postMessage({ type: 'memory.buildProgress', id, message: msg });

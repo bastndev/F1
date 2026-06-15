@@ -159,10 +159,6 @@ const updateButtonAppearance = () => {
 	}
 
 	switch (currentSnapshot.status) {
-		case 'building':
-		case 'installing':
-			setButtonState('loading');
-			break;
 		case 'missing-toolchain':
 			setButtonState('setup');
 			break;

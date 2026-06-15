@@ -113,7 +113,6 @@ export type InboundWebviewMessage = {
 	data?: string;
 	cols?: number;
 	rows?: number;
-	installPython?: boolean;
 	overwrite?: boolean;
 	enabled?: boolean;
 	restore?: boolean;
