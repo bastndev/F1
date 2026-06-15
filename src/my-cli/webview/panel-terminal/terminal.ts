@@ -7,6 +7,7 @@ import { createToolsController, type CliUsageSnapshot } from '../tools/tools';
 import { USAGE_BUSY_ERROR, isUsageAgentBusy, isUsageViewInline } from '../tools/modal-use/agents';
 import { detectModelName } from '../../shared/model-detect';
 import { createRpcChannel } from './host-rpc';
+import { initMemoryHandler, handleMemoryMessage } from '../memory-handler';
 import { createBootSkeletons } from './boot-skeleton';
 import { createCopyToTranslateWatcher } from './copy-to-translate';
 import { getTerminalFontFamily, getTerminalTheme } from './terminal-theme';
@@ -1006,6 +1007,11 @@ window.addEventListener('message', (event: MessageEvent<ServerMessage>) => {
 		return;
 	}
 
+	if (message.type?.startsWith('memory.')) {
+		handleMemoryMessage(message);
+		return;
+	}
+
 	if (message.type === 'cli.error') {
 		terminalStatus.textContent = message.message;
 	}
@@ -1015,5 +1021,7 @@ const resizeObserver = new ResizeObserver(() => {
 	fitTerminal();
 });
 resizeObserver.observe(terminalStack);
+
+initMemoryHandler((message) => vscode.postMessage(message));
 
 vscode.postMessage({ type: 'cli.ready' });

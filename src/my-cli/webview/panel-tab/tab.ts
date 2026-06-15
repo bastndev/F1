@@ -19,6 +19,7 @@ export type CliSessionSummary = {
 };
 
 import { consumeShortcut, matchesShortcut } from '../keymaps';
+import { notifyMemoryToggle, onMemoryForceDisable } from '../memory-handler';
 
 export type CliToolId = 'translate' | 'keymaps' | 'prompt' | 'use';
 
@@ -125,13 +126,21 @@ export const createTabController = (options: TabControllerOptions) => {
 	let promptFilterToastTimer: number | undefined;
 	let isMemoryEnabled = readMemoryPreference();
 
-	const setMemoryEnabled = (enabled: boolean) => {
+	const setMemoryEnabled = (enabled: boolean, notify = true) => {
 		isMemoryEnabled = enabled;
 		memoryToggle.checked = enabled;
 		writeMemoryPreference(enabled);
-		
+
 		memoryActionButton.style.display = enabled ? 'inline-flex' : 'none';
+
+		if (notify) {
+			notifyMemoryToggle(enabled);
+		}
 	};
+
+	// If the host backs out (graphify install cancelled or failed) it tells us
+	// to turn the feature back off and drop the button.
+	onMemoryForceDisable(() => setMemoryEnabled(false, false));
 
 	const setAgentMenuOpen = (isOpen: boolean) => {
 		isAgentMenuOpen = isOpen;
@@ -503,7 +512,12 @@ export const createTabController = (options: TabControllerOptions) => {
 	});
 
 	setPromptFilterEnabled(isPromptFilterEnabled, false);
-	setMemoryEnabled(isMemoryEnabled);
+	setMemoryEnabled(isMemoryEnabled, false);
+	if (isMemoryEnabled) {
+		// Re-sync an already-on toggle to the host after a reload: enable + watch,
+		// without forcing a rebuild.
+		notifyMemoryToggle(true, true);
+	}
 
 	document.addEventListener('click', () => {
 		closeFloatingPanels();

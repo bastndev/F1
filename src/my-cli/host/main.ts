@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 import * as crypto from 'crypto';
-import { allowedAgents, getCliAgent } from '../shared/agents';
+import { allowedAgents, getCliAgent, getAgentSlug } from '../shared/agents';
 import { ensureCliInstalled } from './terminal-cli/installation';
 import { CliSessionManager } from './terminal-cli/session-manager';
 import { getAgentWebviewHtml } from './webview-html';
@@ -19,6 +19,7 @@ import {
 import type { VoiceProgress, VoiceState } from '../shared/voice/voice-types';
 import { checkText as spellCheckText, warmSpellchecker } from './spellcheck/host-spellcheck';
 import { preparePromptForCLI } from './attachments/host-preparer';
+import { MemoryService } from '../../my-memory/my-memory';
 import type { CustomCliLaunch, InboundWebviewMessage } from '../shared/protocol';
 import {
 	getAgentLaunchGuardMessage,
@@ -153,12 +154,16 @@ function normalizeVoiceChunks(message: InboundWebviewMessage): string[] {
 export class MyCliViewProvider implements vscode.WebviewViewProvider, vscode.Disposable {
 	public static readonly viewType = 'f1.myCli';
 	private readonly sessionManager = new CliSessionManager();
+	private readonly memoryService = new MemoryService();
 	private readonly launcherStateSessionId = crypto.randomBytes(16).toString('hex');
 	private pendingInitialAgent?: string;
 	private pendingInitialCustomCli?: CustomCliLaunch;
 	private activePromptTranslation?: AbortController;
 	private activeVoiceSession?: ActiveVoiceSession;
 	private voiceRequestSeq = 0;
+	private _activeWebview?: vscode.Webview;
+	private _memoryWatcher?: vscode.FileSystemWatcher;
+	private _memoryWatchTimer?: ReturnType<typeof setTimeout>;
 
 	constructor(
 		private readonly _extensionUri: vscode.Uri,
@@ -170,6 +175,7 @@ export class MyCliViewProvider implements vscode.WebviewViewProvider, vscode.Dis
 		context: vscode.WebviewViewResolveContext,
 		_token: vscode.CancellationToken,
 	) {
+		this._activeWebview = webviewView.webview;
 		webviewView.webview.options = {
 			enableScripts: true,
 			localResourceRoots: [
@@ -181,6 +187,8 @@ export class MyCliViewProvider implements vscode.WebviewViewProvider, vscode.Dis
 		webviewView.webview.html = await this._getHtmlForWebview(webviewView.webview);
 		webviewView.onDidDispose(() => {
 			this.sessionManager.detach();
+			this._disposeMemoryWatcher();
+			this._activeWebview = undefined;
 		});
 		webviewView.webview.onDidReceiveMessage(async (message: InboundWebviewMessage) => {
 			if (message.type === 'openAgent' && message.agent && allowedAgents.has(message.agent)) {
@@ -226,6 +234,7 @@ export class MyCliViewProvider implements vscode.WebviewViewProvider, vscode.Dis
 					this.sessionManager.createCustomSession(this.pendingInitialCustomCli);
 					this.pendingInitialCustomCli = undefined;
 				} else if (this.pendingInitialAgent) {
+					this._memoryOnLaunch(this.pendingInitialAgent);
 					void this.sessionManager.createSession(this.pendingInitialAgent);
 					this.pendingInitialAgent = undefined;
 				} else {
@@ -301,10 +310,21 @@ export class MyCliViewProvider implements vscode.WebviewViewProvider, vscode.Dis
 				return;
 			}
 
+			if (message.type === 'memory.getSnapshot' && typeof message.id === 'string') {
+				await this._handleMemoryGetSnapshot(webviewView.webview, message);
+				return;
+			}
+
+			if (message.type === 'memory.rebuild' && typeof message.id === 'string') {
+				await this._handleMemoryRebuild(webviewView.webview, message);
+				return;
+			}
+
 			if (message.type === 'cli.create' && message.agent && allowedAgents.has(message.agent)) {
 				if (!(await this._confirmAgentLaunch(message.agent, 'panel'))) {
 					return;
 				}
+				this._memoryOnLaunch(message.agent);
 			}
 
 			if (message.type?.startsWith('cli.')) {
@@ -320,6 +340,7 @@ export class MyCliViewProvider implements vscode.WebviewViewProvider, vscode.Dis
 	public dispose() {
 		this.activePromptTranslation?.abort();
 		stopVoicePlayback();
+		this._disposeMemoryWatcher();
 		this.sessionManager.dispose();
 	}
 
@@ -624,6 +645,167 @@ export class MyCliViewProvider implements vscode.WebviewViewProvider, vscode.Dis
 				issues: [],
 			});
 		}
+	}
+
+	private _getMemoryWorkspaceRoot(): string | undefined {
+		return vscode.workspace.workspaceFolders?.[0]?.uri.fsPath;
+	}
+
+	/** Watch the workspace so the button turns yellow when files change. */
+	private _ensureMemoryWatcher(): void {
+		if (this._memoryWatcher) {
+			return;
+		}
+		const folder = vscode.workspace.workspaceFolders?.[0];
+		if (!folder) {
+			return;
+		}
+		const watcher = vscode.workspace.createFileSystemWatcher(new vscode.RelativePattern(folder, '**/*'));
+		const onEvent = (uri: vscode.Uri) => this._onMemoryFsEvent(uri);
+		watcher.onDidCreate(onEvent);
+		watcher.onDidChange(onEvent);
+		watcher.onDidDelete(onEvent);
+		this._memoryWatcher = watcher;
+	}
+
+	private _disposeMemoryWatcher(): void {
+		if (this._memoryWatchTimer) {
+			clearTimeout(this._memoryWatchTimer);
+			this._memoryWatchTimer = undefined;
+		}
+		this._memoryWatcher?.dispose();
+		this._memoryWatcher = undefined;
+	}
+
+	/** Debounced: a relevant file changed → push a fresh snapshot to the button. */
+	private _onMemoryFsEvent(uri: vscode.Uri): void {
+		const p = uri.fsPath.replace(/\\/g, '/');
+		// Note: we do NOT skip .f1/ here — deleting it must flip the button to red.
+		if (/\/(node_modules|\.git|dist|out|build|coverage|\.next|\.cache|graphify-out)\//.test(p)) {
+			return;
+		}
+		if (this._memoryWatchTimer) {
+			clearTimeout(this._memoryWatchTimer);
+		}
+		this._memoryWatchTimer = setTimeout(() => {
+			const root = this._getMemoryWorkspaceRoot();
+			const webview = this._activeWebview;
+			if (!root || !webview) {
+				return;
+			}
+			void webview.postMessage({ type: 'memory.snapshot', id: 'watch', snapshot: this.memoryService.getSnapshot(root) });
+		}, 600);
+	}
+
+	/** When My Memory is on, point the launching CLI's instructions file at .f1/. */
+	private _memoryOnLaunch(agentLabel: string): void {
+		if (!this.memoryService.isEnabled()) {
+			return;
+		}
+		this.memoryService.onLaunch(this._getMemoryWorkspaceRoot(), getAgentSlug(agentLabel));
+	}
+
+	private async _handleMemoryGetSnapshot(webview: vscode.Webview, message: InboundWebviewMessage) {
+		const id = message.id as string;
+		const root = this._getMemoryWorkspaceRoot();
+		this._activeWebview = webview;
+
+		// A toggle flip (or a reload re-sync) rides along on getSnapshot.
+		if (typeof message.enabled === 'boolean') {
+			this.memoryService.setEnabled(message.enabled);
+			if (message.enabled) {
+				this._ensureMemoryWatcher();
+				// A genuine user toggle-on with no graph yet → build now. A `restore`
+				// (reload of an already-on toggle) only re-enables + watches.
+				const userInitiated = !message.restore;
+				if (userInitiated && !this.memoryService.getSnapshot(root).hasGraphJson) {
+					await this._ensureMemoryBuilt(webview, id);
+					return;
+				}
+			} else {
+				this._disposeMemoryWatcher();
+			}
+		} else if (this.memoryService.isEnabled()) {
+			this._ensureMemoryWatcher();
+		}
+
+		const snapshot = this.memoryService.getSnapshot(root);
+		await webview.postMessage({ type: 'memory.snapshot', id, snapshot });
+	}
+
+	private async _handleMemoryRebuild(webview: vscode.Webview, message: InboundWebviewMessage) {
+		await this._ensureMemoryBuilt(webview, message.id as string);
+	}
+
+	/**
+	 * Shared build path for the toggle and the brain button. Ensures the graphify
+	 * toolchain is present (offering a one-time native install if not), then
+	 * builds the graph + syncs instruction files inside a progress notification.
+	 * If the toolchain is missing and the user cancels — or the install fails —
+	 * the feature is turned back OFF and the webview drops the button.
+	 */
+	private async _ensureMemoryBuilt(webview: vscode.Webview, id: string) {
+		const root = this._getMemoryWorkspaceRoot();
+		if (!root) {
+			await webview.postMessage({ type: 'memory.buildError', id, error: 'Open a folder to build project memory.' });
+			vscode.window.showWarningMessage('My Memory: open a folder before building project context.');
+			await this._memoryDisable(webview);
+			return;
+		}
+
+		if (!this.memoryService.hasToolchain()) {
+			const choice = await vscode.window.showInformationMessage(
+				'My Memory needs the "graphify" engine (Python + graphify) to build your project graph. This is a one-time setup on this machine.',
+				'Install',
+				'Cancel'
+			);
+			if (choice !== 'Install') {
+				await this._memoryDisable(webview);
+				return;
+			}
+
+			try {
+				await webview.postMessage({ type: 'memory.buildStart', id });
+				await vscode.window.withProgress(
+					{ location: vscode.ProgressLocation.Notification, title: 'My Memory: installing graphify…', cancellable: false },
+					async (progress) => this.memoryService.installToolchain((msg) => {
+						progress.report({ message: msg });
+						void webview.postMessage({ type: 'memory.buildProgress', id, message: msg });
+					})
+				);
+			} catch (installError) {
+				const err = installError instanceof Error ? installError.message : String(installError);
+				await webview.postMessage({ type: 'memory.buildError', id, error: err });
+				vscode.window.showErrorMessage(`My Memory: graphify install failed. ${err}`);
+				await this._memoryDisable(webview);
+				return;
+			}
+		}
+
+		await webview.postMessage({ type: 'memory.buildStart', id });
+		const result = await vscode.window.withProgress(
+			{ location: vscode.ProgressLocation.Notification, title: 'My Memory: building project context…', cancellable: false },
+			async (progress) => this.memoryService.rebuild(root, {
+				onProgress: (msg) => {
+					progress.report({ message: msg });
+					void webview.postMessage({ type: 'memory.buildProgress', id, message: msg });
+				}
+			})
+		);
+
+		if (result.success) {
+			await webview.postMessage({ type: 'memory.buildComplete', id, result });
+			vscode.window.showInformationMessage(`My Memory updated · ${result.filesUpdated?.length ?? 0} instruction file(s) synced.`);
+		} else {
+			await webview.postMessage({ type: 'memory.buildError', id, error: result.error || result.message });
+			vscode.window.showErrorMessage(`My Memory failed: ${result.error || result.message}`);
+		}
+	}
+
+	/** Turn the feature OFF and tell the webview to drop the brain button. */
+	private async _memoryDisable(webview: vscode.Webview) {
+		this.memoryService.setEnabled(false);
+		await webview.postMessage({ type: 'memory.disabled' });
 	}
 
 	private async _postPromptTranslationError(webview: vscode.Webview, id: string, message: string) {

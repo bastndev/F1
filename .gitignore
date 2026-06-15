@@ -5,6 +5,9 @@ node_modules/
 out/
 dist/
 
+# My Memory: graphify's working dir + incremental cache (we commit .f1/, not this)
+graphify-out/
+
 # VSCE files
 *.vsix
 
