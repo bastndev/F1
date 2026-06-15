@@ -20,7 +20,7 @@ import { newestSourceMtime, scanProject } from '../tier1-map/scan-project';
 import { writeProjectMap } from '../tier1-map/write-project-map';
 import { syncAllInstructionFiles, syncInstructionFileForSlug } from '../tier1-map/sync-instructions';
 import { detectToolchain, installToolchain, type ProgressFn, type ToolchainStatus } from '../tier2-graph/toolchain';
-import { runGraphify } from '../tier2-graph/graphify-runner';
+import { ensureGraphifyOutIgnored, runGraphify } from '../tier2-graph/graphify-runner';
 import type { MemorySnapshot, MemoryBuildResult } from '../../my-cli/shared/memory-types';
 
 export class MemoryService {
@@ -121,6 +121,7 @@ export class MemoryService {
 
 		try {
 			this.ensureConfig(root);
+			ensureGraphifyOutIgnored(root);
 
 			let graphJsonCreated = false;
 			try {

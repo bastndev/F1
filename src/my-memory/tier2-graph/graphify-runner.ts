@@ -59,3 +59,33 @@ export const runGraphify = async (
 
 	return { graphJsonCreated, reportCreated };
 };
+
+/**
+ * Ensure the project's own `.gitignore` lists `graphify-out/`, so graphify's
+ * working dir + cache go grey/untracked like `dist`/`node_modules` instead of
+ * being committed. Idempotent and non-destructive: only appends the line if it
+ * isn't already there; creates `.gitignore` if the project has none. (The
+ * committed context lives in `.f1/`, which we never ignore.)
+ */
+export const ensureGraphifyOutIgnored = (root: string): void => {
+	try {
+		const gitignorePath = path.join(root, '.gitignore');
+		const existing = fs.existsSync(gitignorePath) ? fs.readFileSync(gitignorePath, 'utf8') : '';
+
+		const alreadyIgnored = existing.split('\n').some((line) => {
+			const normalized = line.trim().replace(/^\//, '').replace(/\/$/, '');
+			return normalized === GRAPHIFY_OUT_DIR;
+		});
+		if (alreadyIgnored) {
+			return;
+		}
+
+		const note = "# F1 My Memory: graphify's working dir + cache (committed context is in .f1/)";
+		const next = existing.trim().length
+			? `${existing.trimEnd()}\n\n${note}\n${GRAPHIFY_OUT_DIR}/\n`
+			: `${note}\n${GRAPHIFY_OUT_DIR}/\n`;
+		fs.writeFileSync(gitignorePath, next, 'utf8');
+	} catch (error) {
+		console.error('[my-memory] ensureGraphifyOutIgnored failed:', error);
+	}
+};
