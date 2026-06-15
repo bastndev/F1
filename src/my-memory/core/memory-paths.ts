@@ -19,28 +19,20 @@ export const BLOCK_START = '<!-- F1-MEMORY:START -->';
 export const BLOCK_END = '<!-- F1-MEMORY:END -->';
 
 /**
- * Agent slug (see shared/agents.ts) → instructions file it auto-reads on
- * startup, relative to the workspace root. AGENTS.md is the de-facto cross-CLI
- * standard, so unmapped agents fall back to it.
+ * AGENTS.md is the single hub every CLI reads — it carries the managed block
+ * that points at `.f1/`. Almost every coding CLI (Codex, Cursor, OpenCode,
+ * Kiro, Grok, Antigravity, Kilo, and now Copilot) reads AGENTS.md directly, so
+ * there is no per-CLI file to maintain and no `.github/copilot-instructions.md`.
  */
-export const instructionFileBySlug: Record<string, string> = {
-	claude: 'CLAUDE.md',
-	codex: 'AGENTS.md',
-	opencode: 'AGENTS.md',
-	kiro: 'AGENTS.md',
-	cursor: 'AGENTS.md',
-	antigravity: 'AGENTS.md',
-	kilocode: 'AGENTS.md',
-	grok: 'AGENTS.md',
-	copilot: '.github/copilot-instructions.md'
-};
+export const HUB_FILE = 'AGENTS.md';
 
-/** The instructions file for one CLI slug (AGENTS.md fallback). */
-export const instructionFileForSlug = (slug: string | undefined): string => {
-	return slug && instructionFileBySlug[slug] ? instructionFileBySlug[slug] : 'AGENTS.md';
-};
-
-/** Every distinct instruction file across all known CLIs (for a full sync). */
-export const allInstructionFiles = (): string[] => {
-	return Array.from(new Set(Object.values(instructionFileBySlug)));
-};
+/**
+ * Claude Code is the one holdout: it keys off CLAUDE.md and won't read AGENTS.md
+ * on its own. So CLAUDE.md is kept as a thin pointer that imports the hub —
+ * never a second copy of the block, so the hub stays the single source of truth.
+ */
+export const CLAUDE_FILE = 'CLAUDE.md';
+/** The line Claude Code uses to import AGENTS.md into CLAUDE.md. */
+export const CLAUDE_IMPORT_LINE = '@AGENTS.md';
+/** Agent slug (see shared/agents.ts) whose CLI keys off CLAUDE.md. */
+export const CLAUDE_SLUG = 'claude';
