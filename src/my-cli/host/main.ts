@@ -19,6 +19,7 @@ import {
 import type { VoiceProgress, VoiceState } from '../shared/voice/voice-types';
 import { checkText as spellCheckText, warmSpellchecker } from './spellcheck/host-spellcheck';
 import { preparePromptForCLI } from './attachments/host-preparer';
+import { MemoryService } from './memory/memory-service';
 import type { CustomCliLaunch, InboundWebviewMessage } from '../shared/protocol';
 import {
 	getAgentLaunchGuardMessage,
@@ -153,6 +154,7 @@ function normalizeVoiceChunks(message: InboundWebviewMessage): string[] {
 export class MyCliViewProvider implements vscode.WebviewViewProvider, vscode.Disposable {
 	public static readonly viewType = 'f1.myCli';
 	private readonly sessionManager = new CliSessionManager();
+	private readonly memoryService = new MemoryService();
 	private readonly launcherStateSessionId = crypto.randomBytes(16).toString('hex');
 	private pendingInitialAgent?: string;
 	private pendingInitialCustomCli?: CustomCliLaunch;
@@ -298,6 +300,16 @@ export class MyCliViewProvider implements vscode.WebviewViewProvider, vscode.Dis
 
 			if (message.type === 'mySkills.openCreate') {
 				await vscode.commands.executeCommand('f1.mySkills.openCreate');
+				return;
+			}
+
+			if (message.type === 'memory.getSnapshot' && typeof message.id === 'string') {
+				await this._handleMemoryGetSnapshot(webviewView.webview, message);
+				return;
+			}
+
+			if (message.type === 'memory.rebuild' && typeof message.id === 'string') {
+				await this._handleMemoryRebuild(webviewView.webview, message);
 				return;
 			}
 
@@ -623,6 +635,86 @@ export class MyCliViewProvider implements vscode.WebviewViewProvider, vscode.Dis
 				id: message.id,
 				issues: [],
 			});
+		}
+	}
+
+	private _getMemoryWorkspaceRoot(): string | undefined {
+		return vscode.workspace.workspaceFolders?.[0]?.uri.fsPath;
+	}
+
+	private async _handleMemoryGetSnapshot(webview: vscode.Webview, message: InboundWebviewMessage) {
+		const id = message.id as string;
+		const root = this._getMemoryWorkspaceRoot();
+
+		// A toggle flip rides along on getSnapshot (memory-handler.notifyMemoryToggle).
+		if (typeof (message as { enabled?: boolean }).enabled === 'boolean') {
+			this.memoryService.setEnabled((message as { enabled?: boolean }).enabled === true);
+		}
+
+		if (!root) {
+			await webview.postMessage({
+				type: 'memory.snapshot',
+				id,
+				snapshot: { enabled: this.memoryService.isEnabled(), status: 'error', error: 'No workspace open' },
+			});
+			return;
+		}
+
+		const snapshot = await this.memoryService.getSnapshot(root);
+		await webview.postMessage({ type: 'memory.snapshot', id, snapshot });
+	}
+
+	private async _handleMemoryRebuild(webview: vscode.Webview, message: InboundWebviewMessage) {
+		const id = message.id as string;
+		const root = this._getMemoryWorkspaceRoot();
+
+		if (!root) {
+			await webview.postMessage({
+				type: 'memory.buildError',
+				id,
+				error: 'Open a folder to build project memory.',
+			});
+			vscode.window.showWarningMessage('My Memory: open a folder before building project context.');
+			return;
+		}
+
+		await webview.postMessage({ type: 'memory.buildStart', id });
+
+		// Native install prompt: check Python first; if missing, ask before building.
+		const snapshot = await this.memoryService.getSnapshot(root);
+		let installPython = false;
+		if (snapshot.status === 'missing-python') {
+			const choice = await vscode.window.showWarningMessage(
+				'You need to install Python to use My Memory. Install it now?',
+				{ modal: true },
+				'Install'
+			);
+			if (choice !== 'Install') {
+				await webview.postMessage({
+					type: 'memory.buildError',
+					id,
+					error: 'Python is required to build project memory.',
+				});
+				return;
+			}
+			installPython = true;
+		}
+
+		const result = await vscode.window.withProgress(
+			{
+				location: vscode.ProgressLocation.Notification,
+				title: installPython ? 'My Memory: installing Python & building context…' : 'My Memory: building project context…',
+				cancellable: false,
+			},
+			async () => this.memoryService.rebuild(root, installPython)
+		);
+
+		if (result.success) {
+			await webview.postMessage({ type: 'memory.buildComplete', id, result });
+			vscode.window.showInformationMessage(`My Memory updated · ${result.filesUpdated?.length ?? 0} instruction file(s) synced.`);
+		} else {
+			await webview.postMessage({ type: 'memory.buildError', id, error: result.error || result.message });
+			vscode.window.showErrorMessage(`My Memory failed: ${result.error || result.message}`);
 		}
 	}
 

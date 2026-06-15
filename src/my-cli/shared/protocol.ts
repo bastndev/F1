@@ -9,6 +9,7 @@
 import type { AgentLaunchGuardMessage } from './agent-launch-guard';
 import type { ImageAttachment, FileMentionEntry, SpellIssue, WorkspaceSkill } from './prompt';
 import type { VoiceProgress, VoiceState } from './voice/voice-types';
+import type { MemorySnapshot, MemoryBuildResult } from './memory-types';
 
 export type CliSessionStatus = 'running' | 'exited' | 'error';
 
@@ -61,7 +62,9 @@ export type WebviewToHostMessage =
 	| { type: 'voice.resume' }
 	| { type: 'voice.stop' }
 	| { type: 'voice.query' }
-	| { type: 'clipboard.read'; id: string };
+	| { type: 'clipboard.read'; id: string }
+	| { type: 'memory.getSnapshot'; id: string }
+	| { type: 'memory.rebuild'; id: string };
 
 /** Extension host → webview. */
 export type HostToWebviewMessage =
@@ -81,7 +84,12 @@ export type HostToWebviewMessage =
 	| { type: 'workspace.files'; id: string; files: FileMentionEntry[] }
 	| { type: 'workspace.skills'; id: string; skills: WorkspaceSkill[] }
 	| { type: 'voice.state'; state: VoiceState; message?: string; progress?: VoiceProgress }
-	| { type: 'clipboard.text'; id: string; text: string };
+	| { type: 'clipboard.text'; id: string; text: string }
+	| { type: 'memory.snapshot'; id: string; snapshot: MemorySnapshot }
+	| { type: 'memory.buildStart'; id: string }
+	| { type: 'memory.buildProgress'; id: string; message: string }
+	| { type: 'memory.buildComplete'; id: string; result: MemoryBuildResult }
+	| { type: 'memory.buildError'; id: string; error: string };
 
 /**
  * Loosely-typed inbound view of WebviewToHostMessage. Webview messages cross
@@ -104,6 +112,9 @@ export type InboundWebviewMessage = {
 	data?: string;
 	cols?: number;
 	rows?: number;
+	installPython?: boolean;
+	overwrite?: boolean;
+	enabled?: boolean;
 };
 
 /** Extension host → pty-host child process (Node IPC). */

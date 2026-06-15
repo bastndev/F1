@@ -19,6 +19,7 @@ export type CliSessionSummary = {
 };
 
 import { consumeShortcut, matchesShortcut } from '../keymaps';
+import { notifyMemoryToggle } from '../memory-handler';
 
 export type CliToolId = 'translate' | 'keymaps' | 'prompt' | 'use';
 
@@ -125,12 +126,16 @@ export const createTabController = (options: TabControllerOptions) => {
 	let promptFilterToastTimer: number | undefined;
 	let isMemoryEnabled = readMemoryPreference();
 
-	const setMemoryEnabled = (enabled: boolean) => {
+	const setMemoryEnabled = (enabled: boolean, notify = true) => {
 		isMemoryEnabled = enabled;
 		memoryToggle.checked = enabled;
 		writeMemoryPreference(enabled);
-		
+
 		memoryActionButton.style.display = enabled ? 'inline-flex' : 'none';
+
+		if (notify) {
+			notifyMemoryToggle(enabled);
+		}
 	};
 
 	const setAgentMenuOpen = (isOpen: boolean) => {
@@ -503,7 +508,7 @@ export const createTabController = (options: TabControllerOptions) => {
 	});
 
 	setPromptFilterEnabled(isPromptFilterEnabled, false);
-	setMemoryEnabled(isMemoryEnabled);
+	setMemoryEnabled(isMemoryEnabled, false);
 
 	document.addEventListener('click', () => {
 		closeFloatingPanels();

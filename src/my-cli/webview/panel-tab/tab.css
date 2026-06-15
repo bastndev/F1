@@ -88,6 +88,39 @@
 	background: var(--vscode-button-hoverBackground, var(--vscode-textLink-activeForeground));
 }
 
+.agent-new-button:disabled {
+	opacity: 0.6;
+	cursor: not-allowed;
+}
+
+.agent-new-button.is-loading {
+	animation: pulse-loading 1.5s infinite;
+}
+
+.agent-new-button.is-success {
+	background: #10b981;
+	color: white;
+}
+
+.agent-new-button.is-error {
+	background: #ef4444;
+	color: white;
+}
+
+.agent-new-button.is-missing-python {
+	background: #f59e0b;
+	color: white;
+}
+
+@keyframes pulse-loading {
+	0%, 100% {
+		opacity: 1;
+	}
+	50% {
+		opacity: 0.6;
+	}
+}
+
 .agent-new-button-label {
 	min-width: 1ch;
 	font-size: 13px;
