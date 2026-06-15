@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 import * as crypto from 'crypto';
-import { allowedAgents, getCliAgent } from '../shared/agents';
+import { allowedAgents, getCliAgent, getAgentSlug } from '../shared/agents';
 import { ensureCliInstalled } from './terminal-cli/installation';
 import { CliSessionManager } from './terminal-cli/session-manager';
 import { getAgentWebviewHtml } from './webview-html';
@@ -19,7 +19,7 @@ import {
 import type { VoiceProgress, VoiceState } from '../shared/voice/voice-types';
 import { checkText as spellCheckText, warmSpellchecker } from './spellcheck/host-spellcheck';
 import { preparePromptForCLI } from './attachments/host-preparer';
-import { MemoryService } from './memory/memory-service';
+import { MemoryService } from '../../my-memory/my-memory';
 import type { CustomCliLaunch, InboundWebviewMessage } from '../shared/protocol';
 import {
 	getAgentLaunchGuardMessage,
@@ -228,6 +228,7 @@ export class MyCliViewProvider implements vscode.WebviewViewProvider, vscode.Dis
 					this.sessionManager.createCustomSession(this.pendingInitialCustomCli);
 					this.pendingInitialCustomCli = undefined;
 				} else if (this.pendingInitialAgent) {
+					this._memoryOnLaunch(this.pendingInitialAgent);
 					void this.sessionManager.createSession(this.pendingInitialAgent);
 					this.pendingInitialAgent = undefined;
 				} else {
@@ -317,6 +318,7 @@ export class MyCliViewProvider implements vscode.WebviewViewProvider, vscode.Dis
 				if (!(await this._confirmAgentLaunch(message.agent, 'panel'))) {
 					return;
 				}
+				this._memoryOnLaunch(message.agent);
 			}
 
 			if (message.type?.startsWith('cli.')) {
@@ -642,25 +644,29 @@ export class MyCliViewProvider implements vscode.WebviewViewProvider, vscode.Dis
 		return vscode.workspace.workspaceFolders?.[0]?.uri.fsPath;
 	}
 
+	/** When My Memory is on, point the launching CLI's instructions file at .f1/. */
+	private _memoryOnLaunch(agentLabel: string): void {
+		if (!this.memoryService.isEnabled()) {
+			return;
+		}
+		this.memoryService.onLaunch(this._getMemoryWorkspaceRoot(), getAgentSlug(agentLabel));
+	}
+
 	private async _handleMemoryGetSnapshot(webview: vscode.Webview, message: InboundWebviewMessage) {
 		const id = message.id as string;
 		const root = this._getMemoryWorkspaceRoot();
 
 		// A toggle flip rides along on getSnapshot (memory-handler.notifyMemoryToggle).
-		if (typeof (message as { enabled?: boolean }).enabled === 'boolean') {
-			this.memoryService.setEnabled((message as { enabled?: boolean }).enabled === true);
+		if (typeof message.enabled === 'boolean') {
+			const turningOn = message.enabled && !this.memoryService.isEnabled();
+			this.memoryService.setEnabled(message.enabled);
+			// Toggling ON builds .f1/ immediately (config + map + instruction sync).
+			if (turningOn) {
+				this.memoryService.ensureForWorkspace(root);
+			}
 		}
 
-		if (!root) {
-			await webview.postMessage({
-				type: 'memory.snapshot',
-				id,
-				snapshot: { enabled: this.memoryService.isEnabled(), status: 'error', error: 'No workspace open' },
-			});
-			return;
-		}
-
-		const snapshot = await this.memoryService.getSnapshot(root);
+		const snapshot = this.memoryService.getSnapshot(root);
 		await webview.postMessage({ type: 'memory.snapshot', id, snapshot });
 	}
 
@@ -669,44 +675,22 @@ export class MyCliViewProvider implements vscode.WebviewViewProvider, vscode.Dis
 		const root = this._getMemoryWorkspaceRoot();
 
 		if (!root) {
-			await webview.postMessage({
-				type: 'memory.buildError',
-				id,
-				error: 'Open a folder to build project memory.',
-			});
+			await webview.postMessage({ type: 'memory.buildError', id, error: 'Open a folder to build project memory.' });
 			vscode.window.showWarningMessage('My Memory: open a folder before building project context.');
 			return;
 		}
 
 		await webview.postMessage({ type: 'memory.buildStart', id });
 
-		// Native install prompt: check Python first; if missing, ask before building.
-		const snapshot = await this.memoryService.getSnapshot(root);
-		let installPython = false;
-		if (snapshot.status === 'missing-python') {
-			const choice = await vscode.window.showWarningMessage(
-				'You need to install Python to use My Memory. Install it now?',
-				{ modal: true },
-				'Install'
-			);
-			if (choice !== 'Install') {
-				await webview.postMessage({
-					type: 'memory.buildError',
-					id,
-					error: 'Python is required to build project memory.',
-				});
-				return;
-			}
-			installPython = true;
-		}
-
+		// Tier 1 is pure TypeScript and fast, but wrap it in a native progress
+		// notification so the user gets the same feedback we'll keep for Tier 2.
 		const result = await vscode.window.withProgress(
 			{
 				location: vscode.ProgressLocation.Notification,
-				title: installPython ? 'My Memory: installing Python & building context…' : 'My Memory: building project context…',
+				title: 'My Memory: updating project context…',
 				cancellable: false,
 			},
-			async () => this.memoryService.rebuild(root, installPython)
+			async () => this.memoryService.rebuild(root)
 		);
 
 		if (result.success) {
