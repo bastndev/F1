@@ -88,6 +88,46 @@
 	background: var(--vscode-button-hoverBackground, var(--vscode-textLink-activeForeground));
 }
 
+.agent-new-button:disabled {
+	opacity: 0.6;
+	cursor: not-allowed;
+}
+
+.agent-new-button.is-loading {
+	animation: pulse-loading 1.5s infinite;
+}
+
+.agent-new-button.is-error {
+	background: #ef4444;
+	color: white;
+}
+
+/* Up to date — green and intentionally not clickable (nothing to do). */
+.agent-new-button.is-fresh {
+	background: #10b981;
+	color: white;
+}
+
+.agent-new-button.is-fresh:disabled {
+	opacity: 1;
+	cursor: default;
+}
+
+/* Project changed / needs build — yellow, clickable. */
+.agent-new-button.is-stale {
+	background: #eab308;
+	color: white;
+}
+
+@keyframes pulse-loading {
+	0%, 100% {
+		opacity: 1;
+	}
+	50% {
+		opacity: 0.6;
+	}
+}
+
 .agent-new-button-label {
 	min-width: 1ch;
 	font-size: 13px;
@@ -174,7 +214,7 @@
 	left: 0;
 	z-index: 30;
 	width: min(210px, calc(100vw - 28px));
-	max-height: min(314px, calc(100vh - 94px));
+	max-height: min(420px, calc(100vh - 94px));
 	border: 1px solid var(--vscode-editorGroup-border, rgba(128, 128, 128, 0.24));
 	border-radius: 6px;
 	padding: 5px 0;
@@ -395,7 +435,7 @@
 	background: var(--vscode-list-hoverBackground, rgba(128, 128, 128, 0.14));
 }
 
-.agent-tools-toggle:focus-within {
+.agent-tools-toggle:has(.agent-tools-toggle-input:focus-visible) {
 	outline: 1px solid var(--vscode-focusBorder, var(--vscode-textLink-foreground));
 	outline-offset: 2px;
 }

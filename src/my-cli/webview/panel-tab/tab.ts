@@ -19,6 +19,7 @@ export type CliSessionSummary = {
 };
 
 import { consumeShortcut, matchesShortcut } from '../keymaps';
+import { notifyMemoryToggle, onMemoryForceDisable } from '../memory-handler';
 
 export type CliToolId = 'translate' | 'keymaps' | 'prompt' | 'use';
 
@@ -81,12 +82,32 @@ const writePromptFilterPreference = (enabled: boolean) => {
 	}
 };
 
+const memoryStorageKey = 'my-cli.memory.enabled';
+
+const readMemoryPreference = () => {
+	try {
+		const storedValue = window.localStorage.getItem(memoryStorageKey);
+		return storedValue === 'true';
+	} catch {
+		return false;
+	}
+};
+
+const writeMemoryPreference = (enabled: boolean) => {
+	try {
+		window.localStorage.setItem(memoryStorageKey, String(enabled));
+	} catch {
+	}
+};
+
 export const createTabController = (options: TabControllerOptions) => {
 	const createButton = getRequiredElement<HTMLButtonElement>('cli-create-button');
 	const createButtonLabel = getRequiredElement<HTMLSpanElement>('cli-create-button-label');
 	const toolsButton = getRequiredElement<HTMLButtonElement>('cli-tools-button');
 	const toolsPopover = getRequiredElement<HTMLDivElement>('cli-tools-popover');
 	const promptFilterToggle = getRequiredElement<HTMLInputElement>('cli-prompt-filter-toggle');
+	const memoryToggle = getRequiredElement<HTMLInputElement>('cli-memory-toggle');
+	const memoryActionButton = getRequiredElement<HTMLButtonElement>('cli-memory-action-button');
 	const agentButton = getRequiredElement<HTMLButtonElement>('cli-agent-button');
 	const agentLabel = getRequiredElement<HTMLSpanElement>('cli-agent-label');
 	const agentMenu = getRequiredElement<HTMLDivElement>('cli-agent-menu');
@@ -103,6 +124,23 @@ export const createTabController = (options: TabControllerOptions) => {
 	let isAltPressed = false;
 	let isPromptFilterEnabled = readPromptFilterPreference();
 	let promptFilterToastTimer: number | undefined;
+	let isMemoryEnabled = readMemoryPreference();
+
+	const setMemoryEnabled = (enabled: boolean, notify = true) => {
+		isMemoryEnabled = enabled;
+		memoryToggle.checked = enabled;
+		writeMemoryPreference(enabled);
+
+		memoryActionButton.style.display = enabled ? 'inline-flex' : 'none';
+
+		if (notify) {
+			notifyMemoryToggle(enabled);
+		}
+	};
+
+	// If the host backs out (graphify install cancelled or failed) it tells us
+	// to turn the feature back off and drop the button.
+	onMemoryForceDisable(() => setMemoryEnabled(false, false));
 
 	const setAgentMenuOpen = (isOpen: boolean) => {
 		isAgentMenuOpen = isOpen;
@@ -456,6 +494,11 @@ export const createTabController = (options: TabControllerOptions) => {
 		setPromptFilterEnabled(promptFilterToggle.checked);
 	});
 
+	memoryToggle.addEventListener('change', () => {
+		setMemoryEnabled(memoryToggle.checked);
+		setToolsPopoverOpen(false);
+	});
+
 	toolsPopover.addEventListener('click', (event) => {
 		event.stopPropagation();
 
@@ -469,6 +512,12 @@ export const createTabController = (options: TabControllerOptions) => {
 	});
 
 	setPromptFilterEnabled(isPromptFilterEnabled, false);
+	setMemoryEnabled(isMemoryEnabled, false);
+	if (isMemoryEnabled) {
+		// Re-sync an already-on toggle to the host after a reload: enable + watch,
+		// without forcing a rebuild.
+		notifyMemoryToggle(true, true);
+	}
 
 	document.addEventListener('click', () => {
 		closeFloatingPanels();
