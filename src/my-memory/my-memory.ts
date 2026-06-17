@@ -8,4 +8,4 @@
  */
 
 export { MemoryService } from './core/memory-service';
-export type { MemorySnapshot, MemoryBuildResult, MemoryStatus } from '../my-cli/shared/memory-types';
+export type { MemorySnapshot, MemoryBuildResult, MemoryStatus } from './memory-types';

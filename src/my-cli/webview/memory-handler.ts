@@ -9,7 +9,7 @@
  * All native dialogs/notifications live on the host.
  */
 
-import type { MemorySnapshot } from '../shared/memory-types';
+import type { MemorySnapshot } from '../../my-memory/memory-types';
 
 const MEMORY_ACTION_BUTTON_ID = 'cli-memory-action-button';
 

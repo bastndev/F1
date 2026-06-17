@@ -9,7 +9,7 @@
 import type { AgentLaunchGuardMessage } from './agent-launch-guard';
 import type { ImageAttachment, FileMentionEntry, SpellIssue, WorkspaceSkill } from './prompt';
 import type { VoiceProgress, VoiceState } from './voice/voice-types';
-import type { MemorySnapshot, MemoryBuildResult } from './memory-types';
+import type { MemorySnapshot, MemoryBuildResult } from '../../my-memory/memory-types';
 
 export type CliSessionStatus = 'running' | 'exited' | 'error';
 
