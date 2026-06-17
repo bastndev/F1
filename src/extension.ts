@@ -20,6 +20,8 @@ export function activate(context: vscode.ExtensionContext) {
 			{ webviewOptions: { retainContextWhenHidden: true } }
 		)
 	);
+
+  console.log('🎉 [F1] My CLI / My Skills / My Memory — activated');
 }
 
 export function deactivate() {}
