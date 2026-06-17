@@ -21,7 +21,7 @@ export function activate(context: vscode.ExtensionContext) {
 		)
 	);
 
-  console.log('🎉 [F1] My CLI / My Skills / My Memory — activated');
+	console.log('🎉 [F1] My CLI / My Skills / My Memory — activated');
 }
 
 export function deactivate() {}
