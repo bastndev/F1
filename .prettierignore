@@ -2,3 +2,4 @@ package.json
 tsconfig.json
 src/my-cli/index.html
 src/my-cli/
+src/extension.ts/
