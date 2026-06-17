@@ -11,6 +11,9 @@ export function activate(context: vscode.ExtensionContext) {
 		vscode.window.registerWebviewViewProvider(MyCliViewProvider.viewType, myCliProvider),
 		mySkillsProvider,
 		vscode.commands.registerCommand('f1.mySkills.openCreate', () => mySkillsProvider.openCreateView()),
+		vscode.commands.registerCommand('f1.mySkills.goCreate', () => mySkillsProvider.switchTab('create-panel')),
+		vscode.commands.registerCommand('f1.mySkills.goInstall', () => mySkillsProvider.switchTab('install-panel')),
+		vscode.commands.registerCommand('f1.mySkills.goLocal', () => mySkillsProvider.switchTab('local-panel')),
 		vscode.window.registerWebviewViewProvider(
 			MySkillsViewProvider.viewType,
 			mySkillsProvider,

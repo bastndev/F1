@@ -59,7 +59,7 @@ const buildCommandLine = (command: string, args: string[]) => {
 };
 
 const getPtyHostPath = () => {
-	return path.join(__dirname, 'my-cli', 'host', 'pty-host.js');
+	return path.join(__dirname, 'my-cli', 'core', 'pty-host.js');
 };
 
 export class CliSessionManager implements vscode.Disposable {

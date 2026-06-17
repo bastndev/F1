@@ -1,3 +1,4 @@
+import { getSkillsTabTarget } from '../../shared/keymaps/skills';
 import { initInstallPanel } from '../screens/install-skill/ui/install';
 import { initOfficialPanel } from '../screens/install-skill/ui/panels/official-skill/official';
 import { initTrendingPanel } from '../screens/install-skill/ui/panels/trending-skill/trending';
@@ -134,6 +135,15 @@ tabs.forEach((tab, index) => {
 			focusRelativeTab(tabs.length - 1, 0);
 		}
 	});
+});
+
+document.addEventListener('keydown', event => {
+	const target = getSkillsTabTarget(event);
+	if (target) {
+		event.preventDefault();
+		event.stopPropagation();
+		switchToTab(target);
+	}
 });
 
 const fallbackTarget = tabs.find(tab => tab.classList.contains('active'))?.dataset.target ?? tabs[0]?.dataset.target;
