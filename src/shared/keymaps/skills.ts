@@ -1,13 +1,33 @@
-import { altKey } from './utils';
-import type { ShortcutDefinition } from './utils';
+// ─── Matcher factory ──────────────────────────────────────────────────────────
+
+function altKey(targetKey: string): (event: KeyboardEvent) => boolean {
+  const lower = targetKey.toLowerCase();
+  return (event: KeyboardEvent): boolean => {
+    if (!event.altKey || event.ctrlKey || event.metaKey) { return false; }
+    const k = event.key.toLowerCase();
+    const code = event.code.toLowerCase();
+    if (k === lower) { return true; }
+    if (lower === '+' && (k === '+' || code.includes('equal') || code.includes('numpadadd'))) { return true; }
+    if (lower === '-' && (k === '-' || code.includes('minus') || code.includes('numpadsubtract'))) { return true; }
+    return false;
+  };
+}
+
+// ─── Types ────────────────────────────────────────────────────────────────────
 
 export type SkillsShortcutId = 'goCreate' | 'goInstall' | 'goLocal';
 
 export type SkillsTabTarget = 'create-panel' | 'install-panel' | 'local-panel';
 
-export interface SkillsShortcutDefinition extends ShortcutDefinition<SkillsShortcutId> {
+export interface SkillsShortcutDefinition {
+  id: SkillsShortcutId;
+  label: string;
+  description: string;
   target: SkillsTabTarget;
+  match: (event: KeyboardEvent) => boolean;
 }
+
+// ─── Shortcuts ────────────────────────────────────────────────────────────────
 
 export const skillsShortcuts: SkillsShortcutDefinition[] = [
   {
@@ -33,9 +53,7 @@ export const skillsShortcuts: SkillsShortcutDefinition[] = [
   },
 ];
 
-export function matchesSkillsShortcut(event: KeyboardEvent, id: SkillsShortcutId): boolean {
-  return skillsShortcuts.find(s => s.id === id)?.match(event) ?? false;
-}
+// ─── Helpers ──────────────────────────────────────────────────────────────────
 
 export function getSkillsTabTarget(event: KeyboardEvent): SkillsTabTarget | undefined {
   return skillsShortcuts.find(s => s.match(event))?.target;

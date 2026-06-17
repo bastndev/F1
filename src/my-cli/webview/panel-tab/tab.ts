@@ -18,7 +18,7 @@ export type CliSessionSummary = {
 	exitCode?: number;
 };
 
-import { consumeShortcut, matchesShortcut } from '../keymaps';
+import { consumeShortcut, matchesShortcut } from '../../../shared/keymaps/cli';
 import { notifyMemoryToggle, onMemoryForceDisable } from '../memory-handler';
 
 export type CliToolId = 'translate' | 'keymaps' | 'prompt' | 'use';

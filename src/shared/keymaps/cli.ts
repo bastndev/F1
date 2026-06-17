@@ -1,5 +1,47 @@
-import { altKey, plainTab, shiftTab, ctrlSpace, escapeKey, Capslock, shiftFKey } from './utils';
-import type { ShortcutDefinition as BaseShortcutDefinition } from './utils';
+// ─── Matcher factories ────────────────────────────────────────────────────────
+
+function altKey(targetKey: string): (event: KeyboardEvent) => boolean {
+  const lower = targetKey.toLowerCase();
+  return (event: KeyboardEvent): boolean => {
+    if (!event.altKey || event.ctrlKey || event.metaKey) { return false; }
+    const k = event.key.toLowerCase();
+    const code = event.code.toLowerCase();
+    if (k === lower) { return true; }
+    if (lower === '+' && (k === '+' || code.includes('equal') || code.includes('numpadadd'))) { return true; }
+    if (lower === '-' && (k === '-' || code.includes('minus') || code.includes('numpadsubtract'))) { return true; }
+    if (lower === '9' && (k === '9' || code.includes('numpad9'))) { return true; }
+    return false;
+  };
+}
+
+function plainTab(): (event: KeyboardEvent) => boolean {
+  return (e: KeyboardEvent) => e.key === 'Tab' && !e.altKey && !e.ctrlKey && !e.metaKey && !e.shiftKey;
+}
+
+function shiftTab(): (event: KeyboardEvent) => boolean {
+  return (e: KeyboardEvent) => e.key === 'Tab' && e.shiftKey && !e.altKey && !e.ctrlKey && !e.metaKey;
+}
+
+function ctrlSpace(): (event: KeyboardEvent) => boolean {
+  return (e: KeyboardEvent) =>
+    (e.key === ' ' || e.code === 'Space') && e.ctrlKey && !e.altKey && !e.metaKey && !e.shiftKey;
+}
+
+function escapeKey(): (event: KeyboardEvent) => boolean {
+  return (e: KeyboardEvent) => e.key === 'Escape';
+}
+
+function Capslock(): (event: KeyboardEvent) => boolean {
+  return (e: KeyboardEvent) =>
+    e.key === 'CapsLock' && !e.altKey && !e.ctrlKey && !e.metaKey && !e.shiftKey;
+}
+
+function shiftFKey(num: number): (event: KeyboardEvent) => boolean {
+  const key = `F${num}`;
+  return (e: KeyboardEvent) => e.shiftKey && !e.altKey && !e.ctrlKey && !e.metaKey && e.key === key;
+}
+
+// ─── Types ────────────────────────────────────────────────────────────────────
 
 export type ShortcutContext = 'launcher' | 'terminal';
 
@@ -17,9 +59,15 @@ export type ShortcutId =
   | 'openKeymaps'
   | 'openUse';
 
-export interface ShortcutDefinition extends BaseShortcutDefinition<ShortcutId> {
+export interface ShortcutDefinition {
+  id: ShortcutId;
+  label: string;
   contexts: ShortcutContext[];
+  description: string;
+  match: (event: KeyboardEvent) => boolean;
 }
+
+// ─── Shortcuts ────────────────────────────────────────────────────────────────
 
 export const shortcuts: ShortcutDefinition[] = [
   {
@@ -107,6 +155,8 @@ export const shortcuts: ShortcutDefinition[] = [
     match: escapeKey(),
   },
 ];
+
+// ─── Helpers ──────────────────────────────────────────────────────────────────
 
 export function getShortcuts(context?: ShortcutContext): ShortcutDefinition[] {
   if (!context) { return shortcuts; }
