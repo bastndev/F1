@@ -215,7 +215,7 @@ async function main() {
 	});
 	const ptyHostCtx = await esbuild.context({
 		entryPoints: [
-			'src/my-cli/host/terminal-cli/pty-host.ts'
+			'src/my-cli/core/terminal-cli/pty-host.ts'
 		],
 		bundle: true,
 		format: 'cjs',
@@ -223,7 +223,7 @@ async function main() {
 		sourcemap: !production,
 		sourcesContent: false,
 		platform: 'node',
-		outfile: 'dist/my-cli/host/pty-host.js',
+		outfile: 'dist/my-cli/core/pty-host.js',
 		external: ['node-pty'],
 		logLevel: 'silent',
 		plugins: [

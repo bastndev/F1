@@ -9,4 +9,4 @@
  * Node bundle and crash activation. Keep this file tiny; if it grows past a
  * handful of exports, internals are leaking out.
  */
-export { MyCliViewProvider } from './host/main';
+export { MyCliViewProvider } from './core/main';
