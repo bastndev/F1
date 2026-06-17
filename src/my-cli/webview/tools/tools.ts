@@ -42,30 +42,7 @@ export type ToolContext = {
 
 type ToolCleanup = () => void;
 type ToolMount = (host: HTMLElement, context: ToolContext) => void | ToolCleanup;
-export type ToolsControllerOptions = {
-	container: HTMLElement;
-	getActiveSessionId?: () => string | undefined;
-	getActiveSessionCreatedAt?: () => number | undefined;
-	getActiveModelName?: () => string | undefined;
-	getUsageSnapshot?: () => CliUsageSnapshot | undefined;
-	requestUsage?: () => Promise<CliUsageSnapshot>;
-	dismissUsageView?: () => void;
-	sendToActiveSession?: (text: string, options?: { paste?: boolean; submit?: boolean }) => void;
-	translatePrompt?: (request: PromptTranslateRequest) => Promise<PromptTranslateResult>;
-	getTerminalSelection?: () => string;
-	preparePromptWithAttachments?: (text: string, attachments: ImageAttachment[]) => Promise<string>;
-	requestWorkspaceFiles?: () => Promise<FileMentionEntry[]>;
-	requestWorkspaceSkills?: () => Promise<WorkspaceSkill[]>;
-	openCreateSkill?: () => void;
-	requestSpellcheck?: (text: string, strict: boolean) => Promise<SpellIssue[]>;
-	speakText?: (text: string, options?: { chunks?: string[] }) => void;
-	pauseSpeech?: () => void;
-	resumeSpeech?: () => void;
-	stopSpeech?: () => void;
-	queryVoiceState?: () => void;
-	onVoiceState?: (listener: (state: VoiceState, message?: string, progress?: VoiceProgress) => void) => () => void;
-	refocusTerminal?: () => void;
-};
+export type ToolsControllerOptions = { container: HTMLElement } & Omit<ToolContext, 'close'>;
 
 const modalId = 'cli-tools-modal';
 

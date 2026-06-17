@@ -1,7 +1,3 @@
-export type CliAgentOption = {
-	label: string;
-};
-
 export type CliAgentIcon = {
 	label: string;
 	icon: string;
@@ -18,6 +14,7 @@ export type CliSessionSummary = {
 	exitCode?: number;
 };
 
+import type { CliAgentOption } from '../../shared/protocol';
 import { consumeShortcut, matchesShortcut } from '../../../shared/keymaps/cli';
 import { notifyMemoryToggle, onMemoryForceDisable } from '../memory-handler';
 
