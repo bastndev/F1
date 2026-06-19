@@ -63,8 +63,8 @@ if (hero && canTrackPointer.matches && !prefersReducedMotion.matches) {
 	}
 
 	function generateBackground() {
-		// Read accent color from CSS
-		const accent = getComputedStyle(document.body).getPropertyValue('--vscode-focusBorder').trim() || '#0078d4';
+		// Hero tint — fixed yellow for CLI Hub (instead of the theme's blue accent).
+		const accent = '#e2b719';
 		const fg = getComputedStyle(document.body).getPropertyValue('--vscode-foreground').trim() || '#cccccc';
 
 		// Create temp canvas to draw gradient
