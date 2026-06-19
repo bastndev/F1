@@ -23,7 +23,7 @@ body {
 	margin: 0;
 	color: var(--vscode-foreground, #cccccc);
 	background:
-		radial-gradient(circle at 8% 6%, color-mix(in srgb, var(--support-accent) 22%, transparent), transparent 26rem),
+		radial-gradient(circle at 8% 6%, color-mix(in srgb, #e2b719 22%, transparent), transparent 26rem),
 		linear-gradient(145deg, color-mix(in srgb, var(--support-bg) 94%, #ffffff 2%), var(--support-bg));
 	font-family: var(--support-font);
 }
@@ -99,7 +99,7 @@ a {
 	border-radius: 50%;
 	border: 2px solid var(--support-border);
 	object-fit: cover;
-	box-shadow: 0 0 0 4px color-mix(in srgb, var(--support-accent) 20%, transparent);
+	box-shadow: 0 0 0 4px color-mix(in srgb, #e2b719 20%, transparent);
 }
 
 .support-author-info h1 {
