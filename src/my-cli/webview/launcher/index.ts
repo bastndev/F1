@@ -3,7 +3,7 @@ import { getAgentSlug as resolveAgentSlug } from '../../shared/agents';
 type VsCodeApi = {
 	getState: () => unknown;
 	setState: (state: LauncherState) => void;
-	postMessage: (message: { type: 'openAgent'; agent: string } | { type: 'customCli.open'; source: 'launcher' }) => void;
+	postMessage: (message: { type: 'openAgent'; agent: string } | { type: 'customCli.open'; source: 'launcher' } | { type: 'cli.openTutorial' }) => void;
 };
 
 type LauncherModel = {
@@ -485,6 +485,11 @@ selectedOption.addEventListener('keydown', (event) => {
 		event.preventDefault();
 		openSelectedModel();
 	}
+});
+
+const tutorialButton = document.getElementById('cli-tutorial-button');
+tutorialButton?.addEventListener('click', () => {
+	vscode.postMessage({ type: 'cli.openTutorial' });
 });
 
 setInterval(() => {
