@@ -1,8 +1,9 @@
 /**
  * Forces lowercase typing in the prompt textarea, with Shift as the only way
  * to write uppercase (defeats Caps Lock) and auto-capitalization of the very
- * first character. Pastes are lowercased too — unless they belong to the
- * image-paste or paste-collapse handlers, which must see them untouched.
+ * first character. Pastes keep their original casing — an UPPERCASE block
+ * pasted in stays uppercase — and image-paste / paste-collapse content is left
+ * untouched for its dedicated handlers.
  */
 import { shouldCollapsePaste } from '../../../shared/prompt';
 import { imagePathPattern } from './attachments-ui';
@@ -60,12 +61,13 @@ export function enforceLowercaseInput(textarea: HTMLTextAreaElement) {
 		}
 
 		e.preventDefault();
+		// Pasted text keeps its original casing — only typed characters are forced
+		// lowercase. So an UPPERCASE block dropped into the prompt stays as-is.
 		const text = pastedForCheck;
-		const lower = text.toLowerCase();
 		const start = textarea.selectionStart ?? 0;
 		const end = textarea.selectionEnd ?? 0;
-		textarea.value = textarea.value.slice(0, start) + lower + textarea.value.slice(end);
-		const newPos = start + lower.length;
+		textarea.value = textarea.value.slice(0, start) + text + textarea.value.slice(end);
+		const newPos = start + text.length;
 		textarea.selectionStart = textarea.selectionEnd = newPos;
 		textarea.dispatchEvent(new Event('input', { bubbles: true }));
 	});
