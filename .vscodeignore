@@ -5,13 +5,19 @@
 .vscodeignore
 .yarnrc
 
-# Source — excluded, EXCEPT the runtime assets My Skills loads straight from src/
-# at runtime (see my-skills.ts: joinPath(extensionUri, 'src', 'my-skills', …, '*.html')).
-# Do NOT remove these negations or the My Skills panel renders blank.
+# Source — excluded, EXCEPT the runtime assets the webviews load straight from src/
+# at runtime (see my-skills.ts: joinPath(extensionUri, 'src', …, '*.html'/'*.css'/'*.webp')).
+# Covers My Skills under src/my-skills/ and the shared tutorials under
+# src/shared/tutorial/ (+ their images in src/shared/assets/). Do NOT remove these
+# negations or the panels render blank.
 src/**
 !src/shared/
 !src/shared/**/
-!src/shared/assets/*.svg
+!src/shared/**/*.html
+!src/shared/**/*.css
+!src/shared/**/*.svg
+!src/shared/**/*.png
+!src/shared/**/*.webp
 !src/my-skills/
 !src/my-skills/**/
 !src/my-skills/**/*.html

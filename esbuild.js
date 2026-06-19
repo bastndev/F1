@@ -199,7 +199,7 @@ async function main() {
 	});
 	const mySkillsCreateSkillSupportCtx = await esbuild.context({
 		entryPoints: [
-			'src/my-skills/screens/create-skill/support/support.ts'
+			'src/shared/tutorial/t-skill/support.ts'
 		],
 		bundle: true,
 		format: 'iife',
