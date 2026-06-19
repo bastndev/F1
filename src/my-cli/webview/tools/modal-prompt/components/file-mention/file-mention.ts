@@ -398,7 +398,24 @@ export function mountFileMentionPicker(
 		if (e.key === 'ArrowUp')   { e.preventDefault(); activeIndex = Math.max(activeIndex - 1, 0); updateActive(); }
 		if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) { /* let send shortcut handle */ return; }
 		if (e.key === 'Enter')  { e.preventDefault(); if (entries[activeIndex]) { selectEntry(entries[activeIndex]); } }
-		if (e.key === 'Escape') { e.stopPropagation(); closeDropdown(); }
+		if (e.key === 'Escape') {
+			e.stopPropagation();
+			// Clean up only an accidental, bare "@": caret right after it, nothing
+			// typed yet, no selection. Any query or surrounding text is left intact.
+			const at = mentionStart;
+			const isBareTrigger =
+				at >= 0 &&
+				textarea.value[at] === '@' &&
+				textarea.selectionStart === at + 1 &&
+				textarea.selectionStart === textarea.selectionEnd;
+			closeDropdown();
+			if (isBareTrigger) {
+				const value = textarea.value;
+				textarea.value = value.slice(0, at) + value.slice(at + 1);
+				textarea.setSelectionRange(at, at);
+				textarea.dispatchEvent(new Event('input', { bubbles: true }));
+			}
+		}
 		if (e.key === 'Tab')    { e.preventDefault(); if (entries[activeIndex]) { selectEntry(entries[activeIndex]); } }
 	});
 
