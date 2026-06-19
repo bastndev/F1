@@ -82,566 +82,300 @@
     </p>
   </header>
 
-  <section class="support-section" id="what-is" aria-labelledby="what-is-title">
-    <div class="support-section-heading">
-      <span class="support-section-kicker">Welcome</span>
-      <h2 id="what-is-title">What is CLI Hub?</h2>
-    </div>
-    <p class="support-body">
-      CLI Hub is a command center for AI coding assistants. It launches and
-      manages multiple terminal CLIs — each in its own embedded terminal — so
-      you can switch agents in a keystroke instead of juggling terminal tabs.
-    </p>
-    <p class="support-body">
-      On top of the terminals it adds a <strong>Prompt</strong> composer, a live
-      <strong>Translator</strong>, a <strong>Status</strong> reader, a
-      <strong>Keymaps</strong> reference, and <strong>My Memory</strong> —
-      project context every agent can read before it touches your code.
-    </p>
-  </section>
+  <div class="clihub-body">
+    <!-- Overview -->
+    <section class="clihub-section" aria-labelledby="overview-title">
+      <span class="clihub-eyebrow">Overview</span>
+      <h2 class="clihub-h2" id="overview-title">One panel for every agent</h2>
+      <p class="clihub-p">
+        CLI Hub launches AI coding assistants as real, fully interactive
+        terminals inside your editor — and keeps several running at once. No
+        extra windows, no lost context, no copy-pasting between tools.
+      </p>
+      <p class="clihub-p">
+        On top of the terminals it adds a <strong>Prompt</strong> composer, a
+        <strong>Translator</strong>, a <strong>Status</strong> reader, a
+        <strong>Keymaps</strong> reference, and <strong>My Memory</strong> —
+        committed project context every agent reads before it touches your code.
+      </p>
+    </section>
 
-  <section
-    class="support-section"
-    id="quick-start"
-    aria-labelledby="quick-start-title"
-  >
-    <!-- 3 banners  -->
-    <div class="support-cards-grid support-cards-grid--3">
-      <article class="support-card support-card--agents">
-        <div class="support-card-copy">
-          <span class="support-card-number" aria-hidden="true">01</span>
-          <h3>Every CLI, one panel</h3>
+    <!-- Agents -->
+    <section class="clihub-section" aria-labelledby="agents-title">
+      <span class="clihub-eyebrow">Agents</span>
+      <h2 class="clihub-h2" id="agents-title">Nine assistants, one launcher</h2>
+      <p class="clihub-p">
+        Open the launcher, type to fuzzy-search, and press
+        <span class="clihub-code">Enter</span>. Each agent runs its own command —
+        a green dot means it's installed, yellow means it still needs installing.
+      </p>
+      <div class="clihub-agents">
+        <div class="clihub-agent">
+          <span class="clihub-agent-dot"></span>
+          <span class="clihub-agent-name">Claude Code</span>
+          <span class="clihub-agent-cmd">claude</span>
+        </div>
+        <div class="clihub-agent">
+          <span class="clihub-agent-dot"></span>
+          <span class="clihub-agent-name">Codex CLI</span>
+          <span class="clihub-agent-cmd">codex</span>
+        </div>
+        <div class="clihub-agent">
+          <span class="clihub-agent-dot"></span>
+          <span class="clihub-agent-name">Cursor</span>
+          <span class="clihub-agent-cmd">cursor agent</span>
+        </div>
+        <div class="clihub-agent">
+          <span class="clihub-agent-dot"></span>
+          <span class="clihub-agent-name">Copilot CLI</span>
+          <span class="clihub-agent-cmd">copilot</span>
+        </div>
+        <div class="clihub-agent">
+          <span class="clihub-agent-dot"></span>
+          <span class="clihub-agent-name">OpenCode</span>
+          <span class="clihub-agent-cmd">opencode</span>
+        </div>
+        <div class="clihub-agent">
+          <span class="clihub-agent-dot"></span>
+          <span class="clihub-agent-name">Antigravity CLI</span>
+          <span class="clihub-agent-cmd">agy</span>
+        </div>
+        <div class="clihub-agent">
+          <span class="clihub-agent-dot"></span>
+          <span class="clihub-agent-name">Kiro CLI</span>
+          <span class="clihub-agent-cmd">kiro-cli</span>
+        </div>
+        <div class="clihub-agent">
+          <span class="clihub-agent-dot"></span>
+          <span class="clihub-agent-name">Kilo Code</span>
+          <span class="clihub-agent-cmd">kilo</span>
+        </div>
+        <div class="clihub-agent">
+          <span class="clihub-agent-dot"></span>
+          <span class="clihub-agent-name">Grok</span>
+          <span class="clihub-agent-cmd">grok</span>
+        </div>
+        <div class="clihub-agent clihub-agent--custom">
+          <span class="clihub-agent-dot"></span>
+          <span class="clihub-agent-name">Custom CLI</span>
+          <span class="clihub-agent-cmd">your command</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Launch -->
+    <section class="clihub-section" aria-labelledby="launch-title">
+      <span class="clihub-eyebrow">Launch</span>
+      <h2 class="clihub-h2" id="launch-title">Start &amp; juggle sessions</h2>
+      <div class="clihub-term" aria-hidden="true">
+        <div class="clihub-term-bar">
+          <span class="clihub-term-dot"></span>
+          <span class="clihub-term-dot"></span>
+          <span class="clihub-term-dot"></span>
+          <span class="clihub-term-title">cli-hub</span>
+        </div>
+        <div class="clihub-term-body">
+          <div class="clihub-term-line"><span class="clihub-term-comment"># type to search, or Tab to browse the palette</span></div>
+          <div class="clihub-term-line"><span class="clihub-term-prompt">❯</span> claude</div>
+          <div class="clihub-term-line"><span class="clihub-term-prompt">❯</span> codex</div>
+          <div class="clihub-term-line"><span class="clihub-term-prompt">❯</span> cursor agent</div>
+          <div class="clihub-term-line"><span class="clihub-term-ok">✓</span> 3 sessions running — <span class="clihub-term-comment">Tab to switch</span></div>
+        </div>
+      </div>
+      <ol class="clihub-steps">
+        <li>Open the <strong>CLI Hub</strong> panel from the bottom panel area.</li>
+        <li><strong>Search or browse</strong> for an agent, then press Enter to launch it in an embedded terminal.</li>
+        <li>Add more agents with <strong>Alt&nbsp;+&nbsp;+</strong> and hop between them with <strong>Tab</strong>.</li>
+        <li>Done with one? Close it with <strong>Alt&nbsp;+&nbsp;−</strong>.</li>
+      </ol>
+      <div class="clihub-note">
+        <span class="clihub-note-icon" aria-hidden="true">💡</span>
+        <p style="margin:0">
+          Need something not in the list? Pick <strong>Custom CLI</strong> and run
+          any command as your agent.
+        </p>
+      </div>
+    </section>
+
+    <!-- Tools -->
+    <section class="clihub-section" aria-labelledby="tools-title">
+      <span class="clihub-eyebrow">Tools</span>
+      <h2 class="clihub-h2" id="tools-title">Built-in, one keystroke away</h2>
+      <p class="clihub-p">
+        The tools dock lives on the right of the panel. Each has a shortcut so you
+        never reach for the mouse.
+      </p>
+      <div class="clihub-tools">
+        <div class="clihub-tool">
+          <div class="clihub-tool-name">Prompt</div>
+          <div class="clihub-tool-desc">
+            A rich composer with <strong>@-file mentions</strong>, image paste,
+            reusable skills, and automatic Spanish→English before your message
+            reaches the CLI.
+          </div>
+          <span class="clihub-key-combo">
+            <kbd class="clihub-kbd">Shift</kbd><span class="clihub-key-plus">+</span><kbd class="clihub-kbd">F1</kbd>
+          </span>
+        </div>
+        <div class="clihub-tool">
+          <div class="clihub-tool-name">Translator</div>
+          <div class="clihub-tool-desc">
+            Select any terminal output and read it in <strong>Spanish</strong> —
+            with an optional voice that reads it aloud.
+          </div>
+          <span class="clihub-key-combo">
+            <kbd class="clihub-kbd">Shift</kbd><span class="clihub-key-plus">+</span><kbd class="clihub-kbd">F2</kbd>
+          </span>
+        </div>
+        <div class="clihub-tool">
+          <div class="clihub-tool-name">Status&nbsp;/&nbsp;use</div>
+          <div class="clihub-tool-desc">
+            A per-CLI <strong>usage and status</strong> view for the active agent.
+          </div>
+          <span class="clihub-key-combo">
+            <kbd class="clihub-kbd">Shift</kbd><span class="clihub-key-plus">+</span><kbd class="clihub-kbd">F3</kbd>
+          </span>
+        </div>
+        <div class="clihub-tool">
+          <div class="clihub-tool-name">Keymaps</div>
+          <div class="clihub-tool-desc">
+            The full shortcut reference — always current, always one keystroke away.
+          </div>
+          <span class="clihub-key-combo">
+            <kbd class="clihub-kbd">Shift</kbd><span class="clihub-key-plus">+</span><kbd class="clihub-kbd">F4</kbd>
+          </span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Shortcuts cheat-sheet -->
+    <section class="clihub-section" aria-labelledby="shortcuts-title">
+      <span class="clihub-eyebrow">Shortcuts</span>
+      <h2 class="clihub-h2" id="shortcuts-title">Keyboard-first cheat-sheet</h2>
+      <div class="clihub-keys">
+        <div class="clihub-keys-group">In the launcher</div>
+        <div class="clihub-key-row">
+          <span class="clihub-key-label">Browse the agent palette</span>
+          <span class="clihub-key-combo"><kbd class="clihub-kbd">Tab</kbd></span>
+        </div>
+        <div class="clihub-key-row">
+          <span class="clihub-key-label">Close the palette</span>
+          <span class="clihub-key-combo"><kbd class="clihub-kbd">Esc</kbd></span>
+        </div>
+
+        <div class="clihub-keys-group">In a session</div>
+        <div class="clihub-key-row">
+          <span class="clihub-key-label">New session</span>
+          <span class="clihub-key-combo"><kbd class="clihub-kbd">Alt</kbd><span class="clihub-key-plus">+</span><kbd class="clihub-kbd">+</kbd></span>
+        </div>
+        <div class="clihub-key-row">
+          <span class="clihub-key-label">Close session</span>
+          <span class="clihub-key-combo"><kbd class="clihub-kbd">Alt</kbd><span class="clihub-key-plus">+</span><kbd class="clihub-kbd">−</kbd></span>
+        </div>
+        <div class="clihub-key-row">
+          <span class="clihub-key-label">Next / previous session</span>
+          <span class="clihub-key-combo"><kbd class="clihub-kbd">Tab</kbd><span class="clihub-key-plus">·</span><kbd class="clihub-kbd">Shift</kbd><span class="clihub-key-plus">+</span><kbd class="clihub-kbd">Tab</kbd></span>
+        </div>
+        <div class="clihub-key-row">
+          <span class="clihub-key-label">Open the CLI selector</span>
+          <span class="clihub-key-combo"><kbd class="clihub-kbd">CapsLock</kbd></span>
+        </div>
+        <div class="clihub-key-row">
+          <span class="clihub-key-label">Toggle the Prompt filter</span>
+          <span class="clihub-key-combo"><kbd class="clihub-kbd">Ctrl</kbd><span class="clihub-key-plus">+</span><kbd class="clihub-kbd">Space</kbd></span>
+        </div>
+        <div class="clihub-key-row">
+          <span class="clihub-key-label">Prompt · Translator · Status · Keymaps</span>
+          <span class="clihub-key-combo"><kbd class="clihub-kbd">Shift</kbd><span class="clihub-key-plus">+</span><kbd class="clihub-kbd">F1</kbd><span class="clihub-key-plus">…</span><kbd class="clihub-kbd">F4</kbd></span>
+        </div>
+      </div>
+    </section>
+
+    <!-- My Memory -->
+    <section class="clihub-section" aria-labelledby="memory-title">
+      <span class="clihub-eyebrow">Memory</span>
+      <h2 class="clihub-h2" id="memory-title">Give every agent project context</h2>
+      <p class="clihub-p">
+        Turn on <strong>My Memory</strong> and CLI Hub builds a committed
+        <span class="clihub-code">.f1/</span> map of your project. Every CLI you
+        launch reads it first — so agents start with context instead of
+        re-scanning your codebase, saving tokens and time. Because
+        <span class="clihub-code">.f1/</span> is committed, your whole team shares
+        the same context.
+      </p>
+      <p class="clihub-p">The brain button shows freshness at a glance:</p>
+      <div class="clihub-states">
+        <span class="clihub-state clihub-state--fresh"><span class="clihub-state-dot"></span>Up to date</span>
+        <span class="clihub-state clihub-state--stale"><span class="clihub-state-dot"></span>Project changed — click to rebuild</span>
+        <span class="clihub-state clihub-state--missing"><span class="clihub-state-dot"></span>Missing — click to set up</span>
+      </div>
+      <div class="clihub-note">
+        <span class="clihub-note-icon" aria-hidden="true">💡</span>
+        <p style="margin:0">
+          The first build sets up its local engine once per machine. After that,
+          updates are instant.
+        </p>
+      </div>
+    </section>
+
+    <!-- FAQ -->
+    <section class="clihub-section" aria-labelledby="faq-title">
+      <span class="clihub-eyebrow">FAQ</span>
+      <h2 class="clihub-h2" id="faq-title">Common questions</h2>
+      <div class="clihub-faq">
+        <details class="clihub-faq-item">
+          <summary>Do I need to install the CLIs separately?</summary>
           <p>
-            Launch any agent into its own embedded terminal and keep several
-            running at once — no extra windows, no lost context.
+            Yes. CLI Hub runs each agent's own command, so the tool has to be on
+            your machine. The launcher shows a green dot when a CLI is ready and a
+            yellow one when it still needs installing.
           </p>
-        </div>
-        <div class="support-card-visual" aria-hidden="true">
-          <div class="support-agent-terminal">
-            <div class="support-terminal-header">
-              <span class="support-terminal-dot"></span>
-              <span class="support-terminal-dot"></span>
-              <span class="support-terminal-dot"></span>
-              <span class="support-terminal-title">CLI Hub</span>
-            </div>
-            <div class="support-terminal-body">
-              <div class="support-terminal-line">
-                <span class="support-terminal-prompt">$</span
-                ><span class="support-terminal-cmd">claude</span>
-              </div>
-              <div class="support-terminal-line">
-                <span class="support-terminal-prompt">$</span
-                ><span class="support-terminal-cmd">codex</span>
-              </div>
-              <div class="support-terminal-line">
-                <span class="support-terminal-prompt">$</span
-                ><span class="support-terminal-cmd">cursor agent</span>
-              </div>
-              <div class="support-terminal-line support-terminal-output">
-                <span class="support-terminal-ok">✓</span
-                ><span>3 sessions running</span>
-              </div>
-            </div>
-          </div>
-          <div class="support-agent-rules">
-            <div class="support-agent-rule">
-              <span class="support-agent-rule-icon">⚡</span
-              ><span class="support-agent-rule-label">Agents</span
-              ><span class="support-agent-rule-tag">9 built in + custom</span>
-            </div>
-            <div class="support-agent-rule">
-              <span class="support-agent-rule-icon">⇄</span
-              ><span class="support-agent-rule-label">Switch</span
-              ><span class="support-agent-rule-tag">Tab / Shift+Tab</span>
-            </div>
-            <div class="support-agent-rule">
-              <span class="support-agent-rule-icon">+</span
-              ><span class="support-agent-rule-label">New</span
-              ><span class="support-agent-rule-tag">Alt + +</span>
-            </div>
-          </div>
-          <div class="support-agent-bar">
-            <span class="support-agent-bar-fill"></span>
-            <span class="support-agent-bar-label">Installed</span>
-          </div>
-        </div>
-      </article>
-      <article class="support-card support-card--claude">
-        <div class="support-card-copy">
-          <span class="support-card-number" aria-hidden="true">02</span>
-          <h3>Tools built in</h3>
+        </details>
+        <details class="clihub-faq-item">
+          <summary>Can I run more than one agent at the same time?</summary>
           <p>
-            A Prompt composer, Translator, Status reader, and Keymaps — one
-            shortcut away from any session.
+            Absolutely. Each CLI opens in its own embedded terminal. Add a session
+            with Alt&nbsp;+&nbsp;+ and switch between them with Tab.
           </p>
-        </div>
-        <div class="support-card-visual" aria-hidden="true">
-          <div class="support-claude-diagram">
-            <div class="support-claude-hub">
-              <span class="support-claude-hub-icon">⌨</span>
-              <span class="support-claude-hub-label">Tools</span>
-            </div>
-            <div class="support-claude-node support-claude-node--tl">
-              <span>Prompt</span>
-            </div>
-            <div class="support-claude-node support-claude-node--tr">
-              <span>Translate</span>
-            </div>
-            <div class="support-claude-node support-claude-node--bl">
-              <span>Status</span>
-            </div>
-            <div class="support-claude-node support-claude-node--br">
-              <span>Keymaps</span>
-            </div>
-            <svg
-              class="support-claude-lines"
-              viewBox="0 0 100 100"
-              preserveAspectRatio="none"
-            >
-              <line x1="50" y1="50" x2="12" y2="12" />
-              <line x1="50" y1="50" x2="88" y2="12" />
-              <line x1="50" y1="50" x2="12" y2="88" />
-              <line x1="50" y1="50" x2="88" y2="88" />
-            </svg>
-          </div>
-          <div class="support-claude-steps">
-            <div class="support-claude-step">
-              <span class="support-claude-step-num">1</span
-              ><span class="support-claude-step-label">Prompt</span
-              ><span class="support-claude-step-dot"></span>
-            </div>
-            <div class="support-claude-step">
-              <span class="support-claude-step-num">2</span
-              ><span class="support-claude-step-label">Translate</span
-              ><span class="support-claude-step-dot"></span>
-            </div>
-            <div class="support-claude-step">
-              <span class="support-claude-step-num">3</span
-              ><span class="support-claude-step-label">Status</span
-              ><span class="support-claude-step-dot"></span>
-            </div>
-            <div class="support-claude-step">
-              <span class="support-claude-step-num">4</span
-              ><span class="support-claude-step-label">Keymaps</span
-              ><span
-                class="support-claude-step-dot support-claude-step-dot--active"
-              ></span>
-            </div>
-          </div>
-          <div class="support-claude-tools">
-            <div class="support-claude-tool">
-              <span class="support-claude-tool-icon">@</span><span>Files</span>
-            </div>
-            <div class="support-claude-tool">
-              <span class="support-claude-tool-icon">▦</span><span>Images</span>
-            </div>
-            <div class="support-claude-tool">
-              <span class="support-claude-tool-icon">✦</span><span>Skills</span>
-            </div>
-            <div class="support-claude-tool">
-              <span class="support-claude-tool-icon">⤳</span><span>ES→EN</span>
-            </div>
-          </div>
-        </div>
-      </article>
-      <article class="support-card support-card--design">
-        <div class="support-card-copy">
-          <span class="support-card-number" aria-hidden="true">03</span>
-          <h3>Feels native</h3>
+        </details>
+        <details class="clihub-faq-item">
+          <summary>What is the Custom CLI option?</summary>
           <p>
-            Every terminal adopts your editor's theme — colors, fonts, and
-            spacing — so the hub blends right in.
+            A way to launch any command that isn't in the built-in list — handy
+            for a private agent or a wrapper script. Pick Custom CLI from the
+            launcher and type the command.
           </p>
-        </div>
-        <div class="support-card-visual" aria-hidden="true">
-          <div class="support-design-palette">
-            <div class="support-design-swatch support-design-swatch--primary">
-              <span>Editor</span>
-            </div>
-            <div class="support-design-swatch support-design-swatch--secondary">
-              <span>Accent</span>
-            </div>
-            <div class="support-design-swatch support-design-swatch--accent">
-              <span>Agent</span>
-            </div>
-            <div class="support-design-swatch support-design-swatch--muted">
-              <span>Muted</span>
-            </div>
-          </div>
-          <div class="support-design-typo">
-            <div class="support-design-font support-design-font--heading">
-              Aa Heading
-            </div>
-            <div class="support-design-font support-design-font--body">
-              Aa Body text
-            </div>
-            <div class="support-design-font support-design-font--mono">
-              Aa Monospace
-            </div>
-          </div>
-          <div class="support-design-spacing">
-            <div class="support-design-space-item">
-              <span
-                class="support-design-space-box"
-                style="width: 8px; height: 8px"
-              ></span
-              ><span class="support-design-space-label">4px</span>
-            </div>
-            <div class="support-design-space-item">
-              <span
-                class="support-design-space-box"
-                style="width: 12px; height: 12px"
-              ></span
-              ><span class="support-design-space-label">8px</span>
-            </div>
-            <div class="support-design-space-item">
-              <span
-                class="support-design-space-box"
-                style="width: 18px; height: 18px"
-              ></span
-              ><span class="support-design-space-label">16px</span>
-            </div>
-            <div class="support-design-space-item">
-              <span
-                class="support-design-space-box"
-                style="width: 26px; height: 26px"
-              ></span
-              ><span class="support-design-space-label">24px</span>
-            </div>
-            <div class="support-design-space-item">
-              <span
-                class="support-design-space-box"
-                style="width: 36px; height: 36px"
-              ></span
-              ><span class="support-design-space-label">32px</span>
-            </div>
-          </div>
-          <div class="support-design-elevation">
-            <div class="support-design-elev-card support-design-elev-card--sm">
-              <span>sm</span>
-            </div>
-            <div class="support-design-elev-card support-design-elev-card--md">
-              <span>md</span>
-            </div>
-            <div class="support-design-elev-card support-design-elev-card--lg">
-              <span>lg</span>
-            </div>
-            <div class="support-design-elev-card support-design-elev-card--xl">
-              <span>xl</span>
-            </div>
-          </div>
-          <div class="support-design-preview">
-            <div class="support-design-component">
-              <div class="support-design-comp-header"></div>
-              <div class="support-design-comp-row">
-                <span></span><span></span>
-              </div>
-              <div class="support-design-comp-row">
-                <span></span><span></span>
-              </div>
-              <div class="support-design-comp-btn"></div>
-            </div>
-          </div>
-        </div>
-      </article>
-    </div>
-  </section>
+        </details>
+        <details class="clihub-faq-item">
+          <summary>What does My Memory actually change?</summary>
+          <p>
+            It writes a committed <span class="clihub-code">.f1/</span> project map
+            and points each CLI's instructions file at it, so a freshly launched
+            agent already understands your project instead of scanning every file.
+          </p>
+        </details>
+        <details class="clihub-faq-item">
+          <summary>Does the Translator need an API key?</summary>
+          <p>
+            No. Translation uses free providers, and the read-aloud voice runs
+            locally. Nothing to configure and no key required.
+          </p>
+        </details>
+      </div>
+    </section>
 
-  <section class="support-section" id="launch" aria-labelledby="launch-title">
-    <div class="support-section-heading">
-      <span class="support-section-kicker">Launch</span>
-      <h2 id="launch-title">Open your first CLI</h2>
-    </div>
-    <p class="support-body">
-      The CLI Hub opens on a fuzzy-search launcher. Pick an agent and it boots
-      straight into an embedded terminal — its real CLI, fully interactive.
-    </p>
-
-    <ol class="support-steps-list">
-      <li>
-        Open the <strong>CLI Hub</strong> panel from the bottom panel area.
-      </li>
-      <li>
-        <strong>Type to search</strong> (for example <code>claude</code> or
-        <code>cursor</code>), or press <strong>Tab</strong> to browse the agent
-        palette.
-      </li>
-      <li>
-        Press <strong>Enter</strong> to launch. A green dot means the CLI is
-        installed; a yellow one means it still needs installing.
-      </li>
-      <li>
-        Need another agent running too? Add a session with
-        <strong>Alt&nbsp;+&nbsp;+</strong> and hop between them with
-        <strong>Tab</strong>.
-      </li>
-    </ol>
-
-    <img
-      src="{{P1_IMAGE_URI}}"
-      alt="CLI Hub launcher selecting an agent"
-      class="support-screenshot"
-      decoding="async"
-      draggable="false"
-    />
-
-    <div class="support-tip">
-      <span class="support-tip-icon" aria-hidden="true">💡</span>
+    <footer class="clihub-footer">
+      <p class="clihub-footer-enjoy">Enjoy — <strong>CLI Hub</strong> is ready!</p>
       <p>
-        <strong>Tip:</strong> Need something that isn't in the list? Pick
-        <strong>Custom CLI</strong> and run any command as your agent.
+        Found a bug or have feedback?
+        <a href="https://github.com/bastndev/F1/issues/new" target="_blank" rel="noopener noreferrer">Open an issue</a>
       </p>
-    </div>
-  </section>
-
-  <section class="support-section" id="tools" aria-labelledby="tools-title">
-    <div class="support-section-heading">
-      <span class="support-section-kicker">Tools</span>
-      <h2 id="tools-title">Do more without leaving the terminal</h2>
-    </div>
-    <p class="support-body">
-      The tools menu lives on the right of the panel. Each tool also has a
-      shortcut so you never reach for the mouse.
-    </p>
-
-    <ul class="support-feature-list">
-      <li>
-        <strong>Prompt</strong> — a rich composer with <code>@</code>-file
-        mentions, image paste, reusable skills, and automatic Spanish→English
-        before your message reaches the CLI.
-      </li>
-      <li>
-        <strong>Translator</strong> — select any terminal output and read it in
-        Spanish, with an optional voice that reads it aloud.
-      </li>
-      <li>
-        <strong>Status / use</strong> — a per-CLI usage and status view for the
-        active agent.
-      </li>
-      <li>
-        <strong>Keymaps</strong> — the full shortcut reference, always one
-        keystroke away.
-      </li>
-    </ul>
-
-    <img
-      src="{{P2_IMAGE_URI}}"
-      alt="CLI Hub Prompt and Translator tools"
-      class="support-screenshot"
-      decoding="async"
-      draggable="false"
-    />
-
-    <div class="support-tip">
-      <span class="support-tip-icon" aria-hidden="true">💡</span>
       <p>
-        <strong>Tip:</strong> Toggle the <strong>Prompt filter</strong> with
-        <strong>Ctrl&nbsp;+&nbsp;Space</strong> to send your message through the
-        composer instead of typing raw into the terminal.
+        Made in 🇵🇪 by
+        <a href="https://gohit.xyz" target="_blank" rel="noopener noreferrer">Gohit X</a>
+        · Licensed under
+        <a href="https://github.com/bastndev/F1/blob/main/LICENSE" target="_blank" rel="noopener noreferrer">MIT</a>
       </p>
-    </div>
-  </section>
-
-  <section class="support-section" id="memory" aria-labelledby="memory-title">
-    <div class="support-section-heading">
-      <span class="support-section-kicker">Memory</span>
-      <h2 id="memory-title">Give every agent project context</h2>
-    </div>
-    <p class="support-body">
-      Turn on <strong>My Memory</strong> and CLI Hub builds a committed
-      <code>.f1/</code> map of your project. Every CLI you launch reads it
-      first — so agents start with context instead of re-scanning your codebase,
-      saving tokens and time.
-    </p>
-
-    <ul class="support-feature-list">
-      <li>
-        <strong>One toggle</strong> — flip My Memory on from the tools menu.
-      </li>
-      <li>
-        <strong>The brain button</strong> shows freshness at a glance: green is
-        up to date, yellow means your project changed, red means rebuild.
-      </li>
-      <li>
-        <strong>Shared by commit</strong> — <code>.f1/</code> lives in your repo,
-        so your whole team's agents share the same context.
-      </li>
-    </ul>
-
-    <img
-      src="{{P3_IMAGE_URI}}"
-      alt="My Memory project context"
-      class="support-screenshot"
-      decoding="async"
-      draggable="false"
-    />
-
-    <div class="support-tip">
-      <span class="support-tip-icon" aria-hidden="true">💡</span>
-      <p>
-        <strong>Tip:</strong> The first build sets up its local engine once per
-        machine. After that, updates are instant.
-      </p>
-    </div>
-  </section>
-
-  <section
-    class="support-section"
-    id="shortcuts"
-    aria-labelledby="shortcuts-title"
-  >
-    <div class="support-section-heading">
-      <span class="support-section-kicker">Shortcuts</span>
-      <h2 id="shortcuts-title">Keyboard-first by design</h2>
-    </div>
-    <p class="support-body">
-      Everything has a key. The essentials, while a session is focused:
-    </p>
-
-    <ul class="support-feature-list">
-      <li><strong>New session</strong> — <kbd>Alt</kbd> <kbd>+</kbd></li>
-      <li><strong>Close session</strong> — <kbd>Alt</kbd> <kbd>-</kbd></li>
-      <li>
-        <strong>Next / previous session</strong> — <kbd>Tab</kbd> /
-        <kbd>Shift</kbd> <kbd>Tab</kbd>
-      </li>
-      <li><strong>Open CLI selector</strong> — <kbd>CapsLock</kbd></li>
-      <li>
-        <strong>Toggle Prompt filter</strong> — <kbd>Ctrl</kbd>
-        <kbd>Space</kbd>
-      </li>
-      <li>
-        <strong>Prompt · Translate · Status · Keymaps</strong> —
-        <kbd>Shift</kbd> <kbd>F1</kbd> … <kbd>F4</kbd>
-      </li>
-    </ul>
-
-    <div class="support-tip">
-      <span class="support-tip-icon" aria-hidden="true">💡</span>
-      <p>
-        <strong>Tip:</strong> Open <strong>Keymaps</strong> (<kbd>Shift</kbd>
-        <kbd>F4</kbd>) any time for the complete, always-current list.
-      </p>
-    </div>
-  </section>
-
-  <!--
-		TODO: Video tutorials — future implementation.
-		Planned sections:
-		- "Watch a 2-minute overview" (CLI Hub overview)
-		- "Launching and switching agents"
-		- "Using the Prompt and Translator tools"
-		- "Setting up My Memory"
-		Hosting options: GitHub Pages or YouTube (unlisted).
-		-->
-  <section class="support-section" id="videos" aria-labelledby="videos-title">
-    <div class="support-section-heading">
-      <span class="support-section-kicker">Videos</span>
-      <h2 id="videos-title">
-        Video tutorials<span class="support-next-update">next update</span>
-      </h2>
-    </div>
-    <p class="support-body">
-      Step-by-step walkthroughs are on the way. Stay tuned!
-    </p>
-    <div class="support-video-placeholder">
-      <a href="https://www.youtube.com/@gohitx?sub_confirmation=1">
-        <div class="support-video-card support-video-card--coming-soon">
-          <span class="support-video-play" aria-hidden="true">▶</span>
-          <strong>CLI Hub in 2 minutes</strong>
-          <span>Coming soon</span>
-        </div>
-      </a>
-      <a href="https://www.youtube.com/@gohitx?sub_confirmation=1">
-        <div class="support-video-card support-video-card--coming-soon">
-          <span class="support-video-play" aria-hidden="true">▶</span>
-          <strong>Launching &amp; switching agents</strong>
-          <span>Coming soon</span>
-        </div>
-      </a>
-      <a href="https://www.youtube.com/@gohitx?sub_confirmation=1">
-        <div class="support-video-card support-video-card--coming-soon">
-          <span class="support-video-play" aria-hidden="true">▶</span>
-          <strong>Prompt, Translator &amp; Memory</strong>
-          <span>Coming soon</span>
-        </div>
-      </a>
-    </div>
-  </section>
-
-  <section class="support-section" id="faq" aria-labelledby="faq-title">
-    <div class="support-section-heading">
-      <span class="support-section-kicker">FAQ</span>
-      <h2 id="faq-title">Common questions</h2>
-    </div>
-    <div class="support-faq">
-      <details class="support-faq-item">
-        <summary>Do I need to install the CLIs separately?</summary>
-        <p>
-          Yes. CLI Hub runs each agent's own command, so the tool has to be on
-          your machine. The launcher shows a green dot when a CLI is ready and a
-          yellow one when it still needs installing.
-        </p>
-      </details>
-      <details class="support-faq-item">
-        <summary>Can I run more than one agent at the same time?</summary>
-        <p>
-          Absolutely. Each CLI opens in its own embedded terminal. Add a session
-          with <strong>Alt&nbsp;+&nbsp;+</strong> and switch between them with
-          <strong>Tab</strong>.
-        </p>
-      </details>
-      <details class="support-faq-item">
-        <summary>What is the Custom CLI option?</summary>
-        <p>
-          A way to launch any command that isn't in the built-in list — handy
-          for a private agent or a wrapper script. Pick <strong>Custom CLI</strong>
-          from the launcher and type the command.
-        </p>
-      </details>
-      <details class="support-faq-item">
-        <summary>What does My Memory actually change?</summary>
-        <p>
-          It writes a committed <code>.f1/</code> project map and points each
-          CLI's instructions file at it, so a freshly launched agent already
-          understands your project instead of scanning every file.
-        </p>
-      </details>
-      <details class="support-faq-item">
-        <summary>Does the Translator need an API key?</summary>
-        <p>
-          No. Translation uses free providers, and the read-aloud voice runs
-          locally. Nothing to configure and no key required.
-        </p>
-      </details>
-    </div>
-  </section>
-
-  <footer class="support-footer">
-    <p class="support-footer-enjoy">
-      Enjoy — <strong>CLI Hub</strong> is ready!
-    </p>
-    <p class="support-footer-feedback">
-      Found a bug or have feedback?
-      <a
-        href="https://github.com/bastndev/F1/issues/new"
-        target="_blank"
-        rel="noopener noreferrer"
-        >Open an issue</a
-      >
-    </p>
-    <p class="support-footer-credit">
-      Made in 🇵🇪 by
-      <a href="https://gohit.xyz" target="_blank" rel="noopener noreferrer"
-        >Gohit X</a
-      >
-      · Licensed under
-      <a
-        href="https://github.com/bastndev/F1/blob/main/LICENSE"
-        target="_blank"
-        rel="noopener noreferrer"
-        >MIT</a
-      >
-    </p>
-  </footer>
+    </footer>
+  </div>
 </main>

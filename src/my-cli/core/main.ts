@@ -262,16 +262,10 @@ export class MyCliViewProvider implements vscode.WebviewViewProvider, vscode.Dis
 		const logoUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, 'src', 'shared', 'assets', 'logo.svg'));
 		const imagesDir = vscode.Uri.joinPath(this._extensionUri, 'src', 'shared', 'assets', 'images');
 		const authorImageUri = webview.asWebviewUri(vscode.Uri.joinPath(imagesDir, 'author.webp'));
-		const p1ImageUri = webview.asWebviewUri(vscode.Uri.joinPath(imagesDir, 'tutorials', 'p1.webp'));
-		const p2ImageUri = webview.asWebviewUri(vscode.Uri.joinPath(imagesDir, 'tutorials', 'p2.webp'));
-		const p3ImageUri = webview.asWebviewUri(vscode.Uri.joinPath(imagesDir, 'tutorials', 'p3.webp'));
 
 		const body = content
 			.replace('{{CREATE_SUPPORT_LOGO_URI}}', logoUri.toString())
-			.replace('{{AUTHOR_IMAGE_URI}}', authorImageUri.toString())
-			.replace('{{P1_IMAGE_URI}}', p1ImageUri.toString())
-			.replace('{{P2_IMAGE_URI}}', p2ImageUri.toString())
-			.replace('{{P3_IMAGE_URI}}', p3ImageUri.toString());
+			.replace('{{AUTHOR_IMAGE_URI}}', authorImageUri.toString());
 
 		const csp = [
 			`default-src 'none';`,
