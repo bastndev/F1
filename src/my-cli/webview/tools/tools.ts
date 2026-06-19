@@ -112,6 +112,13 @@ export const createToolsController = ({
 
 	const handleKeyDown = (event: KeyboardEvent) => {
 		if (event.key === 'Escape') {
+			// An open inner overlay (e.g. the @file-mention dropdown) owns Escape
+			// first: dismissing just that layer must not also close the whole modal.
+			// We run in the capture phase, so bail out and let the picker's own
+			// bubble-phase handler close only itself.
+			if (activeModal?.querySelector('.fm-dropdown')) {
+				return;
+			}
 			event.preventDefault();
 			event.stopPropagation();
 			close();
