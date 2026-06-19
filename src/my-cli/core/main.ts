@@ -109,6 +109,31 @@ export class MyCliViewProvider implements vscode.WebviewViewProvider, vscode.Dis
 				return;
 			}
 
+			if (message.type === 'cli.installExtension' && message.extensionId) {
+				const extensionId = message.extensionId;
+
+				// Already installed and enabled: the extension owns the shortcut, so stay out of the way.
+				if (vscode.extensions.getExtension(extensionId)) {
+					return;
+				}
+
+				// getExtension() can't distinguish "not installed" from "installed but disabled",
+				// so offer both paths: install from the marketplace, or open the page to enable it.
+				const install = 'Install';
+				const openPage = 'Open Extension';
+				const choice = await vscode.window.showInformationMessage(
+					'Lynx Keymap shortcuts aren’t active. Install the extension to enable them.',
+					install,
+					openPage,
+				);
+				if (choice === install) {
+					await vscode.commands.executeCommand('workbench.extensions.installExtension', extensionId);
+				} else if (choice === openPage) {
+					await vscode.commands.executeCommand('extension.open', extensionId);
+				}
+				return;
+			}
+
 			if (message.type === 'cli.ready') {
 				this.sessionManager.attach(webviewView.webview);
 				warmSpellchecker();
