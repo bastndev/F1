@@ -97,26 +97,55 @@
 	animation: pulse-loading 1.5s infinite;
 }
 
+/* Broken — .f1/ missing or unreadable. The only state that changes the colour. */
 .agent-new-button.is-error {
 	background: #ef4444;
 	color: white;
 }
 
-/* Up to date — green and intentionally not clickable (nothing to do). */
-.agent-new-button.is-fresh {
-	background: #0d9668;
-	color: white;
-}
-
+/*
+ * Synced and stale both keep the theme's button colour — no green, no yellow.
+ * They differ only by ICON (brain = up to date, refresh = changes to sync) plus
+ * a small badge on stale. Up to date is intentionally not clickable.
+ */
 .agent-new-button.is-fresh:disabled {
 	opacity: 1;
 	cursor: default;
 }
 
-/* Project changed / needs build — yellow, clickable. */
-.agent-new-button.is-stale {
-	background: #ca9a04;
-	color: white;
+/* The brain button stacks two icons + a badge; only one icon shows at a time. */
+#cli-memory-action-button {
+	position: relative;
+}
+
+.agent-memory-refresh-icon {
+	display: none;
+}
+
+.agent-new-button.is-stale .agent-memory-brain-icon {
+	display: none;
+}
+
+.agent-new-button.is-stale .agent-memory-refresh-icon {
+	display: block;
+}
+
+/* Small "changes pending" dot — subtle nudge that survives the neutral bg. */
+.agent-memory-badge {
+	display: none;
+	position: absolute;
+	top: -2px;
+	right: -2px;
+	width: 8px;
+	height: 8px;
+	border-radius: 50%;
+	box-sizing: border-box;
+	background: var(--vscode-testing-iconQueued, #cca700);
+	border: 1.5px solid var(--vscode-sideBar-background, var(--vscode-editor-background));
+}
+
+.agent-new-button.is-stale .agent-memory-badge {
+	display: block;
 }
 
 @keyframes pulse-loading {
