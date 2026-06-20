@@ -87,6 +87,7 @@ export type HostToWebviewMessage =
 	| { type: 'cli.error'; message: string }
 	| { type: 'cli.visible' }
 	| { type: 'cli.hidden' }
+	| { type: 'cli.focusTerminal' }
 	| { type: 'prompt.translated'; id: string; text: string; provider?: string; fromCache?: boolean }
 	| { type: 'prompt.translationError'; id: string; message: string }
 	| { type: 'prompt.prepared'; id: string; text: string }

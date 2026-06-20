@@ -1068,6 +1068,11 @@ window.addEventListener('message', (event: MessageEvent<ServerMessage>) => {
 		return;
 	}
 
+	if (message.type === 'cli.focusTerminal') {
+		focusActiveTerminal();
+		return;
+	}
+
 	if (message.type === 'cli.hidden') {
 		// The translator is a transient action panel: it auto-opens on copy and has
 		// no draft to preserve. retainContextWhenHidden would otherwise leave it open
@@ -1112,6 +1117,18 @@ const repaintActiveTerminal = () => {
 		} catch {
 			// xterm can throw while the renderer is still settling — fine to drop.
 		}
+	}));
+};
+
+const focusActiveTerminal = () => {
+	const sessionId = activeSessionId;
+	if (!sessionId) {
+		return;
+	}
+
+	requestAnimationFrame(() => requestAnimationFrame(() => {
+		fitTerminal(sessionId);
+		terminals.get(sessionId)?.terminal.focus();
 	}));
 };
 

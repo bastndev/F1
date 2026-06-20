@@ -266,6 +266,11 @@ export class MyCliViewProvider implements vscode.WebviewViewProvider, vscode.Dis
 	 * in src/shared/tutorial/t-cli/; assets are the shared tutorial images.
 	 * Mirrors the My Skills support panel.
 	 */
+	public async smartFocus() {
+		await vscode.commands.executeCommand(`${MyCliViewProvider.viewType}.focus`);
+		await this._activeWebview?.postMessage({ type: 'cli.focusTerminal' });
+	}
+
 	public openTutorial() {
 		if (this._tutorialPanel) {
 			this._tutorialPanel.reveal(vscode.ViewColumn.One);
