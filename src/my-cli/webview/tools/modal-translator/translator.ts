@@ -6,6 +6,7 @@ import type { VoiceProgress, VoiceState } from '../../../shared/voice/voice-type
 import { translateEnToSpanish } from './browser-terminal-translator';
 import { renderMarkdownLite } from './markdown-lite';
 import { segmentTerminalSelection } from './terminal-text';
+import { getCachedTranslation, setCachedTranslation } from './translator-cache';
 import { matchesShortcut } from '../../../../shared/keymaps/cli';
 
 const stylesId = 'cli-translator-panel-styles';
@@ -269,6 +270,20 @@ function initializeTranslator(host: HTMLElement, context: ToolContext) {
 			return;
 		}
 
+		// Already translated this exact selection? Restore it instantly — no
+		// skeleton, no host round-trip, no re-translation. (Cache is RAM-only and
+		// dies with the panel; see translator-cache.ts.)
+		const cached = getCachedTranslation(extracted);
+		if (cached) {
+			copyText = cached.copyText;
+			textEl.classList.remove('placeholder');
+			revealText(textEl, cached.rendered);
+			resultStatus = cached.status;
+			setStatus(resultStatus);
+			enableResultActions();
+			return;
+		}
+
 		// Freeze the body at its current height so swapping the text for the
 		// skeleton doesn't collapse the modal and snap it back on completion.
 		const lockedHeight = bodyEl?.offsetHeight ?? 0;
@@ -324,11 +339,14 @@ function initializeTranslator(host: HTMLElement, context: ToolContext) {
 				copyParts.push(value);
 			}
 
+			const renderedMarkdown = renderedParts.join('\n\n');
 			copyText = copyParts.join('\n\n');
-			revealText(textEl, renderedParts.join('\n\n'));
+			revealText(textEl, renderedMarkdown);
 			resultStatus = provider ? `translated · ${provider.toLowerCase()}` : 'translated';
 			setStatus(resultStatus);
 			enableResultActions();
+			// Remember this exact selection so revisiting it skips the round-trip.
+			setCachedTranslation(extracted, { rendered: renderedMarkdown, copyText, status: resultStatus });
 		} catch (err) {
 			console.error('[Translator] EN->ES failed:', err);
 			copyText = extracted;
