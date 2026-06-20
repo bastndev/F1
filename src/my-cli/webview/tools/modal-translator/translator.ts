@@ -505,27 +505,55 @@ function initializeTranslator(host: HTMLElement, context: ToolContext) {
 		// Playback may still be running from a previous open — resync.
 		context.queryVoiceState?.();
 
-		speakBtn.addEventListener('click', () => {
+		// Shared by the Listen button and the Space shortcut: resume if paused,
+		// pause if speaking, otherwise start reading the current translation. The
+		// preparing / no-result guards let the keyboard path respect the same
+		// constraints the disabled button already enforces for clicks.
+		const toggleSpeak = () => {
+			if (isPreparingVoice) {
+				return;
+			}
 			if (isPaused) {
 				context.resumeSpeech?.();
 				return;
 			}
-
 			if (isSpeaking) {
 				context.pauseSpeech?.();
 				return;
 			}
-
-			if (textEl && context.speakText) {
-				clearVoiceHighlights(activeVoiceChunks);
-				activeVoiceChunks = buildVoiceChunks(textEl);
-				const chunks = activeVoiceChunks.map((chunk) => chunk.text);
-				const value = chunks.join('\n\n');
-				if (value) {
-					context.speakText(value, { chunks });
-				}
+			if (!hasResult || !textEl || !context.speakText) {
+				return;
 			}
-		});
+			clearVoiceHighlights(activeVoiceChunks);
+			activeVoiceChunks = buildVoiceChunks(textEl);
+			const chunks = activeVoiceChunks.map((chunk) => chunk.text);
+			const value = chunks.join('\n\n');
+			if (value) {
+				context.speakText(value, { chunks });
+			}
+		};
+
+		speakBtn.addEventListener('click', toggleSpeak);
+
+		// Space = play/pause while the translator is open. The modal has no text
+		// field so Space is free to claim — but only when there's something to play
+		// or playback is live; otherwise we leave the default (e.g. scrolling a long
+		// translation). preventDefault stops the page scroll and the native button
+		// activation, so Space never double-fires when Listen happens to have focus.
+		const handleSpaceShortcut = (event: KeyboardEvent) => {
+			if (event.key !== ' ' && event.code !== 'Space') {
+				return;
+			}
+			if (event.repeat || event.ctrlKey || event.metaKey || event.altKey || event.shiftKey) {
+				return;
+			}
+			if (isPreparingVoice || (!hasResult && !isSpeaking && !isPaused)) {
+				return;
+			}
+			event.preventDefault();
+			toggleSpeak();
+		};
+		document.addEventListener('keydown', handleSpaceShortcut);
 
 		voiceExtraBtn?.addEventListener('click', () => {
 			if (isSpeaking || isPaused) {
@@ -534,6 +562,7 @@ function initializeTranslator(host: HTMLElement, context: ToolContext) {
 		});
 
 		return () => {
+			document.removeEventListener('keydown', handleSpaceShortcut);
 			disposeVoiceState?.();
 			clearVoiceHighlights(activeVoiceChunks);
 		};
