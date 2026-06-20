@@ -1,7 +1,6 @@
 import * as vscode from 'vscode';
 import * as crypto from 'crypto';
 import * as fs from 'fs';
-import * as path from 'path';
 import { allowedAgents, getCliAgent, getAgentSlug } from '../shared/agents';
 import { ensureCliInstalled } from './terminal-cli/installation';
 import { CliSessionManager } from './terminal-cli/session-manager';
@@ -649,29 +648,6 @@ export class MyCliViewProvider implements vscode.WebviewViewProvider, vscode.Dis
 		void this._extensionContext?.workspaceState.update('myMemory.enabled', enabled);
 	}
 
-	/**
-	 * Install (or refresh) the pre-commit hook that keeps `.f1/` in sync on commit.
-	 * Idempotent and non-destructive — it steps aside on repos that manage their
-	 * own hooks. When asked, it tells the user once if it had to skip.
-	 */
-	private _installMemoryHook(notifyIfSkipped = false): void {
-		const root = this._getMemoryWorkspaceRoot();
-		if (!root) {
-			return;
-		}
-		const nodePath = process.env.CLIHUB_NODE_PATH || 'node';
-		const runnerPath = path.join(this._extensionUri.fsPath, 'dist', 'my-memory', 'run-hook.js');
-		const result = this.memoryService.installCommitHook(root, nodePath, runnerPath);
-		if (notifyIfSkipped && result.status === 'skipped' && result.reason !== 'not-git') {
-			const detail = result.reason === 'managed-elsewhere'
-				? 'this project routes git hooks through its own tooling (e.g. husky).'
-				: 'this project already has a pre-commit hook.';
-			vscode.window.showInformationMessage(
-				`My Memory: auto-update on commit is off because ${detail} Use the brain button to refresh .f1/ manually.`
-			);
-		}
-	}
-
 	/** Watch the workspace so the button turns yellow when files change. */
 	private _ensureMemoryWatcher(): void {
 		if (this._memoryWatcher) {
@@ -741,9 +717,6 @@ export class MyCliViewProvider implements vscode.WebviewViewProvider, vscode.Dis
 					await this._ensureMemoryBuilt(webview, id);
 					return;
 				}
-				// Already built (toggle-on with an existing graph) or a reload restore:
-				// make sure the commit hook is present and points at the current build.
-				this._installMemoryHook(userInitiated);
 			} else {
 				this._disposeMemoryWatcher();
 				this.memoryService.cleanup(root);
@@ -817,7 +790,6 @@ export class MyCliViewProvider implements vscode.WebviewViewProvider, vscode.Dis
 		);
 
 		if (result.success) {
-			this._installMemoryHook(true);
 			await webview.postMessage({ type: 'memory.buildComplete', id, result });
 			vscode.window.showInformationMessage('Memory updated · Instruction files synced. ✔');
 		} else {

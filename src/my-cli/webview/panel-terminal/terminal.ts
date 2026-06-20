@@ -68,7 +68,7 @@ let pendingUsageRequest: {
 	sessionId: string;
 	agentLabel: string;
 	command: string;
-	startBufferLength: number;
+	captured: string;
 	resolve: (snapshot: CliUsageSnapshot) => void;
 	reject: (reason?: unknown) => void;
 	settleTimer?: number;
@@ -246,13 +246,11 @@ const resolvePendingUsageRequest = () => {
 		return;
 	}
 
-	const session = sessions.get(request.sessionId);
-	const raw = session?.buffer.slice(request.startBufferLength) ?? '';
 	const snapshot: CliUsageSnapshot = {
 		sessionId: request.sessionId,
 		agentLabel: request.agentLabel,
 		command: request.command,
-		raw,
+		raw: request.captured,
 		requestedAt: Date.now()
 	};
 
@@ -261,11 +259,18 @@ const resolvePendingUsageRequest = () => {
 	request.resolve(snapshot);
 };
 
-const schedulePendingUsageSettle = (sessionId: string) => {
+// Capture the usage command's output straight into the pending request as it
+// streams in, then (re)arm the settle timer so we resolve 900ms after the last
+// chunk. Capturing here — instead of slicing session.buffer by an absolute
+// offset on resolve — keeps usage detection correct in long sessions, where the
+// append-only buffer is trimmed from the front and a start offset recorded
+// before the command no longer lines up (it would slice off an empty tail).
+const notePendingUsageOutput = (sessionId: string, data: string) => {
 	if (!pendingUsageRequest || pendingUsageRequest.sessionId !== sessionId) {
 		return;
 	}
 
+	pendingUsageRequest.captured = trimSessionBuffer(pendingUsageRequest.captured + data);
 	window.clearTimeout(pendingUsageRequest.settleTimer);
 	pendingUsageRequest.settleTimer = window.setTimeout(resolvePendingUsageRequest, usageRequestSettleDelayMs);
 };
@@ -308,7 +313,7 @@ const requestActiveUsage = () => new Promise<CliUsageSnapshot>((resolve, reject)
 		sessionId: session.id,
 		agentLabel: session.label,
 		command,
-		startBufferLength: session.buffer.length,
+		captured: '',
 		resolve,
 		reject,
 		timeoutTimer: window.setTimeout(resolvePendingUsageRequest, usageRequestTimeoutMs)
@@ -927,7 +932,7 @@ const handleOutput = (message: Extract<ServerMessage, { type: 'cli.output' }>) =
 	const session = sessions.get(message.sessionId);
 	if (session) {
 		appendToSessionBuffer(session, message.data);
-		schedulePendingUsageSettle(message.sessionId);
+		notePendingUsageOutput(message.sessionId, message.data);
 	}
 
 	let restoredFromBuffer = false;

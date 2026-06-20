@@ -24,7 +24,6 @@ import { writeProjectMap } from '../tier1-map/write-project-map';
 import { removeAllInstructionBlocks, syncAllInstructionFiles, syncInstructionFileForSlug } from '../tier1-map/sync-instructions';
 import { detectToolchain, installToolchain, type ProgressFn, type ToolchainStatus } from '../tier2-graph/toolchain';
 import { ensureGraphifyOutIgnored, runGraphify } from '../tier2-graph/graphify-runner';
-import { installPreCommitHook, removePreCommitHook, type HookInstallResult } from './git-hooks';
 import type { MemorySnapshot, MemoryBuildResult } from '../memory-types';
 
 export class MemoryService {
@@ -50,19 +49,6 @@ export class MemoryService {
 	/** Install uv (if needed) + graphify. Throws on failure (host shows it). */
 	public async installToolchain(onProgress?: ProgressFn): Promise<void> {
 		await installToolchain(onProgress);
-	}
-
-	/**
-	 * Install the pre-commit hook that refreshes `.f1/` on commit. Safe and
-	 * non-destructive: skips repos that aren't git, route hooks elsewhere, or
-	 * already have a foreign pre-commit hook. The host supplies the node binary
-	 * and the bundled runner path (it owns those locations).
-	 */
-	public installCommitHook(root: string | undefined, nodePath: string, runnerPath: string): HookInstallResult {
-		if (!root) {
-			return { status: 'skipped', reason: 'not-git' };
-		}
-		return installPreCommitHook(root, nodePath, runnerPath);
 	}
 
 	/** Current state of `.f1/` for the snapshot the webview button reads. */
@@ -185,16 +171,14 @@ export class MemoryService {
 
 	/**
 	 * Full cleanup: delete `.f1/`, `graphify-out/`, strip managed blocks from
-	 * instruction files (deleting them if empty), remove our `.gitignore` entry,
-	 * and remove our pre-commit hook. Called when the user turns the toggle OFF.
+	 * instruction files (deleting them if empty), and remove our `.gitignore`
+	 * and `.vscodeignore` entries. Called when the user turns the toggle OFF.
 	 */
 	public cleanup(root: string | undefined): string[] {
 		if (!root) {
 			return [];
 		}
 		const cleaned: string[] = [];
-
-		removePreCommitHook(root);
 
 		for (const dir of [MEMORY_DIR, GRAPHIFY_OUT_DIR]) {
 			try {
