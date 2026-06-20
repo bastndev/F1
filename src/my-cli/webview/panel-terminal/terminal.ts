@@ -3,6 +3,7 @@ import { Terminal } from '@xterm/xterm';
 import { createTabController, type CliAgentIcon } from '../panel-tab/tab';
 import { createCliCreateMessage } from '../../shared/agent-launch-guard';
 import { getAgentSlug as resolveAgentSlug } from '../../shared/agents';
+import { isLynxPanelNavChord } from '../../../shared/keymaps/lynx-keymap/index';
 import { createToolsController, type CliUsageSnapshot } from '../tools/tools';
 import { USAGE_BUSY_ERROR, isUsageAgentBusy, isUsageViewInline } from '../tools/modal-use/agents';
 import { detectModelName } from '../../shared/model-detect';
@@ -662,6 +663,16 @@ const tabController = createTabController({
 
 const handleTerminalKey = (event: KeyboardEvent) => {
 	if (tabController.handleKeyboardShortcut(event)) {
+		return false;
+	}
+
+	// Lynx Keymap's panel-navigation chords (Alt+E/R/W/Q) must reach VS Code even
+	// while the terminal is focused, so the user can hop between the CLI Hub and the
+	// other bottom panels. Returning false stops xterm from sending them to the pty;
+	// since we don't preventDefault/stopPropagation, the event bubbles to VS Code's
+	// webview keybinding forwarder and the bound command runs. Every other key —
+	// Alt+Enter, Ctrl+C, word-nav, … — still belongs to the CLI.
+	if (isLynxPanelNavChord(event)) {
 		return false;
 	}
 
