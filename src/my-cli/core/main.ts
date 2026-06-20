@@ -791,7 +791,7 @@ export class MyCliViewProvider implements vscode.WebviewViewProvider, vscode.Dis
 
 		if (result.success) {
 			await webview.postMessage({ type: 'memory.buildComplete', id, result });
-			vscode.window.showInformationMessage(`My Memory updated · ${result.filesUpdated?.length ?? 0} instruction file(s) synced.`);
+			vscode.window.showInformationMessage('Memory updated · Instruction files synced. ✔');
 		} else {
 			await webview.postMessage({ type: 'memory.buildError', id, error: result.error || result.message });
 			vscode.window.showErrorMessage(`My Memory failed: ${result.error || result.message}`);
