@@ -228,13 +228,13 @@ export class MemoryService {
 			}
 			const existing = fs.readFileSync(ignorePath, 'utf8');
 			const present = new Set(
-				existing.split('\n').map((line) => line.trim().replace(/^\//, '').replace(/\/$/, ''))
+				existing.split('\n').map((line) => line.trim().replace(/^\//, '').replace(/\/(\*\*)?$/, ''))
 			);
 			const missing = [MEMORY_DIR, GRAPHIFY_OUT_DIR].filter((dir) => !present.has(dir));
 			if (missing.length === 0) {
 				return;
 			}
-			const additions = missing.map((dir) => `${dir}/`).join('\n');
+			const additions = missing.map((dir) => `${dir}/**`).join('\n');
 			const next = existing.trim().length
 				? `${existing.trimEnd()}\n\n${VSCODE_IGNORE_COMMENT}\n${additions}\n`
 				: `${VSCODE_IGNORE_COMMENT}\n${additions}\n`;
@@ -261,7 +261,7 @@ export class MemoryService {
 				if (trimmed === VSCODE_IGNORE_COMMENT) {
 					return false;
 				}
-				const normalized = trimmed.replace(/^\//, '').replace(/\/$/, '');
+				const normalized = trimmed.replace(/^\//, '').replace(/\/(\*\*)?$/, '');
 				return normalized !== MEMORY_DIR && normalized !== GRAPHIFY_OUT_DIR;
 			});
 			const cleaned = filtered.join('\n').replace(/\n{3,}/g, '\n\n').trim();
