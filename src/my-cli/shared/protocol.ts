@@ -29,6 +29,13 @@ export type CliSessionSnapshot = {
 	buffer?: string;
 	hasUnread: boolean;
 	exitCode?: number;
+	/**
+	 * True from session creation until the pty emits its first real output (the
+	 * "CLI Hub: starting …" preamble doesn't count). The webview shows the boot
+	 * skeleton only while this holds. Host-owned so it survives the webview being
+	 * rebuilt on a panel switch — the webview's own memory does not.
+	 */
+	awaitingFirstOutput: boolean;
 };
 
 export type CliAgentOption = {

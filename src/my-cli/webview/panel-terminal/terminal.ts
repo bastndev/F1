@@ -811,12 +811,13 @@ const createTerminalView = (session: CliSession) => {
 	terminals.set(session.id, view);
 	requestAnimationFrame(() => fitTerminal(session.id));
 
-	// Only show the boot skeleton for freshly created sessions that have not
-	// produced output yet. Recycled views (visual-sleep recovery, tab switches
-	// after the panel was hidden) restore from the kept buffer and must not
-	// flash the skeleton over real terminal content.
-	const sessionAge = Date.now() - session.createdAt;
-	if (sessionAge < 12000 && session.buffer.length === 0) {
+	// The host owns "is this CLI still starting?" via awaitingFirstOutput (true
+	// until the pty emits its first real output). It's the only signal that survives
+	// this webview being rebuilt on a panel switch — there's no retainContextWhenHidden
+	// on My CLI, so any in-webview memory resets every time. Show the boot skeleton
+	// only while the CLI genuinely hasn't rendered yet, so it plays on launch but
+	// never replays on return. Gate on running so an instant exit/error doesn't flash it.
+	if (session.awaitingFirstOutput && session.status === 'running') {
 		bootSkeletons.create(session.id);
 	}
 
