@@ -661,7 +661,25 @@ const tabController = createTabController({
 	getOpenToolModal: () => toolsController?.getOpenTool() ?? null
 });
 
-const handleTerminalKey = (event: KeyboardEvent) => {
+const isOpenCodeSession = (sessionId: string): boolean => {
+	const session = sessions.get(sessionId);
+	return session ? getAgentSlug(session.label) === 'opencode' : false;
+};
+
+const isCtrlZ = (event: KeyboardEvent): boolean =>
+	event.type === 'keydown'
+	&& event.ctrlKey
+	&& !event.altKey
+	&& !event.metaKey
+	&& event.key.toLowerCase() === 'z';
+
+const handleTerminalKey = (event: KeyboardEvent, sessionId: string) => {
+	if (isOpenCodeSession(sessionId) && isCtrlZ(event)) {
+		event.preventDefault();
+		event.stopPropagation();
+		return false;
+	}
+
 	if (tabController.handleKeyboardShortcut(event)) {
 		return false;
 	}
@@ -729,7 +747,7 @@ const createTerminalView = (session: CliSession) => {
 		scrollback: 8000,
 		theme: getTerminalTheme()
 	});
-	terminal.attachCustomKeyEventHandler(handleTerminalKey);
+	terminal.attachCustomKeyEventHandler((event) => handleTerminalKey(event, session.id));
 
 	// TUI CLIs copy their internal selection with OSC 52, which xterm.js
 	// ignores by default. Honor the copy (write it to the real clipboard)
@@ -759,7 +777,7 @@ const createTerminalView = (session: CliSession) => {
 	terminal.write(session.buffer);
 	terminal.onData((data) => {
 		const currentSession = sessions.get(session.id);
-		if (currentSession?.status === 'running') {
+		if (currentSession?.status === 'running' && !(isOpenCodeSession(session.id) && data === '\x1a')) {
 			vscode.postMessage({ type: 'cli.input', sessionId: session.id, data });
 		}
 	});
