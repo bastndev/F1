@@ -513,6 +513,84 @@
 	box-shadow: none;
 }
 
+/* Auto mode hides the manual button. The id+attr selector outranks the
+   .translator-action-btn { display: flex } base so [hidden] actually hides. */
+#translateBtn[hidden] {
+	display: none;
+}
+
+/* ── Auto-translate toggle ──────────────────────────────────────────
+   Pill toggle mirroring the prompt modal's translate toggle. ON → translation
+   runs on open and the manual Translate button is hidden; the toggle itself
+   always stays visible so the user can switch back to manual. */
+.translator-auto-toggle {
+	display: flex;
+	align-items: center;
+	gap: 5px;
+	padding: 4px 10px 4px 8px;
+	background: transparent;
+	border: 0.5px solid var(--vscode-editorGroup-border);
+	border-radius: 20px;
+	color: var(--vscode-descriptionForeground);
+	font-family: var(--vscode-font-family);
+	font-size: 10px;
+	font-weight: 600;
+	letter-spacing: 0.04em;
+	text-transform: lowercase;
+	cursor: pointer;
+	opacity: 0.6;
+	flex-shrink: 0;
+	transition: color 0.2s ease, border-color 0.2s ease, background 0.2s ease, opacity 0.2s ease, transform 0.1s ease;
+}
+
+.translator-auto-toggle:hover {
+	opacity: 1;
+	color: var(--agent-accent, #AFA9EC);
+	border-color: color-mix(in srgb, var(--agent-accent, #AFA9EC) 40%, transparent);
+	background: color-mix(in srgb, var(--agent-accent, #AFA9EC) 8%, transparent);
+}
+
+.translator-auto-toggle[aria-pressed="true"] {
+	opacity: 1;
+	color: var(--agent-accent, #AFA9EC);
+	border-color: color-mix(in srgb, var(--agent-accent, #AFA9EC) 45%, transparent);
+	background: color-mix(in srgb, var(--agent-accent, #AFA9EC) 10%, transparent);
+}
+
+.translator-auto-toggle[aria-pressed="true"]:hover {
+	border-color: color-mix(in srgb, var(--agent-accent, #AFA9EC) 65%, transparent);
+	background: color-mix(in srgb, var(--agent-accent, #AFA9EC) 16%, transparent);
+}
+
+.translator-auto-toggle:active {
+	transform: scale(0.96);
+	opacity: 0.85;
+}
+
+.translator-auto-toggle i {
+	font-size: 12px;
+}
+
+.translator-auto-dot {
+	width: 5px;
+	height: 5px;
+	border-radius: 50%;
+	background: currentColor;
+	flex-shrink: 0;
+	opacity: 0.3;
+	transition: opacity 0.2s, transform 0.2s;
+}
+
+.translator-auto-toggle[aria-pressed="true"] .translator-auto-dot {
+	opacity: 1;
+	animation: translator-auto-pulse 2.2s ease-in-out infinite;
+}
+
+@keyframes translator-auto-pulse {
+	0%, 100% { opacity: 1;   transform: scale(1);    }
+	50%      { opacity: 0.4; transform: scale(0.75); }
+}
+
 /* Icon-only copy button */
 .translator-copy {
 	padding: 5px 7px;

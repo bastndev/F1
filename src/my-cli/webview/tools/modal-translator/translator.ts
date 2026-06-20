@@ -407,6 +407,43 @@ function initializeTranslator(host: HTMLElement, context: ToolContext) {
 		});
 	}
 
+	// Auto-translate toggle — persisted via localStorage like the prompt modal's
+	// toggles ('f1-translator-auto' → '1' on | '0'/missing off; default off keeps
+	// today's manual behavior). ON: translate as soon as the panel opens and hide
+	// the manual Translate button. OFF: show the button. The toggle itself is
+	// always visible, so turning auto off never strands the user without a way back.
+	const autoToggle = host.querySelector<HTMLButtonElement>('#autoTranslateToggle');
+	const autoStorageKey = 'f1-translator-auto';
+	let autoTranslate = localStorage.getItem(autoStorageKey) === '1';
+
+	const applyAutoState = () => {
+		autoToggle?.setAttribute('aria-pressed', String(autoTranslate));
+		if (translateBtn) {
+			translateBtn.hidden = autoTranslate;
+		}
+	};
+	applyAutoState();
+
+	// Opening already in auto mode with source text present → translate now.
+	if (autoTranslate && extracted) {
+		void performTranslation();
+	}
+
+	autoToggle?.addEventListener('click', () => {
+		autoTranslate = !autoTranslate;
+		try {
+			localStorage.setItem(autoStorageKey, autoTranslate ? '1' : '0');
+		} catch {
+			/* storage unavailable — the toggle still works for this session */
+		}
+		applyAutoState();
+		// Switching it on acts immediately if there's something not yet translated;
+		// switching it off only restores the manual button (no side effects).
+		if (autoTranslate && !hasResult && extractTextToTranslate(context)) {
+			void performTranslation();
+		}
+	});
+
 	if (speakBtn && spectrum) {
 		let disposeVoiceState: (() => void) | undefined;
 		// Real playback runs in the extension host (Piper TTS, sharing the ATM

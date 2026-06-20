@@ -1,7 +1,7 @@
 # Graph Report - F1  (2026-06-20)
 
 ## Corpus Check
-- 273 files · ~758,561 words
+- 273 files · ~759,026 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
@@ -10,7 +10,7 @@
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `2a098f78`
+- Built from commit: `a5ac8dd2`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -202,8 +202,8 @@ Cohesion: 0.07
 Nodes (37): agentIconPalette, cliInput, getAgentSlug(), getPaletteModels(), getPaletteOptions(), getRequiredElement(), handlePaletteOptionKeydown(), inputContainer (+29 more)
 
 ### Community 10 - "Community 10"
-Cohesion: 0.06
-Nodes (19): DesignTypographyOption, designTypographyOptions, canSkipStep(), createSkippedVisual(), designColorById, DesignCreateStatusDetail, DesignOpenDetail, designStyleById (+11 more)
+Cohesion: 0.07
+Nodes (18): DesignTypographyOption, designTypographyOptions, canSkipStep(), createSkippedVisual(), designColorById, DesignCreateStatusDetail, DesignOpenDetail, designStyleById (+10 more)
 
 ### Community 11 - "Community 11"
 Cohesion: 0.07
@@ -262,8 +262,8 @@ Cohesion: 0.11
 Nodes (23): clampVisibleResultOffset(), createRecommendationCard(), createSkeletonCard(), CreateSkillMode, CreateSkillSubmitDetail, createSvgIcon(), DetectedTechnology, getPageActionState() (+15 more)
 
 ### Community 25 - "Community 25"
-Cohesion: 0.19
-Nodes (12): DesignStyleProfile, bentoStyle, liquidGlassStyle, glassmorphismStyle, neumorphismStyle, minimalisticStyle, pacmanStyle, dashboardStyle (+4 more)
+Cohesion: 0.17
+Nodes (13): designStyleOptions, DesignStyleProfile, bentoStyle, liquidGlassStyle, glassmorphismStyle, neumorphismStyle, minimalisticStyle, pacmanStyle (+5 more)
 
 ### Community 26 - "Community 26"
 Cohesion: 0.11
