@@ -16,6 +16,7 @@
 import { spawnSync } from 'child_process';
 import { createHash } from 'crypto';
 import * as fs from 'fs';
+import * as os from 'os';
 import * as path from 'path';
 import { CLAUDE_FILE, GRAPHIFY_IGNORE_COMMENT, GRAPHIFY_OUT_DIR, HUB_FILE, MEMORY_CONFIG_FILE, MEMORY_DIR, MEMORY_GRAPH_FILE, MEMORY_MAP_FILE } from './memory-paths';
 import { newestSourceMtime, scanProject } from '../tier1-map/scan-project';
@@ -248,23 +249,19 @@ export class MemoryService {
 
 	/**
 	 * True if the project has real content changes since the last build.
-	 * In a git repo, compares a snapshot of `git status --porcelain` + HEAD
-	 * against the values stored at build time. Our own generated files are
-	 * already in the stored snapshot, so they never cause false positives.
+	 * In a git repo, compares a tree SHA of the whole working tree (computed in
+	 * a throwaway index) against the one stored at build time. Because it hashes
+	 * file *content*, it is immune to staging (`git add`/unstage) and to commits
+	 * that don't change content, and it goes back to green on revert.
 	 * Falls back to mtime for non-git repos.
 	 */
 	private isStale(root: string, graphPath: string): boolean {
 		const buildConfig = this.readBuildConfig(root);
 
-		if (this.isGitRepo(root)) {
-			const currentHead = this.gitHead(root);
-			if (buildConfig.head && currentHead) {
-				if (buildConfig.head !== currentHead) {
-					return true;
-				}
-				if (buildConfig.statusHash) {
-					return this.gitStatusHash(root) !== buildConfig.statusHash;
-				}
+		if (this.isGitRepo(root) && buildConfig.treeSha) {
+			const currentTree = this.gitWorkingTreeSha(root);
+			if (currentTree) {
+				return currentTree !== buildConfig.treeSha;
 			}
 		}
 
@@ -290,21 +287,19 @@ export class MemoryService {
 				config = {};
 			}
 			config.lastBuilt = Date.now();
-			config.builtHead = this.gitHead(root);
-			config.builtStatusHash = this.gitStatusHash(root);
+			config.builtTreeSha = this.gitWorkingTreeSha(root);
 			fs.writeFileSync(configPath, JSON.stringify(config, null, 2) + '\n', 'utf8');
 		} catch {
 			// best-effort
 		}
 	}
 
-	private readBuildConfig(root: string): { lastBuilt?: number; head?: string; statusHash?: string } {
+	private readBuildConfig(root: string): { lastBuilt?: number; treeSha?: string } {
 		try {
 			const config = JSON.parse(fs.readFileSync(path.join(root, MEMORY_DIR, MEMORY_CONFIG_FILE), 'utf8'));
 			return {
 				lastBuilt: typeof config.lastBuilt === 'number' ? config.lastBuilt : undefined,
-				head: typeof config.builtHead === 'string' ? config.builtHead : undefined,
-				statusHash: typeof config.builtStatusHash === 'string' ? config.builtStatusHash : undefined
+				treeSha: typeof config.builtTreeSha === 'string' ? config.builtTreeSha : undefined
 			};
 		} catch {
 			return {};
@@ -315,22 +310,25 @@ export class MemoryService {
 		return fs.existsSync(path.join(root, '.git'));
 	}
 
-	private gitHead(root: string): string | undefined {
+	/**
+	 * Content hash of the entire working tree (all non-ignored files), via a
+	 * throwaway index so the user's real staging area is never touched. `git add
+	 * -A` stages every change into that index; `git write-tree` turns it into a
+	 * tree SHA. Identical content → identical SHA, regardless of staging.
+	 *
+	 * The index is kept per-repo in the OS temp dir so git's stat cache makes
+	 * repeat calls cheap (only changed files are re-hashed).
+	 */
+	private gitWorkingTreeSha(root: string): string | undefined {
+		const indexName = `f1-mem-index-${createHash('sha1').update(root).digest('hex').slice(0, 16)}`;
+		const env = { ...process.env, GIT_INDEX_FILE: path.join(os.tmpdir(), indexName) };
 		try {
-			const result = spawnSync('git', ['rev-parse', 'HEAD'], { cwd: root, encoding: 'utf8', timeout: 3000 });
-			return result.status === 0 ? result.stdout.trim() : undefined;
-		} catch {
-			return undefined;
-		}
-	}
-
-	private gitStatusHash(root: string): string | undefined {
-		try {
-			const result = spawnSync('git', ['status', '--porcelain'], { cwd: root, encoding: 'utf8', timeout: 5000 });
-			if (result.status !== 0) {
+			const add = spawnSync('git', ['add', '-A'], { cwd: root, env, timeout: 15000 });
+			if (add.status !== 0) {
 				return undefined;
 			}
-			return createHash('sha256').update(result.stdout).digest('hex');
+			const writeTree = spawnSync('git', ['write-tree'], { cwd: root, env, encoding: 'utf8', timeout: 10000 });
+			return writeTree.status === 0 ? writeTree.stdout.trim() || undefined : undefined;
 		} catch {
 			return undefined;
 		}
