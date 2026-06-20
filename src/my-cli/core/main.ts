@@ -63,6 +63,16 @@ export class MyCliViewProvider implements vscode.WebviewViewProvider, vscode.Dis
 		};
 
 		webviewView.webview.html = await this._getHtmlForWebview(webviewView.webview);
+		// VS Code hides a webview view by layout (display:none on the iframe) while
+		// keeping the window "visible", so the Page Visibility API inside the webview
+		// never fires on a panel switch. retainContextWhenHidden then leaves xterm's
+		// canvas/viewport stale, painting a black rectangle on return. onDidChangeVisibility
+		// is the only reliable signal — relay it so the webview re-fits and repaints.
+		webviewView.onDidChangeVisibility(() => {
+			if (webviewView.visible) {
+				void webviewView.webview.postMessage({ type: 'cli.visible' });
+			}
+		});
 		webviewView.onDidDispose(() => {
 			this.sessionManager.detach();
 			this._disposeMemoryWatcher();

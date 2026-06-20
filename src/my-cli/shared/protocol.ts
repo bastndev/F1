@@ -78,6 +78,7 @@ export type HostToWebviewMessage =
 	}
 	| { type: 'cli.output'; sessionId: string; data: string }
 	| { type: 'cli.error'; message: string }
+	| { type: 'cli.visible' }
 	| { type: 'prompt.translated'; id: string; text: string; provider?: string; fromCache?: boolean }
 	| { type: 'prompt.translationError'; id: string; message: string }
 	| { type: 'prompt.prepared'; id: string; text: string }

@@ -1033,6 +1033,11 @@ window.addEventListener('message', (event: MessageEvent<ServerMessage>) => {
 		return;
 	}
 
+	if (message.type === 'cli.visible') {
+		repaintActiveTerminal();
+		return;
+	}
+
 	if (message.type === 'cli.error') {
 		terminalStatus.textContent = message.message;
 	}
@@ -1042,6 +1047,40 @@ const resizeObserver = new ResizeObserver(() => {
 	fitTerminal();
 });
 resizeObserver.observe(terminalStack);
+
+// When the F1 view is hidden (user switches to Terminal/Debug Console) the
+// webview keeps running thanks to retainContextWhenHidden, but the iframe is laid
+// out display:none and xterm ends up stale — on return the pane shows a black
+// rectangle where the viewport background bleeds below the under-sized screen.
+// Re-fit (the pane regained its real height) and refresh() to force a full
+// repaint. Two RAFs: the first lets layout flush after the iframe is shown again,
+// the second runs once measurements are valid.
+const repaintActiveTerminal = () => {
+	if (!activeSessionId) {
+		return;
+	}
+	const view = terminals.get(activeSessionId);
+	if (!view) {
+		return;
+	}
+	requestAnimationFrame(() => requestAnimationFrame(() => {
+		fitTerminal(activeSessionId);
+		try {
+			view.terminal.refresh(0, view.terminal.rows - 1);
+		} catch {
+			// xterm can throw while the renderer is still settling — fine to drop.
+		}
+	}));
+};
+
+// Window minimize/restore (and OS-level tab switches) do fire the Page Visibility
+// API; a VS Code panel switch does not — that case is driven by the host posting
+// cli.visible via WebviewView.onDidChangeVisibility (handled above).
+document.addEventListener('visibilitychange', () => {
+	if (document.visibilityState === 'visible') {
+		repaintActiveTerminal();
+	}
+});
 
 initMemoryHandler((message) => vscode.postMessage(message));
 
