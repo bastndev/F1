@@ -9,6 +9,8 @@ export function activate(context: vscode.ExtensionContext) {
 	context.subscriptions.push(
 		myCliProvider,
 		vscode.window.registerWebviewViewProvider(MyCliViewProvider.viewType, myCliProvider),
+		vscode.commands.registerCommand('f1.myCli.openTutorial', () => myCliProvider.openTutorial()),
+		vscode.commands.registerCommand('f1.myCli.smartFocus', () => myCliProvider.smartFocus()),
 		mySkillsProvider,
 		vscode.commands.registerCommand('f1.mySkills.openCreate', () => mySkillsProvider.openCreateView()),
 		vscode.commands.registerCommand('f1.mySkills.goCreate', () => mySkillsProvider.switchTab('create-panel')),

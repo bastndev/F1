@@ -92,6 +92,9 @@ export const onMemoryForceDisable = (cb: () => void) => {
 export const notifyMemoryToggle = (enabled: boolean, restore = false) => {
 	const id = generateRequestId();
 	pendingRequestId = enabled ? id : undefined;
+	if (enabled && !restore) {
+		setButtonState('loading');
+	}
 	postToHost({ type: 'memory.getSnapshot', id, enabled, restore });
 };
 

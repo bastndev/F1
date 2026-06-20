@@ -28,8 +28,10 @@
 					style="display: none; margin-right: 4px;"
 				>
 					<span class="agent-new-button-label" aria-hidden="true" style="display: flex; align-items: center; justify-content: center;">
-						<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-brain"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M15.5 13a3.5 3.5 0 0 0 -3.5 3.5v1a3.5 3.5 0 0 0 7 0v-1.8" /><path d="M8.5 13a3.5 3.5 0 0 1 3.5 3.5v1a3.5 3.5 0 0 1 -7 0v-1.8" /><path d="M17.5 16a3.5 3.5 0 0 0 0 -7h-.5" /><path d="M19 9.3v-2.8a3.5 3.5 0 0 0 -7 0" /><path d="M6.5 16a3.5 3.5 0 0 1 0 -7h.5" /><path d="M5 9.3v-2.8a3.5 3.5 0 0 1 7 0v10" /></svg>
+						<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="agent-memory-brain-icon icon icon-tabler icons-tabler-outline icon-tabler-brain"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M15.5 13a3.5 3.5 0 0 0 -3.5 3.5v1a3.5 3.5 0 0 0 7 0v-1.8" /><path d="M8.5 13a3.5 3.5 0 0 1 3.5 3.5v1a3.5 3.5 0 0 1 -7 0v-1.8" /><path d="M17.5 16a3.5 3.5 0 0 0 0 -7h-.5" /><path d="M19 9.3v-2.8a3.5 3.5 0 0 0 -7 0" /><path d="M6.5 16a3.5 3.5 0 0 1 0 -7h.5" /><path d="M5 9.3v-2.8a3.5 3.5 0 0 1 7 0v10" /></svg>
+						<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="agent-memory-refresh-icon icon icon-tabler icons-tabler-outline icon-tabler-refresh"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M20 11a8.1 8.1 0 0 0 -15.5 -2m-.5 -4v4h4" /><path d="M4 13a8.1 8.1 0 0 0 15.5 2m.5 4v-4h-4" /></svg>
 					</span>
+					<span class="agent-memory-badge" aria-hidden="true"></span>
 				</button>
 				<button
 					id="cli-tools-button"
@@ -77,15 +79,15 @@
 
 				<div class="agent-tools-divider"></div>
 
-				<button class="agent-tools-item" type="button" role="menuitem" data-tool="keymaps">
-					<span class="agent-tools-item-icon" aria-hidden="true">K</span>
-					<span class="agent-tools-item-text">Keymaps</span>
-					<span class="agent-tools-item-shortcut">shift+f3</span>
-				</button>
-
 				<button class="agent-tools-item" type="button" role="menuitem" data-tool="use">
 					<span class="agent-tools-item-icon" aria-hidden="true">U</span>
 					<span class="agent-tools-item-text">Status/use</span>
+					<span class="agent-tools-item-shortcut">shift+f3</span>
+				</button>
+
+				<button class="agent-tools-item" type="button" role="menuitem" data-tool="keymaps">
+					<span class="agent-tools-item-icon" aria-hidden="true">K</span>
+					<span class="agent-tools-item-text">Keymaps</span>
 					<span class="agent-tools-item-shortcut">shift+f4</span>
 				</button>
 

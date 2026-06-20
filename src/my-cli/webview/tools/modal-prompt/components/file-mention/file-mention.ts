@@ -1,6 +1,7 @@
 import fileMentionCss from './file-mention.css';
 import type { FileMentionEntry, FileMentionRequest } from '../../../../../shared/prompt/file-mention';
 import { fuzzyMatch } from '../../../../../shared/prompt/fuzzy-match';
+import { matchesShortcut } from '../../../../../../shared/keymaps/cli';
 
 const stylesId = 'cli-file-mention-styles';
 const mentionAliasMap = new Map<string, string>();
@@ -396,7 +397,7 @@ export function mountFileMentionPicker(
 		if (!dropdown) { return; }
 		if (e.key === 'ArrowDown') { e.preventDefault(); activeIndex = Math.min(activeIndex + 1, entries.length - 1); updateActive(); }
 		if (e.key === 'ArrowUp')   { e.preventDefault(); activeIndex = Math.max(activeIndex - 1, 0); updateActive(); }
-		if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) { /* let send shortcut handle */ return; }
+		if (matchesShortcut(e, 'sendPrompt')) { /* let send shortcut handle */ return; }
 		if (e.key === 'Enter')  { e.preventDefault(); if (entries[activeIndex]) { selectEntry(entries[activeIndex]); } }
 		if (e.key === 'Escape') {
 			e.stopPropagation();

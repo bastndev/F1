@@ -29,6 +29,13 @@ export type CliSessionSnapshot = {
 	buffer?: string;
 	hasUnread: boolean;
 	exitCode?: number;
+	/**
+	 * True from session creation until the pty emits its first real output (the
+	 * "CLI Hub: starting …" preamble doesn't count). The webview shows the boot
+	 * skeleton only while this holds. Host-owned so it survives the webview being
+	 * rebuilt on a panel switch — the webview's own memory does not.
+	 */
+	awaitingFirstOutput: boolean;
 };
 
 export type CliAgentOption = {
@@ -47,6 +54,7 @@ export type WebviewToHostMessage =
 	| { type: 'cli.ready' }
 	| { type: 'cli.create'; agent: string; launchGuard?: AgentLaunchGuardMessage }
 	| { type: 'customCli.open'; source: 'launcher' | 'panel' }
+	| { type: 'cli.openTutorial' }
 	| { type: 'cli.input'; sessionId: string; data: string }
 	| { type: 'cli.switch'; sessionId: string }
 	| { type: 'cli.resize'; sessionId?: string; cols: number; rows: number }
@@ -64,7 +72,8 @@ export type WebviewToHostMessage =
 	| { type: 'voice.query' }
 	| { type: 'clipboard.read'; id: string }
 	| { type: 'memory.getSnapshot'; id: string; enabled?: boolean; restore?: boolean }
-	| { type: 'memory.rebuild'; id: string };
+	| { type: 'memory.rebuild'; id: string }
+	| { type: 'cli.installExtension'; extensionId: string };
 
 /** Extension host → webview. */
 export type HostToWebviewMessage =
@@ -76,6 +85,9 @@ export type HostToWebviewMessage =
 	}
 	| { type: 'cli.output'; sessionId: string; data: string }
 	| { type: 'cli.error'; message: string }
+	| { type: 'cli.visible' }
+	| { type: 'cli.hidden' }
+	| { type: 'cli.focusTerminal' }
 	| { type: 'prompt.translated'; id: string; text: string; provider?: string; fromCache?: boolean }
 	| { type: 'prompt.translationError'; id: string; message: string }
 	| { type: 'prompt.prepared'; id: string; text: string }
@@ -85,6 +97,7 @@ export type HostToWebviewMessage =
 	| { type: 'workspace.skills'; id: string; skills: WorkspaceSkill[] }
 	| { type: 'voice.state'; state: VoiceState; message?: string; progress?: VoiceProgress }
 	| { type: 'clipboard.text'; id: string; text: string }
+	| { type: 'memory.initialState'; enabled: boolean }
 	| { type: 'memory.snapshot'; id: string; snapshot: MemorySnapshot }
 	| { type: 'memory.buildStart'; id: string }
 	| { type: 'memory.buildProgress'; id: string; message: string }
@@ -116,6 +129,7 @@ export type InboundWebviewMessage = {
 	overwrite?: boolean;
 	enabled?: boolean;
 	restore?: boolean;
+	extensionId?: string;
 };
 
 /** Extension host → pty-host child process (Node IPC). */

@@ -1,9 +1,23 @@
+# Editor and local workspace state
 .vscode/**
 .vscode-test/**
+.gitignore
+.vscodeignore
+.yarnrc
+
+# Source — excluded, EXCEPT the runtime assets the webviews load straight from src/
+# at runtime (see my-skills.ts: joinPath(extensionUri, 'src', …, '*.html'/'*.css'/'*.webp')).
+# Covers My Skills under src/my-skills/ and the shared tutorials under
+# src/shared/tutorial/ (+ their images in src/shared/assets/). Do NOT remove these
+# negations or the panels render blank.
 src/**
 !src/shared/
 !src/shared/**/
-!src/shared/assets/*.svg
+!src/shared/**/*.html
+!src/shared/**/*.css
+!src/shared/**/*.svg
+!src/shared/**/*.png
+!src/shared/**/*.webp
 !src/my-skills/
 !src/my-skills/**/
 !src/my-skills/**/*.html
@@ -11,11 +25,43 @@ src/**
 !src/my-skills/**/*.svg
 !src/my-skills/**/*.png
 !src/my-skills/**/*.webp
-.gitignore
-.yarnrc
-vsc-extension-quickstart.md
-**/tsconfig.json
-**/eslint.config.mjs
-**/*.map
+
+# Repo/GitHub-only assets (~13 MB, screenshot.gif etc) — not loaded by the extension
+public/**
+
+# Tests and generated development maps
+**/__test__/**
+**/__tests__/**
+**/*.test.*
+**/*.spec.*
 **/*.ts
-**/.vscode-test.*
+**/*.map
+
+# Build, lint, typecheck, and package-manager inputs
+.prettierignore
+bun.lock
+esbuild.js
+**/eslint.config.mjs
+**/tsconfig.json
+
+# Native debug symbols — never loaded at runtime (trims ~53 MB of node-pty .pdb files)
+**/*.pdb
+
+# Project notes and contributor-only documentation
+AGENTS.md
+ARCHITECTURE.md
+CLAUDE.md
+CODE_OF_CONDUCT.md
+CONTRIBUTING.md
+NOTES.md
+vsc-extension-quickstart.md
+
+# Agent/context caches and graph analysis output
+.agents/**
+.claude/**
+.codex/**
+.f1/**
+graphify-out/**
+
+# Local package artifacts
+*.vsix

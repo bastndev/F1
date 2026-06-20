@@ -116,6 +116,7 @@ export class CliSessionManager implements vscode.Disposable {
 			createdAt: Date.now(),
 			buffer: '',
 			hasUnread: false,
+			awaitingFirstOutput: true,
 			cols: 80,
 			rows: 24
 		};
@@ -220,6 +221,13 @@ export class CliSessionManager implements vscode.Disposable {
 
 	private appendSessionOutput(session: CliSession, data: string) {
 		appendToBuffer(session, data);
+
+		// First real output (stdout/stderr/IPC) means the CLI has started rendering —
+		// the boot skeleton's job is done. This is the single funnel for pty output;
+		// the "starting …" preamble goes through appendToBuffer directly, so it never
+		// trips this. cli.output dismisses the live skeleton; the flag keeps it from
+		// reappearing after the webview is rebuilt on a panel switch.
+		session.awaitingFirstOutput = false;
 
 		if (this.activeSessionId !== session.id) {
 			session.hasUnread = true;
@@ -395,6 +403,7 @@ export class CliSessionManager implements vscode.Disposable {
 			createdAt: session.createdAt,
 			...(includeBuffer ? { buffer: session.buffer } : {}),
 			hasUnread: session.hasUnread,
+			awaitingFirstOutput: session.awaitingFirstOutput,
 			exitCode: session.exitCode
 		};
 	}

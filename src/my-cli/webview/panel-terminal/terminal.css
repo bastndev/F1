@@ -87,6 +87,16 @@
 	height: 100%;
 }
 
+/* xterm.css hardcodes .xterm-viewport to background-color:#000. The viewport is
+   absolutely positioned to fill the pane and sits behind the screen rows, so any
+   area the rows don't cover — below an under-sized screen, or the sub-cell pixel
+   remainder at the bottom — bleeds pure black. This is the black rectangle seen
+   when returning to a hidden view. Pin it to the terminal background (the same
+   color xterm sets inline) so that region is never visibly black. */
+.cli-terminal-pane .xterm .xterm-viewport {
+	background-color: var(--vscode-terminal-background, var(--vscode-editor-background)) !important;
+}
+
 .cli-empty-state {
 	position: absolute;
 	inset: 46px 0 0 0;

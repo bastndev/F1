@@ -1,0 +1,617 @@
+:root {
+	--support-bg: var(--vscode-editor-background, #101112);
+	--support-card: color-mix(in srgb, var(--support-bg) 86%, #ffffff 5%);
+	--support-border: color-mix(in srgb, var(--vscode-foreground, #cccccc) 12%, transparent);
+	--support-muted: color-mix(in srgb, var(--vscode-descriptionForeground, var(--vscode-foreground, #cccccc)) 70%, transparent);
+	--support-accent: var(--vscode-focusBorder, #0078d4);
+	--support-accent-soft: color-mix(in srgb, var(--support-accent) 14%, transparent);
+	--support-font: var(--vscode-font-family, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif);
+	--support-mono: var(--vscode-editor-font-family, "Menlo", "Consolas", "Courier New", monospace);
+	--support-radius: 18px;
+}
+
+* {
+	box-sizing: border-box;
+}
+
+html {
+	scroll-behavior: smooth;
+}
+
+body {
+	min-height: 100vh;
+	margin: 0;
+	color: var(--vscode-foreground, #cccccc);
+	background:
+		radial-gradient(circle at 8% 6%, color-mix(in srgb, #e2b719 22%, transparent), transparent 26rem),
+		linear-gradient(145deg, color-mix(in srgb, var(--support-bg) 94%, #ffffff 2%), var(--support-bg));
+	font-family: var(--support-font);
+}
+
+a {
+	color: inherit;
+	text-decoration: none;
+}
+
+/* ── Shell ────────────────────────────────────────────────────────── */
+.support-tutorial-shell {
+	width: min(100%, 960px);
+	margin: 0 auto;
+	padding: 40px 24px 64px;
+}
+
+/* ── Author hero ──────────────────────────────────────────────────── */
+.support-author-hero {
+	position: relative;
+	overflow: hidden;
+	padding: clamp(24px, 5vw, 48px);
+	border: 1px solid var(--support-border);
+	border-radius: var(--support-radius);
+	background: color-mix(in srgb, var(--support-bg) 88%, #000000 12%);
+	box-shadow: 0 24px 72px color-mix(in srgb, #000000 30%, transparent);
+}
+
+/* Water ripple canvas fills the hero */
+.hero-water-canvas {
+	position: absolute;
+	inset: 0;
+	z-index: 0;
+	border-radius: inherit;
+	pointer-events: none;
+}
+
+/* Content above water */
+.support-author-hero > *:not(.hero-water-canvas) {
+	position: relative;
+	z-index: 1;
+}
+
+.support-hero-badge {
+	display: inline-flex;
+	align-items: center;
+	gap: 10px;
+	min-height: 32px;
+	padding: 4px 12px 4px 6px;
+	border: 1px solid var(--support-border);
+	border-radius: 999px;
+	background: color-mix(in srgb, var(--support-bg) 70%, #ffffff 8%);
+	color: var(--vscode-foreground, #ffffff);
+	font-size: 12px;
+	font-weight: 700;
+	letter-spacing: 0.04em;
+}
+
+.support-hero-logo {
+	width: 22px;
+	height: 22px;
+}
+
+.support-author-card {
+	display: flex;
+	align-items: center;
+	gap: 18px;
+	margin-top: 24px;
+}
+
+.support-author-avatar {
+	width: 72px;
+	height: 72px;
+	border-radius: 50%;
+	border: 2px solid var(--support-border);
+	object-fit: cover;
+	box-shadow: 0 0 0 4px color-mix(in srgb, #e2b719 20%, transparent);
+}
+
+.support-author-info h1 {
+	margin: 0;
+	font-size: clamp(22px, 4vw, 32px);
+	font-weight: 780;
+	letter-spacing: -0.04em;
+	line-height: 1.05;
+}
+
+.support-author-avatar-link {
+	display: inline-block;
+	line-height: 0;
+	border-radius: 50%;
+	transition: transform .15s ease, box-shadow .15s ease;
+}
+
+.support-author-avatar-link:hover {
+	transform: scale(1.04);
+}
+
+.support-author-avatar-link:focus-visible {
+	outline: 2px solid var(--support-accent);
+	outline-offset: 3px;
+}
+
+.support-author-handle {
+	color: var(--vscode-foreground, #e0e0e0);
+	font-size: 14px;
+	font-weight: 600;
+}
+
+.support-author-meta {
+	display: flex;
+	align-items: center;
+	gap: 11px;
+	margin-top: 6px;
+}
+
+.support-social-link {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	color: var(--vscode-foreground, #e0e0e0);
+	transition: color .15s ease, transform .15s ease;
+}
+
+.support-social-link:hover {
+	color: var(--vscode-foreground, #fff);
+	transform: scale(1.12);
+}
+
+.support-social-link:focus-visible {
+	outline: 1px solid var(--support-accent);
+	outline-offset: 3px;
+	border-radius: 4px;
+}
+
+.support-social-link svg {
+	width: 15px;
+	height: 15px;
+	display: block;
+}
+
+.support-hero-lead {
+	max-width: 560px;
+	margin: 20px 0 0;
+	color: var(--vscode-foreground, #e0e0e0);
+	font-size: clamp(15px, 2vw, 18px);
+	line-height: 1.55;
+	user-select: none;
+	-webkit-user-select: none;
+}
+
+/* ════════════════════════════════════════════════════════════════════
+   CLI Hub tutorial — terminal / keymap design.
+   Deliberately distinct from My Skills: monospace motifs, real keycaps,
+   command chips and a shortcuts cheat-sheet. Everything below the shared
+   hero uses clihub-* classes. Theme-adaptive via the :root vars above.
+   ════════════════════════════════════════════════════════════════════ */
+
+.clihub-body {
+	margin-top: 44px;
+	display: flex;
+	flex-direction: column;
+	gap: 48px;
+}
+
+.clihub-section {
+	display: flex;
+	flex-direction: column;
+	gap: 16px;
+}
+
+.clihub-eyebrow {
+	display: inline-flex;
+	align-items: center;
+	gap: 8px;
+	font-family: var(--support-mono);
+	font-size: 12px;
+	font-weight: 600;
+	letter-spacing: 0.18em;
+	text-transform: uppercase;
+	color: var(--support-accent);
+}
+
+.clihub-eyebrow::before {
+	content: "❯";
+	font-weight: 700;
+}
+
+.clihub-h2 {
+	margin: 0;
+	font-size: clamp(20px, 3vw, 26px);
+	font-weight: 720;
+	letter-spacing: -0.02em;
+	line-height: 1.15;
+}
+
+.clihub-p {
+	margin: 0;
+	max-width: 72ch;
+	color: color-mix(in srgb, var(--vscode-foreground, #cccccc) 86%, transparent);
+	font-size: 15px;
+	line-height: 1.62;
+}
+
+.clihub-p + .clihub-p {
+	margin-top: -4px;
+}
+
+.clihub-p strong {
+	color: var(--vscode-foreground, #ffffff);
+	font-weight: 650;
+}
+
+.clihub-code {
+	font-family: var(--support-mono);
+	font-size: 0.9em;
+	padding: 1px 6px;
+	border-radius: 6px;
+	background: var(--support-accent-soft);
+	color: var(--vscode-foreground, #ffffff);
+}
+
+/* ── Agent grid ─────────────────────────────────────────────────────── */
+.clihub-agents {
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+	gap: 10px;
+}
+
+.clihub-agent {
+	display: flex;
+	align-items: center;
+	gap: 11px;
+	padding: 12px 14px;
+	border: 1px solid var(--support-border);
+	border-radius: 12px;
+	background: var(--support-card);
+	transition: border-color .15s ease, transform .15s ease;
+}
+
+.clihub-agent:hover {
+	border-color: color-mix(in srgb, var(--support-accent) 50%, var(--support-border));
+	transform: translateY(-2px);
+}
+
+.clihub-agent-dot {
+	flex: 0 0 auto;
+	width: 8px;
+	height: 8px;
+	border-radius: 50%;
+	background: var(--support-accent);
+	box-shadow: 0 0 8px var(--support-accent);
+}
+
+.clihub-agent--custom .clihub-agent-dot {
+	background: transparent;
+	border: 1px dashed var(--support-muted);
+	box-shadow: none;
+}
+
+.clihub-agent-name {
+	font-size: 14px;
+	font-weight: 600;
+}
+
+.clihub-agent-cmd {
+	margin-left: auto;
+	font-family: var(--support-mono);
+	font-size: 12px;
+	color: var(--support-muted);
+}
+
+/* ── Terminal panel ─────────────────────────────────────────────────── */
+.clihub-term {
+	border: 1px solid var(--support-border);
+	border-radius: 12px;
+	overflow: hidden;
+	background: color-mix(in srgb, var(--support-bg) 92%, #000000 8%);
+	box-shadow: 0 18px 50px color-mix(in srgb, #000000 24%, transparent);
+}
+
+.clihub-term-bar {
+	display: flex;
+	align-items: center;
+	gap: 7px;
+	padding: 10px 14px;
+	border-bottom: 1px solid var(--support-border);
+	background: color-mix(in srgb, var(--support-bg) 78%, #ffffff 4%);
+}
+
+.clihub-term-dot {
+	width: 11px;
+	height: 11px;
+	border-radius: 50%;
+	background: color-mix(in srgb, var(--vscode-foreground, #cccccc) 22%, transparent);
+}
+
+.clihub-term-dot:nth-child(1) { background: #ff5f57; }
+.clihub-term-dot:nth-child(2) { background: #febc2e; }
+.clihub-term-dot:nth-child(3) { background: #28c840; }
+
+.clihub-term-title {
+	margin-left: 8px;
+	font-family: var(--support-mono);
+	font-size: 12px;
+	color: var(--support-muted);
+}
+
+.clihub-term-body {
+	padding: 16px 18px;
+	font-family: var(--support-mono);
+	font-size: 13px;
+	line-height: 1.75;
+}
+
+.clihub-term-line {
+	white-space: pre-wrap;
+	word-break: break-word;
+}
+
+.clihub-term-prompt {
+	color: var(--support-accent);
+	user-select: none;
+}
+
+.clihub-term-comment { color: var(--support-muted); }
+.clihub-term-ok { color: #28c840; }
+
+/* ── Keycaps ────────────────────────────────────────────────────────── */
+.clihub-kbd {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	min-width: 26px;
+	height: 26px;
+	padding: 0 8px;
+	font-family: var(--support-mono);
+	font-size: 12px;
+	font-weight: 600;
+	color: var(--vscode-foreground, #ffffff);
+	background: color-mix(in srgb, var(--support-bg) 58%, #ffffff 10%);
+	border: 1px solid var(--support-border);
+	border-bottom-width: 2px;
+	border-radius: 7px;
+	box-shadow: 0 2px 0 color-mix(in srgb, #000000 28%, transparent);
+}
+
+.clihub-key-plus {
+	margin: 0 2px;
+	font-size: 12px;
+	color: var(--support-muted);
+}
+
+/* ── Shortcuts cheat-sheet ──────────────────────────────────────────── */
+.clihub-keys {
+	border: 1px solid var(--support-border);
+	border-radius: 14px;
+	overflow: hidden;
+	background: var(--support-card);
+}
+
+.clihub-keys-group {
+	padding: 11px 16px;
+	font-family: var(--support-mono);
+	font-size: 11px;
+	letter-spacing: 0.14em;
+	text-transform: uppercase;
+	color: var(--support-muted);
+	background: color-mix(in srgb, var(--support-bg) 82%, #ffffff 3%);
+	border-top: 1px solid var(--support-border);
+}
+
+.clihub-keys-group:first-child { border-top: none; }
+
+.clihub-key-row {
+	display: flex;
+	align-items: center;
+	gap: 16px;
+	padding: 12px 16px;
+	border-top: 1px solid color-mix(in srgb, var(--support-border) 55%, transparent);
+}
+
+.clihub-key-label { font-size: 14px; }
+
+.clihub-key-combo {
+	margin-left: auto;
+	display: inline-flex;
+	align-items: center;
+	gap: 4px;
+	flex: 0 0 auto;
+}
+
+/* ── Tools ──────────────────────────────────────────────────────────── */
+.clihub-tools {
+	display: flex;
+	flex-direction: column;
+	gap: 10px;
+}
+
+.clihub-tool {
+	display: grid;
+	grid-template-columns: minmax(96px, auto) 1fr auto;
+	align-items: center;
+	gap: 16px;
+	padding: 14px 16px;
+	border: 1px solid var(--support-border);
+	border-left: 3px solid var(--support-accent);
+	border-radius: 12px;
+	background: var(--support-card);
+}
+
+.clihub-tool-name {
+	font-size: 14px;
+	font-weight: 650;
+}
+
+.clihub-tool-desc {
+	color: var(--support-muted);
+	font-size: 13px;
+	line-height: 1.5;
+}
+
+.clihub-tool-desc strong {
+	color: var(--vscode-foreground, #ffffff);
+	font-weight: 600;
+}
+
+/* ── Steps ──────────────────────────────────────────────────────────── */
+.clihub-steps {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+	counter-reset: step;
+	display: flex;
+	flex-direction: column;
+	gap: 12px;
+}
+
+.clihub-steps li {
+	position: relative;
+	counter-increment: step;
+	padding: 4px 0 4px 46px;
+	font-size: 15px;
+	line-height: 1.55;
+	color: color-mix(in srgb, var(--vscode-foreground, #cccccc) 88%, transparent);
+}
+
+.clihub-steps li::before {
+	content: counter(step, decimal-leading-zero);
+	position: absolute;
+	left: 0;
+	top: 1px;
+	width: 30px;
+	height: 30px;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	font-family: var(--support-mono);
+	font-size: 12px;
+	font-weight: 700;
+	color: var(--support-accent);
+	border: 1px solid color-mix(in srgb, var(--support-accent) 38%, var(--support-border));
+	border-radius: 9px;
+	background: var(--support-accent-soft);
+}
+
+.clihub-steps strong { color: var(--vscode-foreground, #ffffff); }
+
+/* ── Note / callout ─────────────────────────────────────────────────── */
+.clihub-note {
+	display: flex;
+	gap: 12px;
+	padding: 14px 16px;
+	border: 1px solid color-mix(in srgb, var(--support-accent) 30%, var(--support-border));
+	border-radius: 12px;
+	background: var(--support-accent-soft);
+	font-size: 14px;
+	line-height: 1.55;
+}
+
+.clihub-note-icon { flex: 0 0 auto; }
+.clihub-note strong { color: var(--vscode-foreground, #ffffff); }
+
+/* ── Memory states ──────────────────────────────────────────────────── */
+.clihub-states {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 10px;
+}
+
+.clihub-state {
+	display: inline-flex;
+	align-items: center;
+	gap: 9px;
+	padding: 8px 14px;
+	border: 1px solid var(--support-border);
+	border-radius: 999px;
+	background: var(--support-card);
+	font-size: 13px;
+}
+
+.clihub-state-dot {
+	width: 9px;
+	height: 9px;
+	border-radius: 50%;
+}
+
+.clihub-state--fresh .clihub-state-dot { background: #28c840; box-shadow: 0 0 8px #28c840; }
+.clihub-state--stale .clihub-state-dot { background: #febc2e; box-shadow: 0 0 8px #febc2e; }
+.clihub-state--missing .clihub-state-dot { background: #ff5f57; box-shadow: 0 0 8px #ff5f57; }
+
+/* ── FAQ ────────────────────────────────────────────────────────────── */
+.clihub-faq {
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+}
+
+.clihub-faq-item {
+	border: 1px solid var(--support-border);
+	border-radius: 12px;
+	background: var(--support-card);
+	overflow: hidden;
+}
+
+.clihub-faq-item summary {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	padding: 14px 16px;
+	cursor: pointer;
+	font-size: 14px;
+	font-weight: 600;
+	list-style: none;
+}
+
+.clihub-faq-item summary::-webkit-details-marker { display: none; }
+
+.clihub-faq-item summary::before {
+	content: "+";
+	width: 16px;
+	text-align: center;
+	font-family: var(--support-mono);
+	font-size: 16px;
+	color: var(--support-accent);
+}
+
+.clihub-faq-item[open] summary::before { content: "\2212"; }
+
+.clihub-faq-item p {
+	margin: 0;
+	padding: 0 16px 16px 42px;
+	color: var(--support-muted);
+	font-size: 14px;
+	line-height: 1.6;
+}
+
+/* ── Footer ─────────────────────────────────────────────────────────── */
+.clihub-footer {
+	margin-top: 4px;
+	padding-top: 28px;
+	border-top: 1px solid var(--support-border);
+	text-align: center;
+	color: var(--support-muted);
+	font-size: 13px;
+	line-height: 1.7;
+}
+
+.clihub-footer-enjoy {
+	margin: 0 0 6px;
+	font-size: 15px;
+	color: var(--vscode-foreground, #eeeeee);
+}
+
+.clihub-footer p { margin: 0; }
+.clihub-footer strong { color: var(--vscode-foreground, #ffffff); }
+.clihub-footer a { color: var(--support-accent); }
+.clihub-footer a:hover { text-decoration: underline; }
+
+@media (max-width: 560px) {
+	.clihub-tool {
+		grid-template-columns: 1fr;
+		gap: 8px;
+	}
+
+	.clihub-key-row {
+		flex-wrap: wrap;
+		gap: 8px 10px;
+	}
+
+	.clihub-key-combo { margin-left: 0; }
+}

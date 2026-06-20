@@ -13,12 +13,15 @@
  * workspace root in and drives all UI (notifications, progress).
  */
 
+import { spawnSync } from 'child_process';
+import { createHash } from 'crypto';
 import * as fs from 'fs';
+import * as os from 'os';
 import * as path from 'path';
-import { CLAUDE_FILE, HUB_FILE, MEMORY_CONFIG_FILE, MEMORY_DIR, MEMORY_GRAPH_FILE, MEMORY_MAP_FILE } from './memory-paths';
+import { CLAUDE_FILE, GRAPHIFY_IGNORE_COMMENT, GRAPHIFY_OUT_DIR, HUB_FILE, MEMORY_CONFIG_FILE, MEMORY_DIR, MEMORY_GRAPH_FILE, MEMORY_MAP_FILE, VSCODE_IGNORE_COMMENT, VSCODE_IGNORE_FILE } from './memory-paths';
 import { newestSourceMtime, scanProject } from '../tier1-map/scan-project';
 import { writeProjectMap } from '../tier1-map/write-project-map';
-import { syncAllInstructionFiles, syncInstructionFileForSlug } from '../tier1-map/sync-instructions';
+import { removeAllInstructionBlocks, syncAllInstructionFiles, syncInstructionFileForSlug } from '../tier1-map/sync-instructions';
 import { detectToolchain, installToolchain, type ProgressFn, type ToolchainStatus } from '../tier2-graph/toolchain';
 import { ensureGraphifyOutIgnored, runGraphify } from '../tier2-graph/graphify-runner';
 import type { MemorySnapshot, MemoryBuildResult } from '../memory-types';
@@ -122,6 +125,7 @@ export class MemoryService {
 		try {
 			this.ensureConfig(root);
 			ensureGraphifyOutIgnored(root);
+			this.ensureVscodeIgnored(root);
 
 			let graphJsonCreated = false;
 			try {
@@ -165,6 +169,119 @@ export class MemoryService {
 		}
 	}
 
+	/**
+	 * Full cleanup: delete `.f1/`, `graphify-out/`, strip managed blocks from
+	 * instruction files (deleting them if empty), and remove our `.gitignore`
+	 * and `.vscodeignore` entries. Called when the user turns the toggle OFF.
+	 */
+	public cleanup(root: string | undefined): string[] {
+		if (!root) {
+			return [];
+		}
+		const cleaned: string[] = [];
+
+		for (const dir of [MEMORY_DIR, GRAPHIFY_OUT_DIR]) {
+			try {
+				const dirPath = path.join(root, dir);
+				if (fs.existsSync(dirPath)) {
+					fs.rmSync(dirPath, { recursive: true, force: true });
+					cleaned.push(dir);
+				}
+			} catch (error) {
+				console.error(`[my-memory] cleanup ${dir} failed:`, error);
+			}
+		}
+
+		this.removeGitignoreEntry(root);
+		this.removeVscodeIgnoreEntries(root);
+		cleaned.push(...removeAllInstructionBlocks(root));
+		return cleaned;
+	}
+
+	/**
+	 * Add `.f1/` and `graphify-out/` to `.vscodeignore` so they never ship inside
+	 * a packaged extension (.vsix). Only ever *augments* an existing file — if the
+	 * project has no `.vscodeignore` we leave it alone (not every repo is an
+	 * extension, and we must not invent packaging config).
+	 */
+	private ensureVscodeIgnored(root: string): void {
+		try {
+			const ignorePath = path.join(root, VSCODE_IGNORE_FILE);
+			if (!fs.existsSync(ignorePath)) {
+				return;
+			}
+			const existing = fs.readFileSync(ignorePath, 'utf8');
+			const present = new Set(
+				existing.split('\n').map((line) => line.trim().replace(/^\//, '').replace(/\/(\*\*)?$/, ''))
+			);
+			const missing = [MEMORY_DIR, GRAPHIFY_OUT_DIR].filter((dir) => !present.has(dir));
+			if (missing.length === 0) {
+				return;
+			}
+			const additions = missing.map((dir) => `${dir}/**`).join('\n');
+			const next = existing.trim().length
+				? `${existing.trimEnd()}\n\n${VSCODE_IGNORE_COMMENT}\n${additions}\n`
+				: `${VSCODE_IGNORE_COMMENT}\n${additions}\n`;
+			fs.writeFileSync(ignorePath, next, 'utf8');
+		} catch (error) {
+			console.error('[my-memory] ensureVscodeIgnored failed:', error);
+		}
+	}
+
+	/**
+	 * Remove our `.f1/` + `graphify-out/` entries (and our comment) from
+	 * `.vscodeignore`. Never deletes the file — it's the user's packaging config,
+	 * which we only ever appended to.
+	 */
+	private removeVscodeIgnoreEntries(root: string): void {
+		try {
+			const ignorePath = path.join(root, VSCODE_IGNORE_FILE);
+			if (!fs.existsSync(ignorePath)) {
+				return;
+			}
+			const content = fs.readFileSync(ignorePath, 'utf8');
+			const filtered = content.split('\n').filter((line) => {
+				const trimmed = line.trim();
+				if (trimmed === VSCODE_IGNORE_COMMENT) {
+					return false;
+				}
+				const normalized = trimmed.replace(/^\//, '').replace(/\/(\*\*)?$/, '');
+				return normalized !== MEMORY_DIR && normalized !== GRAPHIFY_OUT_DIR;
+			});
+			const cleaned = filtered.join('\n').replace(/\n{3,}/g, '\n\n').trim();
+			fs.writeFileSync(ignorePath, cleaned ? cleaned + '\n' : '', 'utf8');
+		} catch (error) {
+			console.error('[my-memory] removeVscodeIgnoreEntries failed:', error);
+		}
+	}
+
+	private removeGitignoreEntry(root: string): void {
+		try {
+			const gitignorePath = path.join(root, '.gitignore');
+			if (!fs.existsSync(gitignorePath)) {
+				return;
+			}
+			const content = fs.readFileSync(gitignorePath, 'utf8');
+			const lines = content.split('\n');
+			const filtered = lines.filter(line => {
+				const trimmed = line.trim();
+				if (trimmed === GRAPHIFY_IGNORE_COMMENT) {
+					return false;
+				}
+				const normalized = trimmed.replace(/^\//, '').replace(/\/$/, '');
+				return normalized !== GRAPHIFY_OUT_DIR;
+			});
+			const cleaned = filtered.join('\n').replace(/\n{3,}/g, '\n\n').trim();
+			if (cleaned) {
+				fs.writeFileSync(gitignorePath, cleaned + '\n', 'utf8');
+			} else {
+				fs.unlinkSync(gitignorePath);
+			}
+		} catch (error) {
+			console.error('[my-memory] removeGitignoreEntry failed:', error);
+		}
+	}
+
 	/** Create `.f1/` + `memory.json` if missing (idempotent). */
 	private ensureConfig(root: string): void {
 		const dir = path.join(root, MEMORY_DIR);
@@ -189,22 +306,36 @@ export class MemoryService {
 		}
 	}
 
-	/** True if any source file changed since the last successful build. */
+	/**
+	 * True if the project has real content changes since the last build.
+	 * In a git repo, compares a tree SHA of the whole working tree (computed in
+	 * a throwaway index) against the one stored at build time. Because it hashes
+	 * file *content*, it is immune to staging (`git add`/unstage) and to commits
+	 * that don't change content, and it goes back to green on revert.
+	 * Falls back to mtime for non-git repos.
+	 */
 	private isStale(root: string, graphPath: string): boolean {
-		let reference = this.readLastBuilt(root);
-		if (!reference) {
+		const buildConfig = this.readBuildConfig(root);
+
+		if (this.isGitRepo(root) && buildConfig.treeSha) {
+			const currentTree = this.gitWorkingTreeSha(root);
+			if (currentTree) {
+				return currentTree !== buildConfig.treeSha;
+			}
+		}
+
+		if (!buildConfig.lastBuilt) {
 			try {
-				reference = fs.statSync(graphPath).mtimeMs;
+				buildConfig.lastBuilt = fs.statSync(graphPath).mtimeMs;
 			} catch {
 				return false;
 			}
 		}
-		// Our own generated wiring files aren't "source" — ignore them.
 		const ignore = new Set<string>([HUB_FILE, CLAUDE_FILE]);
-		return newestSourceMtime(root, reference, ignore) > reference;
+		return newestSourceMtime(root, buildConfig.lastBuilt, ignore) > buildConfig.lastBuilt;
 	}
 
-	/** Record the build time in memory.json so staleness survives reloads. */
+	/** Record build-time git snapshot in memory.json so staleness survives reloads. */
 	private markBuilt(root: string): void {
 		try {
 			const configPath = path.join(root, MEMORY_DIR, MEMORY_CONFIG_FILE);
@@ -215,18 +346,56 @@ export class MemoryService {
 				config = {};
 			}
 			config.lastBuilt = Date.now();
+			config.builtTreeSha = this.gitWorkingTreeSha(root);
 			fs.writeFileSync(configPath, JSON.stringify(config, null, 2) + '\n', 'utf8');
 		} catch {
 			// best-effort
 		}
 	}
 
-	private readLastBuilt(root: string): number {
+	private readBuildConfig(root: string): { lastBuilt?: number; treeSha?: string } {
 		try {
 			const config = JSON.parse(fs.readFileSync(path.join(root, MEMORY_DIR, MEMORY_CONFIG_FILE), 'utf8'));
-			return typeof config.lastBuilt === 'number' ? config.lastBuilt : 0;
+			return {
+				lastBuilt: typeof config.lastBuilt === 'number' ? config.lastBuilt : undefined,
+				treeSha: typeof config.builtTreeSha === 'string' ? config.builtTreeSha : undefined
+			};
 		} catch {
-			return 0;
+			return {};
+		}
+	}
+
+	private isGitRepo(root: string): boolean {
+		return fs.existsSync(path.join(root, '.git'));
+	}
+
+	/**
+	 * Content hash of the user's source files, via a throwaway index so the real
+	 * staging area is never touched. `git add -A` stages every change into that
+	 * index; `git write-tree` turns it into a tree SHA. Identical content →
+	 * identical SHA, regardless of staging.
+	 *
+	 * Our own generated/managed files are excluded: `.f1/` (which holds the
+	 * memory.json we write the SHA *into* — including it would be self-referential
+	 * and never settle) and the instruction files we rewrite on every build.
+	 *
+	 * The index is kept per-repo in the OS temp dir so git's stat cache makes
+	 * repeat calls cheap (only changed files are re-hashed). The version tag in
+	 * the name retires older indexes whenever this exclusion set changes.
+	 */
+	private gitWorkingTreeSha(root: string): string | undefined {
+		const indexName = `f1-mem-index-v2-${createHash('sha1').update(root).digest('hex').slice(0, 16)}`;
+		const env = { ...process.env, GIT_INDEX_FILE: path.join(os.tmpdir(), indexName) };
+		const excludes = [MEMORY_DIR, HUB_FILE, CLAUDE_FILE].map((p) => `:(exclude)${p}`);
+		try {
+			const add = spawnSync('git', ['add', '-A', '--', ...excludes], { cwd: root, env, timeout: 15000 });
+			if (add.status !== 0) {
+				return undefined;
+			}
+			const writeTree = spawnSync('git', ['write-tree'], { cwd: root, env, encoding: 'utf8', timeout: 10000 });
+			return writeTree.status === 0 ? writeTree.stdout.trim() || undefined : undefined;
+		} catch {
+			return undefined;
 		}
 	}
 }

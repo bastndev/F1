@@ -79,23 +79,6 @@ const writePromptFilterPreference = (enabled: boolean) => {
 	}
 };
 
-const memoryStorageKey = 'my-cli.memory.enabled';
-
-const readMemoryPreference = () => {
-	try {
-		const storedValue = window.localStorage.getItem(memoryStorageKey);
-		return storedValue === 'true';
-	} catch {
-		return false;
-	}
-};
-
-const writeMemoryPreference = (enabled: boolean) => {
-	try {
-		window.localStorage.setItem(memoryStorageKey, String(enabled));
-	} catch {
-	}
-};
 
 export const createTabController = (options: TabControllerOptions) => {
 	const createButton = getRequiredElement<HTMLButtonElement>('cli-create-button');
@@ -121,12 +104,11 @@ export const createTabController = (options: TabControllerOptions) => {
 	let isAltPressed = false;
 	let isPromptFilterEnabled = readPromptFilterPreference();
 	let promptFilterToastTimer: number | undefined;
-	let isMemoryEnabled = readMemoryPreference();
+	let isMemoryEnabled = false;
 
 	const setMemoryEnabled = (enabled: boolean, notify = true) => {
 		isMemoryEnabled = enabled;
 		memoryToggle.checked = enabled;
-		writeMemoryPreference(enabled);
 
 		memoryActionButton.style.display = enabled ? 'inline-flex' : 'none';
 
@@ -509,12 +491,7 @@ export const createTabController = (options: TabControllerOptions) => {
 	});
 
 	setPromptFilterEnabled(isPromptFilterEnabled, false);
-	setMemoryEnabled(isMemoryEnabled, false);
-	if (isMemoryEnabled) {
-		// Re-sync an already-on toggle to the host after a reload: enable + watch,
-		// without forcing a rebuild.
-		notifyMemoryToggle(true, true);
-	}
+	setMemoryEnabled(false, false);
 
 	document.addEventListener('click', () => {
 		closeFloatingPanels();
@@ -636,8 +613,26 @@ export const createTabController = (options: TabControllerOptions) => {
 		syncAgentPicker();
 	};
 
+	// Keep the picker label showing the CLI the user is actually standing in.
+	// Switching sessions (clicking the list or Tab-cycling) only changes the
+	// active session, so without this the label would stay on the last agent
+	// picked from the dropdown.
+	const syncPickerToActiveSession = (sessions: CliSessionSummary[], activeSessionId: string | undefined) => {
+		const activeLabel = activeSessionId
+			? sessions.find((session) => session.id === activeSessionId)?.label
+			: undefined;
+
+		if (!activeLabel || activeLabel === currentAgentLabel) {
+			return;
+		}
+
+		currentAgentLabel = activeLabel;
+		syncAgentPicker();
+	};
+
 	const render = (sessions: CliSessionSummary[], activeSessionId: string | undefined) => {
 		currentActiveSessionId = activeSessionId;
+		syncPickerToActiveSession(sessions, activeSessionId);
 		updateCreateButtonLabel(sessions.length);
 
 		if (sessions.length === 0) {
@@ -745,9 +740,17 @@ export const createTabController = (options: TabControllerOptions) => {
 		sessionList.replaceChildren(fragment);
 	};
 
+	const setMemoryState = (enabled: boolean) => {
+		setMemoryEnabled(enabled, false);
+		if (enabled) {
+			notifyMemoryToggle(true, true);
+		}
+	};
+
 	return {
 		handleKeyboardShortcut,
 		render,
-		setAgents
+		setAgents,
+		setMemoryState
 	};
 };

@@ -1,17 +1,20 @@
 import * as vscode from 'vscode';
 import * as crypto from 'crypto';
+import * as fs from 'fs';
 import { allowedAgents, getCliAgent, getAgentSlug } from '../shared/agents';
 import { ensureCliInstalled } from './terminal-cli/installation';
 import { CliSessionManager } from './terminal-cli/session-manager';
 import { getAgentWebviewHtml } from './webview-html';
 import { getLauncherWebviewHtml } from './launcher-html';
-import { getWebviewAssetUri } from './webview-assets';
+import { getWebviewAssetUri, getNonce } from './webview-assets';
 import { handleWorkspaceListFiles, handleWorkspaceListSkills } from './workspace';
 import { translatePromptToEnglish } from './translation/host-prompt-translator';
 import { resolveCustomCliLaunch, validateCustomCliCommandInput } from './terminal-cli/custom-cli';
 import {
 	ensureSpanishVoice,
-	playSpanishText,
+	streamSpeech,
+	synthesizeSpeech,
+	playPcmBuffer,
 	stopVoicePlayback,
 	isVoiceSpeaking,
 } from './voice/host-voice-tts';
@@ -40,6 +43,7 @@ export class MyCliViewProvider implements vscode.WebviewViewProvider, vscode.Dis
 	private _activeWebview?: vscode.Webview;
 	private _memoryWatcher?: vscode.FileSystemWatcher;
 	private _memoryWatchTimer?: ReturnType<typeof setTimeout>;
+	private _tutorialPanel?: vscode.WebviewPanel;
 
 	constructor(
 		private readonly _extensionUri: vscode.Uri,
@@ -61,6 +65,16 @@ export class MyCliViewProvider implements vscode.WebviewViewProvider, vscode.Dis
 		};
 
 		webviewView.webview.html = await this._getHtmlForWebview(webviewView.webview);
+		// VS Code hides a webview view by layout (display:none on the iframe) while
+		// keeping the window "visible", so the Page Visibility API inside the webview
+		// never fires on a panel switch. retainContextWhenHidden then leaves xterm's
+		// canvas/viewport stale, painting a black rectangle on return. onDidChangeVisibility
+		// is the only reliable signal — relay it so the webview re-fits and repaints.
+		webviewView.onDidChangeVisibility(() => {
+			void webviewView.webview.postMessage({
+				type: webviewView.visible ? 'cli.visible' : 'cli.hidden'
+			});
+		});
 		webviewView.onDidDispose(() => {
 			this.sessionManager.detach();
 			this._disposeMemoryWatcher();
@@ -102,9 +116,43 @@ export class MyCliViewProvider implements vscode.WebviewViewProvider, vscode.Dis
 				return;
 			}
 
+			if (message.type === 'cli.openTutorial') {
+				this.openTutorial();
+				return;
+			}
+
+			if (message.type === 'cli.installExtension' && message.extensionId) {
+				const extensionId = message.extensionId;
+
+				// Already installed and enabled: the extension owns the shortcut, so stay out of the way.
+				if (vscode.extensions.getExtension(extensionId)) {
+					return;
+				}
+
+				// getExtension() can't distinguish "not installed" from "installed but disabled",
+				// so offer both paths: install from the marketplace, or open the page to enable it.
+				const install = 'Install';
+				const openPage = 'Open Extension';
+				const choice = await vscode.window.showInformationMessage(
+					'Lynx Keymap shortcuts aren’t active. Install the extension to enable them.',
+					install,
+					openPage,
+				);
+				if (choice === install) {
+					await vscode.commands.executeCommand('workbench.extensions.installExtension', extensionId);
+				} else if (choice === openPage) {
+					await vscode.commands.executeCommand('extension.open', extensionId);
+				}
+				return;
+			}
+
 			if (message.type === 'cli.ready') {
 				this.sessionManager.attach(webviewView.webview);
 				warmSpellchecker();
+
+				const memoryEnabled = this._readMemoryEnabled();
+				this.memoryService.setEnabled(memoryEnabled);
+				void webviewView.webview.postMessage({ type: 'memory.initialState', enabled: memoryEnabled });
 
 				if (this.pendingInitialCustomCli) {
 					this.sessionManager.createCustomSession(this.pendingInitialCustomCli);
@@ -213,7 +261,89 @@ export class MyCliViewProvider implements vscode.WebviewViewProvider, vscode.Dis
 		});
 	}
 
+	/**
+	 * Open the CLI Hub tutorial in a webview panel. Content + design system live
+	 * in src/shared/tutorial/t-cli/; assets are the shared tutorial images.
+	 * Mirrors the My Skills support panel.
+	 */
+	public async smartFocus() {
+		await vscode.commands.executeCommand(`${MyCliViewProvider.viewType}.focus`);
+		await this._activeWebview?.postMessage({ type: 'cli.focusTerminal' });
+	}
+
+	public openTutorial() {
+		if (this._tutorialPanel) {
+			this._tutorialPanel.reveal(vscode.ViewColumn.One);
+			return;
+		}
+
+		const panel = vscode.window.createWebviewPanel(
+			'f1.cliHubTutorial',
+			'CLI Hub — Tutorial',
+			vscode.ViewColumn.One,
+			{ enableScripts: true, localResourceRoots: [this._extensionUri] }
+		);
+		this._tutorialPanel = panel;
+		panel.iconPath = vscode.Uri.joinPath(this._extensionUri, 'src', 'shared', 'assets', 'logo.svg');
+		panel.webview.html = this._getCliTutorialHtml(panel.webview, getNonce());
+		panel.onDidDispose(() => {
+			this._tutorialPanel = undefined;
+		});
+	}
+
+	private _getCliTutorialHtml(webview: vscode.Webview, nonce: string): string {
+		const tutorialDir = vscode.Uri.joinPath(this._extensionUri, 'src', 'shared', 'tutorial', 't-cli');
+		const htmlPath = vscode.Uri.joinPath(tutorialDir, 'support.html').fsPath;
+
+		let content: string;
+		try {
+			content = fs.readFileSync(htmlPath, 'utf8');
+		} catch (err) {
+			console.error(`[CLI Hub] Failed to read tutorial template: ${err}`);
+			return '<!DOCTYPE html><html><body><p>Failed to load the CLI Hub tutorial.</p></body></html>';
+		}
+
+		const styleUri = webview.asWebviewUri(vscode.Uri.joinPath(tutorialDir, 'support.css'));
+		const scriptUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, 'dist', 'cli-tutorial.js'));
+		const logoUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, 'src', 'shared', 'assets', 'logo.svg'));
+		const imagesDir = vscode.Uri.joinPath(this._extensionUri, 'src', 'shared', 'assets', 'images');
+		const authorImageUri = webview.asWebviewUri(vscode.Uri.joinPath(imagesDir, 'author.webp'));
+
+		const body = content
+			.replace('{{CREATE_SUPPORT_LOGO_URI}}', logoUri.toString())
+			.replace('{{AUTHOR_IMAGE_URI}}', authorImageUri.toString());
+
+		const csp = [
+			`default-src 'none';`,
+			`base-uri 'none';`,
+			`form-action 'none';`,
+			`object-src 'none';`,
+			`style-src ${webview.cspSource};`,
+			`script-src 'nonce-${nonce}';`,
+			`img-src ${webview.cspSource};`,
+			`font-src ${webview.cspSource};`,
+		].join(' ');
+
+		return [
+			'<!DOCTYPE html>',
+			'<html lang="en">',
+			'<head>',
+			'<meta charset="UTF-8">',
+			'<meta name="viewport" content="width=device-width, initial-scale=1.0">',
+			`<meta http-equiv="Content-Security-Policy" content="${csp}">`,
+			'<title>CLI Hub: Tutorial</title>',
+			`<link href="${styleUri}" rel="stylesheet">`,
+			'</head>',
+			'<body>',
+			body,
+			`<script nonce="${nonce}" src="${scriptUri}"></script>`,
+			'</body>',
+			'</html>',
+		].join('');
+	}
+
 	public dispose() {
+		this._tutorialPanel?.dispose();
 		this.activePromptTranslation?.abort();
 		stopVoicePlayback();
 		this._disposeMemoryWatcher();
@@ -386,23 +516,84 @@ export class MyCliViewProvider implements vscode.WebviewViewProvider, vscode.Dis
 			// Reuses ATM's piper engine/voice when installed; downloads into
 			// F1's globalStorage (with a progress notification) otherwise.
 			session.resources ??= await ensureSpanishVoice(this._extensionContext);
+			const resources = session.resources;
+			const chunks = session.chunks;
 
-			for (let index = session.index; index < session.chunks.length; index += 1) {
+			// Prefetch helper: synthesize a block to a buffer ahead of time. The no-op
+			// .catch keeps a bail (pause/stop kills the in-flight synth) from surfacing
+			// as an unhandled rejection; the real await still throws on a genuine failure.
+			const startSynth = (text: string) => {
+				let ready = false;
+				const promise = synthesizeSpeech(resources, text).then((audio) => {
+					ready = true;
+					return audio;
+				});
+				void promise.catch(() => undefined);
+				return { promise, isReady: () => ready };
+			};
+
+			// Best of both worlds:
+			//  • The first block of this run STREAMS — audio starts on the first synthesized
+			//    bytes, so there's no upfront wait (a single-block read is just this).
+			//  • While it plays, the next block is synthesized to a buffer; every later block
+			//    plays from its prefetched buffer → seamless, gap-free transitions.
+			let pending: { promise: Promise<Buffer>; isReady: () => boolean } | undefined;
+
+			for (let index = session.index; index < chunks.length; index += 1) {
 				if (!this._isVoiceRunActive(session, seq)) {
 					return;
 				}
 
 				session.index = index;
-				session.state = 'preparing';
-				await post('preparing');
-				// 'preparing' holds through synthesis; 'speaking' fires only once
-				// the first audio bytes flow, so the UI animates with the sound.
-				await playSpanishText(session.resources, session.chunks[index], () => {
+				const nextIndex = index + 1;
+
+				if (!pending) {
+					// First block of the run (fresh start or resume): fast streaming start,
+					// and begin the next block's prefetch as soon as audio is flowing.
+					session.state = 'preparing';
+					await post('preparing');
+					await streamSpeech(resources, chunks[index], () => {
+						if (!this._isVoiceRunActive(session, seq)) {
+							return;
+						}
+						session.state = 'speaking';
+						void post('speaking');
+						if (nextIndex < chunks.length && !pending) {
+							pending = startSynth(chunks[nextIndex]);
+						}
+					});
+					continue;
+				}
+
+				// Prefetched block: play it (already, or nearly, synthesized) with no gap,
+				// then start synthesizing the one after to overlap this playback.
+				const current = pending;
+				if (!current.isReady()) {
+					session.state = 'preparing';
+					await post('preparing');
+				}
+
+				let audio: Buffer;
+				try {
+					audio = await current.promise;
+				} catch (error) {
 					if (!this._isVoiceRunActive(session, seq)) {
 						return;
 					}
-					session.state = 'speaking';
-					void post('speaking');
+					throw error;
+				}
+				if (!this._isVoiceRunActive(session, seq)) {
+					return;
+				}
+
+				pending = nextIndex < chunks.length ? startSynth(chunks[nextIndex]) : undefined;
+
+				session.state = 'speaking';
+				await playPcmBuffer(resources, audio, () => {
+					if (this._isVoiceRunActive(session, seq)) {
+						session.state = 'speaking';
+						void post('speaking');
+					}
 				});
 			}
 
@@ -527,6 +718,14 @@ export class MyCliViewProvider implements vscode.WebviewViewProvider, vscode.Dis
 		return vscode.workspace.workspaceFolders?.[0]?.uri.fsPath;
 	}
 
+	private _readMemoryEnabled(): boolean {
+		return this._extensionContext?.workspaceState.get<boolean>('myMemory.enabled') ?? false;
+	}
+
+	private _writeMemoryEnabled(enabled: boolean): void {
+		void this._extensionContext?.workspaceState.update('myMemory.enabled', enabled);
+	}
+
 	/** Watch the workspace so the button turns yellow when files change. */
 	private _ensureMemoryWatcher(): void {
 		if (this._memoryWatcher) {
@@ -586,13 +785,11 @@ export class MyCliViewProvider implements vscode.WebviewViewProvider, vscode.Dis
 		const root = this._getMemoryWorkspaceRoot();
 		this._activeWebview = webview;
 
-		// A toggle flip (or a reload re-sync) rides along on getSnapshot.
 		if (typeof message.enabled === 'boolean') {
 			this.memoryService.setEnabled(message.enabled);
+			this._writeMemoryEnabled(message.enabled);
 			if (message.enabled) {
 				this._ensureMemoryWatcher();
-				// A genuine user toggle-on with no graph yet → build now. A `restore`
-				// (reload of an already-on toggle) only re-enables + watches.
 				const userInitiated = !message.restore;
 				if (userInitiated && !this.memoryService.getSnapshot(root).hasGraphJson) {
 					await this._ensureMemoryBuilt(webview, id);
@@ -600,6 +797,7 @@ export class MyCliViewProvider implements vscode.WebviewViewProvider, vscode.Dis
 				}
 			} else {
 				this._disposeMemoryWatcher();
+				this.memoryService.cleanup(root);
 			}
 		} else if (this.memoryService.isEnabled()) {
 			this._ensureMemoryWatcher();
@@ -631,7 +829,7 @@ export class MyCliViewProvider implements vscode.WebviewViewProvider, vscode.Dis
 
 		if (!this.memoryService.hasToolchain()) {
 			const choice = await vscode.window.showInformationMessage(
-				'My Memory needs the "graphify" engine (Python + graphify) to build your project graph. This is a one-time setup on this machine.',
+				'Install (Python + Graphify) to enable project graph generation. One-time setup 📥.',
 				'Install',
 				'Cancel'
 			);
@@ -671,7 +869,7 @@ export class MyCliViewProvider implements vscode.WebviewViewProvider, vscode.Dis
 
 		if (result.success) {
 			await webview.postMessage({ type: 'memory.buildComplete', id, result });
-			vscode.window.showInformationMessage(`My Memory updated · ${result.filesUpdated?.length ?? 0} instruction file(s) synced.`);
+			vscode.window.showInformationMessage('Memory updated · Instruction files synced. ✔');
 		} else {
 			await webview.postMessage({ type: 'memory.buildError', id, error: result.error || result.message });
 			vscode.window.showErrorMessage(`My Memory failed: ${result.error || result.message}`);
@@ -681,6 +879,9 @@ export class MyCliViewProvider implements vscode.WebviewViewProvider, vscode.Dis
 	/** Turn the feature OFF and tell the webview to drop the brain button. */
 	private async _memoryDisable(webview: vscode.Webview) {
 		this.memoryService.setEnabled(false);
+		this._writeMemoryEnabled(false);
+		this._disposeMemoryWatcher();
+		this.memoryService.cleanup(this._getMemoryWorkspaceRoot());
 		await webview.postMessage({ type: 'memory.disabled' });
 	}
 

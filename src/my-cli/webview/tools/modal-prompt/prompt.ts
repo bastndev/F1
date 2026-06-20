@@ -40,6 +40,7 @@ import { updatePromptImageHighlight } from './highlight';
 import { initSkillsChips, isClaudeSession } from './skills-chips';
 import { updateFooterModel } from './footer-model';
 import { initSessionState, showNoSessionMessage } from './session-state';
+import { getShortcut, matchesShortcut } from '../../../../shared/keymaps/cli';
 
 export type { PromptContext } from './prompt-context';
 
@@ -567,8 +568,13 @@ function initRunButton(
 	performSendImpl: () => Promise<void>
 ) {
 	const runBtn = host.querySelector<HTMLButtonElement>('#runBtn');
+	const runHint = host.querySelector<HTMLElement>('.prompt-run-hint');
 	if (!runBtn) {
 		return;
+	}
+
+	if (runHint) {
+		runHint.textContent = getShortcut('sendPrompt')?.description ?? 'Ctrl/Alt + Enter';
 	}
 
 	const updateState = () => {
@@ -599,11 +605,7 @@ function initRunButton(
 
 function initSendShortcut(textarea: HTMLTextAreaElement, context: PromptContext, performSendImpl: () => Promise<void>) {
 	textarea.addEventListener('keydown', (e) => {
-		const isSendShortcut =
-			(e.key === 'Enter' && (e.ctrlKey || e.metaKey)) ||
-			(e.key === 'Enter' && e.ctrlKey);
-
-		if (!isSendShortcut) {
+		if (!matchesShortcut(e, 'sendPrompt')) {
 			return;
 		}
 

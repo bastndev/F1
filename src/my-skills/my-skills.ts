@@ -1168,7 +1168,7 @@ export class MySkillsViewProvider implements vscode.WebviewViewProvider {
 	}
 
 	private _getCreateSkillSupportHtml(webview: vscode.Webview, nonce: string): string {
-		const supportPath = vscode.Uri.joinPath(this._extensionUri, 'src', 'my-skills', 'screens', 'create-skill', 'support', 'support.html').fsPath;
+		const supportPath = vscode.Uri.joinPath(this._extensionUri, 'src', 'shared', 'tutorial', 't-skill', 'support.html').fsPath;
 
 		let content: string;
 		try {
@@ -1178,13 +1178,13 @@ export class MySkillsViewProvider implements vscode.WebviewViewProvider {
 			return this._errorHtml('Failed to load create support');
 		}
 
-		const supportStyleUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, 'src', 'my-skills', 'screens', 'create-skill', 'support', 'support.css'));
+		const supportStyleUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, 'src', 'shared', 'tutorial', 't-skill', 'support.css'));
 		const supportScriptUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, 'dist', 'create-skill-support.js'));
 		const supportLogoUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, 'src', 'my-skills', 'assets', 'svg', 'logo-animated.svg'));
-		const authorImageUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, 'src', 'my-skills', 'assets', 'images', 'support', 'author.webp'));
-		const p1ImageUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, 'src', 'my-skills', 'assets', 'images', 'support', 'panels', 'p1.webp'));
-		const p2ImageUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, 'src', 'my-skills', 'assets', 'images', 'support', 'panels', 'p2.webp'));
-		const p3ImageUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, 'src', 'my-skills', 'assets', 'images', 'support', 'panels', 'p3.webp'));
+		const authorImageUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, 'src', 'shared', 'assets', 'images', 'author.webp'));
+		const p1ImageUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, 'src', 'shared', 'assets', 'images', 'tutorials', 'p1.webp'));
+		const p2ImageUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, 'src', 'shared', 'assets', 'images', 'tutorials', 'p2.webp'));
+		const p3ImageUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, 'src', 'shared', 'assets', 'images', 'tutorials', 'p3.webp'));
 		const supportHtml = content
 			.replace('{{CREATE_SUPPORT_LOGO_URI}}', supportLogoUri.toString())
 			.replace('{{AUTHOR_IMAGE_URI}}', authorImageUri.toString())

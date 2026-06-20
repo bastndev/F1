@@ -1,9 +1,10 @@
 import { getAgentSlug as resolveAgentSlug } from '../../shared/agents';
+import { isAltCapsLock, LYNX_KEYMAP_EXTENSION_ID } from '../../../shared/keymaps/lynx-keymap/index';
 
 type VsCodeApi = {
 	getState: () => unknown;
 	setState: (state: LauncherState) => void;
-	postMessage: (message: { type: 'openAgent'; agent: string } | { type: 'customCli.open'; source: 'launcher' }) => void;
+	postMessage: (message: { type: 'openAgent'; agent: string } | { type: 'customCli.open'; source: 'launcher' } | { type: 'cli.openTutorial' } | { type: 'cli.installExtension'; extensionId: string }) => void;
 };
 
 type LauncherModel = {
@@ -479,12 +480,24 @@ cliInput.addEventListener('keydown', (event) => {
 	}
 });
 
+window.addEventListener('keydown', (event) => {
+	if (isAltCapsLock(event)) {
+		event.preventDefault();
+		vscode.postMessage({ type: 'cli.installExtension', extensionId: LYNX_KEYMAP_EXTENSION_ID });
+	}
+});
+
 selectedOption.addEventListener('click', openSelectedModel);
 selectedOption.addEventListener('keydown', (event) => {
 	if (event.key === 'Enter' || event.key === ' ') {
 		event.preventDefault();
 		openSelectedModel();
 	}
+});
+
+const tutorialButton = document.getElementById('cli-tutorial-button');
+tutorialButton?.addEventListener('click', () => {
+	vscode.postMessage({ type: 'cli.openTutorial' });
 });
 
 setInterval(() => {
