@@ -150,7 +150,7 @@
 	height: 8px;
 	border-radius: 50%;
 	box-sizing: border-box;
-	background: var(--vscode-button-foreground, #ffffff);
+	background: #f5a53c;
 	border: 1.5px solid var(--vscode-sideBar-background, var(--vscode-editor-background));
 }
 
