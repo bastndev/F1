@@ -27,6 +27,11 @@ function ctrlSpace(): (event: KeyboardEvent) => boolean {
     (e.key === ' ' || e.code === 'Space') && e.ctrlKey && !e.altKey && !e.metaKey && !e.shiftKey;
 }
 
+function spaceKey(): (event: KeyboardEvent) => boolean {
+  return (e: KeyboardEvent) =>
+    (e.key === ' ' || e.code === 'Space') && !e.altKey && !e.ctrlKey && !e.metaKey && !e.shiftKey;
+}
+
 function escapeKey(): (event: KeyboardEvent) => boolean {
   return (e: KeyboardEvent) => e.key === 'Escape';
 }
@@ -41,9 +46,16 @@ function shiftFKey(num: number): (event: KeyboardEvent) => boolean {
   return (e: KeyboardEvent) => e.shiftKey && !e.altKey && !e.ctrlKey && !e.metaKey && e.key === key;
 }
 
+function promptSendKey(): (event: KeyboardEvent) => boolean {
+  return (e: KeyboardEvent) =>
+    e.key === 'Enter'
+    && !e.shiftKey
+    && (e.ctrlKey || e.metaKey || e.altKey);
+}
+
 // ─── Types ────────────────────────────────────────────────────────────────────
 
-export type ShortcutContext = 'launcher' | 'terminal';
+export type ShortcutContext = 'launcher' | 'terminal' | 'prompt';
 
 export type ShortcutId =
   | 'newSession'
@@ -57,7 +69,9 @@ export type ShortcutId =
   | 'openPrompt'
   | 'openTranslate'
   | 'openKeymaps'
-  | 'openUse';
+  | 'openUse'
+  | 'toggleVoicePlayback'
+  | 'sendPrompt';
 
 export interface ShortcutDefinition {
   id: ShortcutId;
@@ -139,6 +153,20 @@ export const shortcuts: ShortcutDefinition[] = [
     contexts: ['terminal'],
     description: 'Shift + F3',
     match: shiftFKey(3),
+  },
+  {
+    id: 'toggleVoicePlayback',
+    label: 'Play / pause Listen (Translator)',
+    contexts: ['terminal'],
+    description: 'Space',
+    match: spaceKey(),
+  },
+  {
+    id: 'sendPrompt',
+    label: 'Execute prompt',
+    contexts: ['prompt'],
+    description: 'Ctrl/Alt + Enter',
+    match: promptSendKey(),
   },
   {
     id: 'toggleAgentPalette',

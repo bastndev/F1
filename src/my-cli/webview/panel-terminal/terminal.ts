@@ -3,6 +3,7 @@ import { Terminal } from '@xterm/xterm';
 import { createTabController, type CliAgentIcon } from '../panel-tab/tab';
 import { createCliCreateMessage } from '../../shared/agent-launch-guard';
 import { getAgentSlug as resolveAgentSlug } from '../../shared/agents';
+import { isLynxPanelNavChord } from '../../../shared/keymaps/lynx-keymap/index';
 import { createToolsController, type CliUsageSnapshot } from '../tools/tools';
 import { USAGE_BUSY_ERROR, isUsageAgentBusy, isUsageViewInline } from '../tools/modal-use/agents';
 import { detectModelName } from '../../shared/model-detect';
@@ -660,8 +661,36 @@ const tabController = createTabController({
 	getOpenToolModal: () => toolsController?.getOpenTool() ?? null
 });
 
-const handleTerminalKey = (event: KeyboardEvent) => {
+const isOpenCodeSession = (sessionId: string): boolean => {
+	const session = sessions.get(sessionId);
+	return session ? getAgentSlug(session.label) === 'opencode' : false;
+};
+
+const isCtrlZ = (event: KeyboardEvent): boolean =>
+	event.type === 'keydown'
+	&& event.ctrlKey
+	&& !event.altKey
+	&& !event.metaKey
+	&& event.key.toLowerCase() === 'z';
+
+const handleTerminalKey = (event: KeyboardEvent, sessionId: string) => {
+	if (isOpenCodeSession(sessionId) && isCtrlZ(event)) {
+		event.preventDefault();
+		event.stopPropagation();
+		return false;
+	}
+
 	if (tabController.handleKeyboardShortcut(event)) {
+		return false;
+	}
+
+	// Lynx Keymap's panel-navigation chords (Alt+E/R/W/Q) must reach VS Code even
+	// while the terminal is focused, so the user can hop between the CLI Hub and the
+	// other bottom panels. Returning false stops xterm from sending them to the pty;
+	// since we don't preventDefault/stopPropagation, the event bubbles to VS Code's
+	// webview keybinding forwarder and the bound command runs. Every other key —
+	// Alt+Enter, Ctrl+C, word-nav, … — still belongs to the CLI.
+	if (isLynxPanelNavChord(event)) {
 		return false;
 	}
 
@@ -697,6 +726,15 @@ const createTerminalView = (session: CliSession) => {
 
 	const pane = document.createElement('div');
 	pane.className = 'cli-terminal-pane';
+	// When the new view belongs to the active session (visual-sleep recycling,
+	// late tab switch), mark the pane active synchronously so terminal.open()
+	// and the RAF fit measure real dimensions. The pane is display:none without
+	// is-active — opening xterm against a 0×0 element leaves it stuck at a
+	// degenerate size and paints a tiny cursor with a black void below, even
+	// after setActiveTerminal re-fits later.
+	if (session.id === activeSessionId) {
+		pane.classList.add('is-active');
+	}
 	pane.dataset.sessionId = session.id;
 	terminalStack.append(pane);
 
@@ -709,7 +747,7 @@ const createTerminalView = (session: CliSession) => {
 		scrollback: 8000,
 		theme: getTerminalTheme()
 	});
-	terminal.attachCustomKeyEventHandler(handleTerminalKey);
+	terminal.attachCustomKeyEventHandler((event) => handleTerminalKey(event, session.id));
 
 	// TUI CLIs copy their internal selection with OSC 52, which xterm.js
 	// ignores by default. Honor the copy (write it to the real clipboard)
@@ -739,7 +777,7 @@ const createTerminalView = (session: CliSession) => {
 	terminal.write(session.buffer);
 	terminal.onData((data) => {
 		const currentSession = sessions.get(session.id);
-		if (currentSession?.status === 'running') {
+		if (currentSession?.status === 'running' && !(isOpenCodeSession(session.id) && data === '\x1a')) {
 			vscode.postMessage({ type: 'cli.input', sessionId: session.id, data });
 		}
 	});
@@ -791,10 +829,13 @@ const createTerminalView = (session: CliSession) => {
 	terminals.set(session.id, view);
 	requestAnimationFrame(() => fitTerminal(session.id));
 
-	// Only show the boot skeleton for freshly created sessions.
-	// Old/restored sessions (reopening the panel later) should not flash a skeleton.
-	const sessionAge = Date.now() - session.createdAt;
-	if (sessionAge < 12000) {
+	// The host owns "is this CLI still starting?" via awaitingFirstOutput (true
+	// until the pty emits its first real output). It's the only signal that survives
+	// this webview being rebuilt on a panel switch — there's no retainContextWhenHidden
+	// on My CLI, so any in-webview memory resets every time. Show the boot skeleton
+	// only while the CLI genuinely hasn't rendered yet, so it plays on launch but
+	// never replays on return. Gate on running so an instant exit/error doesn't flash it.
+	if (session.awaitingFirstOutput && session.status === 'running') {
 		bootSkeletons.create(session.id);
 	}
 
@@ -1022,6 +1063,28 @@ window.addEventListener('message', (event: MessageEvent<ServerMessage>) => {
 		return;
 	}
 
+	if (message.type === 'cli.visible') {
+		repaintActiveTerminal();
+		return;
+	}
+
+	if (message.type === 'cli.focusTerminal') {
+		focusActiveTerminal();
+		return;
+	}
+
+	if (message.type === 'cli.hidden') {
+		// The translator is a transient action panel: it auto-opens on copy and has
+		// no draft to preserve. retainContextWhenHidden would otherwise leave it open
+		// across a panel switch, so it reappears (looking like an auto-open) when the
+		// user returns. Dismiss it on hide. The Prompt modal is deliberately left
+		// alone so an in-progress draft survives the round-trip.
+		if (toolsController?.getOpenTool() === 'translate') {
+			toolsController.close();
+		}
+		return;
+	}
+
 	if (message.type === 'cli.error') {
 		terminalStatus.textContent = message.message;
 	}
@@ -1031,6 +1094,52 @@ const resizeObserver = new ResizeObserver(() => {
 	fitTerminal();
 });
 resizeObserver.observe(terminalStack);
+
+// When the F1 view is hidden (user switches to Terminal/Debug Console) the
+// webview keeps running thanks to retainContextWhenHidden, but the iframe is laid
+// out display:none and xterm ends up stale — on return the pane shows a black
+// rectangle where the viewport background bleeds below the under-sized screen.
+// Re-fit (the pane regained its real height) and refresh() to force a full
+// repaint. Two RAFs: the first lets layout flush after the iframe is shown again,
+// the second runs once measurements are valid.
+const repaintActiveTerminal = () => {
+	if (!activeSessionId) {
+		return;
+	}
+	const view = terminals.get(activeSessionId);
+	if (!view) {
+		return;
+	}
+	requestAnimationFrame(() => requestAnimationFrame(() => {
+		fitTerminal(activeSessionId);
+		try {
+			view.terminal.refresh(0, view.terminal.rows - 1);
+		} catch {
+			// xterm can throw while the renderer is still settling — fine to drop.
+		}
+	}));
+};
+
+const focusActiveTerminal = () => {
+	const sessionId = activeSessionId;
+	if (!sessionId) {
+		return;
+	}
+
+	requestAnimationFrame(() => requestAnimationFrame(() => {
+		fitTerminal(sessionId);
+		terminals.get(sessionId)?.terminal.focus();
+	}));
+};
+
+// Window minimize/restore (and OS-level tab switches) do fire the Page Visibility
+// API; a VS Code panel switch does not — that case is driven by the host posting
+// cli.visible via WebviewView.onDidChangeVisibility (handled above).
+document.addEventListener('visibilitychange', () => {
+	if (document.visibilityState === 'visible') {
+		repaintActiveTerminal();
+	}
+});
 
 initMemoryHandler((message) => vscode.postMessage(message));
 
