@@ -16,6 +16,14 @@
 import { spawnSync } from 'child_process';
 import { MemoryService } from '../core/memory-service';
 
+/**
+ * Hard ceiling on the whole run. A context build must never block a commit, so
+ * if anything hangs (e.g. a stuck graphify), we bail and let the commit proceed
+ * — the refresh is picked up on the next commit or via the brain button. This is
+ * the portable safety net (no reliance on a `timeout` binary in the hook shell).
+ */
+const HOOK_TIMEOUT_MS = 60_000;
+
 const finish = (): never => process.exit(0);
 
 const main = async (): Promise<void> => {
@@ -32,9 +40,11 @@ const main = async (): Promise<void> => {
 	const result = await service.rebuild(root);
 	if (result.success) {
 		// Stage ONLY our managed paths — never the user's other changes.
-		spawnSync('git', ['add', '--', '.f1', 'AGENTS.md', 'CLAUDE.md'], { cwd: root });
+		spawnSync('git', ['add', '--', '.f1', 'AGENTS.md', 'CLAUDE.md'], { cwd: root, timeout: 10_000 });
 	}
 	finish();
 };
 
+// finish() is process.exit, so the timer (and any orphaned work) dies with us.
+setTimeout(finish, HOOK_TIMEOUT_MS);
 main().catch(() => finish());
