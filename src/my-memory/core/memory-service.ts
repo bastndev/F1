@@ -311,19 +311,25 @@ export class MemoryService {
 	}
 
 	/**
-	 * Content hash of the entire working tree (all non-ignored files), via a
-	 * throwaway index so the user's real staging area is never touched. `git add
-	 * -A` stages every change into that index; `git write-tree` turns it into a
-	 * tree SHA. Identical content → identical SHA, regardless of staging.
+	 * Content hash of the user's source files, via a throwaway index so the real
+	 * staging area is never touched. `git add -A` stages every change into that
+	 * index; `git write-tree` turns it into a tree SHA. Identical content →
+	 * identical SHA, regardless of staging.
+	 *
+	 * Our own generated/managed files are excluded: `.f1/` (which holds the
+	 * memory.json we write the SHA *into* — including it would be self-referential
+	 * and never settle) and the instruction files we rewrite on every build.
 	 *
 	 * The index is kept per-repo in the OS temp dir so git's stat cache makes
-	 * repeat calls cheap (only changed files are re-hashed).
+	 * repeat calls cheap (only changed files are re-hashed). The version tag in
+	 * the name retires older indexes whenever this exclusion set changes.
 	 */
 	private gitWorkingTreeSha(root: string): string | undefined {
-		const indexName = `f1-mem-index-${createHash('sha1').update(root).digest('hex').slice(0, 16)}`;
+		const indexName = `f1-mem-index-v2-${createHash('sha1').update(root).digest('hex').slice(0, 16)}`;
 		const env = { ...process.env, GIT_INDEX_FILE: path.join(os.tmpdir(), indexName) };
+		const excludes = [MEMORY_DIR, HUB_FILE, CLAUDE_FILE].map((p) => `:(exclude)${p}`);
 		try {
-			const add = spawnSync('git', ['add', '-A'], { cwd: root, env, timeout: 15000 });
+			const add = spawnSync('git', ['add', '-A', '--', ...excludes], { cwd: root, env, timeout: 15000 });
 			if (add.status !== 0) {
 				return undefined;
 			}
