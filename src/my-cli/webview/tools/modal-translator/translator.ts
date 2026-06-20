@@ -155,7 +155,7 @@ function buildVoiceChunks(textEl: HTMLElement): TranslatorVoiceChunk[] {
 function clearVoiceHighlights(chunks: TranslatorVoiceChunk[]): void {
 	for (const chunk of chunks) {
 		for (const element of chunk.elements) {
-			element.classList.remove('is-voice-active');
+			element.classList.remove('is-voice-active', 'is-voice-start', 'is-voice-end');
 		}
 	}
 }
@@ -167,9 +167,19 @@ function setActiveVoiceChunk(chunks: TranslatorVoiceChunk[], index: number): voi
 		return;
 	}
 
-	for (const element of chunk.elements) {
+	// Mark the chunk's blocks so CSS can fuse them into one cohesive reading band:
+	// every block is active; the first opens the band (rounded top), the last
+	// closes it (rounded bottom). A single-block chunk gets both.
+	const lastIndex = chunk.elements.length - 1;
+	chunk.elements.forEach((element, elementIndex) => {
 		element.classList.add('is-voice-active');
-	}
+		if (elementIndex === 0) {
+			element.classList.add('is-voice-start');
+		}
+		if (elementIndex === lastIndex) {
+			element.classList.add('is-voice-end');
+		}
+	});
 	chunk.elements[0]?.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
 }
 

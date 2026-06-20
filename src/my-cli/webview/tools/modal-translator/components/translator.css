@@ -403,12 +403,46 @@
 	border-bottom: 0.5px solid color-mix(in srgb, var(--agent-accent, #AFA9EC) 45%, transparent);
 }
 
-.translator-text.is-voice-active,
+/* ── Voice reading highlight ─────────────────────────────────────────
+   The chunk being read aloud is drawn as one cohesive band BEHIND the text using
+   a pseudo-element. Because that layer is absolutely positioned, toggling it can
+   never change the box — so the text never jumps vertically as the highlight
+   moves — and there is no left rail. Each block gets .is-voice-active; the first
+   .is-voice-start and the last .is-voice-end round the band's ends. The layer
+   bleeds 5px into the inter-paragraph gaps so consecutive blocks join, and 10px
+   into the side padding. z-index:0 gives the block its own stacking context so
+   the ::before sits behind its text but above the modal background. */
 .translator-text .is-voice-active {
 	position: relative;
-	border-radius: 6px;
-	background: rgba(93, 202, 165, 0.075);
+	z-index: 0;
+}
+
+.translator-text .is-voice-active::before {
+	content: '';
+	position: absolute;
+	z-index: -1;
+	inset: -5px -10px;
+	background: rgba(93, 202, 165, 0.08);
 	transition: background 160ms ease;
+}
+
+.translator-text .is-voice-start::before {
+	top: 0;
+	border-top-left-radius: 8px;
+	border-top-right-radius: 8px;
+}
+
+.translator-text .is-voice-end::before {
+	bottom: 0;
+	border-bottom-left-radius: 8px;
+	border-bottom-right-radius: 8px;
+}
+
+/* Fallback: the whole translation is one unstructured block (no child elements),
+   so the container itself carries the highlight — a plain tint, no layout change. */
+.translator-text.is-voice-active {
+	border-radius: 6px;
+	background: rgba(93, 202, 165, 0.08);
 }
 
 .translator-text strong {
