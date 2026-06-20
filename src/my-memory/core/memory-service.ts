@@ -13,6 +13,8 @@
  * workspace root in and drives all UI (notifications, progress).
  */
 
+import { spawnSync } from 'child_process';
+import { createHash } from 'crypto';
 import * as fs from 'fs';
 import * as path from 'path';
 import { CLAUDE_FILE, GRAPHIFY_IGNORE_COMMENT, GRAPHIFY_OUT_DIR, HUB_FILE, MEMORY_CONFIG_FILE, MEMORY_DIR, MEMORY_GRAPH_FILE, MEMORY_MAP_FILE } from './memory-paths';
@@ -244,22 +246,40 @@ export class MemoryService {
 		}
 	}
 
-	/** True if any source file changed since the last successful build. */
+	/**
+	 * True if the project has real content changes since the last build.
+	 * In a git repo, compares a snapshot of `git status --porcelain` + HEAD
+	 * against the values stored at build time. Our own generated files are
+	 * already in the stored snapshot, so they never cause false positives.
+	 * Falls back to mtime for non-git repos.
+	 */
 	private isStale(root: string, graphPath: string): boolean {
-		let reference = this.readLastBuilt(root);
-		if (!reference) {
+		const buildConfig = this.readBuildConfig(root);
+
+		if (this.isGitRepo(root)) {
+			const currentHead = this.gitHead(root);
+			if (buildConfig.head && currentHead) {
+				if (buildConfig.head !== currentHead) {
+					return true;
+				}
+				if (buildConfig.statusHash) {
+					return this.gitStatusHash(root) !== buildConfig.statusHash;
+				}
+			}
+		}
+
+		if (!buildConfig.lastBuilt) {
 			try {
-				reference = fs.statSync(graphPath).mtimeMs;
+				buildConfig.lastBuilt = fs.statSync(graphPath).mtimeMs;
 			} catch {
 				return false;
 			}
 		}
-		// Our own generated wiring files aren't "source" — ignore them.
 		const ignore = new Set<string>([HUB_FILE, CLAUDE_FILE]);
-		return newestSourceMtime(root, reference, ignore) > reference;
+		return newestSourceMtime(root, buildConfig.lastBuilt, ignore) > buildConfig.lastBuilt;
 	}
 
-	/** Record the build time in memory.json so staleness survives reloads. */
+	/** Record build-time git snapshot in memory.json so staleness survives reloads. */
 	private markBuilt(root: string): void {
 		try {
 			const configPath = path.join(root, MEMORY_DIR, MEMORY_CONFIG_FILE);
@@ -270,18 +290,49 @@ export class MemoryService {
 				config = {};
 			}
 			config.lastBuilt = Date.now();
+			config.builtHead = this.gitHead(root);
+			config.builtStatusHash = this.gitStatusHash(root);
 			fs.writeFileSync(configPath, JSON.stringify(config, null, 2) + '\n', 'utf8');
 		} catch {
 			// best-effort
 		}
 	}
 
-	private readLastBuilt(root: string): number {
+	private readBuildConfig(root: string): { lastBuilt?: number; head?: string; statusHash?: string } {
 		try {
 			const config = JSON.parse(fs.readFileSync(path.join(root, MEMORY_DIR, MEMORY_CONFIG_FILE), 'utf8'));
-			return typeof config.lastBuilt === 'number' ? config.lastBuilt : 0;
+			return {
+				lastBuilt: typeof config.lastBuilt === 'number' ? config.lastBuilt : undefined,
+				head: typeof config.builtHead === 'string' ? config.builtHead : undefined,
+				statusHash: typeof config.builtStatusHash === 'string' ? config.builtStatusHash : undefined
+			};
 		} catch {
-			return 0;
+			return {};
+		}
+	}
+
+	private isGitRepo(root: string): boolean {
+		return fs.existsSync(path.join(root, '.git'));
+	}
+
+	private gitHead(root: string): string | undefined {
+		try {
+			const result = spawnSync('git', ['rev-parse', 'HEAD'], { cwd: root, encoding: 'utf8', timeout: 3000 });
+			return result.status === 0 ? result.stdout.trim() : undefined;
+		} catch {
+			return undefined;
+		}
+	}
+
+	private gitStatusHash(root: string): string | undefined {
+		try {
+			const result = spawnSync('git', ['status', '--porcelain'], { cwd: root, encoding: 'utf8', timeout: 5000 });
+			if (result.status !== 0) {
+				return undefined;
+			}
+			return createHash('sha256').update(result.stdout).digest('hex');
+		} catch {
+			return undefined;
 		}
 	}
 }
