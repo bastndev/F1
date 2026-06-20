@@ -751,7 +751,7 @@ export class MyCliViewProvider implements vscode.WebviewViewProvider, vscode.Dis
 
 		if (!this.memoryService.hasToolchain()) {
 			const choice = await vscode.window.showInformationMessage(
-				'My Memory needs the "graphify" engine (Python + graphify) to build your project graph. This is a one-time setup on this machine.',
+				'Install (Python + Graphify) to enable project graph generation. One-time setup 📥.',
 				'Install',
 				'Cancel'
 			);
