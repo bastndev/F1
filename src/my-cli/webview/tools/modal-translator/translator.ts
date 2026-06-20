@@ -231,9 +231,11 @@ function initializeTranslator(host: HTMLElement, context: ToolContext) {
 	let resultStatus = statusEl?.textContent || 'ready';
 	let activeVoiceChunks: TranslatorVoiceChunk[] = [];
 
-	// Copy/Listen start disabled (gray) and only light up — softly, via the
-	// button transition — once there is a translation result to act on.
-	// hasResult also keeps voice.state resyncs from re-enabling Listen early.
+	// Listen starts disabled (gray) and only lights up — softly, via the button
+	// transition — once there is a translation result to read aloud. hasResult also
+	// keeps voice.state resyncs from re-enabling Listen early. Copy is independent:
+	// it enables whenever the panel holds real text (English source or Spanish
+	// result), so the user can copy before and after translating.
 	let hasResult = false;
 	const enableResultActions = () => {
 		hasResult = true;
@@ -252,6 +254,10 @@ function initializeTranslator(host: HTMLElement, context: ToolContext) {
 				textEl.classList.remove('is-rendered');
 				textEl.textContent = 'Select or copy text in the terminal to translate it to Spanish.';
 				textEl.classList.add('placeholder');
+			}
+			// Nothing real on screen — only the hint — so there's nothing to copy.
+			if (copyBtn) {
+				copyBtn.disabled = true;
 			}
 			resultStatus = 'ready';
 			setStatus(resultStatus);
@@ -361,6 +367,12 @@ function initializeTranslator(host: HTMLElement, context: ToolContext) {
 			textEl.textContent = 'Select or copy text in the terminal to translate it to Spanish.';
 			textEl.classList.add('placeholder');
 		}
+	}
+	// Copy works on whatever the panel holds — the English source now, the Spanish
+	// result after translating — so enable it as soon as there is real text (not the
+	// "select text" hint). Listen stays gated to a finished result.
+	if (copyBtn) {
+		copyBtn.disabled = !extracted;
 	}
 
 	if (copyBtn && textEl) {
