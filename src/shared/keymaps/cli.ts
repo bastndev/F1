@@ -46,9 +46,16 @@ function shiftFKey(num: number): (event: KeyboardEvent) => boolean {
   return (e: KeyboardEvent) => e.shiftKey && !e.altKey && !e.ctrlKey && !e.metaKey && e.key === key;
 }
 
+function promptSendKey(): (event: KeyboardEvent) => boolean {
+  return (e: KeyboardEvent) =>
+    e.key === 'Enter'
+    && !e.shiftKey
+    && (e.ctrlKey || e.metaKey || e.altKey);
+}
+
 // ─── Types ────────────────────────────────────────────────────────────────────
 
-export type ShortcutContext = 'launcher' | 'terminal';
+export type ShortcutContext = 'launcher' | 'terminal' | 'prompt';
 
 export type ShortcutId =
   | 'newSession'
@@ -63,7 +70,8 @@ export type ShortcutId =
   | 'openTranslate'
   | 'openKeymaps'
   | 'openUse'
-  | 'toggleVoicePlayback';
+  | 'toggleVoicePlayback'
+  | 'sendPrompt';
 
 export interface ShortcutDefinition {
   id: ShortcutId;
@@ -152,6 +160,13 @@ export const shortcuts: ShortcutDefinition[] = [
     contexts: ['terminal'],
     description: 'Space',
     match: spaceKey(),
+  },
+  {
+    id: 'sendPrompt',
+    label: 'Execute prompt',
+    contexts: ['prompt'],
+    description: 'Ctrl/Alt + Enter',
+    match: promptSendKey(),
   },
   {
     id: 'toggleAgentPalette',
