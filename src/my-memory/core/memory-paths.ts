@@ -41,3 +41,8 @@ export const CLAUDE_SLUG = 'claude';
 export const GRAPHIFY_OUT_DIR = 'graphify-out';
 /** Comment line we add to .gitignore when ignoring graphify-out/. */
 export const GRAPHIFY_IGNORE_COMMENT = "# F1 My Memory: graphify's working dir + cache (committed context is in .f1/)";
+
+/** VS Code extension packaging ignore list (used by vsce when building a .vsix). */
+export const VSCODE_IGNORE_FILE = '.vscodeignore';
+/** Comment line we add to .vscodeignore when keeping context out of the package. */
+export const VSCODE_IGNORE_COMMENT = '# F1 My Memory: keep project context out of the packaged extension';

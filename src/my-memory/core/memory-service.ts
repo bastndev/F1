@@ -18,12 +18,13 @@ import { createHash } from 'crypto';
 import * as fs from 'fs';
 import * as os from 'os';
 import * as path from 'path';
-import { CLAUDE_FILE, GRAPHIFY_IGNORE_COMMENT, GRAPHIFY_OUT_DIR, HUB_FILE, MEMORY_CONFIG_FILE, MEMORY_DIR, MEMORY_GRAPH_FILE, MEMORY_MAP_FILE } from './memory-paths';
+import { CLAUDE_FILE, GRAPHIFY_IGNORE_COMMENT, GRAPHIFY_OUT_DIR, HUB_FILE, MEMORY_CONFIG_FILE, MEMORY_DIR, MEMORY_GRAPH_FILE, MEMORY_MAP_FILE, VSCODE_IGNORE_COMMENT, VSCODE_IGNORE_FILE } from './memory-paths';
 import { newestSourceMtime, scanProject } from '../tier1-map/scan-project';
 import { writeProjectMap } from '../tier1-map/write-project-map';
 import { removeAllInstructionBlocks, syncAllInstructionFiles, syncInstructionFileForSlug } from '../tier1-map/sync-instructions';
 import { detectToolchain, installToolchain, type ProgressFn, type ToolchainStatus } from '../tier2-graph/toolchain';
 import { ensureGraphifyOutIgnored, runGraphify } from '../tier2-graph/graphify-runner';
+import { installPreCommitHook, removePreCommitHook, type HookInstallResult } from './git-hooks';
 import type { MemorySnapshot, MemoryBuildResult } from '../memory-types';
 
 export class MemoryService {
@@ -49,6 +50,19 @@ export class MemoryService {
 	/** Install uv (if needed) + graphify. Throws on failure (host shows it). */
 	public async installToolchain(onProgress?: ProgressFn): Promise<void> {
 		await installToolchain(onProgress);
+	}
+
+	/**
+	 * Install the pre-commit hook that refreshes `.f1/` on commit. Safe and
+	 * non-destructive: skips repos that aren't git, route hooks elsewhere, or
+	 * already have a foreign pre-commit hook. The host supplies the node binary
+	 * and the bundled runner path (it owns those locations).
+	 */
+	public installCommitHook(root: string | undefined, nodePath: string, runnerPath: string): HookInstallResult {
+		if (!root) {
+			return { status: 'skipped', reason: 'not-git' };
+		}
+		return installPreCommitHook(root, nodePath, runnerPath);
 	}
 
 	/** Current state of `.f1/` for the snapshot the webview button reads. */
@@ -125,6 +139,7 @@ export class MemoryService {
 		try {
 			this.ensureConfig(root);
 			ensureGraphifyOutIgnored(root);
+			this.ensureVscodeIgnored(root);
 
 			let graphJsonCreated = false;
 			try {
@@ -170,14 +185,16 @@ export class MemoryService {
 
 	/**
 	 * Full cleanup: delete `.f1/`, `graphify-out/`, strip managed blocks from
-	 * instruction files (deleting them if empty), and remove our `.gitignore` entry.
-	 * Called when the user turns the toggle OFF.
+	 * instruction files (deleting them if empty), remove our `.gitignore` entry,
+	 * and remove our pre-commit hook. Called when the user turns the toggle OFF.
 	 */
 	public cleanup(root: string | undefined): string[] {
 		if (!root) {
 			return [];
 		}
 		const cleaned: string[] = [];
+
+		removePreCommitHook(root);
 
 		for (const dir of [MEMORY_DIR, GRAPHIFY_OUT_DIR]) {
 			try {
@@ -192,8 +209,66 @@ export class MemoryService {
 		}
 
 		this.removeGitignoreEntry(root);
+		this.removeVscodeIgnoreEntries(root);
 		cleaned.push(...removeAllInstructionBlocks(root));
 		return cleaned;
+	}
+
+	/**
+	 * Add `.f1/` and `graphify-out/` to `.vscodeignore` so they never ship inside
+	 * a packaged extension (.vsix). Only ever *augments* an existing file — if the
+	 * project has no `.vscodeignore` we leave it alone (not every repo is an
+	 * extension, and we must not invent packaging config).
+	 */
+	private ensureVscodeIgnored(root: string): void {
+		try {
+			const ignorePath = path.join(root, VSCODE_IGNORE_FILE);
+			if (!fs.existsSync(ignorePath)) {
+				return;
+			}
+			const existing = fs.readFileSync(ignorePath, 'utf8');
+			const present = new Set(
+				existing.split('\n').map((line) => line.trim().replace(/^\//, '').replace(/\/(\*\*)?$/, ''))
+			);
+			const missing = [MEMORY_DIR, GRAPHIFY_OUT_DIR].filter((dir) => !present.has(dir));
+			if (missing.length === 0) {
+				return;
+			}
+			const additions = missing.map((dir) => `${dir}/**`).join('\n');
+			const next = existing.trim().length
+				? `${existing.trimEnd()}\n\n${VSCODE_IGNORE_COMMENT}\n${additions}\n`
+				: `${VSCODE_IGNORE_COMMENT}\n${additions}\n`;
+			fs.writeFileSync(ignorePath, next, 'utf8');
+		} catch (error) {
+			console.error('[my-memory] ensureVscodeIgnored failed:', error);
+		}
+	}
+
+	/**
+	 * Remove our `.f1/` + `graphify-out/` entries (and our comment) from
+	 * `.vscodeignore`. Never deletes the file — it's the user's packaging config,
+	 * which we only ever appended to.
+	 */
+	private removeVscodeIgnoreEntries(root: string): void {
+		try {
+			const ignorePath = path.join(root, VSCODE_IGNORE_FILE);
+			if (!fs.existsSync(ignorePath)) {
+				return;
+			}
+			const content = fs.readFileSync(ignorePath, 'utf8');
+			const filtered = content.split('\n').filter((line) => {
+				const trimmed = line.trim();
+				if (trimmed === VSCODE_IGNORE_COMMENT) {
+					return false;
+				}
+				const normalized = trimmed.replace(/^\//, '').replace(/\/(\*\*)?$/, '');
+				return normalized !== MEMORY_DIR && normalized !== GRAPHIFY_OUT_DIR;
+			});
+			const cleaned = filtered.join('\n').replace(/\n{3,}/g, '\n\n').trim();
+			fs.writeFileSync(ignorePath, cleaned ? cleaned + '\n' : '', 'utf8');
+		} catch (error) {
+			console.error('[my-memory] removeVscodeIgnoreEntries failed:', error);
+		}
 	}
 
 	private removeGitignoreEntry(root: string): void {
