@@ -6,7 +6,7 @@ import type { VoiceProgress, VoiceState } from '../../../shared/voice/voice-type
 import { translateEnToSpanish } from './browser-terminal-translator';
 import { renderMarkdownLite } from './markdown-lite';
 import { segmentTerminalSelection } from './terminal-text';
-import { getCachedTranslation, setCachedTranslation } from './translator-cache';
+import { getCachedTranslation, setCachedTranslation, getCachedParagraph, setCachedParagraph } from './translator-cache';
 import { matchesShortcut } from '../../../../shared/keymaps/cli';
 
 const stylesId = 'cli-translator-panel-styles';
@@ -284,6 +284,23 @@ function initializeTranslator(host: HTMLElement, context: ToolContext) {
 			return;
 		}
 
+		// Every paragraph of this selection already translated as part of an earlier
+		// block? Rebuild it from the paragraph cache — no skeleton, no network. Bails
+		// (→ normal translation) if any paragraph is missing, including code/tree
+		// lines, so it can never show a wrong result; a miss just falls through.
+		const reused = reconstructFromParagraphs(extracted);
+		if (reused) {
+			copyText = reused;
+			textEl.classList.remove('placeholder');
+			revealText(textEl, reused);
+			resultStatus = 'translated';
+			setStatus(resultStatus);
+			enableResultActions();
+			// Remember the exact selection too, so repeating it is a direct hit.
+			setCachedTranslation(extracted, { rendered: reused, copyText, status: resultStatus });
+			return;
+		}
+
 		// Freeze the body at its current height so swapping the text for the
 		// skeleton doesn't collapse the modal and snap it back on completion.
 		const lockedHeight = bodyEl?.offsetHeight ?? 0;
@@ -337,6 +354,11 @@ function initializeTranslator(host: HTMLElement, context: ToolContext) {
 				provider ??= result.provider;
 				renderedParts.push(value);
 				copyParts.push(value);
+				// Populate the paragraph cache so a later single-paragraph selection of
+				// this block reuses the translation. Only when we actually got one.
+				if (result.text.trim()) {
+					cacheParagraphPairs(segment.content, result.text);
+				}
 			}
 
 			const renderedMarkdown = renderedParts.join('\n\n');
@@ -592,6 +614,51 @@ function initializeTranslator(host: HTMLElement, context: ToolContext) {
 
 function extractTextToTranslate(context: ToolContext): string {
 	return context.getTerminalSelection?.() || '';
+}
+
+// Split prose into trimmed, non-empty paragraphs on blank lines. Shared by the
+// populate (after a block translates) and the reuse lookup so their keys line up.
+function splitIntoParagraphs(text: string): string[] {
+	return text.split(/\n[ \t]*\n+/).map((part) => part.trim()).filter((part) => part.length > 0);
+}
+
+// Rebuild a selection purely from cached paragraphs, or undefined if any paragraph
+// is missing (incl. code/tree lines, which are never paragraph-cached). Returning
+// undefined on the first miss is the safety guard: we only ever serve a result when
+// every piece is a known translation, so a partial/altered selection re-translates
+// instead of showing something wrong.
+function reconstructFromParagraphs(sourceText: string): string | undefined {
+	const paragraphs = splitIntoParagraphs(sourceText);
+	if (paragraphs.length === 0) {
+		return undefined;
+	}
+
+	const translated: string[] = [];
+	for (const paragraph of paragraphs) {
+		const cached = getCachedParagraph(paragraph);
+		if (cached === undefined) {
+			return undefined;
+		}
+		translated.push(cached);
+	}
+
+	return translated.join('\n\n');
+}
+
+// Cache each paragraph of a freshly translated block — but only when the source and
+// the translation split into the *same* number of paragraphs. Machine translation
+// can merge or split paragraphs; an unequal count means we can't trust the 1:1
+// alignment, so we skip (the whole-selection cache still covers the full block).
+function cacheParagraphPairs(source: string, translated: string): void {
+	const sourceParagraphs = splitIntoParagraphs(source);
+	const translatedParagraphs = splitIntoParagraphs(translated);
+	if (sourceParagraphs.length === 0 || sourceParagraphs.length !== translatedParagraphs.length) {
+		return;
+	}
+
+	for (let i = 0; i < sourceParagraphs.length; i += 1) {
+		setCachedParagraph(sourceParagraphs[i], translatedParagraphs[i]);
+	}
 }
 
 function buildSkeleton(availableHeight: number): HTMLElement {

@@ -63,3 +63,48 @@ export const setCachedTranslation = (sourceText: string, entry: TranslationMemoE
 		}
 	}
 };
+
+// ── Paragraph-level reuse ───────────────────────────────────────────────────
+// A second cache mapping a single source paragraph → its translated text. It's
+// populated (only when alignment is certain — see the caller's count guard) as a
+// side effect of translating a block, so later selecting just one paragraph of
+// that block restores without a network call. Same RAM-only, ephemeral, bounded
+// properties as the result cache above; values are plain text, so even a generous
+// cap is only tens of KB.
+const maxParagraphEntries = 60;
+const paragraphMemo = new Map<string, string>();
+
+/** Translated text for this exact source paragraph, or undefined. Touches LRU order. */
+export const getCachedParagraph = (sourceParagraph: string): string | undefined => {
+	const key = normalizeKey(sourceParagraph);
+	if (!key) {
+		return undefined;
+	}
+
+	const value = paragraphMemo.get(key);
+	if (value === undefined) {
+		return undefined;
+	}
+
+	paragraphMemo.delete(key);
+	paragraphMemo.set(key, value);
+	return value;
+};
+
+/** Remember one paragraph's translation, evicting the oldest past the cap. */
+export const setCachedParagraph = (sourceParagraph: string, translated: string): void => {
+	const key = normalizeKey(sourceParagraph);
+	if (!key) {
+		return;
+	}
+
+	paragraphMemo.delete(key);
+	paragraphMemo.set(key, translated);
+
+	if (paragraphMemo.size > maxParagraphEntries) {
+		const oldest = paragraphMemo.keys().next().value;
+		if (oldest !== undefined) {
+			paragraphMemo.delete(oldest);
+		}
+	}
+};
