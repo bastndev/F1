@@ -93,8 +93,10 @@
 	cursor: not-allowed;
 }
 
-.agent-new-button.is-loading {
-	animation: pulse-loading 1.5s infinite;
+/* Working — keep the button lit (not dimmed) while the refresh icon spins. */
+.agent-new-button.is-loading:disabled {
+	opacity: 1;
+	cursor: progress;
 }
 
 /* Broken — .f1/ missing or unreadable. The only state that changes the colour. */
@@ -122,7 +124,8 @@
 	display: none;
 }
 
-.agent-new-button.is-stale .agent-memory-brain-icon {
+.agent-new-button.is-stale .agent-memory-brain-icon,
+.agent-new-button.is-loading .agent-memory-brain-icon {
 	display: none;
 }
 
@@ -130,7 +133,14 @@
 	display: block;
 }
 
-/* Small "changes pending" dot — subtle nudge that survives the neutral bg. */
+/* While working, the same refresh icon spins to signal the build is running. */
+.agent-new-button.is-loading .agent-memory-refresh-icon {
+	display: block;
+	animation: agent-memory-spin 0.8s linear infinite;
+}
+
+/* Small "changes pending" dot — neutral (theme button fg) so it contrasts with
+ * the button without reintroducing a warning colour. */
 .agent-memory-badge {
 	display: none;
 	position: absolute;
@@ -140,7 +150,7 @@
 	height: 8px;
 	border-radius: 50%;
 	box-sizing: border-box;
-	background: var(--vscode-testing-iconQueued, #cca700);
+	background: var(--vscode-button-foreground, #ffffff);
 	border: 1.5px solid var(--vscode-sideBar-background, var(--vscode-editor-background));
 }
 
@@ -148,12 +158,9 @@
 	display: block;
 }
 
-@keyframes pulse-loading {
-	0%, 100% {
-		opacity: 1;
-	}
-	50% {
-		opacity: 0.6;
+@keyframes agent-memory-spin {
+	to {
+		transform: rotate(360deg);
 	}
 }
 
