@@ -18,7 +18,7 @@ import * as os from 'os';
 import * as path from 'path';
 import * as https from 'https';
 import * as http from 'http';
-import { spawn, execFile, type ChildProcess } from 'child_process';
+import { spawn, execFile, type ChildProcess, type ChildProcessWithoutNullStreams } from 'child_process';
 
 const VOICE_ID = 'es_ES-sharvard-medium';
 const VOICE_DOWNLOAD_BASE =
@@ -430,98 +430,103 @@ function getPlaybackCommand(piperPath: string): PlaybackCommand {
 	}
 }
 
-let piperProcess: ChildProcess | undefined;
-let playerProcess: ChildProcess | undefined;
+// Several short-lived child processes can be alive at once: a streaming piper+player
+// for the first block, plus a prefetch piper synthesizing the next block during it.
+// Track them all so stop/pause can end every one.
+const activeProcesses = new Set<ChildProcess>();
 let stoppedByUser = false;
+
+function trackProcess(proc: ChildProcess): void {
+	activeProcesses.add(proc);
+	const drop = () => {
+		activeProcesses.delete(proc);
+	};
+	proc.once('close', drop);
+	proc.once('exit', drop);
+}
 
 export function wasVoiceStoppedByUser(): boolean {
 	return stoppedByUser;
 }
 
 export function isVoiceSpeaking(): boolean {
-	return (piperProcess !== undefined && !piperProcess.killed)
-		|| (playerProcess !== undefined && !playerProcess.killed);
+	for (const proc of activeProcesses) {
+		if (!proc.killed) {
+			return true;
+		}
+	}
+	return false;
 }
 
 export function stopVoicePlayback(markStoppedByUser = true): void {
 	stoppedByUser = markStoppedByUser;
-	try {
-		if (piperProcess && playerProcess) {
-			piperProcess.stdout?.unpipe(playerProcess.stdin ?? undefined);
-			playerProcess.stdin?.destroy();
+	for (const proc of activeProcesses) {
+		try {
+			proc.stdin?.destroy();
+			if (!proc.killed) {
+				proc.kill();
+			}
+		} catch (error) {
+			console.error('[f1-voice] Error stopping playback:', error);
 		}
-		if (piperProcess && !piperProcess.killed) {
-			piperProcess.kill();
-		}
-		if (playerProcess && !playerProcess.killed) {
-			playerProcess.kill();
-		}
-	} catch (error) {
-		console.error('[f1-voice] Error stopping playback:', error);
-	} finally {
-		piperProcess = undefined;
-		playerProcess = undefined;
 	}
+	activeProcesses.clear();
 }
 
-/**
- * Speaks the given text with the resolved Piper resources. Resolves when
- * playback finishes (or is stopped by the user); rejects on process errors.
- * Callers obtain `resources` via ensureSpanishVoice() first.
- *
- * `onAudioStart` fires when the first synthesized bytes reach the player —
- * i.e. when sound actually becomes audible, seconds after spawn for long
- * texts. UIs should switch to their "speaking" visuals then, not earlier.
- */
-export async function playSpanishText(
-	resources: VoiceResources,
-	text: string,
-	onAudioStart?: () => void,
-): Promise<void> {
-	const cleaned = text.trim();
-	if (!cleaned) {
-		throw new Error('No text provided');
-	}
-
-	stopVoicePlayback(false);
-
+/** Verify the engine + voice exist and (re)assert exec permissions before spawning. */
+async function assertResourcesReady(resources: VoiceResources): Promise<void> {
 	if (!(await fileExists(resources.piperPath))) {
 		throw new Error(`Piper executable not found at: ${resources.piperPath}`);
 	}
 	if (!(await fileExists(resources.modelPath))) {
 		throw new Error('Spanish voice model not found.');
 	}
-
 	// The engine may come from ATM's storage where another process manages
 	// permissions; re-asserting is idempotent and cheap.
 	if (process.platform === 'linux' || process.platform === 'darwin') {
 		await setExecutablePermissions(path.dirname(resources.piperPath));
 		await fixSymlinks(path.dirname(resources.piperPath));
 	}
+}
 
-	const playback = getPlaybackCommand(resources.piperPath);
-	stoppedByUser = false;
-
+function spawnPiper(resources: VoiceResources): ChildProcessWithoutNullStreams {
 	const piper = spawn(resources.piperPath, ['--model', resources.modelPath, '--output-raw'], {
 		cwd: path.dirname(resources.piperPath),
 		env: { ...process.env },
 		windowsHide: false,
 	});
-	piperProcess = piper;
+	trackProcess(piper);
+	return piper;
+}
 
+/**
+ * Streams synthesis straight to the speaker (piper → player pipe), so audio starts
+ * as soon as the first bytes are produced. This is the fast-start path used for the
+ * FIRST block of a run (and single-block reads) — no full-buffer wait. `onAudioStart`
+ * fires on the first audible bytes, ideal for kicking off the next block's prefetch.
+ */
+export async function streamSpeech(
+	resources: VoiceResources,
+	text: string,
+	onAudioStart?: () => void,
+): Promise<void> {
+	const cleaned = text.trim();
+	if (!cleaned) {
+		return;
+	}
+
+	await assertResourcesReady(resources);
+	const playback = getPlaybackCommand(resources.piperPath);
+	stoppedByUser = false;
+
+	const piper = spawnPiper(resources);
 	const player = spawn(playback.command, playback.args);
-	playerProcess = player;
+	trackProcess(player);
 
 	const noop = () => undefined;
 	piper.stdout.on('error', noop);
 	player.stdin.on('error', noop);
-
-	piper.stdout.once('data', () => {
-		if (!stoppedByUser) {
-			onAudioStart?.();
-		}
-	});
-
+	piper.stdout.once('data', () => onAudioStart?.());
 	piper.stdout.pipe(player.stdin);
 	piper.stdin.write(cleaned);
 	piper.stdin.end();
@@ -537,52 +542,139 @@ export async function playSpanishText(
 				resolve();
 			}
 		};
-
 		const rejectOnce = (err: unknown) => {
 			if (!settled) {
 				settled = true;
 				reject(err instanceof Error ? err : new Error(String(err)));
 			}
 		};
-
 		const maybeFinish = () => {
-			if (stoppedByUser || (piperClosed && playerClosed)) {
+			if (piperClosed && playerClosed) {
 				resolveOnce();
 			}
 		};
 
-		const onProcessError = (err: Error) => {
-			if (stoppedByUser) {
-				resolveOnce();
-			} else {
-				stopVoicePlayback();
-				rejectOnce(err);
-			}
-		};
-
-		piper.on('error', onProcessError);
-		player.on('error', onProcessError);
-
+		// null exit code == killed by stop/pause — treat as a clean end.
+		piper.on('error', rejectOnce);
+		player.on('error', rejectOnce);
 		piper.on('close', (code) => {
-			piperProcess = undefined;
 			piperClosed = true;
-			if (!stoppedByUser && code !== 0 && code !== null) {
-				stopVoicePlayback();
+			if (code !== 0 && code !== null) {
 				rejectOnce(new Error(`Piper process exited with code: ${code}`));
 			} else {
 				maybeFinish();
 			}
 		});
-
 		player.on('close', (code) => {
-			playerProcess = undefined;
 			playerClosed = true;
-			if (stoppedByUser || code === 0) {
-				maybeFinish();
-			} else {
-				stopVoicePlayback();
+			if (code !== 0 && code !== null) {
 				rejectOnce(new Error(`Player process exited with code: ${code}`));
+			} else {
+				maybeFinish();
 			}
 		});
+	});
+}
+
+/**
+ * Synthesizes `text` to raw PCM (S16LE, 22050 Hz, mono) entirely in memory and
+ * resolves the buffer — no audio is played. This is the "produce" half, run ahead
+ * of playback so the next block is ready before the current one ends. Rejects on a
+ * real Piper failure; a process the user stopped resolves with whatever it had.
+ */
+export async function synthesizeSpeech(resources: VoiceResources, text: string): Promise<Buffer> {
+	const cleaned = text.trim();
+	if (!cleaned) {
+		return Buffer.alloc(0);
+	}
+
+	await assertResourcesReady(resources);
+
+	return new Promise<Buffer>((resolve, reject) => {
+		const piper = spawnPiper(resources);
+		const parts: Buffer[] = [];
+		let settled = false;
+		const finish = (error?: Error, buffer?: Buffer) => {
+			if (settled) {
+				return;
+			}
+			settled = true;
+			if (error) {
+				reject(error);
+			} else {
+				resolve(buffer ?? Buffer.concat(parts));
+			}
+		};
+
+		piper.stdout.on('data', (data: Buffer) => parts.push(data));
+		piper.stdout.on('error', () => undefined);
+		piper.stdin.on('error', () => undefined);
+		piper.on('error', (error) => finish(error));
+		piper.on('close', (code) => {
+			// null code == killed (stop/pause): resolve with what we have; the caller
+			// bails on its own sequence check, so the buffer is discarded.
+			if (code === 0 || code === null) {
+				finish(undefined, Buffer.concat(parts));
+			} else {
+				finish(new Error(`Piper process exited with code: ${code}`));
+			}
+		});
+
+		piper.stdin.write(cleaned);
+		piper.stdin.end();
+	});
+}
+
+/**
+ * Plays an already-synthesized PCM buffer through the platform player and resolves
+ * when playback ends (or the user stops it). `onAudioStart` fires as playback
+ * begins — UIs flip to their "speaking" visuals then. Because the buffer is ready,
+ * audio is effectively immediate (no synthesis wait between blocks).
+ */
+export function playPcmBuffer(
+	resources: VoiceResources,
+	buffer: Buffer,
+	onAudioStart?: () => void,
+): Promise<void> {
+	return new Promise((resolve, reject) => {
+		if (!buffer.length) {
+			resolve();
+			return;
+		}
+
+		const playback = getPlaybackCommand(resources.piperPath);
+		stoppedByUser = false;
+
+		const player = spawn(playback.command, playback.args);
+		trackProcess(player);
+		player.stdin.on('error', () => undefined);
+
+		let settled = false;
+		const finish = (error?: Error) => {
+			if (settled) {
+				return;
+			}
+			settled = true;
+			if (error) {
+				reject(error);
+			} else {
+				resolve();
+			}
+		};
+
+		player.on('error', (error) => finish(error));
+		player.on('close', (code) => {
+			// null code == killed by stop/pause; treat like a clean end.
+			if (code === 0 || code === null) {
+				finish();
+			} else {
+				finish(new Error(`Player process exited with code: ${code}`));
+			}
+		});
+
+		// The buffer is ready, so audio begins effectively now.
+		onAudioStart?.();
+		player.stdin.write(buffer);
+		player.stdin.end();
 	});
 }

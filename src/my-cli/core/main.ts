@@ -12,7 +12,9 @@ import { translatePromptToEnglish } from './translation/host-prompt-translator';
 import { resolveCustomCliLaunch, validateCustomCliCommandInput } from './terminal-cli/custom-cli';
 import {
 	ensureSpanishVoice,
-	playSpanishText,
+	streamSpeech,
+	synthesizeSpeech,
+	playPcmBuffer,
 	stopVoicePlayback,
 	isVoiceSpeaking,
 } from './voice/host-voice-tts';
@@ -509,23 +511,84 @@ export class MyCliViewProvider implements vscode.WebviewViewProvider, vscode.Dis
 			// Reuses ATM's piper engine/voice when installed; downloads into
 			// F1's globalStorage (with a progress notification) otherwise.
 			session.resources ??= await ensureSpanishVoice(this._extensionContext);
+			const resources = session.resources;
+			const chunks = session.chunks;
 
-			for (let index = session.index; index < session.chunks.length; index += 1) {
+			// Prefetch helper: synthesize a block to a buffer ahead of time. The no-op
+			// .catch keeps a bail (pause/stop kills the in-flight synth) from surfacing
+			// as an unhandled rejection; the real await still throws on a genuine failure.
+			const startSynth = (text: string) => {
+				let ready = false;
+				const promise = synthesizeSpeech(resources, text).then((audio) => {
+					ready = true;
+					return audio;
+				});
+				void promise.catch(() => undefined);
+				return { promise, isReady: () => ready };
+			};
+
+			// Best of both worlds:
+			//  • The first block of this run STREAMS — audio starts on the first synthesized
+			//    bytes, so there's no upfront wait (a single-block read is just this).
+			//  • While it plays, the next block is synthesized to a buffer; every later block
+			//    plays from its prefetched buffer → seamless, gap-free transitions.
+			let pending: { promise: Promise<Buffer>; isReady: () => boolean } | undefined;
+
+			for (let index = session.index; index < chunks.length; index += 1) {
 				if (!this._isVoiceRunActive(session, seq)) {
 					return;
 				}
 
 				session.index = index;
-				session.state = 'preparing';
-				await post('preparing');
-				// 'preparing' holds through synthesis; 'speaking' fires only once
-				// the first audio bytes flow, so the UI animates with the sound.
-				await playSpanishText(session.resources, session.chunks[index], () => {
+				const nextIndex = index + 1;
+
+				if (!pending) {
+					// First block of the run (fresh start or resume): fast streaming start,
+					// and begin the next block's prefetch as soon as audio is flowing.
+					session.state = 'preparing';
+					await post('preparing');
+					await streamSpeech(resources, chunks[index], () => {
+						if (!this._isVoiceRunActive(session, seq)) {
+							return;
+						}
+						session.state = 'speaking';
+						void post('speaking');
+						if (nextIndex < chunks.length && !pending) {
+							pending = startSynth(chunks[nextIndex]);
+						}
+					});
+					continue;
+				}
+
+				// Prefetched block: play it (already, or nearly, synthesized) with no gap,
+				// then start synthesizing the one after to overlap this playback.
+				const current = pending;
+				if (!current.isReady()) {
+					session.state = 'preparing';
+					await post('preparing');
+				}
+
+				let audio: Buffer;
+				try {
+					audio = await current.promise;
+				} catch (error) {
 					if (!this._isVoiceRunActive(session, seq)) {
 						return;
 					}
-					session.state = 'speaking';
-					void post('speaking');
+					throw error;
+				}
+				if (!this._isVoiceRunActive(session, seq)) {
+					return;
+				}
+
+				pending = nextIndex < chunks.length ? startSynth(chunks[nextIndex]) : undefined;
+
+				session.state = 'speaking';
+				await playPcmBuffer(resources, audio, () => {
+					if (this._isVoiceRunActive(session, seq)) {
+						session.state = 'speaking';
+						void post('speaking');
+					}
 				});
 			}
 
