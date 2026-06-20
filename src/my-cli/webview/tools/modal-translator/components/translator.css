@@ -423,26 +423,28 @@
 	z-index: -1;
 	inset: -5px -10px;
 	background: rgba(93, 202, 165, 0.08);
+	border-left: 2px solid rgba(93, 202, 165, 0.6);
 	transition: background 160ms ease;
 }
 
 .translator-text .is-voice-start::before {
 	top: 0;
-	border-top-left-radius: 8px;
-	border-top-right-radius: 8px;
+	border-top-left-radius: 0;
+	border-top-right-radius: 0;
 }
 
 .translator-text .is-voice-end::before {
 	bottom: 0;
-	border-bottom-left-radius: 8px;
-	border-bottom-right-radius: 8px;
+	border-bottom-left-radius: 0;
+	border-bottom-right-radius: 0;
 }
 
 /* Fallback: the whole translation is one unstructured block (no child elements),
    so the container itself carries the highlight — a plain tint, no layout change. */
 .translator-text.is-voice-active {
-	border-radius: 6px;
+	border-radius: 0;
 	background: rgba(93, 202, 165, 0.08);
+	box-shadow: inset 2px 0 0 0 rgba(93, 202, 165, 0.6);
 }
 
 .translator-text strong {
