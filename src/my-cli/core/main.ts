@@ -69,9 +69,9 @@ export class MyCliViewProvider implements vscode.WebviewViewProvider, vscode.Dis
 		// canvas/viewport stale, painting a black rectangle on return. onDidChangeVisibility
 		// is the only reliable signal — relay it so the webview re-fits and repaints.
 		webviewView.onDidChangeVisibility(() => {
-			if (webviewView.visible) {
-				void webviewView.webview.postMessage({ type: 'cli.visible' });
-			}
+			void webviewView.webview.postMessage({
+				type: webviewView.visible ? 'cli.visible' : 'cli.hidden'
+			});
 		});
 		webviewView.onDidDispose(() => {
 			this.sessionManager.detach();

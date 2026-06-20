@@ -1,16 +1,16 @@
 # Graph Report - F1  (2026-06-20)
 
 ## Corpus Check
-- 273 files · ~758,137 words
+- 273 files · ~758,561 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 2232 nodes · 4445 edges · 127 communities (110 shown, 17 thin omitted)
+- 2231 nodes · 4447 edges · 127 communities (110 shown, 17 thin omitted)
 - Extraction: 100% EXTRACTED · 0% INFERRED · 0% AMBIGUOUS · INFERRED: 1 edges (avg confidence: 0.8)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `4dc5e2fa`
+- Built from commit: `2a098f78`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -101,6 +101,7 @@
 - [[_COMMUNITY_Community 83|Community 83]]
 - [[_COMMUNITY_Community 84|Community 84]]
 - [[_COMMUNITY_Community 85|Community 85]]
+- [[_COMMUNITY_Community 86|Community 86]]
 - [[_COMMUNITY_Community 87|Community 87]]
 - [[_COMMUNITY_Community 88|Community 88]]
 - [[_COMMUNITY_Community 89|Community 89]]
@@ -130,10 +131,9 @@
 - [[_COMMUNITY_Community 127|Community 127]]
 - [[_COMMUNITY_Community 128|Community 128]]
 - [[_COMMUNITY_Community 129|Community 129]]
-- [[_COMMUNITY_Community 131|Community 131]]
 
 ## God Nodes (most connected - your core abstractions)
-1. `Communities (133 total, 20 thin omitted)` - 103 edges
+1. `Communities (127 total, 17 thin omitted)` - 100 edges
 2. `MySkillsViewProvider` - 48 edges
 3. `MyCliViewProvider` - 40 edges
 4. `initPromptTabs()` - 37 edges
@@ -145,8 +145,8 @@
 10. `createClaudeMarkdown()` - 18 edges
 
 ## Surprising Connections (you probably didn't know these)
-- `requestActiveUsage()` --calls--> `isUsageAgentBusy()`  [EXTRACTED]
-  src/my-cli/webview/panel-terminal/terminal.ts → src/my-cli/webview/tools/modal-use/agents/index.ts
+- `getUsageCommandForAgent()` --calls--> `getAgentSlug()`  [EXTRACTED]
+  src/my-cli/webview/panel-terminal/terminal.ts → src/my-cli/shared/agents.ts
 - `handlePaletteOptionKeydown()` --calls--> `activate()`  [INFERRED]
   src/my-cli/webview/launcher/index.ts → src/extension.ts
 - `MyCliViewProvider` --references--> `CustomCliLaunch`  [EXTRACTED]
@@ -154,7 +154,7 @@
 - `translateWithMyMemory()` --calls--> `decodeHtmlEntities()`  [EXTRACTED]
   src/my-cli/core/translation/host-prompt-translator.ts → src/my-cli/shared/translation/html-entities.ts
 - `getAgentSlug()` --calls--> `getAgentSlug()`  [EXTRACTED]
-  src/my-cli/webview/panel-terminal/terminal.ts → src/my-cli/shared/agents.ts
+  src/my-cli/webview/launcher/index.ts → src/my-cli/shared/agents.ts
 
 ## Import Cycles
 - 1-file cycle: `esbuild.js -> esbuild.js`
@@ -175,11 +175,11 @@ Nodes (34): webMeta, webRelations, webSignals, webTechnologies, mobileMeta, mobi
 
 ### Community 3 - "Community 3"
 Cohesion: 0.10
-Nodes (47): getAntigravityGroupLabel(), isAntigravityBusy(), parseAntigravityUsage(), getSection(), parseClaudeUsage(), getCodexMetric(), getCodexPercentBars(), getCodexResetDetail() (+39 more)
+Nodes (50): getAntigravityGroupLabel(), isAntigravityBusy(), parseAntigravityUsage(), getSection(), parseClaudeUsage(), getCodexMetric(), getCodexPercentBars(), getCodexResetDetail() (+42 more)
 
 ### Community 4 - "Community 4"
 Cohesion: 0.04
-Nodes (32): isUsageViewInline(), agentIcons, bootSkeletons, clipboardReadRpc, CliSession, copyToTranslate, dismissActiveUsageView(), getSubmitDelayMs() (+24 more)
+Nodes (31): isLynxPanelNavChord(), agentIcons, bootSkeletons, clipboardReadRpc, CliSession, copyToTranslate, getSubmitDelayMs(), getUsageCommandForAgent() (+23 more)
 
 ### Community 5 - "Community 5"
 Cohesion: 0.09
@@ -190,8 +190,8 @@ Cohesion: 0.08
 Nodes (42): createManualGithubSkill(), createSkillsFromGithubSkillUrls(), CuratedOfficialPayload, CuratedOwner, CuratedSkill, decodeHtml(), extractRawSkills(), fetchAllTimeSkills() (+34 more)
 
 ### Community 7 - "Community 7"
-Cohesion: 0.07
-Nodes (42): isAgentsClaudeInstructionFileName(), AgentsClaudeInstructionFileName, FLAME_SKILL_URLS, CREATE_ROOT_FILE_NAMES, CreateSkillChatCreateMessage, CreateSkillChatTypingMessage, CreateSkillDesignCreateMessage, CreateSkillDesignSelectionMessage (+34 more)
+Cohesion: 0.08
+Nodes (40): isAgentsClaudeInstructionFileName(), FLAME_SKILL_URLS, CREATE_ROOT_FILE_NAMES, CreateSkillChatCreateMessage, CreateSkillChatTypingMessage, CreateSkillDesignCreateMessage, CreateSkillDesignSelectionMessage, CreateSkillDesignStatus (+32 more)
 
 ### Community 8 - "Community 8"
 Cohesion: 0.12
@@ -199,15 +199,15 @@ Nodes (5): MyCliViewProvider, InboundWebviewMessage, stopVoicePlayback(), Active
 
 ### Community 9 - "Community 9"
 Cohesion: 0.07
-Nodes (38): agentIconPalette, cliInput, getAgentSlug(), getPaletteModels(), getPaletteOptions(), getRequiredElement(), handlePaletteOptionKeydown(), inputContainer (+30 more)
+Nodes (37): agentIconPalette, cliInput, getAgentSlug(), getPaletteModels(), getPaletteOptions(), getRequiredElement(), handlePaletteOptionKeydown(), inputContainer (+29 more)
 
 ### Community 10 - "Community 10"
-Cohesion: 0.07
-Nodes (18): DesignTypographyOption, designTypographyOptions, canSkipStep(), createSkippedVisual(), designColorById, DesignCreateStatusDetail, DesignOpenDetail, designStyleById (+10 more)
+Cohesion: 0.06
+Nodes (19): DesignTypographyOption, designTypographyOptions, canSkipStep(), createSkippedVisual(), designColorById, DesignCreateStatusDetail, DesignOpenDetail, designStyleById (+11 more)
 
 ### Community 11 - "Community 11"
-Cohesion: 0.08
-Nodes (12): createAgentsClaudeInstructionMarkdown(), ensureTrailingNewline(), escapeHtml(), filterInstallableSkills(), getInstalledMarketplaceSkillIds(), getNonce(), getWorkspaceName(), isMarketplaceFolderSkillId() (+4 more)
+Cohesion: 0.07
+Nodes (17): createAgentsClaudeInstructionMarkdown(), AgentsClaudeInstructionFileName, InstallSkillInstallMessage, InstallSkillsSearchRequestMessage, LocalSkillDeleteMessage, CreateSkillRootInstructionCreateMessage, ensureTrailingNewline(), escapeHtml() (+9 more)
 
 ### Community 12 - "Community 12"
 Cohesion: 0.10
@@ -262,8 +262,8 @@ Cohesion: 0.11
 Nodes (23): clampVisibleResultOffset(), createRecommendationCard(), createSkeletonCard(), CreateSkillMode, CreateSkillSubmitDetail, createSvgIcon(), DetectedTechnology, getPageActionState() (+15 more)
 
 ### Community 25 - "Community 25"
-Cohesion: 0.17
-Nodes (13): designStyleOptions, DesignStyleProfile, bentoStyle, liquidGlassStyle, glassmorphismStyle, neumorphismStyle, minimalisticStyle, pacmanStyle (+5 more)
+Cohesion: 0.19
+Nodes (12): DesignStyleProfile, bentoStyle, liquidGlassStyle, glassmorphismStyle, neumorphismStyle, minimalisticStyle, pacmanStyle, dashboardStyle (+4 more)
 
 ### Community 26 - "Community 26"
 Cohesion: 0.11
@@ -278,8 +278,8 @@ Cohesion: 0.13
 Nodes (21): buildCacheKey(), getCachedTranslation(), setCachedTranslation(), translationCache, buildTranslationFailure(), isProviderCoolingDown(), MyMemoryResponse, normalizeProviderError() (+13 more)
 
 ### Community 29 - "Community 29"
-Cohesion: 0.18
-Nodes (13): webSkillFastTemplates, mobileSkillFastTemplates, backendSkillFastTemplates, uiUxSkillFastTemplates, aiSkillFastTemplates, testingSkillFastTemplates, securitySkillFastTemplates, databaseSkillFastTemplates (+5 more)
+Cohesion: 0.16
+Nodes (15): webSkillFastTemplates, mobileSkillFastTemplates, backendSkillFastTemplates, uiUxSkillFastTemplates, aiSkillFastTemplates, testingSkillFastTemplates, securitySkillFastTemplates, databaseSkillFastTemplates (+7 more)
 
 ### Community 30 - "Community 30"
 Cohesion: 0.13
@@ -290,8 +290,8 @@ Cohesion: 0.17
 Nodes (17): buildPasteMarker(), codeSignals, countLines(), detectPasteKind(), expandPasteMarkers(), PasteAttachment, PasteKind, ProtectedPasteMarker (+9 more)
 
 ### Community 32 - "Community 32"
-Cohesion: 0.19
-Nodes (18): getLauncherWebviewHtml(), getNonce(), getWebviewAssetUri(), getWebviewAssetUriString(), getWorkspaceDisplayPath(), serializeJsonForHtmlScript(), escapeHtml(), getAgentWebviewHtml() (+10 more)
+Cohesion: 0.17
+Nodes (19): getLauncherWebviewHtml(), getNonce(), getWebviewAssetUri(), getWebviewAssetUriString(), getWorkspaceDisplayPath(), serializeJsonForHtmlScript(), escapeHtml(), getAgentWebviewHtml() (+11 more)
 
 ### Community 33 - "Community 33"
 Cohesion: 0.16
@@ -302,8 +302,8 @@ Cohesion: 0.17
 Nodes (20): downloadFile(), downloadMissingResources(), DownloadProgress, ensureSpanishVoice(), extractArchive(), fileExists(), findExistingPiper(), findExistingVoice() (+12 more)
 
 ### Community 35 - "Community 35"
-Cohesion: 0.18
-Nodes (17): appendManagedBlock(), findGitignoreBlock(), formatManagedBlockSpacing(), getSkillNameFromId(), GitignoreBlock, GitignoreText, lockEntryMatchesSkillName(), normalizeLineEndings() (+9 more)
+Cohesion: 0.16
+Nodes (18): deleteWorkspaceRootSkill(), getDisabledSkillIds(), getSkillNameFromId(), getWorkspaceSkillUri(), GitignoreBlock, GitignoreText, isRootSkillFile(), isRootSkillFolder() (+10 more)
 
 ### Community 36 - "Community 36"
 Cohesion: 0.19
@@ -322,7 +322,7 @@ Cohesion: 0.15
 Nodes (12): Design decisions & gotchas (read before reviving), File 1 — `src/my-memory/hook/run-hook.ts` (the runner), File 2 — `src/my-memory/core/git-hooks.ts` (install / remove / detect), File 3 — `MemoryService` integration (`src/my-memory/core/memory-service.ts`), File 4 — Host wiring (`src/my-cli/core/main.ts`), File 5 — Build target (`esbuild.js`), Flow on commit, My Memory — auto-refresh `.f1/` on commit (shelved feature) (+4 more)
 
 ### Community 40 - "Community 40"
-Cohesion: 0.18
+Cohesion: 0.17
 Nodes (19): clearSearchRecommendationCache(), computeRecommendations(), createEmptyRecommendationResult(), createIntentDisplayTechnologies(), createPublisherRecommendationResult(), createRecommendationResult(), getIntentCategories(), getSearchRecommendationPreview() (+11 more)
 
 ### Community 41 - "Community 41"
@@ -331,19 +331,19 @@ Nodes (16): translateEnToSpanish(), escapeHtml(), renderInline(), renderMarkdown
 
 ### Community 42 - "Community 42"
 Cohesion: 0.02
-Nodes (103): Communities (133 total, 20 thin omitted), Community 0 - "Community 0", Community 10 - "Community 10", Community 11 - "Community 11", Community 127 - "Community 127", Community 12 - "Community 12", Community 131 - "Community 131", Community 132 - "Community 132" (+95 more)
+Nodes (100): Communities (127 total, 17 thin omitted), Community 0 - "Community 0", Community 10 - "Community 10", Community 11 - "Community 11", Community 127 - "Community 127", Community 12 - "Community 12", Community 13 - "Community 13", Community 14 - "Community 14" (+92 more)
 
 ### Community 43 - "Community 43"
-Cohesion: 0.09
-Nodes (24): InstallChoice, installMarketplaceSkill(), isSafeMarketplaceSkillReference(), pickInstallTarget(), runSkillsInstall(), FlameSkillsRequestMessage, FlameSkillsUpdateMessage, InstallSkillInstallMessage (+16 more)
+Cohesion: 0.12
+Nodes (16): FlameSkillsRequestMessage, FlameSkillsUpdateMessage, InstallSkillsMoreRequestMessage, InstallSkillsRequestMessage, InstallSkillsSearchUpdateMessage, InstallSkillStatusMessage, InstallSkillsUpdateMessage, OfficialSkillSource (+8 more)
 
 ### Community 44 - "Community 44"
 Cohesion: 0.15
 Nodes (19): appendToSessionBuffer(), clearPendingUsageRequest(), createTerminalView(), disposeTerminalView(), getAgentSlug(), handleOutput(), isVisualSleepEnabled(), notePendingUsageOutput() (+11 more)
 
 ### Community 45 - "Community 45"
-Cohesion: 0.16
-Nodes (17): SkillFastArchetypeId, SkillFastRenderContext, ARCHETYPE_SECTION_TITLES, buildDesignRulebookProfile(), buildScopeAnchor(), buildSkillFastUniqueProfile(), DECISION_BIASES, extractScopeTerms() (+9 more)
+Cohesion: 0.18
+Nodes (15): ARCHETYPE_SECTION_TITLES, buildDesignRulebookProfile(), buildScopeAnchor(), buildSkillFastUniqueProfile(), DECISION_BIASES, extractScopeTerms(), hashString(), LENS_OPTIONS (+7 more)
 
 ### Community 46 - "Community 46"
 Cohesion: 0.20
@@ -362,12 +362,12 @@ Cohesion: 0.24
 Nodes (16): extractSkillFastIntentSignals(), extractTerms(), getHoverTransitionIntent(), hasAnimationDisabled(), hasAny(), hasFastMotionIntent(), hasGlassmorphismIntent(), hasInteractiveMaterialIntent() (+8 more)
 
 ### Community 50 - "Community 50"
-Cohesion: 0.20
-Nodes (15): MarketplaceQuery, QueryAnalysis, RecommendedSkill, SearchRecommendationResult, SearchResultKind, SkillCandidate, SkillPage, InstallMarketplaceSkill (+7 more)
+Cohesion: 0.16
+Nodes (17): MarketplaceQuery, InstalledSkillSnapshot, QueryAnalysis, RecommendedSkill, SearchRecommendationRequest, SearchRecommendationResult, SearchResultKind, SkillCandidate (+9 more)
 
 ### Community 51 - "Community 51"
-Cohesion: 0.32
-Nodes (12): copyDirectory(), deleteSavedSkill(), enableSavedSkill(), getIndexUri(), getSavedSkills(), getSavedSkillsDir(), isSavedSkillInWorkspace(), readIndex() (+4 more)
+Cohesion: 0.10
+Nodes (24): setWorkspaceRootSkillEnabled(), copyDirectory(), deleteSavedSkill(), enableSavedSkill(), getIndexUri(), getSavedSkills(), getSavedSkillsDir(), isSavedSkillInWorkspace() (+16 more)
 
 ### Community 52 - "Community 52"
 Cohesion: 0.23
@@ -478,8 +478,8 @@ Cohesion: 0.36
 Nodes (8): buildCanonicalSearchQuery(), buildFallbackQuery(), buildProjectTechnologyQuery(), normalizeQuery(), PROJECT_TECH_QUERY_MAP, CanonicalSearchQuery, CategorySelection, getVariantBySelection()
 
 ### Community 80 - "Community 80"
-Cohesion: 0.44
-Nodes (8): add(), addSkillsLockEntries(), getInstalledSkillSnapshot(), isSkillInstalled(), lastPathSegment(), normalize(), InstalledSkillSnapshot, getWorkspaceRootSkills()
+Cohesion: 0.54
+Nodes (7): add(), addSkillsLockEntries(), getInstalledSkillSnapshot(), isSkillInstalled(), lastPathSegment(), normalize(), getWorkspaceRootSkills()
 
 ### Community 81 - "Community 81"
 Cohesion: 0.33
@@ -494,12 +494,16 @@ Cohesion: 0.22
 Nodes (9): contributes, commands, keybindings, views, viewsContainers, myCliContainer, myskills-activity, activitybar (+1 more)
 
 ### Community 84 - "Community 84"
-Cohesion: 0.27
-Nodes (7): toCreateSkillSearchPayload(), getCachedTranslation(), setCachedTranslation(), translationCache, translateQuery(), translateWithGoogle(), translateWithMyMemory()
+Cohesion: 0.36
+Nodes (6): getCachedTranslation(), setCachedTranslation(), translationCache, translateQuery(), translateWithGoogle(), translateWithMyMemory()
 
 ### Community 85 - "Community 85"
 Cohesion: 0.22
 Nodes (8): Explore the API, Get up and running straight away, Go further, Make changes, Run tests, Setup, Welcome to your VS Code Extension, What's in the folder
+
+### Community 86 - "Community 86"
+Cohesion: 0.39
+Nodes (6): InstallChoice, installMarketplaceSkill(), isSafeMarketplaceSkillReference(), pickInstallTarget(), runSkillsInstall(), InstallSkillTarget
 
 ### Community 87 - "Community 87"
 Cohesion: 0.39
@@ -546,19 +550,15 @@ Cohesion: 0.40
 Nodes (4): Dependency graph, Package, Project map, Top-level folders
 
 ### Community 99 - "Community 99"
-Cohesion: 0.27
-Nodes (10): deleteWorkspaceRootSkill(), getDisabledSkillIds(), getWorkspaceSkillUri(), isRootSkillFile(), isRootSkillFolder(), isSupportedSkillId(), parseManagedSkillLine(), readGitignoreText() (+2 more)
+Cohesion: 0.46
+Nodes (8): appendManagedBlock(), findGitignoreBlock(), formatManagedBlockSpacing(), normalizeLineEndings(), removeGitignoreSkillState(), splitLines(), updateGitignoreSkillState(), withLineEndings()
 
 ### Community 127 - "Community 127"
 Cohesion: 0.13
 Nodes (16): CliSessionStatus, CustomCliLaunch, HostToWebviewMessage, PtyHostCommand, PtyHostEvent, WebviewToHostMessage, HostMessage, send() (+8 more)
 
-### Community 131 - "Community 131"
-Cohesion: 0.14
-Nodes (12): LocalSkill, LocalSkillDeleteMessage, LocalSkillDeleteSavedMessage, LocalSkillEnableSavedMessage, LocalSkillKind, LocalSkillOpenMessage, LocalSkillSaveMessage, LocalSkillSetEnabledMessage (+4 more)
-
 ## Knowledge Gaps
-- **563 isolated node(s):** `esbuild`, `fs`, `path`, `production`, `esbuildProblemMatcherPlugin` (+558 more)
+- **561 isolated node(s):** `esbuild`, `fs`, `path`, `production`, `esbuildProblemMatcherPlugin` (+556 more)
   These have ≤1 connection - possible missing edges or undocumented components.
 - **17 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
@@ -567,12 +567,12 @@ _Questions this graph is uniquely positioned to answer:_
 
 - **Why does `MyCliViewProvider` connect `Community 8` to `Community 32`, `Community 81`, `Community 36`, `Community 127`?**
   _High betweenness centrality (0.215) - this node is a cross-community bridge._
-- **Why does `LocalSkill` connect `Community 131` to `Community 51`, `Community 35`, `Community 14`?**
+- **Why does `LocalSkill` connect `Community 51` to `Community 35`, `Community 14`?**
   _High betweenness centrality (0.046) - this node is a cross-community bridge._
 - **Why does `VoiceProgress` connect `Community 8` to `Community 32`, `Community 65`, `Community 4`, `Community 41`, `Community 127`?**
   _High betweenness centrality (0.036) - this node is a cross-community bridge._
 - **What connects `esbuild`, `fs`, `path` to the rest of the system?**
-  _563 weakly-connected nodes found - possible documentation gaps or missing edges._
+  _561 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `Community 0` be split into smaller, more focused modules?**
   _Cohesion score 0.06052393857271906 - nodes in this community are weakly interconnected._
 - **Should `Community 1` be split into smaller, more focused modules?**

@@ -1049,6 +1049,18 @@ window.addEventListener('message', (event: MessageEvent<ServerMessage>) => {
 		return;
 	}
 
+	if (message.type === 'cli.hidden') {
+		// The translator is a transient action panel: it auto-opens on copy and has
+		// no draft to preserve. retainContextWhenHidden would otherwise leave it open
+		// across a panel switch, so it reappears (looking like an auto-open) when the
+		// user returns. Dismiss it on hide. The Prompt modal is deliberately left
+		// alone so an in-progress draft survives the round-trip.
+		if (toolsController?.getOpenTool() === 'translate') {
+			toolsController.close();
+		}
+		return;
+	}
+
 	if (message.type === 'cli.error') {
 		terminalStatus.textContent = message.message;
 	}
