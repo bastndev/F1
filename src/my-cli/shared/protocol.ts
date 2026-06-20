@@ -47,6 +47,7 @@ export type WebviewToHostMessage =
 	| { type: 'cli.ready' }
 	| { type: 'cli.create'; agent: string; launchGuard?: AgentLaunchGuardMessage }
 	| { type: 'customCli.open'; source: 'launcher' | 'panel' }
+	| { type: 'cli.openTutorial' }
 	| { type: 'cli.input'; sessionId: string; data: string }
 	| { type: 'cli.switch'; sessionId: string }
 	| { type: 'cli.resize'; sessionId?: string; cols: number; rows: number }
@@ -64,7 +65,8 @@ export type WebviewToHostMessage =
 	| { type: 'voice.query' }
 	| { type: 'clipboard.read'; id: string }
 	| { type: 'memory.getSnapshot'; id: string; enabled?: boolean; restore?: boolean }
-	| { type: 'memory.rebuild'; id: string };
+	| { type: 'memory.rebuild'; id: string }
+	| { type: 'cli.installExtension'; extensionId: string };
 
 /** Extension host → webview. */
 export type HostToWebviewMessage =
@@ -116,6 +118,7 @@ export type InboundWebviewMessage = {
 	overwrite?: boolean;
 	enabled?: boolean;
 	restore?: boolean;
+	extensionId?: string;
 };
 
 /** Extension host → pty-host child process (Node IPC). */

@@ -199,7 +199,7 @@ async function main() {
 	});
 	const mySkillsCreateSkillSupportCtx = await esbuild.context({
 		entryPoints: [
-			'src/my-skills/screens/create-skill/support/support.ts'
+			'src/shared/tutorial/t-skill/support.ts'
 		],
 		bundle: true,
 		format: 'iife',
@@ -208,6 +208,22 @@ async function main() {
 		sourcesContent: false,
 		platform: 'browser',
 		outfile: 'dist/create-skill-support.js',
+		logLevel: 'silent',
+		plugins: [
+			esbuildProblemMatcherPlugin,
+		],
+	});
+	const cliTutorialCtx = await esbuild.context({
+		entryPoints: [
+			'src/shared/tutorial/t-cli/support.ts'
+		],
+		bundle: true,
+		format: 'iife',
+		minify: production,
+		sourcemap: !production,
+		sourcesContent: false,
+		platform: 'browser',
+		outfile: 'dist/cli-tutorial.js',
 		logLevel: 'silent',
 		plugins: [
 			esbuildProblemMatcherPlugin,
@@ -238,6 +254,7 @@ async function main() {
 		await mySkillsWebviewCtx.watch();
 		await mySkillsCreateSkillCtx.watch();
 		await mySkillsCreateSkillSupportCtx.watch();
+		await cliTutorialCtx.watch();
 		await ptyHostCtx.watch();
 		watchWebviewAssets();
 	} else {
@@ -247,6 +264,7 @@ async function main() {
 		await mySkillsWebviewCtx.rebuild();
 		await mySkillsCreateSkillCtx.rebuild();
 		await mySkillsCreateSkillSupportCtx.rebuild();
+		await cliTutorialCtx.rebuild();
 		await ptyHostCtx.rebuild();
 		await extensionCtx.dispose();
 		await terminalCtx.dispose();
@@ -254,6 +272,7 @@ async function main() {
 		await mySkillsWebviewCtx.dispose();
 		await mySkillsCreateSkillCtx.dispose();
 		await mySkillsCreateSkillSupportCtx.dispose();
+		await cliTutorialCtx.dispose();
 		await ptyHostCtx.dispose();
 	}
 }

@@ -414,6 +414,50 @@ body {
 	opacity: 0.6;
 }
 
+/* Top-window tutorial trigger — mirrors the My Skills "Support" button. */
+.cli-tutorial-button {
+	position: absolute;
+	top: 12px;
+	right: 16px;
+	min-height: 26px;
+	padding: 0 11px;
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	background: color-mix(in srgb, var(--input-bg) 62%, transparent);
+	color: var(--vscode-descriptionForeground, rgba(128, 128, 128, 0.85));
+	border: 1px solid color-mix(in srgb, var(--text-color) 18%, transparent);
+	border-radius: 7px;
+	font-family: var(--font-family);
+	font-size: 12px;
+	font-weight: 600;
+	cursor: pointer;
+	transition: border-color 0.16s ease, background 0.16s ease, color 0.16s ease;
+}
+
+.cli-tutorial-button-icon {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 14px;
+	height: 14px;
+	border-radius: 50%;
+	border: 1px solid currentColor;
+	font-size: 10px;
+	line-height: 1;
+}
+
+.cli-tutorial-button:hover {
+	color: var(--vscode-button-foreground, #ffffff);
+	background: var(--accent-color);
+	border-color: var(--accent-color);
+}
+
+.cli-tutorial-button:focus-visible {
+	outline: 1px solid var(--accent-color);
+	outline-offset: 2px;
+}
+
 /* --- --- -- Animation -> */
 @keyframes pulseGlow {
 	0%, 100% { filter: drop-shadow(0 0 3px var(--accent-color)); }

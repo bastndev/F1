@@ -55,6 +55,13 @@
   "activationEvents": [],
   "main": "./dist/extension.js",
   "contributes": {
+    "commands": [
+      {
+        "command": "f1.myCli.openTutorial",
+        "title": "Open CLI Hub Tutorial",
+        "category": "F1"
+      }
+    ],
     "keybindings": [
       {
         "command": "f1.myCli.focus",

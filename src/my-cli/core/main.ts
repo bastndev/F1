@@ -1,11 +1,12 @@
 import * as vscode from 'vscode';
 import * as crypto from 'crypto';
+import * as fs from 'fs';
 import { allowedAgents, getCliAgent, getAgentSlug } from '../shared/agents';
 import { ensureCliInstalled } from './terminal-cli/installation';
 import { CliSessionManager } from './terminal-cli/session-manager';
 import { getAgentWebviewHtml } from './webview-html';
 import { getLauncherWebviewHtml } from './launcher-html';
-import { getWebviewAssetUri } from './webview-assets';
+import { getWebviewAssetUri, getNonce } from './webview-assets';
 import { handleWorkspaceListFiles, handleWorkspaceListSkills } from './workspace';
 import { translatePromptToEnglish } from './translation/host-prompt-translator';
 import { resolveCustomCliLaunch, validateCustomCliCommandInput } from './terminal-cli/custom-cli';
@@ -40,6 +41,7 @@ export class MyCliViewProvider implements vscode.WebviewViewProvider, vscode.Dis
 	private _activeWebview?: vscode.Webview;
 	private _memoryWatcher?: vscode.FileSystemWatcher;
 	private _memoryWatchTimer?: ReturnType<typeof setTimeout>;
+	private _tutorialPanel?: vscode.WebviewPanel;
 
 	constructor(
 		private readonly _extensionUri: vscode.Uri,
@@ -98,6 +100,36 @@ export class MyCliViewProvider implements vscode.WebviewViewProvider, vscode.Dis
 					webviewView.webview.html = this._getAgentHtmlForWebview(webviewView.webview, customCli.label);
 				} else {
 					this.sessionManager.createCustomSession(customCli);
+				}
+				return;
+			}
+
+			if (message.type === 'cli.openTutorial') {
+				this.openTutorial();
+				return;
+			}
+
+			if (message.type === 'cli.installExtension' && message.extensionId) {
+				const extensionId = message.extensionId;
+
+				// Already installed and enabled: the extension owns the shortcut, so stay out of the way.
+				if (vscode.extensions.getExtension(extensionId)) {
+					return;
+				}
+
+				// getExtension() can't distinguish "not installed" from "installed but disabled",
+				// so offer both paths: install from the marketplace, or open the page to enable it.
+				const install = 'Install';
+				const openPage = 'Open Extension';
+				const choice = await vscode.window.showInformationMessage(
+					'Lynx Keymap shortcuts aren’t active. Install the extension to enable them.',
+					install,
+					openPage,
+				);
+				if (choice === install) {
+					await vscode.commands.executeCommand('workbench.extensions.installExtension', extensionId);
+				} else if (choice === openPage) {
+					await vscode.commands.executeCommand('extension.open', extensionId);
 				}
 				return;
 			}
@@ -213,7 +245,84 @@ export class MyCliViewProvider implements vscode.WebviewViewProvider, vscode.Dis
 		});
 	}
 
+	/**
+	 * Open the CLI Hub tutorial in a webview panel. Content + design system live
+	 * in src/shared/tutorial/t-cli/; assets are the shared tutorial images.
+	 * Mirrors the My Skills support panel.
+	 */
+	public openTutorial() {
+		if (this._tutorialPanel) {
+			this._tutorialPanel.reveal(vscode.ViewColumn.One);
+			return;
+		}
+
+		const panel = vscode.window.createWebviewPanel(
+			'f1.cliHubTutorial',
+			'CLI Hub — Tutorial',
+			vscode.ViewColumn.One,
+			{ enableScripts: true, localResourceRoots: [this._extensionUri] }
+		);
+		this._tutorialPanel = panel;
+		panel.iconPath = vscode.Uri.joinPath(this._extensionUri, 'src', 'shared', 'assets', 'logo.svg');
+		panel.webview.html = this._getCliTutorialHtml(panel.webview, getNonce());
+		panel.onDidDispose(() => {
+			this._tutorialPanel = undefined;
+		});
+	}
+
+	private _getCliTutorialHtml(webview: vscode.Webview, nonce: string): string {
+		const tutorialDir = vscode.Uri.joinPath(this._extensionUri, 'src', 'shared', 'tutorial', 't-cli');
+		const htmlPath = vscode.Uri.joinPath(tutorialDir, 'support.html').fsPath;
+
+		let content: string;
+		try {
+			content = fs.readFileSync(htmlPath, 'utf8');
+		} catch (err) {
+			console.error(`[CLI Hub] Failed to read tutorial template: ${err}`);
+			return '<!DOCTYPE html><html><body><p>Failed to load the CLI Hub tutorial.</p></body></html>';
+		}
+
+		const styleUri = webview.asWebviewUri(vscode.Uri.joinPath(tutorialDir, 'support.css'));
+		const scriptUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, 'dist', 'cli-tutorial.js'));
+		const logoUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, 'src', 'shared', 'assets', 'logo.svg'));
+		const imagesDir = vscode.Uri.joinPath(this._extensionUri, 'src', 'shared', 'assets', 'images');
+		const authorImageUri = webview.asWebviewUri(vscode.Uri.joinPath(imagesDir, 'author.webp'));
+
+		const body = content
+			.replace('{{CREATE_SUPPORT_LOGO_URI}}', logoUri.toString())
+			.replace('{{AUTHOR_IMAGE_URI}}', authorImageUri.toString());
+
+		const csp = [
+			`default-src 'none';`,
+			`base-uri 'none';`,
+			`form-action 'none';`,
+			`object-src 'none';`,
+			`style-src ${webview.cspSource};`,
+			`script-src 'nonce-${nonce}';`,
+			`img-src ${webview.cspSource};`,
+			`font-src ${webview.cspSource};`,
+		].join(' ');
+
+		return [
+			'<!DOCTYPE html>',
+			'<html lang="en">',
+			'<head>',
+			'<meta charset="UTF-8">',
+			'<meta name="viewport" content="width=device-width, initial-scale=1.0">',
+			`<meta http-equiv="Content-Security-Policy" content="${csp}">`,
+			'<title>CLI Hub: Tutorial</title>',
+			`<link href="${styleUri}" rel="stylesheet">`,
+			'</head>',
+			'<body>',
+			body,
+			`<script nonce="${nonce}" src="${scriptUri}"></script>`,
+			'</body>',
+			'</html>',
+		].join('');
+	}
+
 	public dispose() {
+		this._tutorialPanel?.dispose();
 		this.activePromptTranslation?.abort();
 		stopVoicePlayback();
 		this._disposeMemoryWatcher();
