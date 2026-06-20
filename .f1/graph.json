@@ -5340,7 +5340,7 @@
       "source_location": "L279",
       "_origin": "ast",
       "id": "panel_terminal_terminal_requestactiveusage",
-      "community": 3,
+      "community": 4,
       "norm_label": "requestactiveusage()"
     },
     {
@@ -5350,7 +5350,7 @@
       "source_location": "L348",
       "_origin": "ast",
       "id": "panel_terminal_terminal_dismissactiveusageview",
-      "community": 3,
+      "community": 4,
       "norm_label": "dismissactiveusageview()"
     },
     {
@@ -6477,7 +6477,7 @@
       "label": "TranslatorVoiceChunk",
       "file_type": "code",
       "source_file": "src/my-cli/webview/tools/modal-translator/translator.ts",
-      "source_location": "L13",
+      "source_location": "L14",
       "_origin": "ast",
       "id": "modal_translator_translator_translatorvoicechunk",
       "community": 41,
@@ -6487,7 +6487,7 @@
       "label": "ensureStyles()",
       "file_type": "code",
       "source_file": "src/my-cli/webview/tools/modal-translator/translator.ts",
-      "source_location": "L18",
+      "source_location": "L19",
       "_origin": "ast",
       "id": "modal_translator_translator_ensurestyles",
       "community": 41,
@@ -6497,7 +6497,7 @@
       "label": "normalizeSpeechText()",
       "file_type": "code",
       "source_file": "src/my-cli/webview/tools/modal-translator/translator.ts",
-      "source_location": "L29",
+      "source_location": "L30",
       "_origin": "ast",
       "id": "modal_translator_translator_normalizespeechtext",
       "community": 41,
@@ -6507,7 +6507,7 @@
       "label": "splitLongSpeechSegment()",
       "file_type": "code",
       "source_file": "src/my-cli/webview/tools/modal-translator/translator.ts",
-      "source_location": "L33",
+      "source_location": "L34",
       "_origin": "ast",
       "id": "modal_translator_translator_splitlongspeechsegment",
       "community": 41,
@@ -6517,7 +6517,7 @@
       "label": "splitSpeechText()",
       "file_type": "code",
       "source_file": "src/my-cli/webview/tools/modal-translator/translator.ts",
-      "source_location": "L65",
+      "source_location": "L66",
       "_origin": "ast",
       "id": "modal_translator_translator_splitspeechtext",
       "community": 41,
@@ -6527,7 +6527,7 @@
       "label": "buildVoiceChunks()",
       "file_type": "code",
       "source_file": "src/my-cli/webview/tools/modal-translator/translator.ts",
-      "source_location": "L108",
+      "source_location": "L109",
       "_origin": "ast",
       "id": "modal_translator_translator_buildvoicechunks",
       "community": 41,
@@ -6537,7 +6537,7 @@
       "label": "clearVoiceHighlights()",
       "file_type": "code",
       "source_file": "src/my-cli/webview/tools/modal-translator/translator.ts",
-      "source_location": "L153",
+      "source_location": "L154",
       "_origin": "ast",
       "id": "modal_translator_translator_clearvoicehighlights",
       "community": 41,
@@ -6547,7 +6547,7 @@
       "label": "setActiveVoiceChunk()",
       "file_type": "code",
       "source_file": "src/my-cli/webview/tools/modal-translator/translator.ts",
-      "source_location": "L161",
+      "source_location": "L162",
       "_origin": "ast",
       "id": "modal_translator_translator_setactivevoicechunk",
       "community": 41,
@@ -6557,7 +6557,7 @@
       "label": "mountTranslatorPanel()",
       "file_type": "code",
       "source_file": "src/my-cli/webview/tools/modal-translator/translator.ts",
-      "source_location": "L174",
+      "source_location": "L175",
       "_origin": "ast",
       "id": "modal_translator_translator_mounttranslatorpanel",
       "community": 41,
@@ -6567,7 +6567,7 @@
       "label": "initializeTranslator()",
       "file_type": "code",
       "source_file": "src/my-cli/webview/tools/modal-translator/translator.ts",
-      "source_location": "L189",
+      "source_location": "L190",
       "_origin": "ast",
       "id": "modal_translator_translator_initializetranslator",
       "community": 41,
@@ -6577,7 +6577,7 @@
       "label": "extractTextToTranslate()",
       "file_type": "code",
       "source_file": "src/my-cli/webview/tools/modal-translator/translator.ts",
-      "source_location": "L545",
+      "source_location": "L575",
       "_origin": "ast",
       "id": "modal_translator_translator_extracttexttotranslate",
       "community": 41,
@@ -6587,7 +6587,7 @@
       "label": "buildSkeleton()",
       "file_type": "code",
       "source_file": "src/my-cli/webview/tools/modal-translator/translator.ts",
-      "source_location": "L549",
+      "source_location": "L579",
       "_origin": "ast",
       "id": "modal_translator_translator_buildskeleton",
       "community": 41,
@@ -6597,7 +6597,7 @@
       "label": "revealText()",
       "file_type": "code",
       "source_file": "src/my-cli/webview/tools/modal-translator/translator.ts",
-      "source_location": "L603",
+      "source_location": "L633",
       "_origin": "ast",
       "id": "modal_translator_translator_revealtext",
       "community": 41,
@@ -6810,7 +6810,7 @@
       "source_location": "L40",
       "_origin": "ast",
       "id": "agents_index_isusageviewinline",
-      "community": 3,
+      "community": 4,
       "norm_label": "isusageviewinline()"
     },
     {
@@ -8020,7 +8020,7 @@
       "source_location": "L51",
       "_origin": "ast",
       "id": "my_skills_my_skills_createskillrootinstructioncreatemessage",
-      "community": 11,
+      "community": 0,
       "norm_label": "createskillrootinstructioncreatemessage"
     },
     {
@@ -8160,7 +8160,7 @@
       "source_location": "L239",
       "_origin": "ast",
       "id": "my_skills_my_skills_myskillsviewprovider_postlocalskills",
-      "community": 51,
+      "community": 11,
       "norm_label": "._postlocalskills()"
     },
     {
@@ -8210,7 +8210,7 @@
       "source_location": "L399",
       "_origin": "ast",
       "id": "my_skills_my_skills_myskillsviewprovider_postcreaterootinstructionstatus",
-      "community": 11,
+      "community": 0,
       "norm_label": "._postcreaterootinstructionstatus()"
     },
     {
@@ -8250,7 +8250,7 @@
       "source_location": "L430",
       "_origin": "ast",
       "id": "my_skills_my_skills_myskillsviewprovider_postcreateskillsearchrecommendations",
-      "community": 40,
+      "community": 84,
       "norm_label": "._postcreateskillsearchrecommendations()"
     },
     {
@@ -8350,7 +8350,7 @@
       "source_location": "L718",
       "_origin": "ast",
       "id": "my_skills_my_skills_myskillsviewprovider_postofficialsources",
-      "community": 11,
+      "community": 6,
       "norm_label": "._postofficialsources()"
     },
     {
@@ -8360,7 +8360,7 @@
       "source_location": "L750",
       "_origin": "ast",
       "id": "my_skills_my_skills_myskillsviewprovider_sendofficialsourcesupdate",
-      "community": 11,
+      "community": 6,
       "norm_label": "._sendofficialsourcesupdate()"
     },
     {
@@ -8400,7 +8400,7 @@
       "source_location": "L853",
       "_origin": "ast",
       "id": "my_skills_my_skills_myskillsviewprovider_findmarketplaceskill",
-      "community": 50,
+      "community": 11,
       "norm_label": "._findmarketplaceskill()"
     },
     {
@@ -8410,7 +8410,7 @@
       "source_location": "L862",
       "_origin": "ast",
       "id": "my_skills_my_skills_myskillsviewprovider_setlocalskillenabled",
-      "community": 51,
+      "community": 11,
       "norm_label": "._setlocalskillenabled()"
     },
     {
@@ -8860,7 +8860,7 @@
       "source_location": "L1510",
       "_origin": "ast",
       "id": "my_skills_my_skills_tocreateskillsearchpayload",
-      "community": 40,
+      "community": 84,
       "norm_label": "tocreateskillsearchpayload()"
     },
     {
@@ -9240,7 +9240,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "agents_claude_md_types_agentsclaudeinstructionfilename",
-      "community": 11,
+      "community": 0,
       "norm_label": "agentsclaudeinstructionfilename"
     },
     {
@@ -11310,7 +11310,7 @@
       "source_location": "L27",
       "_origin": "ast",
       "id": "chat_create_core_fast_context_manager_getfastcontext",
-      "community": 63,
+      "community": 71,
       "norm_label": "getfastcontext()"
     },
     {
@@ -11420,7 +11420,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "description_better_index",
-      "community": 63,
+      "community": 71,
       "norm_label": "index.ts"
     },
     {
@@ -11430,7 +11430,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "description_better_index_buildbetterdescription",
-      "community": 63,
+      "community": 71,
       "norm_label": "buildbetterdescription()"
     },
     {
@@ -11440,7 +11440,7 @@
       "source_location": "L13",
       "_origin": "ast",
       "id": "description_better_index_buildfallbackinstructions",
-      "community": 63,
+      "community": 71,
       "norm_label": "buildfallbackinstructions()"
     },
     {
@@ -11550,7 +11550,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "templates_markdown_fast",
-      "community": 63,
+      "community": 71,
       "norm_label": "markdown-fast.ts"
     },
     {
@@ -11560,7 +11560,7 @@
       "source_location": "L10",
       "_origin": "ast",
       "id": "templates_markdown_fast_finalizeskillmarkdown",
-      "community": 63,
+      "community": 71,
       "norm_label": "finalizeskillmarkdown()"
     },
     {
@@ -11570,7 +11570,7 @@
       "source_location": "L18",
       "_origin": "ast",
       "id": "templates_markdown_fast_renderfallbackbody",
-      "community": 63,
+      "community": 71,
       "norm_label": "renderfallbackbody()"
     },
     {
@@ -11580,7 +11580,7 @@
       "source_location": "L43",
       "_origin": "ast",
       "id": "templates_markdown_fast_createskillmarkdownfast",
-      "community": 63,
+      "community": 71,
       "norm_label": "createskillmarkdownfast()"
     },
     {
@@ -12060,7 +12060,7 @@
       "source_location": "L857",
       "_origin": "ast",
       "id": "skill_fast_archetypes_getskillfastarchetypeid",
-      "community": 63,
+      "community": 20,
       "norm_label": "getskillfastarchetypeid()"
     },
     {
@@ -12120,7 +12120,7 @@
       "source_location": "L39",
       "_origin": "ast",
       "id": "skill_fast_index_getskillfasttemplate",
-      "community": 63,
+      "community": 71,
       "norm_label": "getskillfasttemplate()"
     },
     {
@@ -12190,7 +12190,7 @@
       "source_location": "L79",
       "_origin": "ast",
       "id": "skill_fast_intent_signals_compact",
-      "community": 63,
+      "community": 49,
       "norm_label": "compact()"
     },
     {
@@ -12200,7 +12200,7 @@
       "source_location": "L83",
       "_origin": "ast",
       "id": "skill_fast_intent_signals_normalizeskillfastintent",
-      "community": 63,
+      "community": 49,
       "norm_label": "normalizeskillfastintent()"
     },
     {
@@ -12330,7 +12330,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "skill_fast_intro",
-      "community": 63,
+      "community": 49,
       "norm_label": "intro.ts"
     },
     {
@@ -12340,7 +12340,7 @@
       "source_location": "L5",
       "_origin": "ast",
       "id": "skill_fast_intro_category_nouns",
-      "community": 63,
+      "community": 49,
       "norm_label": "category_nouns"
     },
     {
@@ -12350,7 +12350,7 @@
       "source_location": "L16",
       "_origin": "ast",
       "id": "skill_fast_intro_category_guarantees",
-      "community": 63,
+      "community": 49,
       "norm_label": "category_guarantees"
     },
     {
@@ -12360,7 +12360,7 @@
       "source_location": "L27",
       "_origin": "ast",
       "id": "skill_fast_intro_category_identities",
-      "community": 63,
+      "community": 49,
       "norm_label": "category_identities"
     },
     {
@@ -12370,7 +12370,7 @@
       "source_location": "L38",
       "_origin": "ast",
       "id": "skill_fast_intro_compact",
-      "community": 63,
+      "community": 49,
       "norm_label": "compact()"
     },
     {
@@ -12380,7 +12380,7 @@
       "source_location": "L42",
       "_origin": "ast",
       "id": "skill_fast_intro_wordlimit",
-      "community": 63,
+      "community": 49,
       "norm_label": "wordlimit()"
     },
     {
@@ -12390,7 +12390,7 @@
       "source_location": "L51",
       "_origin": "ast",
       "id": "skill_fast_intro_buildskillfastintro",
-      "community": 63,
+      "community": 49,
       "norm_label": "buildskillfastintro()"
     },
     {
@@ -12540,7 +12540,7 @@
       "source_location": "L152",
       "_origin": "ast",
       "id": "skill_fast_reference_sections_extractreferenceskillsections",
-      "community": 63,
+      "community": 57,
       "norm_label": "extractreferenceskillsections()"
     },
     {
@@ -12560,7 +12560,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "skill_fast_types_skillfastarchetypeid",
-      "community": 29,
+      "community": 49,
       "norm_label": "skillfastarchetypeid"
     },
     {
@@ -14000,7 +14000,7 @@
       "source_location": "L7",
       "_origin": "ast",
       "id": "chat_search_core_types_installedskillsnapshot",
-      "community": 50,
+      "community": 80,
       "norm_label": "installedskillsnapshot"
     },
     {
@@ -16740,7 +16740,7 @@
       "source_location": "L76",
       "_origin": "ast",
       "id": "core_marketplace_searchmarketplaceskills",
-      "community": 6,
+      "community": 62,
       "norm_label": "searchmarketplaceskills()"
     },
     {
@@ -16980,7 +16980,7 @@
       "source_location": "L532",
       "_origin": "ast",
       "id": "core_marketplace_normalizesearchquery",
-      "community": 6,
+      "community": 62,
       "norm_label": "normalizesearchquery()"
     },
     {
@@ -16990,7 +16990,7 @@
       "source_location": "L541",
       "_origin": "ast",
       "id": "core_marketplace_ranklocalmatches",
-      "community": 6,
+      "community": 62,
       "norm_label": "ranklocalmatches()"
     },
     {
@@ -18800,7 +18800,7 @@
       "source_location": "L74",
       "_origin": "ast",
       "id": "core_local_skills_setworkspacerootskillenabled",
-      "community": 51,
+      "community": 63,
       "norm_label": "setworkspacerootskillenabled()"
     },
     {
@@ -18810,7 +18810,7 @@
       "source_location": "L95",
       "_origin": "ast",
       "id": "core_local_skills_deleteworkspacerootskill",
-      "community": 35,
+      "community": 63,
       "norm_label": "deleteworkspacerootskill()"
     },
     {
@@ -18840,7 +18840,7 @@
       "source_location": "L171",
       "_origin": "ast",
       "id": "core_local_skills_getdisabledskillids",
-      "community": 35,
+      "community": 63,
       "norm_label": "getdisabledskillids()"
     },
     {
@@ -18850,7 +18850,7 @@
       "source_location": "L190",
       "_origin": "ast",
       "id": "core_local_skills_updategitignoreskillstate",
-      "community": 99,
+      "community": 35,
       "norm_label": "updategitignoreskillstate()"
     },
     {
@@ -18860,7 +18860,7 @@
       "source_location": "L217",
       "_origin": "ast",
       "id": "core_local_skills_removeworkspacerootskillstate",
-      "community": 35,
+      "community": 63,
       "norm_label": "removeworkspacerootskillstate()"
     },
     {
@@ -18880,7 +18880,7 @@
       "source_location": "L270",
       "_origin": "ast",
       "id": "core_local_skills_removegitignoreskillstate",
-      "community": 99,
+      "community": 35,
       "norm_label": "removegitignoreskillstate()"
     },
     {
@@ -18890,7 +18890,7 @@
       "source_location": "L289",
       "_origin": "ast",
       "id": "core_local_skills_appendmanagedblock",
-      "community": 99,
+      "community": 35,
       "norm_label": "appendmanagedblock()"
     },
     {
@@ -18900,7 +18900,7 @@
       "source_location": "L297",
       "_origin": "ast",
       "id": "core_local_skills_findgitignoreblock",
-      "community": 99,
+      "community": 35,
       "norm_label": "findgitignoreblock()"
     },
     {
@@ -18910,7 +18910,7 @@
       "source_location": "L316",
       "_origin": "ast",
       "id": "core_local_skills_parsemanagedskillline",
-      "community": 35,
+      "community": 63,
       "norm_label": "parsemanagedskillline()"
     },
     {
@@ -18920,7 +18920,7 @@
       "source_location": "L328",
       "_origin": "ast",
       "id": "core_local_skills_readgitignoretext",
-      "community": 35,
+      "community": 63,
       "norm_label": "readgitignoretext()"
     },
     {
@@ -18930,7 +18930,7 @@
       "source_location": "L341",
       "_origin": "ast",
       "id": "core_local_skills_splitlines",
-      "community": 99,
+      "community": 35,
       "norm_label": "splitlines()"
     },
     {
@@ -18940,7 +18940,7 @@
       "source_location": "L350",
       "_origin": "ast",
       "id": "core_local_skills_normalizelineendings",
-      "community": 99,
+      "community": 35,
       "norm_label": "normalizelineendings()"
     },
     {
@@ -18950,7 +18950,7 @@
       "source_location": "L354",
       "_origin": "ast",
       "id": "core_local_skills_withlineendings",
-      "community": 99,
+      "community": 35,
       "norm_label": "withlineendings()"
     },
     {
@@ -18960,7 +18960,7 @@
       "source_location": "L358",
       "_origin": "ast",
       "id": "core_local_skills_formatmanagedblockspacing",
-      "community": 99,
+      "community": 35,
       "norm_label": "formatmanagedblockspacing()"
     },
     {
@@ -18970,7 +18970,7 @@
       "source_location": "L382",
       "_origin": "ast",
       "id": "core_local_skills_isrootskillfile",
-      "community": 35,
+      "community": 63,
       "norm_label": "isrootskillfile()"
     },
     {
@@ -18980,7 +18980,7 @@
       "source_location": "L386",
       "_origin": "ast",
       "id": "core_local_skills_isrootskillfolder",
-      "community": 35,
+      "community": 63,
       "norm_label": "isrootskillfolder()"
     },
     {
@@ -19000,7 +19000,7 @@
       "source_location": "L401",
       "_origin": "ast",
       "id": "core_local_skills_getworkspaceskilluri",
-      "community": 35,
+      "community": 63,
       "norm_label": "getworkspaceskilluri()"
     },
     {
@@ -19010,7 +19010,7 @@
       "source_location": "L405",
       "_origin": "ast",
       "id": "core_local_skills_issupportedskillid",
-      "community": 35,
+      "community": 63,
       "norm_label": "issupportedskillid()"
     },
     {
@@ -19290,7 +19290,7 @@
       "source_location": "L23",
       "_origin": "ast",
       "id": "core_types_localskillsetenabledmessage",
-      "community": 51,
+      "community": 11,
       "norm_label": "localskillsetenabledmessage"
     },
     {
@@ -19934,10 +19934,20 @@
       "norm_label": "ctrlspace()"
     },
     {
-      "label": "escapeKey()",
+      "label": "spaceKey()",
       "file_type": "code",
       "source_file": "src/shared/keymaps/cli.ts",
       "source_location": "L30",
+      "_origin": "ast",
+      "id": "keymaps_cli_spacekey",
+      "community": 56,
+      "norm_label": "spacekey()"
+    },
+    {
+      "label": "escapeKey()",
+      "file_type": "code",
+      "source_file": "src/shared/keymaps/cli.ts",
+      "source_location": "L35",
       "_origin": "ast",
       "id": "keymaps_cli_escapekey",
       "community": 56,
@@ -19947,7 +19957,7 @@
       "label": "Capslock()",
       "file_type": "code",
       "source_file": "src/shared/keymaps/cli.ts",
-      "source_location": "L34",
+      "source_location": "L39",
       "_origin": "ast",
       "id": "keymaps_cli_capslock",
       "community": 56,
@@ -19957,7 +19967,7 @@
       "label": "shiftFKey()",
       "file_type": "code",
       "source_file": "src/shared/keymaps/cli.ts",
-      "source_location": "L39",
+      "source_location": "L44",
       "_origin": "ast",
       "id": "keymaps_cli_shiftfkey",
       "community": 56,
@@ -19967,7 +19977,7 @@
       "label": "ShortcutContext",
       "file_type": "code",
       "source_file": "src/shared/keymaps/cli.ts",
-      "source_location": "L46",
+      "source_location": "L51",
       "_origin": "ast",
       "id": "keymaps_cli_shortcutcontext",
       "community": 56,
@@ -19977,7 +19987,7 @@
       "label": "ShortcutId",
       "file_type": "code",
       "source_file": "src/shared/keymaps/cli.ts",
-      "source_location": "L48",
+      "source_location": "L53",
       "_origin": "ast",
       "id": "keymaps_cli_shortcutid",
       "community": 56,
@@ -19987,7 +19997,7 @@
       "label": "ShortcutDefinition",
       "file_type": "code",
       "source_file": "src/shared/keymaps/cli.ts",
-      "source_location": "L62",
+      "source_location": "L68",
       "_origin": "ast",
       "id": "keymaps_cli_shortcutdefinition",
       "community": 56,
@@ -19997,7 +20007,7 @@
       "label": "shortcuts",
       "file_type": "code",
       "source_file": "src/shared/keymaps/cli.ts",
-      "source_location": "L72",
+      "source_location": "L78",
       "_origin": "ast",
       "id": "keymaps_cli_shortcuts",
       "community": 56,
@@ -20007,7 +20017,7 @@
       "label": "getShortcuts()",
       "file_type": "code",
       "source_file": "src/shared/keymaps/cli.ts",
-      "source_location": "L161",
+      "source_location": "L174",
       "_origin": "ast",
       "id": "keymaps_cli_getshortcuts",
       "community": 56,
@@ -20017,7 +20027,7 @@
       "label": "getShortcut()",
       "file_type": "code",
       "source_file": "src/shared/keymaps/cli.ts",
-      "source_location": "L166",
+      "source_location": "L179",
       "_origin": "ast",
       "id": "keymaps_cli_getshortcut",
       "community": 56,
@@ -20027,7 +20037,7 @@
       "label": "matchesShortcut()",
       "file_type": "code",
       "source_file": "src/shared/keymaps/cli.ts",
-      "source_location": "L170",
+      "source_location": "L183",
       "_origin": "ast",
       "id": "keymaps_cli_matchesshortcut",
       "community": 56,
@@ -20037,7 +20047,7 @@
       "label": "consumeShortcut()",
       "file_type": "code",
       "source_file": "src/shared/keymaps/cli.ts",
-      "source_location": "L174",
+      "source_location": "L187",
       "_origin": "ast",
       "id": "keymaps_cli_consumeshortcut",
       "community": 56,
@@ -35985,6 +35995,28 @@
       "target": "modal_translator_terminal_text_segmentterminalselection"
     },
     {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/my-cli/webview/tools/modal-translator/translator.ts",
+      "source_location": "L9",
+      "weight": 1.0,
+      "source": "modal_translator_translator",
+      "target": "keymaps_cli",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/my-cli/webview/tools/modal-translator/translator.ts",
+      "source_location": "L9",
+      "weight": 1.0,
+      "source": "modal_translator_translator",
+      "target": "keymaps_cli_matchesshortcut",
+      "confidence_score": 1.0
+    },
+    {
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/my-cli/webview/tools/modal-translator/translator.ts",
@@ -36223,6 +36255,17 @@
       "confidence_score": 1.0,
       "source": "tools_tools",
       "target": "modal_translator_translator_mounttranslatorpanel"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src/my-cli/webview/tools/modal-translator/translator.ts",
+      "source_location": "L548",
+      "weight": 1.0,
+      "source": "modal_translator_translator_initializetranslator",
+      "target": "keymaps_cli_matchesshortcut",
+      "confidence_score": 1.0
     },
     {
       "relation": "calls",
@@ -67072,6 +67115,16 @@
       "target": "keymaps_cli_shortcuts"
     },
     {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/shared/keymaps/cli.ts",
+      "source_location": "L30",
+      "weight": 1.0,
+      "source": "keymaps_cli",
+      "target": "keymaps_cli_spacekey",
+      "confidence_score": 1.0
+    },
+    {
       "relation": "calls",
       "context": "call",
       "confidence": "EXTRACTED",
@@ -69272,5 +69325,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "a5ac8dd27fe35be5a20d70075a876e8a0f3457e8"
+  "built_at_commit": "45e9d552b456c094f6686c0113edd867158c2e06"
 }
