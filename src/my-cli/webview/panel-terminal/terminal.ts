@@ -697,6 +697,15 @@ const createTerminalView = (session: CliSession) => {
 
 	const pane = document.createElement('div');
 	pane.className = 'cli-terminal-pane';
+	// When the new view belongs to the active session (visual-sleep recycling,
+	// late tab switch), mark the pane active synchronously so terminal.open()
+	// and the RAF fit measure real dimensions. The pane is display:none without
+	// is-active — opening xterm against a 0×0 element leaves it stuck at a
+	// degenerate size and paints a tiny cursor with a black void below, even
+	// after setActiveTerminal re-fits later.
+	if (session.id === activeSessionId) {
+		pane.classList.add('is-active');
+	}
 	pane.dataset.sessionId = session.id;
 	terminalStack.append(pane);
 
@@ -791,10 +800,12 @@ const createTerminalView = (session: CliSession) => {
 	terminals.set(session.id, view);
 	requestAnimationFrame(() => fitTerminal(session.id));
 
-	// Only show the boot skeleton for freshly created sessions.
-	// Old/restored sessions (reopening the panel later) should not flash a skeleton.
+	// Only show the boot skeleton for freshly created sessions that have not
+	// produced output yet. Recycled views (visual-sleep recovery, tab switches
+	// after the panel was hidden) restore from the kept buffer and must not
+	// flash the skeleton over real terminal content.
 	const sessionAge = Date.now() - session.createdAt;
-	if (sessionAge < 12000) {
+	if (sessionAge < 12000 && session.buffer.length === 0) {
 		bootSkeletons.create(session.id);
 	}
 
