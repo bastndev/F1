@@ -900,7 +900,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "core_main",
-      "community": 32,
+      "community": 81,
       "norm_label": "main.ts"
     },
     {
@@ -1000,7 +1000,7 @@
       "source_location": "L394",
       "_origin": "ast",
       "id": "core_main_mycliviewprovider_postvoicestate",
-      "community": 8,
+      "community": 127,
       "norm_label": "._postvoicestate()"
     },
     {
@@ -1010,7 +1010,7 @@
       "source_location": "L403",
       "_origin": "ast",
       "id": "core_main_mycliviewprovider_voiceprogress",
-      "community": 8,
+      "community": 127,
       "norm_label": "._voiceprogress()"
     },
     {
@@ -1020,7 +1020,7 @@
       "source_location": "L410",
       "_origin": "ast",
       "id": "core_main_mycliviewprovider_voicechunklabel",
-      "community": 8,
+      "community": 127,
       "norm_label": "._voicechunklabel()"
     },
     {
@@ -1030,7 +1030,7 @@
       "source_location": "L415",
       "_origin": "ast",
       "id": "core_main_mycliviewprovider_isvoicerunactive",
-      "community": 8,
+      "community": 127,
       "norm_label": "._isvoicerunactive()"
     },
     {
@@ -1040,7 +1040,7 @@
       "source_location": "L419",
       "_origin": "ast",
       "id": "core_main_mycliviewprovider_postcurrentvoicestate",
-      "community": 8,
+      "community": 127,
       "norm_label": "._postcurrentvoicestate()"
     },
     {
@@ -1050,7 +1050,7 @@
       "source_location": "L429",
       "_origin": "ast",
       "id": "core_main_mycliviewprovider_handlevoicespeak",
-      "community": 8,
+      "community": 34,
       "norm_label": "._handlevoicespeak()"
     },
     {
@@ -1060,7 +1060,7 @@
       "source_location": "L454",
       "_origin": "ast",
       "id": "core_main_mycliviewprovider_handlevoicepause",
-      "community": 8,
+      "community": 127,
       "norm_label": "._handlevoicepause()"
     },
     {
@@ -1080,7 +1080,7 @@
       "source_location": "L476",
       "_origin": "ast",
       "id": "core_main_mycliviewprovider_handlevoicestop",
-      "community": 8,
+      "community": 127,
       "norm_label": "._handlevoicestop()"
     },
     {
@@ -1090,7 +1090,7 @@
       "source_location": "L483",
       "_origin": "ast",
       "id": "core_main_mycliviewprovider_runvoicesession",
-      "community": 8,
+      "community": 34,
       "norm_label": "._runvoicesession()"
     },
     {
@@ -1190,7 +1190,7 @@
       "source_location": "L698",
       "_origin": "ast",
       "id": "core_main_mycliviewprovider_memoryonlaunch",
-      "community": 32,
+      "community": 8,
       "norm_label": "._memoryonlaunch()"
     },
     {
@@ -1770,7 +1770,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "terminal_cli_pty_host",
-      "community": 127,
+      "community": 1,
       "norm_label": "pty-host.ts"
     },
     {
@@ -1780,7 +1780,7 @@
       "source_location": "L4",
       "_origin": "ast",
       "id": "terminal_cli_pty_host_startmessage",
-      "community": 127,
+      "community": 1,
       "norm_label": "startmessage"
     },
     {
@@ -1790,7 +1790,7 @@
       "source_location": "L5",
       "_origin": "ast",
       "id": "terminal_cli_pty_host_hostmessage",
-      "community": 127,
+      "community": 1,
       "norm_label": "hostmessage"
     },
     {
@@ -1800,7 +1800,7 @@
       "source_location": "L9",
       "_origin": "ast",
       "id": "terminal_cli_pty_host_send",
-      "community": 127,
+      "community": 1,
       "norm_label": "send()"
     },
     {
@@ -1810,7 +1810,7 @@
       "source_location": "L13",
       "_origin": "ast",
       "id": "terminal_cli_pty_host_stop",
-      "community": 127,
+      "community": 1,
       "norm_label": "stop()"
     },
     {
@@ -1820,7 +1820,7 @@
       "source_location": "L21",
       "_origin": "ast",
       "id": "terminal_cli_pty_host_start",
-      "community": 127,
+      "community": 1,
       "norm_label": "start()"
     },
     {
@@ -2730,7 +2730,7 @@
       "source_location": "L441",
       "_origin": "ast",
       "id": "voice_host_voice_tts_isvoicespeaking",
-      "community": 34,
+      "community": 127,
       "norm_label": "isvoicespeaking()"
     },
     {
@@ -2740,7 +2740,7 @@
       "source_location": "L446",
       "_origin": "ast",
       "id": "voice_host_voice_tts_stopvoiceplayback",
-      "community": 8,
+      "community": 34,
       "norm_label": "stopvoiceplayback()"
     },
     {
@@ -2770,7 +2770,7 @@
       "source_location": "L9",
       "_origin": "ast",
       "id": "voice_voice_chunks_activevoicesession",
-      "community": 8,
+      "community": 127,
       "norm_label": "activevoicesession"
     },
     {
@@ -3250,7 +3250,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "shared_agents",
-      "community": 32,
+      "community": 81,
       "norm_label": "agents.ts"
     },
     {
@@ -3260,7 +3260,7 @@
       "source_location": "L8",
       "_origin": "ast",
       "id": "shared_agents_cliagent",
-      "community": 32,
+      "community": 66,
       "norm_label": "cliagent"
     },
     {
@@ -3270,7 +3270,7 @@
       "source_location": "L22",
       "_origin": "ast",
       "id": "shared_agents_cliagents",
-      "community": 32,
+      "community": 81,
       "norm_label": "cliagents"
     },
     {
@@ -3280,7 +3280,7 @@
       "source_location": "L34",
       "_origin": "ast",
       "id": "shared_agents_allowedagents",
-      "community": 32,
+      "community": 81,
       "norm_label": "allowedagents"
     },
     {
@@ -3290,7 +3290,7 @@
       "source_location": "L36",
       "_origin": "ast",
       "id": "shared_agents_getcliagent",
-      "community": 15,
+      "community": 81,
       "norm_label": "getcliagent()"
     },
     {
@@ -3300,7 +3300,7 @@
       "source_location": "L47",
       "_origin": "ast",
       "id": "shared_agents_getagentslug",
-      "community": 32,
+      "community": 81,
       "norm_label": "getagentslug()"
     },
     {
@@ -4040,7 +4040,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "shared_protocol",
-      "community": 127,
+      "community": 1,
       "norm_label": "protocol.ts"
     },
     {
@@ -4050,7 +4050,7 @@
       "source_location": "L14",
       "_origin": "ast",
       "id": "shared_protocol_clisessionstatus",
-      "community": 127,
+      "community": 1,
       "norm_label": "clisessionstatus"
     },
     {
@@ -4080,7 +4080,7 @@
       "source_location": "L38",
       "_origin": "ast",
       "id": "shared_protocol_customclilaunch",
-      "community": 127,
+      "community": 15,
       "norm_label": "customclilaunch"
     },
     {
@@ -4090,7 +4090,7 @@
       "source_location": "L45",
       "_origin": "ast",
       "id": "shared_protocol_webviewtohostmessage",
-      "community": 127,
+      "community": 1,
       "norm_label": "webviewtohostmessage"
     },
     {
@@ -4100,7 +4100,7 @@
       "source_location": "L72",
       "_origin": "ast",
       "id": "shared_protocol_hosttowebviewmessage",
-      "community": 127,
+      "community": 1,
       "norm_label": "hosttowebviewmessage"
     },
     {
@@ -4120,7 +4120,7 @@
       "source_location": "L126",
       "_origin": "ast",
       "id": "shared_protocol_ptyhostcommand",
-      "community": 127,
+      "community": 1,
       "norm_label": "ptyhostcommand"
     },
     {
@@ -4130,7 +4130,7 @@
       "source_location": "L141",
       "_origin": "ast",
       "id": "shared_protocol_ptyhostevent",
-      "community": 127,
+      "community": 1,
       "norm_label": "ptyhostevent"
     },
     {
@@ -4220,7 +4220,7 @@
       "source_location": "L5",
       "_origin": "ast",
       "id": "voice_voice_types_voiceprogress",
-      "community": 8,
+      "community": 127,
       "norm_label": "voiceprogress"
     },
     {
@@ -8150,7 +8150,7 @@
       "source_location": "L239",
       "_origin": "ast",
       "id": "my_skills_my_skills_myskillsviewprovider_postlocalskills",
-      "community": 71,
+      "community": 11,
       "norm_label": "._postlocalskills()"
     },
     {
@@ -8400,7 +8400,7 @@
       "source_location": "L862",
       "_origin": "ast",
       "id": "my_skills_my_skills_myskillsviewprovider_setlocalskillenabled",
-      "community": 71,
+      "community": 11,
       "norm_label": "._setlocalskillenabled()"
     },
     {
@@ -8410,7 +8410,7 @@
       "source_location": "L873",
       "_origin": "ast",
       "id": "my_skills_my_skills_myskillsviewprovider_deletelocalskill",
-      "community": 71,
+      "community": 11,
       "norm_label": "._deletelocalskill()"
     },
     {
@@ -8420,7 +8420,7 @@
       "source_location": "L899",
       "_origin": "ast",
       "id": "my_skills_my_skills_myskillsviewprovider_openlocalskill",
-      "community": 71,
+      "community": 51,
       "norm_label": "._openlocalskill()"
     },
     {
@@ -8450,7 +8450,7 @@
       "source_location": "L938",
       "_origin": "ast",
       "id": "my_skills_my_skills_myskillsviewprovider_enablesavedskill",
-      "community": 71,
+      "community": 11,
       "norm_label": "._enablesavedskill()"
     },
     {
@@ -8850,7 +8850,7 @@
       "source_location": "L1510",
       "_origin": "ast",
       "id": "my_skills_my_skills_tocreateskillsearchpayload",
-      "community": 7,
+      "community": 40,
       "norm_label": "tocreateskillsearchpayload()"
     },
     {
@@ -8870,7 +8870,7 @@
       "source_location": "L1556",
       "_origin": "ast",
       "id": "my_skills_my_skills_ismarketplacefolderskillid",
-      "community": 71,
+      "community": 11,
       "norm_label": "ismarketplacefolderskillid()"
     },
     {
@@ -9900,7 +9900,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_my_skills_screens_create_skill_core_chat_create_core_data_categories_02_mobile_signals_ts_02_mobile_signals",
-      "community": 2,
+      "community": 101,
       "norm_label": "signals.ts"
     },
     {
@@ -9910,7 +9910,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "02_mobile_signals_mobilesignals",
-      "community": 2,
+      "community": 101,
       "norm_label": "mobilesignals"
     },
     {
@@ -10060,7 +10060,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_my_skills_screens_create_skill_core_chat_create_core_data_categories_04_ui_ux_signals_ts_04_ui_ux_signals",
-      "community": 2,
+      "community": 108,
       "norm_label": "signals.ts"
     },
     {
@@ -10070,7 +10070,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "04_ui_ux_signals_uiuxsignals",
-      "community": 2,
+      "community": 108,
       "norm_label": "uiuxsignals"
     },
     {
@@ -10220,7 +10220,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_my_skills_screens_create_skill_core_chat_create_core_data_categories_06_testing_signals_ts_06_testing_signals",
-      "community": 2,
+      "community": 111,
       "norm_label": "signals.ts"
     },
     {
@@ -10230,7 +10230,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "06_testing_signals_testingsignals",
-      "community": 2,
+      "community": 111,
       "norm_label": "testingsignals"
     },
     {
@@ -10300,7 +10300,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_my_skills_screens_create_skill_core_chat_create_core_data_categories_07_security_signals_ts_07_security_signals",
-      "community": 2,
+      "community": 130,
       "norm_label": "signals.ts"
     },
     {
@@ -10310,7 +10310,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "07_security_signals_securitysignals",
-      "community": 2,
+      "community": 130,
       "norm_label": "securitysignals"
     },
     {
@@ -10380,7 +10380,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_my_skills_screens_create_skill_core_chat_create_core_data_categories_08_database_signals_ts_08_database_signals",
-      "community": 101,
+      "community": 2,
       "norm_label": "signals.ts"
     },
     {
@@ -10390,7 +10390,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "08_database_signals_databasesignals",
-      "community": 101,
+      "community": 2,
       "norm_label": "databasesignals"
     },
     {
@@ -11080,7 +11080,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "variants_defaults",
-      "community": 16,
+      "community": 75,
       "norm_label": "defaults.ts"
     },
     {
@@ -11090,7 +11090,7 @@
       "source_location": "L5",
       "_origin": "ast",
       "id": "variants_defaults_default_variant_order",
-      "community": 16,
+      "community": 75,
       "norm_label": "default_variant_order"
     },
     {
@@ -11120,7 +11120,7 @@
       "source_location": "L22",
       "_origin": "ast",
       "id": "variants_definitions_variants_by_category",
-      "community": 16,
+      "community": 75,
       "norm_label": "variants_by_category"
     },
     {
@@ -11170,7 +11170,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "variants_ranking",
-      "community": 16,
+      "community": 75,
       "norm_label": "ranking.ts"
     },
     {
@@ -11180,7 +11180,7 @@
       "source_location": "L7",
       "_origin": "ast",
       "id": "variants_ranking_normalize",
-      "community": 16,
+      "community": 75,
       "norm_label": "normalize()"
     },
     {
@@ -11190,7 +11190,7 @@
       "source_location": "L17",
       "_origin": "ast",
       "id": "variants_ranking_gettokens",
-      "community": 16,
+      "community": 75,
       "norm_label": "gettokens()"
     },
     {
@@ -11200,7 +11200,7 @@
       "source_location": "L21",
       "_origin": "ast",
       "id": "variants_ranking_hassignal",
-      "community": 16,
+      "community": 75,
       "norm_label": "hassignal()"
     },
     {
@@ -11210,7 +11210,7 @@
       "source_location": "L34",
       "_origin": "ast",
       "id": "variants_ranking_scorevariant",
-      "community": 16,
+      "community": 75,
       "norm_label": "scorevariant()"
     },
     {
@@ -11220,7 +11220,7 @@
       "source_location": "L47",
       "_origin": "ast",
       "id": "variants_ranking_rankvariantsforcategory",
-      "community": 16,
+      "community": 75,
       "norm_label": "rankvariantsforcategory()"
     },
     {
@@ -11300,7 +11300,7 @@
       "source_location": "L27",
       "_origin": "ast",
       "id": "chat_create_core_fast_context_manager_getfastcontext",
-      "community": 57,
+      "community": 63,
       "norm_label": "getfastcontext()"
     },
     {
@@ -11380,7 +11380,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "chat_create_core_skill_generator",
-      "community": 57,
+      "community": 71,
       "norm_label": "skill-generator.ts"
     },
     {
@@ -11390,7 +11390,7 @@
       "source_location": "L7",
       "_origin": "ast",
       "id": "chat_create_core_skill_generator_createchatskillpayloadwithtemplate",
-      "community": 57,
+      "community": 71,
       "norm_label": "createchatskillpayloadwithtemplate"
     },
     {
@@ -11400,7 +11400,7 @@
       "source_location": "L11",
       "_origin": "ast",
       "id": "chat_create_core_skill_generator_createskillboilerplate",
-      "community": 57,
+      "community": 71,
       "norm_label": "createskillboilerplate()"
     },
     {
@@ -11410,7 +11410,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "description_better_index",
-      "community": 57,
+      "community": 63,
       "norm_label": "index.ts"
     },
     {
@@ -11420,7 +11420,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "description_better_index_buildbetterdescription",
-      "community": 57,
+      "community": 63,
       "norm_label": "buildbetterdescription()"
     },
     {
@@ -11430,7 +11430,7 @@
       "source_location": "L13",
       "_origin": "ast",
       "id": "description_better_index_buildfallbackinstructions",
-      "community": 57,
+      "community": 63,
       "norm_label": "buildfallbackinstructions()"
     },
     {
@@ -11440,7 +11440,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "templates_markdown_ai",
-      "community": 57,
+      "community": 71,
       "norm_label": "markdown-ai.ts"
     },
     {
@@ -11450,7 +11450,7 @@
       "source_location": "L3",
       "_origin": "ast",
       "id": "templates_markdown_ai_createskillmarkdownai",
-      "community": 57,
+      "community": 71,
       "norm_label": "createskillmarkdownai()"
     },
     {
@@ -11460,7 +11460,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "templates_markdown_base",
-      "community": 57,
+      "community": 71,
       "norm_label": "markdown-base.ts"
     },
     {
@@ -11470,7 +11470,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "templates_markdown_base_createchatskillpayload",
-      "community": 57,
+      "community": 71,
       "norm_label": "createchatskillpayload"
     },
     {
@@ -11480,7 +11480,7 @@
       "source_location": "L13",
       "_origin": "ast",
       "id": "templates_markdown_base_buildsafename",
-      "community": 57,
+      "community": 71,
       "norm_label": "buildsafename()"
     },
     {
@@ -11490,7 +11490,7 @@
       "source_location": "L36",
       "_origin": "ast",
       "id": "templates_markdown_base_builddescription",
-      "community": 57,
+      "community": 71,
       "norm_label": "builddescription()"
     },
     {
@@ -11500,7 +11500,7 @@
       "source_location": "L63",
       "_origin": "ast",
       "id": "templates_markdown_base_yamlescape",
-      "community": 57,
+      "community": 71,
       "norm_label": "yamlescape()"
     },
     {
@@ -11510,7 +11510,7 @@
       "source_location": "L71",
       "_origin": "ast",
       "id": "templates_markdown_base_getinstructionsnote",
-      "community": 57,
+      "community": 71,
       "norm_label": "getinstructionsnote()"
     },
     {
@@ -11520,7 +11520,7 @@
       "source_location": "L77",
       "_origin": "ast",
       "id": "templates_markdown_base_getreferencessection",
-      "community": 57,
+      "community": 71,
       "norm_label": "getreferencessection()"
     },
     {
@@ -11530,7 +11530,7 @@
       "source_location": "L103",
       "_origin": "ast",
       "id": "templates_markdown_base_createskillmarkdown",
-      "community": 57,
+      "community": 71,
       "norm_label": "createskillmarkdown()"
     },
     {
@@ -11540,7 +11540,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "templates_markdown_fast",
-      "community": 57,
+      "community": 63,
       "norm_label": "markdown-fast.ts"
     },
     {
@@ -11550,7 +11550,7 @@
       "source_location": "L10",
       "_origin": "ast",
       "id": "templates_markdown_fast_finalizeskillmarkdown",
-      "community": 57,
+      "community": 63,
       "norm_label": "finalizeskillmarkdown()"
     },
     {
@@ -11560,7 +11560,7 @@
       "source_location": "L18",
       "_origin": "ast",
       "id": "templates_markdown_fast_renderfallbackbody",
-      "community": 57,
+      "community": 63,
       "norm_label": "renderfallbackbody()"
     },
     {
@@ -11570,7 +11570,7 @@
       "source_location": "L43",
       "_origin": "ast",
       "id": "templates_markdown_fast_createskillmarkdownfast",
-      "community": 57,
+      "community": 63,
       "norm_label": "createskillmarkdownfast()"
     },
     {
@@ -12050,7 +12050,7 @@
       "source_location": "L857",
       "_origin": "ast",
       "id": "skill_fast_archetypes_getskillfastarchetypeid",
-      "community": 49,
+      "community": 63,
       "norm_label": "getskillfastarchetypeid()"
     },
     {
@@ -12110,7 +12110,7 @@
       "source_location": "L39",
       "_origin": "ast",
       "id": "skill_fast_index_getskillfasttemplate",
-      "community": 57,
+      "community": 63,
       "norm_label": "getskillfasttemplate()"
     },
     {
@@ -12180,7 +12180,7 @@
       "source_location": "L79",
       "_origin": "ast",
       "id": "skill_fast_intent_signals_compact",
-      "community": 49,
+      "community": 63,
       "norm_label": "compact()"
     },
     {
@@ -12190,7 +12190,7 @@
       "source_location": "L83",
       "_origin": "ast",
       "id": "skill_fast_intent_signals_normalizeskillfastintent",
-      "community": 49,
+      "community": 63,
       "norm_label": "normalizeskillfastintent()"
     },
     {
@@ -12320,7 +12320,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "skill_fast_intro",
-      "community": 49,
+      "community": 63,
       "norm_label": "intro.ts"
     },
     {
@@ -12330,7 +12330,7 @@
       "source_location": "L5",
       "_origin": "ast",
       "id": "skill_fast_intro_category_nouns",
-      "community": 49,
+      "community": 63,
       "norm_label": "category_nouns"
     },
     {
@@ -12340,7 +12340,7 @@
       "source_location": "L16",
       "_origin": "ast",
       "id": "skill_fast_intro_category_guarantees",
-      "community": 49,
+      "community": 63,
       "norm_label": "category_guarantees"
     },
     {
@@ -12350,7 +12350,7 @@
       "source_location": "L27",
       "_origin": "ast",
       "id": "skill_fast_intro_category_identities",
-      "community": 49,
+      "community": 63,
       "norm_label": "category_identities"
     },
     {
@@ -12360,7 +12360,7 @@
       "source_location": "L38",
       "_origin": "ast",
       "id": "skill_fast_intro_compact",
-      "community": 49,
+      "community": 63,
       "norm_label": "compact()"
     },
     {
@@ -12370,7 +12370,7 @@
       "source_location": "L42",
       "_origin": "ast",
       "id": "skill_fast_intro_wordlimit",
-      "community": 49,
+      "community": 63,
       "norm_label": "wordlimit()"
     },
     {
@@ -12380,7 +12380,7 @@
       "source_location": "L51",
       "_origin": "ast",
       "id": "skill_fast_intro_buildskillfastintro",
-      "community": 49,
+      "community": 63,
       "norm_label": "buildskillfastintro()"
     },
     {
@@ -12580,7 +12580,7 @@
       "source_location": "L32",
       "_origin": "ast",
       "id": "skill_fast_types_skillfastreferencesection",
-      "community": 29,
+      "community": 63,
       "norm_label": "skillfastreferencesection"
     },
     {
@@ -14290,7 +14290,7 @@
       "source_location": "L9",
       "_origin": "ast",
       "id": "project_analyzer_index_getprojectanalysis",
-      "community": 40,
+      "community": 19,
       "norm_label": "getprojectanalysis()"
     },
     {
@@ -14300,7 +14300,7 @@
       "source_location": "L27",
       "_origin": "ast",
       "id": "project_analyzer_index_prewarmprojectanalysis",
-      "community": 40,
+      "community": 19,
       "norm_label": "prewarmprojectanalysis()"
     },
     {
@@ -14550,7 +14550,7 @@
       "source_location": "L10",
       "_origin": "ast",
       "id": "category_category_initcategoryselection",
-      "community": 27,
+      "community": 13,
       "norm_label": "initcategoryselection()"
     },
     {
@@ -18790,7 +18790,7 @@
       "source_location": "L74",
       "_origin": "ast",
       "id": "core_local_skills_setworkspacerootskillenabled",
-      "community": 71,
+      "community": 11,
       "norm_label": "setworkspacerootskillenabled()"
     },
     {
@@ -18800,7 +18800,7 @@
       "source_location": "L95",
       "_origin": "ast",
       "id": "core_local_skills_deleteworkspacerootskill",
-      "community": 35,
+      "community": 99,
       "norm_label": "deleteworkspacerootskill()"
     },
     {
@@ -18840,7 +18840,7 @@
       "source_location": "L190",
       "_origin": "ast",
       "id": "core_local_skills_updategitignoreskillstate",
-      "community": 63,
+      "community": 35,
       "norm_label": "updategitignoreskillstate()"
     },
     {
@@ -18860,7 +18860,7 @@
       "source_location": "L229",
       "_origin": "ast",
       "id": "core_local_skills_removeskillslockentry",
-      "community": 35,
+      "community": 99,
       "norm_label": "removeskillslockentry()"
     },
     {
@@ -18870,7 +18870,7 @@
       "source_location": "L270",
       "_origin": "ast",
       "id": "core_local_skills_removegitignoreskillstate",
-      "community": 63,
+      "community": 35,
       "norm_label": "removegitignoreskillstate()"
     },
     {
@@ -18880,7 +18880,7 @@
       "source_location": "L289",
       "_origin": "ast",
       "id": "core_local_skills_appendmanagedblock",
-      "community": 63,
+      "community": 35,
       "norm_label": "appendmanagedblock()"
     },
     {
@@ -18890,7 +18890,7 @@
       "source_location": "L297",
       "_origin": "ast",
       "id": "core_local_skills_findgitignoreblock",
-      "community": 63,
+      "community": 35,
       "norm_label": "findgitignoreblock()"
     },
     {
@@ -18920,7 +18920,7 @@
       "source_location": "L341",
       "_origin": "ast",
       "id": "core_local_skills_splitlines",
-      "community": 63,
+      "community": 35,
       "norm_label": "splitlines()"
     },
     {
@@ -18930,7 +18930,7 @@
       "source_location": "L350",
       "_origin": "ast",
       "id": "core_local_skills_normalizelineendings",
-      "community": 63,
+      "community": 35,
       "norm_label": "normalizelineendings()"
     },
     {
@@ -18940,7 +18940,7 @@
       "source_location": "L354",
       "_origin": "ast",
       "id": "core_local_skills_withlineendings",
-      "community": 63,
+      "community": 35,
       "norm_label": "withlineendings()"
     },
     {
@@ -18950,7 +18950,7 @@
       "source_location": "L358",
       "_origin": "ast",
       "id": "core_local_skills_formatmanagedblockspacing",
-      "community": 63,
+      "community": 35,
       "norm_label": "formatmanagedblockspacing()"
     },
     {
@@ -18960,7 +18960,7 @@
       "source_location": "L382",
       "_origin": "ast",
       "id": "core_local_skills_isrootskillfile",
-      "community": 35,
+      "community": 99,
       "norm_label": "isrootskillfile()"
     },
     {
@@ -18970,7 +18970,7 @@
       "source_location": "L386",
       "_origin": "ast",
       "id": "core_local_skills_isrootskillfolder",
-      "community": 35,
+      "community": 99,
       "norm_label": "isrootskillfolder()"
     },
     {
@@ -18990,7 +18990,7 @@
       "source_location": "L401",
       "_origin": "ast",
       "id": "core_local_skills_getworkspaceskilluri",
-      "community": 35,
+      "community": 99,
       "norm_label": "getworkspaceskilluri()"
     },
     {
@@ -19000,7 +19000,7 @@
       "source_location": "L405",
       "_origin": "ast",
       "id": "core_local_skills_issupportedskillid",
-      "community": 35,
+      "community": 99,
       "norm_label": "issupportedskillid()"
     },
     {
@@ -19010,7 +19010,7 @@
       "source_location": "L409",
       "_origin": "ast",
       "id": "core_local_skills_getskillnamefromid",
-      "community": 35,
+      "community": 99,
       "norm_label": "getskillnamefromid()"
     },
     {
@@ -19020,7 +19020,7 @@
       "source_location": "L414",
       "_origin": "ast",
       "id": "core_local_skills_lockentrymatchesskillname",
-      "community": 35,
+      "community": 99,
       "norm_label": "lockentrymatchesskillname()"
     },
     {
@@ -19230,7 +19230,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_my_skills_screens_local_skill_core_types_ts_core_types",
-      "community": 71,
+      "community": 51,
       "norm_label": "types.ts"
     },
     {
@@ -19240,7 +19240,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "core_types_localskillkind",
-      "community": 71,
+      "community": 51,
       "norm_label": "localskillkind"
     },
     {
@@ -19260,7 +19260,7 @@
       "source_location": "L14",
       "_origin": "ast",
       "id": "core_types_localskillsupdatemessage",
-      "community": 71,
+      "community": 51,
       "norm_label": "localskillsupdatemessage"
     },
     {
@@ -19270,7 +19270,7 @@
       "source_location": "L19",
       "_origin": "ast",
       "id": "core_types_localskillsrequestmessage",
-      "community": 71,
+      "community": 51,
       "norm_label": "localskillsrequestmessage"
     },
     {
@@ -19280,7 +19280,7 @@
       "source_location": "L23",
       "_origin": "ast",
       "id": "core_types_localskillsetenabledmessage",
-      "community": 71,
+      "community": 11,
       "norm_label": "localskillsetenabledmessage"
     },
     {
@@ -19290,7 +19290,7 @@
       "source_location": "L29",
       "_origin": "ast",
       "id": "core_types_localskilldeletemessage",
-      "community": 71,
+      "community": 11,
       "norm_label": "localskilldeletemessage"
     },
     {
@@ -19300,7 +19300,7 @@
       "source_location": "L34",
       "_origin": "ast",
       "id": "core_types_localskillopenmessage",
-      "community": 71,
+      "community": 51,
       "norm_label": "localskillopenmessage"
     },
     {
@@ -19320,7 +19320,7 @@
       "source_location": "L44",
       "_origin": "ast",
       "id": "core_types_localskillssavedrequestmessage",
-      "community": 71,
+      "community": 51,
       "norm_label": "localskillssavedrequestmessage"
     },
     {
@@ -19330,7 +19330,7 @@
       "source_location": "L48",
       "_origin": "ast",
       "id": "core_types_localskillssavedupdatemessage",
-      "community": 71,
+      "community": 51,
       "norm_label": "localskillssavedupdatemessage"
     },
     {
@@ -19350,7 +19350,7 @@
       "source_location": "L58",
       "_origin": "ast",
       "id": "core_types_localskillenablesavedmessage",
-      "community": 71,
+      "community": 11,
       "norm_label": "localskillenablesavedmessage"
     },
     {
@@ -20577,7 +20577,7 @@
       "label": "God Nodes (most connected - your core abstractions)",
       "file_type": "document",
       "source_file": ".f1/GRAPH_REPORT.md",
-      "source_location": "L136",
+      "source_location": "L134",
       "_origin": "ast",
       "id": "f1_graph_report_god_nodes_most_connected_your_core_abstractions",
       "community": 64,
@@ -20587,7 +20587,7 @@
       "label": "Surprising Connections (you probably didn't know these)",
       "file_type": "document",
       "source_file": ".f1/GRAPH_REPORT.md",
-      "source_location": "L148",
+      "source_location": "L146",
       "_origin": "ast",
       "id": "f1_graph_report_surprising_connections_you_probably_didn_t_know_these",
       "community": 64,
@@ -20597,27 +20597,27 @@
       "label": "Import Cycles",
       "file_type": "document",
       "source_file": ".f1/GRAPH_REPORT.md",
-      "source_location": "L160",
+      "source_location": "L158",
       "_origin": "ast",
       "id": "f1_graph_report_import_cycles",
       "community": 64,
       "norm_label": "import cycles"
     },
     {
-      "label": "Communities (128 total, 17 thin omitted)",
+      "label": "Communities (126 total, 17 thin omitted)",
       "file_type": "document",
       "source_file": ".f1/GRAPH_REPORT.md",
-      "source_location": "L163",
+      "source_location": "L161",
       "_origin": "ast",
-      "id": "f1_graph_report_communities_128_total_17_thin_omitted",
+      "id": "f1_graph_report_communities_126_total_17_thin_omitted",
       "community": 42,
-      "norm_label": "communities (128 total, 17 thin omitted)"
+      "norm_label": "communities (126 total, 17 thin omitted)"
     },
     {
       "label": "Community 0 - \"Community 0\"",
       "file_type": "document",
       "source_file": ".f1/GRAPH_REPORT.md",
-      "source_location": "L165",
+      "source_location": "L163",
       "_origin": "ast",
       "id": "f1_graph_report_community_0_community_0",
       "community": 42,
@@ -20627,7 +20627,7 @@
       "label": "Community 1 - \"Community 1\"",
       "file_type": "document",
       "source_file": ".f1/GRAPH_REPORT.md",
-      "source_location": "L169",
+      "source_location": "L167",
       "_origin": "ast",
       "id": "f1_graph_report_community_1_community_1",
       "community": 42,
@@ -20637,7 +20637,7 @@
       "label": "Community 2 - \"Community 2\"",
       "file_type": "document",
       "source_file": ".f1/GRAPH_REPORT.md",
-      "source_location": "L173",
+      "source_location": "L171",
       "_origin": "ast",
       "id": "f1_graph_report_community_2_community_2",
       "community": 42,
@@ -20647,7 +20647,7 @@
       "label": "Community 3 - \"Community 3\"",
       "file_type": "document",
       "source_file": ".f1/GRAPH_REPORT.md",
-      "source_location": "L177",
+      "source_location": "L175",
       "_origin": "ast",
       "id": "f1_graph_report_community_3_community_3",
       "community": 42,
@@ -20657,7 +20657,7 @@
       "label": "Community 4 - \"Community 4\"",
       "file_type": "document",
       "source_file": ".f1/GRAPH_REPORT.md",
-      "source_location": "L181",
+      "source_location": "L179",
       "_origin": "ast",
       "id": "f1_graph_report_community_4_community_4",
       "community": 42,
@@ -20667,7 +20667,7 @@
       "label": "Community 5 - \"Community 5\"",
       "file_type": "document",
       "source_file": ".f1/GRAPH_REPORT.md",
-      "source_location": "L185",
+      "source_location": "L183",
       "_origin": "ast",
       "id": "f1_graph_report_community_5_community_5",
       "community": 42,
@@ -20677,7 +20677,7 @@
       "label": "Community 6 - \"Community 6\"",
       "file_type": "document",
       "source_file": ".f1/GRAPH_REPORT.md",
-      "source_location": "L189",
+      "source_location": "L187",
       "_origin": "ast",
       "id": "f1_graph_report_community_6_community_6",
       "community": 42,
@@ -20687,7 +20687,7 @@
       "label": "Community 7 - \"Community 7\"",
       "file_type": "document",
       "source_file": ".f1/GRAPH_REPORT.md",
-      "source_location": "L193",
+      "source_location": "L191",
       "_origin": "ast",
       "id": "f1_graph_report_community_7_community_7",
       "community": 42,
@@ -20697,7 +20697,7 @@
       "label": "Community 8 - \"Community 8\"",
       "file_type": "document",
       "source_file": ".f1/GRAPH_REPORT.md",
-      "source_location": "L197",
+      "source_location": "L195",
       "_origin": "ast",
       "id": "f1_graph_report_community_8_community_8",
       "community": 42,
@@ -20707,7 +20707,7 @@
       "label": "Community 9 - \"Community 9\"",
       "file_type": "document",
       "source_file": ".f1/GRAPH_REPORT.md",
-      "source_location": "L201",
+      "source_location": "L199",
       "_origin": "ast",
       "id": "f1_graph_report_community_9_community_9",
       "community": 42,
@@ -20717,7 +20717,7 @@
       "label": "Community 10 - \"Community 10\"",
       "file_type": "document",
       "source_file": ".f1/GRAPH_REPORT.md",
-      "source_location": "L205",
+      "source_location": "L203",
       "_origin": "ast",
       "id": "f1_graph_report_community_10_community_10",
       "community": 42,
@@ -20727,7 +20727,7 @@
       "label": "Community 11 - \"Community 11\"",
       "file_type": "document",
       "source_file": ".f1/GRAPH_REPORT.md",
-      "source_location": "L209",
+      "source_location": "L207",
       "_origin": "ast",
       "id": "f1_graph_report_community_11_community_11",
       "community": 42,
@@ -20737,7 +20737,7 @@
       "label": "Community 12 - \"Community 12\"",
       "file_type": "document",
       "source_file": ".f1/GRAPH_REPORT.md",
-      "source_location": "L213",
+      "source_location": "L211",
       "_origin": "ast",
       "id": "f1_graph_report_community_12_community_12",
       "community": 42,
@@ -20747,7 +20747,7 @@
       "label": "Community 13 - \"Community 13\"",
       "file_type": "document",
       "source_file": ".f1/GRAPH_REPORT.md",
-      "source_location": "L217",
+      "source_location": "L215",
       "_origin": "ast",
       "id": "f1_graph_report_community_13_community_13",
       "community": 42,
@@ -20757,7 +20757,7 @@
       "label": "Community 14 - \"Community 14\"",
       "file_type": "document",
       "source_file": ".f1/GRAPH_REPORT.md",
-      "source_location": "L221",
+      "source_location": "L219",
       "_origin": "ast",
       "id": "f1_graph_report_community_14_community_14",
       "community": 42,
@@ -20767,7 +20767,7 @@
       "label": "Community 15 - \"Community 15\"",
       "file_type": "document",
       "source_file": ".f1/GRAPH_REPORT.md",
-      "source_location": "L225",
+      "source_location": "L223",
       "_origin": "ast",
       "id": "f1_graph_report_community_15_community_15",
       "community": 42,
@@ -20777,7 +20777,7 @@
       "label": "Community 16 - \"Community 16\"",
       "file_type": "document",
       "source_file": ".f1/GRAPH_REPORT.md",
-      "source_location": "L229",
+      "source_location": "L227",
       "_origin": "ast",
       "id": "f1_graph_report_community_16_community_16",
       "community": 42,
@@ -20787,7 +20787,7 @@
       "label": "Community 17 - \"Community 17\"",
       "file_type": "document",
       "source_file": ".f1/GRAPH_REPORT.md",
-      "source_location": "L233",
+      "source_location": "L231",
       "_origin": "ast",
       "id": "f1_graph_report_community_17_community_17",
       "community": 42,
@@ -20797,7 +20797,7 @@
       "label": "Community 18 - \"Community 18\"",
       "file_type": "document",
       "source_file": ".f1/GRAPH_REPORT.md",
-      "source_location": "L237",
+      "source_location": "L235",
       "_origin": "ast",
       "id": "f1_graph_report_community_18_community_18",
       "community": 42,
@@ -20807,7 +20807,7 @@
       "label": "Community 19 - \"Community 19\"",
       "file_type": "document",
       "source_file": ".f1/GRAPH_REPORT.md",
-      "source_location": "L241",
+      "source_location": "L239",
       "_origin": "ast",
       "id": "f1_graph_report_community_19_community_19",
       "community": 42,
@@ -20817,7 +20817,7 @@
       "label": "Community 20 - \"Community 20\"",
       "file_type": "document",
       "source_file": ".f1/GRAPH_REPORT.md",
-      "source_location": "L245",
+      "source_location": "L243",
       "_origin": "ast",
       "id": "f1_graph_report_community_20_community_20",
       "community": 42,
@@ -20827,7 +20827,7 @@
       "label": "Community 21 - \"Community 21\"",
       "file_type": "document",
       "source_file": ".f1/GRAPH_REPORT.md",
-      "source_location": "L249",
+      "source_location": "L247",
       "_origin": "ast",
       "id": "f1_graph_report_community_21_community_21",
       "community": 42,
@@ -20837,7 +20837,7 @@
       "label": "Community 22 - \"Community 22\"",
       "file_type": "document",
       "source_file": ".f1/GRAPH_REPORT.md",
-      "source_location": "L253",
+      "source_location": "L251",
       "_origin": "ast",
       "id": "f1_graph_report_community_22_community_22",
       "community": 42,
@@ -20847,7 +20847,7 @@
       "label": "Community 23 - \"Community 23\"",
       "file_type": "document",
       "source_file": ".f1/GRAPH_REPORT.md",
-      "source_location": "L257",
+      "source_location": "L255",
       "_origin": "ast",
       "id": "f1_graph_report_community_23_community_23",
       "community": 42,
@@ -20857,7 +20857,7 @@
       "label": "Community 24 - \"Community 24\"",
       "file_type": "document",
       "source_file": ".f1/GRAPH_REPORT.md",
-      "source_location": "L261",
+      "source_location": "L259",
       "_origin": "ast",
       "id": "f1_graph_report_community_24_community_24",
       "community": 42,
@@ -20867,7 +20867,7 @@
       "label": "Community 25 - \"Community 25\"",
       "file_type": "document",
       "source_file": ".f1/GRAPH_REPORT.md",
-      "source_location": "L265",
+      "source_location": "L263",
       "_origin": "ast",
       "id": "f1_graph_report_community_25_community_25",
       "community": 42,
@@ -20877,7 +20877,7 @@
       "label": "Community 26 - \"Community 26\"",
       "file_type": "document",
       "source_file": ".f1/GRAPH_REPORT.md",
-      "source_location": "L269",
+      "source_location": "L267",
       "_origin": "ast",
       "id": "f1_graph_report_community_26_community_26",
       "community": 42,
@@ -20887,7 +20887,7 @@
       "label": "Community 27 - \"Community 27\"",
       "file_type": "document",
       "source_file": ".f1/GRAPH_REPORT.md",
-      "source_location": "L273",
+      "source_location": "L271",
       "_origin": "ast",
       "id": "f1_graph_report_community_27_community_27",
       "community": 42,
@@ -20897,7 +20897,7 @@
       "label": "Community 28 - \"Community 28\"",
       "file_type": "document",
       "source_file": ".f1/GRAPH_REPORT.md",
-      "source_location": "L277",
+      "source_location": "L275",
       "_origin": "ast",
       "id": "f1_graph_report_community_28_community_28",
       "community": 42,
@@ -20907,7 +20907,7 @@
       "label": "Community 29 - \"Community 29\"",
       "file_type": "document",
       "source_file": ".f1/GRAPH_REPORT.md",
-      "source_location": "L281",
+      "source_location": "L279",
       "_origin": "ast",
       "id": "f1_graph_report_community_29_community_29",
       "community": 42,
@@ -20917,7 +20917,7 @@
       "label": "Community 30 - \"Community 30\"",
       "file_type": "document",
       "source_file": ".f1/GRAPH_REPORT.md",
-      "source_location": "L285",
+      "source_location": "L283",
       "_origin": "ast",
       "id": "f1_graph_report_community_30_community_30",
       "community": 42,
@@ -20927,7 +20927,7 @@
       "label": "Community 31 - \"Community 31\"",
       "file_type": "document",
       "source_file": ".f1/GRAPH_REPORT.md",
-      "source_location": "L289",
+      "source_location": "L287",
       "_origin": "ast",
       "id": "f1_graph_report_community_31_community_31",
       "community": 42,
@@ -20937,7 +20937,7 @@
       "label": "Community 32 - \"Community 32\"",
       "file_type": "document",
       "source_file": ".f1/GRAPH_REPORT.md",
-      "source_location": "L293",
+      "source_location": "L291",
       "_origin": "ast",
       "id": "f1_graph_report_community_32_community_32",
       "community": 42,
@@ -20947,7 +20947,7 @@
       "label": "Community 33 - \"Community 33\"",
       "file_type": "document",
       "source_file": ".f1/GRAPH_REPORT.md",
-      "source_location": "L297",
+      "source_location": "L295",
       "_origin": "ast",
       "id": "f1_graph_report_community_33_community_33",
       "community": 42,
@@ -20957,7 +20957,7 @@
       "label": "Community 34 - \"Community 34\"",
       "file_type": "document",
       "source_file": ".f1/GRAPH_REPORT.md",
-      "source_location": "L301",
+      "source_location": "L299",
       "_origin": "ast",
       "id": "f1_graph_report_community_34_community_34",
       "community": 42,
@@ -20967,7 +20967,7 @@
       "label": "Community 35 - \"Community 35\"",
       "file_type": "document",
       "source_file": ".f1/GRAPH_REPORT.md",
-      "source_location": "L305",
+      "source_location": "L303",
       "_origin": "ast",
       "id": "f1_graph_report_community_35_community_35",
       "community": 42,
@@ -20977,7 +20977,7 @@
       "label": "Community 36 - \"Community 36\"",
       "file_type": "document",
       "source_file": ".f1/GRAPH_REPORT.md",
-      "source_location": "L309",
+      "source_location": "L307",
       "_origin": "ast",
       "id": "f1_graph_report_community_36_community_36",
       "community": 42,
@@ -20987,7 +20987,7 @@
       "label": "Community 37 - \"Community 37\"",
       "file_type": "document",
       "source_file": ".f1/GRAPH_REPORT.md",
-      "source_location": "L313",
+      "source_location": "L311",
       "_origin": "ast",
       "id": "f1_graph_report_community_37_community_37",
       "community": 42,
@@ -20997,7 +20997,7 @@
       "label": "Community 38 - \"Community 38\"",
       "file_type": "document",
       "source_file": ".f1/GRAPH_REPORT.md",
-      "source_location": "L317",
+      "source_location": "L315",
       "_origin": "ast",
       "id": "f1_graph_report_community_38_community_38",
       "community": 42,
@@ -21007,7 +21007,7 @@
       "label": "Community 39 - \"Community 39\"",
       "file_type": "document",
       "source_file": ".f1/GRAPH_REPORT.md",
-      "source_location": "L321",
+      "source_location": "L319",
       "_origin": "ast",
       "id": "f1_graph_report_community_39_community_39",
       "community": 42,
@@ -21017,7 +21017,7 @@
       "label": "Community 40 - \"Community 40\"",
       "file_type": "document",
       "source_file": ".f1/GRAPH_REPORT.md",
-      "source_location": "L325",
+      "source_location": "L323",
       "_origin": "ast",
       "id": "f1_graph_report_community_40_community_40",
       "community": 42,
@@ -21027,7 +21027,7 @@
       "label": "Community 41 - \"Community 41\"",
       "file_type": "document",
       "source_file": ".f1/GRAPH_REPORT.md",
-      "source_location": "L329",
+      "source_location": "L327",
       "_origin": "ast",
       "id": "f1_graph_report_community_41_community_41",
       "community": 42,
@@ -21037,7 +21037,7 @@
       "label": "Community 42 - \"Community 42\"",
       "file_type": "document",
       "source_file": ".f1/GRAPH_REPORT.md",
-      "source_location": "L333",
+      "source_location": "L331",
       "_origin": "ast",
       "id": "f1_graph_report_community_42_community_42",
       "community": 42,
@@ -21047,7 +21047,7 @@
       "label": "Community 43 - \"Community 43\"",
       "file_type": "document",
       "source_file": ".f1/GRAPH_REPORT.md",
-      "source_location": "L337",
+      "source_location": "L335",
       "_origin": "ast",
       "id": "f1_graph_report_community_43_community_43",
       "community": 42,
@@ -21057,7 +21057,7 @@
       "label": "Community 44 - \"Community 44\"",
       "file_type": "document",
       "source_file": ".f1/GRAPH_REPORT.md",
-      "source_location": "L341",
+      "source_location": "L339",
       "_origin": "ast",
       "id": "f1_graph_report_community_44_community_44",
       "community": 42,
@@ -21067,7 +21067,7 @@
       "label": "Community 45 - \"Community 45\"",
       "file_type": "document",
       "source_file": ".f1/GRAPH_REPORT.md",
-      "source_location": "L345",
+      "source_location": "L343",
       "_origin": "ast",
       "id": "f1_graph_report_community_45_community_45",
       "community": 42,
@@ -21077,7 +21077,7 @@
       "label": "Community 46 - \"Community 46\"",
       "file_type": "document",
       "source_file": ".f1/GRAPH_REPORT.md",
-      "source_location": "L349",
+      "source_location": "L347",
       "_origin": "ast",
       "id": "f1_graph_report_community_46_community_46",
       "community": 42,
@@ -21087,7 +21087,7 @@
       "label": "Community 47 - \"Community 47\"",
       "file_type": "document",
       "source_file": ".f1/GRAPH_REPORT.md",
-      "source_location": "L353",
+      "source_location": "L351",
       "_origin": "ast",
       "id": "f1_graph_report_community_47_community_47",
       "community": 42,
@@ -21097,7 +21097,7 @@
       "label": "Community 48 - \"Community 48\"",
       "file_type": "document",
       "source_file": ".f1/GRAPH_REPORT.md",
-      "source_location": "L357",
+      "source_location": "L355",
       "_origin": "ast",
       "id": "f1_graph_report_community_48_community_48",
       "community": 42,
@@ -21107,7 +21107,7 @@
       "label": "Community 49 - \"Community 49\"",
       "file_type": "document",
       "source_file": ".f1/GRAPH_REPORT.md",
-      "source_location": "L361",
+      "source_location": "L359",
       "_origin": "ast",
       "id": "f1_graph_report_community_49_community_49",
       "community": 42,
@@ -21117,7 +21117,7 @@
       "label": "Community 50 - \"Community 50\"",
       "file_type": "document",
       "source_file": ".f1/GRAPH_REPORT.md",
-      "source_location": "L365",
+      "source_location": "L363",
       "_origin": "ast",
       "id": "f1_graph_report_community_50_community_50",
       "community": 42,
@@ -21127,7 +21127,7 @@
       "label": "Community 51 - \"Community 51\"",
       "file_type": "document",
       "source_file": ".f1/GRAPH_REPORT.md",
-      "source_location": "L369",
+      "source_location": "L367",
       "_origin": "ast",
       "id": "f1_graph_report_community_51_community_51",
       "community": 42,
@@ -21137,7 +21137,7 @@
       "label": "Community 52 - \"Community 52\"",
       "file_type": "document",
       "source_file": ".f1/GRAPH_REPORT.md",
-      "source_location": "L373",
+      "source_location": "L371",
       "_origin": "ast",
       "id": "f1_graph_report_community_52_community_52",
       "community": 42,
@@ -21147,7 +21147,7 @@
       "label": "Community 53 - \"Community 53\"",
       "file_type": "document",
       "source_file": ".f1/GRAPH_REPORT.md",
-      "source_location": "L377",
+      "source_location": "L375",
       "_origin": "ast",
       "id": "f1_graph_report_community_53_community_53",
       "community": 42,
@@ -21157,7 +21157,7 @@
       "label": "Community 54 - \"Community 54\"",
       "file_type": "document",
       "source_file": ".f1/GRAPH_REPORT.md",
-      "source_location": "L381",
+      "source_location": "L379",
       "_origin": "ast",
       "id": "f1_graph_report_community_54_community_54",
       "community": 42,
@@ -21167,7 +21167,7 @@
       "label": "Community 55 - \"Community 55\"",
       "file_type": "document",
       "source_file": ".f1/GRAPH_REPORT.md",
-      "source_location": "L385",
+      "source_location": "L383",
       "_origin": "ast",
       "id": "f1_graph_report_community_55_community_55",
       "community": 42,
@@ -21177,7 +21177,7 @@
       "label": "Community 56 - \"Community 56\"",
       "file_type": "document",
       "source_file": ".f1/GRAPH_REPORT.md",
-      "source_location": "L389",
+      "source_location": "L387",
       "_origin": "ast",
       "id": "f1_graph_report_community_56_community_56",
       "community": 42,
@@ -21187,7 +21187,7 @@
       "label": "Community 57 - \"Community 57\"",
       "file_type": "document",
       "source_file": ".f1/GRAPH_REPORT.md",
-      "source_location": "L393",
+      "source_location": "L391",
       "_origin": "ast",
       "id": "f1_graph_report_community_57_community_57",
       "community": 42,
@@ -21197,7 +21197,7 @@
       "label": "Community 58 - \"Community 58\"",
       "file_type": "document",
       "source_file": ".f1/GRAPH_REPORT.md",
-      "source_location": "L397",
+      "source_location": "L395",
       "_origin": "ast",
       "id": "f1_graph_report_community_58_community_58",
       "community": 42,
@@ -21207,7 +21207,7 @@
       "label": "Community 59 - \"Community 59\"",
       "file_type": "document",
       "source_file": ".f1/GRAPH_REPORT.md",
-      "source_location": "L401",
+      "source_location": "L399",
       "_origin": "ast",
       "id": "f1_graph_report_community_59_community_59",
       "community": 42,
@@ -21217,7 +21217,7 @@
       "label": "Community 60 - \"Community 60\"",
       "file_type": "document",
       "source_file": ".f1/GRAPH_REPORT.md",
-      "source_location": "L405",
+      "source_location": "L403",
       "_origin": "ast",
       "id": "f1_graph_report_community_60_community_60",
       "community": 42,
@@ -21227,7 +21227,7 @@
       "label": "Community 61 - \"Community 61\"",
       "file_type": "document",
       "source_file": ".f1/GRAPH_REPORT.md",
-      "source_location": "L409",
+      "source_location": "L407",
       "_origin": "ast",
       "id": "f1_graph_report_community_61_community_61",
       "community": 42,
@@ -21237,7 +21237,7 @@
       "label": "Community 62 - \"Community 62\"",
       "file_type": "document",
       "source_file": ".f1/GRAPH_REPORT.md",
-      "source_location": "L413",
+      "source_location": "L411",
       "_origin": "ast",
       "id": "f1_graph_report_community_62_community_62",
       "community": 42,
@@ -21247,7 +21247,7 @@
       "label": "Community 63 - \"Community 63\"",
       "file_type": "document",
       "source_file": ".f1/GRAPH_REPORT.md",
-      "source_location": "L417",
+      "source_location": "L415",
       "_origin": "ast",
       "id": "f1_graph_report_community_63_community_63",
       "community": 42,
@@ -21257,7 +21257,7 @@
       "label": "Community 64 - \"Community 64\"",
       "file_type": "document",
       "source_file": ".f1/GRAPH_REPORT.md",
-      "source_location": "L421",
+      "source_location": "L419",
       "_origin": "ast",
       "id": "f1_graph_report_community_64_community_64",
       "community": 42,
@@ -21267,7 +21267,7 @@
       "label": "Community 65 - \"Community 65\"",
       "file_type": "document",
       "source_file": ".f1/GRAPH_REPORT.md",
-      "source_location": "L425",
+      "source_location": "L423",
       "_origin": "ast",
       "id": "f1_graph_report_community_65_community_65",
       "community": 42,
@@ -21277,7 +21277,7 @@
       "label": "Community 66 - \"Community 66\"",
       "file_type": "document",
       "source_file": ".f1/GRAPH_REPORT.md",
-      "source_location": "L429",
+      "source_location": "L427",
       "_origin": "ast",
       "id": "f1_graph_report_community_66_community_66",
       "community": 42,
@@ -21287,7 +21287,7 @@
       "label": "Community 67 - \"Community 67\"",
       "file_type": "document",
       "source_file": ".f1/GRAPH_REPORT.md",
-      "source_location": "L433",
+      "source_location": "L431",
       "_origin": "ast",
       "id": "f1_graph_report_community_67_community_67",
       "community": 42,
@@ -21297,7 +21297,7 @@
       "label": "Community 68 - \"Community 68\"",
       "file_type": "document",
       "source_file": ".f1/GRAPH_REPORT.md",
-      "source_location": "L437",
+      "source_location": "L435",
       "_origin": "ast",
       "id": "f1_graph_report_community_68_community_68",
       "community": 42,
@@ -21307,7 +21307,7 @@
       "label": "Community 69 - \"Community 69\"",
       "file_type": "document",
       "source_file": ".f1/GRAPH_REPORT.md",
-      "source_location": "L441",
+      "source_location": "L439",
       "_origin": "ast",
       "id": "f1_graph_report_community_69_community_69",
       "community": 42,
@@ -21317,7 +21317,7 @@
       "label": "Community 70 - \"Community 70\"",
       "file_type": "document",
       "source_file": ".f1/GRAPH_REPORT.md",
-      "source_location": "L445",
+      "source_location": "L443",
       "_origin": "ast",
       "id": "f1_graph_report_community_70_community_70",
       "community": 42,
@@ -21327,7 +21327,7 @@
       "label": "Community 71 - \"Community 71\"",
       "file_type": "document",
       "source_file": ".f1/GRAPH_REPORT.md",
-      "source_location": "L449",
+      "source_location": "L447",
       "_origin": "ast",
       "id": "f1_graph_report_community_71_community_71",
       "community": 42,
@@ -21337,7 +21337,7 @@
       "label": "Community 72 - \"Community 72\"",
       "file_type": "document",
       "source_file": ".f1/GRAPH_REPORT.md",
-      "source_location": "L453",
+      "source_location": "L451",
       "_origin": "ast",
       "id": "f1_graph_report_community_72_community_72",
       "community": 42,
@@ -21347,7 +21347,7 @@
       "label": "Community 73 - \"Community 73\"",
       "file_type": "document",
       "source_file": ".f1/GRAPH_REPORT.md",
-      "source_location": "L457",
+      "source_location": "L455",
       "_origin": "ast",
       "id": "f1_graph_report_community_73_community_73",
       "community": 42,
@@ -21357,27 +21357,17 @@
       "label": "Community 74 - \"Community 74\"",
       "file_type": "document",
       "source_file": ".f1/GRAPH_REPORT.md",
-      "source_location": "L461",
+      "source_location": "L459",
       "_origin": "ast",
       "id": "f1_graph_report_community_74_community_74",
       "community": 42,
       "norm_label": "community 74 - \"community 74\""
     },
     {
-      "label": "Community 75 - \"Community 75\"",
-      "file_type": "document",
-      "source_file": ".f1/GRAPH_REPORT.md",
-      "source_location": "L465",
-      "_origin": "ast",
-      "id": "f1_graph_report_community_75_community_75",
-      "community": 42,
-      "norm_label": "community 75 - \"community 75\""
-    },
-    {
       "label": "Community 76 - \"Community 76\"",
       "file_type": "document",
       "source_file": ".f1/GRAPH_REPORT.md",
-      "source_location": "L469",
+      "source_location": "L463",
       "_origin": "ast",
       "id": "f1_graph_report_community_76_community_76",
       "community": 42,
@@ -21387,7 +21377,7 @@
       "label": "Community 77 - \"Community 77\"",
       "file_type": "document",
       "source_file": ".f1/GRAPH_REPORT.md",
-      "source_location": "L473",
+      "source_location": "L467",
       "_origin": "ast",
       "id": "f1_graph_report_community_77_community_77",
       "community": 42,
@@ -21397,7 +21387,7 @@
       "label": "Community 78 - \"Community 78\"",
       "file_type": "document",
       "source_file": ".f1/GRAPH_REPORT.md",
-      "source_location": "L477",
+      "source_location": "L471",
       "_origin": "ast",
       "id": "f1_graph_report_community_78_community_78",
       "community": 42,
@@ -21407,7 +21397,7 @@
       "label": "Community 79 - \"Community 79\"",
       "file_type": "document",
       "source_file": ".f1/GRAPH_REPORT.md",
-      "source_location": "L481",
+      "source_location": "L475",
       "_origin": "ast",
       "id": "f1_graph_report_community_79_community_79",
       "community": 42,
@@ -21417,7 +21407,7 @@
       "label": "Community 80 - \"Community 80\"",
       "file_type": "document",
       "source_file": ".f1/GRAPH_REPORT.md",
-      "source_location": "L485",
+      "source_location": "L479",
       "_origin": "ast",
       "id": "f1_graph_report_community_80_community_80",
       "community": 42,
@@ -21427,7 +21417,7 @@
       "label": "Community 81 - \"Community 81\"",
       "file_type": "document",
       "source_file": ".f1/GRAPH_REPORT.md",
-      "source_location": "L489",
+      "source_location": "L483",
       "_origin": "ast",
       "id": "f1_graph_report_community_81_community_81",
       "community": 42,
@@ -21437,7 +21427,7 @@
       "label": "Community 82 - \"Community 82\"",
       "file_type": "document",
       "source_file": ".f1/GRAPH_REPORT.md",
-      "source_location": "L493",
+      "source_location": "L487",
       "_origin": "ast",
       "id": "f1_graph_report_community_82_community_82",
       "community": 42,
@@ -21447,7 +21437,7 @@
       "label": "Community 83 - \"Community 83\"",
       "file_type": "document",
       "source_file": ".f1/GRAPH_REPORT.md",
-      "source_location": "L497",
+      "source_location": "L491",
       "_origin": "ast",
       "id": "f1_graph_report_community_83_community_83",
       "community": 42,
@@ -21457,7 +21447,7 @@
       "label": "Community 84 - \"Community 84\"",
       "file_type": "document",
       "source_file": ".f1/GRAPH_REPORT.md",
-      "source_location": "L501",
+      "source_location": "L495",
       "_origin": "ast",
       "id": "f1_graph_report_community_84_community_84",
       "community": 42,
@@ -21467,7 +21457,7 @@
       "label": "Community 85 - \"Community 85\"",
       "file_type": "document",
       "source_file": ".f1/GRAPH_REPORT.md",
-      "source_location": "L505",
+      "source_location": "L499",
       "_origin": "ast",
       "id": "f1_graph_report_community_85_community_85",
       "community": 42,
@@ -21477,7 +21467,7 @@
       "label": "Community 86 - \"Community 86\"",
       "file_type": "document",
       "source_file": ".f1/GRAPH_REPORT.md",
-      "source_location": "L509",
+      "source_location": "L503",
       "_origin": "ast",
       "id": "f1_graph_report_community_86_community_86",
       "community": 42,
@@ -21487,7 +21477,7 @@
       "label": "Community 87 - \"Community 87\"",
       "file_type": "document",
       "source_file": ".f1/GRAPH_REPORT.md",
-      "source_location": "L513",
+      "source_location": "L507",
       "_origin": "ast",
       "id": "f1_graph_report_community_87_community_87",
       "community": 42,
@@ -21497,7 +21487,7 @@
       "label": "Community 88 - \"Community 88\"",
       "file_type": "document",
       "source_file": ".f1/GRAPH_REPORT.md",
-      "source_location": "L517",
+      "source_location": "L511",
       "_origin": "ast",
       "id": "f1_graph_report_community_88_community_88",
       "community": 42,
@@ -21507,7 +21497,7 @@
       "label": "Community 89 - \"Community 89\"",
       "file_type": "document",
       "source_file": ".f1/GRAPH_REPORT.md",
-      "source_location": "L521",
+      "source_location": "L515",
       "_origin": "ast",
       "id": "f1_graph_report_community_89_community_89",
       "community": 42,
@@ -21517,7 +21507,7 @@
       "label": "Community 90 - \"Community 90\"",
       "file_type": "document",
       "source_file": ".f1/GRAPH_REPORT.md",
-      "source_location": "L525",
+      "source_location": "L519",
       "_origin": "ast",
       "id": "f1_graph_report_community_90_community_90",
       "community": 42,
@@ -21527,7 +21517,7 @@
       "label": "Community 91 - \"Community 91\"",
       "file_type": "document",
       "source_file": ".f1/GRAPH_REPORT.md",
-      "source_location": "L529",
+      "source_location": "L523",
       "_origin": "ast",
       "id": "f1_graph_report_community_91_community_91",
       "community": 42,
@@ -21537,7 +21527,7 @@
       "label": "Community 92 - \"Community 92\"",
       "file_type": "document",
       "source_file": ".f1/GRAPH_REPORT.md",
-      "source_location": "L533",
+      "source_location": "L527",
       "_origin": "ast",
       "id": "f1_graph_report_community_92_community_92",
       "community": 42,
@@ -21547,7 +21537,7 @@
       "label": "Community 93 - \"Community 93\"",
       "file_type": "document",
       "source_file": ".f1/GRAPH_REPORT.md",
-      "source_location": "L537",
+      "source_location": "L531",
       "_origin": "ast",
       "id": "f1_graph_report_community_93_community_93",
       "community": 42,
@@ -21557,7 +21547,7 @@
       "label": "Community 94 - \"Community 94\"",
       "file_type": "document",
       "source_file": ".f1/GRAPH_REPORT.md",
-      "source_location": "L541",
+      "source_location": "L535",
       "_origin": "ast",
       "id": "f1_graph_report_community_94_community_94",
       "community": 42,
@@ -21567,7 +21557,7 @@
       "label": "Community 96 - \"Community 96\"",
       "file_type": "document",
       "source_file": ".f1/GRAPH_REPORT.md",
-      "source_location": "L545",
+      "source_location": "L539",
       "_origin": "ast",
       "id": "f1_graph_report_community_96_community_96",
       "community": 42,
@@ -21577,7 +21567,7 @@
       "label": "Community 97 - \"Community 97\"",
       "file_type": "document",
       "source_file": ".f1/GRAPH_REPORT.md",
-      "source_location": "L549",
+      "source_location": "L543",
       "_origin": "ast",
       "id": "f1_graph_report_community_97_community_97",
       "community": 42,
@@ -21587,27 +21577,17 @@
       "label": "Community 98 - \"Community 98\"",
       "file_type": "document",
       "source_file": ".f1/GRAPH_REPORT.md",
-      "source_location": "L553",
+      "source_location": "L547",
       "_origin": "ast",
       "id": "f1_graph_report_community_98_community_98",
       "community": 42,
       "norm_label": "community 98 - \"community 98\""
     },
     {
-      "label": "Community 99 - \"Community 99\"",
-      "file_type": "document",
-      "source_file": ".f1/GRAPH_REPORT.md",
-      "source_location": "L557",
-      "_origin": "ast",
-      "id": "f1_graph_report_community_99_community_99",
-      "community": 42,
-      "norm_label": "community 99 - \"community 99\""
-    },
-    {
       "label": "Community 127 - \"Community 127\"",
       "file_type": "document",
       "source_file": ".f1/GRAPH_REPORT.md",
-      "source_location": "L561",
+      "source_location": "L551",
       "_origin": "ast",
       "id": "f1_graph_report_community_127_community_127",
       "community": 42,
@@ -21617,7 +21597,7 @@
       "label": "Knowledge Gaps",
       "file_type": "document",
       "source_file": ".f1/GRAPH_REPORT.md",
-      "source_location": "L565",
+      "source_location": "L555",
       "_origin": "ast",
       "id": "f1_graph_report_knowledge_gaps",
       "community": 64,
@@ -21627,7 +21607,7 @@
       "label": "Suggested Questions",
       "file_type": "document",
       "source_file": ".f1/GRAPH_REPORT.md",
-      "source_location": "L570",
+      "source_location": "L560",
       "_origin": "ast",
       "id": "f1_graph_report_suggested_questions",
       "community": 64,
@@ -67540,10 +67520,10 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": ".f1/GRAPH_REPORT.md",
-      "source_location": "L163",
+      "source_location": "L161",
       "weight": 1.0,
       "source": "f1_graph_report_graph_report_f1_2026_06_20",
-      "target": "f1_graph_report_communities_128_total_17_thin_omitted",
+      "target": "f1_graph_report_communities_126_total_17_thin_omitted",
       "confidence_score": 1.0
     },
     {
@@ -67640,9 +67620,9 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": ".f1/GRAPH_REPORT.md",
-      "source_location": "L165",
+      "source_location": "L163",
       "weight": 1.0,
-      "source": "f1_graph_report_communities_128_total_17_thin_omitted",
+      "source": "f1_graph_report_communities_126_total_17_thin_omitted",
       "target": "f1_graph_report_community_0_community_0",
       "confidence_score": 1.0
     },
@@ -67650,9 +67630,9 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": ".f1/GRAPH_REPORT.md",
-      "source_location": "L205",
+      "source_location": "L203",
       "weight": 1.0,
-      "source": "f1_graph_report_communities_128_total_17_thin_omitted",
+      "source": "f1_graph_report_communities_126_total_17_thin_omitted",
       "target": "f1_graph_report_community_10_community_10",
       "confidence_score": 1.0
     },
@@ -67660,9 +67640,9 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": ".f1/GRAPH_REPORT.md",
-      "source_location": "L209",
+      "source_location": "L207",
       "weight": 1.0,
-      "source": "f1_graph_report_communities_128_total_17_thin_omitted",
+      "source": "f1_graph_report_communities_126_total_17_thin_omitted",
       "target": "f1_graph_report_community_11_community_11",
       "confidence_score": 1.0
     },
@@ -67670,9 +67650,9 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": ".f1/GRAPH_REPORT.md",
-      "source_location": "L561",
+      "source_location": "L551",
       "weight": 1.0,
-      "source": "f1_graph_report_communities_128_total_17_thin_omitted",
+      "source": "f1_graph_report_communities_126_total_17_thin_omitted",
       "target": "f1_graph_report_community_127_community_127",
       "confidence_score": 1.0
     },
@@ -67680,9 +67660,9 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": ".f1/GRAPH_REPORT.md",
-      "source_location": "L213",
+      "source_location": "L211",
       "weight": 1.0,
-      "source": "f1_graph_report_communities_128_total_17_thin_omitted",
+      "source": "f1_graph_report_communities_126_total_17_thin_omitted",
       "target": "f1_graph_report_community_12_community_12",
       "confidence_score": 1.0
     },
@@ -67690,9 +67670,9 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": ".f1/GRAPH_REPORT.md",
-      "source_location": "L217",
+      "source_location": "L215",
       "weight": 1.0,
-      "source": "f1_graph_report_communities_128_total_17_thin_omitted",
+      "source": "f1_graph_report_communities_126_total_17_thin_omitted",
       "target": "f1_graph_report_community_13_community_13",
       "confidence_score": 1.0
     },
@@ -67700,9 +67680,9 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": ".f1/GRAPH_REPORT.md",
-      "source_location": "L221",
+      "source_location": "L219",
       "weight": 1.0,
-      "source": "f1_graph_report_communities_128_total_17_thin_omitted",
+      "source": "f1_graph_report_communities_126_total_17_thin_omitted",
       "target": "f1_graph_report_community_14_community_14",
       "confidence_score": 1.0
     },
@@ -67710,9 +67690,9 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": ".f1/GRAPH_REPORT.md",
-      "source_location": "L225",
+      "source_location": "L223",
       "weight": 1.0,
-      "source": "f1_graph_report_communities_128_total_17_thin_omitted",
+      "source": "f1_graph_report_communities_126_total_17_thin_omitted",
       "target": "f1_graph_report_community_15_community_15",
       "confidence_score": 1.0
     },
@@ -67720,9 +67700,9 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": ".f1/GRAPH_REPORT.md",
-      "source_location": "L229",
+      "source_location": "L227",
       "weight": 1.0,
-      "source": "f1_graph_report_communities_128_total_17_thin_omitted",
+      "source": "f1_graph_report_communities_126_total_17_thin_omitted",
       "target": "f1_graph_report_community_16_community_16",
       "confidence_score": 1.0
     },
@@ -67730,9 +67710,9 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": ".f1/GRAPH_REPORT.md",
-      "source_location": "L233",
+      "source_location": "L231",
       "weight": 1.0,
-      "source": "f1_graph_report_communities_128_total_17_thin_omitted",
+      "source": "f1_graph_report_communities_126_total_17_thin_omitted",
       "target": "f1_graph_report_community_17_community_17",
       "confidence_score": 1.0
     },
@@ -67740,9 +67720,9 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": ".f1/GRAPH_REPORT.md",
-      "source_location": "L237",
+      "source_location": "L235",
       "weight": 1.0,
-      "source": "f1_graph_report_communities_128_total_17_thin_omitted",
+      "source": "f1_graph_report_communities_126_total_17_thin_omitted",
       "target": "f1_graph_report_community_18_community_18",
       "confidence_score": 1.0
     },
@@ -67750,9 +67730,9 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": ".f1/GRAPH_REPORT.md",
-      "source_location": "L241",
+      "source_location": "L239",
       "weight": 1.0,
-      "source": "f1_graph_report_communities_128_total_17_thin_omitted",
+      "source": "f1_graph_report_communities_126_total_17_thin_omitted",
       "target": "f1_graph_report_community_19_community_19",
       "confidence_score": 1.0
     },
@@ -67760,9 +67740,9 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": ".f1/GRAPH_REPORT.md",
-      "source_location": "L169",
+      "source_location": "L167",
       "weight": 1.0,
-      "source": "f1_graph_report_communities_128_total_17_thin_omitted",
+      "source": "f1_graph_report_communities_126_total_17_thin_omitted",
       "target": "f1_graph_report_community_1_community_1",
       "confidence_score": 1.0
     },
@@ -67770,9 +67750,9 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": ".f1/GRAPH_REPORT.md",
-      "source_location": "L245",
+      "source_location": "L243",
       "weight": 1.0,
-      "source": "f1_graph_report_communities_128_total_17_thin_omitted",
+      "source": "f1_graph_report_communities_126_total_17_thin_omitted",
       "target": "f1_graph_report_community_20_community_20",
       "confidence_score": 1.0
     },
@@ -67780,9 +67760,9 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": ".f1/GRAPH_REPORT.md",
-      "source_location": "L249",
+      "source_location": "L247",
       "weight": 1.0,
-      "source": "f1_graph_report_communities_128_total_17_thin_omitted",
+      "source": "f1_graph_report_communities_126_total_17_thin_omitted",
       "target": "f1_graph_report_community_21_community_21",
       "confidence_score": 1.0
     },
@@ -67790,9 +67770,9 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": ".f1/GRAPH_REPORT.md",
-      "source_location": "L253",
+      "source_location": "L251",
       "weight": 1.0,
-      "source": "f1_graph_report_communities_128_total_17_thin_omitted",
+      "source": "f1_graph_report_communities_126_total_17_thin_omitted",
       "target": "f1_graph_report_community_22_community_22",
       "confidence_score": 1.0
     },
@@ -67800,9 +67780,9 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": ".f1/GRAPH_REPORT.md",
-      "source_location": "L257",
+      "source_location": "L255",
       "weight": 1.0,
-      "source": "f1_graph_report_communities_128_total_17_thin_omitted",
+      "source": "f1_graph_report_communities_126_total_17_thin_omitted",
       "target": "f1_graph_report_community_23_community_23",
       "confidence_score": 1.0
     },
@@ -67810,9 +67790,9 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": ".f1/GRAPH_REPORT.md",
-      "source_location": "L261",
+      "source_location": "L259",
       "weight": 1.0,
-      "source": "f1_graph_report_communities_128_total_17_thin_omitted",
+      "source": "f1_graph_report_communities_126_total_17_thin_omitted",
       "target": "f1_graph_report_community_24_community_24",
       "confidence_score": 1.0
     },
@@ -67820,9 +67800,9 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": ".f1/GRAPH_REPORT.md",
-      "source_location": "L265",
+      "source_location": "L263",
       "weight": 1.0,
-      "source": "f1_graph_report_communities_128_total_17_thin_omitted",
+      "source": "f1_graph_report_communities_126_total_17_thin_omitted",
       "target": "f1_graph_report_community_25_community_25",
       "confidence_score": 1.0
     },
@@ -67830,9 +67810,9 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": ".f1/GRAPH_REPORT.md",
-      "source_location": "L269",
+      "source_location": "L267",
       "weight": 1.0,
-      "source": "f1_graph_report_communities_128_total_17_thin_omitted",
+      "source": "f1_graph_report_communities_126_total_17_thin_omitted",
       "target": "f1_graph_report_community_26_community_26",
       "confidence_score": 1.0
     },
@@ -67840,9 +67820,9 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": ".f1/GRAPH_REPORT.md",
-      "source_location": "L273",
+      "source_location": "L271",
       "weight": 1.0,
-      "source": "f1_graph_report_communities_128_total_17_thin_omitted",
+      "source": "f1_graph_report_communities_126_total_17_thin_omitted",
       "target": "f1_graph_report_community_27_community_27",
       "confidence_score": 1.0
     },
@@ -67850,9 +67830,9 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": ".f1/GRAPH_REPORT.md",
-      "source_location": "L277",
+      "source_location": "L275",
       "weight": 1.0,
-      "source": "f1_graph_report_communities_128_total_17_thin_omitted",
+      "source": "f1_graph_report_communities_126_total_17_thin_omitted",
       "target": "f1_graph_report_community_28_community_28",
       "confidence_score": 1.0
     },
@@ -67860,9 +67840,9 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": ".f1/GRAPH_REPORT.md",
-      "source_location": "L281",
+      "source_location": "L279",
       "weight": 1.0,
-      "source": "f1_graph_report_communities_128_total_17_thin_omitted",
+      "source": "f1_graph_report_communities_126_total_17_thin_omitted",
       "target": "f1_graph_report_community_29_community_29",
       "confidence_score": 1.0
     },
@@ -67870,9 +67850,9 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": ".f1/GRAPH_REPORT.md",
-      "source_location": "L173",
+      "source_location": "L171",
       "weight": 1.0,
-      "source": "f1_graph_report_communities_128_total_17_thin_omitted",
+      "source": "f1_graph_report_communities_126_total_17_thin_omitted",
       "target": "f1_graph_report_community_2_community_2",
       "confidence_score": 1.0
     },
@@ -67880,9 +67860,9 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": ".f1/GRAPH_REPORT.md",
-      "source_location": "L285",
+      "source_location": "L283",
       "weight": 1.0,
-      "source": "f1_graph_report_communities_128_total_17_thin_omitted",
+      "source": "f1_graph_report_communities_126_total_17_thin_omitted",
       "target": "f1_graph_report_community_30_community_30",
       "confidence_score": 1.0
     },
@@ -67890,9 +67870,9 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": ".f1/GRAPH_REPORT.md",
-      "source_location": "L289",
+      "source_location": "L287",
       "weight": 1.0,
-      "source": "f1_graph_report_communities_128_total_17_thin_omitted",
+      "source": "f1_graph_report_communities_126_total_17_thin_omitted",
       "target": "f1_graph_report_community_31_community_31",
       "confidence_score": 1.0
     },
@@ -67900,9 +67880,9 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": ".f1/GRAPH_REPORT.md",
-      "source_location": "L293",
+      "source_location": "L291",
       "weight": 1.0,
-      "source": "f1_graph_report_communities_128_total_17_thin_omitted",
+      "source": "f1_graph_report_communities_126_total_17_thin_omitted",
       "target": "f1_graph_report_community_32_community_32",
       "confidence_score": 1.0
     },
@@ -67910,9 +67890,9 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": ".f1/GRAPH_REPORT.md",
-      "source_location": "L297",
+      "source_location": "L295",
       "weight": 1.0,
-      "source": "f1_graph_report_communities_128_total_17_thin_omitted",
+      "source": "f1_graph_report_communities_126_total_17_thin_omitted",
       "target": "f1_graph_report_community_33_community_33",
       "confidence_score": 1.0
     },
@@ -67920,9 +67900,9 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": ".f1/GRAPH_REPORT.md",
-      "source_location": "L301",
+      "source_location": "L299",
       "weight": 1.0,
-      "source": "f1_graph_report_communities_128_total_17_thin_omitted",
+      "source": "f1_graph_report_communities_126_total_17_thin_omitted",
       "target": "f1_graph_report_community_34_community_34",
       "confidence_score": 1.0
     },
@@ -67930,9 +67910,9 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": ".f1/GRAPH_REPORT.md",
-      "source_location": "L305",
+      "source_location": "L303",
       "weight": 1.0,
-      "source": "f1_graph_report_communities_128_total_17_thin_omitted",
+      "source": "f1_graph_report_communities_126_total_17_thin_omitted",
       "target": "f1_graph_report_community_35_community_35",
       "confidence_score": 1.0
     },
@@ -67940,9 +67920,9 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": ".f1/GRAPH_REPORT.md",
-      "source_location": "L309",
+      "source_location": "L307",
       "weight": 1.0,
-      "source": "f1_graph_report_communities_128_total_17_thin_omitted",
+      "source": "f1_graph_report_communities_126_total_17_thin_omitted",
       "target": "f1_graph_report_community_36_community_36",
       "confidence_score": 1.0
     },
@@ -67950,9 +67930,9 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": ".f1/GRAPH_REPORT.md",
-      "source_location": "L313",
+      "source_location": "L311",
       "weight": 1.0,
-      "source": "f1_graph_report_communities_128_total_17_thin_omitted",
+      "source": "f1_graph_report_communities_126_total_17_thin_omitted",
       "target": "f1_graph_report_community_37_community_37",
       "confidence_score": 1.0
     },
@@ -67960,9 +67940,9 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": ".f1/GRAPH_REPORT.md",
-      "source_location": "L317",
+      "source_location": "L315",
       "weight": 1.0,
-      "source": "f1_graph_report_communities_128_total_17_thin_omitted",
+      "source": "f1_graph_report_communities_126_total_17_thin_omitted",
       "target": "f1_graph_report_community_38_community_38",
       "confidence_score": 1.0
     },
@@ -67970,9 +67950,9 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": ".f1/GRAPH_REPORT.md",
-      "source_location": "L321",
+      "source_location": "L319",
       "weight": 1.0,
-      "source": "f1_graph_report_communities_128_total_17_thin_omitted",
+      "source": "f1_graph_report_communities_126_total_17_thin_omitted",
       "target": "f1_graph_report_community_39_community_39",
       "confidence_score": 1.0
     },
@@ -67980,9 +67960,9 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": ".f1/GRAPH_REPORT.md",
-      "source_location": "L177",
+      "source_location": "L175",
       "weight": 1.0,
-      "source": "f1_graph_report_communities_128_total_17_thin_omitted",
+      "source": "f1_graph_report_communities_126_total_17_thin_omitted",
       "target": "f1_graph_report_community_3_community_3",
       "confidence_score": 1.0
     },
@@ -67990,9 +67970,9 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": ".f1/GRAPH_REPORT.md",
-      "source_location": "L325",
+      "source_location": "L323",
       "weight": 1.0,
-      "source": "f1_graph_report_communities_128_total_17_thin_omitted",
+      "source": "f1_graph_report_communities_126_total_17_thin_omitted",
       "target": "f1_graph_report_community_40_community_40",
       "confidence_score": 1.0
     },
@@ -68000,9 +67980,9 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": ".f1/GRAPH_REPORT.md",
-      "source_location": "L329",
+      "source_location": "L327",
       "weight": 1.0,
-      "source": "f1_graph_report_communities_128_total_17_thin_omitted",
+      "source": "f1_graph_report_communities_126_total_17_thin_omitted",
       "target": "f1_graph_report_community_41_community_41",
       "confidence_score": 1.0
     },
@@ -68010,9 +67990,9 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": ".f1/GRAPH_REPORT.md",
-      "source_location": "L333",
+      "source_location": "L331",
       "weight": 1.0,
-      "source": "f1_graph_report_communities_128_total_17_thin_omitted",
+      "source": "f1_graph_report_communities_126_total_17_thin_omitted",
       "target": "f1_graph_report_community_42_community_42",
       "confidence_score": 1.0
     },
@@ -68020,9 +68000,9 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": ".f1/GRAPH_REPORT.md",
-      "source_location": "L337",
+      "source_location": "L335",
       "weight": 1.0,
-      "source": "f1_graph_report_communities_128_total_17_thin_omitted",
+      "source": "f1_graph_report_communities_126_total_17_thin_omitted",
       "target": "f1_graph_report_community_43_community_43",
       "confidence_score": 1.0
     },
@@ -68030,9 +68010,9 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": ".f1/GRAPH_REPORT.md",
-      "source_location": "L341",
+      "source_location": "L339",
       "weight": 1.0,
-      "source": "f1_graph_report_communities_128_total_17_thin_omitted",
+      "source": "f1_graph_report_communities_126_total_17_thin_omitted",
       "target": "f1_graph_report_community_44_community_44",
       "confidence_score": 1.0
     },
@@ -68040,9 +68020,9 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": ".f1/GRAPH_REPORT.md",
-      "source_location": "L345",
+      "source_location": "L343",
       "weight": 1.0,
-      "source": "f1_graph_report_communities_128_total_17_thin_omitted",
+      "source": "f1_graph_report_communities_126_total_17_thin_omitted",
       "target": "f1_graph_report_community_45_community_45",
       "confidence_score": 1.0
     },
@@ -68050,9 +68030,9 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": ".f1/GRAPH_REPORT.md",
-      "source_location": "L349",
+      "source_location": "L347",
       "weight": 1.0,
-      "source": "f1_graph_report_communities_128_total_17_thin_omitted",
+      "source": "f1_graph_report_communities_126_total_17_thin_omitted",
       "target": "f1_graph_report_community_46_community_46",
       "confidence_score": 1.0
     },
@@ -68060,9 +68040,9 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": ".f1/GRAPH_REPORT.md",
-      "source_location": "L353",
+      "source_location": "L351",
       "weight": 1.0,
-      "source": "f1_graph_report_communities_128_total_17_thin_omitted",
+      "source": "f1_graph_report_communities_126_total_17_thin_omitted",
       "target": "f1_graph_report_community_47_community_47",
       "confidence_score": 1.0
     },
@@ -68070,9 +68050,9 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": ".f1/GRAPH_REPORT.md",
-      "source_location": "L357",
+      "source_location": "L355",
       "weight": 1.0,
-      "source": "f1_graph_report_communities_128_total_17_thin_omitted",
+      "source": "f1_graph_report_communities_126_total_17_thin_omitted",
       "target": "f1_graph_report_community_48_community_48",
       "confidence_score": 1.0
     },
@@ -68080,9 +68060,9 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": ".f1/GRAPH_REPORT.md",
-      "source_location": "L361",
+      "source_location": "L359",
       "weight": 1.0,
-      "source": "f1_graph_report_communities_128_total_17_thin_omitted",
+      "source": "f1_graph_report_communities_126_total_17_thin_omitted",
       "target": "f1_graph_report_community_49_community_49",
       "confidence_score": 1.0
     },
@@ -68090,9 +68070,9 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": ".f1/GRAPH_REPORT.md",
-      "source_location": "L181",
+      "source_location": "L179",
       "weight": 1.0,
-      "source": "f1_graph_report_communities_128_total_17_thin_omitted",
+      "source": "f1_graph_report_communities_126_total_17_thin_omitted",
       "target": "f1_graph_report_community_4_community_4",
       "confidence_score": 1.0
     },
@@ -68100,9 +68080,9 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": ".f1/GRAPH_REPORT.md",
-      "source_location": "L365",
+      "source_location": "L363",
       "weight": 1.0,
-      "source": "f1_graph_report_communities_128_total_17_thin_omitted",
+      "source": "f1_graph_report_communities_126_total_17_thin_omitted",
       "target": "f1_graph_report_community_50_community_50",
       "confidence_score": 1.0
     },
@@ -68110,9 +68090,9 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": ".f1/GRAPH_REPORT.md",
-      "source_location": "L369",
+      "source_location": "L367",
       "weight": 1.0,
-      "source": "f1_graph_report_communities_128_total_17_thin_omitted",
+      "source": "f1_graph_report_communities_126_total_17_thin_omitted",
       "target": "f1_graph_report_community_51_community_51",
       "confidence_score": 1.0
     },
@@ -68120,9 +68100,9 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": ".f1/GRAPH_REPORT.md",
-      "source_location": "L373",
+      "source_location": "L371",
       "weight": 1.0,
-      "source": "f1_graph_report_communities_128_total_17_thin_omitted",
+      "source": "f1_graph_report_communities_126_total_17_thin_omitted",
       "target": "f1_graph_report_community_52_community_52",
       "confidence_score": 1.0
     },
@@ -68130,9 +68110,9 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": ".f1/GRAPH_REPORT.md",
-      "source_location": "L377",
+      "source_location": "L375",
       "weight": 1.0,
-      "source": "f1_graph_report_communities_128_total_17_thin_omitted",
+      "source": "f1_graph_report_communities_126_total_17_thin_omitted",
       "target": "f1_graph_report_community_53_community_53",
       "confidence_score": 1.0
     },
@@ -68140,9 +68120,9 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": ".f1/GRAPH_REPORT.md",
-      "source_location": "L381",
+      "source_location": "L379",
       "weight": 1.0,
-      "source": "f1_graph_report_communities_128_total_17_thin_omitted",
+      "source": "f1_graph_report_communities_126_total_17_thin_omitted",
       "target": "f1_graph_report_community_54_community_54",
       "confidence_score": 1.0
     },
@@ -68150,9 +68130,9 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": ".f1/GRAPH_REPORT.md",
-      "source_location": "L385",
+      "source_location": "L383",
       "weight": 1.0,
-      "source": "f1_graph_report_communities_128_total_17_thin_omitted",
+      "source": "f1_graph_report_communities_126_total_17_thin_omitted",
       "target": "f1_graph_report_community_55_community_55",
       "confidence_score": 1.0
     },
@@ -68160,9 +68140,9 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": ".f1/GRAPH_REPORT.md",
-      "source_location": "L389",
+      "source_location": "L387",
       "weight": 1.0,
-      "source": "f1_graph_report_communities_128_total_17_thin_omitted",
+      "source": "f1_graph_report_communities_126_total_17_thin_omitted",
       "target": "f1_graph_report_community_56_community_56",
       "confidence_score": 1.0
     },
@@ -68170,9 +68150,9 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": ".f1/GRAPH_REPORT.md",
-      "source_location": "L393",
+      "source_location": "L391",
       "weight": 1.0,
-      "source": "f1_graph_report_communities_128_total_17_thin_omitted",
+      "source": "f1_graph_report_communities_126_total_17_thin_omitted",
       "target": "f1_graph_report_community_57_community_57",
       "confidence_score": 1.0
     },
@@ -68180,9 +68160,9 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": ".f1/GRAPH_REPORT.md",
-      "source_location": "L397",
+      "source_location": "L395",
       "weight": 1.0,
-      "source": "f1_graph_report_communities_128_total_17_thin_omitted",
+      "source": "f1_graph_report_communities_126_total_17_thin_omitted",
       "target": "f1_graph_report_community_58_community_58",
       "confidence_score": 1.0
     },
@@ -68190,9 +68170,9 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": ".f1/GRAPH_REPORT.md",
-      "source_location": "L401",
+      "source_location": "L399",
       "weight": 1.0,
-      "source": "f1_graph_report_communities_128_total_17_thin_omitted",
+      "source": "f1_graph_report_communities_126_total_17_thin_omitted",
       "target": "f1_graph_report_community_59_community_59",
       "confidence_score": 1.0
     },
@@ -68200,9 +68180,9 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": ".f1/GRAPH_REPORT.md",
-      "source_location": "L185",
+      "source_location": "L183",
       "weight": 1.0,
-      "source": "f1_graph_report_communities_128_total_17_thin_omitted",
+      "source": "f1_graph_report_communities_126_total_17_thin_omitted",
       "target": "f1_graph_report_community_5_community_5",
       "confidence_score": 1.0
     },
@@ -68210,9 +68190,9 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": ".f1/GRAPH_REPORT.md",
-      "source_location": "L405",
+      "source_location": "L403",
       "weight": 1.0,
-      "source": "f1_graph_report_communities_128_total_17_thin_omitted",
+      "source": "f1_graph_report_communities_126_total_17_thin_omitted",
       "target": "f1_graph_report_community_60_community_60",
       "confidence_score": 1.0
     },
@@ -68220,9 +68200,9 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": ".f1/GRAPH_REPORT.md",
-      "source_location": "L409",
+      "source_location": "L407",
       "weight": 1.0,
-      "source": "f1_graph_report_communities_128_total_17_thin_omitted",
+      "source": "f1_graph_report_communities_126_total_17_thin_omitted",
       "target": "f1_graph_report_community_61_community_61",
       "confidence_score": 1.0
     },
@@ -68230,9 +68210,9 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": ".f1/GRAPH_REPORT.md",
-      "source_location": "L413",
+      "source_location": "L411",
       "weight": 1.0,
-      "source": "f1_graph_report_communities_128_total_17_thin_omitted",
+      "source": "f1_graph_report_communities_126_total_17_thin_omitted",
       "target": "f1_graph_report_community_62_community_62",
       "confidence_score": 1.0
     },
@@ -68240,9 +68220,9 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": ".f1/GRAPH_REPORT.md",
-      "source_location": "L417",
+      "source_location": "L415",
       "weight": 1.0,
-      "source": "f1_graph_report_communities_128_total_17_thin_omitted",
+      "source": "f1_graph_report_communities_126_total_17_thin_omitted",
       "target": "f1_graph_report_community_63_community_63",
       "confidence_score": 1.0
     },
@@ -68250,9 +68230,9 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": ".f1/GRAPH_REPORT.md",
-      "source_location": "L421",
+      "source_location": "L419",
       "weight": 1.0,
-      "source": "f1_graph_report_communities_128_total_17_thin_omitted",
+      "source": "f1_graph_report_communities_126_total_17_thin_omitted",
       "target": "f1_graph_report_community_64_community_64",
       "confidence_score": 1.0
     },
@@ -68260,9 +68240,9 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": ".f1/GRAPH_REPORT.md",
-      "source_location": "L425",
+      "source_location": "L423",
       "weight": 1.0,
-      "source": "f1_graph_report_communities_128_total_17_thin_omitted",
+      "source": "f1_graph_report_communities_126_total_17_thin_omitted",
       "target": "f1_graph_report_community_65_community_65",
       "confidence_score": 1.0
     },
@@ -68270,9 +68250,9 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": ".f1/GRAPH_REPORT.md",
-      "source_location": "L429",
+      "source_location": "L427",
       "weight": 1.0,
-      "source": "f1_graph_report_communities_128_total_17_thin_omitted",
+      "source": "f1_graph_report_communities_126_total_17_thin_omitted",
       "target": "f1_graph_report_community_66_community_66",
       "confidence_score": 1.0
     },
@@ -68280,9 +68260,9 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": ".f1/GRAPH_REPORT.md",
-      "source_location": "L433",
+      "source_location": "L431",
       "weight": 1.0,
-      "source": "f1_graph_report_communities_128_total_17_thin_omitted",
+      "source": "f1_graph_report_communities_126_total_17_thin_omitted",
       "target": "f1_graph_report_community_67_community_67",
       "confidence_score": 1.0
     },
@@ -68290,9 +68270,9 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": ".f1/GRAPH_REPORT.md",
-      "source_location": "L437",
+      "source_location": "L435",
       "weight": 1.0,
-      "source": "f1_graph_report_communities_128_total_17_thin_omitted",
+      "source": "f1_graph_report_communities_126_total_17_thin_omitted",
       "target": "f1_graph_report_community_68_community_68",
       "confidence_score": 1.0
     },
@@ -68300,9 +68280,9 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": ".f1/GRAPH_REPORT.md",
-      "source_location": "L441",
+      "source_location": "L439",
       "weight": 1.0,
-      "source": "f1_graph_report_communities_128_total_17_thin_omitted",
+      "source": "f1_graph_report_communities_126_total_17_thin_omitted",
       "target": "f1_graph_report_community_69_community_69",
       "confidence_score": 1.0
     },
@@ -68310,9 +68290,9 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": ".f1/GRAPH_REPORT.md",
-      "source_location": "L189",
+      "source_location": "L187",
       "weight": 1.0,
-      "source": "f1_graph_report_communities_128_total_17_thin_omitted",
+      "source": "f1_graph_report_communities_126_total_17_thin_omitted",
       "target": "f1_graph_report_community_6_community_6",
       "confidence_score": 1.0
     },
@@ -68320,9 +68300,9 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": ".f1/GRAPH_REPORT.md",
-      "source_location": "L445",
+      "source_location": "L443",
       "weight": 1.0,
-      "source": "f1_graph_report_communities_128_total_17_thin_omitted",
+      "source": "f1_graph_report_communities_126_total_17_thin_omitted",
       "target": "f1_graph_report_community_70_community_70",
       "confidence_score": 1.0
     },
@@ -68330,9 +68310,9 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": ".f1/GRAPH_REPORT.md",
-      "source_location": "L449",
+      "source_location": "L447",
       "weight": 1.0,
-      "source": "f1_graph_report_communities_128_total_17_thin_omitted",
+      "source": "f1_graph_report_communities_126_total_17_thin_omitted",
       "target": "f1_graph_report_community_71_community_71",
       "confidence_score": 1.0
     },
@@ -68340,9 +68320,9 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": ".f1/GRAPH_REPORT.md",
-      "source_location": "L453",
+      "source_location": "L451",
       "weight": 1.0,
-      "source": "f1_graph_report_communities_128_total_17_thin_omitted",
+      "source": "f1_graph_report_communities_126_total_17_thin_omitted",
       "target": "f1_graph_report_community_72_community_72",
       "confidence_score": 1.0
     },
@@ -68350,9 +68330,9 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": ".f1/GRAPH_REPORT.md",
-      "source_location": "L457",
+      "source_location": "L455",
       "weight": 1.0,
-      "source": "f1_graph_report_communities_128_total_17_thin_omitted",
+      "source": "f1_graph_report_communities_126_total_17_thin_omitted",
       "target": "f1_graph_report_community_73_community_73",
       "confidence_score": 1.0
     },
@@ -68360,9 +68340,9 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": ".f1/GRAPH_REPORT.md",
-      "source_location": "L461",
+      "source_location": "L459",
       "weight": 1.0,
-      "source": "f1_graph_report_communities_128_total_17_thin_omitted",
+      "source": "f1_graph_report_communities_126_total_17_thin_omitted",
       "target": "f1_graph_report_community_74_community_74",
       "confidence_score": 1.0
     },
@@ -68370,19 +68350,9 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": ".f1/GRAPH_REPORT.md",
-      "source_location": "L465",
+      "source_location": "L463",
       "weight": 1.0,
-      "source": "f1_graph_report_communities_128_total_17_thin_omitted",
-      "target": "f1_graph_report_community_75_community_75",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": ".f1/GRAPH_REPORT.md",
-      "source_location": "L469",
-      "weight": 1.0,
-      "source": "f1_graph_report_communities_128_total_17_thin_omitted",
+      "source": "f1_graph_report_communities_126_total_17_thin_omitted",
       "target": "f1_graph_report_community_76_community_76",
       "confidence_score": 1.0
     },
@@ -68390,9 +68360,9 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": ".f1/GRAPH_REPORT.md",
-      "source_location": "L473",
+      "source_location": "L467",
       "weight": 1.0,
-      "source": "f1_graph_report_communities_128_total_17_thin_omitted",
+      "source": "f1_graph_report_communities_126_total_17_thin_omitted",
       "target": "f1_graph_report_community_77_community_77",
       "confidence_score": 1.0
     },
@@ -68400,9 +68370,9 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": ".f1/GRAPH_REPORT.md",
-      "source_location": "L477",
+      "source_location": "L471",
       "weight": 1.0,
-      "source": "f1_graph_report_communities_128_total_17_thin_omitted",
+      "source": "f1_graph_report_communities_126_total_17_thin_omitted",
       "target": "f1_graph_report_community_78_community_78",
       "confidence_score": 1.0
     },
@@ -68410,9 +68380,9 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": ".f1/GRAPH_REPORT.md",
-      "source_location": "L481",
+      "source_location": "L475",
       "weight": 1.0,
-      "source": "f1_graph_report_communities_128_total_17_thin_omitted",
+      "source": "f1_graph_report_communities_126_total_17_thin_omitted",
       "target": "f1_graph_report_community_79_community_79",
       "confidence_score": 1.0
     },
@@ -68420,9 +68390,9 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": ".f1/GRAPH_REPORT.md",
-      "source_location": "L193",
+      "source_location": "L191",
       "weight": 1.0,
-      "source": "f1_graph_report_communities_128_total_17_thin_omitted",
+      "source": "f1_graph_report_communities_126_total_17_thin_omitted",
       "target": "f1_graph_report_community_7_community_7",
       "confidence_score": 1.0
     },
@@ -68430,9 +68400,9 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": ".f1/GRAPH_REPORT.md",
-      "source_location": "L485",
+      "source_location": "L479",
       "weight": 1.0,
-      "source": "f1_graph_report_communities_128_total_17_thin_omitted",
+      "source": "f1_graph_report_communities_126_total_17_thin_omitted",
       "target": "f1_graph_report_community_80_community_80",
       "confidence_score": 1.0
     },
@@ -68440,9 +68410,9 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": ".f1/GRAPH_REPORT.md",
-      "source_location": "L489",
+      "source_location": "L483",
       "weight": 1.0,
-      "source": "f1_graph_report_communities_128_total_17_thin_omitted",
+      "source": "f1_graph_report_communities_126_total_17_thin_omitted",
       "target": "f1_graph_report_community_81_community_81",
       "confidence_score": 1.0
     },
@@ -68450,9 +68420,9 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": ".f1/GRAPH_REPORT.md",
-      "source_location": "L493",
+      "source_location": "L487",
       "weight": 1.0,
-      "source": "f1_graph_report_communities_128_total_17_thin_omitted",
+      "source": "f1_graph_report_communities_126_total_17_thin_omitted",
       "target": "f1_graph_report_community_82_community_82",
       "confidence_score": 1.0
     },
@@ -68460,9 +68430,9 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": ".f1/GRAPH_REPORT.md",
-      "source_location": "L497",
+      "source_location": "L491",
       "weight": 1.0,
-      "source": "f1_graph_report_communities_128_total_17_thin_omitted",
+      "source": "f1_graph_report_communities_126_total_17_thin_omitted",
       "target": "f1_graph_report_community_83_community_83",
       "confidence_score": 1.0
     },
@@ -68470,9 +68440,9 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": ".f1/GRAPH_REPORT.md",
-      "source_location": "L501",
+      "source_location": "L495",
       "weight": 1.0,
-      "source": "f1_graph_report_communities_128_total_17_thin_omitted",
+      "source": "f1_graph_report_communities_126_total_17_thin_omitted",
       "target": "f1_graph_report_community_84_community_84",
       "confidence_score": 1.0
     },
@@ -68480,9 +68450,9 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": ".f1/GRAPH_REPORT.md",
-      "source_location": "L505",
+      "source_location": "L499",
       "weight": 1.0,
-      "source": "f1_graph_report_communities_128_total_17_thin_omitted",
+      "source": "f1_graph_report_communities_126_total_17_thin_omitted",
       "target": "f1_graph_report_community_85_community_85",
       "confidence_score": 1.0
     },
@@ -68490,9 +68460,9 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": ".f1/GRAPH_REPORT.md",
-      "source_location": "L509",
+      "source_location": "L503",
       "weight": 1.0,
-      "source": "f1_graph_report_communities_128_total_17_thin_omitted",
+      "source": "f1_graph_report_communities_126_total_17_thin_omitted",
       "target": "f1_graph_report_community_86_community_86",
       "confidence_score": 1.0
     },
@@ -68500,9 +68470,9 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": ".f1/GRAPH_REPORT.md",
-      "source_location": "L513",
+      "source_location": "L507",
       "weight": 1.0,
-      "source": "f1_graph_report_communities_128_total_17_thin_omitted",
+      "source": "f1_graph_report_communities_126_total_17_thin_omitted",
       "target": "f1_graph_report_community_87_community_87",
       "confidence_score": 1.0
     },
@@ -68510,9 +68480,9 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": ".f1/GRAPH_REPORT.md",
-      "source_location": "L517",
+      "source_location": "L511",
       "weight": 1.0,
-      "source": "f1_graph_report_communities_128_total_17_thin_omitted",
+      "source": "f1_graph_report_communities_126_total_17_thin_omitted",
       "target": "f1_graph_report_community_88_community_88",
       "confidence_score": 1.0
     },
@@ -68520,9 +68490,9 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": ".f1/GRAPH_REPORT.md",
-      "source_location": "L521",
+      "source_location": "L515",
       "weight": 1.0,
-      "source": "f1_graph_report_communities_128_total_17_thin_omitted",
+      "source": "f1_graph_report_communities_126_total_17_thin_omitted",
       "target": "f1_graph_report_community_89_community_89",
       "confidence_score": 1.0
     },
@@ -68530,9 +68500,9 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": ".f1/GRAPH_REPORT.md",
-      "source_location": "L197",
+      "source_location": "L195",
       "weight": 1.0,
-      "source": "f1_graph_report_communities_128_total_17_thin_omitted",
+      "source": "f1_graph_report_communities_126_total_17_thin_omitted",
       "target": "f1_graph_report_community_8_community_8",
       "confidence_score": 1.0
     },
@@ -68540,9 +68510,9 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": ".f1/GRAPH_REPORT.md",
-      "source_location": "L525",
+      "source_location": "L519",
       "weight": 1.0,
-      "source": "f1_graph_report_communities_128_total_17_thin_omitted",
+      "source": "f1_graph_report_communities_126_total_17_thin_omitted",
       "target": "f1_graph_report_community_90_community_90",
       "confidence_score": 1.0
     },
@@ -68550,9 +68520,9 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": ".f1/GRAPH_REPORT.md",
-      "source_location": "L529",
+      "source_location": "L523",
       "weight": 1.0,
-      "source": "f1_graph_report_communities_128_total_17_thin_omitted",
+      "source": "f1_graph_report_communities_126_total_17_thin_omitted",
       "target": "f1_graph_report_community_91_community_91",
       "confidence_score": 1.0
     },
@@ -68560,9 +68530,9 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": ".f1/GRAPH_REPORT.md",
-      "source_location": "L533",
+      "source_location": "L527",
       "weight": 1.0,
-      "source": "f1_graph_report_communities_128_total_17_thin_omitted",
+      "source": "f1_graph_report_communities_126_total_17_thin_omitted",
       "target": "f1_graph_report_community_92_community_92",
       "confidence_score": 1.0
     },
@@ -68570,9 +68540,9 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": ".f1/GRAPH_REPORT.md",
-      "source_location": "L537",
+      "source_location": "L531",
       "weight": 1.0,
-      "source": "f1_graph_report_communities_128_total_17_thin_omitted",
+      "source": "f1_graph_report_communities_126_total_17_thin_omitted",
       "target": "f1_graph_report_community_93_community_93",
       "confidence_score": 1.0
     },
@@ -68580,9 +68550,9 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": ".f1/GRAPH_REPORT.md",
-      "source_location": "L541",
+      "source_location": "L535",
       "weight": 1.0,
-      "source": "f1_graph_report_communities_128_total_17_thin_omitted",
+      "source": "f1_graph_report_communities_126_total_17_thin_omitted",
       "target": "f1_graph_report_community_94_community_94",
       "confidence_score": 1.0
     },
@@ -68590,9 +68560,9 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": ".f1/GRAPH_REPORT.md",
-      "source_location": "L545",
+      "source_location": "L539",
       "weight": 1.0,
-      "source": "f1_graph_report_communities_128_total_17_thin_omitted",
+      "source": "f1_graph_report_communities_126_total_17_thin_omitted",
       "target": "f1_graph_report_community_96_community_96",
       "confidence_score": 1.0
     },
@@ -68600,9 +68570,9 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": ".f1/GRAPH_REPORT.md",
-      "source_location": "L549",
+      "source_location": "L543",
       "weight": 1.0,
-      "source": "f1_graph_report_communities_128_total_17_thin_omitted",
+      "source": "f1_graph_report_communities_126_total_17_thin_omitted",
       "target": "f1_graph_report_community_97_community_97",
       "confidence_score": 1.0
     },
@@ -68610,9 +68580,9 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": ".f1/GRAPH_REPORT.md",
-      "source_location": "L553",
+      "source_location": "L547",
       "weight": 1.0,
-      "source": "f1_graph_report_communities_128_total_17_thin_omitted",
+      "source": "f1_graph_report_communities_126_total_17_thin_omitted",
       "target": "f1_graph_report_community_98_community_98",
       "confidence_score": 1.0
     },
@@ -68620,19 +68590,9 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": ".f1/GRAPH_REPORT.md",
-      "source_location": "L557",
+      "source_location": "L199",
       "weight": 1.0,
-      "source": "f1_graph_report_communities_128_total_17_thin_omitted",
-      "target": "f1_graph_report_community_99_community_99",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": ".f1/GRAPH_REPORT.md",
-      "source_location": "L201",
-      "weight": 1.0,
-      "source": "f1_graph_report_communities_128_total_17_thin_omitted",
+      "source": "f1_graph_report_communities_126_total_17_thin_omitted",
       "target": "f1_graph_report_community_9_community_9",
       "confidence_score": 1.0
     },
@@ -68992,9 +68952,9 @@
       "source_file": "src/my-memory/hook/README.md",
       "source_location": "L1",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "hook_readme",
-      "target": "hook_readme_my_memory_auto_refresh_f1_on_commit_shelved_feature",
-      "confidence_score": 1.0
+      "target": "hook_readme_my_memory_auto_refresh_f1_on_commit_shelved_feature"
     },
     {
       "relation": "contains",
@@ -69002,9 +68962,9 @@
       "source_file": "src/my-memory/hook/README.md",
       "source_location": "L292",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "hook_readme_my_memory_auto_refresh_f1_on_commit_shelved_feature",
-      "target": "hook_readme_design_decisions_gotchas_read_before_reviving",
-      "confidence_score": 1.0
+      "target": "hook_readme_design_decisions_gotchas_read_before_reviving"
     },
     {
       "relation": "contains",
@@ -69012,9 +68972,9 @@
       "source_file": "src/my-memory/hook/README.md",
       "source_location": "L47",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "hook_readme_my_memory_auto_refresh_f1_on_commit_shelved_feature",
-      "target": "hook_readme_file_1_src_my_memory_hook_run_hook_ts_the_runner",
-      "confidence_score": 1.0
+      "target": "hook_readme_file_1_src_my_memory_hook_run_hook_ts_the_runner"
     },
     {
       "relation": "contains",
@@ -69022,9 +68982,9 @@
       "source_file": "src/my-memory/hook/README.md",
       "source_location": "L105",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "hook_readme_my_memory_auto_refresh_f1_on_commit_shelved_feature",
-      "target": "hook_readme_file_2_src_my_memory_core_git_hooks_ts_install_remove_detect",
-      "confidence_score": 1.0
+      "target": "hook_readme_file_2_src_my_memory_core_git_hooks_ts_install_remove_detect"
     },
     {
       "relation": "contains",
@@ -69032,9 +68992,9 @@
       "source_file": "src/my-memory/hook/README.md",
       "source_location": "L205",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "hook_readme_my_memory_auto_refresh_f1_on_commit_shelved_feature",
-      "target": "hook_readme_file_3_memoryservice_integration_src_my_memory_core_memory_service_ts",
-      "confidence_score": 1.0
+      "target": "hook_readme_file_3_memoryservice_integration_src_my_memory_core_memory_service_ts"
     },
     {
       "relation": "contains",
@@ -69042,9 +69002,9 @@
       "source_file": "src/my-memory/hook/README.md",
       "source_location": "L229",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "hook_readme_my_memory_auto_refresh_f1_on_commit_shelved_feature",
-      "target": "hook_readme_file_4_host_wiring_src_my_cli_core_main_ts",
-      "confidence_score": 1.0
+      "target": "hook_readme_file_4_host_wiring_src_my_cli_core_main_ts"
     },
     {
       "relation": "contains",
@@ -69052,9 +69012,9 @@
       "source_file": "src/my-memory/hook/README.md",
       "source_location": "L265",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "hook_readme_my_memory_auto_refresh_f1_on_commit_shelved_feature",
-      "target": "hook_readme_file_5_build_target_esbuild_js",
-      "confidence_score": 1.0
+      "target": "hook_readme_file_5_build_target_esbuild_js"
     },
     {
       "relation": "contains",
@@ -69062,9 +69022,9 @@
       "source_file": "src/my-memory/hook/README.md",
       "source_location": "L31",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "hook_readme_my_memory_auto_refresh_f1_on_commit_shelved_feature",
-      "target": "hook_readme_flow_on_commit",
-      "confidence_score": 1.0
+      "target": "hook_readme_flow_on_commit"
     },
     {
       "relation": "contains",
@@ -69072,9 +69032,9 @@
       "source_file": "src/my-memory/hook/README.md",
       "source_location": "L308",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "hook_readme_my_memory_auto_refresh_f1_on_commit_shelved_feature",
-      "target": "hook_readme_open_items_that_were_never_finished_the_reason_it_s_shelved_not_shipped",
-      "confidence_score": 1.0
+      "target": "hook_readme_open_items_that_were_never_finished_the_reason_it_s_shelved_not_shipped"
     },
     {
       "relation": "contains",
@@ -69082,9 +69042,9 @@
       "source_file": "src/my-memory/hook/README.md",
       "source_location": "L322",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "hook_readme_my_memory_auto_refresh_f1_on_commit_shelved_feature",
-      "target": "hook_readme_re_integration_checklist",
-      "confidence_score": 1.0
+      "target": "hook_readme_re_integration_checklist"
     },
     {
       "relation": "contains",
@@ -69092,9 +69052,9 @@
       "source_file": "src/my-memory/hook/README.md",
       "source_location": "L7",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "hook_readme_my_memory_auto_refresh_f1_on_commit_shelved_feature",
-      "target": "hook_readme_what_it_did",
-      "confidence_score": 1.0
+      "target": "hook_readme_what_it_did"
     },
     {
       "relation": "contains",
@@ -69102,9 +69062,9 @@
       "source_file": "src/my-memory/hook/README.md",
       "source_location": "L18",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "hook_readme_my_memory_auto_refresh_f1_on_commit_shelved_feature",
-      "target": "hook_readme_why_it_was_designed_this_way",
-      "confidence_score": 1.0
+      "target": "hook_readme_why_it_was_designed_this_way"
     },
     {
       "relation": "contains",
@@ -69188,5 +69148,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "d9b37b721013e8ed7a9bca52d0f76ba53fb3ed02"
+  "built_at_commit": "6684228728d89bf4bbd0f360cb082746e5d45347"
 }
