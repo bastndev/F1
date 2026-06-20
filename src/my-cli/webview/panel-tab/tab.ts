@@ -613,8 +613,26 @@ export const createTabController = (options: TabControllerOptions) => {
 		syncAgentPicker();
 	};
 
+	// Keep the picker label showing the CLI the user is actually standing in.
+	// Switching sessions (clicking the list or Tab-cycling) only changes the
+	// active session, so without this the label would stay on the last agent
+	// picked from the dropdown.
+	const syncPickerToActiveSession = (sessions: CliSessionSummary[], activeSessionId: string | undefined) => {
+		const activeLabel = activeSessionId
+			? sessions.find((session) => session.id === activeSessionId)?.label
+			: undefined;
+
+		if (!activeLabel || activeLabel === currentAgentLabel) {
+			return;
+		}
+
+		currentAgentLabel = activeLabel;
+		syncAgentPicker();
+	};
+
 	const render = (sessions: CliSessionSummary[], activeSessionId: string | undefined) => {
 		currentActiveSessionId = activeSessionId;
+		syncPickerToActiveSession(sessions, activeSessionId);
 		updateCreateButtonLabel(sessions.length);
 
 		if (sessions.length === 0) {
