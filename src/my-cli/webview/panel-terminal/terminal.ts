@@ -1007,6 +1007,11 @@ window.addEventListener('message', (event: MessageEvent<ServerMessage>) => {
 		return;
 	}
 
+	if (message.type === 'memory.initialState') {
+		tabController.setMemoryState(message.enabled);
+		return;
+	}
+
 	if (message.type?.startsWith('memory.')) {
 		handleMemoryMessage(message);
 		return;

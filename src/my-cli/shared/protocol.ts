@@ -87,6 +87,7 @@ export type HostToWebviewMessage =
 	| { type: 'workspace.skills'; id: string; skills: WorkspaceSkill[] }
 	| { type: 'voice.state'; state: VoiceState; message?: string; progress?: VoiceProgress }
 	| { type: 'clipboard.text'; id: string; text: string }
+	| { type: 'memory.initialState'; enabled: boolean }
 	| { type: 'memory.snapshot'; id: string; snapshot: MemorySnapshot }
 	| { type: 'memory.buildStart'; id: string }
 	| { type: 'memory.buildProgress'; id: string; message: string }

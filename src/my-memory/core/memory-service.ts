@@ -18,7 +18,7 @@ import * as path from 'path';
 import { CLAUDE_FILE, HUB_FILE, MEMORY_CONFIG_FILE, MEMORY_DIR, MEMORY_GRAPH_FILE, MEMORY_MAP_FILE } from './memory-paths';
 import { newestSourceMtime, scanProject } from '../tier1-map/scan-project';
 import { writeProjectMap } from '../tier1-map/write-project-map';
-import { syncAllInstructionFiles, syncInstructionFileForSlug } from '../tier1-map/sync-instructions';
+import { removeAllInstructionBlocks, syncAllInstructionFiles, syncInstructionFileForSlug } from '../tier1-map/sync-instructions';
 import { detectToolchain, installToolchain, type ProgressFn, type ToolchainStatus } from '../tier2-graph/toolchain';
 import { ensureGraphifyOutIgnored, runGraphify } from '../tier2-graph/graphify-runner';
 import type { MemorySnapshot, MemoryBuildResult } from '../memory-types';
@@ -163,6 +163,28 @@ export class MemoryService {
 				durationMs: Date.now() - startTime
 			};
 		}
+	}
+
+	/**
+	 * Full cleanup: delete `.f1/` and strip managed blocks from instruction files.
+	 * Called when the user turns the toggle OFF.
+	 */
+	public cleanup(root: string | undefined): string[] {
+		if (!root) {
+			return [];
+		}
+		const cleaned: string[] = [];
+		try {
+			const memoryDir = path.join(root, MEMORY_DIR);
+			if (fs.existsSync(memoryDir)) {
+				fs.rmSync(memoryDir, { recursive: true, force: true });
+				cleaned.push(MEMORY_DIR);
+			}
+		} catch (error) {
+			console.error('[my-memory] cleanup .f1/ failed:', error);
+		}
+		cleaned.push(...removeAllInstructionBlocks(root));
+		return cleaned;
 	}
 
 	/** Create `.f1/` + `memory.json` if missing (idempotent). */
