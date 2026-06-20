@@ -6,6 +6,7 @@ import type { VoiceProgress, VoiceState } from '../../../shared/voice/voice-type
 import { translateEnToSpanish } from './browser-terminal-translator';
 import { renderMarkdownLite } from './markdown-lite';
 import { segmentTerminalSelection } from './terminal-text';
+import { matchesShortcut } from '../../../../shared/keymaps/cli';
 
 const stylesId = 'cli-translator-panel-styles';
 const maxVoiceChunkChars = 900;
@@ -541,10 +542,10 @@ function initializeTranslator(host: HTMLElement, context: ToolContext) {
 		// translation). preventDefault stops the page scroll and the native button
 		// activation, so Space never double-fires when Listen happens to have focus.
 		const handleSpaceShortcut = (event: KeyboardEvent) => {
-			if (event.key !== ' ' && event.code !== 'Space') {
-				return;
-			}
-			if (event.repeat || event.ctrlKey || event.metaKey || event.altKey || event.shiftKey) {
+			// Key match lives in the shared registry (src/shared/keymaps/cli.ts:
+			// 'toggleVoicePlayback') so this handler and the keymaps modal stay in
+			// sync; spaceKey() already rejects modifier combos like Ctrl+Space.
+			if (!matchesShortcut(event, 'toggleVoicePlayback') || event.repeat) {
 				return;
 			}
 			if (isPreparingVoice || (!hasResult && !isSpeaking && !isPaused)) {
