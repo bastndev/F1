@@ -15,7 +15,7 @@
 
 import * as fs from 'fs';
 import * as path from 'path';
-import { CLAUDE_FILE, HUB_FILE, MEMORY_CONFIG_FILE, MEMORY_DIR, MEMORY_GRAPH_FILE, MEMORY_MAP_FILE } from './memory-paths';
+import { CLAUDE_FILE, GRAPHIFY_IGNORE_COMMENT, GRAPHIFY_OUT_DIR, HUB_FILE, MEMORY_CONFIG_FILE, MEMORY_DIR, MEMORY_GRAPH_FILE, MEMORY_MAP_FILE } from './memory-paths';
 import { newestSourceMtime, scanProject } from '../tier1-map/scan-project';
 import { writeProjectMap } from '../tier1-map/write-project-map';
 import { removeAllInstructionBlocks, syncAllInstructionFiles, syncInstructionFileForSlug } from '../tier1-map/sync-instructions';
@@ -166,7 +166,8 @@ export class MemoryService {
 	}
 
 	/**
-	 * Full cleanup: delete `.f1/` and strip managed blocks from instruction files.
+	 * Full cleanup: delete `.f1/`, `graphify-out/`, strip managed blocks from
+	 * instruction files (deleting them if empty), and remove our `.gitignore` entry.
 	 * Called when the user turns the toggle OFF.
 	 */
 	public cleanup(root: string | undefined): string[] {
@@ -174,17 +175,49 @@ export class MemoryService {
 			return [];
 		}
 		const cleaned: string[] = [];
-		try {
-			const memoryDir = path.join(root, MEMORY_DIR);
-			if (fs.existsSync(memoryDir)) {
-				fs.rmSync(memoryDir, { recursive: true, force: true });
-				cleaned.push(MEMORY_DIR);
+
+		for (const dir of [MEMORY_DIR, GRAPHIFY_OUT_DIR]) {
+			try {
+				const dirPath = path.join(root, dir);
+				if (fs.existsSync(dirPath)) {
+					fs.rmSync(dirPath, { recursive: true, force: true });
+					cleaned.push(dir);
+				}
+			} catch (error) {
+				console.error(`[my-memory] cleanup ${dir} failed:`, error);
 			}
-		} catch (error) {
-			console.error('[my-memory] cleanup .f1/ failed:', error);
 		}
+
+		this.removeGitignoreEntry(root);
 		cleaned.push(...removeAllInstructionBlocks(root));
 		return cleaned;
+	}
+
+	private removeGitignoreEntry(root: string): void {
+		try {
+			const gitignorePath = path.join(root, '.gitignore');
+			if (!fs.existsSync(gitignorePath)) {
+				return;
+			}
+			const content = fs.readFileSync(gitignorePath, 'utf8');
+			const lines = content.split('\n');
+			const filtered = lines.filter(line => {
+				const trimmed = line.trim();
+				if (trimmed === GRAPHIFY_IGNORE_COMMENT) {
+					return false;
+				}
+				const normalized = trimmed.replace(/^\//, '').replace(/\/$/, '');
+				return normalized !== GRAPHIFY_OUT_DIR;
+			});
+			const cleaned = filtered.join('\n').replace(/\n{3,}/g, '\n\n').trim();
+			if (cleaned) {
+				fs.writeFileSync(gitignorePath, cleaned + '\n', 'utf8');
+			} else {
+				fs.unlinkSync(gitignorePath);
+			}
+		} catch (error) {
+			console.error('[my-memory] removeGitignoreEntry failed:', error);
+		}
 	}
 
 	/** Create `.f1/` + `memory.json` if missing (idempotent). */

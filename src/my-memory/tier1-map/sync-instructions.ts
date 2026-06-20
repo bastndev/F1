@@ -146,7 +146,11 @@ export const removeAllInstructionBlocks = (root: string): string[] => {
 				const cleaned = (content.slice(0, start) + content.slice(end + BLOCK_END.length))
 					.replace(/\n{3,}/g, '\n\n')
 					.trim();
-				fs.writeFileSync(hubPath, cleaned ? cleaned + '\n' : '', 'utf8');
+				if (cleaned) {
+					fs.writeFileSync(hubPath, cleaned + '\n', 'utf8');
+				} else {
+					fs.unlinkSync(hubPath);
+				}
 				removed.push(HUB_FILE);
 			}
 		}
@@ -161,8 +165,12 @@ export const removeAllInstructionBlocks = (root: string): string[] => {
 			const lines = content.split('\n');
 			const filtered = lines.filter(line => line.trim() !== CLAUDE_IMPORT_LINE);
 			if (filtered.length !== lines.length) {
-				const cleaned = filtered.join('\n').replace(/^\n+/, '').replace(/\n{3,}/g, '\n\n');
-				fs.writeFileSync(claudePath, cleaned ? cleaned + '\n' : '', 'utf8');
+				const cleaned = filtered.join('\n').replace(/^\n+/, '').replace(/\n{3,}/g, '\n\n').trim();
+				if (cleaned) {
+					fs.writeFileSync(claudePath, cleaned + '\n', 'utf8');
+				} else {
+					fs.unlinkSync(claudePath);
+				}
 				removed.push(CLAUDE_FILE);
 			}
 		}
