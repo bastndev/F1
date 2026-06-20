@@ -10,7 +10,7 @@
 
 import * as fs from 'fs';
 import * as path from 'path';
-import { MEMORY_DIR, MEMORY_GRAPH_FILE } from '../core/memory-paths';
+import { GRAPHIFY_IGNORE_COMMENT, GRAPHIFY_OUT_DIR, MEMORY_DIR, MEMORY_GRAPH_FILE } from '../core/memory-paths';
 import { detectToolchain, resolveGraphifyInvocation, run, type ProgressFn } from './toolchain';
 
 // Build command (confirmed against `graphify --help` on 2026-06-15).
@@ -22,7 +22,6 @@ import { detectToolchain, resolveGraphifyInvocation, run, type ProgressFn } from
 // would shrink (after deleting code, or recovering a deleted .f1/ over a stale cache).
 const BUILD_ARGS = ['update', '.', '--force'];
 
-const GRAPHIFY_OUT_DIR = 'graphify-out';
 const OUT_GRAPH = 'graph.json';
 const OUT_REPORT = 'GRAPH_REPORT.md';
 
@@ -80,10 +79,9 @@ export const ensureGraphifyOutIgnored = (root: string): void => {
 			return;
 		}
 
-		const note = "# F1 My Memory: graphify's working dir + cache (committed context is in .f1/)";
 		const next = existing.trim().length
-			? `${existing.trimEnd()}\n\n${note}\n${GRAPHIFY_OUT_DIR}/\n`
-			: `${note}\n${GRAPHIFY_OUT_DIR}/\n`;
+			? `${existing.trimEnd()}\n\n${GRAPHIFY_IGNORE_COMMENT}\n${GRAPHIFY_OUT_DIR}/\n`
+			: `${GRAPHIFY_IGNORE_COMMENT}\n${GRAPHIFY_OUT_DIR}/\n`;
 		fs.writeFileSync(gitignorePath, next, 'utf8');
 	} catch (error) {
 		console.error('[my-memory] ensureGraphifyOutIgnored failed:', error);

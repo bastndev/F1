@@ -138,6 +138,10 @@ export class MyCliViewProvider implements vscode.WebviewViewProvider, vscode.Dis
 				this.sessionManager.attach(webviewView.webview);
 				warmSpellchecker();
 
+				const memoryEnabled = this._readMemoryEnabled();
+				this.memoryService.setEnabled(memoryEnabled);
+				void webviewView.webview.postMessage({ type: 'memory.initialState', enabled: memoryEnabled });
+
 				if (this.pendingInitialCustomCli) {
 					this.sessionManager.createCustomSession(this.pendingInitialCustomCli);
 					this.pendingInitialCustomCli = undefined;
@@ -636,6 +640,14 @@ export class MyCliViewProvider implements vscode.WebviewViewProvider, vscode.Dis
 		return vscode.workspace.workspaceFolders?.[0]?.uri.fsPath;
 	}
 
+	private _readMemoryEnabled(): boolean {
+		return this._extensionContext?.workspaceState.get<boolean>('myMemory.enabled') ?? false;
+	}
+
+	private _writeMemoryEnabled(enabled: boolean): void {
+		void this._extensionContext?.workspaceState.update('myMemory.enabled', enabled);
+	}
+
 	/** Watch the workspace so the button turns yellow when files change. */
 	private _ensureMemoryWatcher(): void {
 		if (this._memoryWatcher) {
@@ -695,13 +707,11 @@ export class MyCliViewProvider implements vscode.WebviewViewProvider, vscode.Dis
 		const root = this._getMemoryWorkspaceRoot();
 		this._activeWebview = webview;
 
-		// A toggle flip (or a reload re-sync) rides along on getSnapshot.
 		if (typeof message.enabled === 'boolean') {
 			this.memoryService.setEnabled(message.enabled);
+			this._writeMemoryEnabled(message.enabled);
 			if (message.enabled) {
 				this._ensureMemoryWatcher();
-				// A genuine user toggle-on with no graph yet → build now. A `restore`
-				// (reload of an already-on toggle) only re-enables + watches.
 				const userInitiated = !message.restore;
 				if (userInitiated && !this.memoryService.getSnapshot(root).hasGraphJson) {
 					await this._ensureMemoryBuilt(webview, id);
@@ -709,6 +719,7 @@ export class MyCliViewProvider implements vscode.WebviewViewProvider, vscode.Dis
 				}
 			} else {
 				this._disposeMemoryWatcher();
+				this.memoryService.cleanup(root);
 			}
 		} else if (this.memoryService.isEnabled()) {
 			this._ensureMemoryWatcher();
@@ -740,7 +751,7 @@ export class MyCliViewProvider implements vscode.WebviewViewProvider, vscode.Dis
 
 		if (!this.memoryService.hasToolchain()) {
 			const choice = await vscode.window.showInformationMessage(
-				'My Memory needs the "graphify" engine (Python + graphify) to build your project graph. This is a one-time setup on this machine.',
+				'Install (Python + Graphify) to enable project graph generation. One-time setup 📥.',
 				'Install',
 				'Cancel'
 			);
@@ -780,7 +791,7 @@ export class MyCliViewProvider implements vscode.WebviewViewProvider, vscode.Dis
 
 		if (result.success) {
 			await webview.postMessage({ type: 'memory.buildComplete', id, result });
-			vscode.window.showInformationMessage(`My Memory updated · ${result.filesUpdated?.length ?? 0} instruction file(s) synced.`);
+			vscode.window.showInformationMessage('Memory updated · Instruction files synced. ✔');
 		} else {
 			await webview.postMessage({ type: 'memory.buildError', id, error: result.error || result.message });
 			vscode.window.showErrorMessage(`My Memory failed: ${result.error || result.message}`);
@@ -790,6 +801,9 @@ export class MyCliViewProvider implements vscode.WebviewViewProvider, vscode.Dis
 	/** Turn the feature OFF and tell the webview to drop the brain button. */
 	private async _memoryDisable(webview: vscode.Webview) {
 		this.memoryService.setEnabled(false);
+		this._writeMemoryEnabled(false);
+		this._disposeMemoryWatcher();
+		this.memoryService.cleanup(this._getMemoryWorkspaceRoot());
 		await webview.postMessage({ type: 'memory.disabled' });
 	}
 

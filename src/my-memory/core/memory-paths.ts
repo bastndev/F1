@@ -36,3 +36,8 @@ export const CLAUDE_FILE = 'CLAUDE.md';
 export const CLAUDE_IMPORT_LINE = '@AGENTS.md';
 /** Agent slug (see shared/agents.ts) whose CLI keys off CLAUDE.md. */
 export const CLAUDE_SLUG = 'claude';
+
+/** graphify's working directory (cache + intermediate files). */
+export const GRAPHIFY_OUT_DIR = 'graphify-out';
+/** Comment line we add to .gitignore when ignoring graphify-out/. */
+export const GRAPHIFY_IGNORE_COMMENT = "# F1 My Memory: graphify's working dir + cache (committed context is in .f1/)";

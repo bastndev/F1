@@ -104,7 +104,7 @@
 
 /* Up to date — green and intentionally not clickable (nothing to do). */
 .agent-new-button.is-fresh {
-	background: #10b981;
+	background: #0d9668;
 	color: white;
 }
 
@@ -115,7 +115,7 @@
 
 /* Project changed / needs build — yellow, clickable. */
 .agent-new-button.is-stale {
-	background: #eab308;
+	background: #ca9a04;
 	color: white;
 }
 

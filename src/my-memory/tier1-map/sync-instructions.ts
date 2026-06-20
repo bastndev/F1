@@ -131,3 +131,52 @@ export const syncAllInstructionFiles = (root: string): string[] => {
 	}
 	return updated;
 };
+
+/** Strip the managed block from AGENTS.md and the @AGENTS.md import from CLAUDE.md. */
+export const removeAllInstructionBlocks = (root: string): string[] => {
+	const removed: string[] = [];
+
+	try {
+		const hubPath = path.join(root, HUB_FILE);
+		if (fs.existsSync(hubPath)) {
+			const content = fs.readFileSync(hubPath, 'utf8');
+			const start = content.indexOf(BLOCK_START);
+			const end = content.indexOf(BLOCK_END);
+			if (start !== -1 && end !== -1 && end > start) {
+				const cleaned = (content.slice(0, start) + content.slice(end + BLOCK_END.length))
+					.replace(/\n{3,}/g, '\n\n')
+					.trim();
+				if (cleaned) {
+					fs.writeFileSync(hubPath, cleaned + '\n', 'utf8');
+				} else {
+					fs.unlinkSync(hubPath);
+				}
+				removed.push(HUB_FILE);
+			}
+		}
+	} catch (error) {
+		console.error(`[my-memory] remove block from ${HUB_FILE} failed:`, error);
+	}
+
+	try {
+		const claudePath = path.join(root, CLAUDE_FILE);
+		if (fs.existsSync(claudePath)) {
+			const content = fs.readFileSync(claudePath, 'utf8');
+			const lines = content.split('\n');
+			const filtered = lines.filter(line => line.trim() !== CLAUDE_IMPORT_LINE);
+			if (filtered.length !== lines.length) {
+				const cleaned = filtered.join('\n').replace(/^\n+/, '').replace(/\n{3,}/g, '\n\n').trim();
+				if (cleaned) {
+					fs.writeFileSync(claudePath, cleaned + '\n', 'utf8');
+				} else {
+					fs.unlinkSync(claudePath);
+				}
+				removed.push(CLAUDE_FILE);
+			}
+		}
+	} catch (error) {
+		console.error(`[my-memory] remove import from ${CLAUDE_FILE} failed:`, error);
+	}
+
+	return removed;
+};
