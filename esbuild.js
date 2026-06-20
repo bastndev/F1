@@ -246,23 +246,6 @@ async function main() {
 			esbuildProblemMatcherPlugin,
 		],
 	});
-	const memoryHookCtx = await esbuild.context({
-		entryPoints: [
-			'src/my-memory/hook/run-hook.ts'
-		],
-		bundle: true,
-		format: 'cjs',
-		minify: production,
-		sourcemap: !production,
-		sourcesContent: false,
-		platform: 'node',
-		outfile: 'dist/my-memory/run-hook.js',
-		external: ['vscode'],
-		logLevel: 'silent',
-		plugins: [
-			esbuildProblemMatcherPlugin,
-		],
-	});
 
 	if (watch) {
 		await extensionCtx.watch();
@@ -273,7 +256,6 @@ async function main() {
 		await mySkillsCreateSkillSupportCtx.watch();
 		await cliTutorialCtx.watch();
 		await ptyHostCtx.watch();
-		await memoryHookCtx.watch();
 		watchWebviewAssets();
 	} else {
 		await extensionCtx.rebuild();
@@ -284,7 +266,6 @@ async function main() {
 		await mySkillsCreateSkillSupportCtx.rebuild();
 		await cliTutorialCtx.rebuild();
 		await ptyHostCtx.rebuild();
-		await memoryHookCtx.rebuild();
 		await extensionCtx.dispose();
 		await terminalCtx.dispose();
 		await launcherCtx.dispose();
@@ -293,7 +274,6 @@ async function main() {
 		await mySkillsCreateSkillSupportCtx.dispose();
 		await cliTutorialCtx.dispose();
 		await ptyHostCtx.dispose();
-		await memoryHookCtx.dispose();
 	}
 }
 

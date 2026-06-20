@@ -8,5 +8,4 @@
  */
 
 export { MemoryService } from './core/memory-service';
-export type { HookInstallResult } from './core/git-hooks';
 export type { MemorySnapshot, MemoryBuildResult, MemoryStatus } from './memory-types';
