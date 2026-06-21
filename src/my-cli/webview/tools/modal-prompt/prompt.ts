@@ -574,7 +574,7 @@ function initRunButton(
 	}
 
 	if (runHint) {
-		runHint.textContent = getShortcut('sendPrompt')?.description ?? 'Ctrl/Alt + Enter';
+		runHint.textContent = getShortcut('sendPrompt')?.description ?? 'Ctrl + Enter';
 	}
 
 	const updateState = () => {

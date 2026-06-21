@@ -165,7 +165,7 @@ export const shortcuts: ShortcutDefinition[] = [
     id: 'sendPrompt',
     label: 'Execute prompt',
     contexts: ['prompt'],
-    description: 'Ctrl/Alt + Enter',
+    description: 'Ctrl + Enter',
     match: promptSendKey(),
   },
   {
