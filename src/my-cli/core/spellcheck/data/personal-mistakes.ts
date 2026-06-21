@@ -6,7 +6,12 @@ export const PERSONAL_MISTAKES: Record<string, string> = {
 	'cuadno': 'cuando',
     'loguica': 'lógica',
 	'eleji': 'elegí',
+	'deveria': 'deberia',
+	'deve': 'debe',
 
+
+
+	
     // New world ~
 	'manana': 'mañana',
 	'mananas': 'mañanas',

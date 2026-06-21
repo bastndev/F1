@@ -1,6 +1,6 @@
 export const PROTECTED_TERMS = new Set<string>([
 	// Word
-	'analizalo',
+	'analizalo', 'banderitas',
 
 	// Frameworks & libraries
 	'react', 'vue', 'angular', 'svelte', 'solid', 'nextjs', 'nuxt', 'astro', 'remix',
