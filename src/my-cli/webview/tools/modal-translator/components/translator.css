@@ -697,6 +697,34 @@
 	color: #5DCAA5;
 }
 
+/* Needs-download: the voice for the chosen language isn't installed yet. The
+   button becomes an accent-tinted "Download voice" affordance; the down arrow
+   gently bobs. Wider slot since the label is longer than "Listen". */
+.translator-speak.needs-download {
+	min-width: auto;
+	color: var(--agent-accent, #AFA9EC);
+	border-color: color-mix(in srgb, var(--agent-accent, #534AB7) 40%, transparent);
+}
+
+.translator-speak.needs-download:not(:disabled) {
+	background: color-mix(in srgb, var(--agent-accent, #534AB7) 14%, transparent);
+}
+
+.translator-speak.needs-download:not(:disabled):hover {
+	color: var(--agent-accent, #AFA9EC);
+	border-color: color-mix(in srgb, var(--agent-accent, #534AB7) 60%, transparent);
+	background: color-mix(in srgb, var(--agent-accent, #534AB7) 22%, transparent);
+}
+
+.translator-speak.needs-download:not(:disabled) .speak-idle i {
+	animation: voice-download-bob 1.5s ease-in-out infinite;
+}
+
+@keyframes voice-download-bob {
+	0%, 100% { transform: translateY(0); }
+	50%      { transform: translateY(2px); }
+}
+
 .translator-voice-control.is-speaking:hover .translator-speak,
 .translator-voice-control.is-speaking:focus-within .translator-speak,
 .translator-voice-control.is-paused:hover .translator-speak,

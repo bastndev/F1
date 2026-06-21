@@ -449,6 +449,16 @@ const speakText = (text: string, options?: { chunks?: string[]; lang?: string })
 	vscode.postMessage({ type: 'voice.speak', text, chunks: options?.chunks, lang: options?.lang });
 };
 
+// Ask the host whether the voice for a language is already downloaded, so the
+// Listen button can show a "download" affordance before the first click.
+const voiceReadyRpc = createRpcChannel<[string], boolean>({
+	prefix: 'voice-ready',
+	timeoutMs: 5000,
+	// On no answer assume ready — don't show a download prompt we're unsure about.
+	onTimeout: { resolveWith: true },
+	send: (id, lang) => vscode.postMessage({ type: 'voice.checkReady', id, lang })
+});
+
 const stopSpeech = () => {
 	vscode.postMessage({ type: 'voice.stop' });
 };
@@ -592,6 +602,7 @@ const toolsController = layoutRight
 			openCreateSkill: () => vscode.postMessage({ type: 'mySkills.openCreate' }),
 			requestSpellcheck: (text: string, lang: string, strict: boolean) => spellcheckRpc.request(text, lang, strict),
 			speakText,
+			checkVoiceReady: (lang: string) => voiceReadyRpc.request(lang),
 			pauseSpeech,
 			resumeSpeech,
 			stopSpeech,
@@ -1015,6 +1026,11 @@ window.addEventListener('message', (event: MessageEvent<ServerMessage>) => {
 
 	if (message.type === 'voice.state') {
 		voiceStateListener?.(message.state, message.message, message.progress);
+		return;
+	}
+
+	if (message.type === 'voice.ready') {
+		voiceReadyRpc.resolve(message.id, message.ready);
 		return;
 	}
 

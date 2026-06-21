@@ -66,6 +66,7 @@ export type WebviewToHostMessage =
 	| { type: 'workspace.listSkills'; id: string }
 	| { type: 'mySkills.openCreate' }
 	| { type: 'voice.speak'; text: string; lang?: string; chunks?: string[] }
+	| { type: 'voice.checkReady'; id: string; lang: string }
 	| { type: 'voice.pause' }
 	| { type: 'voice.resume' }
 	| { type: 'voice.stop' }
@@ -96,6 +97,7 @@ export type HostToWebviewMessage =
 	| { type: 'workspace.files'; id: string; files: FileMentionEntry[] }
 	| { type: 'workspace.skills'; id: string; skills: WorkspaceSkill[] }
 	| { type: 'voice.state'; state: VoiceState; message?: string; progress?: VoiceProgress }
+	| { type: 'voice.ready'; id: string; ready: boolean }
 	| { type: 'clipboard.text'; id: string; text: string }
 	| { type: 'memory.initialState'; enabled: boolean }
 	| { type: 'memory.snapshot'; id: string; snapshot: MemorySnapshot }

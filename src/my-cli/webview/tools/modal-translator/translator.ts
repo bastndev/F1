@@ -517,11 +517,22 @@ function initializeTranslator(host: HTMLElement, context: ToolContext) {
 
 	if (speakBtn && spectrum) {
 		let disposeVoiceState: (() => void) | undefined;
+		// Whether the voice for the target language is already downloaded. Until the
+		// host probe answers we assume it is (no premature download prompt). When
+		// false and idle, the Listen button becomes a "Download voice" affordance.
+		let voiceReady = true;
+		let lastVoiceState: VoiceState = 'idle';
 		// Real playback runs in the extension host (Piper TTS, sharing the ATM
 		// extension's downloaded engine/voice). The button mirrors broadcast
 		// voice.state events: CSS swaps the idle label for the animated bars
 		// (and a stop glyph on hover) while actually speaking.
 		const applyVoiceState = (state: VoiceState, message?: string, progress?: VoiceProgress) => {
+			lastVoiceState = state;
+			// Reaching playback means the model is present now (any download just
+			// finished) — drop the download affordance for the rest of the session.
+			if (state === 'speaking') {
+				voiceReady = true;
+			}
 			isSpeaking = state === 'speaking';
 			isPaused = state === 'paused';
 			isPreparingVoice = state === 'preparing';
@@ -535,14 +546,27 @@ function initializeTranslator(host: HTMLElement, context: ToolContext) {
 			// playback from a previous open is running (so it can be controlled).
 			speakBtn.disabled = isPreparingVoice || (!hasResult && !isSpeaking && !isPaused);
 
+			// Idle + the voice isn't downloaded yet → "Download voice" affordance.
+			const needsDownload = !voiceReady && !isSpeaking && !isPaused && !isPreparingVoice;
+			speakBtn.classList.toggle('needs-download', needsDownload);
+
 			if (speakIdleLabel) {
-				speakIdleLabel.textContent = isPreparingVoice ? 'Preparing' : isPaused ? 'Resume' : 'Listen';
+				speakIdleLabel.textContent = isPreparingVoice ? 'Preparing'
+					: isPaused ? 'Resume'
+					: needsDownload ? 'Download voice'
+					: 'Listen';
 			}
 			if (speakIdleIcon) {
-				speakIdleIcon.className = isPaused ? 'ti ti-player-play-filled' : 'ti ti-volume-2';
+				speakIdleIcon.className = isPaused ? 'ti ti-player-play-filled'
+					: needsDownload ? 'ti ti-download'
+					: 'ti ti-volume-2';
 			}
 
-			const label = isPreparingVoice ? 'Preparing voice…' : isSpeaking ? 'Pause' : isPaused ? 'Resume' : 'Listen';
+			const label = isPreparingVoice ? 'Preparing voice…'
+				: isSpeaking ? 'Pause'
+				: isPaused ? 'Resume'
+				: needsDownload ? 'Download voice'
+				: 'Listen';
 			speakBtn.title = label;
 			speakBtn.setAttribute('aria-label', label);
 
@@ -575,6 +599,13 @@ function initializeTranslator(host: HTMLElement, context: ToolContext) {
 		disposeVoiceState = context.onVoiceState?.(applyVoiceState);
 		// Playback may still be running from a previous open — resync.
 		context.queryVoiceState?.();
+
+		// Probe whether this language's voice is downloaded; if not, the Listen
+		// button flips to the download affordance (re-render with the same state).
+		void context.checkVoiceReady?.(targetLang).then((ready) => {
+			voiceReady = ready;
+			applyVoiceState(lastVoiceState);
+		});
 
 		// Shared by the Listen button and the Space shortcut: resume if paused,
 		// pause if speaking, otherwise start reading the current translation. The

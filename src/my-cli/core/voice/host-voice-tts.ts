@@ -142,6 +142,20 @@ async function findExistingVoice(context: vscode.ExtensionContext, voiceId: stri
 
 const setupInFlight = new Map<string, Promise<VoiceResources>>();
 
+/**
+ * Whether the engine AND the voice model for `lang` are already on disk (ATM or
+ * F1 storage) — i.e. pressing Listen would NOT trigger a download. Lets the UI
+ * show a download affordance ahead of time.
+ */
+export async function isVoiceReady(context: vscode.ExtensionContext, lang: string): Promise<boolean> {
+	const piperPath = await findExistingPiper(context);
+	if (!piperPath) {
+		return false;
+	}
+	const modelPath = await findExistingVoice(context, resolveVoiceId(lang));
+	return modelPath !== null;
+}
+
 export async function ensureVoice(context: vscode.ExtensionContext, lang: string): Promise<VoiceResources> {
 	const voiceId = resolveVoiceId(lang);
 	const piperPath = await findExistingPiper(context);
