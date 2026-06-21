@@ -21,6 +21,7 @@ export const PERSONAL_MISTAKES: Record<string, string> = {
 	'serai': 'sería',
 	'duada': 'duda',
 	'hce': 'hace',
+	'automaticamnte': 'automáticamente',
 
 
 
