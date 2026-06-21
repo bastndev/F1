@@ -263,6 +263,12 @@ function initializeTranslator(host: HTMLElement, context: ToolContext) {
 	let resultStatus = statusEl?.textContent || 'ready';
 	let activeVoiceChunks: TranslatorVoiceChunk[] = [];
 
+	// Auto-read: when "auto" is on, start reading as soon as a translation is
+	// shown (no Listen press). Wired once the voice control is set up below; the
+	// per-translation flag stops the same result being read twice.
+	let triggerAutoRead: () => void = () => {};
+	let autoReadConsumed = false;
+
 	// Listen starts disabled (gray) and only lights up — softly, via the button
 	// transition — once there is a translation result to read aloud. hasResult also
 	// keeps voice.state resyncs from re-enabling Listen early. Copy is independent:
@@ -280,6 +286,8 @@ function initializeTranslator(host: HTMLElement, context: ToolContext) {
 	};
 
 	const performTranslation = async () => {
+		// A new translation re-arms auto-read (the previous result was its own).
+		autoReadConsumed = false;
 		const extracted = extractTextToTranslate(context);
 		if (!extracted) {
 			if (textEl) {
@@ -311,6 +319,7 @@ function initializeTranslator(host: HTMLElement, context: ToolContext) {
 			resultStatus = cached.status;
 			setStatus(resultStatus);
 			enableResultActions();
+			triggerAutoRead();
 			return;
 		}
 
@@ -326,6 +335,7 @@ function initializeTranslator(host: HTMLElement, context: ToolContext) {
 			resultStatus = 'translated';
 			setStatus(resultStatus);
 			enableResultActions();
+			triggerAutoRead();
 			// Remember the exact selection too, so repeating it is a direct hit.
 			setCachedTranslation(targetLang, extracted, { rendered: reused, copyText, status: resultStatus });
 			return;
@@ -397,6 +407,7 @@ function initializeTranslator(host: HTMLElement, context: ToolContext) {
 			resultStatus = provider ? `translated · ${provider.toLowerCase()}` : 'translated';
 			setStatus(resultStatus);
 			enableResultActions();
+			triggerAutoRead();
 			// Remember this exact selection so revisiting it skips the round-trip.
 			setCachedTranslation(targetLang, extracted, { rendered: renderedMarkdown, copyText, status: resultStatus });
 		} catch (err) {
@@ -508,10 +519,16 @@ function initializeTranslator(host: HTMLElement, context: ToolContext) {
 			/* storage unavailable — the toggle still works for this session */
 		}
 		applyAutoState();
-		// Switching it on acts immediately if there's something not yet translated;
-		// switching it off only restores the manual button (no side effects).
-		if (autoTranslate && !hasResult && extractTextToTranslate(context)) {
-			void performTranslation();
+		// Switching it on acts immediately: translate pending text (auto-read fires
+		// on completion), or — if a result is already up — read it now. Switching
+		// off only restores the manual button (no side effects).
+		if (autoTranslate) {
+			if (!hasResult && extractTextToTranslate(context)) {
+				void performTranslation();
+			} else if (hasResult) {
+				autoReadConsumed = false;
+				triggerAutoRead();
+			}
 		}
 	});
 
@@ -637,6 +654,24 @@ function initializeTranslator(host: HTMLElement, context: ToolContext) {
 		};
 
 		speakBtn.addEventListener('click', toggleSpeak);
+
+		// Auto-read implementation: while "auto" is on, read the current result once
+		// it's idle. toggleSpeak triggers the download itself when the voice is
+		// missing (auto-download → read), so this stays a single entry point.
+		triggerAutoRead = () => {
+			if (!autoTranslate || !hasResult || autoReadConsumed) {
+				return;
+			}
+			if (isSpeaking || isPaused || isPreparingVoice) {
+				return;
+			}
+			autoReadConsumed = true;
+			toggleSpeak();
+		};
+
+		// A translation may have been revealed before this voice setup ran (e.g. a
+		// cache hit on auto-open) — catch that result now.
+		triggerAutoRead();
 
 		// Space = play/pause while the translator is open. The modal has no text
 		// field so Space is free to claim — but only when there's something to play
