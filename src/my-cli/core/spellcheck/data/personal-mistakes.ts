@@ -15,6 +15,11 @@ export const PERSONAL_MISTAKES: Record<string, string> = {
 	'ahce': 'hace',
 	'selecionada': 'seleccionada',
 	'mejorez': 'mejores',
+	'exelente': 'excelente',
+	'contiuamos': 'continuamos',
+	'mejro': 'mejor',
+	'serai': 'sería',
+	'duada': 'duda',
 
 
 
