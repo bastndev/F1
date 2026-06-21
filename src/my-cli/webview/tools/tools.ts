@@ -30,8 +30,9 @@ export type ToolContext = {
 	requestWorkspaceFiles?: () => Promise<FileMentionEntry[]>;
 	requestWorkspaceSkills?: () => Promise<WorkspaceSkill[]>;
 	openCreateSkill?: () => void;
-	requestSpellcheck?: (text: string, strict: boolean) => Promise<SpellIssue[]>;
-	speakText?: (text: string, options?: { chunks?: string[] }) => void;
+	requestSpellcheck?: (text: string, lang: string, strict: boolean) => Promise<SpellIssue[]>;
+	speakText?: (text: string, options?: { chunks?: string[]; lang?: string }) => void;
+	checkVoiceReady?: (lang: string) => Promise<boolean>;
 	pauseSpeech?: () => void;
 	resumeSpeech?: () => void;
 	stopSpeech?: () => void;
@@ -78,6 +79,7 @@ export const createToolsController = ({
 	openCreateSkill,
 	requestSpellcheck,
 	speakText,
+	checkVoiceReady,
 	pauseSpeech,
 	resumeSpeech,
 	stopSpeech,
@@ -185,6 +187,7 @@ export const createToolsController = ({
 			openCreateSkill,
 			requestSpellcheck,
 			speakText,
+			checkVoiceReady,
 			pauseSpeech,
 			resumeSpeech,
 			stopSpeech,

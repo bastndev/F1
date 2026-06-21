@@ -3,11 +3,13 @@ import translatorHtml from './components/translator.html';
 import loadingStyles from '../../styles/skeleton/translator-loading.css';
 import type { ToolContext } from '../tools';
 import type { VoiceProgress, VoiceState } from '../../../shared/voice/voice-types';
-import { translateEnToSpanish } from './browser-terminal-translator';
+import { translateEnTo } from './browser-terminal-translator';
 import { renderMarkdownLite } from './markdown-lite';
 import { segmentTerminalSelection } from './terminal-text';
 import { getCachedTranslation, setCachedTranslation, getCachedParagraph, setCachedParagraph } from './translator-cache';
 import { matchesShortcut } from '../../../../shared/keymaps/cli';
+import { getStoredPromptLang } from '../modal-prompt/language-select';
+import { getPromptLanguage } from '../../../shared/prompt';
 
 const stylesId = 'cli-translator-panel-styles';
 const maxVoiceChunkChars = 900;
@@ -219,13 +221,31 @@ function initializeTranslator(host: HTMLElement, context: ToolContext) {
 		}
 	};
 
+	// Target language mirrors the prompt modal's chosen source language (the user
+	// only picks once): if they write in Spanish, CLI output is translated to
+	// Spanish. Defaults to Spanish until a language is picked.
+	const targetLang = getStoredPromptLang() ?? 'es';
+	const targetInfo = getPromptLanguage(targetLang);
+	const targetLabel = targetInfo?.label ?? 'Spanish';
+
+	// Reflect the target in the header direction row: "cli → 🇪🇸 spanish".
+	const langToEl = host.querySelector<HTMLElement>('.lang-to');
+	if (langToEl && targetInfo) {
+		langToEl.textContent = `${targetInfo.flag} ${targetInfo.label.toLowerCase()}`;
+	}
+
 	// Translate via the extension host (chunked providers, cache, no CORS —
 	// handles long multi-paragraph selections). The direct browser providers
-	// remain only as a fallback if the host route is unavailable.
-	const translateToSpanish = async (text: string): Promise<{ text: string; provider?: string }> => {
+	// remain only as a fallback if the host route is unavailable. English target
+	// needs no translation — CLI output is already English.
+	const translateSelection = async (text: string): Promise<{ text: string; provider?: string }> => {
+		if (targetLang === 'en') {
+			return { text };
+		}
+
 		if (context.translatePrompt) {
 			try {
-				const result = await context.translatePrompt({ text, from: 'en', to: 'es' });
+				const result = await context.translatePrompt({ text, from: 'en', to: targetLang });
 				if (result.text.trim()) {
 					return { text: result.text, provider: result.provider };
 				}
@@ -234,7 +254,7 @@ function initializeTranslator(host: HTMLElement, context: ToolContext) {
 			}
 		}
 
-		return { text: await translateEnToSpanish(text) };
+		return { text: await translateEnTo(text, targetLang) };
 	};
 
 	// Raw text behind whatever is on screen — the Copy button copies this,
@@ -242,6 +262,12 @@ function initializeTranslator(host: HTMLElement, context: ToolContext) {
 	let copyText = '';
 	let resultStatus = statusEl?.textContent || 'ready';
 	let activeVoiceChunks: TranslatorVoiceChunk[] = [];
+
+	// Auto-read: when "auto" is on, start reading as soon as a translation is
+	// shown (no Listen press). Wired once the voice control is set up below; the
+	// per-translation flag stops the same result being read twice.
+	let triggerAutoRead: () => void = () => {};
+	let autoReadConsumed = false;
 
 	// Listen starts disabled (gray) and only lights up — softly, via the button
 	// transition — once there is a translation result to read aloud. hasResult also
@@ -260,11 +286,13 @@ function initializeTranslator(host: HTMLElement, context: ToolContext) {
 	};
 
 	const performTranslation = async () => {
+		// A new translation re-arms auto-read (the previous result was its own).
+		autoReadConsumed = false;
 		const extracted = extractTextToTranslate(context);
 		if (!extracted) {
 			if (textEl) {
 				textEl.classList.remove('is-rendered');
-				textEl.textContent = 'Select or copy text in the terminal to translate it to Spanish.';
+				textEl.textContent = `Select or copy text in the terminal to translate it to ${targetLabel}.`;
 				textEl.classList.add('placeholder');
 			}
 			// Nothing real on screen — only the hint — so there's nothing to copy.
@@ -283,7 +311,7 @@ function initializeTranslator(host: HTMLElement, context: ToolContext) {
 		// Already translated this exact selection? Restore it instantly — no
 		// skeleton, no host round-trip, no re-translation. (Cache is RAM-only and
 		// dies with the panel; see translator-cache.ts.)
-		const cached = getCachedTranslation(extracted);
+		const cached = getCachedTranslation(targetLang, extracted);
 		if (cached) {
 			copyText = cached.copyText;
 			textEl.classList.remove('placeholder');
@@ -291,6 +319,7 @@ function initializeTranslator(host: HTMLElement, context: ToolContext) {
 			resultStatus = cached.status;
 			setStatus(resultStatus);
 			enableResultActions();
+			triggerAutoRead();
 			return;
 		}
 
@@ -298,7 +327,7 @@ function initializeTranslator(host: HTMLElement, context: ToolContext) {
 		// block? Rebuild it from the paragraph cache — no skeleton, no network. Bails
 		// (→ normal translation) if any paragraph is missing, including code/tree
 		// lines, so it can never show a wrong result; a miss just falls through.
-		const reused = reconstructFromParagraphs(extracted);
+		const reused = reconstructFromParagraphs(targetLang, extracted);
 		if (reused) {
 			copyText = reused;
 			textEl.classList.remove('placeholder');
@@ -306,8 +335,9 @@ function initializeTranslator(host: HTMLElement, context: ToolContext) {
 			resultStatus = 'translated';
 			setStatus(resultStatus);
 			enableResultActions();
+			triggerAutoRead();
 			// Remember the exact selection too, so repeating it is a direct hit.
-			setCachedTranslation(extracted, { rendered: reused, copyText, status: resultStatus });
+			setCachedTranslation(targetLang, extracted, { rendered: reused, copyText, status: resultStatus });
 			return;
 		}
 
@@ -359,7 +389,7 @@ function initializeTranslator(host: HTMLElement, context: ToolContext) {
 					continue;
 				}
 
-				const result = await translateToSpanish(segment.content);
+				const result = await translateSelection(segment.content);
 				const value = result.text || segment.content;
 				provider ??= result.provider;
 				renderedParts.push(value);
@@ -367,7 +397,7 @@ function initializeTranslator(host: HTMLElement, context: ToolContext) {
 				// Populate the paragraph cache so a later single-paragraph selection of
 				// this block reuses the translation. Only when we actually got one.
 				if (result.text.trim()) {
-					cacheParagraphPairs(segment.content, result.text);
+					cacheParagraphPairs(targetLang, segment.content, result.text);
 				}
 			}
 
@@ -377,8 +407,9 @@ function initializeTranslator(host: HTMLElement, context: ToolContext) {
 			resultStatus = provider ? `translated · ${provider.toLowerCase()}` : 'translated';
 			setStatus(resultStatus);
 			enableResultActions();
+			triggerAutoRead();
 			// Remember this exact selection so revisiting it skips the round-trip.
-			setCachedTranslation(extracted, { rendered: renderedMarkdown, copyText, status: resultStatus });
+			setCachedTranslation(targetLang, extracted, { rendered: renderedMarkdown, copyText, status: resultStatus });
 		} catch (err) {
 			console.error('[Translator] EN->ES failed:', err);
 			copyText = extracted;
@@ -415,7 +446,7 @@ function initializeTranslator(host: HTMLElement, context: ToolContext) {
 			textEl.textContent = extracted;
 			textEl.classList.add('placeholder');
 		} else {
-			textEl.textContent = 'Select or copy text in the terminal to translate it to Spanish.';
+			textEl.textContent = `Select or copy text in the terminal to translate it to ${targetLabel}.`;
 			textEl.classList.add('placeholder');
 		}
 	}
@@ -488,20 +519,37 @@ function initializeTranslator(host: HTMLElement, context: ToolContext) {
 			/* storage unavailable — the toggle still works for this session */
 		}
 		applyAutoState();
-		// Switching it on acts immediately if there's something not yet translated;
-		// switching it off only restores the manual button (no side effects).
-		if (autoTranslate && !hasResult && extractTextToTranslate(context)) {
-			void performTranslation();
+		// Switching it on acts immediately: translate pending text (auto-read fires
+		// on completion), or — if a result is already up — read it now. Switching
+		// off only restores the manual button (no side effects).
+		if (autoTranslate) {
+			if (!hasResult && extractTextToTranslate(context)) {
+				void performTranslation();
+			} else if (hasResult) {
+				autoReadConsumed = false;
+				triggerAutoRead();
+			}
 		}
 	});
 
 	if (speakBtn && spectrum) {
 		let disposeVoiceState: (() => void) | undefined;
+		// Whether the voice for the target language is already downloaded. Until the
+		// host probe answers we assume it is (no premature download prompt). When
+		// false and idle, the Listen button becomes a "Download voice" affordance.
+		let voiceReady = true;
+		let lastVoiceState: VoiceState = 'idle';
 		// Real playback runs in the extension host (Piper TTS, sharing the ATM
 		// extension's downloaded engine/voice). The button mirrors broadcast
 		// voice.state events: CSS swaps the idle label for the animated bars
 		// (and a stop glyph on hover) while actually speaking.
 		const applyVoiceState = (state: VoiceState, message?: string, progress?: VoiceProgress) => {
+			lastVoiceState = state;
+			// Reaching playback means the model is present now (any download just
+			// finished) — drop the download affordance for the rest of the session.
+			if (state === 'speaking') {
+				voiceReady = true;
+			}
 			isSpeaking = state === 'speaking';
 			isPaused = state === 'paused';
 			isPreparingVoice = state === 'preparing';
@@ -515,14 +563,27 @@ function initializeTranslator(host: HTMLElement, context: ToolContext) {
 			// playback from a previous open is running (so it can be controlled).
 			speakBtn.disabled = isPreparingVoice || (!hasResult && !isSpeaking && !isPaused);
 
+			// Idle + the voice isn't downloaded yet → "Download voice" affordance.
+			const needsDownload = !voiceReady && !isSpeaking && !isPaused && !isPreparingVoice;
+			speakBtn.classList.toggle('needs-download', needsDownload);
+
 			if (speakIdleLabel) {
-				speakIdleLabel.textContent = isPreparingVoice ? 'Preparing' : isPaused ? 'Resume' : 'Listen';
+				speakIdleLabel.textContent = isPreparingVoice ? 'Preparing'
+					: isPaused ? 'Resume'
+					: needsDownload ? 'Download voice'
+					: 'Listen';
 			}
 			if (speakIdleIcon) {
-				speakIdleIcon.className = isPaused ? 'ti ti-player-play-filled' : 'ti ti-volume-2';
+				speakIdleIcon.className = isPaused ? 'ti ti-player-play-filled'
+					: needsDownload ? 'ti ti-download'
+					: 'ti ti-volume-2';
 			}
 
-			const label = isPreparingVoice ? 'Preparing voice…' : isSpeaking ? 'Pause' : isPaused ? 'Resume' : 'Listen';
+			const label = isPreparingVoice ? 'Preparing voice…'
+				: isSpeaking ? 'Pause'
+				: isPaused ? 'Resume'
+				: needsDownload ? 'Download voice'
+				: 'Listen';
 			speakBtn.title = label;
 			speakBtn.setAttribute('aria-label', label);
 
@@ -556,6 +617,13 @@ function initializeTranslator(host: HTMLElement, context: ToolContext) {
 		// Playback may still be running from a previous open — resync.
 		context.queryVoiceState?.();
 
+		// Probe whether this language's voice is downloaded; if not, the Listen
+		// button flips to the download affordance (re-render with the same state).
+		void context.checkVoiceReady?.(targetLang).then((ready) => {
+			voiceReady = ready;
+			applyVoiceState(lastVoiceState);
+		});
+
 		// Shared by the Listen button and the Space shortcut: resume if paused,
 		// pause if speaking, otherwise start reading the current translation. The
 		// preparing / no-result guards let the keyboard path respect the same
@@ -580,11 +648,30 @@ function initializeTranslator(host: HTMLElement, context: ToolContext) {
 			const chunks = activeVoiceChunks.map((chunk) => chunk.text);
 			const value = chunks.join('\n\n');
 			if (value) {
-				context.speakText(value, { chunks });
+				// Read in the same language shown on screen (the chosen target).
+				context.speakText(value, { chunks, lang: targetLang });
 			}
 		};
 
 		speakBtn.addEventListener('click', toggleSpeak);
+
+		// Auto-read implementation: while "auto" is on, read the current result once
+		// it's idle. toggleSpeak triggers the download itself when the voice is
+		// missing (auto-download → read), so this stays a single entry point.
+		triggerAutoRead = () => {
+			if (!autoTranslate || !hasResult || autoReadConsumed) {
+				return;
+			}
+			if (isSpeaking || isPaused || isPreparingVoice) {
+				return;
+			}
+			autoReadConsumed = true;
+			toggleSpeak();
+		};
+
+		// A translation may have been revealed before this voice setup ran (e.g. a
+		// cache hit on auto-open) — catch that result now.
+		triggerAutoRead();
 
 		// Space = play/pause while the translator is open. The modal has no text
 		// field so Space is free to claim — but only when there's something to play
@@ -637,7 +724,7 @@ function splitIntoParagraphs(text: string): string[] {
 // undefined on the first miss is the safety guard: we only ever serve a result when
 // every piece is a known translation, so a partial/altered selection re-translates
 // instead of showing something wrong.
-function reconstructFromParagraphs(sourceText: string): string | undefined {
+function reconstructFromParagraphs(target: string, sourceText: string): string | undefined {
 	const paragraphs = splitIntoParagraphs(sourceText);
 	if (paragraphs.length === 0) {
 		return undefined;
@@ -645,7 +732,7 @@ function reconstructFromParagraphs(sourceText: string): string | undefined {
 
 	const translated: string[] = [];
 	for (const paragraph of paragraphs) {
-		const cached = getCachedParagraph(paragraph);
+		const cached = getCachedParagraph(target, paragraph);
 		if (cached === undefined) {
 			return undefined;
 		}
@@ -659,7 +746,7 @@ function reconstructFromParagraphs(sourceText: string): string | undefined {
 // the translation split into the *same* number of paragraphs. Machine translation
 // can merge or split paragraphs; an unequal count means we can't trust the 1:1
 // alignment, so we skip (the whole-selection cache still covers the full block).
-function cacheParagraphPairs(source: string, translated: string): void {
+function cacheParagraphPairs(target: string, source: string, translated: string): void {
 	const sourceParagraphs = splitIntoParagraphs(source);
 	const translatedParagraphs = splitIntoParagraphs(translated);
 	if (sourceParagraphs.length === 0 || sourceParagraphs.length !== translatedParagraphs.length) {
@@ -667,7 +754,7 @@ function cacheParagraphPairs(source: string, translated: string): void {
 	}
 
 	for (let i = 0; i < sourceParagraphs.length; i += 1) {
-		setCachedParagraph(sourceParagraphs[i], translatedParagraphs[i]);
+		setCachedParagraph(target, sourceParagraphs[i], translatedParagraphs[i]);
 	}
 }
 

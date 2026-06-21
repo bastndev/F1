@@ -122,7 +122,7 @@ async function main() {
 		sourcesContent: false,
 		platform: 'node',
 		outfile: 'dist/extension.js',
-		external: ['vscode', 'node-pty', 'cspell-trie-lib', '@cspell/dict-es-es'],
+		external: ['vscode', 'node-pty', 'fixnow'],
 		logLevel: 'silent',
 		plugins: [
 			webviewAssetsPlugin,

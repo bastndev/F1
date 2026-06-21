@@ -69,7 +69,7 @@ export function handleImageMarkerDeleteKey(textarea: HTMLTextAreaElement, event:
 	if (event.key !== 'Backspace' && event.key !== 'Delete') {
 		return false;
 	}
-	// We deliberately allow Ctrl/Alt/Meta modifiers here so that Ctrl+Backspace
+	// We deliberately allow Ctrl Meta modifiers here so that Ctrl+Backspace
 	// also cleanly deletes the entire image block instead of just a part of it.
 	if (textarea.selectionStart !== textarea.selectionEnd) {
 		return false;

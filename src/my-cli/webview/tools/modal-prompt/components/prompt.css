@@ -75,23 +75,6 @@
   margin-bottom: 3px;
 }
 
-.prompt-title-filter {
-  color: var(--vscode-descriptionForeground);
-  font-weight: 300;
-}
-
-.prompt-badge {
-  font-size: 9px;
-  background: rgba(29, 158, 117, 0.2);
-  color: #5DCAA5;
-  border: 0.5px solid rgba(29, 158, 117, 0.3);
-  border-radius: 10px;
-  padding: 1px 5px;
-  font-family: 'JetBrains Mono', monospace;
-  font-weight: 500;
-  vertical-align: middle;
-}
-
 .prompt-subtitle {
   font-size: 11px;
   color: var(--vscode-descriptionForeground);
@@ -105,17 +88,134 @@
   gap: 8px;
 }
 
-.prompt-lang-indicator {
-  font-size: 10px;
-  font-weight: 500;
-  letter-spacing: 0.04em;
-  padding: 3px 6px;
-  background: color-mix(in srgb, var(--agent-accent, #534AB7) 20%, transparent);
+/* === Language picker (header) ===
+   Replaces the old static "🌐 → EN" chip. Pick the SOURCE language; the
+   translator target is always English. Menu opens downward (header is at the
+   top of the modal). Mirrors the footer model-switcher visuals. */
+.prompt-lang-picker {
+  position: relative;
+  display: inline-flex;
+}
+
+.prompt-lang-trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 7px;
+  background: color-mix(in srgb, var(--agent-accent, #534AB7) 18%, transparent);
   color: var(--agent-accent, #AFA9EC);
-  border-radius: 0;
+  border: 0.5px solid color-mix(in srgb, var(--agent-accent, #534AB7) 30%, transparent);
+  border-radius: 6px;
   font-family: 'Syne', sans-serif;
-  user-select: none;
-  cursor: default;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+
+.prompt-lang-trigger:hover,
+.prompt-lang-trigger[aria-expanded="true"] {
+  background: color-mix(in srgb, var(--agent-accent, #534AB7) 28%, transparent);
+  border-color: color-mix(in srgb, var(--agent-accent, #534AB7) 50%, transparent);
+}
+
+.prompt-lang-current {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.prompt-lang-dir {
+  opacity: 0.85;
+}
+
+/* Color-emoji fonts ignore `color`; named fonts keep the glyph crisp and give a
+   graceful "ES"-style letter fallback on systems without flag emoji. */
+.prompt-lang-flag {
+  font-size: 12px;
+  line-height: 1;
+  font-family: 'Noto Color Emoji', 'Apple Color Emoji', 'Segoe UI Emoji', sans-serif;
+}
+
+.prompt-lang-caret {
+  font-size: 7px;
+  line-height: 1;
+  opacity: 0.7;
+  transition: transform 0.15s ease;
+}
+
+.prompt-lang-trigger[aria-expanded="true"] .prompt-lang-caret {
+  transform: rotate(180deg);
+}
+
+.prompt-lang-menu {
+  display: none;
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  min-width: 150px;
+  padding: 4px;
+  background: var(--vscode-editor-background);
+  border: 1px solid var(--vscode-editorGroup-border);
+  border-radius: 10px;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.45);
+  z-index: 30;
+}
+
+.prompt-lang-menu.open {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.prompt-lang-item {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  width: 100%;
+  /* Left gutter reserved for the active dot so labels stay aligned. */
+  padding: 6px 8px 6px 20px;
+  background: transparent;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-family: 'Syne', sans-serif;
+  text-align: left;
+  transition: background 0.12s ease;
+}
+
+.prompt-lang-item:hover {
+  background: color-mix(in srgb, var(--agent-accent, #534AB7) 12%, transparent);
+}
+
+.prompt-lang-item-flag {
+  font-size: 13px;
+  line-height: 1;
+  font-family: 'Noto Color Emoji', 'Apple Color Emoji', 'Segoe UI Emoji', sans-serif;
+}
+
+.prompt-lang-item-label {
+  font-size: 11px;
+  color: var(--vscode-foreground);
+  white-space: nowrap;
+}
+
+.prompt-lang-item.active .prompt-lang-item-label {
+  color: var(--agent-accent, #AFA9EC);
+}
+
+.prompt-lang-item.active::before {
+  content: '';
+  position: absolute;
+  left: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: var(--agent-accent, #AFA9EC);
 }
 
 .prompt-close-btn {
@@ -137,7 +237,7 @@
   background: transparent;
 }
 
-/* Toolbar & Tabs */
+/* Toolbar: language toggles (left) + Pro button (right) */
 .prompt-toolbar {
   display: flex;
   justify-content: space-between;
@@ -151,9 +251,54 @@
   gap: 12px;
 }
 
-.prompt-tabs {
+/* The toggles set display:flex, which would defeat the [hidden] UA rule — the
+   language gate hides them per-language (e.g. English hides both), so make the
+   hidden attribute win. */
+.prompt-translate-toggle[hidden],
+.prompt-strict-toggle[hidden] {
+  display: none;
+}
+
+/* Pro button — anchors the toolbar's left edge. Always present, so when English
+   hides both toggles (on the right) the row keeps its height (no collapse /
+   jump). Subtle pill from the same family as the translate/strict toggles.
+   Reserved for future "Pro" features. */
+.prompt-toolbar-pro {
   display: flex;
-  gap: 2px;
+  align-items: flex-end;
+}
+
+.prompt-pro-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 12px;
+  /* Tab shape: rounded top corners only, squared bottom — sits flush on the
+     toolbar's bottom edge (no margin-bottom, unlike the toggles). */
+  border-radius: 6px 6px 0 0;
+  background: color-mix(in srgb, var(--agent-accent, #534AB7) 14%, transparent);
+  border: 0.5px solid color-mix(in srgb, var(--agent-accent, #534AB7) 22%, transparent);
+  border-bottom: none;
+  /* Subtle bright top edge to match the tab highlight. */
+  box-shadow: inset 0 1px 0 color-mix(in srgb, var(--agent-accent, #AFA9EC) 35%, transparent);
+  color: var(--agent-accent, #AFA9EC);
+  font-family: 'Syne', sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  cursor: pointer;
+  transition: background 0.2s ease, border-color 0.2s ease;
+}
+
+.prompt-pro-btn:hover {
+  background: color-mix(in srgb, var(--agent-accent, #534AB7) 20%, transparent);
+  border-color: color-mix(in srgb, var(--agent-accent, #534AB7) 40%, transparent);
+}
+
+/* The beta chip rides inside the Pro button; drop its standalone left margin and
+   let the button's flex gap own the spacing. */
+.prompt-pro-btn .prompt-beta {
+  margin-left: 0;
 }
 
 .prompt-actions-right {
@@ -392,31 +537,7 @@
   font-size: 13px;
 }
 
-.prompt-tab {
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 0.05em;
-  color: var(--vscode-descriptionForeground);
-  padding: 6px 12px;
-  border-radius: 6px 6px 0 0;
-  cursor: pointer;
-  text-transform: uppercase;
-  transition: all 0.15s;
-  font-family: 'Syne', sans-serif;
-  user-select: none;
-
-  /* Reserve space for border so switching tabs doesn't cause layout jump */
-  border: 0.5px solid transparent;
-  border-bottom: none;
-}
-
-.prompt-tab.active {
-  color: var(--agent-accent, #AFA9EC);
-  background: color-mix(in srgb, var(--agent-accent, #534AB7) 14%, transparent);
-  border-color: color-mix(in srgb, var(--agent-accent, #534AB7) 22%, transparent);
-}
-
-/* Cool beta badge */
+/* Cool beta badge (sits next to the PRO badge in the title) */
 .prompt-beta {
   font-size: 9px;
   font-weight: 500;
@@ -431,13 +552,6 @@
   font-family: 'JetBrains Mono', monospace;
   transition: all 0.15s ease;
   opacity: 0.85;
-}
-
-.prompt-tab.active .prompt-beta {
-  background: color-mix(in srgb, var(--agent-accent) 22%, transparent);
-  color: color-mix(in srgb, var(--agent-accent) 70%, white);
-  box-shadow: 0 0 0 1px color-mix(in srgb, var(--agent-accent) 25%, transparent);
-  opacity: 1;
 }
 
 /* Body */
@@ -697,6 +811,32 @@
   background-position: left bottom;
   background-repeat: repeat-x;
   background-size: 6px 3px;
+}
+
+/* Ephemeral "No suggestions" note shown at the click point when an Alt-click
+   finds no correction for a red word. Fixed to the viewport, auto-dismisses. */
+.prompt-spell-note {
+  position: fixed;
+  z-index: 1000;
+  transform: translate(-50%, -135%);
+  padding: 3px 8px;
+  font-family: 'Syne', sans-serif;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: var(--vscode-descriptionForeground);
+  background: var(--vscode-editor-background);
+  border: 0.5px solid var(--vscode-editorGroup-border);
+  border-radius: 6px;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.4);
+  pointer-events: none;
+  white-space: nowrap;
+  animation: prompt-spell-note-in 0.12s ease;
+}
+
+@keyframes prompt-spell-note-in {
+  from { opacity: 0; transform: translate(-50%, -120%); }
+  to   { opacity: 1; transform: translate(-50%, -135%); }
 }
 
 .prompt-char-count {
@@ -1127,9 +1267,6 @@
   .prompt-body {
     padding: 14px 16px;
   }
-  .prompt-tabs {
-    padding: 10px 16px 0;
-  }
   .prompt-footer {
     padding: 10px 16px;
   }
@@ -1145,12 +1282,6 @@
 }
 
 /* General agent accent for interactive elements */
-.agent-shell[data-agent] .prompt-tab.active {
-	color: var(--agent-accent);
-	background: color-mix(in srgb, var(--agent-accent) 14%, transparent);
-	border-color: color-mix(in srgb, var(--agent-accent) 35%, transparent);
-}
-
 .agent-shell[data-agent] .prompt-tool-btn.active,
 .agent-shell[data-agent] .prompt-tool-btn:hover {
 	background: color-mix(in srgb, var(--agent-accent) 16%, transparent);
@@ -1196,7 +1327,7 @@
 
 /* === Specific fixes requested === */
 
-.agent-shell[data-agent="claude"] .prompt-lang-indicator {
+.agent-shell[data-agent="claude"] .prompt-lang-trigger {
 	background: color-mix(in srgb, var(--claude) 22%, transparent);
 	color: var(--claude);
 }

@@ -1,6 +1,4 @@
-import * as fs from 'fs';
-import * as path from 'path';
-import * as zlib from 'zlib';
+import type { CheckOptions, LanguageCode, SpellIssue as FixnowSpellIssue } from 'fixnow';
 import { PERSONAL_MISTAKES } from './data/personal-mistakes';
 import { shouldProtectWord } from './data/protected-terms';
 
@@ -10,11 +8,10 @@ export interface SpellIssue {
 	word: string;
 }
 
-// Segments that must never be flagged: code spans/blocks, URLs, emails, paths,
-// CLI flags, hex colors, ACRONYMS, file names, and dotted identifiers.
-// Lifted verbatim from the former local-replacer so behavior stays consistent.
-const protectedPattern = /\[(?:Image|Code|Text) #\d+[^\]\n]*\]|\[Skills? #[^\]\n]+\]|\/skills #\d+|\/skill\b|```[\s\S]*?```|`[^`\n]+`|https?:\/\/[^\s"'`<>]+|[\w.-]+@[\w.-]+\.\w{2,}|(?:\.{1,2}\/|~\/|\/)[^\s"'`<>]+|[A-Za-z]:\\[^\s"'`<>]+|#[0-9a-fA-F]{3,8}\b|\b[A-Z][A-Z0-9_]{1,}\b|(?<!\S)--?[A-Za-z][\w-]*(?:=[^\s"'`<>]+)?|\b(?:@[\w.-]+\/)?[\w.-]+@[\w.-]+\b|\b[\w.-]+\.(?:ts|tsx|js|jsx|mjs|cjs|json|html|css|scss|sass|md|mdx|svg|png|jpg|jpeg|gif|webp|yml|yaml|toml|env|lock)\b|\b[$A-Za-z_][\w$]*(?:[._:$][\w$-]+)+\b/g;
-const wordPattern = /\p{L}+/gu;
+// F1-specific markers that fixnow's default tokenizer no longer skips (they were
+// dropped in fixnow 2.0). Composed with fixnow's DEFAULT_PROTECTED_PATTERN so the
+// prompt's image/code/text/skill chips are never flagged as misspellings.
+const F1_MARKERS = /\[(?:Image|Code|Text) #\d+[^\]\n]*\]|\[Skills? #[^\]\n]+\]|\/skills #\d+|\/skill\b/g;
 
 // Known personal typos worth flagging even when the dictionary is lenient.
 // Two sets, selected by the "strict" mode:
@@ -37,180 +34,112 @@ for (const [rawKey, rawValue] of Object.entries(PERSONAL_MISTAKES)) {
 	}
 }
 
-interface SpanishTrie {
-	has(word: string): boolean;
+function deaccent(value: string): string {
+	return value.normalize('NFD').replace(/[̀-ͯ]/g, '');
 }
 
-// esbuild emits this host bundle as CJS, which would downlevel a literal
-// `import()` into `require()` and break on the ESM-only cspell-trie-lib.
-// Hiding the import behind `new Function` keeps it a real dynamic import.
+// The spell checker (Spanish trie + accent/enclitic logic) lives in `fixnow`,
+// loaded from node_modules so its on-disk dictionary resolves — fixnow must stay
+// external (see esbuild.js). esbuild emits this host bundle as CJS, which would
+// downlevel a literal `import()` into `require()` and break the ESM entry; hiding
+// the import behind `new Function` keeps it a real dynamic import.
+interface FixnowModule {
+	checkText(text: string, options: CheckOptions): Promise<FixnowSpellIssue[]>;
+	warmup(language?: string): Promise<void>;
+	DEFAULT_PROTECTED_PATTERN: RegExp;
+}
+
 const dynamicImport = new Function('specifier', 'return import(specifier);') as (
 	specifier: string
-) => Promise<Record<string, unknown>>;
+) => Promise<FixnowModule>;
 
-let triePromise: Promise<SpanishTrie | null> | null = null;
-const wordCache = new Map<string, boolean>();
-const maxWordCacheEntries = 5000;
+let fixnowPromise: Promise<FixnowModule> | null = null;
 
-async function loadTrie(): Promise<SpanishTrie | null> {
-	try {
-		const extJsonPath = require.resolve('@cspell/dict-es-es/cspell-ext.json');
-		const triePath = path.join(path.dirname(extJsonPath), 'Spanish.trie.gz');
-		const trieText = zlib.gunzipSync(fs.readFileSync(triePath)).toString('utf8');
-
-		const trieLib = await dynamicImport('cspell-trie-lib');
-		const decodeTrie = trieLib.decodeTrie as (text: string) => SpanishTrie;
-
-		return decodeTrie(trieText);
-	} catch (error) {
-		console.error('[spellcheck] Failed to load Spanish dictionary:', error);
-		return null;
-	}
-}
-
-function getTrie(): Promise<SpanishTrie | null> {
-	if (!triePromise) {
-		triePromise = loadTrie();
+function getFixnow(): Promise<FixnowModule> {
+	if (!fixnowPromise) {
+		fixnowPromise = dynamicImport('fixnow');
 	}
 
-	return triePromise;
+	return fixnowPromise;
 }
 
-/** Preload the dictionary so the first keystroke isn't slowed by trie decoding. */
-export function warmSpellchecker(): void {
-	void getTrie();
+// fixnow bundles dictionaries for ar/de/en/es/fr/pt/ru/vi. Of the prompt's four
+// offered languages only these have a usable checker — Chinese (zh) is
+// character-based and has no trie, so it falls through to "no marking".
+const SUPPORTED_LANGUAGES = new Set(['en', 'es', 'pt']);
+
+// Corrections attached per flagged word. The Alt-click fix applies the first one;
+// a few extras are kept cheaply in case a richer picker is added later.
+const SUGGESTION_LIMIT = 3;
+
+const normalizeLanguage = (lang: string | undefined): string => (lang ?? 'es').toLowerCase();
+
+/** Preload a dictionary so the first keystroke isn't slowed by trie decoding. */
+export function warmSpellchecker(lang = 'es'): void {
+	const language = normalizeLanguage(lang);
+	if (!SUPPORTED_LANGUAGES.has(language)) {
+		return;
+	}
+
+	void getFixnow()
+		.then((fixnow) => fixnow.warmup(language))
+		.catch((error) => {
+			console.error(`[spellcheck] Failed to warm "${language}" dictionary:`, error);
+		});
 }
 
-export async function checkText(text: string, strict = false): Promise<SpellIssue[]> {
+export async function checkText(text: string, lang = 'es', strict = false): Promise<SpellIssue[]> {
 	if (!text || text.trim().length < 2) {
 		return [];
 	}
 
-	const trie = await getTrie();
-	if (!trie) {
+	const language = normalizeLanguage(lang);
+	if (!SUPPORTED_LANGUAGES.has(language)) {
 		return [];
 	}
 
-	const protectedRanges: Array<[number, number]> = [];
-	for (const match of text.matchAll(protectedPattern)) {
-		const start = match.index ?? 0;
-		protectedRanges.push([start, start + match[0].length]);
+	let fixnow: FixnowModule;
+	try {
+		fixnow = await getFixnow();
+	} catch (error) {
+		console.error('[spellcheck] Failed to load fixnow:', error);
+		return [];
 	}
 
-	const isProtectedOffset = (offset: number) =>
-		protectedRanges.some(([start, end]) => offset >= start && offset < end);
+	// The personal-typo list is Spanish-specific shorthand ("ue" → "que"); only
+	// apply it when checking Spanish. Other languages rely on the dictionary alone.
+	const flagWords = language === 'es'
+		? (strict ? personalMistakeKeysStrict : personalMistakeKeysLenient)
+		: undefined;
 
-	const issues: SpellIssue[] = [];
-	for (const match of text.matchAll(wordPattern)) {
-		const word = match[0];
-		const offset = match.index ?? 0;
+	const issues = await fixnow.checkText(text, {
+		// Narrowed by SUPPORTED_LANGUAGES above — all members are valid LanguageCodes.
+		language: language as LanguageCode,
+		// strict → accent-sensitive; lenient (default) → accept missing tildes.
+		acceptAccentOmissions: !strict,
+		isProtectedWord: shouldProtectWord,
+		flagWords,
+		protectedSegments: [fixnow.DEFAULT_PROTECTED_PATTERN, F1_MARKERS],
+		// Attach corrections so the webview's Alt-click fix is an instant local
+		// replace. Cheap for prompt-sized text (only flagged words are scored).
+		suggestions: true,
+		maxSuggestions: SUGGESTION_LIMIT,
+	});
 
-		if (word.length <= 2 || isProtectedOffset(offset) || shouldProtectWord(word)) {
-			continue;
+	if (language !== 'es') {
+		return issues;
+	}
+
+	// Spanish: prefer the known personal-typo correction (e.g. "tb" → "también")
+	// at the top of the list, falling back to fixnow's dictionary suggestions.
+	return issues.map((issue) => {
+		const personal = PERSONAL_MISTAKES[issue.word.toLowerCase()];
+		if (!personal) {
+			return issue;
 		}
-
-		if (isMisspelled(word, trie, strict)) {
-			issues.push({ offset, length: word.length, word });
-		}
-	}
-
-	return issues;
-}
-
-// Enclitic pronoun clusters that attach to infinitives/gerunds/imperatives
-// (e.g. corregir + me). Longest-first so "melo" is tried before "lo"/"me".
-const enclitics = [
-	'noslo', 'nosla', 'melo', 'mela', 'telo', 'tela', 'selo', 'sela', 'oslo', 'osla',
-	'nos', 'les', 'los', 'las', 'os', 'me', 'te', 'se', 'lo', 'la', 'le'
-];
-
-function isMisspelled(word: string, trie: SpanishTrie, strict: boolean): boolean {
-	const key = word.toLowerCase();
-	// Strict and lenient verdicts differ for the same word, so namespace the cache.
-	const cacheKey = strict ? `s:${key}` : key;
-
-	const cached = wordCache.get(cacheKey);
-	if (cached !== undefined) {
-		return cached;
-	}
-
-	const personalKeys = strict ? personalMistakeKeysStrict : personalMistakeKeysLenient;
-	const inDictionary = strict
-		? trie.has(word) || trie.has(key)
-		: trie.has(word) || matchesIgnoringAccents(key, trie);
-
-	const misspelled = personalKeys.has(key) || (!inDictionary && !isEncliticVerb(key, trie));
-
-	if (wordCache.size >= maxWordCacheEntries) {
-		wordCache.clear();
-	}
-	wordCache.set(cacheKey, misspelled);
-
-	return misspelled;
-}
-
-// The es dictionary covers most verb+pronoun forms, but has gaps (e.g. "corregirme").
-// Strip a trailing enclitic and accept the word only when the remaining stem is a
-// real infinitive/gerund in the dictionary — so true typos stay flagged.
-function isEncliticVerb(lowerWord: string, trie: SpanishTrie): boolean {
-	for (const clitic of enclitics) {
-		if (lowerWord.length <= clitic.length + 2 || !lowerWord.endsWith(clitic)) {
-			continue;
-		}
-
-		const stem = lowerWord.slice(0, lowerWord.length - clitic.length);
-		if (!stem.endsWith('r') && !stem.endsWith('ndo')) {
-			continue;
-		}
-
-		if (trie.has(stem) || trie.has(deaccent(stem))) {
-			return true;
-		}
-	}
-
-	return false;
-}
-
-function deaccent(value: string): string {
-	return value.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
-}
-
-const acuteAccent: Record<string, string> = { a: '\u00e1', e: '\u00e9', i: '\u00ed', o: '\u00f3', u: '\u00fa' };
-
-// Accept a word as correct if it matches a dictionary entry once Spanish acute
-// accents are ignored \u2014 i.e. the user typed "codigo"/"tambien" but the trie only
-// knows "c\u00f3digo"/"tambi\u00e9n". We strip accents to a base form, then test every
-// combination of accented vowels against the trie. Bounded to 6 vowels (\u226464
-// lookups) so very long words fall back to the strict check; all results are
-// cached by the caller, so steady-state cost is negligible.
-function matchesIgnoringAccents(lowerWord: string, trie: SpanishTrie): boolean {
-	if (trie.has(lowerWord)) {
-		return true;
-	}
-
-	const base = deaccent(lowerWord);
-	const vowelPositions: number[] = [];
-	for (let i = 0; i < base.length; i++) {
-		if (acuteAccent[base[i]]) {
-			vowelPositions.push(i);
-		}
-	}
-
-	if (vowelPositions.length === 0 || vowelPositions.length > 6) {
-		return false;
-	}
-
-	const chars = base.split('');
-	const combinations = 1 << vowelPositions.length;
-	for (let mask = 0; mask < combinations; mask++) {
-		for (let bit = 0; bit < vowelPositions.length; bit++) {
-			const pos = vowelPositions[bit];
-			chars[pos] = mask & (1 << bit) ? acuteAccent[base[pos]] : base[pos];
-		}
-		if (trie.has(chars.join(''))) {
-			return true;
-		}
-	}
-
-	return false;
+		const rest = (issue.suggestions ?? []).filter(
+			(suggestion) => suggestion.toLowerCase() !== personal.toLowerCase()
+		);
+		return { ...issue, suggestions: [personal, ...rest] };
+	});
 }

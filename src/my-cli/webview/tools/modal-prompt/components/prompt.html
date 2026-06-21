@@ -2,43 +2,47 @@
   <!-- HEADER -->
   <div class="prompt-header">
     <div class="prompt-header-left">
-      <div class="prompt-title"><span class="prompt-title-filter">FILTER</span> PROMPT <span class="prompt-badge">PRO</span></div>
+      <div class="prompt-title">PROMPT</div>
       <div class="prompt-subtitle-row">
         <div class="prompt-subtitle">send a message to the active CLI session</div>
-        <span class="prompt-lang-indicator" id="langToggle">🌐 → EN</span>
+        <span class="prompt-lang-picker" id="langToggle"></span>
       </div>
     </div>
     <div class="prompt-header-actions">
       <button class="prompt-close-btn" id="closePromptBtn" aria-label="Close" title="Close (Esc)">esc</button>
     </div>
   </div>
-  <!-- TOOLBAR (TRANSLATE TOGGLE + TABS) -->
+  <!-- TOOLBAR: Pro button (left) + language toggles (right). The Pro button is
+       always present, so English — which hides both toggles — can't collapse /
+       jump the row height. -->
   <div class="prompt-toolbar">
+    <div class="prompt-toolbar-pro">
+      <button class="prompt-pro-btn" id="proBtn" type="button" title="Pro features">
+        PRO <span class="prompt-beta">beta</span>
+      </button>
+    </div>
     <div class="prompt-toolbar-toggles">
+      <button
+        class="prompt-strict-toggle"
+        id="strictToggle"
+        aria-pressed="false"
+        title="Strict accents: flag words missing tildes (click to toggle)"
+      >
+        <span class="prompt-strict-dot" aria-hidden="true"></span>
+        <i class="ti ti-spell-check prompt-strict-icon" aria-hidden="true"></i>
+        <span class="prompt-strict-label">strict</span>
+      </button>
       <button
         class="prompt-translate-toggle"
         id="translateToggle"
-      aria-pressed="true"
-      title="Auto-translate to English before sending (click to toggle)"
-    >
-      <span class="prompt-translate-dot" aria-hidden="true"></span>
-      <i class="ti ti-language prompt-translate-icon" aria-hidden="true"></i>
-      <i class="ti ti-loader-2 prompt-translate-spinner" aria-hidden="true"></i>
-      <span class="prompt-translate-label">translate</span>
-    </button>
-    <button
-      class="prompt-strict-toggle"
-      id="strictToggle"
-      aria-pressed="false"
-      title="Strict accents: flag words missing tildes (click to toggle)"
-    >
-      <span class="prompt-strict-dot" aria-hidden="true"></span>
-      <i class="ti ti-spell-check prompt-strict-icon" aria-hidden="true"></i>
-      <span class="prompt-strict-label">strict</span>
-    </button>
-    </div>
-    <div class="prompt-tabs">
-      <div class="prompt-tab active" data-tab="write">Pro <span class="prompt-beta">beta</span></div>
+        aria-pressed="true"
+        title="Auto-translate to English before sending (click to toggle)"
+      >
+        <span class="prompt-translate-dot" aria-hidden="true"></span>
+        <i class="ti ti-language prompt-translate-icon" aria-hidden="true"></i>
+        <i class="ti ti-loader-2 prompt-translate-spinner" aria-hidden="true"></i>
+        <span class="prompt-translate-label">translate</span>
+      </button>
     </div>
   </div>
   <!-- BODY -->
@@ -50,7 +54,7 @@
       <textarea
         id="promptInput"
         class="prompt-textarea"
-        placeholder="write your prompt here…"
+        placeholder="Select a language to start…"
       ></textarea>
       <span class="prompt-char-count" id="charCount">0/5000</span>
     </div>

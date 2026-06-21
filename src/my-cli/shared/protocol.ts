@@ -61,11 +61,12 @@ export type WebviewToHostMessage =
 	| { type: 'cli.close'; sessionId: string }
 	| { type: 'prompt.translate'; id: string; text: string; from: string; to: string }
 	| { type: 'prompt.prepare'; id: string; text: string; attachments: ImageAttachment[] }
-	| { type: 'prompt.spellcheck'; id: string; text: string; strict: boolean }
+	| { type: 'prompt.spellcheck'; id: string; text: string; lang: string; strict: boolean }
 	| { type: 'workspace.listFiles'; id: string }
 	| { type: 'workspace.listSkills'; id: string }
 	| { type: 'mySkills.openCreate' }
-	| { type: 'voice.speak'; text: string; chunks?: string[] }
+	| { type: 'voice.speak'; text: string; lang?: string; chunks?: string[] }
+	| { type: 'voice.checkReady'; id: string; lang: string }
 	| { type: 'voice.pause' }
 	| { type: 'voice.resume' }
 	| { type: 'voice.stop' }
@@ -96,6 +97,7 @@ export type HostToWebviewMessage =
 	| { type: 'workspace.files'; id: string; files: FileMentionEntry[] }
 	| { type: 'workspace.skills'; id: string; skills: WorkspaceSkill[] }
 	| { type: 'voice.state'; state: VoiceState; message?: string; progress?: VoiceProgress }
+	| { type: 'voice.ready'; id: string; ready: boolean }
 	| { type: 'clipboard.text'; id: string; text: string }
 	| { type: 'memory.initialState'; enabled: boolean }
 	| { type: 'memory.snapshot'; id: string; snapshot: MemorySnapshot }
@@ -121,6 +123,7 @@ export type InboundWebviewMessage = {
 	from?: string;
 	to?: string;
 	attachments?: ImageAttachment[];
+	lang?: string;
 	strict?: boolean;
 	sessionId?: string;
 	data?: string;

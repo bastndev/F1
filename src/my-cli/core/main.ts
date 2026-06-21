@@ -11,7 +11,8 @@ import { handleWorkspaceListFiles, handleWorkspaceListSkills } from './workspace
 import { translatePromptToEnglish } from './translation/host-prompt-translator';
 import { resolveCustomCliLaunch, validateCustomCliCommandInput } from './terminal-cli/custom-cli';
 import {
-	ensureSpanishVoice,
+	ensureVoice,
+	isVoiceReady,
 	streamSpeech,
 	synthesizeSpeech,
 	playPcmBuffer,
@@ -195,6 +196,11 @@ export class MyCliViewProvider implements vscode.WebviewViewProvider, vscode.Dis
 
 			if (message.type === 'voice.query') {
 				await this._postCurrentVoiceState(webviewView.webview);
+				return;
+			}
+
+			if (message.type === 'voice.checkReady') {
+				await this._handleVoiceCheckReady(webviewView.webview, message);
 				return;
 			}
 
@@ -461,7 +467,8 @@ export class MyCliViewProvider implements vscode.WebviewViewProvider, vscode.Dis
 		const session: ActiveVoiceSession = {
 			chunks,
 			index: 0,
-			state: 'preparing'
+			state: 'preparing',
+			lang: typeof message.lang === 'string' ? message.lang : 'es',
 		};
 		this.activeVoiceSession = session;
 
@@ -497,6 +504,22 @@ export class MyCliViewProvider implements vscode.WebviewViewProvider, vscode.Dis
 		await this._postVoiceState(webview, 'idle');
 	}
 
+	private async _handleVoiceCheckReady(webview: vscode.Webview, message: InboundWebviewMessage) {
+		if (typeof message.id !== 'string') {
+			return;
+		}
+		const lang = typeof message.lang === 'string' ? message.lang : 'es';
+		let ready = false;
+		try {
+			ready = this._extensionContext ? await isVoiceReady(this._extensionContext, lang) : false;
+		} catch {
+			// Treat a probe failure as "ready" so the UI doesn't nag with a
+			// download prompt; pressing Listen still downloads if truly missing.
+			ready = true;
+		}
+		await webview.postMessage({ type: 'voice.ready', id: message.id, ready });
+	}
+
 	private async _runVoiceSession(webview: vscode.Webview, session: ActiveVoiceSession, seq: number) {
 		const post = async (state: VoiceState) => {
 			if (this._isVoiceRunActive(session, seq)) {
@@ -515,7 +538,7 @@ export class MyCliViewProvider implements vscode.WebviewViewProvider, vscode.Dis
 			await post('preparing');
 			// Reuses ATM's piper engine/voice when installed; downloads into
 			// F1's globalStorage (with a progress notification) otherwise.
-			session.resources ??= await ensureSpanishVoice(this._extensionContext);
+			session.resources ??= await ensureVoice(this._extensionContext, session.lang);
 			const resources = session.resources;
 			const chunks = session.chunks;
 
@@ -695,10 +718,11 @@ export class MyCliViewProvider implements vscode.WebviewViewProvider, vscode.Dis
 		}
 
 		const text = typeof message.text === 'string' ? message.text : '';
+		const lang = typeof message.lang === 'string' ? message.lang : 'es';
 		const strict = message.strict === true;
 
 		try {
-			const issues = await spellCheckText(text, strict);
+			const issues = await spellCheckText(text, lang, strict);
 			await webview.postMessage({
 				type: 'prompt.spellResult',
 				id: message.id,

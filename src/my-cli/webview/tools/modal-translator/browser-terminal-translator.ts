@@ -1,6 +1,8 @@
 /**
- * English → Spanish translator with multiple free providers.
- * Used exclusively by the Translator modal for terminal/CLI output.
+ * English → user-language translator with multiple free providers.
+ * Used exclusively by the Translator modal for terminal/CLI output as a fallback
+ * when the host translation route is unavailable. The target language mirrors the
+ * prompt modal's choice (es by default); en is short-circuited by the caller.
  *
  * Provider cascade (all free, no API key):
  *   1. MyMemory    — api.mymemory.translated.net
@@ -16,14 +18,14 @@ const TIMEOUT_MS = 10000;
 
 type TranslationProvider = {
 	name: string;
-	translate: (text: string, signal: AbortSignal) => Promise<string>;
+	translate: (text: string, target: string, signal: AbortSignal) => Promise<string>;
 };
 
 // ── Provider: MyMemory ─────────────────────────────────────────────
-async function translateMyMemory(text: string, signal: AbortSignal): Promise<string> {
+async function translateMyMemory(text: string, target: string, signal: AbortSignal): Promise<string> {
 	const params = new URLSearchParams({
 		q: text,
-		langpair: 'en|es',
+		langpair: `en|${target}`,
 	});
 
 	const res = await fetch(
@@ -53,10 +55,10 @@ async function translateMyMemory(text: string, signal: AbortSignal): Promise<str
 }
 
 // ── Provider: Lingva Translate (Google mirror) ─────────────────────
-async function translateLingva(text: string, signal: AbortSignal): Promise<string> {
+async function translateLingva(text: string, target: string, signal: AbortSignal): Promise<string> {
 	const encoded = encodeURIComponent(text);
 	const res = await fetch(
-		`https://lingva.thedaviddelta.com/api/v1/en/es/${encoded}`,
+		`https://lingva.thedaviddelta.com/api/v1/en/${target}/${encoded}`,
 		{ signal }
 	);
 
@@ -74,14 +76,14 @@ async function translateLingva(text: string, signal: AbortSignal): Promise<strin
 }
 
 // ── Provider: LibreTranslate ───────────────────────────────────────
-async function translateLibre(text: string, signal: AbortSignal): Promise<string> {
+async function translateLibre(text: string, target: string, signal: AbortSignal): Promise<string> {
 	const res = await fetch('https://libretranslate.de/translate', {
 		method: 'POST',
 		headers: { 'Content-Type': 'application/json' },
 		body: JSON.stringify({
 			q: text,
 			source: 'en',
-			target: 'es',
+			target,
 			format: 'text',
 		}),
 		signal,
@@ -108,7 +110,7 @@ const providers: TranslationProvider[] = [
 ];
 
 // ── Public API ─────────────────────────────────────────────────────
-export async function translateEnToSpanish(text: string): Promise<string> {
+export async function translateEnTo(text: string, target: string): Promise<string> {
 	const clean = text.trim();
 	if (!clean) {
 		return '';
@@ -122,7 +124,7 @@ export async function translateEnToSpanish(text: string): Promise<string> {
 	try {
 		for (const provider of providers) {
 			try {
-				const result = await provider.translate(clean, controller.signal);
+				const result = await provider.translate(clean, target, controller.signal);
 				console.log(`[Translator] ✓ ${provider.name} succeeded`);
 				return result;
 			} catch (err) {

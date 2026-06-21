@@ -49,6 +49,16 @@ export type { PasteAttachment, PasteKind } from './attachments/pastes';
 // Live spell-marking: the misspelled-range contract shared between host and webview.
 export type { SpellIssue } from './spellcheck-types';
 
+// Source-language table: drives translation source, spell-check language and the
+// strict-toggle visibility. Single source of truth, shared host ↔ webview.
+export {
+	PROMPT_LANGUAGES,
+	PROMPT_LANG_GLOBE,
+	isPromptLang,
+	getPromptLanguage,
+} from './languages';
+export type { PromptLang, PromptLanguage } from './languages';
+
 // File mention picker (@ in prompt textarea) — only the data contract lives in shared.
 // The actual DOM implementation (mountFileMentionPicker + styles) lives in the webview
 // layer under tools/modal-prompt/components/file-mention to keep shared free of presentation.

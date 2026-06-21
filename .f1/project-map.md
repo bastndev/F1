@@ -8,7 +8,7 @@
 - **Description:** Available now: VSCode • Cursor • Windsurf • Trae.ai • Kiro & (Firebase Studio)... 雨
 - **Entry point:** `./dist/extension.js`
 - **Scripts:** `vscode:prepublish`, `compile`, `watch`, `watch:esbuild`, `watch:tsc`, `check-types`, `lint`
-- **Dependencies:** @cspell/dict-es-es, cspell-trie-lib, node-pty
+- **Dependencies:** fixnow, node-pty
 
 ## Top-level folders
 - `public/`
