@@ -3,11 +3,13 @@ import translatorHtml from './components/translator.html';
 import loadingStyles from '../../styles/skeleton/translator-loading.css';
 import type { ToolContext } from '../tools';
 import type { VoiceProgress, VoiceState } from '../../../shared/voice/voice-types';
-import { translateEnToSpanish } from './browser-terminal-translator';
+import { translateEnTo } from './browser-terminal-translator';
 import { renderMarkdownLite } from './markdown-lite';
 import { segmentTerminalSelection } from './terminal-text';
 import { getCachedTranslation, setCachedTranslation, getCachedParagraph, setCachedParagraph } from './translator-cache';
 import { matchesShortcut } from '../../../../shared/keymaps/cli';
+import { getStoredPromptLang } from '../modal-prompt/language-select';
+import { getPromptLanguage } from '../../../shared/prompt';
 
 const stylesId = 'cli-translator-panel-styles';
 const maxVoiceChunkChars = 900;
@@ -219,13 +221,31 @@ function initializeTranslator(host: HTMLElement, context: ToolContext) {
 		}
 	};
 
+	// Target language mirrors the prompt modal's chosen source language (the user
+	// only picks once): if they write in Spanish, CLI output is translated to
+	// Spanish. Defaults to Spanish until a language is picked.
+	const targetLang = getStoredPromptLang() ?? 'es';
+	const targetInfo = getPromptLanguage(targetLang);
+	const targetLabel = targetInfo?.label ?? 'Spanish';
+
+	// Reflect the target in the header direction row: "cli → 🇪🇸 spanish".
+	const langToEl = host.querySelector<HTMLElement>('.lang-to');
+	if (langToEl && targetInfo) {
+		langToEl.textContent = `${targetInfo.flag} ${targetInfo.label.toLowerCase()}`;
+	}
+
 	// Translate via the extension host (chunked providers, cache, no CORS —
 	// handles long multi-paragraph selections). The direct browser providers
-	// remain only as a fallback if the host route is unavailable.
-	const translateToSpanish = async (text: string): Promise<{ text: string; provider?: string }> => {
+	// remain only as a fallback if the host route is unavailable. English target
+	// needs no translation — CLI output is already English.
+	const translateSelection = async (text: string): Promise<{ text: string; provider?: string }> => {
+		if (targetLang === 'en') {
+			return { text };
+		}
+
 		if (context.translatePrompt) {
 			try {
-				const result = await context.translatePrompt({ text, from: 'en', to: 'es' });
+				const result = await context.translatePrompt({ text, from: 'en', to: targetLang });
 				if (result.text.trim()) {
 					return { text: result.text, provider: result.provider };
 				}
@@ -234,7 +254,7 @@ function initializeTranslator(host: HTMLElement, context: ToolContext) {
 			}
 		}
 
-		return { text: await translateEnToSpanish(text) };
+		return { text: await translateEnTo(text, targetLang) };
 	};
 
 	// Raw text behind whatever is on screen — the Copy button copies this,
@@ -264,7 +284,7 @@ function initializeTranslator(host: HTMLElement, context: ToolContext) {
 		if (!extracted) {
 			if (textEl) {
 				textEl.classList.remove('is-rendered');
-				textEl.textContent = 'Select or copy text in the terminal to translate it to Spanish.';
+				textEl.textContent = `Select or copy text in the terminal to translate it to ${targetLabel}.`;
 				textEl.classList.add('placeholder');
 			}
 			// Nothing real on screen — only the hint — so there's nothing to copy.
@@ -283,7 +303,7 @@ function initializeTranslator(host: HTMLElement, context: ToolContext) {
 		// Already translated this exact selection? Restore it instantly — no
 		// skeleton, no host round-trip, no re-translation. (Cache is RAM-only and
 		// dies with the panel; see translator-cache.ts.)
-		const cached = getCachedTranslation(extracted);
+		const cached = getCachedTranslation(targetLang, extracted);
 		if (cached) {
 			copyText = cached.copyText;
 			textEl.classList.remove('placeholder');
@@ -298,7 +318,7 @@ function initializeTranslator(host: HTMLElement, context: ToolContext) {
 		// block? Rebuild it from the paragraph cache — no skeleton, no network. Bails
 		// (→ normal translation) if any paragraph is missing, including code/tree
 		// lines, so it can never show a wrong result; a miss just falls through.
-		const reused = reconstructFromParagraphs(extracted);
+		const reused = reconstructFromParagraphs(targetLang, extracted);
 		if (reused) {
 			copyText = reused;
 			textEl.classList.remove('placeholder');
@@ -307,7 +327,7 @@ function initializeTranslator(host: HTMLElement, context: ToolContext) {
 			setStatus(resultStatus);
 			enableResultActions();
 			// Remember the exact selection too, so repeating it is a direct hit.
-			setCachedTranslation(extracted, { rendered: reused, copyText, status: resultStatus });
+			setCachedTranslation(targetLang, extracted, { rendered: reused, copyText, status: resultStatus });
 			return;
 		}
 
@@ -359,7 +379,7 @@ function initializeTranslator(host: HTMLElement, context: ToolContext) {
 					continue;
 				}
 
-				const result = await translateToSpanish(segment.content);
+				const result = await translateSelection(segment.content);
 				const value = result.text || segment.content;
 				provider ??= result.provider;
 				renderedParts.push(value);
@@ -367,7 +387,7 @@ function initializeTranslator(host: HTMLElement, context: ToolContext) {
 				// Populate the paragraph cache so a later single-paragraph selection of
 				// this block reuses the translation. Only when we actually got one.
 				if (result.text.trim()) {
-					cacheParagraphPairs(segment.content, result.text);
+					cacheParagraphPairs(targetLang, segment.content, result.text);
 				}
 			}
 
@@ -378,7 +398,7 @@ function initializeTranslator(host: HTMLElement, context: ToolContext) {
 			setStatus(resultStatus);
 			enableResultActions();
 			// Remember this exact selection so revisiting it skips the round-trip.
-			setCachedTranslation(extracted, { rendered: renderedMarkdown, copyText, status: resultStatus });
+			setCachedTranslation(targetLang, extracted, { rendered: renderedMarkdown, copyText, status: resultStatus });
 		} catch (err) {
 			console.error('[Translator] EN->ES failed:', err);
 			copyText = extracted;
@@ -415,7 +435,7 @@ function initializeTranslator(host: HTMLElement, context: ToolContext) {
 			textEl.textContent = extracted;
 			textEl.classList.add('placeholder');
 		} else {
-			textEl.textContent = 'Select or copy text in the terminal to translate it to Spanish.';
+			textEl.textContent = `Select or copy text in the terminal to translate it to ${targetLabel}.`;
 			textEl.classList.add('placeholder');
 		}
 	}
@@ -637,7 +657,7 @@ function splitIntoParagraphs(text: string): string[] {
 // undefined on the first miss is the safety guard: we only ever serve a result when
 // every piece is a known translation, so a partial/altered selection re-translates
 // instead of showing something wrong.
-function reconstructFromParagraphs(sourceText: string): string | undefined {
+function reconstructFromParagraphs(target: string, sourceText: string): string | undefined {
 	const paragraphs = splitIntoParagraphs(sourceText);
 	if (paragraphs.length === 0) {
 		return undefined;
@@ -645,7 +665,7 @@ function reconstructFromParagraphs(sourceText: string): string | undefined {
 
 	const translated: string[] = [];
 	for (const paragraph of paragraphs) {
-		const cached = getCachedParagraph(paragraph);
+		const cached = getCachedParagraph(target, paragraph);
 		if (cached === undefined) {
 			return undefined;
 		}
@@ -659,7 +679,7 @@ function reconstructFromParagraphs(sourceText: string): string | undefined {
 // the translation split into the *same* number of paragraphs. Machine translation
 // can merge or split paragraphs; an unequal count means we can't trust the 1:1
 // alignment, so we skip (the whole-selection cache still covers the full block).
-function cacheParagraphPairs(source: string, translated: string): void {
+function cacheParagraphPairs(target: string, source: string, translated: string): void {
 	const sourceParagraphs = splitIntoParagraphs(source);
 	const translatedParagraphs = splitIntoParagraphs(translated);
 	if (sourceParagraphs.length === 0 || sourceParagraphs.length !== translatedParagraphs.length) {
@@ -667,7 +687,7 @@ function cacheParagraphPairs(source: string, translated: string): void {
 	}
 
 	for (let i = 0; i < sourceParagraphs.length; i += 1) {
-		setCachedParagraph(sourceParagraphs[i], translatedParagraphs[i]);
+		setCachedParagraph(target, sourceParagraphs[i], translatedParagraphs[i]);
 	}
 }
 

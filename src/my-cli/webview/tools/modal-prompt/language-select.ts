@@ -22,7 +22,11 @@ export interface LanguageSelectController {
 	getLang: () => PromptLang | undefined;
 }
 
-const readStoredLang = (): PromptLang | undefined => {
+/**
+ * The user's chosen prompt language (or undefined before any pick). Exported so
+ * the Translator modal can mirror it as its translation target (CLI → this lang).
+ */
+export const getStoredPromptLang = (): PromptLang | undefined => {
 	try {
 		const stored = localStorage.getItem(STORAGE_KEY);
 		return isPromptLang(stored) ? stored : undefined;
@@ -44,7 +48,7 @@ export function initLanguageSelect(
 	onChange: (lang: PromptLang) => void,
 ): LanguageSelectController {
 	const picker = host.querySelector<HTMLElement>('#langToggle');
-	let current = readStoredLang();
+	let current = getStoredPromptLang();
 
 	if (!picker) {
 		return { getLang: () => current };
