@@ -75,18 +75,6 @@
   margin-bottom: 3px;
 }
 
-.prompt-badge {
-  font-size: 9px;
-  background: rgba(29, 158, 117, 0.2);
-  color: #5DCAA5;
-  border: 0.5px solid rgba(29, 158, 117, 0.3);
-  border-radius: 10px;
-  padding: 1px 5px;
-  font-family: 'JetBrains Mono', monospace;
-  font-weight: 500;
-  vertical-align: middle;
-}
-
 .prompt-subtitle {
   font-size: 11px;
   color: var(--vscode-descriptionForeground);
@@ -249,7 +237,7 @@
   background: transparent;
 }
 
-/* Toolbar & Tabs */
+/* Toolbar: language toggles (left) + Pro button (right) */
 .prompt-toolbar {
   display: flex;
   justify-content: space-between;
@@ -269,6 +257,48 @@
 .prompt-translate-toggle[hidden],
 .prompt-strict-toggle[hidden] {
   display: none;
+}
+
+/* Pro button — anchors the toolbar's left edge. Always present, so when English
+   hides both toggles (on the right) the row keeps its height (no collapse /
+   jump). Subtle pill from the same family as the translate/strict toggles.
+   Reserved for future "Pro" features. */
+.prompt-toolbar-pro {
+  display: flex;
+  align-items: flex-end;
+}
+
+.prompt-pro-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 6px;
+  padding: 4px 10px;
+  background: transparent;
+  border: 1px solid var(--vscode-editorGroup-border);
+  border-radius: 20px;
+  color: var(--agent-accent, #AFA9EC);
+  font-family: 'Syne', sans-serif;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  cursor: pointer;
+  transition: border-color 0.2s ease, background 0.2s ease, transform 0.1s ease;
+}
+
+.prompt-pro-btn:hover {
+  border-color: color-mix(in srgb, var(--agent-accent, #534AB7) 45%, transparent);
+  background: color-mix(in srgb, var(--agent-accent, #534AB7) 8%, transparent);
+}
+
+.prompt-pro-btn:active {
+  transform: scale(0.96);
+}
+
+/* The beta chip rides inside the Pro button; drop its standalone left margin and
+   let the button's flex gap own the spacing. */
+.prompt-pro-btn .prompt-beta {
+  margin-left: 0;
 }
 
 .prompt-actions-right {

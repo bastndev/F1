@@ -2,7 +2,7 @@
   <!-- HEADER -->
   <div class="prompt-header">
     <div class="prompt-header-left">
-      <div class="prompt-title">PROMPT <span class="prompt-badge">PRO</span> <span class="prompt-beta">beta</span></div>
+      <div class="prompt-title">PROMPT</div>
       <div class="prompt-subtitle-row">
         <div class="prompt-subtitle">send a message to the active CLI session</div>
         <span class="prompt-lang-picker" id="langToggle"></span>
@@ -12,8 +12,15 @@
       <button class="prompt-close-btn" id="closePromptBtn" aria-label="Close" title="Close (Esc)">esc</button>
     </div>
   </div>
-  <!-- TOOLBAR (TRANSLATE TOGGLE + TABS) -->
+  <!-- TOOLBAR: Pro button (left) + language toggles (right). The Pro button is
+       always present, so English — which hides both toggles — can't collapse /
+       jump the row height. -->
   <div class="prompt-toolbar">
+    <div class="prompt-toolbar-pro">
+      <button class="prompt-pro-btn" id="proBtn" type="button" title="Pro features">
+        PRO <span class="prompt-beta">beta</span>
+      </button>
+    </div>
     <div class="prompt-toolbar-toggles">
       <button
         class="prompt-translate-toggle"
