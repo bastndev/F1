@@ -445,8 +445,8 @@ const spellcheckRpc = createRpcChannel<[string, string, boolean], SpellIssue[]>(
 // extension). The webview fires commands and mirrors broadcast state.
 let voiceStateListener: ((state: VoiceState, message?: string, progress?: VoiceProgress) => void) | undefined;
 
-const speakText = (text: string, options?: { chunks?: string[] }) => {
-	vscode.postMessage({ type: 'voice.speak', text, chunks: options?.chunks });
+const speakText = (text: string, options?: { chunks?: string[]; lang?: string }) => {
+	vscode.postMessage({ type: 'voice.speak', text, chunks: options?.chunks, lang: options?.lang });
 };
 
 const stopSpeech = () => {

@@ -65,7 +65,7 @@ export type WebviewToHostMessage =
 	| { type: 'workspace.listFiles'; id: string }
 	| { type: 'workspace.listSkills'; id: string }
 	| { type: 'mySkills.openCreate' }
-	| { type: 'voice.speak'; text: string; chunks?: string[] }
+	| { type: 'voice.speak'; text: string; lang?: string; chunks?: string[] }
 	| { type: 'voice.pause' }
 	| { type: 'voice.resume' }
 	| { type: 'voice.stop' }

@@ -10,6 +10,8 @@ export type ActiveVoiceSession = {
 	chunks: string[];
 	index: number;
 	state: VoiceState;
+	/** Language of the spoken text — selects the Piper voice. */
+	lang: string;
 	resources?: VoiceResources;
 };
 

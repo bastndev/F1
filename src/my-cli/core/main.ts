@@ -11,7 +11,7 @@ import { handleWorkspaceListFiles, handleWorkspaceListSkills } from './workspace
 import { translatePromptToEnglish } from './translation/host-prompt-translator';
 import { resolveCustomCliLaunch, validateCustomCliCommandInput } from './terminal-cli/custom-cli';
 import {
-	ensureSpanishVoice,
+	ensureVoice,
 	streamSpeech,
 	synthesizeSpeech,
 	playPcmBuffer,
@@ -461,7 +461,8 @@ export class MyCliViewProvider implements vscode.WebviewViewProvider, vscode.Dis
 		const session: ActiveVoiceSession = {
 			chunks,
 			index: 0,
-			state: 'preparing'
+			state: 'preparing',
+			lang: typeof message.lang === 'string' ? message.lang : 'es',
 		};
 		this.activeVoiceSession = session;
 
@@ -515,7 +516,7 @@ export class MyCliViewProvider implements vscode.WebviewViewProvider, vscode.Dis
 			await post('preparing');
 			// Reuses ATM's piper engine/voice when installed; downloads into
 			// F1's globalStorage (with a progress notification) otherwise.
-			session.resources ??= await ensureSpanishVoice(this._extensionContext);
+			session.resources ??= await ensureVoice(this._extensionContext, session.lang);
 			const resources = session.resources;
 			const chunks = session.chunks;
 

@@ -600,7 +600,8 @@ function initializeTranslator(host: HTMLElement, context: ToolContext) {
 			const chunks = activeVoiceChunks.map((chunk) => chunk.text);
 			const value = chunks.join('\n\n');
 			if (value) {
-				context.speakText(value, { chunks });
+				// Read in the same language shown on screen (the chosen target).
+				context.speakText(value, { chunks, lang: targetLang });
 			}
 		};
 
