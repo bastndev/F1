@@ -4,8 +4,9 @@ import type { ImageAttachment, PromptTranslateRequest, PromptTranslateResult, Fi
 import type { VoiceProgress, VoiceState } from '../../shared/voice/voice-types';
 import { mountTranslatorPanel } from './modal-translator/translator';
 import { mountUsePanel } from './modal-use/use';
+import { mountCommandsPanel } from './modal-commands/commands';
 
-export type ToolId = 'translate' | 'keymaps' | 'prompt' | 'use';
+export type ToolId = 'translate' | 'keymaps' | 'prompt' | 'use' | 'commands';
 
 export type CliUsageSnapshot = {
 	sessionId: string;
@@ -57,6 +58,7 @@ const applyStyles = (element: HTMLElement, styles: Partial<CSSStyleDeclaration>)
 
 const toolMounts: Record<ToolId, ToolMount> = {
 	keymaps: mountKeymapsPanel,
+	commands: mountCommandsPanel,
 	prompt: mountPromptPanel,
 	translate: mountTranslatorPanel,
 	use: mountUsePanel
@@ -161,7 +163,7 @@ export const createToolsController = ({
 		modal.append(host);
 
 		modal.addEventListener('click', (event) => {
-			if (event.target === modal && tool === 'keymaps') {
+			if (event.target === modal && (tool === 'keymaps' || tool === 'commands')) {
 				close();
 			}
 		});

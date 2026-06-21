@@ -18,7 +18,7 @@ import type { CliAgentOption } from '../../shared/protocol';
 import { consumeShortcut, matchesShortcut } from '../../../shared/keymaps/cli';
 import { notifyMemoryToggle, onMemoryForceDisable } from '../memory-handler';
 
-export type CliToolId = 'translate' | 'keymaps' | 'prompt' | 'use';
+export type CliToolId = 'translate' | 'keymaps' | 'prompt' | 'use' | 'commands';
 
 type TabControllerOptions = {
 	getAgentIcon: (label: string) => CliAgentIcon | undefined;
@@ -484,7 +484,7 @@ export const createTabController = (options: TabControllerOptions) => {
 		const target = event.target instanceof HTMLElement ? event.target : null;
 		const toolButton = target?.closest<HTMLButtonElement>('[data-tool]');
 		const tool = toolButton?.dataset.tool;
-		if (tool === 'translate' || tool === 'keymaps' || tool === 'prompt' || tool === 'use') {
+		if (tool === 'translate' || tool === 'keymaps' || tool === 'prompt' || tool === 'use' || tool === 'commands') {
 			setToolsPopoverOpen(false);
 			options.onOpenTool?.(tool);
 		}
