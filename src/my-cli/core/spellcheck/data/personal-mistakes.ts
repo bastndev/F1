@@ -20,6 +20,7 @@ export const PERSONAL_MISTAKES: Record<string, string> = {
 	'mejro': 'mejor',
 	'serai': 'sería',
 	'duada': 'duda',
+	'hce': 'hace',
 
 
 
