@@ -4,7 +4,8 @@ export const PERSONAL_MISTAKES: Record<string, string> = {
 	'mejroa': 'mejora',
 	'brebe': 'breve',
 	'cuadno': 'cuando',
-
+    'loguica': 'lógica',
+	'eleji': 'elegí',
 
     // New world ~
 	'manana': 'mañana',
@@ -128,7 +129,6 @@ export const PERSONAL_MISTAKES: Record<string, string> = {
 	'queiro': 'quiero',
 
 	// Transposition errors
-	'loguica': 'lógica',
 	'logica': 'lógica',
 	'ideoma': 'idioma',
 	'priemro': 'primero',
