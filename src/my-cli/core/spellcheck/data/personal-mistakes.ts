@@ -1,8 +1,43 @@
 export const PERSONAL_MISTAKES: Record<string, string> = {
-    // New world
+    // New world ~
 	'manana': 'mañana',
+	'mananas': 'mañanas',
+	'companero': 'compañero',
+    'companera': 'compañera',
+    'companeros': 'compañeros',
+    'companeras': 'compañeras',
 
+    'otono': 'otoño',
 
+    'pina': 'piña',
+    'pinas': 'piñas',
+    'ano': 'año',
+    'anos': 'años',
+
+    'nino': 'niño',
+    'nina': 'niña',
+    'ninos': 'niños',
+    'ninas': 'niñas',
+
+    'senor': 'señor',
+    'senora': 'señora',
+    'senores': 'señores',
+    'senorita': 'señorita',
+
+    'espanol': 'español',
+    'espanola': 'española',
+
+    'bano': 'baño',
+    'banos': 'baños',
+
+    'dano': 'daño',
+    'danos': 'daños',
+
+    'sueno': 'sueño',
+    'suenos': 'sueños',
+
+    'dueno': 'dueño',
+    'duenos': 'dueños',
 
 
 	// Common shorthand and abbreviations
