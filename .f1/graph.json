@@ -897,7 +897,7 @@
       "label": "MyCliViewProvider",
       "file_type": "code",
       "source_file": "src/my-cli/core/main.ts",
-      "source_location": "L33",
+      "source_location": "L34",
       "_origin": "ast",
       "id": "core_main_mycliviewprovider",
       "community": 8,
@@ -907,7 +907,7 @@
       "label": ".constructor()",
       "file_type": "code",
       "source_file": "src/my-cli/core/main.ts",
-      "source_location": "L48",
+      "source_location": "L49",
       "_origin": "ast",
       "id": "core_main_mycliviewprovider_constructor",
       "community": 8,
@@ -917,17 +917,17 @@
       "label": ".resolveWebviewView()",
       "file_type": "code",
       "source_file": "src/my-cli/core/main.ts",
-      "source_location": "L53",
+      "source_location": "L54",
       "_origin": "ast",
       "id": "core_main_mycliviewprovider_resolvewebviewview",
-      "community": 32,
+      "community": 8,
       "norm_label": ".resolvewebviewview()"
     },
     {
       "label": ".smartFocus()",
       "file_type": "code",
       "source_file": "src/my-cli/core/main.ts",
-      "source_location": "L269",
+      "source_location": "L275",
       "_origin": "ast",
       "id": "core_main_mycliviewprovider_smartfocus",
       "community": 8,
@@ -937,7 +937,7 @@
       "label": ".openTutorial()",
       "file_type": "code",
       "source_file": "src/my-cli/core/main.ts",
-      "source_location": "L274",
+      "source_location": "L280",
       "_origin": "ast",
       "id": "core_main_mycliviewprovider_opentutorial",
       "community": 8,
@@ -947,7 +947,7 @@
       "label": "._getCliTutorialHtml()",
       "file_type": "code",
       "source_file": "src/my-cli/core/main.ts",
-      "source_location": "L294",
+      "source_location": "L300",
       "_origin": "ast",
       "id": "core_main_mycliviewprovider_getclitutorialhtml",
       "community": 8,
@@ -957,7 +957,7 @@
       "label": ".dispose()",
       "file_type": "code",
       "source_file": "src/my-cli/core/main.ts",
-      "source_location": "L345",
+      "source_location": "L351",
       "_origin": "ast",
       "id": "core_main_mycliviewprovider_dispose",
       "community": 8,
@@ -967,7 +967,7 @@
       "label": "._getAgentLaunchExtensionMode()",
       "file_type": "code",
       "source_file": "src/my-cli/core/main.ts",
-      "source_location": "L353",
+      "source_location": "L359",
       "_origin": "ast",
       "id": "core_main_mycliviewprovider_getagentlaunchextensionmode",
       "community": 36,
@@ -977,7 +977,7 @@
       "label": "._promptForCustomCliLaunch()",
       "file_type": "code",
       "source_file": "src/my-cli/core/main.ts",
-      "source_location": "L367",
+      "source_location": "L373",
       "_origin": "ast",
       "id": "core_main_mycliviewprovider_promptforcustomclilaunch",
       "community": 81,
@@ -987,7 +987,7 @@
       "label": "._confirmAgentLaunch()",
       "file_type": "code",
       "source_file": "src/my-cli/core/main.ts",
-      "source_location": "L389",
+      "source_location": "L395",
       "_origin": "ast",
       "id": "core_main_mycliviewprovider_confirmagentlaunch",
       "community": 36,
@@ -997,7 +997,7 @@
       "label": "._postVoiceState()",
       "file_type": "code",
       "source_file": "src/my-cli/core/main.ts",
-      "source_location": "L411",
+      "source_location": "L417",
       "_origin": "ast",
       "id": "core_main_mycliviewprovider_postvoicestate",
       "community": 8,
@@ -1007,7 +1007,7 @@
       "label": "._voiceProgress()",
       "file_type": "code",
       "source_file": "src/my-cli/core/main.ts",
-      "source_location": "L420",
+      "source_location": "L426",
       "_origin": "ast",
       "id": "core_main_mycliviewprovider_voiceprogress",
       "community": 8,
@@ -1017,7 +1017,7 @@
       "label": "._voiceChunkLabel()",
       "file_type": "code",
       "source_file": "src/my-cli/core/main.ts",
-      "source_location": "L427",
+      "source_location": "L433",
       "_origin": "ast",
       "id": "core_main_mycliviewprovider_voicechunklabel",
       "community": 8,
@@ -1027,7 +1027,7 @@
       "label": "._isVoiceRunActive()",
       "file_type": "code",
       "source_file": "src/my-cli/core/main.ts",
-      "source_location": "L432",
+      "source_location": "L438",
       "_origin": "ast",
       "id": "core_main_mycliviewprovider_isvoicerunactive",
       "community": 8,
@@ -1037,7 +1037,7 @@
       "label": "._postCurrentVoiceState()",
       "file_type": "code",
       "source_file": "src/my-cli/core/main.ts",
-      "source_location": "L436",
+      "source_location": "L442",
       "_origin": "ast",
       "id": "core_main_mycliviewprovider_postcurrentvoicestate",
       "community": 8,
@@ -1047,7 +1047,7 @@
       "label": "._handleVoiceSpeak()",
       "file_type": "code",
       "source_file": "src/my-cli/core/main.ts",
-      "source_location": "L446",
+      "source_location": "L452",
       "_origin": "ast",
       "id": "core_main_mycliviewprovider_handlevoicespeak",
       "community": 8,
@@ -1057,7 +1057,7 @@
       "label": "._handleVoicePause()",
       "file_type": "code",
       "source_file": "src/my-cli/core/main.ts",
-      "source_location": "L471",
+      "source_location": "L478",
       "_origin": "ast",
       "id": "core_main_mycliviewprovider_handlevoicepause",
       "community": 8,
@@ -1067,7 +1067,7 @@
       "label": "._handleVoiceResume()",
       "file_type": "code",
       "source_file": "src/my-cli/core/main.ts",
-      "source_location": "L483",
+      "source_location": "L490",
       "_origin": "ast",
       "id": "core_main_mycliviewprovider_handlevoiceresume",
       "community": 8,
@@ -1077,17 +1077,27 @@
       "label": "._handleVoiceStop()",
       "file_type": "code",
       "source_file": "src/my-cli/core/main.ts",
-      "source_location": "L493",
+      "source_location": "L500",
       "_origin": "ast",
       "id": "core_main_mycliviewprovider_handlevoicestop",
       "community": 8,
       "norm_label": "._handlevoicestop()"
     },
     {
+      "label": "._handleVoiceCheckReady()",
+      "file_type": "code",
+      "source_file": "src/my-cli/core/main.ts",
+      "source_location": "L507",
+      "_origin": "ast",
+      "id": "core_main_mycliviewprovider_handlevoicecheckready",
+      "community": 34,
+      "norm_label": "._handlevoicecheckready()"
+    },
+    {
       "label": "._runVoiceSession()",
       "file_type": "code",
       "source_file": "src/my-cli/core/main.ts",
-      "source_location": "L500",
+      "source_location": "L523",
       "_origin": "ast",
       "id": "core_main_mycliviewprovider_runvoicesession",
       "community": 8,
@@ -1097,7 +1107,7 @@
       "label": "._handlePromptTranslate()",
       "file_type": "code",
       "source_file": "src/my-cli/core/main.ts",
-      "source_location": "L620",
+      "source_location": "L643",
       "_origin": "ast",
       "id": "core_main_mycliviewprovider_handleprompttranslate",
       "community": 8,
@@ -1107,7 +1117,7 @@
       "label": "._handlePromptPrepare()",
       "file_type": "code",
       "source_file": "src/my-cli/core/main.ts",
-      "source_location": "L666",
+      "source_location": "L689",
       "_origin": "ast",
       "id": "core_main_mycliviewprovider_handlepromptprepare",
       "community": 8,
@@ -1117,7 +1127,7 @@
       "label": "._handlePromptSpellcheck()",
       "file_type": "code",
       "source_file": "src/my-cli/core/main.ts",
-      "source_location": "L692",
+      "source_location": "L715",
       "_origin": "ast",
       "id": "core_main_mycliviewprovider_handlepromptspellcheck",
       "community": 8,
@@ -1127,7 +1137,7 @@
       "label": "._getMemoryWorkspaceRoot()",
       "file_type": "code",
       "source_file": "src/my-cli/core/main.ts",
-      "source_location": "L717",
+      "source_location": "L741",
       "_origin": "ast",
       "id": "core_main_mycliviewprovider_getmemoryworkspaceroot",
       "community": 8,
@@ -1137,7 +1147,7 @@
       "label": "._readMemoryEnabled()",
       "file_type": "code",
       "source_file": "src/my-cli/core/main.ts",
-      "source_location": "L721",
+      "source_location": "L745",
       "_origin": "ast",
       "id": "core_main_mycliviewprovider_readmemoryenabled",
       "community": 8,
@@ -1147,7 +1157,7 @@
       "label": "._writeMemoryEnabled()",
       "file_type": "code",
       "source_file": "src/my-cli/core/main.ts",
-      "source_location": "L725",
+      "source_location": "L749",
       "_origin": "ast",
       "id": "core_main_mycliviewprovider_writememoryenabled",
       "community": 8,
@@ -1157,7 +1167,7 @@
       "label": "._ensureMemoryWatcher()",
       "file_type": "code",
       "source_file": "src/my-cli/core/main.ts",
-      "source_location": "L730",
+      "source_location": "L754",
       "_origin": "ast",
       "id": "core_main_mycliviewprovider_ensurememorywatcher",
       "community": 8,
@@ -1167,7 +1177,7 @@
       "label": "._disposeMemoryWatcher()",
       "file_type": "code",
       "source_file": "src/my-cli/core/main.ts",
-      "source_location": "L746",
+      "source_location": "L770",
       "_origin": "ast",
       "id": "core_main_mycliviewprovider_disposememorywatcher",
       "community": 8,
@@ -1177,7 +1187,7 @@
       "label": "._onMemoryFsEvent()",
       "file_type": "code",
       "source_file": "src/my-cli/core/main.ts",
-      "source_location": "L756",
+      "source_location": "L780",
       "_origin": "ast",
       "id": "core_main_mycliviewprovider_onmemoryfsevent",
       "community": 8,
@@ -1187,17 +1197,17 @@
       "label": "._memoryOnLaunch()",
       "file_type": "code",
       "source_file": "src/my-cli/core/main.ts",
-      "source_location": "L776",
+      "source_location": "L800",
       "_origin": "ast",
       "id": "core_main_mycliviewprovider_memoryonlaunch",
-      "community": 32,
+      "community": 8,
       "norm_label": "._memoryonlaunch()"
     },
     {
       "label": "._handleMemoryGetSnapshot()",
       "file_type": "code",
       "source_file": "src/my-cli/core/main.ts",
-      "source_location": "L783",
+      "source_location": "L807",
       "_origin": "ast",
       "id": "core_main_mycliviewprovider_handlememorygetsnapshot",
       "community": 8,
@@ -1207,7 +1217,7 @@
       "label": "._handleMemoryRebuild()",
       "file_type": "code",
       "source_file": "src/my-cli/core/main.ts",
-      "source_location": "L810",
+      "source_location": "L834",
       "_origin": "ast",
       "id": "core_main_mycliviewprovider_handlememoryrebuild",
       "community": 8,
@@ -1217,7 +1227,7 @@
       "label": "._ensureMemoryBuilt()",
       "file_type": "code",
       "source_file": "src/my-cli/core/main.ts",
-      "source_location": "L821",
+      "source_location": "L845",
       "_origin": "ast",
       "id": "core_main_mycliviewprovider_ensurememorybuilt",
       "community": 8,
@@ -1227,7 +1237,7 @@
       "label": "._memoryDisable()",
       "file_type": "code",
       "source_file": "src/my-cli/core/main.ts",
-      "source_location": "L880",
+      "source_location": "L904",
       "_origin": "ast",
       "id": "core_main_mycliviewprovider_memorydisable",
       "community": 8,
@@ -1237,7 +1247,7 @@
       "label": "._postPromptTranslationError()",
       "file_type": "code",
       "source_file": "src/my-cli/core/main.ts",
-      "source_location": "L888",
+      "source_location": "L912",
       "_origin": "ast",
       "id": "core_main_mycliviewprovider_postprompttranslationerror",
       "community": 8,
@@ -1247,17 +1257,17 @@
       "label": "._getHtmlForWebview()",
       "file_type": "code",
       "source_file": "src/my-cli/core/main.ts",
-      "source_location": "L896",
+      "source_location": "L920",
       "_origin": "ast",
       "id": "core_main_mycliviewprovider_gethtmlforwebview",
-      "community": 32,
+      "community": 8,
       "norm_label": "._gethtmlforwebview()"
     },
     {
       "label": "._getAgentHtmlForWebview()",
       "file_type": "code",
       "source_file": "src/my-cli/core/main.ts",
-      "source_location": "L900",
+      "source_location": "L924",
       "_origin": "ast",
       "id": "core_main_mycliviewprovider_getagenthtmlforwebview",
       "community": 8,
@@ -1287,7 +1297,7 @@
       "label": "PersonalMistakeResult",
       "file_type": "code",
       "source_file": "src/my-cli/core/spellcheck/data/personal-mistakes.ts",
-      "source_location": "L178",
+      "source_location": "L247",
       "_origin": "ast",
       "id": "data_personal_mistakes_personalmistakeresult",
       "community": 18,
@@ -1297,7 +1307,7 @@
       "label": "CompiledMistake",
       "file_type": "code",
       "source_file": "src/my-cli/core/spellcheck/data/personal-mistakes.ts",
-      "source_location": "L183",
+      "source_location": "L252",
       "_origin": "ast",
       "id": "data_personal_mistakes_compiledmistake",
       "community": 18,
@@ -1307,7 +1317,7 @@
       "label": "compiledMistakes",
       "file_type": "code",
       "source_file": "src/my-cli/core/spellcheck/data/personal-mistakes.ts",
-      "source_location": "L188",
+      "source_location": "L257",
       "_origin": "ast",
       "id": "data_personal_mistakes_compiledmistakes",
       "community": 18,
@@ -1317,7 +1327,7 @@
       "label": "applyPersonalMistakes()",
       "file_type": "code",
       "source_file": "src/my-cli/core/spellcheck/data/personal-mistakes.ts",
-      "source_location": "L204",
+      "source_location": "L273",
       "_origin": "ast",
       "id": "data_personal_mistakes_applypersonalmistakes",
       "community": 18,
@@ -1327,7 +1337,7 @@
       "label": "applyPersonalMistakesWithStats()",
       "file_type": "code",
       "source_file": "src/my-cli/core/spellcheck/data/personal-mistakes.ts",
-      "source_location": "L208",
+      "source_location": "L277",
       "_origin": "ast",
       "id": "data_personal_mistakes_applypersonalmistakeswithstats",
       "community": 18,
@@ -1337,7 +1347,7 @@
       "label": "escapeRegExp()",
       "file_type": "code",
       "source_file": "src/my-cli/core/spellcheck/data/personal-mistakes.ts",
-      "source_location": "L226",
+      "source_location": "L295",
       "_origin": "ast",
       "id": "data_personal_mistakes_escaperegexp",
       "community": 18,
@@ -1347,7 +1357,7 @@
       "label": "preserveCase()",
       "file_type": "code",
       "source_file": "src/my-cli/core/spellcheck/data/personal-mistakes.ts",
-      "source_location": "L230",
+      "source_location": "L299",
       "_origin": "ast",
       "id": "data_personal_mistakes_preservecase",
       "community": 18,
@@ -1377,7 +1387,7 @@
       "label": "isProtectedTerm()",
       "file_type": "code",
       "source_file": "src/my-cli/core/spellcheck/data/protected-terms.ts",
-      "source_location": "L61",
+      "source_location": "L64",
       "_origin": "ast",
       "id": "data_protected_terms_isprotectedterm",
       "community": 18,
@@ -1387,7 +1397,7 @@
       "label": "shouldProtectWord()",
       "file_type": "code",
       "source_file": "src/my-cli/core/spellcheck/data/protected-terms.ts",
-      "source_location": "L65",
+      "source_location": "L68",
       "_origin": "ast",
       "id": "data_protected_terms_shouldprotectword",
       "community": 18,
@@ -1397,7 +1407,7 @@
       "label": "isAcronym()",
       "file_type": "code",
       "source_file": "src/my-cli/core/spellcheck/data/protected-terms.ts",
-      "source_location": "L85",
+      "source_location": "L88",
       "_origin": "ast",
       "id": "data_protected_terms_isacronym",
       "community": 18,
@@ -1407,7 +1417,7 @@
       "label": "hasInternalCapital()",
       "file_type": "code",
       "source_file": "src/my-cli/core/spellcheck/data/protected-terms.ts",
-      "source_location": "L89",
+      "source_location": "L92",
       "_origin": "ast",
       "id": "data_protected_terms_hasinternalcapital",
       "community": 18,
@@ -1494,10 +1504,30 @@
       "norm_label": "getfixnow()"
     },
     {
+      "label": "SUPPORTED_LANGUAGES",
+      "file_type": "code",
+      "source_file": "src/my-cli/core/spellcheck/host-spellcheck.ts",
+      "source_location": "L69",
+      "_origin": "ast",
+      "id": "spellcheck_host_spellcheck_supported_languages",
+      "community": 18,
+      "norm_label": "supported_languages"
+    },
+    {
+      "label": "normalizeLanguage()",
+      "file_type": "code",
+      "source_file": "src/my-cli/core/spellcheck/host-spellcheck.ts",
+      "source_location": "L75",
+      "_origin": "ast",
+      "id": "spellcheck_host_spellcheck_normalizelanguage",
+      "community": 18,
+      "norm_label": "normalizelanguage()"
+    },
+    {
       "label": "warmSpellchecker()",
       "file_type": "code",
       "source_file": "src/my-cli/core/spellcheck/host-spellcheck.ts",
-      "source_location": "L67",
+      "source_location": "L78",
       "_origin": "ast",
       "id": "spellcheck_host_spellcheck_warmspellchecker",
       "community": 18,
@@ -1507,7 +1537,7 @@
       "label": "checkText()",
       "file_type": "code",
       "source_file": "src/my-cli/core/spellcheck/host-spellcheck.ts",
-      "source_location": "L75",
+      "source_location": "L91",
       "_origin": "ast",
       "id": "spellcheck_host_spellcheck_checktext",
       "community": 18,
@@ -2444,10 +2474,50 @@
       "norm_label": "host-voice-tts.ts"
     },
     {
+      "label": "VOICE_IDS",
+      "file_type": "code",
+      "source_file": "src/my-cli/core/voice/host-voice-tts.ts",
+      "source_location": "L27",
+      "_origin": "ast",
+      "id": "voice_host_voice_tts_voice_ids",
+      "community": 34,
+      "norm_label": "voice_ids"
+    },
+    {
+      "label": "VOICE_LABELS",
+      "file_type": "code",
+      "source_file": "src/my-cli/core/voice/host-voice-tts.ts",
+      "source_location": "L33",
+      "_origin": "ast",
+      "id": "voice_host_voice_tts_voice_labels",
+      "community": 34,
+      "norm_label": "voice_labels"
+    },
+    {
+      "label": "resolveVoiceId()",
+      "file_type": "code",
+      "source_file": "src/my-cli/core/voice/host-voice-tts.ts",
+      "source_location": "L41",
+      "_origin": "ast",
+      "id": "voice_host_voice_tts_resolvevoiceid",
+      "community": 34,
+      "norm_label": "resolvevoiceid()"
+    },
+    {
+      "label": "VoicesCatalog",
+      "file_type": "code",
+      "source_file": "src/my-cli/core/voice/host-voice-tts.ts",
+      "source_location": "L52",
+      "_origin": "ast",
+      "id": "voice_host_voice_tts_voicescatalog",
+      "community": 34,
+      "norm_label": "voicescatalog"
+    },
+    {
       "label": "VoiceResources",
       "file_type": "code",
       "source_file": "src/my-cli/core/voice/host-voice-tts.ts",
-      "source_location": "L30",
+      "source_location": "L55",
       "_origin": "ast",
       "id": "voice_host_voice_tts_voiceresources",
       "community": 127,
@@ -2457,7 +2527,7 @@
       "label": "PiperPlatform",
       "file_type": "code",
       "source_file": "src/my-cli/core/voice/host-voice-tts.ts",
-      "source_location": "L37",
+      "source_location": "L62",
       "_origin": "ast",
       "id": "voice_host_voice_tts_piperplatform",
       "community": 34,
@@ -2467,7 +2537,7 @@
       "label": "getPiperPlatform()",
       "file_type": "code",
       "source_file": "src/my-cli/core/voice/host-voice-tts.ts",
-      "source_location": "L43",
+      "source_location": "L68",
       "_origin": "ast",
       "id": "voice_host_voice_tts_getpiperplatform",
       "community": 34,
@@ -2477,7 +2547,7 @@
       "label": "piperBinaryPath()",
       "file_type": "code",
       "source_file": "src/my-cli/core/voice/host-voice-tts.ts",
-      "source_location": "L67",
+      "source_location": "L92",
       "_origin": "ast",
       "id": "voice_host_voice_tts_piperbinarypath",
       "community": 34,
@@ -2487,7 +2557,7 @@
       "label": "voiceFilePaths()",
       "file_type": "code",
       "source_file": "src/my-cli/core/voice/host-voice-tts.ts",
-      "source_location": "L72",
+      "source_location": "L97",
       "_origin": "ast",
       "id": "voice_host_voice_tts_voicefilepaths",
       "community": 34,
@@ -2497,7 +2567,7 @@
       "label": "storageBases()",
       "file_type": "code",
       "source_file": "src/my-cli/core/voice/host-voice-tts.ts",
-      "source_location": "L81",
+      "source_location": "L106",
       "_origin": "ast",
       "id": "voice_host_voice_tts_storagebases",
       "community": 34,
@@ -2507,7 +2577,7 @@
       "label": "fileExists()",
       "file_type": "code",
       "source_file": "src/my-cli/core/voice/host-voice-tts.ts",
-      "source_location": "L87",
+      "source_location": "L112",
       "_origin": "ast",
       "id": "voice_host_voice_tts_fileexists",
       "community": 34,
@@ -2517,7 +2587,7 @@
       "label": "findExistingPiper()",
       "file_type": "code",
       "source_file": "src/my-cli/core/voice/host-voice-tts.ts",
-      "source_location": "L96",
+      "source_location": "L121",
       "_origin": "ast",
       "id": "voice_host_voice_tts_findexistingpiper",
       "community": 34,
@@ -2527,37 +2597,77 @@
       "label": "findExistingVoice()",
       "file_type": "code",
       "source_file": "src/my-cli/core/voice/host-voice-tts.ts",
-      "source_location": "L106",
+      "source_location": "L131",
       "_origin": "ast",
       "id": "voice_host_voice_tts_findexistingvoice",
       "community": 34,
       "norm_label": "findexistingvoice()"
     },
     {
-      "label": "ensureSpanishVoice()",
+      "label": "setupInFlight",
       "file_type": "code",
       "source_file": "src/my-cli/core/voice/host-voice-tts.ts",
-      "source_location": "L120",
+      "source_location": "L143",
       "_origin": "ast",
-      "id": "voice_host_voice_tts_ensurespanishvoice",
+      "id": "voice_host_voice_tts_setupinflight",
       "community": 34,
-      "norm_label": "ensurespanishvoice()"
+      "norm_label": "setupinflight"
+    },
+    {
+      "label": "isVoiceReady()",
+      "file_type": "code",
+      "source_file": "src/my-cli/core/voice/host-voice-tts.ts",
+      "source_location": "L150",
+      "_origin": "ast",
+      "id": "voice_host_voice_tts_isvoiceready",
+      "community": 34,
+      "norm_label": "isvoiceready()"
+    },
+    {
+      "label": "ensureVoice()",
+      "file_type": "code",
+      "source_file": "src/my-cli/core/voice/host-voice-tts.ts",
+      "source_location": "L159",
+      "_origin": "ast",
+      "id": "voice_host_voice_tts_ensurevoice",
+      "community": 34,
+      "norm_label": "ensurevoice()"
     },
     {
       "label": "downloadMissingResources()",
       "file_type": "code",
       "source_file": "src/my-cli/core/voice/host-voice-tts.ts",
-      "source_location": "L135",
+      "source_location": "L179",
       "_origin": "ast",
       "id": "voice_host_voice_tts_downloadmissingresources",
       "community": 34,
       "norm_label": "downloadmissingresources()"
     },
     {
+      "label": "loadVoicesCatalog()",
+      "file_type": "code",
+      "source_file": "src/my-cli/core/voice/host-voice-tts.ts",
+      "source_location": "L225",
+      "_origin": "ast",
+      "id": "voice_host_voice_tts_loadvoicescatalog",
+      "community": 34,
+      "norm_label": "loadvoicescatalog()"
+    },
+    {
+      "label": "resolveVoiceDownloadUrls()",
+      "file_type": "code",
+      "source_file": "src/my-cli/core/voice/host-voice-tts.ts",
+      "source_location": "L250",
+      "_origin": "ast",
+      "id": "voice_host_voice_tts_resolvevoicedownloadurls",
+      "community": 34,
+      "norm_label": "resolvevoicedownloadurls()"
+    },
+    {
       "label": "DownloadProgress",
       "file_type": "code",
       "source_file": "src/my-cli/core/voice/host-voice-tts.ts",
-      "source_location": "L178",
+      "source_location": "L275",
       "_origin": "ast",
       "id": "voice_host_voice_tts_downloadprogress",
       "community": 34,
@@ -2567,7 +2677,7 @@
       "label": "downloadFile()",
       "file_type": "code",
       "source_file": "src/my-cli/core/voice/host-voice-tts.ts",
-      "source_location": "L184",
+      "source_location": "L281",
       "_origin": "ast",
       "id": "voice_host_voice_tts_downloadfile",
       "community": 34,
@@ -2577,7 +2687,7 @@
       "label": "formatBytes()",
       "file_type": "code",
       "source_file": "src/my-cli/core/voice/host-voice-tts.ts",
-      "source_location": "L254",
+      "source_location": "L351",
       "_origin": "ast",
       "id": "voice_host_voice_tts_formatbytes",
       "community": 34,
@@ -2587,7 +2697,7 @@
       "label": "installPiper()",
       "file_type": "code",
       "source_file": "src/my-cli/core/voice/host-voice-tts.ts",
-      "source_location": "L266",
+      "source_location": "L363",
       "_origin": "ast",
       "id": "voice_host_voice_tts_installpiper",
       "community": 34,
@@ -2597,7 +2707,7 @@
       "label": "extractArchive()",
       "file_type": "code",
       "source_file": "src/my-cli/core/voice/host-voice-tts.ts",
-      "source_location": "L300",
+      "source_location": "L397",
       "_origin": "ast",
       "id": "voice_host_voice_tts_extractarchive",
       "community": 34,
@@ -2607,7 +2717,7 @@
       "label": "setExecutablePermissions()",
       "file_type": "code",
       "source_file": "src/my-cli/core/voice/host-voice-tts.ts",
-      "source_location": "L349",
+      "source_location": "L446",
       "_origin": "ast",
       "id": "voice_host_voice_tts_setexecutablepermissions",
       "community": 34,
@@ -2617,7 +2727,7 @@
       "label": "fixSymlinks()",
       "file_type": "code",
       "source_file": "src/my-cli/core/voice/host-voice-tts.ts",
-      "source_location": "L376",
+      "source_location": "L473",
       "_origin": "ast",
       "id": "voice_host_voice_tts_fixsymlinks",
       "community": 34,
@@ -2627,7 +2737,7 @@
       "label": "PlaybackCommand",
       "file_type": "code",
       "source_file": "src/my-cli/core/voice/host-voice-tts.ts",
-      "source_location": "L412",
+      "source_location": "L509",
       "_origin": "ast",
       "id": "voice_host_voice_tts_playbackcommand",
       "community": 34,
@@ -2637,7 +2747,7 @@
       "label": "getPlaybackCommand()",
       "file_type": "code",
       "source_file": "src/my-cli/core/voice/host-voice-tts.ts",
-      "source_location": "L417",
+      "source_location": "L514",
       "_origin": "ast",
       "id": "voice_host_voice_tts_getplaybackcommand",
       "community": 34,
@@ -2647,7 +2757,7 @@
       "label": "activeProcesses",
       "file_type": "code",
       "source_file": "src/my-cli/core/voice/host-voice-tts.ts",
-      "source_location": "L436",
+      "source_location": "L533",
       "_origin": "ast",
       "id": "voice_host_voice_tts_activeprocesses",
       "community": 34,
@@ -2657,7 +2767,7 @@
       "label": "trackProcess()",
       "file_type": "code",
       "source_file": "src/my-cli/core/voice/host-voice-tts.ts",
-      "source_location": "L439",
+      "source_location": "L536",
       "_origin": "ast",
       "id": "voice_host_voice_tts_trackprocess",
       "community": 34,
@@ -2667,7 +2777,7 @@
       "label": "wasVoiceStoppedByUser()",
       "file_type": "code",
       "source_file": "src/my-cli/core/voice/host-voice-tts.ts",
-      "source_location": "L448",
+      "source_location": "L545",
       "_origin": "ast",
       "id": "voice_host_voice_tts_wasvoicestoppedbyuser",
       "community": 34,
@@ -2677,7 +2787,7 @@
       "label": "isVoiceSpeaking()",
       "file_type": "code",
       "source_file": "src/my-cli/core/voice/host-voice-tts.ts",
-      "source_location": "L452",
+      "source_location": "L549",
       "_origin": "ast",
       "id": "voice_host_voice_tts_isvoicespeaking",
       "community": 8,
@@ -2687,7 +2797,7 @@
       "label": "stopVoicePlayback()",
       "file_type": "code",
       "source_file": "src/my-cli/core/voice/host-voice-tts.ts",
-      "source_location": "L461",
+      "source_location": "L558",
       "_origin": "ast",
       "id": "voice_host_voice_tts_stopvoiceplayback",
       "community": 8,
@@ -2697,7 +2807,7 @@
       "label": "assertResourcesReady()",
       "file_type": "code",
       "source_file": "src/my-cli/core/voice/host-voice-tts.ts",
-      "source_location": "L477",
+      "source_location": "L574",
       "_origin": "ast",
       "id": "voice_host_voice_tts_assertresourcesready",
       "community": 34,
@@ -2707,7 +2817,7 @@
       "label": "spawnPiper()",
       "file_type": "code",
       "source_file": "src/my-cli/core/voice/host-voice-tts.ts",
-      "source_location": "L492",
+      "source_location": "L589",
       "_origin": "ast",
       "id": "voice_host_voice_tts_spawnpiper",
       "community": 34,
@@ -2717,7 +2827,7 @@
       "label": "streamSpeech()",
       "file_type": "code",
       "source_file": "src/my-cli/core/voice/host-voice-tts.ts",
-      "source_location": "L508",
+      "source_location": "L605",
       "_origin": "ast",
       "id": "voice_host_voice_tts_streamspeech",
       "community": 34,
@@ -2727,7 +2837,7 @@
       "label": "synthesizeSpeech()",
       "file_type": "code",
       "source_file": "src/my-cli/core/voice/host-voice-tts.ts",
-      "source_location": "L585",
+      "source_location": "L682",
       "_origin": "ast",
       "id": "voice_host_voice_tts_synthesizespeech",
       "community": 34,
@@ -2737,7 +2847,7 @@
       "label": "playPcmBuffer()",
       "file_type": "code",
       "source_file": "src/my-cli/core/voice/host-voice-tts.ts",
-      "source_location": "L634",
+      "source_location": "L731",
       "_origin": "ast",
       "id": "voice_host_voice_tts_playpcmbuffer",
       "community": 8,
@@ -2767,7 +2877,7 @@
       "label": "normalizeVoiceText()",
       "file_type": "code",
       "source_file": "src/my-cli/core/voice/voice-chunks.ts",
-      "source_location": "L16",
+      "source_location": "L18",
       "_origin": "ast",
       "id": "voice_voice_chunks_normalizevoicetext",
       "community": 127,
@@ -2777,7 +2887,7 @@
       "label": "splitLongVoiceSegment()",
       "file_type": "code",
       "source_file": "src/my-cli/core/voice/voice-chunks.ts",
-      "source_location": "L24",
+      "source_location": "L26",
       "_origin": "ast",
       "id": "voice_voice_chunks_splitlongvoicesegment",
       "community": 127,
@@ -2787,7 +2897,7 @@
       "label": "splitVoiceText()",
       "file_type": "code",
       "source_file": "src/my-cli/core/voice/voice-chunks.ts",
-      "source_location": "L56",
+      "source_location": "L58",
       "_origin": "ast",
       "id": "voice_voice_chunks_splitvoicetext",
       "community": 127,
@@ -2797,7 +2907,7 @@
       "label": "normalizeVoiceChunks()",
       "file_type": "code",
       "source_file": "src/my-cli/core/voice/voice-chunks.ts",
-      "source_location": "L101",
+      "source_location": "L103",
       "_origin": "ast",
       "id": "voice_voice_chunks_normalizevoicechunks",
       "community": 127,
@@ -3250,7 +3360,7 @@
       "source_location": "L8",
       "_origin": "ast",
       "id": "shared_agents_cliagent",
-      "community": 32,
+      "community": 66,
       "norm_label": "cliagent"
     },
     {
@@ -3280,7 +3390,7 @@
       "source_location": "L36",
       "_origin": "ast",
       "id": "shared_agents_getcliagent",
-      "community": 15,
+      "community": 32,
       "norm_label": "getcliagent()"
     },
     {
@@ -3500,7 +3610,7 @@
       "source_location": "L69",
       "_origin": "ast",
       "id": "attachments_markers_collectimagemarkerids",
-      "community": 5,
+      "community": 53,
       "norm_label": "collectimagemarkerids()"
     },
     {
@@ -3834,6 +3944,76 @@
       "norm_label": "index.ts"
     },
     {
+      "label": "languages.ts",
+      "file_type": "code",
+      "source_file": "src/my-cli/shared/prompt/languages.ts",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "prompt_languages",
+      "community": 56,
+      "norm_label": "languages.ts"
+    },
+    {
+      "label": "PromptLang",
+      "file_type": "code",
+      "source_file": "src/my-cli/shared/prompt/languages.ts",
+      "source_location": "L18",
+      "_origin": "ast",
+      "id": "prompt_languages_promptlang",
+      "community": 56,
+      "norm_label": "promptlang"
+    },
+    {
+      "label": "PromptLanguage",
+      "file_type": "code",
+      "source_file": "src/my-cli/shared/prompt/languages.ts",
+      "source_location": "L20",
+      "_origin": "ast",
+      "id": "prompt_languages_promptlanguage",
+      "community": 56,
+      "norm_label": "promptlanguage"
+    },
+    {
+      "label": "PROMPT_LANGUAGES",
+      "file_type": "code",
+      "source_file": "src/my-cli/shared/prompt/languages.ts",
+      "source_location": "L34",
+      "_origin": "ast",
+      "id": "prompt_languages_prompt_languages",
+      "community": 56,
+      "norm_label": "prompt_languages"
+    },
+    {
+      "label": "byCode",
+      "file_type": "code",
+      "source_file": "src/my-cli/shared/prompt/languages.ts",
+      "source_location": "L44",
+      "_origin": "ast",
+      "id": "prompt_languages_bycode",
+      "community": 56,
+      "norm_label": "bycode"
+    },
+    {
+      "label": "isPromptLang()",
+      "file_type": "code",
+      "source_file": "src/my-cli/shared/prompt/languages.ts",
+      "source_location": "L46",
+      "_origin": "ast",
+      "id": "prompt_languages_ispromptlang",
+      "community": 56,
+      "norm_label": "ispromptlang()"
+    },
+    {
+      "label": "getPromptLanguage()",
+      "file_type": "code",
+      "source_file": "src/my-cli/shared/prompt/languages.ts",
+      "source_location": "L50",
+      "_origin": "ast",
+      "id": "prompt_languages_getpromptlanguage",
+      "community": 56,
+      "norm_label": "getpromptlanguage()"
+    },
+    {
       "label": "prompt-processor.ts",
       "file_type": "code",
       "source_file": "src/my-cli/shared/prompt/prompt-processor.ts",
@@ -3910,7 +4090,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "prompt_prompt_translate_types_prompttranslaterequest",
-      "community": 47,
+      "community": 31,
       "norm_label": "prompttranslaterequest"
     },
     {
@@ -4060,7 +4240,7 @@
       "source_location": "L41",
       "_origin": "ast",
       "id": "shared_protocol_cliagentoption",
-      "community": 127,
+      "community": 59,
       "norm_label": "cliagentoption"
     },
     {
@@ -4087,7 +4267,7 @@
       "label": "HostToWebviewMessage",
       "file_type": "code",
       "source_file": "src/my-cli/shared/protocol.ts",
-      "source_location": "L79",
+      "source_location": "L80",
       "_origin": "ast",
       "id": "shared_protocol_hosttowebviewmessage",
       "community": 127,
@@ -4097,7 +4277,7 @@
       "label": "InboundWebviewMessage",
       "file_type": "code",
       "source_file": "src/my-cli/shared/protocol.ts",
-      "source_location": "L113",
+      "source_location": "L115",
       "_origin": "ast",
       "id": "shared_protocol_inboundwebviewmessage",
       "community": 8,
@@ -4107,7 +4287,7 @@
       "label": "PtyHostCommand",
       "file_type": "code",
       "source_file": "src/my-cli/shared/protocol.ts",
-      "source_location": "L136",
+      "source_location": "L139",
       "_origin": "ast",
       "id": "shared_protocol_ptyhostcommand",
       "community": 127,
@@ -4117,7 +4297,7 @@
       "label": "PtyHostEvent",
       "file_type": "code",
       "source_file": "src/my-cli/shared/protocol.ts",
-      "source_location": "L151",
+      "source_location": "L154",
       "_origin": "ast",
       "id": "shared_protocol_ptyhostevent",
       "community": 127,
@@ -4127,7 +4307,7 @@
       "label": "InboundPtyHostEvent",
       "file_type": "code",
       "source_file": "src/my-cli/shared/protocol.ts",
-      "source_location": "L158",
+      "source_location": "L161",
       "_origin": "ast",
       "id": "shared_protocol_inboundptyhostevent",
       "community": 15,
@@ -5434,10 +5614,20 @@
       "norm_label": "speaktext()"
     },
     {
+      "label": "voiceReadyRpc",
+      "file_type": "code",
+      "source_file": "src/my-cli/webview/panel-terminal/terminal.ts",
+      "source_location": "L454",
+      "_origin": "ast",
+      "id": "panel_terminal_terminal_voicereadyrpc",
+      "community": 4,
+      "norm_label": "voicereadyrpc"
+    },
+    {
       "label": "stopSpeech()",
       "file_type": "code",
       "source_file": "src/my-cli/webview/panel-terminal/terminal.ts",
-      "source_location": "L452",
+      "source_location": "L462",
       "_origin": "ast",
       "id": "panel_terminal_terminal_stopspeech",
       "community": 4,
@@ -5447,7 +5637,7 @@
       "label": "pauseSpeech()",
       "file_type": "code",
       "source_file": "src/my-cli/webview/panel-terminal/terminal.ts",
-      "source_location": "L456",
+      "source_location": "L466",
       "_origin": "ast",
       "id": "panel_terminal_terminal_pausespeech",
       "community": 4,
@@ -5457,7 +5647,7 @@
       "label": "resumeSpeech()",
       "file_type": "code",
       "source_file": "src/my-cli/webview/panel-terminal/terminal.ts",
-      "source_location": "L460",
+      "source_location": "L470",
       "_origin": "ast",
       "id": "panel_terminal_terminal_resumespeech",
       "community": 4,
@@ -5467,7 +5657,7 @@
       "label": "queryVoiceState()",
       "file_type": "code",
       "source_file": "src/my-cli/webview/panel-terminal/terminal.ts",
-      "source_location": "L464",
+      "source_location": "L474",
       "_origin": "ast",
       "id": "panel_terminal_terminal_queryvoicestate",
       "community": 4,
@@ -5477,7 +5667,7 @@
       "label": "onVoiceState()",
       "file_type": "code",
       "source_file": "src/my-cli/webview/panel-terminal/terminal.ts",
-      "source_location": "L468",
+      "source_location": "L478",
       "_origin": "ast",
       "id": "panel_terminal_terminal_onvoicestate",
       "community": 4,
@@ -5487,7 +5677,7 @@
       "label": "openPromptFromTerminal()",
       "file_type": "code",
       "source_file": "src/my-cli/webview/panel-terminal/terminal.ts",
-      "source_location": "L477",
+      "source_location": "L487",
       "_origin": "ast",
       "id": "panel_terminal_terminal_openpromptfromterminal",
       "community": 4,
@@ -5497,7 +5687,7 @@
       "label": "openTranslatorFromTerminal()",
       "file_type": "code",
       "source_file": "src/my-cli/webview/panel-terminal/terminal.ts",
-      "source_location": "L494",
+      "source_location": "L504",
       "_origin": "ast",
       "id": "panel_terminal_terminal_opentranslatorfromterminal",
       "community": 4,
@@ -5507,7 +5697,7 @@
       "label": "copyToTranslate",
       "file_type": "code",
       "source_file": "src/my-cli/webview/panel-terminal/terminal.ts",
-      "source_location": "L624",
+      "source_location": "L635",
       "_origin": "ast",
       "id": "panel_terminal_terminal_copytotranslate",
       "community": 4,
@@ -5517,7 +5707,7 @@
       "label": "tabController",
       "file_type": "code",
       "source_file": "src/my-cli/webview/panel-terminal/terminal.ts",
-      "source_location": "L637",
+      "source_location": "L648",
       "_origin": "ast",
       "id": "panel_terminal_terminal_tabcontroller",
       "community": 4,
@@ -5527,7 +5717,7 @@
       "label": "isOpenCodeSession()",
       "file_type": "code",
       "source_file": "src/my-cli/webview/panel-terminal/terminal.ts",
-      "source_location": "L664",
+      "source_location": "L675",
       "_origin": "ast",
       "id": "panel_terminal_terminal_isopencodesession",
       "community": 82,
@@ -5537,7 +5727,7 @@
       "label": "isCtrlZ()",
       "file_type": "code",
       "source_file": "src/my-cli/webview/panel-terminal/terminal.ts",
-      "source_location": "L669",
+      "source_location": "L680",
       "_origin": "ast",
       "id": "panel_terminal_terminal_isctrlz",
       "community": 82,
@@ -5547,7 +5737,7 @@
       "label": "handleTerminalKey()",
       "file_type": "code",
       "source_file": "src/my-cli/webview/panel-terminal/terminal.ts",
-      "source_location": "L676",
+      "source_location": "L687",
       "_origin": "ast",
       "id": "panel_terminal_terminal_handleterminalkey",
       "community": 82,
@@ -5557,7 +5747,7 @@
       "label": "getAgentSlug()",
       "file_type": "code",
       "source_file": "src/my-cli/webview/panel-terminal/terminal.ts",
-      "source_location": "L711",
+      "source_location": "L722",
       "_origin": "ast",
       "id": "panel_terminal_terminal_getagentslug",
       "community": 82,
@@ -5567,7 +5757,7 @@
       "label": "bootSkeletons",
       "file_type": "code",
       "source_file": "src/my-cli/webview/panel-terminal/terminal.ts",
-      "source_location": "L715",
+      "source_location": "L726",
       "_origin": "ast",
       "id": "panel_terminal_terminal_bootskeletons",
       "community": 4,
@@ -5577,7 +5767,7 @@
       "label": "createTerminalView()",
       "file_type": "code",
       "source_file": "src/my-cli/webview/panel-terminal/terminal.ts",
-      "source_location": "L721",
+      "source_location": "L732",
       "_origin": "ast",
       "id": "panel_terminal_terminal_createterminalview",
       "community": 44,
@@ -5587,7 +5777,7 @@
       "label": "disposeTerminalView()",
       "file_type": "code",
       "source_file": "src/my-cli/webview/panel-terminal/terminal.ts",
-      "source_location": "L845",
+      "source_location": "L856",
       "_origin": "ast",
       "id": "panel_terminal_terminal_disposeterminalview",
       "community": 44,
@@ -5597,7 +5787,7 @@
       "label": "removeClosedTerminals()",
       "file_type": "code",
       "source_file": "src/my-cli/webview/panel-terminal/terminal.ts",
-      "source_location": "L851",
+      "source_location": "L862",
       "_origin": "ast",
       "id": "panel_terminal_terminal_removeclosedterminals",
       "community": 44,
@@ -5607,7 +5797,7 @@
       "label": "sleepInactiveTerminals()",
       "file_type": "code",
       "source_file": "src/my-cli/webview/panel-terminal/terminal.ts",
-      "source_location": "L861",
+      "source_location": "L872",
       "_origin": "ast",
       "id": "panel_terminal_terminal_sleepinactiveterminals",
       "community": 44,
@@ -5617,7 +5807,7 @@
       "label": "setActiveTerminal()",
       "file_type": "code",
       "source_file": "src/my-cli/webview/panel-terminal/terminal.ts",
-      "source_location": "L873",
+      "source_location": "L884",
       "_origin": "ast",
       "id": "panel_terminal_terminal_setactiveterminal",
       "community": 44,
@@ -5627,7 +5817,7 @@
       "label": "updateAgentTheme()",
       "file_type": "code",
       "source_file": "src/my-cli/webview/panel-terminal/terminal.ts",
-      "source_location": "L907",
+      "source_location": "L918",
       "_origin": "ast",
       "id": "panel_terminal_terminal_updateagenttheme",
       "community": 82,
@@ -5637,7 +5827,7 @@
       "label": "syncState()",
       "file_type": "code",
       "source_file": "src/my-cli/webview/panel-terminal/terminal.ts",
-      "source_location": "L922",
+      "source_location": "L933",
       "_origin": "ast",
       "id": "panel_terminal_terminal_syncstate",
       "community": 44,
@@ -5647,7 +5837,7 @@
       "label": "handleOutput()",
       "file_type": "code",
       "source_file": "src/my-cli/webview/panel-terminal/terminal.ts",
-      "source_location": "L972",
+      "source_location": "L983",
       "_origin": "ast",
       "id": "panel_terminal_terminal_handleoutput",
       "community": 44,
@@ -5657,7 +5847,7 @@
       "label": "resizeObserver",
       "file_type": "code",
       "source_file": "src/my-cli/webview/panel-terminal/terminal.ts",
-      "source_location": "L1093",
+      "source_location": "L1109",
       "_origin": "ast",
       "id": "panel_terminal_terminal_resizeobserver",
       "community": 4,
@@ -5667,7 +5857,7 @@
       "label": "repaintActiveTerminal()",
       "file_type": "code",
       "source_file": "src/my-cli/webview/panel-terminal/terminal.ts",
-      "source_location": "L1105",
+      "source_location": "L1121",
       "_origin": "ast",
       "id": "panel_terminal_terminal_repaintactiveterminal",
       "community": 4,
@@ -5677,7 +5867,7 @@
       "label": "focusActiveTerminal()",
       "file_type": "code",
       "source_file": "src/my-cli/webview/panel-terminal/terminal.ts",
-      "source_location": "L1123",
+      "source_location": "L1139",
       "_origin": "ast",
       "id": "panel_terminal_terminal_focusactiveterminal",
       "community": 4,
@@ -5760,7 +5950,7 @@
       "source_location": "L39",
       "_origin": "ast",
       "id": "modal_prompt_attachments_ui_getreferencedimageattachments",
-      "community": 5,
+      "community": 53,
       "norm_label": "getreferencedimageattachments()"
     },
     {
@@ -6034,6 +6224,56 @@
       "norm_label": "appendsegment()"
     },
     {
+      "label": "language-select.ts",
+      "file_type": "code",
+      "source_file": "src/my-cli/webview/tools/modal-prompt/language-select.ts",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "modal_prompt_language_select",
+      "community": 56,
+      "norm_label": "language-select.ts"
+    },
+    {
+      "label": "LanguageSelectController",
+      "file_type": "code",
+      "source_file": "src/my-cli/webview/tools/modal-prompt/language-select.ts",
+      "source_location": "L20",
+      "_origin": "ast",
+      "id": "modal_prompt_language_select_languageselectcontroller",
+      "community": 56,
+      "norm_label": "languageselectcontroller"
+    },
+    {
+      "label": "getStoredPromptLang()",
+      "file_type": "code",
+      "source_file": "src/my-cli/webview/tools/modal-prompt/language-select.ts",
+      "source_location": "L29",
+      "_origin": "ast",
+      "id": "modal_prompt_language_select_getstoredpromptlang",
+      "community": 56,
+      "norm_label": "getstoredpromptlang()"
+    },
+    {
+      "label": "persistLang()",
+      "file_type": "code",
+      "source_file": "src/my-cli/webview/tools/modal-prompt/language-select.ts",
+      "source_location": "L38",
+      "_origin": "ast",
+      "id": "modal_prompt_language_select_persistlang",
+      "community": 56,
+      "norm_label": "persistlang()"
+    },
+    {
+      "label": "initLanguageSelect()",
+      "file_type": "code",
+      "source_file": "src/my-cli/webview/tools/modal-prompt/language-select.ts",
+      "source_location": "L46",
+      "_origin": "ast",
+      "id": "modal_prompt_language_select_initlanguageselect",
+      "community": 56,
+      "norm_label": "initlanguageselect()"
+    },
+    {
       "label": "lowercase-input.ts",
       "file_type": "code",
       "source_file": "src/my-cli/webview/tools/modal-prompt/lowercase-input.ts",
@@ -6097,7 +6337,7 @@
       "label": "ensureStyles()",
       "file_type": "code",
       "source_file": "src/my-cli/webview/tools/modal-prompt/prompt.ts",
-      "source_location": "L49",
+      "source_location": "L53",
       "_origin": "ast",
       "id": "modal_prompt_prompt_ensurestyles",
       "community": 5,
@@ -6107,7 +6347,7 @@
       "label": "hasRouteMention()",
       "file_type": "code",
       "source_file": "src/my-cli/webview/tools/modal-prompt/prompt.ts",
-      "source_location": "L69",
+      "source_location": "L73",
       "_origin": "ast",
       "id": "modal_prompt_prompt_hasroutemention",
       "community": 5,
@@ -6117,7 +6357,7 @@
       "label": "PromptDraft",
       "file_type": "code",
       "source_file": "src/my-cli/webview/tools/modal-prompt/prompt.ts",
-      "source_location": "L75",
+      "source_location": "L79",
       "_origin": "ast",
       "id": "modal_prompt_prompt_promptdraft",
       "community": 5,
@@ -6127,7 +6367,7 @@
       "label": "promptDrafts",
       "file_type": "code",
       "source_file": "src/my-cli/webview/tools/modal-prompt/prompt.ts",
-      "source_location": "L82",
+      "source_location": "L86",
       "_origin": "ast",
       "id": "modal_prompt_prompt_promptdrafts",
       "community": 5,
@@ -6137,27 +6377,27 @@
       "label": "mountPromptPanel()",
       "file_type": "code",
       "source_file": "src/my-cli/webview/tools/modal-prompt/prompt.ts",
-      "source_location": "L84",
+      "source_location": "L88",
       "_origin": "ast",
       "id": "modal_prompt_prompt_mountpromptpanel",
       "community": 5,
       "norm_label": "mountpromptpanel()"
     },
     {
-      "label": "initPromptTabs()",
+      "label": "initPromptComposer()",
       "file_type": "code",
       "source_file": "src/my-cli/webview/tools/modal-prompt/prompt.ts",
-      "source_location": "L103",
+      "source_location": "L107",
       "_origin": "ast",
-      "id": "modal_prompt_prompt_initprompttabs",
+      "id": "modal_prompt_prompt_initpromptcomposer",
       "community": 5,
-      "norm_label": "initprompttabs()"
+      "norm_label": "initpromptcomposer()"
     },
     {
       "label": "initToolbarActions()",
       "file_type": "code",
       "source_file": "src/my-cli/webview/tools/modal-prompt/prompt.ts",
-      "source_location": "L516",
+      "source_location": "L570",
       "_origin": "ast",
       "id": "modal_prompt_prompt_inittoolbaractions",
       "community": 5,
@@ -6167,7 +6407,7 @@
       "label": "initStrictToggle()",
       "file_type": "code",
       "source_file": "src/my-cli/webview/tools/modal-prompt/prompt.ts",
-      "source_location": "L544",
+      "source_location": "L598",
       "_origin": "ast",
       "id": "modal_prompt_prompt_initstricttoggle",
       "community": 5,
@@ -6177,7 +6417,7 @@
       "label": "initRunButton()",
       "file_type": "code",
       "source_file": "src/my-cli/webview/tools/modal-prompt/prompt.ts",
-      "source_location": "L564",
+      "source_location": "L618",
       "_origin": "ast",
       "id": "modal_prompt_prompt_initrunbutton",
       "community": 5,
@@ -6187,7 +6427,7 @@
       "label": "initSendShortcut()",
       "file_type": "code",
       "source_file": "src/my-cli/webview/tools/modal-prompt/prompt.ts",
-      "source_location": "L606",
+      "source_location": "L660",
       "_origin": "ast",
       "id": "modal_prompt_prompt_initsendshortcut",
       "community": 5,
@@ -6197,7 +6437,7 @@
       "label": "updateCharCount()",
       "file_type": "code",
       "source_file": "src/my-cli/webview/tools/modal-prompt/prompt.ts",
-      "source_location": "L617",
+      "source_location": "L671",
       "_origin": "ast",
       "id": "modal_prompt_prompt_updatecharcount",
       "community": 5,
@@ -6264,6 +6504,76 @@
       "norm_label": "initskillschips()"
     },
     {
+      "label": "spell-suggest.ts",
+      "file_type": "code",
+      "source_file": "src/my-cli/webview/tools/modal-prompt/spell-suggest.ts",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "modal_prompt_spell_suggest",
+      "community": 91,
+      "norm_label": "spell-suggest.ts"
+    },
+    {
+      "label": "SpellSuggestOptions",
+      "file_type": "code",
+      "source_file": "src/my-cli/webview/tools/modal-prompt/spell-suggest.ts",
+      "source_location": "L18",
+      "_origin": "ast",
+      "id": "modal_prompt_spell_suggest_spellsuggestoptions",
+      "community": 91,
+      "norm_label": "spellsuggestoptions"
+    },
+    {
+      "label": "initSpellSuggest()",
+      "file_type": "code",
+      "source_file": "src/my-cli/webview/tools/modal-prompt/spell-suggest.ts",
+      "source_location": "L28",
+      "_origin": "ast",
+      "id": "modal_prompt_spell_suggest_initspellsuggest",
+      "community": 91,
+      "norm_label": "initspellsuggest()"
+    },
+    {
+      "label": "applyFix()",
+      "file_type": "code",
+      "source_file": "src/my-cli/webview/tools/modal-prompt/spell-suggest.ts",
+      "source_location": "L81",
+      "_origin": "ast",
+      "id": "modal_prompt_spell_suggest_applyfix",
+      "community": 91,
+      "norm_label": "applyfix()"
+    },
+    {
+      "label": "matchLeadingCase()",
+      "file_type": "code",
+      "source_file": "src/my-cli/webview/tools/modal-prompt/spell-suggest.ts",
+      "source_location": "L107",
+      "_origin": "ast",
+      "id": "modal_prompt_spell_suggest_matchleadingcase",
+      "community": 91,
+      "norm_label": "matchleadingcase()"
+    },
+    {
+      "label": "isOverMisspelled()",
+      "file_type": "code",
+      "source_file": "src/my-cli/webview/tools/modal-prompt/spell-suggest.ts",
+      "source_location": "L115",
+      "_origin": "ast",
+      "id": "modal_prompt_spell_suggest_isovermisspelled",
+      "community": 91,
+      "norm_label": "isovermisspelled()"
+    },
+    {
+      "label": "showNote()",
+      "file_type": "code",
+      "source_file": "src/my-cli/webview/tools/modal-prompt/spell-suggest.ts",
+      "source_location": "L129",
+      "_origin": "ast",
+      "id": "modal_prompt_spell_suggest_shownote",
+      "community": 91,
+      "norm_label": "shownote()"
+    },
+    {
       "label": "textarea-history.ts",
       "file_type": "code",
       "source_file": "src/my-cli/webview/tools/modal-prompt/textarea-history.ts",
@@ -6297,7 +6607,7 @@
       "label": "TranslationProvider",
       "file_type": "code",
       "source_file": "src/my-cli/webview/tools/modal-translator/browser-terminal-translator.ts",
-      "source_location": "L17",
+      "source_location": "L19",
       "_origin": "ast",
       "id": "modal_translator_browser_terminal_translator_translationprovider",
       "community": 28,
@@ -6307,7 +6617,7 @@
       "label": "translateMyMemory()",
       "file_type": "code",
       "source_file": "src/my-cli/webview/tools/modal-translator/browser-terminal-translator.ts",
-      "source_location": "L23",
+      "source_location": "L25",
       "_origin": "ast",
       "id": "modal_translator_browser_terminal_translator_translatemymemory",
       "community": 28,
@@ -6317,7 +6627,7 @@
       "label": "translateLingva()",
       "file_type": "code",
       "source_file": "src/my-cli/webview/tools/modal-translator/browser-terminal-translator.ts",
-      "source_location": "L56",
+      "source_location": "L58",
       "_origin": "ast",
       "id": "modal_translator_browser_terminal_translator_translatelingva",
       "community": 28,
@@ -6327,7 +6637,7 @@
       "label": "translateLibre()",
       "file_type": "code",
       "source_file": "src/my-cli/webview/tools/modal-translator/browser-terminal-translator.ts",
-      "source_location": "L77",
+      "source_location": "L79",
       "_origin": "ast",
       "id": "modal_translator_browser_terminal_translator_translatelibre",
       "community": 28,
@@ -6337,21 +6647,21 @@
       "label": "providers",
       "file_type": "code",
       "source_file": "src/my-cli/webview/tools/modal-translator/browser-terminal-translator.ts",
-      "source_location": "L104",
+      "source_location": "L106",
       "_origin": "ast",
       "id": "modal_translator_browser_terminal_translator_providers",
       "community": 28,
       "norm_label": "providers"
     },
     {
-      "label": "translateEnToSpanish()",
+      "label": "translateEnTo()",
       "file_type": "code",
       "source_file": "src/my-cli/webview/tools/modal-translator/browser-terminal-translator.ts",
-      "source_location": "L111",
+      "source_location": "L113",
       "_origin": "ast",
-      "id": "modal_translator_browser_terminal_translator_translateentospanish",
+      "id": "modal_translator_browser_terminal_translator_translateento",
       "community": 41,
-      "norm_label": "translateentospanish()"
+      "norm_label": "translateento()"
     },
     {
       "label": "markdown-lite.ts",
@@ -6517,7 +6827,7 @@
       "label": "normalizeKey()",
       "file_type": "code",
       "source_file": "src/my-cli/webview/tools/modal-translator/translator-cache.ts",
-      "source_location": "L29",
+      "source_location": "L31",
       "_origin": "ast",
       "id": "modal_translator_translator_cache_normalizekey",
       "community": 41,
@@ -6527,7 +6837,7 @@
       "label": "getCachedTranslation()",
       "file_type": "code",
       "source_file": "src/my-cli/webview/tools/modal-translator/translator-cache.ts",
-      "source_location": "L32",
+      "source_location": "L37",
       "_origin": "ast",
       "id": "modal_translator_translator_cache_getcachedtranslation",
       "community": 41,
@@ -6537,7 +6847,7 @@
       "label": "setCachedTranslation()",
       "file_type": "code",
       "source_file": "src/my-cli/webview/tools/modal-translator/translator-cache.ts",
-      "source_location": "L50",
+      "source_location": "L55",
       "_origin": "ast",
       "id": "modal_translator_translator_cache_setcachedtranslation",
       "community": 41,
@@ -6547,7 +6857,7 @@
       "label": "paragraphMemo",
       "file_type": "code",
       "source_file": "src/my-cli/webview/tools/modal-translator/translator-cache.ts",
-      "source_location": "L75",
+      "source_location": "L80",
       "_origin": "ast",
       "id": "modal_translator_translator_cache_paragraphmemo",
       "community": 41,
@@ -6557,7 +6867,7 @@
       "label": "getCachedParagraph()",
       "file_type": "code",
       "source_file": "src/my-cli/webview/tools/modal-translator/translator-cache.ts",
-      "source_location": "L78",
+      "source_location": "L83",
       "_origin": "ast",
       "id": "modal_translator_translator_cache_getcachedparagraph",
       "community": 41,
@@ -6567,7 +6877,7 @@
       "label": "setCachedParagraph()",
       "file_type": "code",
       "source_file": "src/my-cli/webview/tools/modal-translator/translator-cache.ts",
-      "source_location": "L95",
+      "source_location": "L100",
       "_origin": "ast",
       "id": "modal_translator_translator_cache_setcachedparagraph",
       "community": 41,
@@ -6587,7 +6897,7 @@
       "label": "TranslatorVoiceChunk",
       "file_type": "code",
       "source_file": "src/my-cli/webview/tools/modal-translator/translator.ts",
-      "source_location": "L15",
+      "source_location": "L17",
       "_origin": "ast",
       "id": "modal_translator_translator_translatorvoicechunk",
       "community": 41,
@@ -6597,7 +6907,7 @@
       "label": "ensureStyles()",
       "file_type": "code",
       "source_file": "src/my-cli/webview/tools/modal-translator/translator.ts",
-      "source_location": "L20",
+      "source_location": "L22",
       "_origin": "ast",
       "id": "modal_translator_translator_ensurestyles",
       "community": 41,
@@ -6607,7 +6917,7 @@
       "label": "normalizeSpeechText()",
       "file_type": "code",
       "source_file": "src/my-cli/webview/tools/modal-translator/translator.ts",
-      "source_location": "L31",
+      "source_location": "L33",
       "_origin": "ast",
       "id": "modal_translator_translator_normalizespeechtext",
       "community": 41,
@@ -6617,7 +6927,7 @@
       "label": "splitLongSpeechSegment()",
       "file_type": "code",
       "source_file": "src/my-cli/webview/tools/modal-translator/translator.ts",
-      "source_location": "L35",
+      "source_location": "L37",
       "_origin": "ast",
       "id": "modal_translator_translator_splitlongspeechsegment",
       "community": 41,
@@ -6627,7 +6937,7 @@
       "label": "splitSpeechText()",
       "file_type": "code",
       "source_file": "src/my-cli/webview/tools/modal-translator/translator.ts",
-      "source_location": "L67",
+      "source_location": "L69",
       "_origin": "ast",
       "id": "modal_translator_translator_splitspeechtext",
       "community": 41,
@@ -6637,7 +6947,7 @@
       "label": "buildVoiceChunks()",
       "file_type": "code",
       "source_file": "src/my-cli/webview/tools/modal-translator/translator.ts",
-      "source_location": "L110",
+      "source_location": "L112",
       "_origin": "ast",
       "id": "modal_translator_translator_buildvoicechunks",
       "community": 41,
@@ -6647,7 +6957,7 @@
       "label": "clearVoiceHighlights()",
       "file_type": "code",
       "source_file": "src/my-cli/webview/tools/modal-translator/translator.ts",
-      "source_location": "L155",
+      "source_location": "L157",
       "_origin": "ast",
       "id": "modal_translator_translator_clearvoicehighlights",
       "community": 41,
@@ -6657,7 +6967,7 @@
       "label": "setActiveVoiceChunk()",
       "file_type": "code",
       "source_file": "src/my-cli/webview/tools/modal-translator/translator.ts",
-      "source_location": "L163",
+      "source_location": "L165",
       "_origin": "ast",
       "id": "modal_translator_translator_setactivevoicechunk",
       "community": 41,
@@ -6667,7 +6977,7 @@
       "label": "mountTranslatorPanel()",
       "file_type": "code",
       "source_file": "src/my-cli/webview/tools/modal-translator/translator.ts",
-      "source_location": "L186",
+      "source_location": "L188",
       "_origin": "ast",
       "id": "modal_translator_translator_mounttranslatorpanel",
       "community": 41,
@@ -6677,7 +6987,7 @@
       "label": "initializeTranslator()",
       "file_type": "code",
       "source_file": "src/my-cli/webview/tools/modal-translator/translator.ts",
-      "source_location": "L201",
+      "source_location": "L203",
       "_origin": "ast",
       "id": "modal_translator_translator_initializetranslator",
       "community": 41,
@@ -6687,7 +6997,7 @@
       "label": "extractTextToTranslate()",
       "file_type": "code",
       "source_file": "src/my-cli/webview/tools/modal-translator/translator.ts",
-      "source_location": "L625",
+      "source_location": "L712",
       "_origin": "ast",
       "id": "modal_translator_translator_extracttexttotranslate",
       "community": 41,
@@ -6697,7 +7007,7 @@
       "label": "splitIntoParagraphs()",
       "file_type": "code",
       "source_file": "src/my-cli/webview/tools/modal-translator/translator.ts",
-      "source_location": "L631",
+      "source_location": "L718",
       "_origin": "ast",
       "id": "modal_translator_translator_splitintoparagraphs",
       "community": 41,
@@ -6707,7 +7017,7 @@
       "label": "reconstructFromParagraphs()",
       "file_type": "code",
       "source_file": "src/my-cli/webview/tools/modal-translator/translator.ts",
-      "source_location": "L640",
+      "source_location": "L727",
       "_origin": "ast",
       "id": "modal_translator_translator_reconstructfromparagraphs",
       "community": 41,
@@ -6717,7 +7027,7 @@
       "label": "cacheParagraphPairs()",
       "file_type": "code",
       "source_file": "src/my-cli/webview/tools/modal-translator/translator.ts",
-      "source_location": "L662",
+      "source_location": "L749",
       "_origin": "ast",
       "id": "modal_translator_translator_cacheparagraphpairs",
       "community": 41,
@@ -6727,7 +7037,7 @@
       "label": "buildSkeleton()",
       "file_type": "code",
       "source_file": "src/my-cli/webview/tools/modal-translator/translator.ts",
-      "source_location": "L674",
+      "source_location": "L761",
       "_origin": "ast",
       "id": "modal_translator_translator_buildskeleton",
       "community": 41,
@@ -6737,7 +7047,7 @@
       "label": "revealText()",
       "file_type": "code",
       "source_file": "src/my-cli/webview/tools/modal-translator/translator.ts",
-      "source_location": "L728",
+      "source_location": "L815",
       "_origin": "ast",
       "id": "modal_translator_translator_revealtext",
       "community": 41,
@@ -7387,7 +7697,7 @@
       "label": "ToolCleanup",
       "file_type": "code",
       "source_file": "src/my-cli/webview/tools/tools.ts",
-      "source_location": "L43",
+      "source_location": "L44",
       "_origin": "ast",
       "id": "tools_tools_toolcleanup",
       "community": 65,
@@ -7397,7 +7707,7 @@
       "label": "ToolMount",
       "file_type": "code",
       "source_file": "src/my-cli/webview/tools/tools.ts",
-      "source_location": "L44",
+      "source_location": "L45",
       "_origin": "ast",
       "id": "tools_tools_toolmount",
       "community": 65,
@@ -7407,7 +7717,7 @@
       "label": "ToolsControllerOptions",
       "file_type": "code",
       "source_file": "src/my-cli/webview/tools/tools.ts",
-      "source_location": "L45",
+      "source_location": "L46",
       "_origin": "ast",
       "id": "tools_tools_toolscontrolleroptions",
       "community": 65,
@@ -7417,7 +7727,7 @@
       "label": "applyStyles()",
       "file_type": "code",
       "source_file": "src/my-cli/webview/tools/tools.ts",
-      "source_location": "L49",
+      "source_location": "L50",
       "_origin": "ast",
       "id": "tools_tools_applystyles",
       "community": 65,
@@ -7427,7 +7737,7 @@
       "label": "toolMounts",
       "file_type": "code",
       "source_file": "src/my-cli/webview/tools/tools.ts",
-      "source_location": "L57",
+      "source_location": "L58",
       "_origin": "ast",
       "id": "tools_tools_toolmounts",
       "community": 65,
@@ -7437,7 +7747,7 @@
       "label": "createToolsController()",
       "file_type": "code",
       "source_file": "src/my-cli/webview/tools/tools.ts",
-      "source_location": "L64",
+      "source_location": "L65",
       "_origin": "ast",
       "id": "tools_tools_createtoolscontroller",
       "community": 65,
@@ -8160,7 +8470,7 @@
       "source_location": "L51",
       "_origin": "ast",
       "id": "my_skills_my_skills_createskillrootinstructioncreatemessage",
-      "community": 0,
+      "community": 11,
       "norm_label": "createskillrootinstructioncreatemessage"
     },
     {
@@ -8350,7 +8660,7 @@
       "source_location": "L399",
       "_origin": "ast",
       "id": "my_skills_my_skills_myskillsviewprovider_postcreaterootinstructionstatus",
-      "community": 0,
+      "community": 11,
       "norm_label": "._postcreaterootinstructionstatus()"
     },
     {
@@ -8550,7 +8860,7 @@
       "source_location": "L862",
       "_origin": "ast",
       "id": "my_skills_my_skills_myskillsviewprovider_setlocalskillenabled",
-      "community": 63,
+      "community": 11,
       "norm_label": "._setlocalskillenabled()"
     },
     {
@@ -8570,7 +8880,7 @@
       "source_location": "L899",
       "_origin": "ast",
       "id": "my_skills_my_skills_myskillsviewprovider_openlocalskill",
-      "community": 63,
+      "community": 51,
       "norm_label": "._openlocalskill()"
     },
     {
@@ -8600,7 +8910,7 @@
       "source_location": "L938",
       "_origin": "ast",
       "id": "my_skills_my_skills_myskillsviewprovider_enablesavedskill",
-      "community": 11,
+      "community": 51,
       "norm_label": "._enablesavedskill()"
     },
     {
@@ -9000,7 +9310,7 @@
       "source_location": "L1510",
       "_origin": "ast",
       "id": "my_skills_my_skills_tocreateskillsearchpayload",
-      "community": 40,
+      "community": 7,
       "norm_label": "tocreateskillsearchpayload()"
     },
     {
@@ -9380,7 +9690,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "agents_claude_md_types_agentsclaudeinstructionfilename",
-      "community": 0,
+      "community": 11,
       "norm_label": "agentsclaudeinstructionfilename"
     },
     {
@@ -11450,7 +11760,7 @@
       "source_location": "L27",
       "_origin": "ast",
       "id": "chat_create_core_fast_context_manager_getfastcontext",
-      "community": 56,
+      "community": 57,
       "norm_label": "getfastcontext()"
     },
     {
@@ -11530,7 +11840,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "chat_create_core_skill_generator",
-      "community": 71,
+      "community": 57,
       "norm_label": "skill-generator.ts"
     },
     {
@@ -11540,7 +11850,7 @@
       "source_location": "L7",
       "_origin": "ast",
       "id": "chat_create_core_skill_generator_createchatskillpayloadwithtemplate",
-      "community": 71,
+      "community": 57,
       "norm_label": "createchatskillpayloadwithtemplate"
     },
     {
@@ -11550,7 +11860,7 @@
       "source_location": "L11",
       "_origin": "ast",
       "id": "chat_create_core_skill_generator_createskillboilerplate",
-      "community": 71,
+      "community": 57,
       "norm_label": "createskillboilerplate()"
     },
     {
@@ -11560,7 +11870,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "description_better_index",
-      "community": 56,
+      "community": 57,
       "norm_label": "index.ts"
     },
     {
@@ -11570,7 +11880,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "description_better_index_buildbetterdescription",
-      "community": 56,
+      "community": 57,
       "norm_label": "buildbetterdescription()"
     },
     {
@@ -11580,7 +11890,7 @@
       "source_location": "L13",
       "_origin": "ast",
       "id": "description_better_index_buildfallbackinstructions",
-      "community": 56,
+      "community": 57,
       "norm_label": "buildfallbackinstructions()"
     },
     {
@@ -11590,7 +11900,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "templates_markdown_ai",
-      "community": 71,
+      "community": 57,
       "norm_label": "markdown-ai.ts"
     },
     {
@@ -11600,7 +11910,7 @@
       "source_location": "L3",
       "_origin": "ast",
       "id": "templates_markdown_ai_createskillmarkdownai",
-      "community": 71,
+      "community": 57,
       "norm_label": "createskillmarkdownai()"
     },
     {
@@ -11610,7 +11920,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "templates_markdown_base",
-      "community": 71,
+      "community": 57,
       "norm_label": "markdown-base.ts"
     },
     {
@@ -11620,7 +11930,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "templates_markdown_base_createchatskillpayload",
-      "community": 71,
+      "community": 57,
       "norm_label": "createchatskillpayload"
     },
     {
@@ -11630,7 +11940,7 @@
       "source_location": "L13",
       "_origin": "ast",
       "id": "templates_markdown_base_buildsafename",
-      "community": 71,
+      "community": 57,
       "norm_label": "buildsafename()"
     },
     {
@@ -11640,7 +11950,7 @@
       "source_location": "L36",
       "_origin": "ast",
       "id": "templates_markdown_base_builddescription",
-      "community": 71,
+      "community": 57,
       "norm_label": "builddescription()"
     },
     {
@@ -11650,7 +11960,7 @@
       "source_location": "L63",
       "_origin": "ast",
       "id": "templates_markdown_base_yamlescape",
-      "community": 71,
+      "community": 57,
       "norm_label": "yamlescape()"
     },
     {
@@ -11660,7 +11970,7 @@
       "source_location": "L71",
       "_origin": "ast",
       "id": "templates_markdown_base_getinstructionsnote",
-      "community": 71,
+      "community": 57,
       "norm_label": "getinstructionsnote()"
     },
     {
@@ -11670,7 +11980,7 @@
       "source_location": "L77",
       "_origin": "ast",
       "id": "templates_markdown_base_getreferencessection",
-      "community": 71,
+      "community": 57,
       "norm_label": "getreferencessection()"
     },
     {
@@ -11680,7 +11990,7 @@
       "source_location": "L103",
       "_origin": "ast",
       "id": "templates_markdown_base_createskillmarkdown",
-      "community": 71,
+      "community": 57,
       "norm_label": "createskillmarkdown()"
     },
     {
@@ -11690,7 +12000,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "templates_markdown_fast",
-      "community": 56,
+      "community": 57,
       "norm_label": "markdown-fast.ts"
     },
     {
@@ -11700,7 +12010,7 @@
       "source_location": "L10",
       "_origin": "ast",
       "id": "templates_markdown_fast_finalizeskillmarkdown",
-      "community": 56,
+      "community": 57,
       "norm_label": "finalizeskillmarkdown()"
     },
     {
@@ -11710,7 +12020,7 @@
       "source_location": "L18",
       "_origin": "ast",
       "id": "templates_markdown_fast_renderfallbackbody",
-      "community": 56,
+      "community": 57,
       "norm_label": "renderfallbackbody()"
     },
     {
@@ -11720,7 +12030,7 @@
       "source_location": "L43",
       "_origin": "ast",
       "id": "templates_markdown_fast_createskillmarkdownfast",
-      "community": 56,
+      "community": 57,
       "norm_label": "createskillmarkdownfast()"
     },
     {
@@ -12200,7 +12510,7 @@
       "source_location": "L857",
       "_origin": "ast",
       "id": "skill_fast_archetypes_getskillfastarchetypeid",
-      "community": 56,
+      "community": 49,
       "norm_label": "getskillfastarchetypeid()"
     },
     {
@@ -12260,7 +12570,7 @@
       "source_location": "L39",
       "_origin": "ast",
       "id": "skill_fast_index_getskillfasttemplate",
-      "community": 56,
+      "community": 57,
       "norm_label": "getskillfasttemplate()"
     },
     {
@@ -12340,7 +12650,7 @@
       "source_location": "L83",
       "_origin": "ast",
       "id": "skill_fast_intent_signals_normalizeskillfastintent",
-      "community": 56,
+      "community": 49,
       "norm_label": "normalizeskillfastintent()"
     },
     {
@@ -12470,7 +12780,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "skill_fast_intro",
-      "community": 56,
+      "community": 49,
       "norm_label": "intro.ts"
     },
     {
@@ -12480,7 +12790,7 @@
       "source_location": "L5",
       "_origin": "ast",
       "id": "skill_fast_intro_category_nouns",
-      "community": 56,
+      "community": 49,
       "norm_label": "category_nouns"
     },
     {
@@ -12490,7 +12800,7 @@
       "source_location": "L16",
       "_origin": "ast",
       "id": "skill_fast_intro_category_guarantees",
-      "community": 56,
+      "community": 49,
       "norm_label": "category_guarantees"
     },
     {
@@ -12500,7 +12810,7 @@
       "source_location": "L27",
       "_origin": "ast",
       "id": "skill_fast_intro_category_identities",
-      "community": 56,
+      "community": 49,
       "norm_label": "category_identities"
     },
     {
@@ -12510,7 +12820,7 @@
       "source_location": "L38",
       "_origin": "ast",
       "id": "skill_fast_intro_compact",
-      "community": 56,
+      "community": 49,
       "norm_label": "compact()"
     },
     {
@@ -12520,7 +12830,7 @@
       "source_location": "L42",
       "_origin": "ast",
       "id": "skill_fast_intro_wordlimit",
-      "community": 56,
+      "community": 49,
       "norm_label": "wordlimit()"
     },
     {
@@ -12530,7 +12840,7 @@
       "source_location": "L51",
       "_origin": "ast",
       "id": "skill_fast_intro_buildskillfastintro",
-      "community": 56,
+      "community": 49,
       "norm_label": "buildskillfastintro()"
     },
     {
@@ -12720,7 +13030,7 @@
       "source_location": "L23",
       "_origin": "ast",
       "id": "skill_fast_types_skillfastrendercontext",
-      "community": 49,
+      "community": 45,
       "norm_label": "skillfastrendercontext"
     },
     {
@@ -13180,7 +13490,7 @@
       "source_location": "L26",
       "_origin": "ast",
       "id": "skill_fast_visual_blocks_skillfastvisualblock",
-      "community": 33,
+      "community": 52,
       "norm_label": "skillfastvisualblock"
     },
     {
@@ -13330,7 +13640,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "data_query_intents_queryintentid",
-      "community": 46,
+      "community": 77,
       "norm_label": "queryintentid"
     },
     {
@@ -13610,7 +13920,7 @@
       "source_location": "L18",
       "_origin": "ast",
       "id": "chat_search_core_marketplace_match_marketplacequery",
-      "community": 46,
+      "community": 77,
       "norm_label": "marketplacequery"
     },
     {
@@ -14190,7 +14500,7 @@
       "source_location": "L34",
       "_origin": "ast",
       "id": "chat_search_core_types_queryanalysis",
-      "community": 46,
+      "community": 77,
       "norm_label": "queryanalysis"
     },
     {
@@ -15130,7 +15440,7 @@
       "source_location": "L14",
       "_origin": "ast",
       "id": "design_styles_index_designstyleoptions",
-      "community": 25,
+      "community": 10,
       "norm_label": "designstyleoptions"
     },
     {
@@ -15380,7 +15690,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "data_styles",
-      "community": 25,
+      "community": 10,
       "norm_label": "styles.ts"
     },
     {
@@ -16850,7 +17160,7 @@
       "source_location": "L24",
       "_origin": "ast",
       "id": "core_marketplace_skillpage",
-      "community": 77,
+      "community": 6,
       "norm_label": "skillpage"
     },
     {
@@ -16880,7 +17190,7 @@
       "source_location": "L76",
       "_origin": "ast",
       "id": "core_marketplace_searchmarketplaceskills",
-      "community": 62,
+      "community": 6,
       "norm_label": "searchmarketplaceskills()"
     },
     {
@@ -17120,7 +17430,7 @@
       "source_location": "L532",
       "_origin": "ast",
       "id": "core_marketplace_normalizesearchquery",
-      "community": 62,
+      "community": 6,
       "norm_label": "normalizesearchquery()"
     },
     {
@@ -17130,7 +17440,7 @@
       "source_location": "L541",
       "_origin": "ast",
       "id": "core_marketplace_ranklocalmatches",
-      "community": 62,
+      "community": 6,
       "norm_label": "ranklocalmatches()"
     },
     {
@@ -18950,7 +19260,7 @@
       "source_location": "L95",
       "_origin": "ast",
       "id": "core_local_skills_deleteworkspacerootskill",
-      "community": 35,
+      "community": 63,
       "norm_label": "deleteworkspacerootskill()"
     },
     {
@@ -18980,7 +19290,7 @@
       "source_location": "L171",
       "_origin": "ast",
       "id": "core_local_skills_getdisabledskillids",
-      "community": 35,
+      "community": 63,
       "norm_label": "getdisabledskillids()"
     },
     {
@@ -18990,7 +19300,7 @@
       "source_location": "L190",
       "_origin": "ast",
       "id": "core_local_skills_updategitignoreskillstate",
-      "community": 86,
+      "community": 35,
       "norm_label": "updategitignoreskillstate()"
     },
     {
@@ -19000,7 +19310,7 @@
       "source_location": "L217",
       "_origin": "ast",
       "id": "core_local_skills_removeworkspacerootskillstate",
-      "community": 35,
+      "community": 63,
       "norm_label": "removeworkspacerootskillstate()"
     },
     {
@@ -19020,7 +19330,7 @@
       "source_location": "L270",
       "_origin": "ast",
       "id": "core_local_skills_removegitignoreskillstate",
-      "community": 86,
+      "community": 35,
       "norm_label": "removegitignoreskillstate()"
     },
     {
@@ -19030,7 +19340,7 @@
       "source_location": "L289",
       "_origin": "ast",
       "id": "core_local_skills_appendmanagedblock",
-      "community": 86,
+      "community": 35,
       "norm_label": "appendmanagedblock()"
     },
     {
@@ -19040,7 +19350,7 @@
       "source_location": "L297",
       "_origin": "ast",
       "id": "core_local_skills_findgitignoreblock",
-      "community": 86,
+      "community": 35,
       "norm_label": "findgitignoreblock()"
     },
     {
@@ -19050,7 +19360,7 @@
       "source_location": "L316",
       "_origin": "ast",
       "id": "core_local_skills_parsemanagedskillline",
-      "community": 35,
+      "community": 63,
       "norm_label": "parsemanagedskillline()"
     },
     {
@@ -19060,7 +19370,7 @@
       "source_location": "L328",
       "_origin": "ast",
       "id": "core_local_skills_readgitignoretext",
-      "community": 35,
+      "community": 63,
       "norm_label": "readgitignoretext()"
     },
     {
@@ -19070,7 +19380,7 @@
       "source_location": "L341",
       "_origin": "ast",
       "id": "core_local_skills_splitlines",
-      "community": 86,
+      "community": 35,
       "norm_label": "splitlines()"
     },
     {
@@ -19080,7 +19390,7 @@
       "source_location": "L350",
       "_origin": "ast",
       "id": "core_local_skills_normalizelineendings",
-      "community": 86,
+      "community": 35,
       "norm_label": "normalizelineendings()"
     },
     {
@@ -19090,7 +19400,7 @@
       "source_location": "L354",
       "_origin": "ast",
       "id": "core_local_skills_withlineendings",
-      "community": 86,
+      "community": 35,
       "norm_label": "withlineendings()"
     },
     {
@@ -19100,7 +19410,7 @@
       "source_location": "L358",
       "_origin": "ast",
       "id": "core_local_skills_formatmanagedblockspacing",
-      "community": 86,
+      "community": 35,
       "norm_label": "formatmanagedblockspacing()"
     },
     {
@@ -19110,7 +19420,7 @@
       "source_location": "L382",
       "_origin": "ast",
       "id": "core_local_skills_isrootskillfile",
-      "community": 35,
+      "community": 63,
       "norm_label": "isrootskillfile()"
     },
     {
@@ -19120,7 +19430,7 @@
       "source_location": "L386",
       "_origin": "ast",
       "id": "core_local_skills_isrootskillfolder",
-      "community": 35,
+      "community": 63,
       "norm_label": "isrootskillfolder()"
     },
     {
@@ -19140,7 +19450,7 @@
       "source_location": "L401",
       "_origin": "ast",
       "id": "core_local_skills_getworkspaceskilluri",
-      "community": 35,
+      "community": 63,
       "norm_label": "getworkspaceskilluri()"
     },
     {
@@ -19150,7 +19460,7 @@
       "source_location": "L405",
       "_origin": "ast",
       "id": "core_local_skills_issupportedskillid",
-      "community": 35,
+      "community": 63,
       "norm_label": "issupportedskillid()"
     },
     {
@@ -19380,7 +19690,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_my_skills_screens_local_skill_core_types_ts_core_types",
-      "community": 63,
+      "community": 51,
       "norm_label": "types.ts"
     },
     {
@@ -19390,7 +19700,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "core_types_localskillkind",
-      "community": 63,
+      "community": 51,
       "norm_label": "localskillkind"
     },
     {
@@ -19400,7 +19710,7 @@
       "source_location": "L3",
       "_origin": "ast",
       "id": "core_types_localskill",
-      "community": 63,
+      "community": 51,
       "norm_label": "localskill"
     },
     {
@@ -19410,7 +19720,7 @@
       "source_location": "L14",
       "_origin": "ast",
       "id": "core_types_localskillsupdatemessage",
-      "community": 63,
+      "community": 51,
       "norm_label": "localskillsupdatemessage"
     },
     {
@@ -19420,7 +19730,7 @@
       "source_location": "L19",
       "_origin": "ast",
       "id": "core_types_localskillsrequestmessage",
-      "community": 63,
+      "community": 51,
       "norm_label": "localskillsrequestmessage"
     },
     {
@@ -19430,7 +19740,7 @@
       "source_location": "L23",
       "_origin": "ast",
       "id": "core_types_localskillsetenabledmessage",
-      "community": 63,
+      "community": 11,
       "norm_label": "localskillsetenabledmessage"
     },
     {
@@ -19450,7 +19760,7 @@
       "source_location": "L34",
       "_origin": "ast",
       "id": "core_types_localskillopenmessage",
-      "community": 63,
+      "community": 51,
       "norm_label": "localskillopenmessage"
     },
     {
@@ -19470,7 +19780,7 @@
       "source_location": "L44",
       "_origin": "ast",
       "id": "core_types_localskillssavedrequestmessage",
-      "community": 63,
+      "community": 51,
       "norm_label": "localskillssavedrequestmessage"
     },
     {
@@ -19480,7 +19790,7 @@
       "source_location": "L48",
       "_origin": "ast",
       "id": "core_types_localskillssavedupdatemessage",
-      "community": 63,
+      "community": 51,
       "norm_label": "localskillssavedupdatemessage"
     },
     {
@@ -19500,7 +19810,7 @@
       "source_location": "L58",
       "_origin": "ast",
       "id": "core_types_localskillenablesavedmessage",
-      "community": 11,
+      "community": 51,
       "norm_label": "localskillenablesavedmessage"
     },
     {
@@ -23249,9 +23559,9 @@
       "source_file": "package.json",
       "source_location": "L143",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "package_dependencies",
-      "target": "package_dependencies_fixnow",
-      "confidence_score": 1.0
+      "target": "package_dependencies_fixnow"
     },
     {
       "relation": "contains",
@@ -24096,11 +24406,22 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "src/my-cli/core/main.ts",
-      "source_location": "L14",
+      "source_location": "L13",
       "weight": 1.0,
-      "confidence_score": 1.0,
       "source": "core_main",
-      "target": "voice_host_voice_tts_ensurespanishvoice"
+      "target": "voice_host_voice_tts_ensurevoice",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/my-cli/core/main.ts",
+      "source_location": "L13",
+      "weight": 1.0,
+      "source": "core_main",
+      "target": "voice_host_voice_tts_isvoiceready",
+      "confidence_score": 1.0
     },
     {
       "relation": "imports",
@@ -24393,6 +24714,16 @@
       "confidence_score": 1.0,
       "source": "core_main_mycliviewprovider",
       "target": "core_main_mycliviewprovider_handleprompttranslate"
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "src/my-cli/core/main.ts",
+      "source_location": "L507",
+      "weight": 1.0,
+      "source": "core_main_mycliviewprovider",
+      "target": "core_main_mycliviewprovider_handlevoicecheckready",
+      "confidence_score": 1.0
     },
     {
       "relation": "method",
@@ -25024,15 +25355,37 @@
       "target": "voice_host_voice_tts_stopvoiceplayback"
     },
     {
+      "relation": "references",
+      "context": "parameter_type",
+      "confidence": "EXTRACTED",
+      "source_file": "src/my-cli/core/main.ts",
+      "source_location": "L507",
+      "weight": 1.0,
+      "source": "core_main_mycliviewprovider_handlevoicecheckready",
+      "target": "shared_protocol_inboundwebviewmessage",
+      "confidence_score": 1.0
+    },
+    {
       "relation": "calls",
       "context": "call",
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/my-cli/core/main.ts",
-      "source_location": "L502",
+      "source_location": "L514",
+      "weight": 1.0,
+      "source": "core_main_mycliviewprovider_handlevoicecheckready",
+      "target": "voice_host_voice_tts_isvoiceready"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "src/my-cli/core/main.ts",
+      "source_location": "L541",
       "weight": 1.0,
       "source": "core_main_mycliviewprovider_runvoicesession",
-      "target": "voice_host_voice_tts_ensurespanishvoice"
+      "target": "voice_host_voice_tts_ensurevoice"
     },
     {
       "relation": "calls",
@@ -25563,9 +25916,9 @@
       "source_file": "src/my-cli/core/spellcheck/host-spellcheck.ts",
       "source_location": "L46",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "spellcheck_host_spellcheck",
-      "target": "spellcheck_host_spellcheck_fixnowmodule",
-      "confidence_score": 1.0
+      "target": "spellcheck_host_spellcheck_fixnowmodule"
     },
     {
       "relation": "contains",
@@ -25573,8 +25926,18 @@
       "source_file": "src/my-cli/core/spellcheck/host-spellcheck.ts",
       "source_location": "L58",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "spellcheck_host_spellcheck",
-      "target": "spellcheck_host_spellcheck_getfixnow",
+      "target": "spellcheck_host_spellcheck_getfixnow"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/my-cli/core/spellcheck/host-spellcheck.ts",
+      "source_location": "L75",
+      "weight": 1.0,
+      "source": "spellcheck_host_spellcheck",
+      "target": "spellcheck_host_spellcheck_normalizelanguage",
       "confidence_score": 1.0
     },
     {
@@ -25611,6 +25974,16 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/my-cli/core/spellcheck/host-spellcheck.ts",
+      "source_location": "L69",
+      "weight": 1.0,
+      "source": "spellcheck_host_spellcheck",
+      "target": "spellcheck_host_spellcheck_supported_languages",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/my-cli/core/spellcheck/host-spellcheck.ts",
       "source_location": "L80",
       "weight": 1.0,
       "confidence_score": 1.0,
@@ -25624,9 +25997,9 @@
       "source_file": "src/my-cli/core/spellcheck/host-spellcheck.ts",
       "source_location": "L60",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "spellcheck_host_spellcheck_getfixnow",
-      "target": "spellcheck_host_spellcheck_dynamicimport",
-      "confidence_score": 1.0
+      "target": "spellcheck_host_spellcheck_dynamicimport"
     },
     {
       "relation": "calls",
@@ -25635,9 +26008,9 @@
       "source_file": "src/my-cli/core/spellcheck/host-spellcheck.ts",
       "source_location": "L82",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "spellcheck_host_spellcheck_checktext",
-      "target": "spellcheck_host_spellcheck_getfixnow",
-      "confidence_score": 1.0
+      "target": "spellcheck_host_spellcheck_getfixnow"
     },
     {
       "relation": "calls",
@@ -25646,8 +26019,30 @@
       "source_file": "src/my-cli/core/spellcheck/host-spellcheck.ts",
       "source_location": "L68",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "spellcheck_host_spellcheck_warmspellchecker",
-      "target": "spellcheck_host_spellcheck_getfixnow",
+      "target": "spellcheck_host_spellcheck_getfixnow"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src/my-cli/core/spellcheck/host-spellcheck.ts",
+      "source_location": "L96",
+      "weight": 1.0,
+      "source": "spellcheck_host_spellcheck_checktext",
+      "target": "spellcheck_host_spellcheck_normalizelanguage",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src/my-cli/core/spellcheck/host-spellcheck.ts",
+      "source_location": "L79",
+      "weight": 1.0,
+      "source": "spellcheck_host_spellcheck_warmspellchecker",
+      "target": "spellcheck_host_spellcheck_normalizelanguage",
       "confidence_score": 1.0
     },
     {
@@ -27765,11 +28160,11 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/my-cli/core/voice/host-voice-tts.ts",
-      "source_location": "L120",
+      "source_location": "L159",
       "weight": 1.0,
-      "confidence_score": 1.0,
       "source": "voice_host_voice_tts",
-      "target": "voice_host_voice_tts_ensurespanishvoice"
+      "target": "voice_host_voice_tts_ensurevoice",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -27865,11 +28260,31 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/my-cli/core/voice/host-voice-tts.ts",
+      "source_location": "L150",
+      "weight": 1.0,
+      "source": "voice_host_voice_tts",
+      "target": "voice_host_voice_tts_isvoiceready",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/my-cli/core/voice/host-voice-tts.ts",
       "source_location": "L441",
       "weight": 1.0,
       "confidence_score": 1.0,
       "source": "voice_host_voice_tts",
       "target": "voice_host_voice_tts_isvoicespeaking"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/my-cli/core/voice/host-voice-tts.ts",
+      "source_location": "L225",
+      "weight": 1.0,
+      "source": "voice_host_voice_tts",
+      "target": "voice_host_voice_tts_loadvoicescatalog",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -27915,11 +28330,41 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/my-cli/core/voice/host-voice-tts.ts",
+      "source_location": "L250",
+      "weight": 1.0,
+      "source": "voice_host_voice_tts",
+      "target": "voice_host_voice_tts_resolvevoicedownloadurls",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/my-cli/core/voice/host-voice-tts.ts",
+      "source_location": "L41",
+      "weight": 1.0,
+      "source": "voice_host_voice_tts",
+      "target": "voice_host_voice_tts_resolvevoiceid",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/my-cli/core/voice/host-voice-tts.ts",
       "source_location": "L349",
       "weight": 1.0,
       "confidence_score": 1.0,
       "source": "voice_host_voice_tts",
       "target": "voice_host_voice_tts_setexecutablepermissions"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/my-cli/core/voice/host-voice-tts.ts",
+      "source_location": "L143",
+      "weight": 1.0,
+      "source": "voice_host_voice_tts",
+      "target": "voice_host_voice_tts_setupinflight",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -27985,6 +28430,26 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/my-cli/core/voice/host-voice-tts.ts",
+      "source_location": "L27",
+      "weight": 1.0,
+      "source": "voice_host_voice_tts",
+      "target": "voice_host_voice_tts_voice_ids",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/my-cli/core/voice/host-voice-tts.ts",
+      "source_location": "L33",
+      "weight": 1.0,
+      "source": "voice_host_voice_tts",
+      "target": "voice_host_voice_tts_voice_labels",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/my-cli/core/voice/host-voice-tts.ts",
       "source_location": "L72",
       "weight": 1.0,
       "confidence_score": 1.0,
@@ -28000,6 +28465,16 @@
       "confidence_score": 1.0,
       "source": "voice_host_voice_tts",
       "target": "voice_host_voice_tts_voiceresources"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/my-cli/core/voice/host-voice-tts.ts",
+      "source_location": "L52",
+      "weight": 1.0,
+      "source": "voice_host_voice_tts",
+      "target": "voice_host_voice_tts_voicescatalog",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -28021,6 +28496,28 @@
       "confidence_score": 1.0,
       "source": "voice_voice_chunks",
       "target": "voice_host_voice_tts"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src/my-cli/core/voice/host-voice-tts.ts",
+      "source_location": "L160",
+      "weight": 1.0,
+      "source": "voice_host_voice_tts_ensurevoice",
+      "target": "voice_host_voice_tts_resolvevoiceid",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src/my-cli/core/voice/host-voice-tts.ts",
+      "source_location": "L155",
+      "weight": 1.0,
+      "source": "voice_host_voice_tts_isvoiceready",
+      "target": "voice_host_voice_tts_resolvevoiceid",
+      "confidence_score": 1.0
     },
     {
       "relation": "imports",
@@ -28104,6 +28601,17 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/my-cli/core/voice/host-voice-tts.ts",
+      "source_location": "L231",
+      "weight": 1.0,
+      "source": "voice_host_voice_tts_loadvoicescatalog",
+      "target": "voice_host_voice_tts_storagebases",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src/my-cli/core/voice/host-voice-tts.ts",
       "source_location": "L478",
       "weight": 1.0,
       "confidence_score": 1.0,
@@ -28170,33 +28678,88 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/my-cli/core/voice/host-voice-tts.ts",
-      "source_location": "L121",
+      "source_location": "L233",
       "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "voice_host_voice_tts_ensurespanishvoice",
-      "target": "voice_host_voice_tts_findexistingpiper"
+      "source": "voice_host_voice_tts_loadvoicescatalog",
+      "target": "voice_host_voice_tts_fileexists",
+      "confidence_score": 1.0
     },
     {
       "relation": "calls",
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/my-cli/core/voice/host-voice-tts.ts",
-      "source_location": "L122",
+      "source_location": "L161",
       "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "voice_host_voice_tts_ensurespanishvoice",
-      "target": "voice_host_voice_tts_findexistingvoice"
+      "source": "voice_host_voice_tts_ensurevoice",
+      "target": "voice_host_voice_tts_findexistingpiper",
+      "confidence_score": 1.0
     },
     {
       "relation": "calls",
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/my-cli/core/voice/host-voice-tts.ts",
-      "source_location": "L128",
+      "source_location": "L151",
       "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "voice_host_voice_tts_ensurespanishvoice",
-      "target": "voice_host_voice_tts_downloadmissingresources"
+      "source": "voice_host_voice_tts_isvoiceready",
+      "target": "voice_host_voice_tts_findexistingpiper",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src/my-cli/core/voice/host-voice-tts.ts",
+      "source_location": "L162",
+      "weight": 1.0,
+      "source": "voice_host_voice_tts_ensurevoice",
+      "target": "voice_host_voice_tts_findexistingvoice",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src/my-cli/core/voice/host-voice-tts.ts",
+      "source_location": "L155",
+      "weight": 1.0,
+      "source": "voice_host_voice_tts_isvoiceready",
+      "target": "voice_host_voice_tts_findexistingvoice",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src/my-cli/core/voice/host-voice-tts.ts",
+      "source_location": "L172",
+      "weight": 1.0,
+      "source": "voice_host_voice_tts_ensurevoice",
+      "target": "voice_host_voice_tts_downloadmissingresources",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src/my-cli/core/voice/host-voice-tts.ts",
+      "source_location": "L244",
+      "weight": 1.0,
+      "source": "voice_host_voice_tts_loadvoicescatalog",
+      "target": "voice_host_voice_tts_downloadfile",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src/my-cli/core/voice/host-voice-tts.ts",
+      "source_location": "L254",
+      "weight": 1.0,
+      "source": "voice_host_voice_tts_resolvevoicedownloadurls",
+      "target": "voice_host_voice_tts_loadvoicescatalog",
+      "confidence_score": 1.0
     },
     {
       "relation": "calls",
@@ -29781,11 +30344,11 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/my-cli/webview/tools/modal-prompt/prompt.ts",
-      "source_location": "L293",
+      "source_location": "L304",
       "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "modal_prompt_prompt_initprompttabs",
-      "target": "attachments_markers_protectskilltokens"
+      "source": "modal_prompt_prompt_initpromptcomposer",
+      "target": "attachments_markers_protectskilltokens",
+      "confidence_score": 1.0
     },
     {
       "relation": "re_exports",
@@ -29814,11 +30377,11 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/my-cli/webview/tools/modal-prompt/prompt.ts",
-      "source_location": "L297",
+      "source_location": "L308",
       "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "modal_prompt_prompt_initprompttabs",
-      "target": "attachments_markers_restoreskilltokens"
+      "source": "modal_prompt_prompt_initpromptcomposer",
+      "target": "attachments_markers_restoreskilltokens",
+      "confidence_score": 1.0
     },
     {
       "relation": "re_exports",
@@ -29847,11 +30410,11 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/my-cli/webview/tools/modal-prompt/prompt.ts",
-      "source_location": "L294",
+      "source_location": "L305",
       "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "modal_prompt_prompt_initprompttabs",
-      "target": "attachments_markers_protectmentions"
+      "source": "modal_prompt_prompt_initpromptcomposer",
+      "target": "attachments_markers_protectmentions",
+      "confidence_score": 1.0
     },
     {
       "relation": "re_exports",
@@ -29880,11 +30443,11 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/my-cli/webview/tools/modal-prompt/prompt.ts",
-      "source_location": "L297",
+      "source_location": "L308",
       "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "modal_prompt_prompt_initprompttabs",
-      "target": "attachments_markers_restorementions"
+      "source": "modal_prompt_prompt_initpromptcomposer",
+      "target": "attachments_markers_restorementions",
+      "confidence_score": 1.0
     },
     {
       "relation": "re_exports",
@@ -29968,11 +30531,11 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/my-cli/webview/tools/modal-prompt/prompt.ts",
-      "source_location": "L291",
+      "source_location": "L302",
       "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "modal_prompt_prompt_initprompttabs",
-      "target": "attachments_markers_protectimagemarkers"
+      "source": "modal_prompt_prompt_initpromptcomposer",
+      "target": "attachments_markers_protectimagemarkers",
+      "confidence_score": 1.0
     },
     {
       "relation": "re_exports",
@@ -30001,11 +30564,11 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/my-cli/webview/tools/modal-prompt/prompt.ts",
-      "source_location": "L297",
+      "source_location": "L308",
       "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "modal_prompt_prompt_initprompttabs",
-      "target": "attachments_markers_restoreimagemarkers"
+      "source": "modal_prompt_prompt_initpromptcomposer",
+      "target": "attachments_markers_restoreimagemarkers",
+      "confidence_score": 1.0
     },
     {
       "relation": "re_exports",
@@ -30265,11 +30828,11 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/my-cli/webview/tools/modal-prompt/prompt.ts",
-      "source_location": "L177",
+      "source_location": "L186",
       "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "modal_prompt_prompt_initprompttabs",
-      "target": "attachments_pastes_buildpastemarker"
+      "source": "modal_prompt_prompt_initpromptcomposer",
+      "target": "attachments_pastes_buildpastemarker",
+      "confidence_score": 1.0
     },
     {
       "relation": "re_exports",
@@ -30298,11 +30861,11 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/my-cli/webview/tools/modal-prompt/prompt.ts",
-      "source_location": "L177",
+      "source_location": "L186",
       "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "modal_prompt_prompt_initprompttabs",
-      "target": "attachments_pastes_countlines"
+      "source": "modal_prompt_prompt_initpromptcomposer",
+      "target": "attachments_pastes_countlines",
+      "confidence_score": 1.0
     },
     {
       "relation": "re_exports",
@@ -30331,11 +30894,11 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/my-cli/webview/tools/modal-prompt/prompt.ts",
-      "source_location": "L176",
+      "source_location": "L185",
       "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "modal_prompt_prompt_initprompttabs",
-      "target": "attachments_pastes_detectpastekind"
+      "source": "modal_prompt_prompt_initpromptcomposer",
+      "target": "attachments_pastes_detectpastekind",
+      "confidence_score": 1.0
     },
     {
       "relation": "re_exports",
@@ -30364,11 +30927,11 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/my-cli/webview/tools/modal-prompt/prompt.ts",
-      "source_location": "L328",
+      "source_location": "L339",
       "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "modal_prompt_prompt_initprompttabs",
-      "target": "attachments_pastes_expandpastemarkers"
+      "source": "modal_prompt_prompt_initpromptcomposer",
+      "target": "attachments_pastes_expandpastemarkers",
+      "confidence_score": 1.0
     },
     {
       "relation": "re_exports",
@@ -30397,11 +30960,11 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/my-cli/webview/tools/modal-prompt/prompt.ts",
-      "source_location": "L292",
+      "source_location": "L303",
       "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "modal_prompt_prompt_initprompttabs",
-      "target": "attachments_pastes_protectpastemarkers"
+      "source": "modal_prompt_prompt_initpromptcomposer",
+      "target": "attachments_pastes_protectpastemarkers",
+      "confidence_score": 1.0
     },
     {
       "relation": "re_exports",
@@ -30430,11 +30993,11 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/my-cli/webview/tools/modal-prompt/prompt.ts",
-      "source_location": "L297",
+      "source_location": "L308",
       "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "modal_prompt_prompt_initprompttabs",
-      "target": "attachments_pastes_restorepastemarkers"
+      "source": "modal_prompt_prompt_initpromptcomposer",
+      "target": "attachments_pastes_restorepastemarkers",
+      "confidence_score": 1.0
     },
     {
       "relation": "re_exports",
@@ -30859,6 +31422,17 @@
       "relation": "imports_from",
       "context": "import",
       "confidence": "EXTRACTED",
+      "source_file": "src/my-cli/webview/tools/modal-prompt/language-select.ts",
+      "source_location": "L16",
+      "weight": 1.0,
+      "source": "modal_prompt_language_select",
+      "target": "prompt_index",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
       "source_file": "src/my-cli/webview/tools/modal-prompt/lowercase-input.ts",
       "source_location": "L8",
       "weight": 1.0,
@@ -30903,12 +31477,100 @@
       "relation": "imports_from",
       "context": "import",
       "confidence": "EXTRACTED",
+      "source_file": "src/my-cli/webview/tools/modal-prompt/spell-suggest.ts",
+      "source_location": "L16",
+      "weight": 1.0,
+      "source": "modal_prompt_spell_suggest",
+      "target": "prompt_index",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/my-cli/webview/tools/modal-translator/translator.ts",
+      "source_location": "L12",
+      "weight": 1.0,
+      "source": "modal_translator_translator",
+      "target": "prompt_index",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
       "source_file": "src/my-cli/webview/panel-terminal/terminal.ts",
       "source_location": "L14",
       "weight": 1.0,
       "confidence_score": 1.0,
       "source": "panel_terminal_terminal",
       "target": "prompt_index"
+    },
+    {
+      "relation": "re_exports",
+      "context": "export",
+      "confidence": "EXTRACTED",
+      "source_file": "src/my-cli/shared/prompt/index.ts",
+      "source_location": "L54",
+      "weight": 1.0,
+      "source": "prompt_index",
+      "target": "prompt_languages",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "re_exports",
+      "context": "re-export",
+      "confidence": "EXTRACTED",
+      "source_file": "src/my-cli/shared/prompt/index.ts",
+      "source_location": "L54",
+      "weight": 1.0,
+      "source": "prompt_index",
+      "target": "prompt_languages_getpromptlanguage",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "re_exports",
+      "context": "re-export",
+      "confidence": "EXTRACTED",
+      "source_file": "src/my-cli/shared/prompt/index.ts",
+      "source_location": "L54",
+      "weight": 1.0,
+      "source": "prompt_index",
+      "target": "prompt_languages_ispromptlang",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "re_exports",
+      "context": "re-export",
+      "confidence": "EXTRACTED",
+      "source_file": "src/my-cli/shared/prompt/index.ts",
+      "source_location": "L54",
+      "weight": 1.0,
+      "source": "prompt_index",
+      "target": "prompt_languages_prompt_languages",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "re_exports",
+      "context": "re-export",
+      "confidence": "EXTRACTED",
+      "source_file": "src/my-cli/shared/prompt/index.ts",
+      "source_location": "L60",
+      "weight": 1.0,
+      "source": "prompt_index",
+      "target": "prompt_languages_promptlang",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "re_exports",
+      "context": "re-export",
+      "confidence": "EXTRACTED",
+      "source_file": "src/my-cli/shared/prompt/index.ts",
+      "source_location": "L60",
+      "weight": 1.0,
+      "source": "prompt_index",
+      "target": "prompt_languages_promptlanguage",
+      "confidence_score": 1.0
     },
     {
       "relation": "re_exports",
@@ -31133,6 +31795,187 @@
     {
       "relation": "contains",
       "confidence": "EXTRACTED",
+      "source_file": "src/my-cli/shared/prompt/languages.ts",
+      "source_location": "L44",
+      "weight": 1.0,
+      "source": "prompt_languages",
+      "target": "prompt_languages_bycode",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/my-cli/shared/prompt/languages.ts",
+      "source_location": "L50",
+      "weight": 1.0,
+      "source": "prompt_languages",
+      "target": "prompt_languages_getpromptlanguage",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/my-cli/shared/prompt/languages.ts",
+      "source_location": "L46",
+      "weight": 1.0,
+      "source": "prompt_languages",
+      "target": "prompt_languages_ispromptlang",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/my-cli/shared/prompt/languages.ts",
+      "source_location": "L34",
+      "weight": 1.0,
+      "source": "prompt_languages",
+      "target": "prompt_languages_prompt_languages",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/my-cli/shared/prompt/languages.ts",
+      "source_location": "L18",
+      "weight": 1.0,
+      "source": "prompt_languages",
+      "target": "prompt_languages_promptlang",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/my-cli/shared/prompt/languages.ts",
+      "source_location": "L20",
+      "weight": 1.0,
+      "source": "prompt_languages",
+      "target": "prompt_languages_promptlanguage",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/my-cli/webview/tools/modal-prompt/language-select.ts",
+      "source_location": "L16",
+      "weight": 1.0,
+      "source": "modal_prompt_language_select",
+      "target": "prompt_languages_promptlang",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "context": "field",
+      "confidence": "EXTRACTED",
+      "source_file": "src/my-cli/webview/tools/modal-prompt/language-select.ts",
+      "source_location": "L22",
+      "weight": 1.0,
+      "source": "modal_prompt_language_select_languageselectcontroller",
+      "target": "prompt_languages_promptlang",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/my-cli/webview/tools/modal-prompt/prompt.ts",
+      "source_location": "L3",
+      "weight": 1.0,
+      "source": "modal_prompt_prompt",
+      "target": "prompt_languages_promptlang",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/my-cli/webview/tools/modal-prompt/language-select.ts",
+      "source_location": "L16",
+      "weight": 1.0,
+      "source": "modal_prompt_language_select",
+      "target": "prompt_languages_prompt_languages",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/my-cli/webview/tools/modal-prompt/language-select.ts",
+      "source_location": "L16",
+      "weight": 1.0,
+      "source": "modal_prompt_language_select",
+      "target": "prompt_languages_ispromptlang",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "src/my-cli/webview/tools/modal-prompt/language-select.ts",
+      "source_location": "L32",
+      "weight": 1.0,
+      "source": "modal_prompt_language_select_getstoredpromptlang",
+      "target": "prompt_languages_ispromptlang"
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/my-cli/webview/tools/modal-prompt/language-select.ts",
+      "source_location": "L16",
+      "weight": 1.0,
+      "source": "modal_prompt_language_select",
+      "target": "prompt_languages_getpromptlanguage",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/my-cli/webview/tools/modal-prompt/prompt.ts",
+      "source_location": "L3",
+      "weight": 1.0,
+      "source": "modal_prompt_prompt",
+      "target": "prompt_languages_getpromptlanguage",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src/my-cli/webview/tools/modal-prompt/prompt.ts",
+      "source_location": "L290",
+      "weight": 1.0,
+      "source": "modal_prompt_prompt_initpromptcomposer",
+      "target": "prompt_languages_getpromptlanguage",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/my-cli/webview/tools/modal-translator/translator.ts",
+      "source_location": "L12",
+      "weight": 1.0,
+      "source": "modal_translator_translator",
+      "target": "prompt_languages_getpromptlanguage",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src/my-cli/webview/tools/modal-translator/translator.ts",
+      "source_location": "L228",
+      "weight": 1.0,
+      "source": "modal_translator_translator_initializetranslator",
+      "target": "prompt_languages_getpromptlanguage",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
       "source_file": "src/my-cli/shared/prompt/prompt-processor.ts",
       "source_location": "L16",
       "weight": 1.0,
@@ -31176,11 +32019,11 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/my-cli/webview/tools/modal-prompt/prompt.ts",
-      "source_location": "L340",
+      "source_location": "L351",
       "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "modal_prompt_prompt_initprompttabs",
-      "target": "prompt_prompt_processor_processprompt"
+      "source": "modal_prompt_prompt_initpromptcomposer",
+      "target": "prompt_prompt_processor_processprompt",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -31241,11 +32084,11 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/my-cli/webview/tools/modal-prompt/prompt.ts",
-      "source_location": "L295",
+      "source_location": "L306",
       "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "modal_prompt_prompt_initprompttabs",
-      "target": "prompt_prompt_translate_client_translateprompttext"
+      "source": "modal_prompt_prompt_initpromptcomposer",
+      "target": "prompt_prompt_translate_client_translateprompttext",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -31507,11 +32350,11 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/my-cli/webview/tools/modal-prompt/prompt.ts",
-      "source_location": "L324",
+      "source_location": "L335",
       "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "modal_prompt_prompt_initprompttabs",
-      "target": "prompt_skills_expandskillstoken"
+      "source": "modal_prompt_prompt_initpromptcomposer",
+      "target": "prompt_skills_expandskillstoken",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -31555,6 +32398,28 @@
       "confidence_score": 1.0,
       "source": "modal_prompt_prompt_context",
       "target": "prompt_spellcheck_types_spellissue"
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/my-cli/webview/tools/modal-prompt/spell-suggest.ts",
+      "source_location": "L16",
+      "weight": 1.0,
+      "source": "modal_prompt_spell_suggest",
+      "target": "prompt_spellcheck_types_spellissue",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "context": "field",
+      "confidence": "EXTRACTED",
+      "source_file": "src/my-cli/webview/tools/modal-prompt/spell-suggest.ts",
+      "source_location": "L23",
+      "weight": 1.0,
+      "source": "modal_prompt_spell_suggest_spellsuggestoptions",
+      "target": "prompt_spellcheck_types_spellissue",
+      "confidence_score": 1.0
     },
     {
       "relation": "imports",
@@ -34193,6 +35058,16 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/my-cli/webview/panel-terminal/terminal.ts",
+      "source_location": "L454",
+      "weight": 1.0,
+      "source": "panel_terminal_terminal",
+      "target": "panel_terminal_terminal_voicereadyrpc",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/my-cli/webview/panel-terminal/terminal.ts",
       "source_location": "L41",
       "weight": 1.0,
       "confidence_score": 1.0,
@@ -34825,11 +35700,11 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/my-cli/webview/tools/modal-prompt/prompt.ts",
-      "source_location": "L310",
+      "source_location": "L321",
       "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "modal_prompt_prompt_initprompttabs",
-      "target": "modal_prompt_attachments_ui_getreferencedimageattachments"
+      "source": "modal_prompt_prompt_initpromptcomposer",
+      "target": "modal_prompt_attachments_ui_getreferencedimageattachments",
+      "confidence_score": 1.0
     },
     {
       "relation": "calls",
@@ -34869,11 +35744,11 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/my-cli/webview/tools/modal-prompt/prompt.ts",
-      "source_location": "L241",
+      "source_location": "L250",
       "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "modal_prompt_prompt_initprompttabs",
-      "target": "modal_prompt_attachments_ui_handleimagemarkerdeletekey"
+      "source": "modal_prompt_prompt_initpromptcomposer",
+      "target": "modal_prompt_attachments_ui_handleimagemarkerdeletekey",
+      "confidence_score": 1.0
     },
     {
       "relation": "imports",
@@ -34885,6 +35760,72 @@
       "confidence_score": 1.0,
       "source": "modal_prompt_prompt",
       "target": "modal_prompt_attachments_ui_handleimagemarkerarrowkey"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src/my-cli/webview/tools/modal-prompt/prompt.ts",
+      "source_location": "L251",
+      "weight": 1.0,
+      "source": "modal_prompt_prompt_initpromptcomposer",
+      "target": "modal_prompt_attachments_ui_handleimagemarkerarrowkey",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/my-cli/webview/tools/modal-prompt/prompt.ts",
+      "source_location": "L29",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "modal_prompt_prompt",
+      "target": "modal_prompt_attachments_ui_getimagetypefrompath"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src/my-cli/webview/tools/modal-prompt/prompt.ts",
+      "source_location": "L211",
+      "weight": 1.0,
+      "source": "modal_prompt_prompt_initpromptcomposer",
+      "target": "modal_prompt_attachments_ui_getimagetypefrompath",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/my-cli/webview/tools/modal-prompt/prompt.ts",
+      "source_location": "L29",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "modal_prompt_prompt",
+      "target": "modal_prompt_attachments_ui_getpathbasename"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src/my-cli/webview/tools/modal-prompt/prompt.ts",
+      "source_location": "L212",
+      "weight": 1.0,
+      "source": "modal_prompt_prompt_initpromptcomposer",
+      "target": "modal_prompt_attachments_ui_getpathbasename",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/my-cli/webview/tools/modal-prompt/prompt.ts",
+      "source_location": "L29",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "modal_prompt_prompt",
+      "target": "modal_prompt_attachments_ui_setupimagepaste"
     },
     {
       "relation": "calls",
@@ -34893,75 +35834,9 @@
       "source_file": "src/my-cli/webview/tools/modal-prompt/prompt.ts",
       "source_location": "L242",
       "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "modal_prompt_prompt_initprompttabs",
-      "target": "modal_prompt_attachments_ui_handleimagemarkerarrowkey"
-    },
-    {
-      "relation": "imports",
-      "context": "import",
-      "confidence": "EXTRACTED",
-      "source_file": "src/my-cli/webview/tools/modal-prompt/prompt.ts",
-      "source_location": "L29",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "modal_prompt_prompt",
-      "target": "modal_prompt_attachments_ui_getimagetypefrompath"
-    },
-    {
-      "relation": "calls",
-      "context": "call",
-      "confidence": "EXTRACTED",
-      "source_file": "src/my-cli/webview/tools/modal-prompt/prompt.ts",
-      "source_location": "L202",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "modal_prompt_prompt_initprompttabs",
-      "target": "modal_prompt_attachments_ui_getimagetypefrompath"
-    },
-    {
-      "relation": "imports",
-      "context": "import",
-      "confidence": "EXTRACTED",
-      "source_file": "src/my-cli/webview/tools/modal-prompt/prompt.ts",
-      "source_location": "L29",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "modal_prompt_prompt",
-      "target": "modal_prompt_attachments_ui_getpathbasename"
-    },
-    {
-      "relation": "calls",
-      "context": "call",
-      "confidence": "EXTRACTED",
-      "source_file": "src/my-cli/webview/tools/modal-prompt/prompt.ts",
-      "source_location": "L203",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "modal_prompt_prompt_initprompttabs",
-      "target": "modal_prompt_attachments_ui_getpathbasename"
-    },
-    {
-      "relation": "imports",
-      "context": "import",
-      "confidence": "EXTRACTED",
-      "source_file": "src/my-cli/webview/tools/modal-prompt/prompt.ts",
-      "source_location": "L29",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "modal_prompt_prompt",
-      "target": "modal_prompt_attachments_ui_setupimagepaste"
-    },
-    {
-      "relation": "calls",
-      "context": "call",
-      "confidence": "EXTRACTED",
-      "source_file": "src/my-cli/webview/tools/modal-prompt/prompt.ts",
-      "source_location": "L233",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "modal_prompt_prompt_initprompttabs",
-      "target": "modal_prompt_attachments_ui_setupimagepaste"
+      "source": "modal_prompt_prompt_initpromptcomposer",
+      "target": "modal_prompt_attachments_ui_setupimagepaste",
+      "confidence_score": 1.0
     },
     {
       "relation": "imports",
@@ -34979,11 +35854,11 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/my-cli/webview/tools/modal-prompt/prompt.ts",
-      "source_location": "L237",
+      "source_location": "L246",
       "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "modal_prompt_prompt_initprompttabs",
-      "target": "modal_prompt_attachments_ui_setuppastecollapse"
+      "source": "modal_prompt_prompt_initpromptcomposer",
+      "target": "modal_prompt_attachments_ui_setuppastecollapse",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -35125,11 +36000,11 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/my-cli/webview/tools/modal-prompt/prompt.ts",
-      "source_location": "L332",
+      "source_location": "L343",
       "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "modal_prompt_prompt_initprompttabs",
-      "target": "file_mention_file_mention_resolvefilementionaliases"
+      "source": "modal_prompt_prompt_initpromptcomposer",
+      "target": "file_mention_file_mention_resolvefilementionaliases",
+      "confidence_score": 1.0
     },
     {
       "relation": "calls",
@@ -35180,11 +36055,11 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/my-cli/webview/tools/modal-prompt/prompt.ts",
-      "source_location": "L129",
+      "source_location": "L133",
       "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "modal_prompt_prompt_initprompttabs",
-      "target": "file_mention_file_mention_mountfilementionpicker"
+      "source": "modal_prompt_prompt_initpromptcomposer",
+      "target": "file_mention_file_mention_mountfilementionpicker",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -35360,11 +36235,11 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/my-cli/webview/tools/modal-prompt/prompt.ts",
-      "source_location": "L428",
+      "source_location": "L434",
       "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "modal_prompt_prompt_initprompttabs",
-      "target": "modal_prompt_highlight_updatepromptimagehighlight"
+      "source": "modal_prompt_prompt_initpromptcomposer",
+      "target": "modal_prompt_highlight_updatepromptimagehighlight",
+      "confidence_score": 1.0
     },
     {
       "relation": "calls",
@@ -35376,6 +36251,123 @@
       "confidence_score": 1.0,
       "source": "modal_prompt_highlight_buildprompthighlightnodes",
       "target": "modal_prompt_highlight_appendsegment"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/my-cli/webview/tools/modal-prompt/language-select.ts",
+      "source_location": "L29",
+      "weight": 1.0,
+      "source": "modal_prompt_language_select",
+      "target": "modal_prompt_language_select_getstoredpromptlang",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/my-cli/webview/tools/modal-prompt/language-select.ts",
+      "source_location": "L46",
+      "weight": 1.0,
+      "source": "modal_prompt_language_select",
+      "target": "modal_prompt_language_select_initlanguageselect",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/my-cli/webview/tools/modal-prompt/language-select.ts",
+      "source_location": "L20",
+      "weight": 1.0,
+      "source": "modal_prompt_language_select",
+      "target": "modal_prompt_language_select_languageselectcontroller",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/my-cli/webview/tools/modal-prompt/language-select.ts",
+      "source_location": "L38",
+      "weight": 1.0,
+      "source": "modal_prompt_language_select",
+      "target": "modal_prompt_language_select_persistlang",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/my-cli/webview/tools/modal-prompt/prompt.ts",
+      "source_location": "L28",
+      "weight": 1.0,
+      "source": "modal_prompt_prompt",
+      "target": "modal_prompt_language_select",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/my-cli/webview/tools/modal-translator/translator.ts",
+      "source_location": "L11",
+      "weight": 1.0,
+      "source": "modal_translator_translator",
+      "target": "modal_prompt_language_select",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src/my-cli/webview/tools/modal-prompt/language-select.ts",
+      "source_location": "L51",
+      "weight": 1.0,
+      "source": "modal_prompt_language_select_initlanguageselect",
+      "target": "modal_prompt_language_select_getstoredpromptlang",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/my-cli/webview/tools/modal-translator/translator.ts",
+      "source_location": "L11",
+      "weight": 1.0,
+      "source": "modal_translator_translator",
+      "target": "modal_prompt_language_select_getstoredpromptlang",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src/my-cli/webview/tools/modal-translator/translator.ts",
+      "source_location": "L227",
+      "weight": 1.0,
+      "source": "modal_translator_translator_initializetranslator",
+      "target": "modal_prompt_language_select_getstoredpromptlang",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/my-cli/webview/tools/modal-prompt/prompt.ts",
+      "source_location": "L28",
+      "weight": 1.0,
+      "source": "modal_prompt_prompt",
+      "target": "modal_prompt_language_select_initlanguageselect",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src/my-cli/webview/tools/modal-prompt/prompt.ts",
+      "source_location": "L555",
+      "weight": 1.0,
+      "source": "modal_prompt_prompt_initpromptcomposer",
+      "target": "modal_prompt_language_select_initlanguageselect",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -35424,11 +36416,11 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/my-cli/webview/tools/modal-prompt/prompt.ts",
-      "source_location": "L119",
+      "source_location": "L123",
       "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "modal_prompt_prompt_initprompttabs",
-      "target": "modal_prompt_lowercase_input_enforcelowercaseinput"
+      "source": "modal_prompt_prompt_initpromptcomposer",
+      "target": "modal_prompt_lowercase_input_enforcelowercaseinput",
+      "confidence_score": 1.0
     },
     {
       "relation": "re_exports",
@@ -35541,11 +36533,11 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/my-cli/webview/tools/modal-prompt/prompt.ts",
-      "source_location": "L102",
+      "source_location": "L107",
       "weight": 1.0,
-      "confidence_score": 1.0,
       "source": "modal_prompt_prompt",
-      "target": "modal_prompt_prompt_initprompttabs"
+      "target": "modal_prompt_prompt_initpromptcomposer",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -35698,6 +36690,28 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "src/my-cli/webview/tools/modal-prompt/prompt.ts",
+      "source_location": "L29",
+      "weight": 1.0,
+      "source": "modal_prompt_prompt",
+      "target": "modal_prompt_spell_suggest",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/my-cli/webview/tools/modal-prompt/prompt.ts",
+      "source_location": "L29",
+      "weight": 1.0,
+      "source": "modal_prompt_prompt",
+      "target": "modal_prompt_spell_suggest_initspellsuggest",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/my-cli/webview/tools/modal-prompt/prompt.ts",
       "source_location": "L27",
       "weight": 1.0,
       "confidence_score": 1.0,
@@ -35742,11 +36756,11 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/my-cli/webview/tools/modal-prompt/prompt.ts",
-      "source_location": "L99",
+      "source_location": "L104",
       "weight": 1.0,
-      "confidence_score": 1.0,
       "source": "modal_prompt_prompt_mountpromptpanel",
-      "target": "modal_prompt_prompt_initprompttabs"
+      "target": "modal_prompt_prompt_initpromptcomposer",
+      "confidence_score": 1.0
     },
     {
       "relation": "calls",
@@ -35775,99 +36789,110 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/my-cli/webview/tools/modal-prompt/prompt.ts",
-      "source_location": "L407",
+      "source_location": "L413",
       "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "modal_prompt_prompt_initprompttabs",
-      "target": "modal_prompt_prompt_initrunbutton"
+      "source": "modal_prompt_prompt_initpromptcomposer",
+      "target": "modal_prompt_prompt_initrunbutton",
+      "confidence_score": 1.0
     },
     {
       "relation": "calls",
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/my-cli/webview/tools/modal-prompt/prompt.ts",
-      "source_location": "L408",
+      "source_location": "L414",
       "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "modal_prompt_prompt_initprompttabs",
-      "target": "modal_prompt_prompt_initsendshortcut"
+      "source": "modal_prompt_prompt_initpromptcomposer",
+      "target": "modal_prompt_prompt_initsendshortcut",
+      "confidence_score": 1.0
     },
     {
       "relation": "calls",
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/my-cli/webview/tools/modal-prompt/prompt.ts",
-      "source_location": "L392",
+      "source_location": "L398",
       "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "modal_prompt_prompt_initprompttabs",
-      "target": "modal_prompt_prompt_initstricttoggle"
+      "source": "modal_prompt_prompt_initpromptcomposer",
+      "target": "modal_prompt_prompt_initstricttoggle",
+      "confidence_score": 1.0
     },
     {
       "relation": "calls",
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/my-cli/webview/tools/modal-prompt/prompt.ts",
-      "source_location": "L382",
+      "source_location": "L388",
       "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "modal_prompt_prompt_initprompttabs",
-      "target": "modal_prompt_prompt_inittoolbaractions"
+      "source": "modal_prompt_prompt_initpromptcomposer",
+      "target": "modal_prompt_prompt_inittoolbaractions",
+      "confidence_score": 1.0
     },
     {
       "relation": "calls",
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/my-cli/webview/tools/modal-prompt/prompt.ts",
-      "source_location": "L411",
+      "source_location": "L417",
       "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "modal_prompt_prompt_initprompttabs",
-      "target": "modal_prompt_prompt_updatecharcount"
+      "source": "modal_prompt_prompt_initpromptcomposer",
+      "target": "modal_prompt_prompt_updatecharcount",
+      "confidence_score": 1.0
     },
     {
       "relation": "calls",
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/my-cli/webview/tools/modal-prompt/prompt.ts",
-      "source_location": "L258",
+      "source_location": "L267",
       "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "modal_prompt_prompt_initprompttabs",
-      "target": "modal_prompt_session_state_shownosessionmessage"
+      "source": "modal_prompt_prompt_initpromptcomposer",
+      "target": "modal_prompt_session_state_shownosessionmessage",
+      "confidence_score": 1.0
     },
     {
       "relation": "calls",
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/my-cli/webview/tools/modal-prompt/prompt.ts",
-      "source_location": "L379",
+      "source_location": "L385",
       "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "modal_prompt_prompt_initprompttabs",
-      "target": "modal_prompt_skills_chips_initskillschips"
+      "source": "modal_prompt_prompt_initpromptcomposer",
+      "target": "modal_prompt_skills_chips_initskillschips",
+      "confidence_score": 1.0
     },
     {
       "relation": "calls",
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/my-cli/webview/tools/modal-prompt/prompt.ts",
-      "source_location": "L324",
+      "source_location": "L335",
       "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "modal_prompt_prompt_initprompttabs",
-      "target": "modal_prompt_skills_chips_isclaudesession"
+      "source": "modal_prompt_prompt_initpromptcomposer",
+      "target": "modal_prompt_skills_chips_isclaudesession",
+      "confidence_score": 1.0
     },
     {
       "relation": "calls",
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/my-cli/webview/tools/modal-prompt/prompt.ts",
-      "source_location": "L172",
+      "source_location": "L524",
       "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "modal_prompt_prompt_initprompttabs",
-      "target": "modal_prompt_textarea_history_setupundohistory"
+      "source": "modal_prompt_prompt_initpromptcomposer",
+      "target": "modal_prompt_spell_suggest_initspellsuggest",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src/my-cli/webview/tools/modal-prompt/prompt.ts",
+      "source_location": "L181",
+      "weight": 1.0,
+      "source": "modal_prompt_prompt_initpromptcomposer",
+      "target": "modal_prompt_textarea_history_setupundohistory",
+      "confidence_score": 1.0
     },
     {
       "relation": "calls",
@@ -35934,6 +36959,77 @@
     {
       "relation": "contains",
       "confidence": "EXTRACTED",
+      "source_file": "src/my-cli/webview/tools/modal-prompt/spell-suggest.ts",
+      "source_location": "L81",
+      "weight": 1.0,
+      "source": "modal_prompt_spell_suggest",
+      "target": "modal_prompt_spell_suggest_applyfix",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/my-cli/webview/tools/modal-prompt/spell-suggest.ts",
+      "source_location": "L28",
+      "weight": 1.0,
+      "source": "modal_prompt_spell_suggest",
+      "target": "modal_prompt_spell_suggest_initspellsuggest",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/my-cli/webview/tools/modal-prompt/spell-suggest.ts",
+      "source_location": "L115",
+      "weight": 1.0,
+      "source": "modal_prompt_spell_suggest",
+      "target": "modal_prompt_spell_suggest_isovermisspelled",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/my-cli/webview/tools/modal-prompt/spell-suggest.ts",
+      "source_location": "L107",
+      "weight": 1.0,
+      "source": "modal_prompt_spell_suggest",
+      "target": "modal_prompt_spell_suggest_matchleadingcase",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/my-cli/webview/tools/modal-prompt/spell-suggest.ts",
+      "source_location": "L129",
+      "weight": 1.0,
+      "source": "modal_prompt_spell_suggest",
+      "target": "modal_prompt_spell_suggest_shownote",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/my-cli/webview/tools/modal-prompt/spell-suggest.ts",
+      "source_location": "L18",
+      "weight": 1.0,
+      "source": "modal_prompt_spell_suggest",
+      "target": "modal_prompt_spell_suggest_spellsuggestoptions",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src/my-cli/webview/tools/modal-prompt/spell-suggest.ts",
+      "source_location": "L94",
+      "weight": 1.0,
+      "source": "modal_prompt_spell_suggest_applyfix",
+      "target": "modal_prompt_spell_suggest_matchleadingcase",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
       "source_file": "src/my-cli/webview/tools/modal-prompt/textarea-history.ts",
       "source_location": "L9",
       "weight": 1.0,
@@ -35955,11 +37051,11 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/my-cli/webview/tools/modal-translator/browser-terminal-translator.ts",
-      "source_location": "L111",
+      "source_location": "L113",
       "weight": 1.0,
-      "confidence_score": 1.0,
       "source": "modal_translator_browser_terminal_translator",
-      "target": "modal_translator_browser_terminal_translator_translateentospanish"
+      "target": "modal_translator_browser_terminal_translator_translateento",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -36019,20 +37115,20 @@
       "source_file": "src/my-cli/webview/tools/modal-translator/translator.ts",
       "source_location": "L6",
       "weight": 1.0,
-      "confidence_score": 1.0,
       "source": "modal_translator_translator",
-      "target": "modal_translator_browser_terminal_translator_translateentospanish"
+      "target": "modal_translator_browser_terminal_translator_translateento",
+      "confidence_score": 1.0
     },
     {
       "relation": "calls",
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/my-cli/webview/tools/modal-translator/translator.ts",
-      "source_location": "L225",
+      "source_location": "L257",
       "weight": 1.0,
-      "confidence_score": 1.0,
       "source": "modal_translator_translator_initializetranslator",
-      "target": "modal_translator_browser_terminal_translator_translateentospanish"
+      "target": "modal_translator_browser_terminal_translator_translateento",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -68235,9 +69331,9 @@
       "source_file": ".f1/GRAPH_REPORT.md",
       "source_location": "L1",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "f1_graph_report",
-      "target": "f1_graph_report_graph_report_f1_2026_06_21",
-      "confidence_score": 1.0
+      "target": "f1_graph_report_graph_report_f1_2026_06_21"
     },
     {
       "relation": "contains",
@@ -68245,9 +69341,9 @@
       "source_file": ".f1/GRAPH_REPORT.md",
       "source_location": "L158",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "f1_graph_report_graph_report_f1_2026_06_21",
-      "target": "f1_graph_report_communities_123_total_15_thin_omitted",
-      "confidence_score": 1.0
+      "target": "f1_graph_report_communities_123_total_15_thin_omitted"
     },
     {
       "relation": "contains",
@@ -68255,9 +69351,9 @@
       "source_file": ".f1/GRAPH_REPORT.md",
       "source_location": "L17",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "f1_graph_report_graph_report_f1_2026_06_21",
-      "target": "f1_graph_report_community_hubs_navigation",
-      "confidence_score": 1.0
+      "target": "f1_graph_report_community_hubs_navigation"
     },
     {
       "relation": "contains",
@@ -68265,9 +69361,9 @@
       "source_file": ".f1/GRAPH_REPORT.md",
       "source_location": "L3",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "f1_graph_report_graph_report_f1_2026_06_21",
-      "target": "f1_graph_report_corpus_check",
-      "confidence_score": 1.0
+      "target": "f1_graph_report_corpus_check"
     },
     {
       "relation": "contains",
@@ -68275,9 +69371,9 @@
       "source_file": ".f1/GRAPH_REPORT.md",
       "source_location": "L131",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "f1_graph_report_graph_report_f1_2026_06_21",
-      "target": "f1_graph_report_god_nodes_most_connected_your_core_abstractions",
-      "confidence_score": 1.0
+      "target": "f1_graph_report_god_nodes_most_connected_your_core_abstractions"
     },
     {
       "relation": "contains",
@@ -68285,9 +69381,9 @@
       "source_file": ".f1/GRAPH_REPORT.md",
       "source_location": "L12",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "f1_graph_report_graph_report_f1_2026_06_21",
-      "target": "f1_graph_report_graph_freshness",
-      "confidence_score": 1.0
+      "target": "f1_graph_report_graph_freshness"
     },
     {
       "relation": "contains",
@@ -68295,9 +69391,9 @@
       "source_file": ".f1/GRAPH_REPORT.md",
       "source_location": "L155",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "f1_graph_report_graph_report_f1_2026_06_21",
-      "target": "f1_graph_report_import_cycles",
-      "confidence_score": 1.0
+      "target": "f1_graph_report_import_cycles"
     },
     {
       "relation": "contains",
@@ -68305,9 +69401,9 @@
       "source_file": ".f1/GRAPH_REPORT.md",
       "source_location": "L548",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "f1_graph_report_graph_report_f1_2026_06_21",
-      "target": "f1_graph_report_knowledge_gaps",
-      "confidence_score": 1.0
+      "target": "f1_graph_report_knowledge_gaps"
     },
     {
       "relation": "contains",
@@ -68315,9 +69411,9 @@
       "source_file": ".f1/GRAPH_REPORT.md",
       "source_location": "L553",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "f1_graph_report_graph_report_f1_2026_06_21",
-      "target": "f1_graph_report_suggested_questions",
-      "confidence_score": 1.0
+      "target": "f1_graph_report_suggested_questions"
     },
     {
       "relation": "contains",
@@ -68325,9 +69421,9 @@
       "source_file": ".f1/GRAPH_REPORT.md",
       "source_location": "L7",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "f1_graph_report_graph_report_f1_2026_06_21",
-      "target": "f1_graph_report_summary",
-      "confidence_score": 1.0
+      "target": "f1_graph_report_summary"
     },
     {
       "relation": "contains",
@@ -68335,9 +69431,9 @@
       "source_file": ".f1/GRAPH_REPORT.md",
       "source_location": "L143",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "f1_graph_report_graph_report_f1_2026_06_21",
-      "target": "f1_graph_report_surprising_connections_you_probably_didn_t_know_these",
-      "confidence_score": 1.0
+      "target": "f1_graph_report_surprising_connections_you_probably_didn_t_know_these"
     },
     {
       "relation": "contains",
@@ -69861,5 +70957,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "e4674a5de659ca7afbad21ffa083e67459e7537d"
+  "built_at_commit": "3e4499092aa7812343ee1d550b1d9ef6c485dda4"
 }
