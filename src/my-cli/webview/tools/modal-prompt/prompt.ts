@@ -26,6 +26,7 @@ import {
 } from '../../../shared/prompt';
 import { mountFileMentionPicker, resolveFileMentionAliases } from './components/file-mention/file-mention';
 import { initLanguageSelect } from './language-select';
+import { initSpellSuggest } from './spell-suggest';
 import type { PromptContext } from './prompt-context';
 import { setupUndoHistory } from './textarea-history';
 import { enforceLowercaseInput } from './lowercase-input';
@@ -517,6 +518,14 @@ function initPromptComposer(host: HTMLElement, context: PromptContext, hasActive
 	requestAnimationFrame(() => {
 		adjustHeight();
 		renderHighlight();
+	});
+
+	// Alt-click a red word → apply its top correction; Alt-hover → pointer cursor.
+	initSpellSuggest({
+		textarea,
+		highlight,
+		getSpellIssues: () => spellIssues,
+		onApplied: rerunSpellcheck,
 	});
 
 	// ── Language gate ────────────────────────────────────────────────

@@ -1,4 +1,10 @@
 export const PERSONAL_MISTAKES: Record<string, string> = {
+    // New world
+	'manana': 'mañana',
+
+
+
+
 	// Common shorthand and abbreviations
 	'ue': 'que',
 	'eu': 'que',

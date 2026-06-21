@@ -813,6 +813,32 @@
   background-size: 6px 3px;
 }
 
+/* Ephemeral "No suggestions" note shown at the click point when an Alt-click
+   finds no correction for a red word. Fixed to the viewport, auto-dismisses. */
+.prompt-spell-note {
+  position: fixed;
+  z-index: 1000;
+  transform: translate(-50%, -135%);
+  padding: 3px 8px;
+  font-family: 'Syne', sans-serif;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: var(--vscode-descriptionForeground);
+  background: var(--vscode-editor-background);
+  border: 0.5px solid var(--vscode-editorGroup-border);
+  border-radius: 6px;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.4);
+  pointer-events: none;
+  white-space: nowrap;
+  animation: prompt-spell-note-in 0.12s ease;
+}
+
+@keyframes prompt-spell-note-in {
+  from { opacity: 0; transform: translate(-50%, -120%); }
+  to   { opacity: 1; transform: translate(-50%, -135%); }
+}
+
 .prompt-char-count {
   position: absolute;
   bottom: 10px;

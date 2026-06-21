@@ -68,6 +68,10 @@ function getFixnow(): Promise<FixnowModule> {
 // character-based and has no trie, so it falls through to "no marking".
 const SUPPORTED_LANGUAGES = new Set(['en', 'es', 'pt']);
 
+// Corrections attached per flagged word. The Alt-click fix applies the first one;
+// a few extras are kept cheaply in case a richer picker is added later.
+const SUGGESTION_LIMIT = 3;
+
 const normalizeLanguage = (lang: string | undefined): string => (lang ?? 'es').toLowerCase();
 
 /** Preload a dictionary so the first keystroke isn't slowed by trie decoding. */
@@ -108,7 +112,7 @@ export async function checkText(text: string, lang = 'es', strict = false): Prom
 		? (strict ? personalMistakeKeysStrict : personalMistakeKeysLenient)
 		: undefined;
 
-	return fixnow.checkText(text, {
+	const issues = await fixnow.checkText(text, {
 		// Narrowed by SUPPORTED_LANGUAGES above — all members are valid LanguageCodes.
 		language: language as LanguageCode,
 		// strict → accent-sensitive; lenient (default) → accept missing tildes.
@@ -116,5 +120,26 @@ export async function checkText(text: string, lang = 'es', strict = false): Prom
 		isProtectedWord: shouldProtectWord,
 		flagWords,
 		protectedSegments: [fixnow.DEFAULT_PROTECTED_PATTERN, F1_MARKERS],
+		// Attach corrections so the webview's Alt-click fix is an instant local
+		// replace. Cheap for prompt-sized text (only flagged words are scored).
+		suggestions: true,
+		maxSuggestions: SUGGESTION_LIMIT,
+	});
+
+	if (language !== 'es') {
+		return issues;
+	}
+
+	// Spanish: prefer the known personal-typo correction (e.g. "tb" → "también")
+	// at the top of the list, falling back to fixnow's dictionary suggestions.
+	return issues.map((issue) => {
+		const personal = PERSONAL_MISTAKES[issue.word.toLowerCase()];
+		if (!personal) {
+			return issue;
+		}
+		const rest = (issue.suggestions ?? []).filter(
+			(suggestion) => suggestion.toLowerCase() !== personal.toLowerCase()
+		);
+		return { ...issue, suggestions: [personal, ...rest] };
 	});
 }
