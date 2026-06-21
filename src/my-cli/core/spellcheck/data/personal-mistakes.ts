@@ -1,4 +1,9 @@
 export const PERSONAL_MISTAKES: Record<string, string> = {
+    // world 
+	'ideomas': 'idiomas',
+
+
+
     // New world ~
 	'manana': 'mañana',
 	'mananas': 'mañanas',
@@ -41,6 +46,7 @@ export const PERSONAL_MISTAKES: Record<string, string> = {
 
 
 	// Common shorthand and abbreviations
+	'loque': 'lo que',
 	'ue': 'que',
 	'quieroque': 'quiero que',
 	'eu': 'que',
