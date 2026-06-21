@@ -9,6 +9,12 @@ export const PERSONAL_MISTAKES: Record<string, string> = {
 	'deveria': 'deberia',
 	'deve': 'debe',
 	'usario': 'usuario',
+	'eliguio': 'eligió',
+	'alices': 'alices',
+	'seleciono': 'seleccionó',
+	'ahce': 'hace',
+	'selecionada': 'seleccionada',
+	'mejorez': 'mejores',
 
 
 
