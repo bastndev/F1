@@ -695,10 +695,11 @@ export class MyCliViewProvider implements vscode.WebviewViewProvider, vscode.Dis
 		}
 
 		const text = typeof message.text === 'string' ? message.text : '';
+		const lang = typeof message.lang === 'string' ? message.lang : 'es';
 		const strict = message.strict === true;
 
 		try {
-			const issues = await spellCheckText(text, strict);
+			const issues = await spellCheckText(text, lang, strict);
 			await webview.postMessage({
 				type: 'prompt.spellResult',
 				id: message.id,

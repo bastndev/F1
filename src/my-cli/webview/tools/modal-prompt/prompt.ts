@@ -21,8 +21,11 @@ import {
 	expandSkillsToken,
 	protectSkillTokens,
 	restoreSkillTokens,
+	getPromptLanguage,
+	type PromptLang,
 } from '../../../shared/prompt';
 import { mountFileMentionPicker, resolveFileMentionAliases } from './components/file-mention/file-mention';
+import { initLanguageSelect } from './language-select';
 import type { PromptContext } from './prompt-context';
 import { setupUndoHistory } from './textarea-history';
 import { enforceLowercaseInput } from './lowercase-input';
@@ -97,16 +100,15 @@ export const mountPromptPanel = (host: HTMLElement, context: PromptContext = { c
 
 	updateFooterModel(host, context, hasActiveSession);
 	initSessionState(host, hasActiveSession);
-	initPromptTabs(host, context, hasActiveSession);
+	initPromptComposer(host, context, hasActiveSession);
 };
 
-function initPromptTabs(host: HTMLElement, context: PromptContext, hasActiveSession: boolean) {
-	const tabs = host.querySelectorAll<HTMLElement>('.prompt-tab');
+function initPromptComposer(host: HTMLElement, context: PromptContext, hasActiveSession: boolean) {
 	const textarea = host.querySelector<HTMLTextAreaElement>('#promptInput');
 	const textareaWrap = host.querySelector<HTMLElement>('.prompt-textarea-wrap');
 	const highlight = host.querySelector<HTMLElement>('.prompt-textarea-highlight');
 
-	if (!tabs.length || !textarea) {
+	if (!textarea) {
 		return;
 	}
 
@@ -148,6 +150,11 @@ function initPromptTabs(host: HTMLElement, context: PromptContext, hasActiveSess
 	const pasteAttachments: PasteAttachment[] = savedDraft?.pasteAttachments ?? [];
 	let nextPasteAttachmentId = savedDraft?.nextPasteAttachmentId ?? 1;
 	let sendInFlight = false;
+
+	// The chosen source language (persisted by the picker). Drives translation
+	// source, spell-check language and toggle visibility. Undefined until the
+	// user picks one — typing stays locked until then.
+	let currentLang: PromptLang | undefined;
 
 	if (savedDraft?.text) {
 		textarea.value = savedDraft.text;
@@ -276,9 +283,11 @@ function initPromptTabs(host: HTMLElement, context: PromptContext, hasActiveSess
 
 		let textToSend = ta.value;
 
-		// Auto-translate (ES → EN) when the toggle is active.
+		// Auto-translate (<source> → EN) when the language translates and the
+		// toggle is active. English (translates:false) is sent verbatim.
 		// The textarea keeps the original text; the CLI receives the translation.
-		if (translateState.enabled && ctx.translatePrompt) {
+		const sourceLang = currentLang ? getPromptLanguage(currentLang) : undefined;
+		if (sourceLang?.translates && translateState.enabled && ctx.translatePrompt) {
 			setTranslating(true);
 			if (runBtn) {
 				runBtn.classList.add('is-translating');
@@ -293,7 +302,7 @@ function initPromptTabs(host: HTMLElement, context: PromptContext, hasActiveSess
 				const { text: pasteProtected, markers: pasteMarkers } = protectPasteMarkers(imageProtected);
 				const { text: skillProtected, tokens: skillTokens } = protectSkillTokens(pasteProtected);
 				const { text: protectedText, mentions } = protectMentions(skillProtected);
-				const result = await translatePromptText(protectedText, ctx);
+				const result = await translatePromptText(protectedText, ctx, currentLang);
 				const translated = result.text
 					? restoreImageMarkers(restorePasteMarkers(restoreSkillTokens(restoreMentions(result.text, mentions), skillTokens), pasteMarkers), markers)
 					: '';
@@ -361,15 +370,10 @@ function initPromptTabs(host: HTMLElement, context: PromptContext, hasActiveSess
 		}
 	}
 
-	// Single tab — set placeholder once
 	if (textareaWrap) {
 		textareaWrap.classList.remove('is-pro');
 	}
-	textarea.placeholder = 'Ask anything…';
-
-	requestAnimationFrame(() => {
-		textarea.focus();
-	});
+	// Placeholder + focus + textarea unlock are driven by the language gate below.
 
 	// Ordered selection of skills — updated as the user toggles chips. The
 	// textarea holds only the aggregate [Skills #N] count token; the actual
@@ -431,7 +435,10 @@ function initPromptTabs(host: HTMLElement, context: PromptContext, hasActiveSess
 	};
 
 	const runSpellcheck = () => {
-		if (!context.requestSpellcheck) {
+		// No checker, no language chosen, or a language without a dictionary
+		// (Chinese) → no spell marking.
+		const langInfo = currentLang ? getPromptLanguage(currentLang) : undefined;
+		if (!context.requestSpellcheck || !currentLang || !langInfo?.spellcheck) {
 			return;
 		}
 
@@ -441,7 +448,7 @@ function initPromptTabs(host: HTMLElement, context: PromptContext, hasActiveSess
 			return;
 		}
 
-		void context.requestSpellcheck(text, strictState.enabled).then((issues) => {
+		void context.requestSpellcheck(text, currentLang, strictState.enabled).then((issues) => {
 			// Drop stale responses and any result whose offsets no longer match the text.
 			if (token !== spellcheckToken || textarea.value !== text) {
 				return;
@@ -511,6 +518,44 @@ function initPromptTabs(host: HTMLElement, context: PromptContext, hasActiveSess
 		adjustHeight();
 		renderHighlight();
 	});
+
+	// ── Language gate ────────────────────────────────────────────────
+	// The picker is the single source of the source language. Typing stays
+	// locked until one is chosen; the choice persists across sessions.
+	const translateToggleBtn = host.querySelector<HTMLButtonElement>('#translateToggle');
+	const strictToggleBtn = host.querySelector<HTMLButtonElement>('#strictToggle');
+
+	const applyLanguage = (lang: PromptLang) => {
+		currentLang = lang;
+		const info = getPromptLanguage(lang);
+		// Translate toggle: only for languages that translate (hidden for English).
+		if (translateToggleBtn) {
+			translateToggleBtn.hidden = !info?.translates;
+		}
+		// Strict toggle: Spanish only (fixnow's accent leniency is es-only).
+		if (strictToggleBtn) {
+			strictToggleBtn.hidden = !info?.strictToggle;
+		}
+		// Unlock typing now that a language is chosen.
+		textarea.disabled = false;
+		textarea.placeholder = 'Ask anything…';
+		rerunSpellcheck();
+		requestAnimationFrame(() => textarea.focus());
+	};
+
+	const langController = initLanguageSelect(host, applyLanguage);
+	const initialLang = langController.getLang();
+
+	if (initialLang) {
+		applyLanguage(initialLang);
+	} else {
+		// No language yet — lock typing and hide the language-specific toggles
+		// until the user picks one from the header picker.
+		textarea.disabled = true;
+		textarea.placeholder = 'Select a language to start…';
+		if (translateToggleBtn) { translateToggleBtn.hidden = true; }
+		if (strictToggleBtn) { strictToggleBtn.hidden = true; }
+	}
 }
 
 function initToolbarActions(

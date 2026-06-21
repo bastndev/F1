@@ -434,11 +434,11 @@ const clipboardReadRpc = createRpcChannel<[], string>({
 	send: (id) => vscode.postMessage({ type: 'clipboard.read', id })
 });
 
-const spellcheckRpc = createRpcChannel<[string, boolean], SpellIssue[]>({
+const spellcheckRpc = createRpcChannel<[string, string, boolean], SpellIssue[]>({
 	prefix: 'spell',
 	timeoutMs: 5000,
 	onTimeout: { resolveWith: [] },
-	send: (id, text, strict) => vscode.postMessage({ type: 'prompt.spellcheck', id, text, strict })
+	send: (id, text, lang, strict) => vscode.postMessage({ type: 'prompt.spellcheck', id, text, lang, strict })
 });
 
 // Voice playback runs in the extension host (Piper TTS, shared with the ATM
@@ -590,7 +590,7 @@ const toolsController = layoutRight
 			requestWorkspaceFiles: () => workspaceFilesRpc.request(),
 			requestWorkspaceSkills: () => workspaceSkillsRpc.request(),
 			openCreateSkill: () => vscode.postMessage({ type: 'mySkills.openCreate' }),
-			requestSpellcheck: (text: string, strict: boolean) => spellcheckRpc.request(text, strict),
+			requestSpellcheck: (text: string, lang: string, strict: boolean) => spellcheckRpc.request(text, lang, strict),
 			speakText,
 			pauseSpeech,
 			resumeSpeech,

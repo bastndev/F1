@@ -1,4 +1,4 @@
-import type { CheckOptions, SpellIssue as FixnowSpellIssue } from 'fixnow';
+import type { CheckOptions, LanguageCode, SpellIssue as FixnowSpellIssue } from 'fixnow';
 import { PERSONAL_MISTAKES } from './data/personal-mistakes';
 import { shouldProtectWord } from './data/protected-terms';
 
@@ -63,17 +63,34 @@ function getFixnow(): Promise<FixnowModule> {
 	return fixnowPromise;
 }
 
-/** Preload the Spanish dictionary so the first keystroke isn't slowed by trie decoding. */
-export function warmSpellchecker(): void {
+// fixnow bundles dictionaries for ar/de/en/es/fr/pt/ru/vi. Of the prompt's four
+// offered languages only these have a usable checker — Chinese (zh) is
+// character-based and has no trie, so it falls through to "no marking".
+const SUPPORTED_LANGUAGES = new Set(['en', 'es', 'pt']);
+
+const normalizeLanguage = (lang: string | undefined): string => (lang ?? 'es').toLowerCase();
+
+/** Preload a dictionary so the first keystroke isn't slowed by trie decoding. */
+export function warmSpellchecker(lang = 'es'): void {
+	const language = normalizeLanguage(lang);
+	if (!SUPPORTED_LANGUAGES.has(language)) {
+		return;
+	}
+
 	void getFixnow()
-		.then((fixnow) => fixnow.warmup('es'))
+		.then((fixnow) => fixnow.warmup(language))
 		.catch((error) => {
-			console.error('[spellcheck] Failed to warm Spanish dictionary:', error);
+			console.error(`[spellcheck] Failed to warm "${language}" dictionary:`, error);
 		});
 }
 
-export async function checkText(text: string, strict = false): Promise<SpellIssue[]> {
+export async function checkText(text: string, lang = 'es', strict = false): Promise<SpellIssue[]> {
 	if (!text || text.trim().length < 2) {
+		return [];
+	}
+
+	const language = normalizeLanguage(lang);
+	if (!SUPPORTED_LANGUAGES.has(language)) {
 		return [];
 	}
 
@@ -85,12 +102,19 @@ export async function checkText(text: string, strict = false): Promise<SpellIssu
 		return [];
 	}
 
+	// The personal-typo list is Spanish-specific shorthand ("ue" → "que"); only
+	// apply it when checking Spanish. Other languages rely on the dictionary alone.
+	const flagWords = language === 'es'
+		? (strict ? personalMistakeKeysStrict : personalMistakeKeysLenient)
+		: undefined;
+
 	return fixnow.checkText(text, {
-		language: 'es',
+		// Narrowed by SUPPORTED_LANGUAGES above — all members are valid LanguageCodes.
+		language: language as LanguageCode,
 		// strict → accent-sensitive; lenient (default) → accept missing tildes.
 		acceptAccentOmissions: !strict,
 		isProtectedWord: shouldProtectWord,
-		flagWords: strict ? personalMistakeKeysStrict : personalMistakeKeysLenient,
+		flagWords,
 		protectedSegments: [fixnow.DEFAULT_PROTECTED_PATTERN, F1_MARKERS],
 	});
 }

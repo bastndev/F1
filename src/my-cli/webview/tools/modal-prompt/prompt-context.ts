@@ -18,5 +18,5 @@ export type PromptContext = {
 	requestWorkspaceFiles?: () => Promise<FileMentionEntry[]>;
 	requestWorkspaceSkills?: () => Promise<WorkspaceSkill[]>;
 	openCreateSkill?: () => void;
-	requestSpellcheck?: (text: string, strict: boolean) => Promise<SpellIssue[]>;
+	requestSpellcheck?: (text: string, lang: string, strict: boolean) => Promise<SpellIssue[]>;
 };

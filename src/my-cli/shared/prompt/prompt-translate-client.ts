@@ -3,6 +3,7 @@ import type { PromptTranslateClient, PromptTranslateResult } from './prompt-tran
 export async function translatePromptText(
 	text: string,
 	client: PromptTranslateClient,
+	from = 'es',
 ): Promise<PromptTranslateResult> {
 	const cleanText = text.trim();
 	if (!cleanText) {
@@ -15,7 +16,7 @@ export async function translatePromptText(
 
 	return client.translatePrompt({
 		text: cleanText,
-		from: 'es',
+		from,
 		to: 'en',
 	});
 }
