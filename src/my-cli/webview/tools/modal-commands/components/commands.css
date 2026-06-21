@@ -215,8 +215,8 @@
 }
 
 .commands-row {
-	display: flex;
-	justify-content: space-between;
+	display: grid;
+	grid-template-columns: minmax(210px, max-content) 1fr;
 	align-items: center;
 	gap: 16px;
 	width: 100%;
@@ -249,8 +249,7 @@
 }
 
 .commands-tag {
-	order: 2;
-	flex: 0 0 auto;
+	justify-self: start;
 	padding: 4px 10px;
 	border-radius: 6px;
 	background: color-mix(in srgb, var(--cmd-accent) 12%, transparent);
@@ -264,8 +263,6 @@
 }
 
 .commands-desc {
-	order: 1;
-	flex: 1 1 auto;
 	color: var(--vscode-foreground);
 	opacity: 0.9;
 	font-size: 13px;
