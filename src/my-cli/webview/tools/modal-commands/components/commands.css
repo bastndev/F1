@@ -203,11 +203,26 @@
 	display: flex;
 	align-items: flex-start;
 	gap: 12px;
+	width: 100%;
+	margin: 0;
 	padding: 9px 10px;
 	border-radius: 5px;
 	border: 1px solid transparent;
+	background: transparent;
+	color: inherit;
+	font: inherit;
+	text-align: left;
 	cursor: pointer;
+	appearance: none;
+	-webkit-appearance: none;
 	transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+/* The class rules above set display, so the [hidden] attribute needs an
+   explicit override to actually hide filtered rows and emptied groups. */
+.commands-row[hidden],
+.commands-group[hidden] {
+	display: none;
 }
 
 .commands-row:hover {

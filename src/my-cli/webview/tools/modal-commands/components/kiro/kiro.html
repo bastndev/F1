@@ -1,0 +1,151 @@
+<div class="commands-group" data-category="Essentials">
+	<div class="commands-group-label">Essentials</div>
+	<button class="commands-row" type="button" data-cmd="/model">
+		<span class="commands-tag">/model</span>
+		<span class="commands-desc">Select or list available models.</span>
+	</button>
+	<button class="commands-row" type="button" data-cmd="/effort">
+		<span class="commands-tag">/effort</span>
+		<span class="commands-desc">Set thinking effort for this session.</span>
+	</button>
+	<button class="commands-row" type="button" data-cmd="/usage">
+		<span class="commands-tag">/usage</span>
+		<span class="commands-desc">Show billing and usage information.</span>
+	</button>
+	<button class="commands-row" type="button" data-cmd="/compact">
+		<span class="commands-tag">/compact</span>
+		<span class="commands-desc">Compact conversation history.</span>
+	</button>
+	<button class="commands-row" type="button" data-cmd="/plan">
+		<span class="commands-tag">/plan</span>
+		<span class="commands-desc">Switch to Plan agent for breaking down ideas into implementation plans.</span>
+	</button>
+	<button class="commands-row" type="button" data-cmd="/context">
+		<span class="commands-tag">/context</span>
+		<span class="commands-desc">Manage context files or show token usage.</span>
+	</button>
+	<button class="commands-row" type="button" data-cmd="/chat">
+		<span class="commands-tag">/chat</span>
+		<span class="commands-desc">Load a previous session or start a new one.</span>
+	</button>
+	<button class="commands-row" type="button" data-cmd="/clear">
+		<span class="commands-tag">/clear</span>
+		<span class="commands-desc">Clear conversation history.</span>
+	</button>
+</div>
+
+<div class="commands-group" data-category="Session">
+	<div class="commands-group-label">Session</div>
+	<button class="commands-row" type="button" data-cmd="/rewind">
+		<span class="commands-tag">/rewind</span>
+		<span class="commands-desc">Rewind conversation to a previous turn (forks into a new session).</span>
+	</button>
+	<button class="commands-row" type="button" data-cmd="/spawn">
+		<span class="commands-tag">/spawn</span>
+		<span class="commands-desc">Spawn a new agent session with a task.</span>
+	</button>
+	<button class="commands-row" type="button" data-cmd="/session-id">
+		<span class="commands-tag">/session-id</span>
+		<span class="commands-desc">Print the current session ID.</span>
+	</button>
+</div>
+
+<div class="commands-group" data-category="Agents & Context">
+	<div class="commands-group-label">Agents &amp; Context</div>
+	<button class="commands-row" type="button" data-cmd="/agent">
+		<span class="commands-tag">/agent</span>
+		<span class="commands-desc">Select or list available agents.</span>
+	</button>
+	<button class="commands-row" type="button" data-cmd="/knowledge">
+		<span class="commands-tag">/knowledge</span>
+		<span class="commands-desc">Manage knowledge base.</span>
+	</button>
+	<button class="commands-row" type="button" data-cmd="/code">
+		<span class="commands-tag">/code</span>
+		<span class="commands-desc">Code intelligence workspace management.</span>
+	</button>
+	<button class="commands-row" type="button" data-cmd="/hooks">
+		<span class="commands-tag">/hooks</span>
+		<span class="commands-desc">View configured hooks.</span>
+	</button>
+</div>
+
+<div class="commands-group" data-category="Model & Tools">
+	<div class="commands-group-label">Model &amp; Tools</div>
+	<button class="commands-row" type="button" data-cmd="/mcp">
+		<span class="commands-tag">/mcp</span>
+		<span class="commands-desc">Show configured MCP servers.</span>
+	</button>
+	<button class="commands-row" type="button" data-cmd="/tools">
+		<span class="commands-tag">/tools</span>
+		<span class="commands-desc">Show available tools.</span>
+	</button>
+	<button class="commands-row" type="button" data-cmd="/prompts">
+		<span class="commands-tag">/prompts</span>
+		<span class="commands-desc">Select or list available prompts.</span>
+	</button>
+</div>
+
+<div class="commands-group" data-category="Input & Output">
+	<div class="commands-group-label">Input &amp; Output</div>
+	<button class="commands-row" type="button" data-cmd="/editor">
+		<span class="commands-tag">/editor</span>
+		<span class="commands-desc">Open $EDITOR to compose a prompt.</span>
+	</button>
+	<button class="commands-row" type="button" data-cmd="/paste">
+		<span class="commands-tag">/paste</span>
+		<span class="commands-desc">Paste image from clipboard.</span>
+	</button>
+	<button class="commands-row" type="button" data-cmd="/reply">
+		<span class="commands-tag">/reply</span>
+		<span class="commands-desc">Open editor pre-filled with the last assistant message.</span>
+	</button>
+	<button class="commands-row" type="button" data-cmd="/copy">
+		<span class="commands-tag">/copy</span>
+		<span class="commands-desc">Copy last response to clipboard. <span class="commands-alias">use /transcript for full</span></span>
+	</button>
+	<button class="commands-row" type="button" data-cmd="/transcript">
+		<span class="commands-tag">/transcript</span>
+		<span class="commands-desc">Open conversation transcript in $PAGER.</span>
+	</button>
+</div>
+
+<div class="commands-group" data-category="Config">
+	<div class="commands-group-label">Config</div>
+	<button class="commands-row" type="button" data-cmd="/settings">
+		<span class="commands-tag">/settings</span>
+		<span class="commands-desc">Configure theme, terminal, keybindings, and preferences.</span>
+	</button>
+	<button class="commands-row" type="button" data-cmd="/theme">
+		<span class="commands-tag">/theme</span>
+		<span class="commands-desc">Select a theme. <span class="commands-alias">moved to /settings theme</span></span>
+	</button>
+</div>
+
+<div class="commands-group" data-category="Other">
+	<div class="commands-group-label">Other</div>
+	<button class="commands-row" type="button" data-cmd="/changelog">
+		<span class="commands-tag">/changelog</span>
+		<span class="commands-desc">Show recent release notes.</span>
+	</button>
+	<button class="commands-row" type="button" data-cmd="/tui">
+		<span class="commands-tag">/tui</span>
+		<span class="commands-desc">What's new in the TUI experience.</span>
+	</button>
+	<button class="commands-row" type="button" data-cmd="/guide">
+		<span class="commands-tag">/guide</span>
+		<span class="commands-desc">Get help with Kiro CLI features from the guide agent.</span>
+	</button>
+	<button class="commands-row" type="button" data-cmd="/help">
+		<span class="commands-tag">/help</span>
+		<span class="commands-desc">Show available commands.</span>
+	</button>
+	<button class="commands-row" type="button" data-cmd="/feedback">
+		<span class="commands-tag">/feedback</span>
+		<span class="commands-desc">Submit feedback, request features, or report issues.</span>
+	</button>
+	<button class="commands-row" type="button" data-cmd="/exit">
+		<span class="commands-tag">/exit</span>
+		<span class="commands-desc">Quit the application. <span class="commands-alias">alias: /quit</span></span>
+	</button>
+</div>

@@ -1,0 +1,263 @@
+<div class="commands-group" data-category="Essentials">
+	<div class="commands-group-label">Essentials</div>
+	<button class="commands-row" type="button" data-cmd="/model">
+		<span class="commands-tag">/model [filter]</span>
+		<span class="commands-desc">Select model. <span class="commands-alias">Tab to edit</span></span>
+	</button>
+	<button class="commands-row" type="button" data-cmd="/usage">
+		<span class="commands-tag">/usage</span>
+		<span class="commands-desc">Show AI usage stats.</span>
+	</button>
+	<button class="commands-row" type="button" data-cmd="/plan">
+		<span class="commands-tag">/plan [prompt]</span>
+		<span class="commands-desc">Create a plan or show the existing plan with options.</span>
+	</button>
+	<button class="commands-row" type="button" data-cmd="/changes">
+		<span class="commands-tag">/changes</span>
+		<span class="commands-desc">Review changes — Conversation, Unstaged, Staged, and Committed diffs.</span>
+	</button>
+	<button class="commands-row" type="button" data-cmd="/commit">
+		<span class="commands-tag">/commit</span>
+		<span class="commands-desc">Ask the agent to stage and commit changes.</span>
+	</button>
+	<button class="commands-row" type="button" data-cmd="/review">
+		<span class="commands-tag">/review</span>
+		<span class="commands-desc">Review code changes with the Bugbot or Security Review subagent.</span>
+	</button>
+	<button class="commands-row" type="button" data-cmd="/resume">
+		<span class="commands-tag">/resume</span>
+		<span class="commands-desc">Open recent chats and resume one.</span>
+	</button>
+	<button class="commands-row" type="button" data-cmd="/clear">
+		<span class="commands-tag">/clear</span>
+		<span class="commands-desc">Start a new chat session.</span>
+	</button>
+</div>
+
+<div class="commands-group" data-category="Model & Modes">
+	<div class="commands-group-label">Model &amp; Modes</div>
+	<button class="commands-row" type="button" data-cmd="/ask">
+		<span class="commands-tag">/ask</span>
+		<span class="commands-desc">Toggle ask mode (Q&amp;A, read-only; no edits or command execution).</span>
+	</button>
+	<button class="commands-row" type="button" data-cmd="/debug">
+		<span class="commands-tag">/debug [prompt]</span>
+		<span class="commands-desc">Toggle debug mode or submit a prompt in debug mode.</span>
+	</button>
+	<button class="commands-row" type="button" data-cmd="/max-mode">
+		<span class="commands-tag">/max-mode</span>
+		<span class="commands-desc">Toggle max mode. <span class="commands-alias">currently disabled</span></span>
+	</button>
+	<button class="commands-row" type="button" data-cmd="/run-everything">
+		<span class="commands-tag">/run-everything</span>
+		<span class="commands-desc">Toggle Run Everything. <span class="commands-alias">currently disabled</span></span>
+	</button>
+</div>
+
+<div class="commands-group" data-category="Session">
+	<div class="commands-group-label">Session</div>
+	<button class="commands-row" type="button" data-cmd="/fork">
+		<span class="commands-tag">/fork</span>
+		<span class="commands-desc">Fork the current chat into a new session.</span>
+	</button>
+	<button class="commands-row" type="button" data-cmd="/rewind">
+		<span class="commands-tag">/rewind</span>
+		<span class="commands-desc">Jump back to a previous message.</span>
+	</button>
+	<button class="commands-row" type="button" data-cmd="/summarize">
+		<span class="commands-tag">/summarize</span>
+		<span class="commands-desc">Summarize the conversation to reduce context.</span>
+	</button>
+	<button class="commands-row" type="button" data-cmd="/rename">
+		<span class="commands-tag">/rename [name]</span>
+		<span class="commands-desc">Rename the current chat session.</span>
+	</button>
+	<button class="commands-row" type="button" data-cmd="/jobs">
+		<span class="commands-tag">/jobs</span>
+		<span class="commands-desc">Open the active background tasks list.</span>
+	</button>
+</div>
+
+<div class="commands-group" data-category="Code & Review">
+	<div class="commands-group-label">Code &amp; Review</div>
+	<button class="commands-row" type="button" data-cmd="/review-bugbot">
+		<span class="commands-tag">/review-bugbot</span>
+		<span class="commands-desc">Review code changes with the Bugbot subagent. <span class="commands-alias">builtin skill</span></span>
+	</button>
+	<button class="commands-row" type="button" data-cmd="/review-security">
+		<span class="commands-tag">/review-security</span>
+		<span class="commands-desc">Review code changes with the Security Review subagent. <span class="commands-alias">builtin skill</span></span>
+	</button>
+	<button class="commands-row" type="button" data-cmd="/split-to-prs">
+		<span class="commands-tag">/split-to-prs</span>
+		<span class="commands-desc">Split current work into small reviewable PRs.</span>
+	</button>
+	<button class="commands-row" type="button" data-cmd="/babysit">
+		<span class="commands-tag">/babysit</span>
+		<span class="commands-desc">Keep a PR merge-ready by triaging comments, resolving conflicts, and fixing CI.</span>
+	</button>
+	<button class="commands-row" type="button" data-cmd="/multi-model-review">
+		<span class="commands-tag">/multi-model-review</span>
+		<span class="commands-desc">Pick models, then run parallel Task reviewers. <span class="commands-alias">global</span></span>
+	</button>
+	<button class="commands-row" type="button" data-cmd="/simplify">
+		<span class="commands-tag">/simplify</span>
+		<span class="commands-desc">Find low-info comments, one-off helpers, perf issues, and reuse opportunities.</span>
+	</button>
+</div>
+
+<div class="commands-group" data-category="Skills & Automation">
+	<div class="commands-group-label">Skills &amp; Automation</div>
+	<button class="commands-row" type="button" data-cmd="/skills">
+		<span class="commands-tag">/skills</span>
+		<span class="commands-desc">Open the skills menu.</span>
+	</button>
+	<button class="commands-row" type="button" data-cmd="/command">
+		<span class="commands-tag">/command</span>
+		<span class="commands-desc">Manage custom commands.</span>
+	</button>
+	<button class="commands-row" type="button" data-cmd="/create-skill">
+		<span class="commands-tag">/create-skill</span>
+		<span class="commands-desc">Create Cursor Agent Skills, or ask about SKILL.md structure.</span>
+	</button>
+	<button class="commands-row" type="button" data-cmd="/create-subagent">
+		<span class="commands-tag">/create-subagent</span>
+		<span class="commands-desc">Create custom subagents for specialized AI tasks.</span>
+	</button>
+	<button class="commands-row" type="button" data-cmd="/create-hook">
+		<span class="commands-tag">/create-hook</span>
+		<span class="commands-desc">Create Cursor hooks. Write hooks.json or add hook scripts.</span>
+	</button>
+	<button class="commands-row" type="button" data-cmd="/create-rule">
+		<span class="commands-tag">/create-rule</span>
+		<span class="commands-desc">Create Cursor rules for persistent AI guidance.</span>
+	</button>
+	<button class="commands-row" type="button" data-cmd="/migrate-to-skills">
+		<span class="commands-tag">/migrate-to-skills</span>
+		<span class="commands-desc">Convert legacy Cursor rules and slash commands into Agent Skills.</span>
+	</button>
+	<button class="commands-row" type="button" data-cmd="/loop">
+		<span class="commands-tag">/loop [interval]</span>
+		<span class="commands-desc">Run a prompt or skill on a recurring interval. <span class="commands-alias">e.g. /loop 5m /foo</span></span>
+	</button>
+	<button class="commands-row" type="button" data-cmd="/sdk">
+		<span class="commands-tag">/sdk</span>
+		<span class="commands-desc">Guide building apps, scripts, CI pipelines, or automations on the Cursor SDK.</span>
+	</button>
+	<button class="commands-row" type="button" data-cmd="/shell">
+		<span class="commands-tag">/shell</span>
+		<span class="commands-desc">Runs the rest of a /shell request as a literal shell command.</span>
+	</button>
+</div>
+
+<div class="commands-group" data-category="Config">
+	<div class="commands-group-label">Config</div>
+	<button class="commands-row" type="button" data-cmd="/config">
+		<span class="commands-tag">/config</span>
+		<span class="commands-desc">Configure CLI settings interactively.</span>
+	</button>
+	<button class="commands-row" type="button" data-cmd="/update-cli-config">
+		<span class="commands-tag">/update-cli-config</span>
+		<span class="commands-desc">View and modify Cursor CLI configuration settings.</span>
+	</button>
+	<button class="commands-row" type="button" data-cmd="/rule">
+		<span class="commands-tag">/rule</span>
+		<span class="commands-desc">Manage Cursor rules.</span>
+	</button>
+	<button class="commands-row" type="button" data-cmd="/sandbox">
+		<span class="commands-tag">/sandbox</span>
+		<span class="commands-desc">Toggle sandbox mode. <span class="commands-alias">currently disabled</span></span>
+	</button>
+	<button class="commands-row" type="button" data-cmd="/mcp">
+		<span class="commands-tag">/mcp [subcommand]</span>
+		<span class="commands-desc">Manage MCP servers (list, list-tools).</span>
+	</button>
+	<button class="commands-row" type="button" data-cmd="/plugin">
+		<span class="commands-tag">/plugin [subcommand]</span>
+		<span class="commands-desc">Manage plugins — view installed, browse marketplace, install or uninstall.</span>
+	</button>
+	<button class="commands-row" type="button" data-cmd="/statusline">
+		<span class="commands-tag">/statusline</span>
+		<span class="commands-desc">Configure a custom status line in the CLI.</span>
+	</button>
+	<button class="commands-row" type="button" data-cmd="/status-indicators">
+		<span class="commands-tag">/status-indicators</span>
+		<span class="commands-desc">Toggle terminal title status indicators. <span class="commands-alias">currently enabled</span></span>
+	</button>
+	<button class="commands-row" type="button" data-cmd="/setup-terminal">
+		<span class="commands-tag">/setup-terminal</span>
+		<span class="commands-desc">Configure your terminal for newlines.</span>
+	</button>
+	<button class="commands-row" type="button" data-cmd="/vim">
+		<span class="commands-tag">/vim</span>
+		<span class="commands-desc">Toggle Vim keys. <span class="commands-alias">currently disabled</span></span>
+	</button>
+	<button class="commands-row" type="button" data-cmd="/line-numbers">
+		<span class="commands-tag">/line-numbers</span>
+		<span class="commands-desc">Toggle line numbers in code blocks. <span class="commands-alias">currently disabled</span></span>
+	</button>
+	<button class="commands-row" type="button" data-cmd="/show-thinking">
+		<span class="commands-tag">/show-thinking</span>
+		<span class="commands-desc">Toggle thinking block display. <span class="commands-alias">currently disabled</span></span>
+	</button>
+</div>
+
+<div class="commands-group" data-category="Other">
+	<div class="commands-group-label">Other</div>
+	<button class="commands-row" type="button" data-cmd="/about">
+		<span class="commands-tag">/about</span>
+		<span class="commands-desc">Show CLI version, system, and account info. <span class="commands-alias">copies to clipboard</span></span>
+	</button>
+	<button class="commands-row" type="button" data-cmd="/help">
+		<span class="commands-tag">/help [command]</span>
+		<span class="commands-desc">Show help for a command.</span>
+	</button>
+	<button class="commands-row" type="button" data-cmd="/feedback">
+		<span class="commands-tag">/feedback [message]</span>
+		<span class="commands-desc">Share feedback with the team.</span>
+	</button>
+	<button class="commands-row" type="button" data-cmd="/logs">
+		<span class="commands-tag">/logs</span>
+		<span class="commands-desc">Show the current debug log file path. <span class="commands-alias">copies to clipboard</span></span>
+	</button>
+	<button class="commands-row" type="button" data-cmd="/update">
+		<span class="commands-tag">/update</span>
+		<span class="commands-desc">Update Cursor Agent to the latest version.</span>
+	</button>
+	<button class="commands-row" type="button" data-cmd="/btw">
+		<span class="commands-tag">/btw [question]</span>
+		<span class="commands-desc">Ask on the side without disrupting the main chat; not saved to history.</span>
+	</button>
+	<button class="commands-row" type="button" data-cmd="/full-conversation">
+		<span class="commands-tag">/full-conversation</span>
+		<span class="commands-desc">Toggle full conversation rendering after redraw truncation.</span>
+	</button>
+	<button class="commands-row" type="button" data-cmd="/open">
+		<span class="commands-tag">/open</span>
+		<span class="commands-desc">Open the repository's git root in Cursor.</span>
+	</button>
+	<button class="commands-row" type="button" data-cmd="/cursor">
+		<span class="commands-tag">/cursor</span>
+		<span class="commands-desc">Alias for /open.</span>
+	</button>
+	<button class="commands-row" type="button" data-cmd="/copy">
+		<span class="commands-tag">/copy</span>
+		<span class="commands-desc">Copy a previous message to the clipboard.</span>
+	</button>
+	<button class="commands-row" type="button" data-cmd="/copy-request-id">
+		<span class="commands-tag">/copy-request-id</span>
+		<span class="commands-desc">Copy the last request ID.</span>
+	</button>
+	<button class="commands-row" type="button" data-cmd="/copy-conversation-id">
+		<span class="commands-tag">/copy-conversation-id</span>
+		<span class="commands-desc">Copy the current conversation ID.</span>
+	</button>
+	<button class="commands-row" type="button" data-cmd="/logout">
+		<span class="commands-tag">/logout</span>
+		<span class="commands-desc">Sign out from Cursor.</span>
+	</button>
+	<button class="commands-row" type="button" data-cmd="/exit">
+		<span class="commands-tag">/exit</span>
+		<span class="commands-desc">Exit. <span class="commands-alias">alias: /quit</span></span>
+	</button>
+</div>

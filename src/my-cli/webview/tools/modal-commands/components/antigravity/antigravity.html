@@ -1,0 +1,155 @@
+<div class="commands-group" data-category="Essentials">
+	<div class="commands-group-label">Essentials</div>
+	<button class="commands-row" type="button" data-cmd="/model">
+		<span class="commands-tag">/model</span>
+		<span class="commands-desc">Switch the active Gemini model for the session.</span>
+	</button>
+	<button class="commands-row" type="button" data-cmd="/usage">
+		<span class="commands-tag">/usage</span>
+		<span class="commands-desc">Show token usage and session cost statistics. <span class="commands-alias">alias: /quota</span></span>
+	</button>
+	<button class="commands-row" type="button" data-cmd="/context">
+		<span class="commands-tag">/context</span>
+		<span class="commands-desc">List all files and symbols currently in the agent's context.</span>
+	</button>
+	<button class="commands-row" type="button" data-cmd="/diff">
+		<span class="commands-tag">/diff</span>
+		<span class="commands-desc">Show the current code differences from changes made by the agent.</span>
+	</button>
+	<button class="commands-row" type="button" data-cmd="/planning">
+		<span class="commands-tag">/planning</span>
+		<span class="commands-desc">Open the interactive graphical planning and task list editor.</span>
+	</button>
+	<button class="commands-row" type="button" data-cmd="/resume">
+		<span class="commands-tag">/resume</span>
+		<span class="commands-desc">Resume a previous conversation thread by ID or name. <span class="commands-alias">alias: /switch, /conversation</span></span>
+	</button>
+	<button class="commands-row" type="button" data-cmd="/clear">
+		<span class="commands-tag">/clear</span>
+		<span class="commands-desc">Clear the terminal screen and scrollback buffer. <span class="commands-alias">alias: /new</span></span>
+	</button>
+	<button class="commands-row" type="button" data-cmd="/agents">
+		<span class="commands-tag">/agents</span>
+		<span class="commands-desc">List all active subagents and custom agents.</span>
+	</button>
+</div>
+
+<div class="commands-group" data-category="Session">
+	<div class="commands-group-label">Session</div>
+	<button class="commands-row" type="button" data-cmd="/fork">
+		<span class="commands-tag">/fork</span>
+		<span class="commands-desc">Fork the current conversation into a new thread. <span class="commands-alias">alias: /branch</span></span>
+	</button>
+	<button class="commands-row" type="button" data-cmd="/rename">
+		<span class="commands-tag">/rename</span>
+		<span class="commands-desc">Rename the active conversation thread.</span>
+	</button>
+	<button class="commands-row" type="button" data-cmd="/rewind">
+		<span class="commands-tag">/rewind</span>
+		<span class="commands-desc">Rewind the conversation history to a previous checkpoint. <span class="commands-alias">alias: /undo</span></span>
+	</button>
+	<button class="commands-row" type="button" data-cmd="/exit">
+		<span class="commands-tag">/exit</span>
+		<span class="commands-desc">Exit the active Antigravity CLI session. <span class="commands-alias">alias: /quit</span></span>
+	</button>
+</div>
+
+<div class="commands-group" data-category="Context & Code">
+	<div class="commands-group-label">Context &amp; Code</div>
+	<button class="commands-row" type="button" data-cmd="/artifact">
+		<span class="commands-tag">/artifact</span>
+		<span class="commands-desc">Open the TUI artifact viewer.</span>
+	</button>
+	<button class="commands-row" type="button" data-cmd="/open">
+		<span class="commands-tag">/open</span>
+		<span class="commands-desc">Open a file in your preferred local editor.</span>
+	</button>
+	<button class="commands-row" type="button" data-cmd="/copy">
+		<span class="commands-tag">/copy</span>
+		<span class="commands-desc">Copy the agent's last response to the system clipboard.</span>
+	</button>
+</div>
+
+<div class="commands-group" data-category="Agents & Tools">
+	<div class="commands-group-label">Agents &amp; Tools</div>
+	<button class="commands-row" type="button" data-cmd="/skills">
+		<span class="commands-tag">/skills</span>
+		<span class="commands-desc">List all active agent skills.</span>
+	</button>
+	<button class="commands-row" type="button" data-cmd="/hooks">
+		<span class="commands-tag">/hooks</span>
+		<span class="commands-desc">List all registered lifecycle hooks.</span>
+	</button>
+	<button class="commands-row" type="button" data-cmd="/mcp">
+		<span class="commands-tag">/mcp</span>
+		<span class="commands-desc">List active MCP servers and their exposed tools.</span>
+	</button>
+	<button class="commands-row" type="button" data-cmd="/tasks">
+		<span class="commands-tag">/tasks</span>
+		<span class="commands-desc">Show the active task list and its progress.</span>
+	</button>
+	<button class="commands-row" type="button" data-cmd="/permissions">
+		<span class="commands-tag">/permissions</span>
+		<span class="commands-desc">Manage tool execution permissions. <span class="commands-alias">allow/deny lists</span></span>
+	</button>
+</div>
+
+<div class="commands-group" data-category="Model & Planning">
+	<div class="commands-group-label">Model &amp; Planning</div>
+	<button class="commands-row" type="button" data-cmd="/fast">
+		<span class="commands-tag">/fast</span>
+		<span class="commands-desc">Toggle fast mode for typing delays and thought display.</span>
+	</button>
+	<button class="commands-row" type="button" data-cmd="/btw">
+		<span class="commands-tag">/btw</span>
+		<span class="commands-desc">Ask a quick parallel question without starting a full agent run.</span>
+	</button>
+</div>
+
+<div class="commands-group" data-category="Config & Interface">
+	<div class="commands-group-label">Config &amp; Interface</div>
+	<button class="commands-row" type="button" data-cmd="/config">
+		<span class="commands-tag">/config</span>
+		<span class="commands-desc">Open the TUI settings panel to customize preferences. <span class="commands-alias">alias: /settings</span></span>
+	</button>
+	<button class="commands-row" type="button" data-cmd="/keybindings">
+		<span class="commands-tag">/keybindings</span>
+		<span class="commands-desc">Configure a list of all active CLI keyboard shortcuts.</span>
+	</button>
+	<button class="commands-row" type="button" data-cmd="/statusline">
+		<span class="commands-tag">/statusline</span>
+		<span class="commands-desc">Toggle the terminal status line.</span>
+	</button>
+	<button class="commands-row" type="button" data-cmd="/title">
+		<span class="commands-tag">/title</span>
+		<span class="commands-desc">Toggle or configure the terminal title.</span>
+	</button>
+	<button class="commands-row" type="button" data-cmd="/add-dir">
+		<span class="commands-tag">/add-dir</span>
+		<span class="commands-desc">Add a new directory path to the active project's workspace.</span>
+	</button>
+</div>
+
+<div class="commands-group" data-category="Other">
+	<div class="commands-group-label">Other</div>
+	<button class="commands-row" type="button" data-cmd="/help">
+		<span class="commands-tag">/help</span>
+		<span class="commands-desc">Show the help menu with commands and keyboard shortcuts.</span>
+	</button>
+	<button class="commands-row" type="button" data-cmd="/changelog">
+		<span class="commands-tag">/changelog</span>
+		<span class="commands-desc">Show the product changelog and release notes.</span>
+	</button>
+	<button class="commands-row" type="button" data-cmd="/credits">
+		<span class="commands-tag">/credits</span>
+		<span class="commands-desc">Show third-party software licenses and attributions.</span>
+	</button>
+	<button class="commands-row" type="button" data-cmd="/feedback">
+		<span class="commands-tag">/feedback</span>
+		<span class="commands-desc">Open the product feedback form and bug report.</span>
+	</button>
+	<button class="commands-row" type="button" data-cmd="/logout">
+		<span class="commands-tag">/logout</span>
+		<span class="commands-desc">Sign out of the active Google account.</span>
+	</button>
+</div>
