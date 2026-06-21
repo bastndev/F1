@@ -349,6 +349,12 @@ export const createTabController = (options: TabControllerOptions) => {
 				return true;
 			}
 		}
+		if (matchesShortcut(event, 'openCommands')) {
+			if (consumeShortcut(event, 'openCommands')) {
+				options.onOpenTool?.('commands');
+				return true;
+			}
+		}
 
 		const action = getShortcutAction(event);
 		if (!action) {
