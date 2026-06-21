@@ -2,7 +2,6 @@ export const PERSONAL_MISTAKES: Record<string, string> = {
     // world 
 	'ideomas': 'idiomas',
 	'mejroa': 'mejora',
-	'analizalo': 'analízalo',
 
 
 
