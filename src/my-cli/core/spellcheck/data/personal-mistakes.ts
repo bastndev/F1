@@ -1,6 +1,8 @@
 export const PERSONAL_MISTAKES: Record<string, string> = {
     // world 
 	'ideomas': 'idiomas',
+	'mejroa': 'mejora',
+	'analizalo': 'analízalo',
 
 
 
@@ -198,7 +200,6 @@ export const PERSONAL_MISTAKES: Record<string, string> = {
 	'emnos': 'menos',
 	'mla': 'la',
 	'ais': 'así',
-	'mejroa': 'mejorar',
 	'manrea': 'manera',
 	'aoptimiza': 'optimizar',
 	'vuiero': 'quiero',
