@@ -47,6 +47,16 @@ esbuild.js
 # Native debug symbols — never loaded at runtime (trims ~53 MB of node-pty .pdb files)
 **/*.pdb
 
+# fixnow bundles dictionaries for 8 languages (~11 MB); F1 only checks Spanish.
+# Keep es/, drop the rest (loaded from node_modules at runtime; fixnow is external).
+node_modules/fixnow/dictionaries/ar/**
+node_modules/fixnow/dictionaries/de/**
+node_modules/fixnow/dictionaries/en/**
+node_modules/fixnow/dictionaries/fr/**
+node_modules/fixnow/dictionaries/pt/**
+node_modules/fixnow/dictionaries/ru/**
+node_modules/fixnow/dictionaries/vi/**
+
 # Project notes and contributor-only documentation
 AGENTS.md
 ARCHITECTURE.md
