@@ -42,6 +42,7 @@ export const PERSONAL_MISTAKES: Record<string, string> = {
 
 	// Common shorthand and abbreviations
 	'ue': 'que',
+	'quieroque': 'quiero que',
 	'eu': 'que',
 	'ie': 'que',
 	'q': 'que',
