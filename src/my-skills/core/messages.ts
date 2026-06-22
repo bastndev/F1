@@ -72,11 +72,6 @@ export interface CreateSkillDesignCreateMessage {
 	overwrite?: boolean;
 }
 
-export interface CreateSkillChatTypingMessage {
-	type: 'createSkill.chat.typing';
-	query: string;
-}
-
 export interface CreateSkillChatCreateMessage {
 	type: 'createSkill.chat.create';
 	name: string;
@@ -278,12 +273,6 @@ export function isInstallSkillInstallMessage(value: unknown): value is InstallSk
 
 	const message = value as { id?: unknown };
 	return typeof message.id === 'string';
-}
-
-export function isCreateSkillChatTypingMessage(value: unknown): value is CreateSkillChatTypingMessage {
-	return isWebviewMessage(value)
-		&& value.type === 'createSkill.chat.typing'
-		&& typeof (value as any).query === 'string';
 }
 
 export function isCreateSkillChatCreateMessage(value: unknown): value is CreateSkillChatCreateMessage {

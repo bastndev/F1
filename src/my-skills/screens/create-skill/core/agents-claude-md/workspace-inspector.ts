@@ -317,7 +317,7 @@ async function inspectExistingInstructions(workspaceUri: vscode.Uri): Promise<Ex
 async function inspectKeyPaths(workspaceUri: vscode.Uri): Promise<WorkspacePathInfo[]> {
 	const candidates: WorkspacePathInfo[] = [
 		{ path: 'src/extension.ts', description: 'VS Code extension activation entrypoint' },
-		{ path: 'src/my-skills/my-skills.ts', description: 'webview provider and host-side orchestration' },
+		{ path: 'src/my-skills/core/main.ts', description: 'webview provider and host-side orchestration' },
 		{ path: 'src/my-skills/view/index.ts', description: 'main webview shell client script' },
 		{ path: 'src/my-skills/screens/create-skill/ui/index.ts', description: 'CREATE screen client bundle entrypoint' },
 		{ path: 'src/my-skills/screens/install-skill/core', description: 'INSTALL marketplace and installation core' },

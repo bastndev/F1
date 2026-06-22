@@ -209,8 +209,8 @@ function createArchitectureSection(context: AgentsClaudeWorkspaceContext): strin
 		if (context.keyPaths.some(path => path.path === 'src/extension.ts')) {
 			lines.push('- Source activation entrypoint: `src/extension.ts`.');
 		}
-		if (context.keyPaths.some(path => path.path === 'src/my-skills/my-skills.ts')) {
-			lines.push('- `src/my-skills/my-skills.ts` owns the `WebviewViewProvider`, host-side message handling, template loading, and workspace file writes.');
+		if (context.keyPaths.some(path => path.path === 'src/my-skills/core/main.ts')) {
+			lines.push('- `src/my-skills/core/main.ts` owns the `WebviewViewProvider`, host-side message handling, template loading, and workspace file writes.');
 		}
 		if (context.keyPaths.some(path => path.path === 'src/my-skills/view/index.ts')) {
 			lines.push('- `src/my-skills/view/index.ts` is the shell bridge between webview events and `vscode.postMessage`.');
@@ -232,7 +232,7 @@ function createArchitectureSection(context: AgentsClaudeWorkspaceContext): strin
 
 	const keyPaths = context.keyPaths.filter(path => ![
 		'src/extension.ts',
-		'src/my-skills/my-skills.ts',
+		'src/my-skills/core/main.ts',
 		'src/my-skills/view/index.ts',
 		'esbuild.js',
 		'.vscodeignore',
