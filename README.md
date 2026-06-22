@@ -1,0 +1,84 @@
+<div align="center">
+
+<img src="icon.png" alt="F1" width="96" />
+
+# F1
+
+**Launch and manage every AI coding CLI from one VS Code panel.**
+
+Available now on VS Code • Cursor • Windsurf • Trae.ai • Kiro • Firebase Studio
+
+[![Version](https://img.shields.io/visual-studio-marketplace/v/bastndev.f1?color=0a0a0a&label=Marketplace)](https://marketplace.visualstudio.com/items?itemName=bastndev.f1)
+[![Installs](https://img.shields.io/visual-studio-marketplace/i/bastndev.f1?color=0a0a0a)](https://marketplace.visualstudio.com/items?itemName=bastndev.f1)
+[![License](https://img.shields.io/badge/license-MIT-0a0a0a.svg)](LICENSE)
+
+</div>
+
+---
+
+F1 turns VS Code into a hub for AI coding agents. Open **Claude Code, Codex, Copilot, Cursor, Kiro, Kilo Code, OpenCode, Grok, Antigravity** — or any custom CLI — in embedded terminals, switch between them instantly, write better prompts, and keep your project's context cheap to load for every agent.
+
+## ✨ Features
+
+### 🖥️ CLI Hub
+- Run multiple AI coding CLIs side by side in embedded [xterm.js](https://xtermjs.org/) terminals.
+- Fuzzy-search launcher to pick an agent; press **F1** to jump straight to the panel.
+- Built-in tools alongside every session:
+  - **Prompt** — rich editor with `@`-file mentions, image paste, skill chips, live spell‑marking, and source→English translation before sending.
+  - **Translator** — translate any terminal selection inline.
+  - **Use** — per‑CLI usage / status view.
+  - **Keymaps** — keyboard‑shortcut reference.
+- **Voice** — read replies aloud, plus an optional "ding" when an agent finishes while your attention is elsewhere.
+
+### 🧩 My Skills
+- Install skills from the marketplace — **All‑time**, **Trending (24h)**, **🔥 Flame**, and **Official** sources.
+- Create skills with guided generators for `AGENTS.md`, `CLAUDE.md`, and `DESIGN.md`, plus fast templates by category.
+- Manage local and saved skills per workspace.
+
+### 🧠 My Memory
+- Generate a committed `.f1/` project‑context map so any CLI starts with cheap, shared context.
+- Per‑project toggle; instruction files (`AGENTS.md` / `CLAUDE.md`) stay pointed at the context.
+
+## 🚀 Getting started
+
+1. Install **F1** from the [VS Code Marketplace](https://marketplace.visualstudio.com/items?itemName=bastndev.f1).
+2. Press **`F1`** to open the **CLI Hub** panel.
+3. Pick an agent from the launcher (or **Custom CLI** to run your own command).
+4. Open **My Skills** from the activity bar (**`Ctrl+3`**) to install or create skills.
+
+> The first launch of an agent installs its CLI if it isn't already on your `PATH`.
+
+## ⌨️ Keyboard shortcuts
+
+| Shortcut | Action |
+|---|---|
+| `F1` | Focus the CLI Hub panel |
+| `Ctrl+3` | Focus the My Skills panel |
+| `Ctrl+` `` ` `` | Toggle maximized panel |
+
+## 📋 Requirements
+
+- VS Code `^1.75.0` (or a compatible fork: Cursor, Windsurf, Trae.ai, Kiro, Firebase Studio).
+- The AI CLI you want to use (F1 can install supported ones on first launch).
+
+## 🛠️ Development
+
+This repo uses [Bun](https://bun.sh/) and [esbuild](https://esbuild.github.io/).
+
+```bash
+bun install          # install dependencies
+bun run compile      # type-check + lint + bundle (the full gate)
+bun run watch        # rebuild on change (esbuild + tsc)
+```
+
+Press **F5** in VS Code to launch the Extension Development Host.
+
+The codebase is organized into three products under `src/` — `my-cli/`, `my-skills/`, `my-memory/` — plus a shared layer. See [`AGENTS.md`](AGENTS.md) for the full architecture (layout, build targets, message protocol, and how to add a new CLI agent).
+
+## 🤝 Contributing
+
+Issues and pull requests are welcome — please open them on the [GitHub repository](https://github.com/bastndev/F1). Run `bun run compile` before submitting.
+
+## 📄 License
+
+[MIT](LICENSE) © [Gohit (X) Bastian](https://www.gohit.xyz/me)
