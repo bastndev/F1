@@ -170,6 +170,56 @@ export async function fetchOfficialSkillsForOwner(owner: string): Promise<Instal
 	return skills;
 }
 
+export async function fetchFlameSkills(
+	source: { owner: string; repo: string; path: string; ref: string },
+): Promise<InstallMarketplaceSkill[]> {
+	const owner = source.owner.trim();
+	const repo = source.repo.trim().replace(/\.git$/i, '');
+	if (!owner || !repo) {
+		return [];
+	}
+
+	const ref = source.ref.trim() || 'main';
+	const contentsPath = source.path.split('/').filter(Boolean).map(encodeURIComponent).join('/');
+	const apiUrl = `https://api.github.com/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/contents/${contentsPath}?ref=${encodeURIComponent(ref)}`;
+
+	const headers: Record<string, string> = { Accept: 'application/vnd.github+json' };
+	const githubToken = process.env.GITHUB_TOKEN?.trim();
+	if (githubToken) {
+		headers.Authorization = `Bearer ${githubToken}`;
+	}
+
+	const payload = await httpGetJson<unknown>(apiUrl, headers);
+	if (!Array.isArray(payload)) {
+		return [];
+	}
+
+	const sourceSlug = `${owner}/${repo}`;
+	const seen = new Set<string>();
+	const skills: InstallMarketplaceSkill[] = [];
+
+	for (const entry of payload) {
+		if (!entry || typeof entry !== 'object') {
+			continue;
+		}
+
+		const { name, type } = entry as { name?: unknown; type?: unknown };
+		if (type !== 'dir' || typeof name !== 'string' || !name.trim()) {
+			continue;
+		}
+
+		const skill = createManualGithubSkill({ source: sourceSlug, skillId: name.trim() });
+		if (seen.has(skill.id)) {
+			continue;
+		}
+
+		seen.add(skill.id);
+		skills.push(skill);
+	}
+
+	return skills;
+}
+
 export function createSkillsFromGithubSkillUrls(urls: readonly string[]): InstallMarketplaceSkill[] {
 	const entries = urls
 		.map(parseGithubSkillUrl)

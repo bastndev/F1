@@ -1,8 +1,11 @@
 
+type SkillTemplate = 'base' | 'fast';
+
 interface SkillNameConfirmDetail {
 	name: string;
 	query: string;
 	target?: string;
+	template: SkillTemplate;
 }
 
 const skillNamePattern = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
@@ -33,7 +36,11 @@ export function initNamePrompt() {
 
 	const els = { overlay, panel, input, hint, hintText, hintCounter, hintIcon, cancelButton, confirmButton, pathPreview, pathName, pathTarget };
 
+	const templateToggle = panel.querySelector<HTMLElement>('[data-name-prompt-template]');
+	const templateButtons = Array.from(panel.querySelectorAll<HTMLButtonElement>('[data-name-prompt-template] [data-template]'));
+
 	let pendingTarget: string | undefined;
+	let selectedTemplate: SkillTemplate = 'fast';
 	let shakeTimer: number | undefined;
 	let isOpen = false;
 	const existingFolders: { agents: Set<string>; claude: Set<string> } = {
@@ -58,23 +65,37 @@ export function initNamePrompt() {
 		}
 	}
 
-	function open(target?: string, initialValue?: string) {
+	function setTemplate(template: SkillTemplate) {
+		selectedTemplate = template;
+		templateToggle?.classList.toggle('is-fast-active', template === 'fast');
+		templateButtons.forEach(button => {
+			const isActive = button.dataset.template === template;
+			button.classList.toggle('is-active', isActive);
+			button.setAttribute('aria-pressed', String(isActive));
+		});
+	}
+
+	function setTarget(target?: string) {
+		const targetKey = target === 'claude' ? 'claude' : 'agents';
+		pendingTarget = targetKey;
+		if (els.pathTarget) {
+			els.pathTarget.textContent = targetKey === 'claude' ? '.claude' : '.agents';
+		}
+	}
+
+	function open(target?: string, initialValue?: string, initialTemplate?: string) {
 		if (isOpen) {
 			return;
 		}
 
-		pendingTarget = target;
 		isOpen = true;
 		resetInput();
+		setTarget(target);
+		setTemplate(initialTemplate === 'base' ? 'base' : 'fast');
 
 		if (initialValue) {
 			els.input.value = initialValue;
 			syncInputState();
-		}
-
-		// Update path preview target
-		if (els.pathTarget) {
-			els.pathTarget.textContent = pendingTarget === 'claude' ? '.claude' : '.agents';
 		}
 
 		els.overlay.classList.add('is-open');
@@ -227,6 +248,7 @@ export function initNamePrompt() {
 				name,
 				query: '',
 				target: pendingTarget,
+				template: selectedTemplate,
 			},
 		}));
 		close();
@@ -241,6 +263,15 @@ export function initNamePrompt() {
 	});
 	els.cancelButton.addEventListener('click', () => close(true));
 	els.confirmButton.addEventListener('click', confirm);
+
+	templateButtons.forEach(button => {
+		button.addEventListener('click', () => {
+			const template = button.dataset.template;
+			if (template === 'base' || template === 'fast') {
+				setTemplate(template);
+			}
+		});
+	});
 	els.overlay.addEventListener('pointerdown', event => {
 		if (event.target === els.overlay) {
 			close(true);
@@ -259,10 +290,11 @@ export function initNamePrompt() {
 		if (!(event instanceof CustomEvent)) {
 			return;
 		}
-		const detail = event.detail as { target?: unknown; initialValue?: unknown } | null;
+		const detail = event.detail as { target?: unknown; initialValue?: unknown; template?: unknown } | null;
 		const target = typeof detail?.target === 'string' ? detail.target : undefined;
 		const initialValue = typeof detail?.initialValue === 'string' ? detail.initialValue : undefined;
-		open(target, initialValue);
+		const initialTemplate = typeof detail?.template === 'string' ? detail.template : undefined;
+		open(target, initialValue, initialTemplate);
 	});
 
 	window.addEventListener('createSkill.folders.sync', event => {

@@ -163,32 +163,34 @@ export function mountFileMentionPicker(
 		if (!list) { return; }
 
 		// Fuzzy subsequence ranking (quick-open style): "test-pro" matches
-		// "test-del-projecto.ts". Name matches always outrank path-only
-		// matches; within a tie, directories first, then alphabetical.
+		// "test-del-projecto.ts". Entries split into tiers — name matches (tier 1)
+		// always outrank path-only matches (tier 0). Within each tier, folders come
+		// before files (the explorer "folders first" rule), then by relevance, then
+		// alphabetical. Grouping by tier first is what keeps a weakly path-matched
+		// folder from leapfrogging a strong file name match.
 		const query = filter.trim();
-		const nameMatchBonus = 1000;
 		const allowVscode = query.startsWith('.');
 
-		type ScoredEntry = { entry: FileMentionEntry; score: number; namePositions: number[] };
+		type ScoredEntry = { entry: FileMentionEntry; score: number; namePositions: number[]; tier: number };
 
 		const scoreEntry = (entry: FileMentionEntry): ScoredEntry | undefined => {
 			if (!allowVscode && isVscodePath(entry.path)) {
 				return undefined;
 			}
 			if (!query) {
-				return { entry, score: 0, namePositions: [] };
+				return { entry, score: 0, namePositions: [], tier: 0 };
 			}
 			const nameMatch = fuzzyMatch(query, entry.name);
 			if (nameMatch) {
-				return { entry, score: nameMatch.score + nameMatchBonus, namePositions: nameMatch.positions };
+				return { entry, score: nameMatch.score, namePositions: nameMatch.positions, tier: 1 };
 			}
 			const displayPathMatch = entry.displayPath ? fuzzyMatch(query, entry.displayPath) : undefined;
 			if (displayPathMatch) {
-				return { entry, score: displayPathMatch.score, namePositions: [] };
+				return { entry, score: displayPathMatch.score, namePositions: [], tier: 0 };
 			}
 			const pathMatch = fuzzyMatch(query, entry.path);
 			if (pathMatch) {
-				return { entry, score: pathMatch.score, namePositions: [] };
+				return { entry, score: pathMatch.score, namePositions: [], tier: 0 };
 			}
 			return undefined;
 		};
@@ -197,8 +199,12 @@ export function mountFileMentionPicker(
 			.map(scoreEntry)
 			.filter((s): s is ScoredEntry => s !== undefined)
 			.sort((a, b) => {
-				if (a.score !== b.score) { return b.score - a.score; }
+				// 1) Name matches above path-only matches.
+				if (a.tier !== b.tier) { return b.tier - a.tier; }
+				// 2) Within a tier, folders before files.
 				if (a.entry.isDirectory !== b.entry.isDirectory) { return a.entry.isDirectory ? -1 : 1; }
+				// 3) Then by fuzzy relevance, then alphabetical.
+				if (a.score !== b.score) { return b.score - a.score; }
 				return a.entry.name.localeCompare(b.entry.name);
 			});
 

@@ -99,36 +99,42 @@
 
 				<div class="agent-tools-divider"></div>
 
-				<label class="agent-tools-toggle">
+				<div class="agent-tools-toggle">
 					<span class="agent-tools-toggle-copy">
 						<span class="agent-tools-toggle-title">Filter (P... / T...)</span>
 						<span class="agent-tools-toggle-subtitle">ctrl+space</span>
 					</span>
-					<input id="cli-prompt-filter-toggle" class="agent-tools-toggle-input" type="checkbox">
-					<span class="agent-tools-toggle-track" aria-hidden="true">
-						<span class="agent-tools-toggle-thumb"></span>
-					</span>
-				</label>
-				
-				<label class="agent-tools-toggle">
+					<label class="agent-tools-toggle-switch">
+						<input id="cli-prompt-filter-toggle" class="agent-tools-toggle-input" type="checkbox" aria-label="Filter (Prompt / Translate)">
+						<span class="agent-tools-toggle-track" aria-hidden="true">
+							<span class="agent-tools-toggle-thumb"></span>
+						</span>
+					</label>
+				</div>
+
+				<div class="agent-tools-toggle">
 					<span class="agent-tools-toggle-copy">
 						<span class="agent-tools-toggle-title">My Memory</span>
 					</span>
-					<input id="cli-memory-toggle" class="agent-tools-toggle-input" type="checkbox">
-					<span class="agent-tools-toggle-track" aria-hidden="true">
-						<span class="agent-tools-toggle-thumb"></span>
-					</span>
-				</label>
+					<label class="agent-tools-toggle-switch">
+						<input id="cli-memory-toggle" class="agent-tools-toggle-input" type="checkbox" aria-label="My Memory">
+						<span class="agent-tools-toggle-track" aria-hidden="true">
+							<span class="agent-tools-toggle-thumb"></span>
+						</span>
+					</label>
+				</div>
 
-				<label class="agent-tools-toggle">
+				<div class="agent-tools-toggle">
 					<span class="agent-tools-toggle-copy">
 						<span class="agent-tools-toggle-title">Voice Finish</span>
 					</span>
-					<input id="cli-voice-finish-toggle" class="agent-tools-toggle-input" type="checkbox">
-					<span class="agent-tools-toggle-track" aria-hidden="true">
-						<span class="agent-tools-toggle-thumb"></span>
-					</span>
-				</label>
+					<label class="agent-tools-toggle-switch">
+						<input id="cli-voice-finish-toggle" class="agent-tools-toggle-input" type="checkbox" aria-label="Voice Finish">
+						<span class="agent-tools-toggle-track" aria-hidden="true">
+							<span class="agent-tools-toggle-thumb"></span>
+						</span>
+					</label>
+				</div>
 			</div>
 		</div>
 		<div id="cli-session-list" class="agent-session-list" role="listbox" aria-label="Open CLI sessions"></div>

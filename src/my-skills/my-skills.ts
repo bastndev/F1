@@ -1,9 +1,9 @@
 import * as vscode from 'vscode';
 import * as fs from 'fs';
-import { createSkillsFromGithubSkillUrls, fetchAllTimeSkillsPage, fetchOfficialSkillsForOwner, fetchOfficialSkillSources, fetchTrending24hSkills, searchMarketplaceSkills } from './screens/install-skill/core/marketplace';
+import { fetchAllTimeSkillsPage, fetchFlameSkills, fetchOfficialSkillsForOwner, fetchOfficialSkillSources, fetchTrending24hSkills, searchMarketplaceSkills } from './screens/install-skill/core/marketplace';
 import { installMarketplaceSkill } from './screens/install-skill/core/installer';
 import type { FlameSkillsRequestMessage, InstallMarketplaceSkill, InstallSkillInstallMessage, InstallSkillsMoreRequestMessage, InstallSkillsRequestMessage, InstallSkillsSearchRequestMessage, OfficialSkillSource, OfficialSkillsRequestMessage, OfficialSourcesRequestMessage, SkillsLockFile, Trending24hRequestMessage } from './screens/install-skill/core/types';
-import { FLAME_SKILL_URLS } from './screens/install-skill/ui/panels/trending-skill/flame/data/flame-skills';
+import { FLAME_SKILL_REPO_URL, FLAME_SKILL_SOURCE } from './screens/install-skill/ui/panels/trending-skill/flame/data/flame-skills';
 import { ROOT_SKILL_FILE_NAMES, ROOT_SKILL_FOLDER_WATCH_PATTERNS, deleteWorkspaceRootSkill, getWorkspaceRootSkills, setWorkspaceRootSkillEnabled } from './screens/local-skill/core/local-skills';
 import { deleteSavedSkill, enableSavedSkill, getSavedSkills, isSavedSkillInWorkspace, saveSkill } from './screens/local-skill/core/saved-skills';
 import type { LocalSkillDeleteMessage, LocalSkillDeleteSavedMessage, LocalSkillEnableSavedMessage, LocalSkillOpenMessage, LocalSkillSaveMessage, LocalSkillSetEnabledMessage, LocalSkillsRequestMessage, LocalSkillsSavedRequestMessage } from './screens/local-skill/core/types';
@@ -216,6 +216,9 @@ export class MySkillsViewProvider implements vscode.WebviewViewProvider {
 			}
 			if (isFlameSkillsRequestMessage(message)) {
 				void this._postFlameSkills(true);
+			}
+			if (isFlameSkillOpenRepoMessage(message)) {
+				void vscode.env.openExternal(vscode.Uri.parse(FLAME_SKILL_REPO_URL));
 			}
 			if (isOfficialSourcesRequestMessage(message)) {
 				void this._postOfficialSources(true);
@@ -700,7 +703,10 @@ export class MySkillsViewProvider implements vscode.WebviewViewProvider {
 
 		try {
 			this._installedMarketplaceSkillIds = await getInstalledMarketplaceSkillIds();
-			this._flameSkills = filterInstallableSkills(createSkillsFromGithubSkillUrls(FLAME_SKILL_URLS), this._installedMarketplaceSkillIds);
+			this._flameSkills = filterInstallableSkills(await fetchFlameSkills(FLAME_SKILL_SOURCE), this._installedMarketplaceSkillIds);
+			if (this._flameSkills.length === 0 && !this._flameSkillsError) {
+				this._flameSkillsError = 'No skills found in the flame repository.';
+			}
 		} catch (err) {
 			this._flameSkillsError = err instanceof Error ? err.message : String(err);
 		} finally {
@@ -1403,6 +1409,10 @@ function isTrending24hRequestMessage(value: unknown): value is Trending24hReques
 
 function isFlameSkillsRequestMessage(value: unknown): value is FlameSkillsRequestMessage {
 	return isWebviewMessage(value) && value.type === 'flameSkills.request';
+}
+
+function isFlameSkillOpenRepoMessage(value: unknown): value is { type: 'flameSkill.openRepo' } {
+	return isWebviewMessage(value) && value.type === 'flameSkill.openRepo';
 }
 
 function isOfficialSourcesRequestMessage(value: unknown): value is OfficialSourcesRequestMessage {

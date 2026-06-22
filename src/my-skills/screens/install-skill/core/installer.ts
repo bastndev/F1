@@ -10,6 +10,10 @@ interface InstallChoice extends vscode.QuickPickItem {
 const MARKETPLACE_SOURCE_PATTERN = /^[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+$/;
 const MARKETPLACE_SKILL_ID_PATTERN = /^[A-Za-z0-9_.-]+(?:\/[A-Za-z0-9_.-]+)*$/;
 
+// Installs of skills owned by these accounts report telemetry so they count on skills.sh.
+// Every other source stays opt-out (telemetry disabled).
+const TELEMETRY_REPORTING_OWNERS = new Set(['bastndev']);
+
 export async function installMarketplaceSkill(skill: InstallMarketplaceSkill): Promise<boolean> {
 	if (!isSafeMarketplaceSkillReference(skill)) {
 		void vscode.window.showErrorMessage('[My Skills] Install failed: invalid marketplace skill reference.');
@@ -67,12 +71,16 @@ async function runSkillsInstall(skill: InstallMarketplaceSkill, choice: InstallC
 		'-y',
 	];
 
-	const env = {
-		...process.env,
-		DISABLE_TELEMETRY: '1',
-		DO_NOT_TRACK: '1',
-		SKILLS_NO_TELEMETRY: '1',
-	};
+	// Only owners we publish (e.g. bastndev) report installs so they count on skills.sh.
+	// All other sources keep telemetry disabled.
+	const env = shouldReportInstall(skill)
+		? { ...process.env }
+		: {
+			...process.env,
+			DISABLE_TELEMETRY: '1',
+			DO_NOT_TRACK: '1',
+			SKILLS_NO_TELEMETRY: '1',
+		};
 
 	return vscode.window.withProgress(
 		{
@@ -115,6 +123,11 @@ async function runSkillsInstall(skill: InstallMarketplaceSkill, choice: InstallC
 function isSafeMarketplaceSkillReference(skill: InstallMarketplaceSkill): boolean {
 	return MARKETPLACE_SOURCE_PATTERN.test(skill.source)
 		&& MARKETPLACE_SKILL_ID_PATTERN.test(skill.skillId);
+}
+
+function shouldReportInstall(skill: InstallMarketplaceSkill): boolean {
+	const owner = skill.source.split('/')[0]?.trim().toLowerCase();
+	return owner ? TELEMETRY_REPORTING_OWNERS.has(owner) : false;
 }
 
 function cleanCliOutput(value: string): string {

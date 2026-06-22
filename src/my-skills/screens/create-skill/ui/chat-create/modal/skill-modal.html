@@ -3,12 +3,21 @@
 		<div class="skill-modal-accent-bar"></div>
 
 		<div class="skill-modal-header">
-			<div class="skill-modal-icon" aria-hidden="true">
-				<svg viewBox="0 0 16 16" focusable="false">
-					<path d="M4 2.5h5.25L12 5.25v8.25H4z" />
-					<path d="M9 2.75V5.5h2.75" />
-					<path d="M6.5 8h3M6.5 10h3M6.5 12h1.5" />
-				</svg>
+			<div class="skill-modal-template is-fast-active" role="group" aria-label="Skill template" data-name-prompt-template>
+				<span class="skill-modal-template-slider" aria-hidden="true"></span>
+				<button type="button" class="skill-modal-template-btn" data-template="base" aria-pressed="false" title="Create instantly — no extra steps">
+					<svg viewBox="0 0 16 16" focusable="false" aria-hidden="true">
+						<path d="M4 2.5h5.25L12 5.25v8.25H4z" />
+						<path d="M9 2.75V5.5h2.75" />
+					</svg>
+					<span>Base</span>
+				</button>
+				<button type="button" class="skill-modal-template-btn is-active" data-template="fast" aria-pressed="true" title="Guided flow — pick category &amp; description">
+					<svg viewBox="0 0 16 16" focusable="false" aria-hidden="true">
+						<path d="M9 2.5 4.5 8.8H7l-.6 4.7L11 6.7H8.3z" />
+					</svg>
+					<span>Fast</span>
+				</button>
 			</div>
 			<h2 class="skill-modal-title">Name your skill</h2>
 			<p class="skill-modal-subtitle">Choose a unique identifier for your new skill</p>
