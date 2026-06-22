@@ -2,13 +2,13 @@ import * as vscode from 'vscode';
 import * as fs from 'fs';
 import { fetchAllTimeSkillsPage, fetchFlameSkills, fetchOfficialSkillsForOwner, fetchOfficialSkillSources, fetchTrending24hSkills, searchMarketplaceSkills } from '../screens/install-skill/core/marketplace';
 import { installMarketplaceSkill } from '../screens/install-skill/core/installer';
-import type { FlameSkillsRequestMessage, InstallMarketplaceSkill, InstallSkillInstallMessage, InstallSkillsMoreRequestMessage, InstallSkillsRequestMessage, InstallSkillsSearchRequestMessage, OfficialSkillSource, OfficialSkillsRequestMessage, OfficialSourcesRequestMessage, SkillsLockFile, Trending24hRequestMessage } from '../screens/install-skill/core/types';
+import type { InstallMarketplaceSkill, InstallSkillInstallMessage, InstallSkillsSearchRequestMessage, OfficialSkillSource, SkillsLockFile } from '../screens/install-skill/core/types';
 import { FLAME_SKILL_REPO_URL, FLAME_SKILL_SOURCE } from '../screens/install-skill/ui/panels/trending-skill/flame/data/flame-skills';
 import { ROOT_SKILL_FILE_NAMES, ROOT_SKILL_FOLDER_WATCH_PATTERNS, deleteWorkspaceRootSkill, getWorkspaceRootSkills, setWorkspaceRootSkillEnabled } from '../screens/local-skill/core/local-skills';
 import { deleteSavedSkill, enableSavedSkill, getSavedSkills, isSavedSkillInWorkspace, saveSkill } from '../screens/local-skill/core/saved-skills';
-import type { LocalSkillDeleteMessage, LocalSkillDeleteSavedMessage, LocalSkillEnableSavedMessage, LocalSkillOpenMessage, LocalSkillSaveMessage, LocalSkillSetEnabledMessage, LocalSkillsRequestMessage, LocalSkillsSavedRequestMessage } from '../screens/local-skill/core/types';
+import type { LocalSkillDeleteMessage, LocalSkillDeleteSavedMessage, LocalSkillEnableSavedMessage, LocalSkillOpenMessage, LocalSkillSaveMessage, LocalSkillSetEnabledMessage } from '../screens/local-skill/core/types';
 import { clearSearchRecommendationCache, getSearchRecommendationPreview, getSearchRecommendations, prewarmSearchRecommendations, type SearchRecommendationResult } from '../screens/create-skill/core/chat-search-core';
-import { createAgentsClaudeInstructionMarkdown, isAgentsClaudeInstructionFileName, type AgentsClaudeInstructionFileName } from '../screens/create-skill/core/agents-claude-md';
+import { createAgentsClaudeInstructionMarkdown, type AgentsClaudeInstructionFileName } from '../screens/create-skill/core/agents-claude-md';
 
 import { createDesignMdMarkdown } from '../screens/create-skill/ui/chat-create/design-md/core/markdown';
 import type { DesignMdSelection } from '../screens/create-skill/ui/chat-create/design-md/core/types';
@@ -19,68 +19,42 @@ import { createSkillBoilerplate } from '../screens/create-skill/core/chat-create
 import { translateQuery } from '../screens/create-skill/core/shared/project-translation';
 import { resetFastContext, updateFastDescription, updateFastName, updateFastTechnologies, waitForPendingBackgroundFetches } from '../screens/create-skill/core/chat-create-core/fast-context-manager';
 import { AsyncListSection } from './install-state';
+import {
+	isWebviewMessage,
+	isLocalSkillsRequestMessage,
+	isLocalSkillSetEnabledMessage,
+	isLocalSkillDeleteMessage,
+	isLocalSkillOpenMessage,
+	isLocalSkillSaveMessage,
+	isLocalSkillsSavedRequestMessage,
+	isLocalSkillEnableSavedMessage,
+	isLocalSkillDeleteSavedMessage,
+	isInstallSkillsRequestMessage,
+	isInstallSkillsMoreRequestMessage,
+	isInstallSkillsSearchRequestMessage,
+	isCreateSkillSearchRequestMessage,
+	isCreateSkillSearchPrefetchMessage,
+	isCreateSkillSearchTypingMessage,
+	isCreateSkillFastNameConfirmedMessage,
+	isCreateSkillFastTechsSelectedMessage,
+	isCreateSkillRootInstructionCreateMessage,
+	isCreateSkillDesignCreateMessage,
+	isTrending24hRequestMessage,
+	isFlameSkillsRequestMessage,
+	isFlameSkillOpenRepoMessage,
+	isOfficialSourcesRequestMessage,
+	isOfficialSkillsRequestMessage,
+	isInstallSkillInstallMessage,
+	isCreateSkillChatCreateMessage,
+	type CreateSkillSearchRequestMessage,
+	type CreateSkillRootInstructionCreateMessage,
+	type CreateSkillDesignCreateMessage,
+	type CreateSkillChatCreateMessage,
+	type CreateSkillDesignSelectionMessage,
+} from './messages';
 
 const CREATE_ROOT_FILE_NAMES = ['AGENTS.md', 'CLAUDE.md', 'DESIGN.md'] as const;
 const CREATE_ROOT_INSTRUCTION_MINIMUM_LOADING_MS = 1200;
-
-interface CreateSkillSearchRequestMessage {
-	type: 'createSkill.search.request';
-	query: string;
-	requestId: number;
-	limit?: number;
-}
-
-interface CreateSkillSearchPrefetchMessage {
-	type: 'createSkill.search.prefetch';
-}
-
-interface CreateSkillSearchTypingMessage {
-	type: 'createSkill.search.typing';
-	query: string;
-}
-
-interface CreateSkillFastNameConfirmedMessage {
-	type: 'createSkill.fast.nameConfirmed';
-	name: string;
-}
-
-interface CreateSkillFastTechsSelectedMessage {
-	type: 'createSkill.fast.techsSelected';
-	categories: string[];
-}
-
-interface CreateSkillRootInstructionCreateMessage {
-	type: 'createSkill.rootFile.create';
-	fileName: AgentsClaudeInstructionFileName;
-}
-
-interface CreateSkillDesignSelectionMessage {
-	colorId?: string;
-	typographyId?: string;
-	styleId?: string;
-	skipColor?: boolean;
-	skipTypography?: boolean;
-	skipStyle?: boolean;
-}
-
-interface CreateSkillDesignCreateMessage {
-	type: 'createSkill.design.create';
-	selection: CreateSkillDesignSelectionMessage;
-	overwrite?: boolean;
-}
-
-interface CreateSkillChatTypingMessage {
-	type: 'createSkill.chat.typing';
-	query: string;
-}
-
-interface CreateSkillChatCreateMessage {
-	type: 'createSkill.chat.create';
-	name: string;
-	query: string;
-	target: 'agents' | 'claude';
-	template: 'base' | 'fast' | 'ai';
-}
 
 type CreateSkillDesignStatus = 'writing' | 'created' | 'error';
 type CreateSkillRootInstructionStatus = 'writing' | 'created' | 'error';
@@ -1193,201 +1167,6 @@ export class MySkillsViewProvider implements vscode.WebviewViewProvider {
 	}
 }
 
-function isWebviewMessage(value: unknown): value is { type: string } {
-	return Boolean(value) && typeof value === 'object' && typeof (value as { type?: unknown }).type === 'string';
-}
-
-function isLocalSkillsRequestMessage(value: unknown): value is LocalSkillsRequestMessage {
-	return isWebviewMessage(value) && value.type === 'localSkills.request';
-}
-
-function isLocalSkillSetEnabledMessage(value: unknown): value is LocalSkillSetEnabledMessage {
-	if (!isWebviewMessage(value) || value.type !== 'localSkill.setEnabled') {
-		return false;
-	}
-
-	const message = value as { id?: unknown; enabled?: unknown };
-	return typeof message.id === 'string' && typeof message.enabled === 'boolean';
-}
-
-function isLocalSkillDeleteMessage(value: unknown): value is LocalSkillDeleteMessage {
-	if (!isWebviewMessage(value) || value.type !== 'localSkill.delete') {
-		return false;
-	}
-
-	const message = value as { id?: unknown };
-	return typeof message.id === 'string';
-}
-
-function isLocalSkillOpenMessage(value: unknown): value is LocalSkillOpenMessage {
-	if (!isWebviewMessage(value) || value.type !== 'localSkill.open') {
-		return false;
-	}
-
-	const message = value as { id?: unknown };
-	return typeof message.id === 'string';
-}
-
-function isLocalSkillSaveMessage(value: unknown): value is LocalSkillSaveMessage {
-	if (!isWebviewMessage(value) || value.type !== 'localSkill.save') {
-		return false;
-	}
-
-	const message = value as { id?: unknown };
-	return typeof message.id === 'string';
-}
-
-function isLocalSkillsSavedRequestMessage(value: unknown): value is LocalSkillsSavedRequestMessage {
-	return isWebviewMessage(value) && value.type === 'localSkills.saved.request';
-}
-
-function isLocalSkillEnableSavedMessage(value: unknown): value is LocalSkillEnableSavedMessage {
-	if (!isWebviewMessage(value) || value.type !== 'localSkill.enableSaved') {
-		return false;
-	}
-
-	const message = value as { id?: unknown };
-	return typeof message.id === 'string';
-}
-
-function isLocalSkillDeleteSavedMessage(value: unknown): value is LocalSkillDeleteSavedMessage {
-	if (!isWebviewMessage(value) || value.type !== 'localSkill.deleteSaved') {
-		return false;
-	}
-
-	const message = value as { id?: unknown };
-	return typeof message.id === 'string';
-}
-
-function isInstallSkillsRequestMessage(value: unknown): value is InstallSkillsRequestMessage {
-	if (!isWebviewMessage(value) || value.type !== 'installSkills.request') {
-		return false;
-	}
-
-	const message = value as { refresh?: unknown };
-	return message.refresh === undefined || typeof message.refresh === 'boolean';
-}
-
-function isInstallSkillsMoreRequestMessage(value: unknown): value is InstallSkillsMoreRequestMessage {
-	return isWebviewMessage(value) && value.type === 'installSkills.more.request';
-}
-
-function isInstallSkillsSearchRequestMessage(value: unknown): value is InstallSkillsSearchRequestMessage {
-	if (!isWebviewMessage(value) || value.type !== 'installSkills.search.request') {
-		return false;
-	}
-
-	const message = value as { query?: unknown; requestId?: unknown; limit?: unknown };
-	return typeof message.query === 'string'
-		&& typeof message.requestId === 'number'
-		&& (message.limit === undefined || typeof message.limit === 'number');
-}
-
-function isCreateSkillSearchRequestMessage(value: unknown): value is CreateSkillSearchRequestMessage {
-	if (!isWebviewMessage(value) || value.type !== 'createSkill.search.request') {
-		return false;
-	}
-
-	const message = value as { query?: unknown; requestId?: unknown; limit?: unknown };
-	return typeof message.query === 'string'
-		&& typeof message.requestId === 'number'
-		&& (message.limit === undefined || typeof message.limit === 'number');
-}
-
-function isCreateSkillSearchPrefetchMessage(value: unknown): value is CreateSkillSearchPrefetchMessage {
-	return isWebviewMessage(value) && value.type === 'createSkill.search.prefetch';
-}
-
-function isCreateSkillSearchTypingMessage(value: unknown): value is CreateSkillSearchTypingMessage {
-	if (!isWebviewMessage(value) || value.type !== 'createSkill.search.typing') {
-		return false;
-	}
-
-	const message = value as { query?: unknown };
-	return typeof message.query === 'string';
-}
-
-function isCreateSkillFastNameConfirmedMessage(value: unknown): value is CreateSkillFastNameConfirmedMessage {
-	if (!isWebviewMessage(value) || value.type !== 'createSkill.fast.nameConfirmed') {
-		return false;
-	}
-
-	const message = value as { name?: unknown };
-	return typeof message.name === 'string';
-}
-
-function isCreateSkillFastTechsSelectedMessage(value: unknown): value is CreateSkillFastTechsSelectedMessage {
-	if (!isWebviewMessage(value) || value.type !== 'createSkill.fast.techsSelected') {
-		return false;
-	}
-
-	const message = value as { categories?: unknown };
-	return Array.isArray(message.categories) && message.categories.every(cat => typeof cat === 'string');
-}
-
-function isCreateSkillRootInstructionCreateMessage(value: unknown): value is CreateSkillRootInstructionCreateMessage {
-	if (!isWebviewMessage(value) || value.type !== 'createSkill.rootFile.create') {
-		return false;
-	}
-
-	const message = value as { fileName?: unknown };
-	return isAgentsClaudeInstructionFileName(message.fileName);
-}
-
-function isCreateSkillDesignCreateMessage(value: unknown): value is CreateSkillDesignCreateMessage {
-	if (!isWebviewMessage(value) || value.type !== 'createSkill.design.create') {
-		return false;
-	}
-
-	const message = value as { selection?: unknown; overwrite?: unknown };
-	if (!message.selection || typeof message.selection !== 'object') {
-		return false;
-	}
-
-	const selection = message.selection as { colorId?: unknown; typographyId?: unknown; styleId?: unknown; skipColor?: unknown; skipTypography?: unknown; skipStyle?: unknown };
-	return (selection.colorId === undefined || typeof selection.colorId === 'string')
-		&& (selection.typographyId === undefined || typeof selection.typographyId === 'string')
-		&& (selection.styleId === undefined || typeof selection.styleId === 'string')
-		&& (selection.skipColor === undefined || typeof selection.skipColor === 'boolean')
-		&& (selection.skipTypography === undefined || typeof selection.skipTypography === 'boolean')
-		&& (selection.skipStyle === undefined || typeof selection.skipStyle === 'boolean')
-		&& (message.overwrite === undefined || typeof message.overwrite === 'boolean');
-}
-
-function isTrending24hRequestMessage(value: unknown): value is Trending24hRequestMessage {
-	return isWebviewMessage(value) && value.type === 'trending24h.request';
-}
-
-function isFlameSkillsRequestMessage(value: unknown): value is FlameSkillsRequestMessage {
-	return isWebviewMessage(value) && value.type === 'flameSkills.request';
-}
-
-function isFlameSkillOpenRepoMessage(value: unknown): value is { type: 'flameSkill.openRepo' } {
-	return isWebviewMessage(value) && value.type === 'flameSkill.openRepo';
-}
-
-function isOfficialSourcesRequestMessage(value: unknown): value is OfficialSourcesRequestMessage {
-	return isWebviewMessage(value) && value.type === 'officialSources.request';
-}
-
-function isOfficialSkillsRequestMessage(value: unknown): value is OfficialSkillsRequestMessage {
-	if (!isWebviewMessage(value) || value.type !== 'officialSkills.request') {
-		return false;
-	}
-
-	const message = value as { owner?: unknown };
-	return typeof message.owner === 'string';
-}
-
-function isInstallSkillInstallMessage(value: unknown): value is InstallSkillInstallMessage {
-	if (!isWebviewMessage(value) || value.type !== 'installSkill.install') {
-		return false;
-	}
-
-	const message = value as { id?: unknown };
-	return typeof message.id === 'string';
-}
-
 function getNonce(): string {
 	let text = '';
 	const possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
@@ -1523,19 +1302,4 @@ function mergeMarketplaceSkills(
 
 function isMarketplaceFolderSkillId(skillId: string): boolean {
 	return skillId.startsWith('.agents/skills/') || skillId.startsWith('.claude/skills/');
-}
-
-function isCreateSkillChatTypingMessage(value: unknown): value is CreateSkillChatTypingMessage {
-	return isWebviewMessage(value)
-		&& value.type === 'createSkill.chat.typing'
-		&& typeof (value as any).query === 'string';
-}
-
-function isCreateSkillChatCreateMessage(value: unknown): value is CreateSkillChatCreateMessage {
-	return isWebviewMessage(value)
-		&& value.type === 'createSkill.chat.create'
-		&& typeof (value as any).name === 'string'
-		&& typeof (value as any).query === 'string'
-		&& ((value as any).target === 'agents' || (value as any).target === 'claude')
-		&& ((value as any).template === 'base' || (value as any).template === 'fast' || (value as any).template === 'ai');
 }
