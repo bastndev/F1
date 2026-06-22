@@ -30,6 +30,7 @@ export const PERSONAL_MISTAKES: Record<string, string> = {
 	'autorizacion': 'autorización',
 	'achiva': 'archiva',
 	'biendo': 'viendo',
+	'defaul': 'default',
 
 
 
