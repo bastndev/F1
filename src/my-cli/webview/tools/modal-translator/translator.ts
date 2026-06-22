@@ -226,9 +226,18 @@ function initializeTranslator(host: HTMLElement, context: ToolContext) {
 	// Spanish. Until a language is picked, default to English — i.e. don't
 	// translate at all (English is short-circuited below). Assuming Spanish for a
 	// fresh install would silently mistranslate for everyone who isn't Spanish.
-	const targetLang = getStoredPromptLang() ?? 'en';
+	const storedLang = getStoredPromptLang();
+	const targetLang = storedLang ?? 'en';
 	const targetInfo = getPromptLanguage(targetLang);
 	const targetLabel = targetInfo?.label ?? 'English';
+
+	// Empty-state copy: with no language chosen yet there's nothing to translate
+	// to, so point the user at the prompt's picker instead of saying "translate to
+	// English" (which would read as a no-op). Once a language is set, the normal
+	// "select text →" hint applies.
+	const emptyStateMessage = storedLang
+		? `Select or copy text in the terminal to translate it to ${targetLabel}.`
+		: 'Pick a language in the prompt (🌐) to translate CLI output.';
 
 	// Reflect the target in the header direction row: "cli → 🇪🇸 spanish".
 	const langToEl = host.querySelector<HTMLElement>('.lang-to');
@@ -294,7 +303,7 @@ function initializeTranslator(host: HTMLElement, context: ToolContext) {
 		if (!extracted) {
 			if (textEl) {
 				textEl.classList.remove('is-rendered');
-				textEl.textContent = `Select or copy text in the terminal to translate it to ${targetLabel}.`;
+				textEl.textContent = emptyStateMessage;
 				textEl.classList.add('placeholder');
 			}
 			// Nothing real on screen — only the hint — so there's nothing to copy.
@@ -448,7 +457,7 @@ function initializeTranslator(host: HTMLElement, context: ToolContext) {
 			textEl.textContent = extracted;
 			textEl.classList.add('placeholder');
 		} else {
-			textEl.textContent = `Select or copy text in the terminal to translate it to ${targetLabel}.`;
+			textEl.textContent = emptyStateMessage;
 			textEl.classList.add('placeholder');
 		}
 	}
