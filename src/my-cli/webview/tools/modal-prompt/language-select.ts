@@ -82,6 +82,11 @@ export function initLanguageSelect(
 		indicator.replaceChildren();
 		const lang = current ? getPromptLanguage(current) : undefined;
 
+		// First-run nudge: the composer stays locked until a language is chosen, so
+		// pulse the globe (CSS .is-unset) to point the user at the picker. Cleared
+		// the moment a language is selected — and it persists, so it never returns.
+		trigger.classList.toggle('is-unset', !lang);
+
 		if (!lang) {
 			const globe = document.createElement('span');
 			globe.className = 'prompt-lang-flag';

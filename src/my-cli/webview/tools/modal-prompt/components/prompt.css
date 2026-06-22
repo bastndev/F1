@@ -120,6 +120,43 @@
   border-color: color-mix(in srgb, var(--agent-accent, #534AB7) 50%, transparent);
 }
 
+/* First-run nudge: until a language is picked the composer is locked, so the
+   globe breathes with a soft accent glow to pull the eye to the picker. The
+   .is-unset class is dropped the instant a language is chosen (language-select.ts)
+   and the choice persists, so this only ever plays on first install. */
+@keyframes prompt-lang-pulse {
+  0%, 100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 color-mix(in srgb, var(--agent-accent, #534AB7) 45%, transparent);
+  }
+  50% {
+    transform: scale(1.08);
+    box-shadow: 0 0 10px 3px color-mix(in srgb, var(--agent-accent, #534AB7) 38%, transparent);
+  }
+}
+
+.prompt-lang-trigger.is-unset {
+  background: color-mix(in srgb, var(--agent-accent, #534AB7) 26%, transparent);
+  border-color: color-mix(in srgb, var(--agent-accent, #534AB7) 55%, transparent);
+  transform-origin: center;
+  animation: prompt-lang-pulse 1.8s ease-in-out infinite;
+}
+
+/* Once they're interacting with it the point is made — hold it still. */
+.prompt-lang-trigger.is-unset:hover,
+.prompt-lang-trigger.is-unset[aria-expanded="true"] {
+  animation: none;
+  transform: scale(1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .prompt-lang-trigger.is-unset {
+    animation: none;
+    transform: none;
+    box-shadow: 0 0 8px 2px color-mix(in srgb, var(--agent-accent, #534AB7) 30%, transparent);
+  }
+}
+
 .prompt-lang-current {
   display: inline-flex;
   align-items: center;

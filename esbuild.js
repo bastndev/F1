@@ -45,6 +45,17 @@ const collectDirectories = (rootDir) => {
 	return directories;
 };
 
+// The finish-sound WAVs live under src/my-cli/shared, which .vscodeignore drops
+// from the package (it only keeps src/shared + src/my-skills assets). The host
+// reads them at runtime via __dirname (= dist/), so copy them into dist where
+// they actually ship. See core/voice/finish-sound.ts.
+const copyVoiceAssets = () => {
+	copyDirectoryAssets(
+		path.join('src', 'my-cli', 'shared', 'voice', 'wav'),
+		path.join('dist', 'my-cli', 'shared', 'voice', 'wav')
+	);
+};
+
 const copyWebviewAssets = () => {
 	const outDir = path.join('dist', 'my-cli', 'webview');
 
@@ -52,6 +63,7 @@ const copyWebviewAssets = () => {
 	// dist/my-cli/webview (HTML, CSS, SVG icons). xterm.css ships under vendor/.
 	copyDirectoryAssets(path.join('src', 'my-cli', 'webview'), outDir);
 	copyXtermAssets(outDir);
+	copyVoiceAssets();
 };
 
 const watchWebviewAssets = () => {

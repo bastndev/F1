@@ -30,6 +30,8 @@ type TabControllerOptions = {
 	onDismissToolModal?: () => void;
 	onOpenTool?: (tool: CliToolId) => void;
 	onPromptFilterChange?: (enabled: boolean) => void;
+	/** Voice Finish toggle flipped — host is told the new enabled state + language. */
+	onVoiceFinishChange?: (enabled: boolean) => void;
 	/** Which tool modal is currently open, if any (used to gate shortcuts). */
 	getOpenToolModal?: () => CliToolId | null;
 };
@@ -79,6 +81,29 @@ const writePromptFilterPreference = (enabled: boolean) => {
 	}
 };
 
+// Voice Finish ("ding when the CLI is done") — ON by default so the feature is
+// discovered; an explicit off is remembered (null = never touched → on). Persists
+// across reload/restart. Read is exported so terminal.ts can fold it into the
+// cli.voiceFinish config it pushes to the host alongside the language.
+const voiceFinishStorageKey = 'my-cli.voiceFinish.enabled';
+
+export const readVoiceFinishPreference = () => {
+	try {
+		const storedValue = window.localStorage.getItem(voiceFinishStorageKey);
+		return storedValue === null ? true : storedValue === 'true';
+	} catch {
+		return true;
+	}
+};
+
+const writeVoiceFinishPreference = (enabled: boolean) => {
+	try {
+		window.localStorage.setItem(voiceFinishStorageKey, String(enabled));
+	} catch {
+		// Ignore unavailable webview storage.
+	}
+};
+
 
 export const createTabController = (options: TabControllerOptions) => {
 	const createButton = getRequiredElement<HTMLButtonElement>('cli-create-button');
@@ -87,6 +112,7 @@ export const createTabController = (options: TabControllerOptions) => {
 	const toolsPopover = getRequiredElement<HTMLDivElement>('cli-tools-popover');
 	const promptFilterToggle = getRequiredElement<HTMLInputElement>('cli-prompt-filter-toggle');
 	const memoryToggle = getRequiredElement<HTMLInputElement>('cli-memory-toggle');
+	const voiceFinishToggle = getRequiredElement<HTMLInputElement>('cli-voice-finish-toggle');
 	const memoryActionButton = getRequiredElement<HTMLButtonElement>('cli-memory-action-button');
 	const agentButton = getRequiredElement<HTMLButtonElement>('cli-agent-button');
 	const agentLabel = getRequiredElement<HTMLSpanElement>('cli-agent-label');
@@ -484,6 +510,12 @@ export const createTabController = (options: TabControllerOptions) => {
 		setToolsPopoverOpen(false);
 	});
 
+	voiceFinishToggle.addEventListener('change', () => {
+		const enabled = voiceFinishToggle.checked;
+		writeVoiceFinishPreference(enabled);
+		options.onVoiceFinishChange?.(enabled);
+	});
+
 	toolsPopover.addEventListener('click', (event) => {
 		event.stopPropagation();
 
@@ -498,6 +530,9 @@ export const createTabController = (options: TabControllerOptions) => {
 
 	setPromptFilterEnabled(isPromptFilterEnabled, false);
 	setMemoryEnabled(false, false);
+	// Restore the persisted Voice Finish state into the checkbox; the host is
+	// (re)synced separately from terminal.ts so it also has the current language.
+	voiceFinishToggle.checked = readVoiceFinishPreference();
 
 	document.addEventListener('click', () => {
 		closeFloatingPanels();

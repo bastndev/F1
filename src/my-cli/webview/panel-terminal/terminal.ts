@@ -1,6 +1,7 @@
 import { FitAddon } from '@xterm/addon-fit';
 import { Terminal } from '@xterm/xterm';
-import { createTabController, type CliAgentIcon } from '../panel-tab/tab';
+import { createTabController, readVoiceFinishPreference, type CliAgentIcon } from '../panel-tab/tab';
+import { getStoredPromptLang } from '../tools/modal-prompt/language-select';
 import { createCliCreateMessage } from '../../shared/agent-launch-guard';
 import { getAgentSlug as resolveAgentSlug } from '../../shared/agents';
 import { isLynxPanelNavChord } from '../../../shared/keymaps/lynx-keymap/index';
@@ -40,6 +41,19 @@ type TerminalView = {
 declare const acquireVsCodeApi: () => VsCodeApi;
 
 const vscode = acquireVsCodeApi();
+
+// Push the Voice Finish config (enabled + which language's WAV to play) to the
+// host. The host detects "response done" and plays the cue even when this panel
+// is hidden, so it needs both flags pushed while the webview is alive — on
+// startup, when the toggle flips, and on each submit (so the language is fresh).
+const sendVoiceFinishConfig = () => {
+	vscode.postMessage({
+		type: 'cli.voiceFinish',
+		enabled: readVoiceFinishPreference(),
+		lang: getStoredPromptLang() ?? 'en'
+	});
+};
+
 const customCliIconLabel = '__custom-cli__';
 const sessions = new Map<string, CliSession>();
 const terminals = new Map<string, TerminalView>();
@@ -573,6 +587,9 @@ const toolsController = layoutRight
 				}
 				vscode.postMessage({ type: 'cli.input', sessionId, data });
 				if (options?.submit) {
+					// Refresh the host's Voice Finish config so the cue matches the
+					// language the user is writing in right now for this response.
+					sendVoiceFinishConfig();
 					// Enter must arrive as its own write or TUI CLIs treat it as part
 					// of the paste. Copilot digests pastes noticeably slower than the
 					// rest. Route mentions are special in most CLI TUIs: the first
@@ -669,6 +686,7 @@ const tabController = createTabController({
 			terminals.get(activeSessionId)?.terminal.focus();
 		}
 	},
+	onVoiceFinishChange: () => sendVoiceFinishConfig(),
 	getOpenToolModal: () => toolsController?.getOpenTool() ?? null
 });
 
@@ -1180,5 +1198,9 @@ document.addEventListener('visibilitychange', () => {
 });
 
 initMemoryHandler((message) => vscode.postMessage(message));
+
+// Seed the host with the persisted Voice Finish state on load — the host's copy
+// resets each time this (non-retained) webview is rebuilt on a panel switch.
+sendVoiceFinishConfig();
 
 vscode.postMessage({ type: 'cli.ready' });
