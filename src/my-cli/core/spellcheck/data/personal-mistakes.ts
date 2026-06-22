@@ -31,6 +31,7 @@ export const PERSONAL_MISTAKES: Record<string, string> = {
 	'achiva': 'archiva',
 	'biendo': 'viendo',
 	'defaul': 'default',
+	'telemetria': 'telemetría',
 
 
 
