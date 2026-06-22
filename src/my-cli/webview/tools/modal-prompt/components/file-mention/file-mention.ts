@@ -287,7 +287,12 @@ export function mountFileMentionPicker(
 		mentionStart = -1;
 		currentQuery = '';
 		document.removeEventListener('click', onOutsideClick);
-		// Note: we intentionally keep cachedEntries for the rest of the prompt session
+		// Drop the cache so the *next* "@" trigger refetches from the host. This
+		// is what makes folders/files created while the prompt stays open show up:
+		// delete the whole "@path", type "@" again → fresh findFiles. During a
+		// single open session (typing/filtering after "@") the cache still serves
+		// every keystroke, so we never re-hit the host mid-query.
+		cachedEntries = null;
 	};
 
 	const onOutsideClick = (e: MouseEvent) => {
