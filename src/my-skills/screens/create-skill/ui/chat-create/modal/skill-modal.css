@@ -41,20 +41,39 @@
 	transform: translateY(0) scale(1);
 }
 
-/* Accent gradient bar at top */
+/* Accent gradient bar at top — fades to transparent at both ends */
 .skill-modal-accent-bar {
 	position: absolute;
 	top: 0;
 	left: 0;
 	right: 0;
-	height: 3px;
+	height: 2px;
 	background: linear-gradient(
 		90deg,
-		var(--create-accent) 0%,
-		color-mix(in srgb, var(--create-accent) 60%, #ffffff) 50%,
-		var(--create-accent) 100%
+		transparent 0%,
+		color-mix(in srgb, var(--create-accent) 45%, transparent) 20%,
+		color-mix(in srgb, var(--create-accent) 92%, #ffffff) 50%,
+		color-mix(in srgb, var(--create-accent) 45%, transparent) 80%,
+		transparent 100%
 	);
-	opacity: 0.85;
+	opacity: 0.95;
+}
+
+/* Soft bloom beneath the bar so the center glows toward the panel */
+.skill-modal-accent-bar::before {
+	content: "";
+	position: absolute;
+	top: -1px;
+	left: 12%;
+	right: 12%;
+	height: 12px;
+	background: radial-gradient(
+		60% 100% at 50% 0%,
+		color-mix(in srgb, var(--create-accent) 38%, transparent) 0%,
+		transparent 72%
+	);
+	filter: blur(4px);
+	pointer-events: none;
 }
 
 .skill-modal-accent-bar::after {
