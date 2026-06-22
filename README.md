@@ -1,8 +1,13 @@
 <div align="center">
 
-<img src="icon.png" alt="F1" width="96" />
+![Lynx F1](https://raw.githubusercontent.com/bastndev/F1/refs/heads/main/public/banner.webp)
 
-# F1
+<p align="center">
+  <img src="https://vsmarketplacebadges.dev/version-short/bastndev.f1.jpg?style=for-the-badge&colorA=000000&colorB=FFFFFF&label=VERSION" alt="Version">&nbsp;
+  <img src="https://vsmarketplacebadges.dev/downloads-short/bastndev.f1.jpg?style=for-the-badge&colorA=000000&colorB=FFFFFF&label=Downloads" alt="Downloads">&nbsp;
+  <img src="https://vsmarketplacebadges.dev/rating-short/bastndev.f1.jpg?style=for-the-badge&colorA=000000&colorB=FFFFFF&label=RATING" alt="Rating">&nbsp;
+  <a href="https://github.com/bastndev/F1"><img src="https://raw.githubusercontent.com/bastndev/F1/refs/heads/main/public/github/icons/star.png" width="26.6px" alt="Github Star ⭐️"></a>
+</p>
 
 **Launch and manage every AI coding CLI from one VS Code panel.**
 
@@ -21,6 +26,7 @@ F1 turns VS Code into a hub for AI coding agents. Open **Claude Code, Codex, Cop
 ## ✨ Features
 
 ### 🖥️ CLI Hub
+
 - Run multiple AI coding CLIs side by side in embedded [xterm.js](https://xtermjs.org/) terminals.
 - Fuzzy-search launcher to pick an agent; press **F1** to jump straight to the panel.
 - Built-in tools alongside every session:
@@ -31,11 +37,13 @@ F1 turns VS Code into a hub for AI coding agents. Open **Claude Code, Codex, Cop
 - **Voice** — read replies aloud, plus an optional "ding" when an agent finishes while your attention is elsewhere.
 
 ### 🧩 My Skills
+
 - Install skills from the marketplace — **All‑time**, **Trending (24h)**, **🔥 Flame**, and **Official** sources.
 - Create skills with guided generators for `AGENTS.md`, `CLAUDE.md`, and `DESIGN.md`, plus fast templates by category.
 - Manage local and saved skills per workspace.
 
 ### 🧠 My Memory
+
 - Generate a committed `.f1/` project‑context map so any CLI starts with cheap, shared context.
 - Per‑project toggle; instruction files (`AGENTS.md` / `CLAUDE.md`) stay pointed at the context.
 
@@ -50,11 +58,11 @@ F1 turns VS Code into a hub for AI coding agents. Open **Claude Code, Codex, Cop
 
 ## ⌨️ Keyboard shortcuts
 
-| Shortcut | Action |
-|---|---|
-| `F1` | Focus the CLI Hub panel |
-| `Ctrl+3` | Focus the My Skills panel |
-| `Ctrl+` `` ` `` | Toggle maximized panel |
+| Shortcut        | Action                    |
+| --------------- | ------------------------- |
+| `F1`            | Focus the CLI Hub panel   |
+| `Ctrl+3`        | Focus the My Skills panel |
+| `Ctrl+` `` ` `` | Toggle maximized panel    |
 
 ## 📋 Requirements
 
