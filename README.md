@@ -1,16 +1,29 @@
 <div align="center">
 
-<img src="icon.png" alt="F1" width="96" />
+![Lynx F1](https://raw.githubusercontent.com/bastndev/F1/refs/heads/main/public/banner.webp)
 
-# F1
+<p>
+  <img src="https://vsmarketplacebadges.dev/version-short/bastndev.f1.jpg?style=for-the-badge&colorA=000000&colorB=FFFFFF&label=VERSION" alt="Version">&nbsp;
+  <img src="https://vsmarketplacebadges.dev/downloads-short/bastndev.f1.jpg?style=for-the-badge&colorA=000000&colorB=FFFFFF&label=Downloads" alt="Downloads">&nbsp;
+  <img src="https://vsmarketplacebadges.dev/rating-short/bastndev.f1.jpg?style=for-the-badge&colorA=000000&colorB=FFFFFF&label=RATING" alt="Rating">&nbsp;
+  <a href="https://github.com/bastndev/F1"><img src="https://raw.githubusercontent.com/bastndev/F1/refs/heads/main/public/github/icons/star.png" width="26.6px" alt="Github Star ⭐️"></a>
+</p>
+
+<p >
+  <a href="https://github.com/bastndev/F1/blob/main/public/docs/README_ES.md">Español 🇪🇸</a> |
+  <a href="https://github.com/bastndev/F1/blob/main/public/docs/README_ZH.md">中文 🇨🇳</a> |
+  <a href="https://github.com/bastndev/F1/blob/main/public/docs/README_DE.md">Deutsch 🇩🇪</a> |
+  <a href="https://github.com/bastndev/F1/blob/main/public/docs/README_FR.md">Français 🇫🇷</a> |
+  <a href="https://github.com/bastndev/F1/blob/main/public/docs/README_JA.md">日本語 🇯🇵</a> |
+  <a href="https://github.com/bastndev/F1/blob/main/public/docs/README_KO.md">한국어 🇰🇷</a> |
+  <a href="https://github.com/bastndev/F1/blob/main/public/docs/README_PT.md">Português 🇧🇷</a> |
+  <a href="https://github.com/bastndev/F1/blob/main/public/docs/README_RU.md">Русский 🇷🇺</a> |
+  <a href="https://github.com/bastndev/F1/blob/main/public/docs/README_VI.md">Tiếng Việt 🇻🇳</a> |
+  <a href="https://github.com/bastndev/F1/blob/main/public/docs/README_HI.md">हिन्दी 🇮🇳</a> |
+  <a href="https://github.com/bastndev/F1/blob/main/public/docs/README_AR.md">العربية 🇸🇦</a><span>...</span>
+</p>
 
 **Launch and manage every AI coding CLI from one VS Code panel.**
-
-Available now on VS Code • Cursor • Windsurf • Trae.ai • Kiro • Firebase Studio
-
-[![Version](https://img.shields.io/visual-studio-marketplace/v/bastndev.f1?color=0a0a0a&label=Marketplace)](https://marketplace.visualstudio.com/items?itemName=bastndev.f1)
-[![Installs](https://img.shields.io/visual-studio-marketplace/i/bastndev.f1?color=0a0a0a)](https://marketplace.visualstudio.com/items?itemName=bastndev.f1)
-[![License](https://img.shields.io/badge/license-MIT-0a0a0a.svg)](LICENSE)
 
 </div>
 
@@ -18,9 +31,10 @@ Available now on VS Code • Cursor • Windsurf • Trae.ai • Kiro • Fireba
 
 F1 turns VS Code into a hub for AI coding agents. Open **Claude Code, Codex, Copilot, Cursor, Kiro, Kilo Code, OpenCode, Grok, Antigravity** — or any custom CLI — in embedded terminals, switch between them instantly, write better prompts, and keep your project's context cheap to load for every agent.
 
-## ✨ Features
+## |::: Features
 
 ### 🖥️ CLI Hub
+
 - Run multiple AI coding CLIs side by side in embedded [xterm.js](https://xtermjs.org/) terminals.
 - Fuzzy-search launcher to pick an agent; press **F1** to jump straight to the panel.
 - Built-in tools alongside every session:
@@ -31,11 +45,13 @@ F1 turns VS Code into a hub for AI coding agents. Open **Claude Code, Codex, Cop
 - **Voice** — read replies aloud, plus an optional "ding" when an agent finishes while your attention is elsewhere.
 
 ### 🧩 My Skills
+
 - Install skills from the marketplace — **All‑time**, **Trending (24h)**, **🔥 Flame**, and **Official** sources.
 - Create skills with guided generators for `AGENTS.md`, `CLAUDE.md`, and `DESIGN.md`, plus fast templates by category.
 - Manage local and saved skills per workspace.
 
 ### 🧠 My Memory
+
 - Generate a committed `.f1/` project‑context map so any CLI starts with cheap, shared context.
 - Per‑project toggle; instruction files (`AGENTS.md` / `CLAUDE.md`) stay pointed at the context.
 
@@ -50,11 +66,11 @@ F1 turns VS Code into a hub for AI coding agents. Open **Claude Code, Codex, Cop
 
 ## ⌨️ Keyboard shortcuts
 
-| Shortcut | Action |
-|---|---|
-| `F1` | Focus the CLI Hub panel |
-| `Ctrl+3` | Focus the My Skills panel |
-| `Ctrl+` `` ` `` | Toggle maximized panel |
+| Shortcut        | Action                    |
+| --------------- | ------------------------- |
+| `F1`            | Focus the CLI Hub panel   |
+| `Ctrl+3`        | Focus the My Skills panel |
+| `Ctrl+` `` ` `` | Toggle maximized panel    |
 
 ## 📋 Requirements
 
