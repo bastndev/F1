@@ -71,12 +71,24 @@ export class MyCliViewProvider implements vscode.WebviewViewProvider, vscode.Dis
 		// never fires on a panel switch. retainContextWhenHidden then leaves xterm's
 		// canvas/viewport stale, painting a black rectangle on return. onDidChangeVisibility
 		// is the only reliable signal — relay it so the webview re-fits and repaints.
+		// Voice Finish should only ring when the user's attention is elsewhere.
+		// "Watching" = the F1 panel is visible AND the window has OS focus; in that
+		// case suppress the cue. Any other state (other panel, collapsed, alt-tabbed
+		// to another app, or the panel torn down while hidden) lets it play.
+		const updateFinishSoundGate = () => {
+			this.sessionManager.setFinishSoundSuppressed(webviewView.visible && vscode.window.state.focused);
+		};
+		updateFinishSoundGate();
+		const windowStateSub = vscode.window.onDidChangeWindowState(updateFinishSoundGate);
+
 		webviewView.onDidChangeVisibility(() => {
+			updateFinishSoundGate();
 			void webviewView.webview.postMessage({
 				type: webviewView.visible ? 'cli.visible' : 'cli.hidden'
 			});
 		});
 		webviewView.onDidDispose(() => {
+			windowStateSub.dispose();
 			this.sessionManager.detach();
 			this._disposeMemoryWatcher();
 			this._activeWebview = undefined;

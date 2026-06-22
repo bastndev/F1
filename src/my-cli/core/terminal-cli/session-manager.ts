@@ -82,6 +82,10 @@ export class CliSessionManager implements vscode.Disposable {
 	// default; the language picks which WAV cue plays when a response settles.
 	private voiceFinishEnabled = false;
 	private voiceFinishLang = 'en';
+	// True while the user is actually watching the CLI (panel visible + window
+	// focused). The cue is meant to notify you when you're elsewhere, so it stays
+	// silent in that case. Driven by the provider's visibility/focus listeners.
+	private finishSoundSuppressed = false;
 
 	/**
 	 * Sessions whose full buffer the *current* webview already received —
@@ -99,6 +103,15 @@ export class CliSessionManager implements vscode.Disposable {
 	public detach() {
 		this.webview = undefined;
 		this.sessionsKnownToWebview.clear();
+	}
+
+	/**
+	 * Tell the manager whether the user is currently watching the CLI (F1 panel
+	 * visible AND window focused). When true, a finishing response stays silent —
+	 * the Voice Finish cue is only useful when attention is elsewhere.
+	 */
+	public setFinishSoundSuppressed(suppressed: boolean) {
+		this.finishSoundSuppressed = suppressed;
 	}
 
 	public async createSession(agentLabel: string) {
@@ -268,7 +281,12 @@ export class CliSessionManager implements vscode.Disposable {
 		session.responseSettleTimer = setTimeout(() => {
 			session.responseSettleTimer = undefined;
 			session.awaitingResponse = false;
-			if (this.voiceFinishEnabled && session.status === 'running' && !session.closing) {
+			if (
+				this.voiceFinishEnabled
+				&& !this.finishSoundSuppressed
+				&& session.status === 'running'
+				&& !session.closing
+			) {
 				playFinishSound(this.voiceFinishLang);
 			}
 		}, responseSettleMs);
