@@ -32,10 +32,10 @@ export interface PromptLanguage {
 }
 
 export const PROMPT_LANGUAGES: readonly PromptLanguage[] = [
-	{ code: 'en', label: 'English',    flag: '🇺🇲', translates: false, spellcheck: true,  strictToggle: false },
 	{ code: 'es', label: 'Spanish',    flag: '🇪🇸', translates: true,  spellcheck: true,  strictToggle: true  },
 	{ code: 'zh', label: 'Chinese',    flag: '🇨🇳', translates: true,  spellcheck: false, strictToggle: false },
 	{ code: 'pt', label: 'Portuguese', flag: '🇧🇷', translates: true,  spellcheck: true,  strictToggle: false },
+	{ code: 'en', label: 'English',    flag: '🌐', translates: false, spellcheck: true,  strictToggle: false },
 ];
 
 /** Placeholder shown before any language is chosen. */
