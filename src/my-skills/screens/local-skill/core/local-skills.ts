@@ -485,7 +485,13 @@ function removeGitignoreSkillState(content: string, skillId: string, eol: '\n' |
 	if (nextLines.some(line => parseManagedSkillLine(line))) {
 		allLines.splice(block.startIndex + 1, block.lines.length, ...nextLines);
 	} else {
-		allLines.splice(block.startIndex, block.endIndex - block.startIndex + 1);
+		let removeStart = block.startIndex;
+		let removeCount = block.endIndex - block.startIndex + 1;
+		if (removeStart > 0 && allLines[removeStart - 1] === '') {
+			removeStart--;
+			removeCount++;
+		}
+		allLines.splice(removeStart, removeCount);
 	}
 
 	return withLineEndings(formatManagedBlockSpacing(allLines).join('\n'), eol);
@@ -563,7 +569,11 @@ function withLineEndings(content: string, eol: '\n' | '\r\n'): string {
 function formatManagedBlockSpacing(lines: string[]): string[] {
 	const startIndex = lines.findIndex(line => line.trim() === BLOCK_BEGIN);
 	if (startIndex === -1) {
-		return [...lines, ''];
+		const trimmed = [...lines];
+		while (trimmed.length > 0 && trimmed[trimmed.length - 1] === '') {
+			trimmed.pop();
+		}
+		return trimmed.length === 0 ? [''] : [...trimmed, ''];
 	}
 
 	const nextLines = [...lines];
