@@ -43,7 +43,7 @@ Inside `src/my-cli/` the code is split by **where it runs**:
 
 `core/` code must never be imported from `webview/**` and vice versa; `shared/**` must not import `vscode` or touch the DOM at module scope (types and pure logic only). `src/shared/` (keymaps) is importable from both `my-cli/webview/` and `my-skills/` webview code.
 
-### Seven build targets (esbuild.js)
+### Eight build targets (esbuild.js)
 
 | Entry point | Output | Platform |
 |---|---|---|
@@ -53,7 +53,8 @@ Inside `src/my-cli/` the code is split by **where it runs**:
 | `src/my-cli/core/terminal-cli/pty-host.ts` | `dist/my-cli/core/pty-host.js` | Node.js / CJS |
 | `src/my-skills/view/index.ts` | `dist/webview.js` | Browser / IIFE |
 | `src/my-skills/screens/create-skill/ui/index.ts` | `dist/create-skill.js` | Browser / IIFE |
-| `src/my-skills/screens/create-skill/support/support.ts` | `dist/create-skill-support.js` | Browser / IIFE |
+| `src/shared/tutorial/t-skill/support.ts` | `dist/create-skill-support.js` | Browser / IIFE |
+| `src/shared/tutorial/t-cli/support.ts` | `dist/cli-tutorial.js` | Browser / IIFE |
 
 `node-pty` and `vscode` are always external. Non-TS assets (HTML, CSS, SVG) are copied from `src/my-cli/webview/` into `dist/my-cli/webview/` by the build script — they are not bundled. CSS/HTML files imported inside the terminal bundle (modal UI files) use esbuild's `text` loader so they bundle as strings.
 
