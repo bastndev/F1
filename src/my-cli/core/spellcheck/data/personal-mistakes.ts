@@ -25,6 +25,7 @@ export const PERSONAL_MISTAKES: Record<string, string> = {
 	'obiamente': 'obviamente',
 	'apra': 'para',
 	'ago': 'hago',
+	'pueds': 'puedes',
 
 
 
