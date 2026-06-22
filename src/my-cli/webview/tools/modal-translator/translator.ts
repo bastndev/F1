@@ -223,10 +223,12 @@ function initializeTranslator(host: HTMLElement, context: ToolContext) {
 
 	// Target language mirrors the prompt modal's chosen source language (the user
 	// only picks once): if they write in Spanish, CLI output is translated to
-	// Spanish. Defaults to Spanish until a language is picked.
-	const targetLang = getStoredPromptLang() ?? 'es';
+	// Spanish. Until a language is picked, default to English — i.e. don't
+	// translate at all (English is short-circuited below). Assuming Spanish for a
+	// fresh install would silently mistranslate for everyone who isn't Spanish.
+	const targetLang = getStoredPromptLang() ?? 'en';
 	const targetInfo = getPromptLanguage(targetLang);
-	const targetLabel = targetInfo?.label ?? 'Spanish';
+	const targetLabel = targetInfo?.label ?? 'English';
 
 	// Reflect the target in the header direction row: "cli → 🇪🇸 spanish".
 	const langToEl = host.querySelector<HTMLElement>('.lang-to');
