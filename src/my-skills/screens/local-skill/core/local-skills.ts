@@ -111,6 +111,61 @@ export async function deleteWorkspaceRootSkill(skillId: string): Promise<void> {
 	await removeWorkspaceRootSkillState(workspaceFolder.uri, skillId);
 	if (isRootSkillFolder(skillId)) {
 		await removeSkillsLockEntry(workspaceFolder.uri, skillId);
+		await pruneEmptySkillContainers(workspaceFolder.uri, skillId);
+		await deleteSkillsLockIfEmpty(workspaceFolder.uri);
+	}
+}
+
+async function pruneEmptySkillContainers(workspaceUri: vscode.Uri, skillId: string): Promise<void> {
+	const folder = ROOT_SKILL_FOLDERS.find(candidate => skillId.startsWith(`${candidate}/`));
+	if (!folder) {
+		return;
+	}
+
+	const segments = folder.split('/');
+	for (let depth = segments.length; depth > 0; depth--) {
+		const slice = segments.slice(0, depth);
+		const dirUri = vscode.Uri.joinPath(workspaceUri, ...slice);
+		if (!(await isDirectoryEmpty(dirUri))) {
+			return;
+		}
+
+		try {
+			await vscode.workspace.fs.delete(dirUri, { recursive: false, useTrash: true });
+		} catch {
+			return;
+		}
+	}
+}
+
+async function isDirectoryEmpty(uri: vscode.Uri): Promise<boolean> {
+	try {
+		const entries = await vscode.workspace.fs.readDirectory(uri);
+		return entries.length === 0;
+	} catch {
+		return false;
+	}
+}
+
+async function deleteSkillsLockIfEmpty(workspaceUri: vscode.Uri): Promise<void> {
+	const lockUri = vscode.Uri.joinPath(workspaceUri, SKILLS_LOCK_FILE);
+	let parsed: SkillsLockFile;
+
+	try {
+		const bytes = await vscode.workspace.fs.readFile(lockUri);
+		parsed = JSON.parse(new TextDecoder().decode(bytes)) as SkillsLockFile;
+	} catch {
+		return;
+	}
+
+	if (parsed.skills && typeof parsed.skills === 'object' && Object.keys(parsed.skills).length > 0) {
+		return;
+	}
+
+	try {
+		await vscode.workspace.fs.delete(lockUri, { recursive: false, useTrash: true });
+	} catch {
+		// ignore — lock file may already be gone
 	}
 }
 
