@@ -63,10 +63,10 @@ function getFixnow(): Promise<FixnowModule> {
 	return fixnowPromise;
 }
 
-// fixnow bundles dictionaries for ar/de/en/es/fr/pt/ru/vi. Of the prompt's four
+// fixnow bundles dictionaries for ar/de/en/es/fr/pt/ru/vi. Of the prompt's five
 // offered languages only these have a usable checker — Chinese (zh) is
 // character-based and has no trie, so it falls through to "no marking".
-const SUPPORTED_LANGUAGES = new Set(['en', 'es', 'pt']);
+const SUPPORTED_LANGUAGES = new Set(['en', 'es', 'pt', 'ru']);
 
 // Corrections attached per flagged word. The Alt-click fix applies the first one;
 // a few extras are kept cheaply in case a richer picker is added later.
