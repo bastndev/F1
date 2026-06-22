@@ -382,9 +382,12 @@ function initPromptComposer(host: HTMLElement, context: PromptContext, hasActive
 	let selectedSkills: WorkspaceSkill[] = [];
 
 	if (hasActiveSession) {
-		initSkillsChips(host, context, textarea, (selection) => {
+		const refreshSkills = initSkillsChips(host, context, textarea, (selection) => {
 			selectedSkills = selection;
 		});
+		if (refreshSkills) {
+			context.registerSkillsRefresh?.(refreshSkills);
+		}
 		const tools = initToolbarActions(
 			host,
 			() => translateState.enabled,

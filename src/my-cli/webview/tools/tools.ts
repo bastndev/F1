@@ -32,6 +32,7 @@ export type ToolContext = {
 	requestWorkspaceSkills?: () => Promise<WorkspaceSkill[]>;
 	openCreateSkill?: () => void;
 	requestSpellcheck?: (text: string, lang: string, strict: boolean) => Promise<SpellIssue[]>;
+	registerSkillsRefresh?: (refresh: () => void) => void;
 	speakText?: (text: string, options?: { chunks?: string[]; lang?: string }) => void;
 	checkVoiceReady?: (lang: string) => Promise<boolean>;
 	pauseSpeech?: () => void;
@@ -92,6 +93,7 @@ export const createToolsController = ({
 	let activeModal: HTMLElement | null = null;
 	let currentTool: ToolId | null = null;
 	let activeCleanup: ToolCleanup | null = null;
+	let skillsRefreshFn: (() => void) | null = null;
 
 	const close = () => {
 		document.removeEventListener('keydown', handleKeyDown, true);
@@ -105,6 +107,7 @@ export const createToolsController = ({
 		activeModal?.remove();
 		activeModal = null;
 		currentTool = null;
+		skillsRefreshFn = null;
 
 		// Return focus using the host-provided function (uses real Terminal.focus()
 		// on the xterm instance so input works and no visible focus ring appears
@@ -188,6 +191,7 @@ export const createToolsController = ({
 			requestWorkspaceSkills,
 			openCreateSkill,
 			requestSpellcheck,
+			registerSkillsRefresh: (fn) => { skillsRefreshFn = fn; },
 			speakText,
 			checkVoiceReady,
 			pauseSpeech,
@@ -233,9 +237,7 @@ export const createToolsController = ({
 	};
 
 	const refreshPromptIfOpen = () => {
-		if (currentTool === 'prompt') {
-			open('prompt');
-		}
+		skillsRefreshFn?.();
 	};
 
 	return { open, toggle, close, isOpen: () => currentTool !== null, getOpenTool: () => currentTool, refreshPromptIfOpen };
