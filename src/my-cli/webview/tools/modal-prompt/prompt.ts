@@ -283,12 +283,17 @@ function initPromptComposer(host: HTMLElement, context: PromptContext, hasActive
 		};
 
 		let textToSend = ta.value;
+		// Whether this send actually ran the translator. Drives the button label
+		// for @route prompts below: a translated route keeps "Translating…" all
+		// the way to the close instead of flashing a separate "Sending…" state.
+		let didTranslate = false;
 
 		// Auto-translate (<source> → EN) when the language translates and the
 		// toggle is active. English (translates:false) is sent verbatim.
 		// The textarea keeps the original text; the CLI receives the translation.
 		const sourceLang = currentLang ? getPromptLanguage(currentLang) : undefined;
 		if (sourceLang?.translates && translateState.enabled && ctx.translatePrompt) {
+			didTranslate = true;
 			setTranslating(true);
 			if (runBtn) {
 				runBtn.classList.add('is-translating');
@@ -314,7 +319,9 @@ function initPromptComposer(host: HTMLElement, context: PromptContext, hasActive
 				console.error('[Prompt] Auto-translate failed:', err);
 			} finally {
 				setTranslating(false);
-				restoreRunButton();
+				// Button restore is deferred until the @route check below: a
+				// translated route prompt must keep its "Translating…" label
+				// straight through to the close, not snap back to "Execute" here.
 			}
 		}
 
@@ -343,9 +350,19 @@ function initPromptComposer(host: HTMLElement, context: PromptContext, hasActive
 		textToSend = resolveFileMentionAliases(textToSend);
 		const shouldDelayClose = hasRouteMention(textToSend);
 		if (shouldDelayClose && runBtn) {
+			// Route prompts hold the modal open briefly so the @path paste can land
+			// in the terminal. Keep the "Translating…" label straight through that
+			// window when we translated (no jarring "Sending…" flash); show a
+			// neutral "Sending…" only when no translation ran.
 			runBtn.classList.add('is-translating');
 			runBtn.disabled = true;
-			runBtn.innerHTML = '<i class="ti ti-loader-2" aria-hidden="true"></i><span>Sending…</span>';
+			runBtn.innerHTML = didTranslate
+				? '<i class="ti ti-sparkles" aria-hidden="true"></i><span>Translating…</span>'
+				: '<i class="ti ti-loader-2" aria-hidden="true"></i><span>Sending…</span>';
+		} else if (didTranslate) {
+			// Translated but closing immediately (no @route) — restore the normal
+			// button now that the deferred restore above no longer runs.
+			restoreRunButton();
 		}
 
 		const result = processPrompt(textToSend, {
