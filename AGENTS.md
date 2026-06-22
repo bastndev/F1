@@ -1,12 +1,5 @@
 # CLAUDE.md
 
-<!-- F1-MEMORY:START -->
-## Project context (F1 My Memory)
-
-This project ships a prebuilt context map at `./.f1/project-map.md`.
-Read it first to understand the project before scanning files — it saves tokens.
-<!-- F1-MEMORY:END -->
-
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
 ## Commands
