@@ -464,14 +464,23 @@
 	gap: 8px;
 	box-sizing: border-box;
 	color: inherit;
-	cursor: pointer;
 }
 
 .agent-tools-toggle:hover {
 	background: var(--vscode-list-hoverBackground, rgba(128, 128, 128, 0.14));
 }
 
-.agent-tools-toggle:has(.agent-tools-toggle-input:focus-visible) {
+/* Only the switch itself is interactive — clicking the row's text does nothing. */
+.agent-tools-toggle-switch {
+	flex: 0 0 auto;
+	position: relative;
+	display: inline-flex;
+	align-items: center;
+	border-radius: 999px;
+	cursor: pointer;
+}
+
+.agent-tools-toggle-switch:has(.agent-tools-toggle-input:focus-visible) {
 	outline: 1px solid var(--vscode-focusBorder, var(--vscode-textLink-foreground));
 	outline-offset: 2px;
 }

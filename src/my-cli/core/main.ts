@@ -11,7 +11,8 @@ import { handleWorkspaceListFiles, handleWorkspaceListSkills } from './workspace
 import { translatePromptToEnglish } from './translation/host-prompt-translator';
 import { resolveCustomCliLaunch, validateCustomCliCommandInput } from './terminal-cli/custom-cli';
 import {
-	ensureSpanishVoice,
+	ensureVoice,
+	isVoiceReady,
 	streamSpeech,
 	synthesizeSpeech,
 	playPcmBuffer,
@@ -70,12 +71,24 @@ export class MyCliViewProvider implements vscode.WebviewViewProvider, vscode.Dis
 		// never fires on a panel switch. retainContextWhenHidden then leaves xterm's
 		// canvas/viewport stale, painting a black rectangle on return. onDidChangeVisibility
 		// is the only reliable signal — relay it so the webview re-fits and repaints.
+		// Voice Finish should only ring when the user's attention is elsewhere.
+		// "Watching" = the F1 panel is visible AND the window has OS focus; in that
+		// case suppress the cue. Any other state (other panel, collapsed, alt-tabbed
+		// to another app, or the panel torn down while hidden) lets it play.
+		const updateFinishSoundGate = () => {
+			this.sessionManager.setFinishSoundSuppressed(webviewView.visible && vscode.window.state.focused);
+		};
+		updateFinishSoundGate();
+		const windowStateSub = vscode.window.onDidChangeWindowState(updateFinishSoundGate);
+
 		webviewView.onDidChangeVisibility(() => {
+			updateFinishSoundGate();
 			void webviewView.webview.postMessage({
 				type: webviewView.visible ? 'cli.visible' : 'cli.hidden'
 			});
 		});
 		webviewView.onDidDispose(() => {
+			windowStateSub.dispose();
 			this.sessionManager.detach();
 			this._disposeMemoryWatcher();
 			this._activeWebview = undefined;
@@ -198,6 +211,11 @@ export class MyCliViewProvider implements vscode.WebviewViewProvider, vscode.Dis
 				return;
 			}
 
+			if (message.type === 'voice.checkReady') {
+				await this._handleVoiceCheckReady(webviewView.webview, message);
+				return;
+			}
+
 			if (message.type === 'clipboard.read' && typeof message.id === 'string') {
 				let text = '';
 				try {
@@ -269,6 +287,10 @@ export class MyCliViewProvider implements vscode.WebviewViewProvider, vscode.Dis
 	public async smartFocus() {
 		await vscode.commands.executeCommand(`${MyCliViewProvider.viewType}.focus`);
 		await this._activeWebview?.postMessage({ type: 'cli.focusTerminal' });
+	}
+
+	public notifySkillsChanged() {
+		void this._activeWebview?.postMessage({ type: 'workspace.skillsChanged' });
 	}
 
 	public openTutorial() {
@@ -461,7 +483,8 @@ export class MyCliViewProvider implements vscode.WebviewViewProvider, vscode.Dis
 		const session: ActiveVoiceSession = {
 			chunks,
 			index: 0,
-			state: 'preparing'
+			state: 'preparing',
+			lang: typeof message.lang === 'string' ? message.lang : 'es',
 		};
 		this.activeVoiceSession = session;
 
@@ -497,6 +520,22 @@ export class MyCliViewProvider implements vscode.WebviewViewProvider, vscode.Dis
 		await this._postVoiceState(webview, 'idle');
 	}
 
+	private async _handleVoiceCheckReady(webview: vscode.Webview, message: InboundWebviewMessage) {
+		if (typeof message.id !== 'string') {
+			return;
+		}
+		const lang = typeof message.lang === 'string' ? message.lang : 'es';
+		let ready = false;
+		try {
+			ready = this._extensionContext ? await isVoiceReady(this._extensionContext, lang) : false;
+		} catch {
+			// Treat a probe failure as "ready" so the UI doesn't nag with a
+			// download prompt; pressing Listen still downloads if truly missing.
+			ready = true;
+		}
+		await webview.postMessage({ type: 'voice.ready', id: message.id, ready });
+	}
+
 	private async _runVoiceSession(webview: vscode.Webview, session: ActiveVoiceSession, seq: number) {
 		const post = async (state: VoiceState) => {
 			if (this._isVoiceRunActive(session, seq)) {
@@ -515,7 +554,7 @@ export class MyCliViewProvider implements vscode.WebviewViewProvider, vscode.Dis
 			await post('preparing');
 			// Reuses ATM's piper engine/voice when installed; downloads into
 			// F1's globalStorage (with a progress notification) otherwise.
-			session.resources ??= await ensureSpanishVoice(this._extensionContext);
+			session.resources ??= await ensureVoice(this._extensionContext, session.lang);
 			const resources = session.resources;
 			const chunks = session.chunks;
 
@@ -695,10 +734,11 @@ export class MyCliViewProvider implements vscode.WebviewViewProvider, vscode.Dis
 		}
 
 		const text = typeof message.text === 'string' ? message.text : '';
+		const lang = typeof message.lang === 'string' ? message.lang : 'es';
 		const strict = message.strict === true;
 
 		try {
-			const issues = await spellCheckText(text, strict);
+			const issues = await spellCheckText(text, lang, strict);
 			await webview.postMessage({
 				type: 'prompt.spellResult',
 				id: message.id,

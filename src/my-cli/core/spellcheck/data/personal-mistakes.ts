@@ -1,6 +1,86 @@
 export const PERSONAL_MISTAKES: Record<string, string> = {
+    // world 
+	'ideomas': 'idiomas',
+	'mejroa': 'mejora',
+	'brebe': 'breve',
+	'cuadno': 'cuando',
+    'loguica': 'lógica',
+	'eleji': 'elegí',
+	'deveria': 'deberia',
+	'deve': 'debe',
+	'usario': 'usuario',
+	'eliguio': 'eligió',
+	'alices': 'alices',
+	'seleciono': 'seleccionó',
+	'ahce': 'hace',
+	'selecionada': 'seleccionada',
+	'mejorez': 'mejores',
+	'exelente': 'excelente',
+	'contiuamos': 'continuamos',
+	'mejro': 'mejor',
+	'serai': 'sería',
+	'duada': 'duda',
+	'hce': 'hace',
+	'automaticamnte': 'automáticamente',
+	'obiamente': 'obviamente',
+	'apra': 'para',
+	'ago': 'hago',
+	'pueds': 'puedes',
+	'tamano': 'tamaño',
+	'autorizacion': 'autorización',
+	'achiva': 'archiva',
+	'biendo': 'viendo',
+	'defaul': 'default',
+	'telemetria': 'telemetría',
+
+
+
+	
+    // New world ~
+	'manana': 'mañana',
+	'mananas': 'mañanas',
+	'companero': 'compañero',
+    'companera': 'compañera',
+    'companeros': 'compañeros',
+    'companeras': 'compañeras',
+
+    'otono': 'otoño',
+
+    'pina': 'piña',
+    'pinas': 'piñas',
+    'ano': 'año',
+    'anos': 'años',
+
+    'nino': 'niño',
+    'nina': 'niña',
+    'ninos': 'niños',
+    'ninas': 'niñas',
+
+    'senor': 'señor',
+    'senora': 'señora',
+    'senores': 'señores',
+    'senorita': 'señorita',
+
+    'espanol': 'español',
+    'espanola': 'española',
+
+    'bano': 'baño',
+    'banos': 'baños',
+
+    'dano': 'daño',
+    'danos': 'daños',
+
+    'sueno': 'sueño',
+    'suenos': 'sueños',
+
+    'dueno': 'dueño',
+    'duenos': 'dueños',
+
+
 	// Common shorthand and abbreviations
+	'loque': 'lo que',
 	'ue': 'que',
+	'quieroque': 'quiero que',
 	'eu': 'que',
 	'ie': 'que',
 	'q': 'que',
@@ -78,7 +158,6 @@ export const PERSONAL_MISTAKES: Record<string, string> = {
 	'queiro': 'quiero',
 
 	// Transposition errors
-	'loguica': 'lógica',
 	'logica': 'lógica',
 	'ideoma': 'idioma',
 	'priemro': 'primero',
@@ -150,7 +229,6 @@ export const PERSONAL_MISTAKES: Record<string, string> = {
 	'emnos': 'menos',
 	'mla': 'la',
 	'ais': 'así',
-	'mejroa': 'mejorar',
 	'manrea': 'manera',
 	'aoptimiza': 'optimizar',
 	'vuiero': 'quiero',

@@ -6,7 +6,6 @@ out/
 dist/
 
 # My Memory: graphify's working dir + incremental cache (we commit .f1/, not this)
-graphify-out/
 
 # VSCE files
 *.vsix
@@ -27,13 +26,3 @@ NOTES.md
 analizar/
 analizar2/
 analizar-pe/
-
-.claude/
-.agents/
-
-skills-lock.json
-
-# My Skills: begin
-# .claude/skills/end
-.agents/skills/end-2
-# My Skills: end

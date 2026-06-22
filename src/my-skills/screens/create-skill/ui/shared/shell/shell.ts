@@ -248,7 +248,7 @@ function openCreateChatScreen(target?: CreateSkillTarget, focusChat = false) {
 
 			// Phase 2: after cards are gone, open the name modal
 			window.dispatchEvent(new CustomEvent('createSkill.namePrompt.open', {
-				detail: { target: activeCreateTarget },
+				detail: { target: activeCreateTarget, template: activeCreateTemplate },
 			}));
 		}, 500);
 	} else {
@@ -266,7 +266,7 @@ function openCreateChatScreen(target?: CreateSkillTarget, focusChat = false) {
 			return;
 		}
 		window.dispatchEvent(new CustomEvent('createSkill.namePrompt.open', {
-			detail: { target: activeCreateTarget },
+			detail: { target: activeCreateTarget, template: activeCreateTemplate },
 		}));
 		syncMode();
 	}
@@ -292,16 +292,18 @@ function closeCreateChatScreen() {
 	confirmedCreateCategory = undefined;
 	activeCategoryLabel = null;
 	
-	activeCreateTemplate = 'fast';
-	templateButtons.forEach(b => b.classList.toggle('is-active', b.dataset.createChatTemplate === 'fast'));
-	if (templateToggleContainer) {
-		templateToggleContainer.classList.add('is-fast-active');
-	}
+	setActiveCreateTemplate('fast');
 
 	syncConfirmedCreateName();
 	syncCreateFlowStatus();
 	syncMode();
 	window.dispatchEvent(new CustomEvent('createSkill.category.reset'));
+}
+
+function setActiveCreateTemplate(template: CreateSkillTemplate): void {
+	activeCreateTemplate = template;
+	templateButtons.forEach(button => button.classList.toggle('is-active', button.dataset.createChatTemplate === template));
+	templateToggleContainer?.classList.toggle('is-fast-active', template === 'fast');
 }
 
 function syncConfirmedCreateName() {
@@ -768,6 +770,7 @@ createFlowEditButtons.forEach(button => {
 				detail: {
 					target: activeCreateTarget,
 					initialValue: confirmedCreateSkillName,
+					template: activeCreateTemplate,
 				},
 			}));
 		} else if (cardType === 'category' && confirmedCreateCategory) {
@@ -812,14 +815,43 @@ window.addEventListener('createSkill.namePrompt.open', () => {
 window.addEventListener('createSkill.skillName.confirm', event => {
 	createSurface?.classList.remove('is-name-prompt-open');
 
+	let selectedTemplate: CreateSkillTemplate = 'fast';
 	if (event instanceof CustomEvent && event.detail && typeof event.detail === 'object') {
-		const detail = event.detail as { name?: unknown; target?: unknown };
+		const detail = event.detail as { name?: unknown; target?: unknown; template?: unknown };
 		if (typeof detail.name === 'string' && detail.name.trim()) {
 			confirmedCreateSkillName = detail.name.trim();
 		}
 		if (detail.target === 'agents' || detail.target === 'claude') {
 			activeCreateTarget = detail.target;
 		}
+		if (detail.template === 'base' || detail.template === 'fast') {
+			selectedTemplate = detail.template;
+		}
+	}
+
+	// Mirror the modal's choice onto the in-screen Base/Fast toggle.
+	setActiveCreateTemplate(selectedTemplate);
+
+	if (selectedTemplate === 'base') {
+		// Base skips the guided flow entirely: create immediately, no redirect.
+		createChatState = 'open';
+		confirmedCreateCategory = 'Base Template';
+		confirmedCreateDescription = 'Skipped description';
+		activeCreateFlowStep = 'done';
+		syncConfirmedCreateName();
+		syncCreateFlowStatus();
+		syncMode();
+		beginCreateHostWait();
+		pendingCreateTemplate = 'base';
+		window.dispatchEvent(new CustomEvent('createSkill.chat.create', {
+			detail: {
+				name: confirmedCreateSkillName,
+				query: '',
+				target: activeCreateTarget ?? 'agents',
+				template: 'base',
+			},
+		}));
+		return;
 	}
 
 	createChatState = 'open';

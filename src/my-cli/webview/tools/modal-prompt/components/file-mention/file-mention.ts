@@ -163,32 +163,34 @@ export function mountFileMentionPicker(
 		if (!list) { return; }
 
 		// Fuzzy subsequence ranking (quick-open style): "test-pro" matches
-		// "test-del-projecto.ts". Name matches always outrank path-only
-		// matches; within a tie, directories first, then alphabetical.
+		// "test-del-projecto.ts". Entries split into tiers — name matches (tier 1)
+		// always outrank path-only matches (tier 0). Within each tier, folders come
+		// before files (the explorer "folders first" rule), then by relevance, then
+		// alphabetical. Grouping by tier first is what keeps a weakly path-matched
+		// folder from leapfrogging a strong file name match.
 		const query = filter.trim();
-		const nameMatchBonus = 1000;
 		const allowVscode = query.startsWith('.');
 
-		type ScoredEntry = { entry: FileMentionEntry; score: number; namePositions: number[] };
+		type ScoredEntry = { entry: FileMentionEntry; score: number; namePositions: number[]; tier: number };
 
 		const scoreEntry = (entry: FileMentionEntry): ScoredEntry | undefined => {
 			if (!allowVscode && isVscodePath(entry.path)) {
 				return undefined;
 			}
 			if (!query) {
-				return { entry, score: 0, namePositions: [] };
+				return { entry, score: 0, namePositions: [], tier: 0 };
 			}
 			const nameMatch = fuzzyMatch(query, entry.name);
 			if (nameMatch) {
-				return { entry, score: nameMatch.score + nameMatchBonus, namePositions: nameMatch.positions };
+				return { entry, score: nameMatch.score, namePositions: nameMatch.positions, tier: 1 };
 			}
 			const displayPathMatch = entry.displayPath ? fuzzyMatch(query, entry.displayPath) : undefined;
 			if (displayPathMatch) {
-				return { entry, score: displayPathMatch.score, namePositions: [] };
+				return { entry, score: displayPathMatch.score, namePositions: [], tier: 0 };
 			}
 			const pathMatch = fuzzyMatch(query, entry.path);
 			if (pathMatch) {
-				return { entry, score: pathMatch.score, namePositions: [] };
+				return { entry, score: pathMatch.score, namePositions: [], tier: 0 };
 			}
 			return undefined;
 		};
@@ -197,8 +199,12 @@ export function mountFileMentionPicker(
 			.map(scoreEntry)
 			.filter((s): s is ScoredEntry => s !== undefined)
 			.sort((a, b) => {
-				if (a.score !== b.score) { return b.score - a.score; }
+				// 1) Name matches above path-only matches.
+				if (a.tier !== b.tier) { return b.tier - a.tier; }
+				// 2) Within a tier, folders before files.
 				if (a.entry.isDirectory !== b.entry.isDirectory) { return a.entry.isDirectory ? -1 : 1; }
+				// 3) Then by fuzzy relevance, then alphabetical.
+				if (a.score !== b.score) { return b.score - a.score; }
 				return a.entry.name.localeCompare(b.entry.name);
 			});
 
@@ -287,7 +293,12 @@ export function mountFileMentionPicker(
 		mentionStart = -1;
 		currentQuery = '';
 		document.removeEventListener('click', onOutsideClick);
-		// Note: we intentionally keep cachedEntries for the rest of the prompt session
+		// Drop the cache so the *next* "@" trigger refetches from the host. This
+		// is what makes folders/files created while the prompt stays open show up:
+		// delete the whole "@path", type "@" again → fresh findFiles. During a
+		// single open session (typing/filtering after "@") the cache still serves
+		// every keystroke, so we never re-hit the host mid-query.
+		cachedEntries = null;
 	};
 
 	const onOutsideClick = (e: MouseEvent) => {
@@ -336,8 +347,8 @@ export function mountFileMentionPicker(
 
 	/**
 	 * Ctrl+Backspace while the caret is right after an @mention:
-	 * deletes everything between '@' and the caret, leaving '@' so
-	 * the user can type a new path without closing the modal.
+	 * deletes the whole token — '@' included — in one press (the
+	 * trailing space too, when present), leaving no orphan '@'.
 	 * Returns true if it handled the event (caller should return early).
 	 */
 	const handleMentionCtrlBackspace = (e: KeyboardEvent): boolean => {
@@ -377,13 +388,13 @@ export function mountFileMentionPicker(
 
 		if (atPos === -1) { return false; }
 
-		// Delete from the char right after '@' up to the original caret
-		// (includes the trailing space when present) → leaves a clean '@'
+		// Delete the whole mention — '@' included — from its start up to the
+		// original caret (the trailing space too, when present) in one press.
 		e.preventDefault();
 		e.stopPropagation();
-		const newValue = value.slice(0, atPos + 1) + value.slice(caret);
+		const newValue = value.slice(0, atPos) + value.slice(caret);
 		textarea.value = newValue;
-		const newPos = atPos + 1;
+		const newPos = atPos;
 		textarea.setSelectionRange(newPos, newPos);
 		textarea.dispatchEvent(new Event('input', { bubbles: true }));
 		return true;

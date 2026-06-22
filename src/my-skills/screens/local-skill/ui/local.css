@@ -130,7 +130,6 @@
 .local-section-tab--active {
 	color: var(--local-fg);
 	border-bottom-color: var(--local-accent);
-	background: linear-gradient(90deg, var(--local-accent), transparent) left bottom / 100% 2px no-repeat;
 }
 
 .local-section-tab--hidden {

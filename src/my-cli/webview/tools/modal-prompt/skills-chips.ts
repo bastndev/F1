@@ -29,12 +29,15 @@ export function initSkillsChips(
 	context: PromptContext,
 	textarea: HTMLTextAreaElement,
 	onSelectionChange: (selected: WorkspaceSkill[]) => void
-) {
+): (() => void) | undefined {
 	const row = host.querySelector<HTMLElement>('.prompt-skills');
 	const chipsHost = host.querySelector<HTMLElement>('#skillChips');
 	if (!row || !chipsHost || !context.requestWorkspaceSkills) {
-		return;
+		return undefined;
 	}
+
+	const selected: WorkspaceSkill[] = [];
+	let updatingToken = false;
 
 	const createAddChip = () => {
 		const addChip = document.createElement('button');
@@ -56,70 +59,57 @@ export function initSkillsChips(
 		return addChip;
 	};
 
-	void context.requestWorkspaceSkills().then((skills) => {
-		if (!row.isConnected) {
-			return;
-		}
+	const updateToken = () => {
+		updatingToken = true;
+		try {
+			const hasToken = skillsTokenPresencePattern.test(textarea.value);
 
+			if (selected.length === 0) {
+				if (hasToken) {
+					textarea.value = textarea.value
+						.replace(skillsTokenWithOptionalTrailingSpacePattern, '')
+						.trimStart();
+					textarea.dispatchEvent(new Event('input', { bubbles: true }));
+				}
+			} else {
+				const newToken = buildSkillsToken(selected.length);
+				if (hasToken) {
+					textarea.value = textarea.value
+						.replace(skillsTokenPattern, newToken);
+				} else {
+					const current = textarea.value;
+					textarea.value = current ? `${newToken} ${current}` : `${newToken} `;
+				}
+				textarea.setSelectionRange(textarea.value.length, textarea.value.length);
+				textarea.dispatchEvent(new Event('input', { bubbles: true }));
+			}
+
+			onSelectionChange([...selected]);
+		} finally {
+			updatingToken = false;
+		}
+	};
+
+	const syncBadges = () => {
+		for (const chip of Array.from(chipsHost.querySelectorAll<HTMLButtonElement>('[data-skill]'))) {
+			const name = chip.dataset.skill!;
+			const idx = selected.findIndex((s) => s.name === name);
+			const badge = chip.querySelector<HTMLElement>('.skill-badge');
+			chip.classList.toggle('selected', idx >= 0);
+			if (badge) {
+				badge.textContent = idx >= 0 ? `#${idx + 1}` : '';
+			}
+		}
+	};
+
+	const renderSkills = (skills: WorkspaceSkill[]) => {
 		chipsHost.replaceChildren();
 
-		// No skills installed: offer the CREATE flow directly.
 		if (!skills.length) {
 			chipsHost.append(createAddChip());
 			row.hidden = false;
 			return;
 		}
-
-		const selected: WorkspaceSkill[] = [];
-		let updatingToken = false;
-
-		const updateToken = () => {
-			updatingToken = true;
-			try {
-				// Match compact formats (/skill, /skills #N) and legacy bracket format
-				const hasToken = skillsTokenPresencePattern.test(textarea.value);
-
-				if (selected.length === 0) {
-					if (hasToken) {
-						textarea.value = textarea.value
-							.replace(skillsTokenWithOptionalTrailingSpacePattern, '')
-							.trimStart();
-						textarea.dispatchEvent(new Event('input', { bubbles: true }));
-					}
-				} else {
-					const newToken = buildSkillsToken(selected.length);
-					if (hasToken) {
-						textarea.value = textarea.value
-							.replace(skillsTokenPattern, newToken);
-					} else {
-						const current = textarea.value;
-						textarea.value = current ? `${newToken} ${current}` : `${newToken} `;
-					}
-					textarea.setSelectionRange(textarea.value.length, textarea.value.length);
-					textarea.dispatchEvent(new Event('input', { bubbles: true }));
-				}
-
-				onSelectionChange([...selected]);
-			} finally {
-				updatingToken = false;
-			}
-		};
-
-		const syncBadges = () => {
-			for (const chip of Array.from(chipsHost!.querySelectorAll<HTMLButtonElement>('[data-skill]'))) {
-				const name = chip.dataset.skill!;
-				const idx = selected.findIndex((s) => s.name === name);
-				const badge = chip.querySelector<HTMLElement>('.skill-badge');
-				chip.classList.toggle('selected', idx >= 0);
-				if (badge) {
-					badge.textContent = idx >= 0 ? `#${idx + 1}` : '';
-				}
-			}
-		};
-
-		const sync = () => {
-			syncBadges();
-		};
 
 		for (const skill of skills) {
 			const chip = document.createElement('button');
@@ -145,7 +135,7 @@ export function initSkillsChips(
 					selected.push(skill);
 				}
 				updateToken();
-				sync();
+				syncBadges();
 				textarea.focus();
 			});
 
@@ -153,28 +143,55 @@ export function initSkillsChips(
 		}
 
 		row.hidden = false;
-		sync();
+		syncBadges();
+	};
 
-		// Strip any stale skills token from a restored draft — the token
-		// doesn't encode skill names, so selection can't be reconstructed.
+	const refresh = () => {
+		void context.requestWorkspaceSkills!().then((skills) => {
+			if (!row.isConnected) {
+				return;
+			}
+
+			const validNames = new Set(skills.map(s => s.name));
+			const prevCount = selected.length;
+			for (let i = selected.length - 1; i >= 0; i--) {
+				if (!validNames.has(selected[i].name)) {
+					selected.splice(i, 1);
+				}
+			}
+			if (selected.length !== prevCount) {
+				updateToken();
+			}
+
+			renderSkills(skills);
+		});
+	};
+
+	void context.requestWorkspaceSkills().then((skills) => {
+		if (!row.isConnected) {
+			return;
+		}
+
+		renderSkills(skills);
+
 		if (skillsTokenPresencePattern.test(textarea.value)) {
 			textarea.value = textarea.value
 				.replace(skillsTokenWithOptionalTrailingSpacePattern, '')
 				.trimStart();
 			textarea.dispatchEvent(new Event('input', { bubbles: true }));
 		}
-
-		// When the user manually deletes the token, clear the chip selection
-		// so the UI stays in sync with what the textarea contains.
-		textarea.addEventListener('input', () => {
-			if (updatingToken) {
-				return;
-			}
-			if (selected.length > 0 && !skillsTokenPresencePattern.test(textarea.value)) {
-				selected.length = 0;
-				onSelectionChange([]);
-				sync();
-			}
-		});
 	});
+
+	textarea.addEventListener('input', () => {
+		if (updatingToken) {
+			return;
+		}
+		if (selected.length > 0 && !skillsTokenPresencePattern.test(textarea.value)) {
+			selected.length = 0;
+			onSelectionChange([]);
+			syncBadges();
+		}
+	});
+
+	return refresh;
 }

@@ -1,15 +1,17 @@
 /**
- * Spanish text-to-speech for the Translator modal, powered by Piper.
+ * Multi-language text-to-speech for the Translator modal, powered by Piper.
  *
  * F1 complements the ATM extension (same publisher): both keep the Piper
  * engine and voice models inside their globalStorage folder. Resources are
- * resolved ATM-first — if ATM already downloaded the engine or the Spanish
- * voice (…/globalStorage/bastndev.atm), F1 reuses those files and downloads
+ * resolved ATM-first — if ATM already downloaded the engine or a voice
+ * (…/globalStorage/bastndev.atm), F1 reuses those files and downloads
  * nothing. Only what is missing in BOTH extensions is downloaded into F1's
  * own storage, behind a VS Code progress notification (same UX as ATM).
  *
- * Adapted from ATM's voice-tts module (voice-tts/core). Spanish only for
- * now; future voices will mirror whatever ATM ships.
+ * Adapted from ATM's voice-tts module. One voice per supported language
+ * (en/es/zh/pt), mirroring ATM's "best" medium voice for each — same voice ids
+ * and on-disk layout, so ATM's downloads are reused as-is. The engine is shared
+ * across all languages; only the voice model differs.
  */
 
 import * as vscode from 'vscode';
@@ -20,12 +22,37 @@ import * as https from 'https';
 import * as http from 'http';
 import { spawn, execFile, type ChildProcess, type ChildProcessWithoutNullStreams } from 'child_process';
 
-const VOICE_ID = 'es_ES-sharvard-medium';
-const VOICE_DOWNLOAD_BASE =
-	'https://huggingface.co/rhasspy/piper-voices/resolve/v1.0.0/es/es_ES/sharvard/medium/';
+// One voice per language, keyed by the prompt/translator language code. These are
+// ATM's recommended medium voices; using the same ids keeps ATM's cache reusable.
+const VOICE_IDS: Record<string, string> = {
+	en: 'en_US-hfc_female-medium',
+	es: 'es_ES-sharvard-medium',
+	zh: 'zh_CN-huayan-medium',
+	pt: 'pt_BR-faber-medium',
+	ru: 'ru_RU-irina-medium',
+};
+const VOICE_LABELS: Record<string, string> = {
+	en: 'English',
+	es: 'Spanish',
+	zh: 'Chinese',
+	pt: 'Portuguese',
+	ru: 'Russian',
+};
+const DEFAULT_LANG = 'es';
+
+const resolveVoiceId = (lang: string): string => VOICE_IDS[lang] ?? VOICE_IDS[DEFAULT_LANG];
+
+// Voice files are resolved from HuggingFace's catalog (voices.json) so paths stay
+// correct if the upstream layout changes. Cached on disk (ATM-first) + in memory.
+const VOICES_JSON_URL = 'https://huggingface.co/rhasspy/piper-voices/raw/main/voices.json';
+const VOICES_DOWNLOAD_BASE_URL = 'https://huggingface.co/rhasspy/piper-voices/resolve/v1.0.0/';
+
 const PIPER_RELEASE_BASE =
 	'https://github.com/rhasspy/piper/releases/download/2023.11.14-2';
 const ATM_STORAGE_DIR = 'bastndev.atm';
+
+type VoicesCatalog = Record<string, { files: Record<string, { size_bytes?: number }> }>;
+let voicesCatalogCache: VoicesCatalog | null = null;
 
 export type VoiceResources = {
 	piperPath: string;
@@ -69,11 +96,11 @@ function piperBinaryPath(storageBase: string): string {
 	return path.join(storageBase, 'piper', getPiperPlatform().dirName, binary);
 }
 
-function voiceFilePaths(storageBase: string): { modelPath: string; configPath: string } {
+function voiceFilePaths(storageBase: string, voiceId: string): { modelPath: string; configPath: string } {
 	const voicesDir = path.join(storageBase, 'voices');
 	return {
-		modelPath: path.join(voicesDir, `${VOICE_ID}.onnx`),
-		configPath: path.join(voicesDir, `${VOICE_ID}.onnx.json`),
+		modelPath: path.join(voicesDir, `${voiceId}.onnx`),
+		configPath: path.join(voicesDir, `${voiceId}.onnx.json`),
 	};
 }
 
@@ -103,9 +130,9 @@ async function findExistingPiper(context: vscode.ExtensionContext): Promise<stri
 	return null;
 }
 
-async function findExistingVoice(context: vscode.ExtensionContext): Promise<string | null> {
+async function findExistingVoice(context: vscode.ExtensionContext, voiceId: string): Promise<string | null> {
 	for (const base of storageBases(context)) {
-		const { modelPath, configPath } = voiceFilePaths(base);
+		const { modelPath, configPath } = voiceFilePaths(base, voiceId);
 		if (await fileExists(modelPath) && await fileExists(configPath)) {
 			return modelPath;
 		}
@@ -115,27 +142,48 @@ async function findExistingVoice(context: vscode.ExtensionContext): Promise<stri
 
 /* ── Setup: download whatever is missing in both extensions ──────── */
 
-let setupInFlight: Promise<VoiceResources> | null = null;
+const setupInFlight = new Map<string, Promise<VoiceResources>>();
 
-export async function ensureSpanishVoice(context: vscode.ExtensionContext): Promise<VoiceResources> {
+/**
+ * Whether the engine AND the voice model for `lang` are already on disk (ATM or
+ * F1 storage) — i.e. pressing Listen would NOT trigger a download. Lets the UI
+ * show a download affordance ahead of time.
+ */
+export async function isVoiceReady(context: vscode.ExtensionContext, lang: string): Promise<boolean> {
 	const piperPath = await findExistingPiper(context);
-	const modelPath = await findExistingVoice(context);
+	if (!piperPath) {
+		return false;
+	}
+	const modelPath = await findExistingVoice(context, resolveVoiceId(lang));
+	return modelPath !== null;
+}
+
+export async function ensureVoice(context: vscode.ExtensionContext, lang: string): Promise<VoiceResources> {
+	const voiceId = resolveVoiceId(lang);
+	const piperPath = await findExistingPiper(context);
+	const modelPath = await findExistingVoice(context, voiceId);
 	if (piperPath && modelPath) {
 		return { piperPath, modelPath };
 	}
 
-	// A download may already be running (e.g. double click) — share it.
-	setupInFlight ??= downloadMissingResources(context, piperPath, modelPath)
-		.finally(() => {
-			setupInFlight = null;
-		});
-	return setupInFlight;
+	// Share an in-flight setup per voice (double-click, or both modals at once)
+	// so the same model is never downloaded twice concurrently.
+	let inflight = setupInFlight.get(voiceId);
+	if (!inflight) {
+		const label = VOICE_LABELS[lang] ?? 'voice';
+		inflight = downloadMissingResources(context, piperPath, modelPath, voiceId, label)
+			.finally(() => setupInFlight.delete(voiceId));
+		setupInFlight.set(voiceId, inflight);
+	}
+	return inflight;
 }
 
 async function downloadMissingResources(
 	context: vscode.ExtensionContext,
 	existingPiper: string | null,
 	existingModel: string | null,
+	voiceId: string,
+	langLabel: string,
 ): Promise<VoiceResources> {
 	const own = context.globalStorageUri.fsPath;
 	await fs.promises.mkdir(own, { recursive: true });
@@ -156,14 +204,15 @@ async function downloadMissingResources(
 
 			let modelPath = existingModel;
 			if (!modelPath) {
-				const target = voiceFilePaths(own);
-				progress.report({ message: 'Downloading Spanish voice… 0%' });
-				await downloadFile(`${VOICE_DOWNLOAD_BASE}${VOICE_ID}.onnx`, target.modelPath, (p) => {
+				const target = voiceFilePaths(own, voiceId);
+				const { modelUrl, configUrl } = await resolveVoiceDownloadUrls(context, voiceId);
+				progress.report({ message: `Downloading ${langLabel} voice… 0%` });
+				await downloadFile(modelUrl, target.modelPath, (p) => {
 					const pct = p.percentage ?? 0;
-					progress.report({ message: `Downloading Spanish voice… ${pct}% (${formatBytes(p.bytesDownloaded)})` });
+					progress.report({ message: `Downloading ${langLabel} voice… ${pct}% (${formatBytes(p.bytesDownloaded)})` });
 				});
 				progress.report({ message: 'Downloading voice config…' });
-				await downloadFile(`${VOICE_DOWNLOAD_BASE}${VOICE_ID}.onnx.json`, target.configPath);
+				await downloadFile(configUrl, target.configPath);
 				modelPath = target.modelPath;
 			}
 
@@ -171,6 +220,56 @@ async function downloadMissingResources(
 			return { piperPath, modelPath };
 		},
 	);
+}
+
+/* ── Voice catalog (voices.json) resolution ──────────────────────── */
+
+async function loadVoicesCatalog(context: vscode.ExtensionContext): Promise<VoicesCatalog> {
+	if (voicesCatalogCache) {
+		return voicesCatalogCache;
+	}
+
+	// Reuse a catalog already on disk (ATM first, then F1's own storage).
+	for (const base of storageBases(context)) {
+		const candidate = path.join(base, 'voices', 'voices.json');
+		if (await fileExists(candidate)) {
+			try {
+				voicesCatalogCache = JSON.parse(await fs.promises.readFile(candidate, 'utf8')) as VoicesCatalog;
+				return voicesCatalogCache;
+			} catch {
+				// Corrupt copy — fall through to a fresh download.
+			}
+		}
+	}
+
+	const dest = path.join(context.globalStorageUri.fsPath, 'voices', 'voices.json');
+	await downloadFile(VOICES_JSON_URL, dest);
+	voicesCatalogCache = JSON.parse(await fs.promises.readFile(dest, 'utf8')) as VoicesCatalog;
+	return voicesCatalogCache;
+}
+
+/** Resolve a voice's .onnx + .onnx.json download URLs from its catalog entry. */
+async function resolveVoiceDownloadUrls(
+	context: vscode.ExtensionContext,
+	voiceId: string,
+): Promise<{ modelUrl: string; configUrl: string }> {
+	const catalog = await loadVoicesCatalog(context);
+	const entry = catalog[voiceId];
+	if (!entry) {
+		throw new Error(`Voice "${voiceId}" is not in the catalog.`);
+	}
+
+	const files = Object.keys(entry.files);
+	const onnxFile = files.find((f) => f.endsWith('.onnx') && !f.endsWith('.onnx.json'));
+	const configFile = files.find((f) => f.endsWith('.onnx.json'));
+	if (!onnxFile || !configFile) {
+		throw new Error(`Voice "${voiceId}" is missing model/config files in the catalog.`);
+	}
+
+	return {
+		modelUrl: `${VOICES_DOWNLOAD_BASE_URL}${onnxFile}`,
+		configUrl: `${VOICES_DOWNLOAD_BASE_URL}${configFile}`,
+	};
 }
 
 /* ── Download helpers (from ATM's installer) ─────────────────────── */
@@ -479,7 +578,7 @@ async function assertResourcesReady(resources: VoiceResources): Promise<void> {
 		throw new Error(`Piper executable not found at: ${resources.piperPath}`);
 	}
 	if (!(await fileExists(resources.modelPath))) {
-		throw new Error('Spanish voice model not found.');
+		throw new Error('Voice model not found.');
 	}
 	// The engine may come from ATM's storage where another process manages
 	// permissions; re-asserting is idempotent and cheap.

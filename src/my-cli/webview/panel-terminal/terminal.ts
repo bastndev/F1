@@ -1,6 +1,7 @@
 import { FitAddon } from '@xterm/addon-fit';
 import { Terminal } from '@xterm/xterm';
-import { createTabController, type CliAgentIcon } from '../panel-tab/tab';
+import { createTabController, readVoiceFinishPreference, type CliAgentIcon } from '../panel-tab/tab';
+import { getStoredPromptLang } from '../tools/modal-prompt/language-select';
 import { createCliCreateMessage } from '../../shared/agent-launch-guard';
 import { getAgentSlug as resolveAgentSlug } from '../../shared/agents';
 import { isLynxPanelNavChord } from '../../../shared/keymaps/lynx-keymap/index';
@@ -40,6 +41,19 @@ type TerminalView = {
 declare const acquireVsCodeApi: () => VsCodeApi;
 
 const vscode = acquireVsCodeApi();
+
+// Push the Voice Finish config (enabled + which language's WAV to play) to the
+// host. The host detects "response done" and plays the cue even when this panel
+// is hidden, so it needs both flags pushed while the webview is alive — on
+// startup, when the toggle flips, and on each submit (so the language is fresh).
+const sendVoiceFinishConfig = () => {
+	vscode.postMessage({
+		type: 'cli.voiceFinish',
+		enabled: readVoiceFinishPreference(),
+		lang: getStoredPromptLang() ?? 'en'
+	});
+};
+
 const customCliIconLabel = '__custom-cli__';
 const sessions = new Map<string, CliSession>();
 const terminals = new Map<string, TerminalView>();
@@ -434,20 +448,30 @@ const clipboardReadRpc = createRpcChannel<[], string>({
 	send: (id) => vscode.postMessage({ type: 'clipboard.read', id })
 });
 
-const spellcheckRpc = createRpcChannel<[string, boolean], SpellIssue[]>({
+const spellcheckRpc = createRpcChannel<[string, string, boolean], SpellIssue[]>({
 	prefix: 'spell',
 	timeoutMs: 5000,
 	onTimeout: { resolveWith: [] },
-	send: (id, text, strict) => vscode.postMessage({ type: 'prompt.spellcheck', id, text, strict })
+	send: (id, text, lang, strict) => vscode.postMessage({ type: 'prompt.spellcheck', id, text, lang, strict })
 });
 
 // Voice playback runs in the extension host (Piper TTS, shared with the ATM
 // extension). The webview fires commands and mirrors broadcast state.
 let voiceStateListener: ((state: VoiceState, message?: string, progress?: VoiceProgress) => void) | undefined;
 
-const speakText = (text: string, options?: { chunks?: string[] }) => {
-	vscode.postMessage({ type: 'voice.speak', text, chunks: options?.chunks });
+const speakText = (text: string, options?: { chunks?: string[]; lang?: string }) => {
+	vscode.postMessage({ type: 'voice.speak', text, chunks: options?.chunks, lang: options?.lang });
 };
+
+// Ask the host whether the voice for a language is already downloaded, so the
+// Listen button can show a "download" affordance before the first click.
+const voiceReadyRpc = createRpcChannel<[string], boolean>({
+	prefix: 'voice-ready',
+	timeoutMs: 5000,
+	// On no answer assume ready — don't show a download prompt we're unsure about.
+	onTimeout: { resolveWith: true },
+	send: (id, lang) => vscode.postMessage({ type: 'voice.checkReady', id, lang })
+});
 
 const stopSpeech = () => {
 	vscode.postMessage({ type: 'voice.stop' });
@@ -563,6 +587,9 @@ const toolsController = layoutRight
 				}
 				vscode.postMessage({ type: 'cli.input', sessionId, data });
 				if (options?.submit) {
+					// Refresh the host's Voice Finish config so the cue matches the
+					// language the user is writing in right now for this response.
+					sendVoiceFinishConfig();
 					// Enter must arrive as its own write or TUI CLIs treat it as part
 					// of the paste. Copilot digests pastes noticeably slower than the
 					// rest. Route mentions are special in most CLI TUIs: the first
@@ -590,8 +617,9 @@ const toolsController = layoutRight
 			requestWorkspaceFiles: () => workspaceFilesRpc.request(),
 			requestWorkspaceSkills: () => workspaceSkillsRpc.request(),
 			openCreateSkill: () => vscode.postMessage({ type: 'mySkills.openCreate' }),
-			requestSpellcheck: (text: string, strict: boolean) => spellcheckRpc.request(text, strict),
+			requestSpellcheck: (text: string, lang: string, strict: boolean) => spellcheckRpc.request(text, lang, strict),
 			speakText,
+			checkVoiceReady: (lang: string) => voiceReadyRpc.request(lang),
 			pauseSpeech,
 			resumeSpeech,
 			stopSpeech,
@@ -658,6 +686,7 @@ const tabController = createTabController({
 			terminals.get(activeSessionId)?.terminal.focus();
 		}
 	},
+	onVoiceFinishChange: () => sendVoiceFinishConfig(),
 	getOpenToolModal: () => toolsController?.getOpenTool() ?? null
 });
 
@@ -749,10 +778,22 @@ const createTerminalView = (session: CliSession) => {
 	});
 	terminal.attachCustomKeyEventHandler((event) => handleTerminalKey(event, session.id));
 
+	// OSC 52 sequences inside the restored scrollback (replayed by terminal.write
+	// below) are history, not a live copy. Honoring them would re-write the system
+	// clipboard and re-open the translator every time this webview is rebuilt on a
+	// panel switch (My CLI has no retainContextWhenHidden) — a claude-specific
+	// phantom, since TUIs copy via OSC 52 and that sequence is persisted in the
+	// session buffer. xterm parses its write queue in order, so the replay's write
+	// callback clears this flag before any later live output is parsed.
+	let replayingScrollback = false;
+
 	// TUI CLIs copy their internal selection with OSC 52, which xterm.js
 	// ignores by default. Honor the copy (write it to the real clipboard)
 	// and route it through the copy-to-translate flow.
 	terminal.parser.registerOscHandler(52, (data) => {
+		if (replayingScrollback) {
+			return true;
+		}
 		const separator = data.indexOf(';');
 		const payload = separator >= 0 ? data.slice(separator + 1) : data;
 		if (!payload || payload === '?') {
@@ -774,7 +815,12 @@ const createTerminalView = (session: CliSession) => {
 	const fitAddon = new FitAddon();
 	terminal.loadAddon(fitAddon);
 	terminal.open(pane);
-	terminal.write(session.buffer);
+	if (session.buffer) {
+		replayingScrollback = true;
+		terminal.write(session.buffer, () => {
+			replayingScrollback = false;
+		});
+	}
 	terminal.onData((data) => {
 		const currentSession = sessions.get(session.id);
 		if (currentSession?.status === 'running' && !(isOpenCodeSession(session.id) && data === '\x1a')) {
@@ -1018,6 +1064,11 @@ window.addEventListener('message', (event: MessageEvent<ServerMessage>) => {
 		return;
 	}
 
+	if (message.type === 'voice.ready') {
+		voiceReadyRpc.resolve(message.id, message.ready);
+		return;
+	}
+
 	if (message.type === 'clipboard.text') {
 		clipboardReadRpc.resolve(message.id, message.text);
 		return;
@@ -1050,6 +1101,11 @@ window.addEventListener('message', (event: MessageEvent<ServerMessage>) => {
 
 	if (message.type === 'workspace.skills') {
 		workspaceSkillsRpc.resolve(message.id, message.skills);
+		return;
+	}
+
+	if (message.type === 'workspace.skillsChanged') {
+		toolsController?.refreshPromptIfOpen();
 		return;
 	}
 
@@ -1142,5 +1198,9 @@ document.addEventListener('visibilitychange', () => {
 });
 
 initMemoryHandler((message) => vscode.postMessage(message));
+
+// Seed the host with the persisted Voice Finish state on load — the host's copy
+// resets each time this (non-retained) webview is rebuilt on a panel switch.
+sendVoiceFinishConfig();
 
 vscode.postMessage({ type: 'cli.ready' });

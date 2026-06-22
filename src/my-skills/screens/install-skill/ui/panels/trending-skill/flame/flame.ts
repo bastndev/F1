@@ -42,15 +42,24 @@ export function initTrendingFlamePanel(api: VsCodeApi): void {
 	});
 
 	list.addEventListener('click', event => {
-		const button = (event.target as HTMLElement | null)?.closest<HTMLButtonElement>('.install-btn[data-install-id]');
-		if (!button || button.disabled || !button.dataset.installId) {
+		const target = event.target as HTMLElement | null;
+		const button = target?.closest<HTMLButtonElement>('.install-btn[data-install-id]');
+		if (button) {
+			if (button.disabled || !button.dataset.installId) {
+				return;
+			}
+
+			const id = button.dataset.installId;
+			installStatuses.set(id, 'installing');
+			renderer?.updateItem(id);
+			vscodeApi?.postMessage({ type: 'installSkill.install', id });
 			return;
 		}
 
-		const id = button.dataset.installId;
-		installStatuses.set(id, 'installing');
-		renderer?.updateItem(id);
-		vscodeApi?.postMessage({ type: 'installSkill.install', id });
+		// Clicking the skill row anywhere but the Install button opens the source repository.
+		if (target?.closest('.install-item')) {
+			vscodeApi?.postMessage({ type: 'flameSkill.openRepo' });
+		}
 	});
 
 	window.addEventListener('message', event => {
