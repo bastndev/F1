@@ -4,6 +4,7 @@ import * as path from 'path';
 import * as vscode from 'vscode';
 import { cliAgents, getCliAgent } from '../../shared/agents';
 import { ensureCliInstalled } from './installation';
+import { playFinishSound } from '../voice/finish-sound';
 import type {
 	CliSessionSnapshot,
 	CustomCliLaunch,
@@ -21,11 +22,20 @@ type CliSession = Omit<CliSessionSnapshot, 'buffer'> & {
 	rows: number;
 	started?: boolean;
 	closing?: boolean;
+	/** Set on submit; cleared when the response settles (drives Voice Finish). */
+	awaitingResponse?: boolean;
+	/** Quiet-period timer that decides the response is done. */
+	responseSettleTimer?: ReturnType<typeof setTimeout>;
 };
 
 type MyCliMessageResult = 'closed-last-session' | undefined;
 
 const maxBufferLength = 240000;
+
+// How long the CLI output must stay quiet after a submission before we call the
+// response "finished". TUI CLIs stream spinner frames while thinking, so this
+// only elapses once the agent has actually stopped writing.
+const responseSettleMs = 1500;
 
 const getWorkspaceCwd = () => {
 	return vscode.workspace.workspaceFolders?.[0]?.uri.fsPath || os.homedir();
@@ -67,6 +77,11 @@ export class CliSessionManager implements vscode.Disposable {
 	private webview?: vscode.Webview;
 	private activeSessionId?: string;
 	private nextSessionId = 1;
+
+	// Voice Finish config, pushed from the webview (cli.voiceFinish). Off by
+	// default; the language picks which WAV cue plays when a response settles.
+	private voiceFinishEnabled = false;
+	private voiceFinishLang = 'en';
 
 	/**
 	 * Sessions whose full buffer the *current* webview already received —
@@ -234,6 +249,29 @@ export class CliSessionManager implements vscode.Disposable {
 		}
 
 		this.postMessage({ type: 'cli.output', sessionId: session.id, data });
+		this.scheduleResponseSettle(session);
+	}
+
+	// While a response is in flight, restart a quiet-period timer on every output
+	// chunk. When the CLI stops writing for responseSettleMs the response is done
+	// — play the Voice Finish cue once (if enabled) and disarm. No-op until a
+	// submission arms the session, so boot output and idle redraws never fire.
+	private scheduleResponseSettle(session: CliSession) {
+		if (!session.awaitingResponse) {
+			return;
+		}
+
+		if (session.responseSettleTimer) {
+			clearTimeout(session.responseSettleTimer);
+		}
+
+		session.responseSettleTimer = setTimeout(() => {
+			session.responseSettleTimer = undefined;
+			session.awaitingResponse = false;
+			if (this.voiceFinishEnabled && session.status === 'running' && !session.closing) {
+				playFinishSound(this.voiceFinishLang);
+			}
+		}, responseSettleMs);
 	}
 
 	private markSessionError(session: CliSession, message: string) {
@@ -273,6 +311,12 @@ export class CliSessionManager implements vscode.Disposable {
 				break;
 			case 'cli.ready':
 				this.postState();
+				break;
+			case 'cli.voiceFinish':
+				this.voiceFinishEnabled = message.enabled === true;
+				if (typeof message.lang === 'string' && message.lang) {
+					this.voiceFinishLang = message.lang;
+				}
 				break;
 		}
 
@@ -314,6 +358,13 @@ export class CliSessionManager implements vscode.Disposable {
 		const session = this.sessions.get(sessionId);
 		if (!session || session.status !== 'running') {
 			return;
+		}
+
+		// A carriage return means the user submitted something — arm the finish
+		// detector so the next quiet period counts as "response done". Plain
+		// keystrokes (no Enter) don't arm it, so idle redraws never ding.
+		if (data.includes('\r') || data.includes('\n')) {
+			session.awaitingResponse = true;
 		}
 
 		this.sendPtyHostCommand(session, { type: 'input', data });
@@ -376,6 +427,12 @@ export class CliSessionManager implements vscode.Disposable {
 
 	private disposeSession(session: CliSession) {
 		session.closing = true;
+
+		if (session.responseSettleTimer) {
+			clearTimeout(session.responseSettleTimer);
+			session.responseSettleTimer = undefined;
+		}
+		session.awaitingResponse = false;
 
 		try {
 			this.sendPtyHostCommand(session, { type: 'kill' });
