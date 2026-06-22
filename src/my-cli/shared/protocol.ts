@@ -96,6 +96,7 @@ export type HostToWebviewMessage =
 	| { type: 'prompt.spellResult'; id: string; issues: SpellIssue[] }
 	| { type: 'workspace.files'; id: string; files: FileMentionEntry[] }
 	| { type: 'workspace.skills'; id: string; skills: WorkspaceSkill[] }
+	| { type: 'workspace.skillsChanged' }
 	| { type: 'voice.state'; state: VoiceState; message?: string; progress?: VoiceProgress }
 	| { type: 'voice.ready'; id: string; ready: boolean }
 	| { type: 'clipboard.text'; id: string; text: string }

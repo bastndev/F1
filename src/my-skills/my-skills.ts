@@ -89,6 +89,8 @@ export class MySkillsViewProvider implements vscode.WebviewViewProvider {
 	private _view?: vscode.WebviewView;
 	private _supportPanel?: vscode.WebviewPanel;
 	private _localSkillWatchers: vscode.FileSystemWatcher[] = [];
+	private readonly _onDidSkillsChange = new vscode.EventEmitter<void>();
+	public readonly onDidSkillsChange = this._onDidSkillsChange.event;
 	private _installSkills: InstallMarketplaceSkill[] = [];
 	private _isLoadingInstallSkills = false;
 	private _installSkillsError: string | null = null;
@@ -384,6 +386,7 @@ export class MySkillsViewProvider implements vscode.WebviewViewProvider {
 
 			await createSkillBoilerplate(workspaceFolder.uri, skillMessage);
 			await this._postLocalSkills();
+			this._onDidSkillsChange.fire();
 			await this._postCreateSkillResult(true, 'Skill created');
 		} catch (err) {
 			console.error(`[MySkills] Failed to create chat skill: ${err}`);
@@ -845,6 +848,7 @@ export class MySkillsViewProvider implements vscode.WebviewViewProvider {
 			await this._sendFlameSkillsUpdate();
 			await Promise.all(Array.from(this._officialSkillsByOwner.keys(), owner => this._sendOfficialSkillsUpdate(owner)));
 			await this._postLocalSkills();
+			this._onDidSkillsChange.fire();
 			clearSearchRecommendationCache();
 			await this._postCreateDesignReturnToLocal();
 		}
@@ -867,6 +871,7 @@ export class MySkillsViewProvider implements vscode.WebviewViewProvider {
 			void vscode.window.showErrorMessage('My Skills could not update .gitignore.');
 		} finally {
 			await this._postLocalSkills();
+			this._onDidSkillsChange.fire();
 		}
 	}
 
@@ -888,6 +893,7 @@ export class MySkillsViewProvider implements vscode.WebviewViewProvider {
 			void vscode.window.showErrorMessage('My Skills could not delete this item.');
 		} finally {
 			await this._postLocalSkills();
+			this._onDidSkillsChange.fire();
 			if (isMarketplaceFolderSkillId(message.id)) {
 				await this._postInstallSkills(true);
 				await this._postTrending24hSkills(true);
@@ -1226,6 +1232,7 @@ export class MySkillsViewProvider implements vscode.WebviewViewProvider {
 		this._supportPanel = undefined;
 		this._localSkillWatchers.forEach(watcher => watcher.dispose());
 		this._localSkillWatchers = [];
+		this._onDidSkillsChange.dispose();
 	}
 }
 

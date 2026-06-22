@@ -12,6 +12,7 @@ export function activate(context: vscode.ExtensionContext) {
 		vscode.commands.registerCommand('f1.myCli.openTutorial', () => myCliProvider.openTutorial()),
 		vscode.commands.registerCommand('f1.myCli.smartFocus', () => myCliProvider.smartFocus()),
 		mySkillsProvider,
+		mySkillsProvider.onDidSkillsChange(() => myCliProvider.notifySkillsChanged()),
 		vscode.commands.registerCommand('f1.mySkills.openCreate', () => mySkillsProvider.openCreateView()),
 		vscode.commands.registerCommand('f1.mySkills.goCreate', () => mySkillsProvider.switchTab('create-panel')),
 		vscode.commands.registerCommand('f1.mySkills.goInstall', () => mySkillsProvider.switchTab('install-panel')),

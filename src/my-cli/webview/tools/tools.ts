@@ -232,5 +232,11 @@ export const createToolsController = ({
 		}
 	};
 
-	return { open, toggle, close, isOpen: () => currentTool !== null, getOpenTool: () => currentTool };
+	const refreshPromptIfOpen = () => {
+		if (currentTool === 'prompt') {
+			open('prompt');
+		}
+	};
+
+	return { open, toggle, close, isOpen: () => currentTool !== null, getOpenTool: () => currentTool, refreshPromptIfOpen };
 };

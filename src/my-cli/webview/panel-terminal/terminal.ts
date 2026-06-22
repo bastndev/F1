@@ -1069,6 +1069,11 @@ window.addEventListener('message', (event: MessageEvent<ServerMessage>) => {
 		return;
 	}
 
+	if (message.type === 'workspace.skillsChanged') {
+		toolsController?.refreshPromptIfOpen();
+		return;
+	}
+
 	if (message.type === 'memory.initialState') {
 		tabController.setMemoryState(message.enabled);
 		return;
