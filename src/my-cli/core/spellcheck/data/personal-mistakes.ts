@@ -32,6 +32,7 @@ export const PERSONAL_MISTAKES: Record<string, string> = {
 	'biendo': 'viendo',
 	'defaul': 'default',
 	'telemetria': 'telemetría',
+	'tokes': 'tokens',
 
 
 
