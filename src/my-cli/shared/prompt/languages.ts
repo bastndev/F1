@@ -4,18 +4,18 @@
  * three things at once, all encoded here so the rules live in exactly one place:
  *
  *   • translation  — `<code> → en` (skipped entirely for English, source == target)
- *   • spell-check  — fixnow has dictionaries for en/es/pt but NOT zh (Chinese is
- *                    character-based; a trie/word checker doesn't apply)
+ *   • spell-check  — fixnow has dictionaries for en/es/pt/ru but NOT zh (Chinese
+ *                    is character-based; a trie/word checker doesn't apply)
  *   • the strict-accents toggle — only Spanish has a meaningful "accept missing
  *                    tildes" mode to override; fixnow's accent leniency is
- *                    Spanish-only, so pt/en are always accent-strict by nature.
+ *                    Spanish-only, so pt/en/ru are always accent-strict by nature.
  *
- * Only these four are offered. Both the picker UI (webview) and the host
+ * Only these five are offered. Both the picker UI (webview) and the host
  * spell-check/translation read from this list, so it must stay DOM- and
  * vscode-free (pure data + types).
  */
 
-export type PromptLang = 'en' | 'es' | 'zh' | 'pt';
+export type PromptLang = 'en' | 'es' | 'zh' | 'pt' | 'ru';
 
 export interface PromptLanguage {
 	code: PromptLang;
@@ -32,10 +32,11 @@ export interface PromptLanguage {
 }
 
 export const PROMPT_LANGUAGES: readonly PromptLanguage[] = [
-	{ code: 'en', label: 'English',    flag: '🇺🇲', translates: false, spellcheck: true,  strictToggle: false },
 	{ code: 'es', label: 'Spanish',    flag: '🇪🇸', translates: true,  spellcheck: true,  strictToggle: true  },
 	{ code: 'zh', label: 'Chinese',    flag: '🇨🇳', translates: true,  spellcheck: false, strictToggle: false },
 	{ code: 'pt', label: 'Portuguese', flag: '🇧🇷', translates: true,  spellcheck: true,  strictToggle: false },
+	{ code: 'ru', label: 'Russian',    flag: '🇷🇺', translates: true,  spellcheck: true,  strictToggle: false },
+	{ code: 'en', label: 'English',    flag: '🌐', translates: false, spellcheck: true,  strictToggle: false },
 ];
 
 /** Placeholder shown before any language is chosen. */

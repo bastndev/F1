@@ -4,8 +4,9 @@ import type { ImageAttachment, PromptTranslateRequest, PromptTranslateResult, Fi
 import type { VoiceProgress, VoiceState } from '../../shared/voice/voice-types';
 import { mountTranslatorPanel } from './modal-translator/translator';
 import { mountUsePanel } from './modal-use/use';
+import { mountCommandsPanel } from './modal-commands/commands';
 
-export type ToolId = 'translate' | 'keymaps' | 'prompt' | 'use';
+export type ToolId = 'translate' | 'keymaps' | 'prompt' | 'use' | 'commands';
 
 export type CliUsageSnapshot = {
 	sessionId: string;
@@ -31,6 +32,7 @@ export type ToolContext = {
 	requestWorkspaceSkills?: () => Promise<WorkspaceSkill[]>;
 	openCreateSkill?: () => void;
 	requestSpellcheck?: (text: string, lang: string, strict: boolean) => Promise<SpellIssue[]>;
+	registerSkillsRefresh?: (refresh: () => void) => void;
 	speakText?: (text: string, options?: { chunks?: string[]; lang?: string }) => void;
 	checkVoiceReady?: (lang: string) => Promise<boolean>;
 	pauseSpeech?: () => void;
@@ -57,6 +59,7 @@ const applyStyles = (element: HTMLElement, styles: Partial<CSSStyleDeclaration>)
 
 const toolMounts: Record<ToolId, ToolMount> = {
 	keymaps: mountKeymapsPanel,
+	commands: mountCommandsPanel,
 	prompt: mountPromptPanel,
 	translate: mountTranslatorPanel,
 	use: mountUsePanel
@@ -90,6 +93,7 @@ export const createToolsController = ({
 	let activeModal: HTMLElement | null = null;
 	let currentTool: ToolId | null = null;
 	let activeCleanup: ToolCleanup | null = null;
+	let skillsRefreshFn: (() => void) | null = null;
 
 	const close = () => {
 		document.removeEventListener('keydown', handleKeyDown, true);
@@ -103,6 +107,7 @@ export const createToolsController = ({
 		activeModal?.remove();
 		activeModal = null;
 		currentTool = null;
+		skillsRefreshFn = null;
 
 		// Return focus using the host-provided function (uses real Terminal.focus()
 		// on the xterm instance so input works and no visible focus ring appears
@@ -161,7 +166,7 @@ export const createToolsController = ({
 		modal.append(host);
 
 		modal.addEventListener('click', (event) => {
-			if (event.target === modal && tool === 'keymaps') {
+			if (event.target === modal && (tool === 'keymaps' || tool === 'commands')) {
 				close();
 			}
 		});
@@ -186,6 +191,7 @@ export const createToolsController = ({
 			requestWorkspaceSkills,
 			openCreateSkill,
 			requestSpellcheck,
+			registerSkillsRefresh: (fn) => { skillsRefreshFn = fn; },
 			speakText,
 			checkVoiceReady,
 			pauseSpeech,
@@ -230,5 +236,9 @@ export const createToolsController = ({
 		}
 	};
 
-	return { open, toggle, close, isOpen: () => currentTool !== null, getOpenTool: () => currentTool };
+	const refreshPromptIfOpen = () => {
+		skillsRefreshFn?.();
+	};
+
+	return { open, toggle, close, isOpen: () => currentTool !== null, getOpenTool: () => currentTool, refreshPromptIfOpen };
 };

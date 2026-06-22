@@ -1,0 +1,37 @@
+<div class="commands-modal" role="dialog" aria-label="CLI commands">
+	<div class="commands-header">
+		<div class="commands-header-copy">
+			<div class="commands-title-row">
+				<span class="commands-eyebrow">filter</span>
+				<span class="commands-eyebrow commands-eyebrow-accent">commands</span>
+				<span class="commands-pill">CLI</span>
+			</div>
+			<div class="commands-subtitle">Browse every slash command for the active session</div>
+		</div>
+		<button class="commands-close-btn" id="closeCommandsBtn" type="button" aria-label="Close" title="Close (Esc)">esc</button>
+	</div>
+
+	<div class="commands-search-wrap">
+		<div class="commands-search-box">
+			<input id="commandsSearchInput" type="text" placeholder="Search a command…" autocomplete="off" spellcheck="false">
+		</div>
+	</div>
+
+	<div class="commands-chips" id="commandsChips"></div>
+
+	<div class="commands-list" id="commandsList">
+		<div class="commands-empty" id="commandsEmpty" hidden>No commands found</div>
+	</div>
+
+	<div class="commands-footer">
+		<div class="commands-footer-left">
+			<span class="commands-live-dot"></span>
+			<span id="commandsAgentLabel">cli</span>
+			<span class="commands-footer-sep">|</span>
+			<span class="commands-footer-tip">click to insert</span>
+		</div>
+		<div class="commands-footer-right">
+			<span id="commandsCount">0 commands</span>
+		</div>
+	</div>
+</div>

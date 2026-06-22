@@ -59,6 +59,8 @@ export const handleWorkspaceListSkills = async (webview: vscode.Webview, message
 	const workspaceFolder = vscode.workspace.workspaceFolders?.[0];
 
 	if (workspaceFolder) {
+		const gitignoreRules = await getWorkspaceGitignoreRules(workspaceFolder);
+
 		for (const root of skillRoots) {
 			const rootUri = vscode.Uri.joinPath(workspaceFolder.uri, ...root.rel.split('/'));
 			let entries: Array<[string, vscode.FileType]>;
@@ -71,6 +73,9 @@ export const handleWorkspaceListSkills = async (webview: vscode.Webview, message
 			const checks = entries
 				.filter(([name, type]) => type === vscode.FileType.Directory && !name.startsWith('.'))
 				.map(async ([name]) => {
+					if (isGitignoredPath(`${root.rel}/${name}`, true, gitignoreRules)) {
+						return undefined;
+					}
 					try {
 						const manifest = vscode.Uri.joinPath(rootUri, name, 'SKILL.md');
 						const stat = await vscode.workspace.fs.stat(manifest);

@@ -19,4 +19,5 @@ export type PromptContext = {
 	requestWorkspaceSkills?: () => Promise<WorkspaceSkill[]>;
 	openCreateSkill?: () => void;
 	requestSpellcheck?: (text: string, lang: string, strict: boolean) => Promise<SpellIssue[]>;
+	registerSkillsRefresh?: (refresh: () => void) => void;
 };

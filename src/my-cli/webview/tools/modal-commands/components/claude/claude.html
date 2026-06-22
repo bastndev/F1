@@ -1,0 +1,359 @@
+<div class="commands-group" data-category="Essentials">
+	<div class="commands-group-label">Essentials</div>
+	<button class="commands-row" type="button" data-cmd="/model">
+		<span class="commands-tag">/model [model]</span>
+		<span class="commands-desc">Switch the AI model and save it as default for new sessions.</span>
+	</button>
+	<button class="commands-row" type="button" data-cmd="/effort">
+		<span class="commands-tag">/effort [level|auto]</span>
+		<span class="commands-desc">Set effort: low, medium, high, xhigh, max, ultracode.</span>
+	</button>
+	<button class="commands-row" type="button" data-cmd="/context">
+		<span class="commands-tag">/context [all]</span>
+		<span class="commands-desc">Visualize current context usage as a colored grid.</span>
+	</button>
+	<button class="commands-row" type="button" data-cmd="/compact">
+		<span class="commands-tag">/compact [instructions]</span>
+		<span class="commands-desc">Summarize the conversation to free up context.</span>
+	</button>
+	<button class="commands-row" type="button" data-cmd="/plan">
+		<span class="commands-tag">/plan [description]</span>
+		<span class="commands-desc">Enter plan mode before a large change.</span>
+	</button>
+	<button class="commands-row" type="button" data-cmd="/resume">
+		<span class="commands-tag">/resume [session]</span>
+		<span class="commands-desc">Resume a conversation by ID or name. <span class="commands-alias">alias: /continue</span></span>
+	</button>
+	<button class="commands-row" type="button" data-cmd="/usage">
+		<span class="commands-tag">/usage</span>
+		<span class="commands-desc">Session cost, plan limits, and activity stats. <span class="commands-alias">alias: /cost, /stats</span></span>
+	</button>
+	<button class="commands-row" type="button" data-cmd="/clear">
+		<span class="commands-tag">/clear [name]</span>
+		<span class="commands-desc">Start a fresh conversation, keep project memory. <span class="commands-alias">alias: /reset, /new</span></span>
+	</button>
+</div>
+
+<div class="commands-group" data-category="Model">
+	<div class="commands-group-label">Model</div>
+	<button class="commands-row" type="button" data-cmd="/fast">
+		<span class="commands-tag">/fast [on|off]</span>
+		<span class="commands-desc">Toggle fast mode on or off.</span>
+	</button>
+	<button class="commands-row" type="button" data-cmd="/advisor">
+		<span class="commands-tag">/advisor [model|off]</span>
+		<span class="commands-desc">Consult a second model for guidance at key moments.</span>
+	</button>
+</div>
+
+<div class="commands-group" data-category="Context">
+	<div class="commands-group-label">Context</div>
+	<button class="commands-row" type="button" data-cmd="/btw">
+		<span class="commands-tag">/btw &lt;question&gt;</span>
+		<span class="commands-desc">Ask a quick side question without adding to history.</span>
+	</button>
+	<button class="commands-row" type="button" data-cmd="/rewind">
+		<span class="commands-tag">/rewind</span>
+		<span class="commands-desc">Roll back code and/or conversation to a checkpoint. <span class="commands-alias">alias: /checkpoint, /undo</span></span>
+	</button>
+	<button class="commands-row" type="button" data-cmd="/recap">
+		<span class="commands-tag">/recap</span>
+		<span class="commands-desc">Generate a one-line summary of the current session.</span>
+	</button>
+	<button class="commands-row" type="button" data-cmd="/export">
+		<span class="commands-tag">/export [filename]</span>
+		<span class="commands-desc">Export the current conversation as plain text.</span>
+	</button>
+	<button class="commands-row" type="button" data-cmd="/copy">
+		<span class="commands-tag">/copy [N]</span>
+		<span class="commands-desc">Copy the last (or Nth-latest) assistant response.</span>
+	</button>
+</div>
+
+<div class="commands-group" data-category="Session">
+	<div class="commands-group-label">Session</div>
+	<button class="commands-row" type="button" data-cmd="/branch">
+		<span class="commands-tag">/branch [name]</span>
+		<span class="commands-desc">Branch the conversation here and switch into it.</span>
+	</button>
+	<button class="commands-row" type="button" data-cmd="/fork">
+		<span class="commands-tag">/fork &lt;directive&gt;</span>
+		<span class="commands-desc">Spawn a forked subagent that inherits the conversation.</span>
+	</button>
+	<button class="commands-row" type="button" data-cmd="/rename">
+		<span class="commands-tag">/rename [name]</span>
+		<span class="commands-desc">Rename the current session.</span>
+	</button>
+	<button class="commands-row" type="button" data-cmd="/cd">
+		<span class="commands-tag">/cd &lt;path&gt;</span>
+		<span class="commands-desc">Move this session to a new working directory.</span>
+	</button>
+	<button class="commands-row" type="button" data-cmd="/add-dir">
+		<span class="commands-tag">/add-dir &lt;path&gt;</span>
+		<span class="commands-desc">Add a working directory for file access this session.</span>
+	</button>
+	<button class="commands-row" type="button" data-cmd="/exit">
+		<span class="commands-tag">/exit</span>
+		<span class="commands-desc">Exit the CLI (detaches an attached background session). <span class="commands-alias">alias: /quit</span></span>
+	</button>
+	<button class="commands-row" type="button" data-cmd="/stop">
+		<span class="commands-tag">/stop</span>
+		<span class="commands-desc">Stop the current background session.</span>
+	</button>
+</div>
+
+<div class="commands-group" data-category="Code & Review">
+	<div class="commands-group-label">Code &amp; Review</div>
+	<button class="commands-row" type="button" data-cmd="/diff">
+		<span class="commands-tag">/diff</span>
+		<span class="commands-desc">Open an interactive diff viewer.</span>
+	</button>
+	<button class="commands-row" type="button" data-cmd="/code-review">
+		<span class="commands-tag">/code-review [level] [--fix]</span>
+		<span class="commands-desc">Review the diff for bugs and cleanups.</span>
+	</button>
+	<button class="commands-row" type="button" data-cmd="/simplify">
+		<span class="commands-tag">/simplify [target]</span>
+		<span class="commands-desc">Cleanup-only review that applies fixes.</span>
+	</button>
+	<button class="commands-row" type="button" data-cmd="/review">
+		<span class="commands-tag">/review [PR]</span>
+		<span class="commands-desc">Review a pull request locally.</span>
+	</button>
+	<button class="commands-row" type="button" data-cmd="/security-review">
+		<span class="commands-tag">/security-review</span>
+		<span class="commands-desc">Scan pending changes for vulnerabilities.</span>
+	</button>
+	<button class="commands-row" type="button" data-cmd="/ultrareview">
+		<span class="commands-tag">/ultrareview [PR]</span>
+		<span class="commands-desc">Deep multi-agent cloud review.</span>
+	</button>
+	<button class="commands-row" type="button" data-cmd="/ultraplan">
+		<span class="commands-tag">/ultraplan &lt;prompt&gt;</span>
+		<span class="commands-desc">Draft a plan in a cloud session, review in browser.</span>
+	</button>
+	<button class="commands-row" type="button" data-cmd="/autofix-pr">
+		<span class="commands-tag">/autofix-pr [prompt]</span>
+		<span class="commands-desc">Cloud session that watches the PR and pushes fixes.</span>
+	</button>
+</div>
+
+<div class="commands-group" data-category="Agents">
+	<div class="commands-group-label">Agents</div>
+	<button class="commands-row" type="button" data-cmd="/agents">
+		<span class="commands-tag">/agents</span>
+		<span class="commands-desc">Manage subagent configurations.</span>
+	</button>
+	<button class="commands-row" type="button" data-cmd="/background">
+		<span class="commands-tag">/background [prompt]</span>
+		<span class="commands-desc">Detach the session as a background agent. <span class="commands-alias">alias: /bg</span></span>
+	</button>
+	<button class="commands-row" type="button" data-cmd="/batch">
+		<span class="commands-tag">/batch &lt;instruction&gt;</span>
+		<span class="commands-desc">Decompose a large change into parallel worktrees.</span>
+	</button>
+	<button class="commands-row" type="button" data-cmd="/tasks">
+		<span class="commands-tag">/tasks</span>
+		<span class="commands-desc">View and manage everything running in the background. <span class="commands-alias">alias: /bashes</span></span>
+	</button>
+	<button class="commands-row" type="button" data-cmd="/goal">
+		<span class="commands-tag">/goal [condition|clear]</span>
+		<span class="commands-desc">Keep working across turns until the condition is met.</span>
+	</button>
+	<button class="commands-row" type="button" data-cmd="/loop">
+		<span class="commands-tag">/loop [interval] [prompt]</span>
+		<span class="commands-desc">Run a prompt repeatedly while the session stays open. <span class="commands-alias">alias: /proactive</span></span>
+	</button>
+	<button class="commands-row" type="button" data-cmd="/schedule">
+		<span class="commands-tag">/schedule [description]</span>
+		<span class="commands-desc">Create/manage cloud routines on a schedule. <span class="commands-alias">alias: /routines</span></span>
+	</button>
+	<button class="commands-row" type="button" data-cmd="/deep-research">
+		<span class="commands-tag">/deep-research &lt;question&gt;</span>
+		<span class="commands-desc">Fan out web searches and synthesize a cited report.</span>
+	</button>
+</div>
+
+<div class="commands-group" data-category="Skills & Extensions">
+	<div class="commands-group-label">Skills &amp; Extensions</div>
+	<button class="commands-row" type="button" data-cmd="/skills">
+		<span class="commands-tag">/skills</span>
+		<span class="commands-desc">List available skills.</span>
+	</button>
+	<button class="commands-row" type="button" data-cmd="/reload-skills">
+		<span class="commands-tag">/reload-skills</span>
+		<span class="commands-desc">Re-scan skill and command directories.</span>
+	</button>
+	<button class="commands-row" type="button" data-cmd="/plugin">
+		<span class="commands-tag">/plugin [subcommand]</span>
+		<span class="commands-desc">Manage Claude Code plugins.</span>
+	</button>
+	<button class="commands-row" type="button" data-cmd="/reload-plugins">
+		<span class="commands-tag">/reload-plugins [--force]</span>
+		<span class="commands-desc">Reload active plugins without restarting.</span>
+	</button>
+	<button class="commands-row" type="button" data-cmd="/mcp">
+		<span class="commands-tag">/mcp [subcommand]</span>
+		<span class="commands-desc">Manage MCP server connections and auth.</span>
+	</button>
+	<button class="commands-row" type="button" data-cmd="/hooks">
+		<span class="commands-tag">/hooks</span>
+		<span class="commands-desc">View hook configurations for tool events.</span>
+	</button>
+	<button class="commands-row" type="button" data-cmd="/claude-api">
+		<span class="commands-tag">/claude-api [migrate]</span>
+		<span class="commands-desc">Load Claude API reference for your language.</span>
+	</button>
+	<button class="commands-row" type="button" data-cmd="/fewer-permission-prompts">
+		<span class="commands-tag">/fewer-permission-prompts</span>
+		<span class="commands-desc">Build a read-only allowlist from your transcripts.</span>
+	</button>
+	<button class="commands-row" type="button" data-cmd="/run">
+		<span class="commands-tag">/run</span>
+		<span class="commands-desc">Launch and drive your project's app.</span>
+	</button>
+	<button class="commands-row" type="button" data-cmd="/verify">
+		<span class="commands-tag">/verify</span>
+		<span class="commands-desc">Build, run, and observe to confirm a change works.</span>
+	</button>
+	<button class="commands-row" type="button" data-cmd="/run-skill-generator">
+		<span class="commands-tag">/run-skill-generator</span>
+		<span class="commands-desc">Author a per-project run/verify skill.</span>
+	</button>
+</div>
+
+<div class="commands-group" data-category="Config">
+	<div class="commands-group-label">Config</div>
+	<button class="commands-row" type="button" data-cmd="/init">
+		<span class="commands-tag">/init</span>
+		<span class="commands-desc">Initialize the project with a CLAUDE.md guide.</span>
+	</button>
+	<button class="commands-row" type="button" data-cmd="/memory">
+		<span class="commands-tag">/memory</span>
+		<span class="commands-desc">Edit CLAUDE.md memory files and auto-memory.</span>
+	</button>
+	<button class="commands-row" type="button" data-cmd="/permissions">
+		<span class="commands-tag">/permissions</span>
+		<span class="commands-desc">Manage allow/ask/deny rules for tools. <span class="commands-alias">alias: /allowed-tools</span></span>
+	</button>
+	<button class="commands-row" type="button" data-cmd="/config">
+		<span class="commands-tag">/config [key=value]</span>
+		<span class="commands-desc">Open Settings or set a key directly. <span class="commands-alias">alias: /settings</span></span>
+	</button>
+	<button class="commands-row" type="button" data-cmd="/theme">
+		<span class="commands-tag">/theme</span>
+		<span class="commands-desc">Change the color theme.</span>
+	</button>
+	<button class="commands-row" type="button" data-cmd="/color">
+		<span class="commands-tag">/color [color|default]</span>
+		<span class="commands-desc">Set the prompt bar color for this session.</span>
+	</button>
+	<button class="commands-row" type="button" data-cmd="/statusline">
+		<span class="commands-tag">/statusline</span>
+		<span class="commands-desc">Configure the status line.</span>
+	</button>
+	<button class="commands-row" type="button" data-cmd="/keybindings">
+		<span class="commands-tag">/keybindings</span>
+		<span class="commands-desc">Open your keyboard shortcuts file.</span>
+	</button>
+	<button class="commands-row" type="button" data-cmd="/tui">
+		<span class="commands-tag">/tui [default|fullscreen]</span>
+		<span class="commands-desc">Set the terminal UI renderer and relaunch.</span>
+	</button>
+	<button class="commands-row" type="button" data-cmd="/sandbox">
+		<span class="commands-tag">/sandbox</span>
+		<span class="commands-desc">Toggle sandbox mode.</span>
+	</button>
+</div>
+
+<div class="commands-group" data-category="Account & Integrations">
+	<div class="commands-group-label">Account &amp; Integrations</div>
+	<button class="commands-row" type="button" data-cmd="/login">
+		<span class="commands-tag">/login</span>
+		<span class="commands-desc">Sign in to your Anthropic account.</span>
+	</button>
+	<button class="commands-row" type="button" data-cmd="/logout">
+		<span class="commands-tag">/logout</span>
+		<span class="commands-desc">Sign out from your Anthropic account.</span>
+	</button>
+	<button class="commands-row" type="button" data-cmd="/usage-credits">
+		<span class="commands-tag">/usage-credits</span>
+		<span class="commands-desc">Configure usage credits to keep working at a limit.</span>
+	</button>
+	<button class="commands-row" type="button" data-cmd="/upgrade">
+		<span class="commands-tag">/upgrade</span>
+		<span class="commands-desc">Open the upgrade page for a higher plan tier.</span>
+	</button>
+	<button class="commands-row" type="button" data-cmd="/privacy-settings">
+		<span class="commands-tag">/privacy-settings</span>
+		<span class="commands-desc">View and update your privacy settings.</span>
+	</button>
+	<button class="commands-row" type="button" data-cmd="/passes">
+		<span class="commands-tag">/passes</span>
+		<span class="commands-desc">Share a free week of Claude Code with friends.</span>
+	</button>
+	<button class="commands-row" type="button" data-cmd="/remote-control">
+		<span class="commands-tag">/remote-control</span>
+		<span class="commands-desc">Allow remote control of this session from claude.ai. <span class="commands-alias">alias: /rc</span></span>
+	</button>
+	<button class="commands-row" type="button" data-cmd="/remote-env">
+		<span class="commands-tag">/remote-env</span>
+		<span class="commands-desc">Choose the default environment for cloud agents.</span>
+	</button>
+	<button class="commands-row" type="button" data-cmd="/teleport">
+		<span class="commands-tag">/teleport</span>
+		<span class="commands-desc">Pull a web session into this terminal. <span class="commands-alias">alias: /tp</span></span>
+	</button>
+	<button class="commands-row" type="button" data-cmd="/web-setup">
+		<span class="commands-tag">/web-setup</span>
+		<span class="commands-desc">Connect your GitHub account for Claude Code on the web.</span>
+	</button>
+	<button class="commands-row" type="button" data-cmd="/install-github-app">
+		<span class="commands-tag">/install-github-app</span>
+		<span class="commands-desc">Set up the Claude GitHub Actions app.</span>
+	</button>
+	<button class="commands-row" type="button" data-cmd="/install-slack-app">
+		<span class="commands-tag">/install-slack-app</span>
+		<span class="commands-desc">Install the Claude Slack app.</span>
+	</button>
+	<button class="commands-row" type="button" data-cmd="/mobile">
+		<span class="commands-tag">/mobile</span>
+		<span class="commands-desc">Show a QR code to download the mobile app. <span class="commands-alias">alias: /ios, /android</span></span>
+	</button>
+	<button class="commands-row" type="button" data-cmd="/ide">
+		<span class="commands-tag">/ide</span>
+		<span class="commands-desc">Manage IDE integrations and show status.</span>
+	</button>
+</div>
+
+<div class="commands-group" data-category="Diagnostics">
+	<div class="commands-group-label">Diagnostics</div>
+	<button class="commands-row" type="button" data-cmd="/help">
+		<span class="commands-tag">/help</span>
+		<span class="commands-desc">Show help and available commands.</span>
+	</button>
+	<button class="commands-row" type="button" data-cmd="/doctor">
+		<span class="commands-tag">/doctor</span>
+		<span class="commands-desc">Diagnose and verify your installation and settings.</span>
+	</button>
+	<button class="commands-row" type="button" data-cmd="/debug">
+		<span class="commands-tag">/debug [description]</span>
+		<span class="commands-desc">Enable debug logging and troubleshoot.</span>
+	</button>
+	<button class="commands-row" type="button" data-cmd="/status">
+		<span class="commands-tag">/status</span>
+		<span class="commands-desc">Open Settings on the Status tab (version, model, account).</span>
+	</button>
+	<button class="commands-row" type="button" data-cmd="/release-notes">
+		<span class="commands-tag">/release-notes</span>
+		<span class="commands-desc">View the changelog in a version picker.</span>
+	</button>
+	<button class="commands-row" type="button" data-cmd="/insights">
+		<span class="commands-tag">/insights</span>
+		<span class="commands-desc">Generate a report analyzing your sessions.</span>
+	</button>
+	<button class="commands-row" type="button" data-cmd="/feedback">
+		<span class="commands-tag">/feedback [report]</span>
+		<span class="commands-desc">Submit feedback, report a bug, or share. <span class="commands-alias">alias: /bug, /share</span></span>
+	</button>
+</div>

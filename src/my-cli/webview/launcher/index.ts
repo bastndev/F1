@@ -76,7 +76,11 @@ const getRequiredElement = <T extends HTMLElement>(id: string) => {
 const parseJsonScript = (id: string) => {
 	const script = getRequiredElement<HTMLScriptElement>(id);
 
-	return JSON.parse(script.textContent || 'null') as unknown;
+	try {
+		return JSON.parse(script.textContent || 'null') as unknown;
+	} catch {
+		return null;
+	}
 };
 
 const modelsValue = parseJsonScript('cli-models');
@@ -338,7 +342,9 @@ const setPaletteOpen = (isOpen: boolean, shouldFocus = false, shouldAnimate = tr
 
 	if (!shouldAnimate) {
 		agentIconPalette.offsetHeight;
-		agentIconPalette.style.transition = '';
+		requestAnimationFrame(() => {
+			agentIconPalette.style.transition = '';
+		});
 	}
 
 	for (const option of Array.from(agentIconPalette.querySelectorAll<HTMLButtonElement>('.agent-icon-option'))) {
@@ -376,6 +382,8 @@ const renderIconPalette = () => {
 		image.className = 'agent-icon-image';
 		image.src = model.icon;
 		image.alt = '';
+		image.width = 24;
+		image.height = 24;
 		image.draggable = false;
 
 		const status = document.createElement('span');
@@ -500,16 +508,21 @@ tutorialButton?.addEventListener('click', () => {
 	vscode.postMessage({ type: 'cli.openTutorial' });
 });
 
-setInterval(() => {
-	if (cliInput.value.trim() || models.length === 0) {
-		return;
-	}
-
-	textElement.style.opacity = '0';
-
+const scheduleCycle = () => {
 	setTimeout(() => {
-		currentIndex = (currentIndex + 1) % models.length;
-		setSelectedModel(models[currentIndex], false);
-		textElement.style.opacity = '1';
-	}, 400);
-}, 3800);
+		if (document.hidden || cliInput.value.trim() || models.length === 0) {
+			scheduleCycle();
+			return;
+		}
+
+		textElement.style.opacity = '0';
+
+		setTimeout(() => {
+			currentIndex = (currentIndex + 1) % models.length;
+			setSelectedModel(models[currentIndex], false);
+			textElement.style.opacity = '1';
+			scheduleCycle();
+		}, 400);
+	}, 3800);
+};
+scheduleCycle();

@@ -70,8 +70,6 @@ vsc-extension-quickstart.md
 .agents/**
 .claude/**
 .codex/**
-.f1/**
-graphify-out/**
 
 # Local package artifacts
 *.vsix

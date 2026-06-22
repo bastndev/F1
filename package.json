@@ -82,6 +82,11 @@
         "key": "ctrl+[Backquote]",
         "mac": "cmd+[Backquote]",
         "command": "workbench.action.toggleMaximizedPanel"
+      },
+      {
+        "key": "alt+f1",
+        "mac": "alt+f1",
+        "command": "-editor.action.accessibilityHelp"
       }
     ],
     "viewsContainers": {

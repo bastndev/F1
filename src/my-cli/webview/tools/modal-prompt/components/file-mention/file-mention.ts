@@ -287,7 +287,12 @@ export function mountFileMentionPicker(
 		mentionStart = -1;
 		currentQuery = '';
 		document.removeEventListener('click', onOutsideClick);
-		// Note: we intentionally keep cachedEntries for the rest of the prompt session
+		// Drop the cache so the *next* "@" trigger refetches from the host. This
+		// is what makes folders/files created while the prompt stays open show up:
+		// delete the whole "@path", type "@" again → fresh findFiles. During a
+		// single open session (typing/filtering after "@") the cache still serves
+		// every keystroke, so we never re-hit the host mid-query.
+		cachedEntries = null;
 	};
 
 	const onOutsideClick = (e: MouseEvent) => {
@@ -336,8 +341,8 @@ export function mountFileMentionPicker(
 
 	/**
 	 * Ctrl+Backspace while the caret is right after an @mention:
-	 * deletes everything between '@' and the caret, leaving '@' so
-	 * the user can type a new path without closing the modal.
+	 * deletes the whole token — '@' included — in one press (the
+	 * trailing space too, when present), leaving no orphan '@'.
 	 * Returns true if it handled the event (caller should return early).
 	 */
 	const handleMentionCtrlBackspace = (e: KeyboardEvent): boolean => {
@@ -377,13 +382,13 @@ export function mountFileMentionPicker(
 
 		if (atPos === -1) { return false; }
 
-		// Delete from the char right after '@' up to the original caret
-		// (includes the trailing space when present) → leaves a clean '@'
+		// Delete the whole mention — '@' included — from its start up to the
+		// original caret (the trailing space too, when present) in one press.
 		e.preventDefault();
 		e.stopPropagation();
-		const newValue = value.slice(0, atPos + 1) + value.slice(caret);
+		const newValue = value.slice(0, atPos) + value.slice(caret);
 		textarea.value = newValue;
-		const newPos = atPos + 1;
+		const newPos = atPos;
 		textarea.setSelectionRange(newPos, newPos);
 		textarea.dispatchEvent(new Event('input', { bubbles: true }));
 		return true;

@@ -1,0 +1,207 @@
+<div class="commands-group" data-category="Essentials">
+	<div class="commands-group-label">Essentials</div>
+	<button class="commands-row" type="button" data-cmd="/model">
+		<span class="commands-tag">/model</span>
+		<span class="commands-desc">Choose the active model and reasoning effort.</span>
+	</button>
+	<button class="commands-row" type="button" data-cmd="/status">
+		<span class="commands-tag">/status</span>
+		<span class="commands-desc">Show current session configuration and token usage.</span>
+	</button>
+	<button class="commands-row" type="button" data-cmd="/usage">
+		<span class="commands-tag">/usage</span>
+		<span class="commands-desc">Show account usage activity.</span>
+	</button>
+	<button class="commands-row" type="button" data-cmd="/compact">
+		<span class="commands-tag">/compact</span>
+		<span class="commands-desc">Summarize conversation to prevent hitting the context limit.</span>
+	</button>
+	<button class="commands-row" type="button" data-cmd="/plan">
+		<span class="commands-tag">/plan</span>
+		<span class="commands-desc">Switch to Plan mode.</span>
+	</button>
+	<button class="commands-row" type="button" data-cmd="/review">
+		<span class="commands-tag">/review</span>
+		<span class="commands-desc">Review my current changes and find issues.</span>
+	</button>
+	<button class="commands-row" type="button" data-cmd="/resume">
+		<span class="commands-tag">/resume</span>
+		<span class="commands-desc">Resume a saved chat.</span>
+	</button>
+	<button class="commands-row" type="button" data-cmd="/diff">
+		<span class="commands-tag">/diff</span>
+		<span class="commands-desc">Show git diff, including untracked files.</span>
+	</button>
+</div>
+
+<div class="commands-group" data-category="Model">
+	<div class="commands-group-label">Model</div>
+	<button class="commands-row" type="button" data-cmd="/fast">
+		<span class="commands-tag">/fast</span>
+		<span class="commands-desc">Toggle the Fast service tier when available.</span>
+	</button>
+	<button class="commands-row" type="button" data-cmd="/personality">
+		<span class="commands-tag">/personality</span>
+		<span class="commands-desc">Choose a communication style for Codex.</span>
+	</button>
+	<button class="commands-row" type="button" data-cmd="/goal">
+		<span class="commands-tag">/goal</span>
+		<span class="commands-desc">Set or view the goal for a long-running task.</span>
+	</button>
+</div>
+
+<div class="commands-group" data-category="Session">
+	<div class="commands-group-label">Session</div>
+	<button class="commands-row" type="button" data-cmd="/clear">
+		<span class="commands-tag">/clear</span>
+		<span class="commands-desc">Clear the terminal and start a new chat.</span>
+	</button>
+	<button class="commands-row" type="button" data-cmd="/new">
+		<span class="commands-tag">/new</span>
+		<span class="commands-desc">Start a new chat during a conversation.</span>
+	</button>
+	<button class="commands-row" type="button" data-cmd="/fork">
+		<span class="commands-tag">/fork</span>
+		<span class="commands-desc">Fork the current chat.</span>
+	</button>
+	<button class="commands-row" type="button" data-cmd="/side">
+		<span class="commands-tag">/side</span>
+		<span class="commands-desc">Start a side conversation in an ephemeral fork. <span class="commands-alias">alias: /btw</span></span>
+	</button>
+	<button class="commands-row" type="button" data-cmd="/btw">
+		<span class="commands-tag">/btw</span>
+		<span class="commands-desc">Start a side conversation in an ephemeral fork. <span class="commands-alias">alias: /side</span></span>
+	</button>
+	<button class="commands-row" type="button" data-cmd="/rename">
+		<span class="commands-tag">/rename</span>
+		<span class="commands-desc">Rename the current thread.</span>
+	</button>
+	<button class="commands-row" type="button" data-cmd="/archive">
+		<span class="commands-tag">/archive</span>
+		<span class="commands-desc">Archive this session and exit.</span>
+	</button>
+	<button class="commands-row" type="button" data-cmd="/delete">
+		<span class="commands-tag">/delete</span>
+		<span class="commands-desc">Permanently delete this session and exit.</span>
+	</button>
+</div>
+
+<div class="commands-group" data-category="Code">
+	<div class="commands-group-label">Code</div>
+	<button class="commands-row" type="button" data-cmd="/init">
+		<span class="commands-tag">/init</span>
+		<span class="commands-desc">Create an AGENTS.md file with instructions for Codex.</span>
+	</button>
+	<button class="commands-row" type="button" data-cmd="/mention">
+		<span class="commands-tag">/mention</span>
+		<span class="commands-desc">Mention a file.</span>
+	</button>
+	<button class="commands-row" type="button" data-cmd="/copy">
+		<span class="commands-tag">/copy</span>
+		<span class="commands-desc">Copy last response as markdown.</span>
+	</button>
+	<button class="commands-row" type="button" data-cmd="/raw">
+		<span class="commands-tag">/raw</span>
+		<span class="commands-desc">Toggle raw scrollback mode for copy-friendly terminal selection.</span>
+	</button>
+</div>
+
+<div class="commands-group" data-category="Agents">
+	<div class="commands-group-label">Agents</div>
+	<button class="commands-row" type="button" data-cmd="/agent">
+		<span class="commands-tag">/agent</span>
+		<span class="commands-desc">Switch the active agent thread. <span class="commands-alias">alias: /subagents</span></span>
+	</button>
+	<button class="commands-row" type="button" data-cmd="/plugins">
+		<span class="commands-tag">/plugins</span>
+		<span class="commands-desc">Browse plugins.</span>
+	</button>
+	<button class="commands-row" type="button" data-cmd="/skills">
+		<span class="commands-tag">/skills</span>
+		<span class="commands-desc">Use skills to improve how Codex performs specific tasks.</span>
+	</button>
+	<button class="commands-row" type="button" data-cmd="/mcp">
+		<span class="commands-tag">/mcp</span>
+		<span class="commands-desc">List configured MCP tools. <span class="commands-alias">use /mcp verbose for details</span></span>
+	</button>
+	<button class="commands-row" type="button" data-cmd="/ps">
+		<span class="commands-tag">/ps</span>
+		<span class="commands-desc">List background terminals.</span>
+	</button>
+	<button class="commands-row" type="button" data-cmd="/stop">
+		<span class="commands-tag">/stop</span>
+		<span class="commands-desc">Stop all background terminals. <span class="commands-alias">alias: /clean</span></span>
+	</button>
+</div>
+
+<div class="commands-group" data-category="Config">
+	<div class="commands-group-label">Config</div>
+	<button class="commands-row" type="button" data-cmd="/permissions">
+		<span class="commands-tag">/permissions</span>
+		<span class="commands-desc">Choose what Codex is allowed to do.</span>
+	</button>
+	<button class="commands-row" type="button" data-cmd="/approve">
+		<span class="commands-tag">/approve</span>
+		<span class="commands-desc">Approve one retry of a recent auto-review denial.</span>
+	</button>
+	<button class="commands-row" type="button" data-cmd="/memories">
+		<span class="commands-tag">/memories</span>
+		<span class="commands-desc">Configure memory use and generation.</span>
+	</button>
+	<button class="commands-row" type="button" data-cmd="/hooks">
+		<span class="commands-tag">/hooks</span>
+		<span class="commands-desc">View and manage lifecycle hooks.</span>
+	</button>
+	<button class="commands-row" type="button" data-cmd="/theme">
+		<span class="commands-tag">/theme</span>
+		<span class="commands-desc">Choose a syntax highlighting theme.</span>
+	</button>
+	<button class="commands-row" type="button" data-cmd="/statusline">
+		<span class="commands-tag">/statusline</span>
+		<span class="commands-desc">Configure which items appear in the status line.</span>
+	</button>
+	<button class="commands-row" type="button" data-cmd="/title">
+		<span class="commands-tag">/title</span>
+		<span class="commands-desc">Configure which items appear in the terminal title.</span>
+	</button>
+	<button class="commands-row" type="button" data-cmd="/keymap">
+		<span class="commands-tag">/keymap</span>
+		<span class="commands-desc">Remap TUI shortcuts.</span>
+	</button>
+	<button class="commands-row" type="button" data-cmd="/vim">
+		<span class="commands-tag">/vim</span>
+		<span class="commands-desc">Toggle Vim mode for the composer.</span>
+	</button>
+	<button class="commands-row" type="button" data-cmd="/experimental">
+		<span class="commands-tag">/experimental</span>
+		<span class="commands-desc">Toggle experimental features.</span>
+	</button>
+	<button class="commands-row" type="button" data-cmd="/pets">
+		<span class="commands-tag">/pets</span>
+		<span class="commands-desc">Choose or hide the terminal pet.</span>
+	</button>
+</div>
+
+<div class="commands-group" data-category="Other">
+	<div class="commands-group-label">Other</div>
+	<button class="commands-row" type="button" data-cmd="/import">
+		<span class="commands-tag">/import</span>
+		<span class="commands-desc">Import setup, this project, and recent chats from Claude Code.</span>
+	</button>
+	<button class="commands-row" type="button" data-cmd="/ide">
+		<span class="commands-tag">/ide</span>
+		<span class="commands-desc">Include current selection, open files, and other context from your IDE.</span>
+	</button>
+	<button class="commands-row" type="button" data-cmd="/feedback">
+		<span class="commands-tag">/feedback</span>
+		<span class="commands-desc">Send logs to maintainers.</span>
+	</button>
+	<button class="commands-row" type="button" data-cmd="/logout">
+		<span class="commands-tag">/logout</span>
+		<span class="commands-desc">Log out of Codex.</span>
+	</button>
+	<button class="commands-row" type="button" data-cmd="/quit">
+		<span class="commands-tag">/quit</span>
+		<span class="commands-desc">Exit the CLI. <span class="commands-alias">alias: /exit</span></span>
+	</button>
+</div>

@@ -46,6 +46,11 @@ function shiftFKey(num: number): (event: KeyboardEvent) => boolean {
   return (e: KeyboardEvent) => e.shiftKey && !e.altKey && !e.ctrlKey && !e.metaKey && e.key === key;
 }
 
+function altFKey(num: number): (event: KeyboardEvent) => boolean {
+  const key = `F${num}`;
+  return (e: KeyboardEvent) => e.altKey && !e.shiftKey && !e.ctrlKey && !e.metaKey && e.key === key;
+}
+
 function promptSendKey(): (event: KeyboardEvent) => boolean {
   return (e: KeyboardEvent) =>
     e.key === 'Enter'
@@ -70,6 +75,7 @@ export type ShortcutId =
   | 'openTranslate'
   | 'openKeymaps'
   | 'openUse'
+  | 'openCommands'
   | 'toggleVoicePlayback'
   | 'sendPrompt';
 
@@ -153,6 +159,13 @@ export const shortcuts: ShortcutDefinition[] = [
     contexts: ['terminal'],
     description: 'Shift + F3',
     match: shiftFKey(3),
+  },
+  {
+    id: 'openCommands',
+    label: 'Open Commands tool',
+    contexts: ['terminal'],
+    description: 'Alt + F1',
+    match: altFKey(1),
   },
   {
     id: 'toggleVoicePlayback',

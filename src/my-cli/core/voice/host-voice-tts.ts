@@ -29,12 +29,14 @@ const VOICE_IDS: Record<string, string> = {
 	es: 'es_ES-sharvard-medium',
 	zh: 'zh_CN-huayan-medium',
 	pt: 'pt_BR-faber-medium',
+	ru: 'ru_RU-irina-medium',
 };
 const VOICE_LABELS: Record<string, string> = {
 	en: 'English',
 	es: 'Spanish',
 	zh: 'Chinese',
 	pt: 'Portuguese',
+	ru: 'Russian',
 };
 const DEFAULT_LANG = 'es';
 

@@ -277,6 +277,10 @@ export class MyCliViewProvider implements vscode.WebviewViewProvider, vscode.Dis
 		await this._activeWebview?.postMessage({ type: 'cli.focusTerminal' });
 	}
 
+	public notifySkillsChanged() {
+		void this._activeWebview?.postMessage({ type: 'workspace.skillsChanged' });
+	}
+
 	public openTutorial() {
 		if (this._tutorialPanel) {
 			this._tutorialPanel.reveal(vscode.ViewColumn.One);

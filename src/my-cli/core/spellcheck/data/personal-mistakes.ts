@@ -23,6 +23,14 @@ export const PERSONAL_MISTAKES: Record<string, string> = {
 	'hce': 'hace',
 	'automaticamnte': 'automáticamente',
 	'obiamente': 'obviamente',
+	'apra': 'para',
+	'ago': 'hago',
+	'pueds': 'puedes',
+	'tamano': 'tamaño',
+	'autorizacion': 'autorización',
+	'achiva': 'archiva',
+	'biendo': 'viendo',
+	'defaul': 'default',
 
 
 
