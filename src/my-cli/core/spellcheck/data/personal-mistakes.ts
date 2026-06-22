@@ -29,6 +29,7 @@ export const PERSONAL_MISTAKES: Record<string, string> = {
 	'tamano': 'tamaño',
 	'autorizacion': 'autorización',
 	'achiva': 'archiva',
+	'biendo': 'viendo',
 
 
 
