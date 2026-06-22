@@ -760,10 +760,22 @@ const createTerminalView = (session: CliSession) => {
 	});
 	terminal.attachCustomKeyEventHandler((event) => handleTerminalKey(event, session.id));
 
+	// OSC 52 sequences inside the restored scrollback (replayed by terminal.write
+	// below) are history, not a live copy. Honoring them would re-write the system
+	// clipboard and re-open the translator every time this webview is rebuilt on a
+	// panel switch (My CLI has no retainContextWhenHidden) — a claude-specific
+	// phantom, since TUIs copy via OSC 52 and that sequence is persisted in the
+	// session buffer. xterm parses its write queue in order, so the replay's write
+	// callback clears this flag before any later live output is parsed.
+	let replayingScrollback = false;
+
 	// TUI CLIs copy their internal selection with OSC 52, which xterm.js
 	// ignores by default. Honor the copy (write it to the real clipboard)
 	// and route it through the copy-to-translate flow.
 	terminal.parser.registerOscHandler(52, (data) => {
+		if (replayingScrollback) {
+			return true;
+		}
 		const separator = data.indexOf(';');
 		const payload = separator >= 0 ? data.slice(separator + 1) : data;
 		if (!payload || payload === '?') {
@@ -785,7 +797,12 @@ const createTerminalView = (session: CliSession) => {
 	const fitAddon = new FitAddon();
 	terminal.loadAddon(fitAddon);
 	terminal.open(pane);
-	terminal.write(session.buffer);
+	if (session.buffer) {
+		replayingScrollback = true;
+		terminal.write(session.buffer, () => {
+			replayingScrollback = false;
+		});
+	}
 	terminal.onData((data) => {
 		const currentSession = sessions.get(session.id);
 		if (currentSession?.status === 'running' && !(isOpenCodeSession(session.id) && data === '\x1a')) {
