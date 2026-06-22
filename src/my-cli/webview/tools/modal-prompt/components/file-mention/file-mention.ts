@@ -341,8 +341,8 @@ export function mountFileMentionPicker(
 
 	/**
 	 * Ctrl+Backspace while the caret is right after an @mention:
-	 * deletes everything between '@' and the caret, leaving '@' so
-	 * the user can type a new path without closing the modal.
+	 * deletes the whole token — '@' included — in one press (the
+	 * trailing space too, when present), leaving no orphan '@'.
 	 * Returns true if it handled the event (caller should return early).
 	 */
 	const handleMentionCtrlBackspace = (e: KeyboardEvent): boolean => {
@@ -382,13 +382,13 @@ export function mountFileMentionPicker(
 
 		if (atPos === -1) { return false; }
 
-		// Delete from the char right after '@' up to the original caret
-		// (includes the trailing space when present) → leaves a clean '@'
+		// Delete the whole mention — '@' included — from its start up to the
+		// original caret (the trailing space too, when present) in one press.
 		e.preventDefault();
 		e.stopPropagation();
-		const newValue = value.slice(0, atPos + 1) + value.slice(caret);
+		const newValue = value.slice(0, atPos) + value.slice(caret);
 		textarea.value = newValue;
-		const newPos = atPos + 1;
+		const newPos = atPos;
 		textarea.setSelectionRange(newPos, newPos);
 		textarea.dispatchEvent(new Event('input', { bubbles: true }));
 		return true;
