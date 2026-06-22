@@ -81,16 +81,18 @@ const writePromptFilterPreference = (enabled: boolean) => {
 	}
 };
 
-// Voice Finish ("ding when the CLI is done") — off by default, persisted so it
-// survives a reload/restart. Read is exported so terminal.ts can fold it into
-// the cli.voiceFinish config it pushes to the host alongside the language.
+// Voice Finish ("ding when the CLI is done") — ON by default so the feature is
+// discovered; an explicit off is remembered (null = never touched → on). Persists
+// across reload/restart. Read is exported so terminal.ts can fold it into the
+// cli.voiceFinish config it pushes to the host alongside the language.
 const voiceFinishStorageKey = 'my-cli.voiceFinish.enabled';
 
 export const readVoiceFinishPreference = () => {
 	try {
-		return window.localStorage.getItem(voiceFinishStorageKey) === 'true';
+		const storedValue = window.localStorage.getItem(voiceFinishStorageKey);
+		return storedValue === null ? true : storedValue === 'true';
 	} catch {
-		return false;
+		return true;
 	}
 };
 
