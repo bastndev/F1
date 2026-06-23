@@ -5,7 +5,6 @@
   "version": "1.0.0",
   "publisher": "bastndev",
   "license": "MIT",
-  "preview": true,
   "engines": {
     "vscode": "^1.75.0"
   },
@@ -46,8 +45,6 @@
     "keymaps",
     "productivity"
   ],
-  "qna": "marketplace",
-  "markdown": "github",
   "icon": "icon.png",
   "galleryBanner": {
     "color": "#0a0a0a",
@@ -69,8 +66,11 @@
   "sponsor": {
     "url": "https://github.com/sponsors/bastndev"
   },
+
+  "l10n": "./l10n",
   "activationEvents": [],
   "main": "./dist/extension.js",
+
   "contributes": {
     "commands": [
       {
