@@ -24,6 +24,11 @@ Following VS Code best practices, F1 uses semantic versioning for all releases.
 <!-- --- -->
 
 ---
+## [1.0.1] - 2026-06-23
+- **Add**: l10n
+
+
+---
 ## [1.0.0] - 2026-06-22
 
 ### 🎉 Initial Release
