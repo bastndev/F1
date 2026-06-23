@@ -346,7 +346,7 @@ export class MySkillsViewProvider implements vscode.WebviewViewProvider {
 	private async _createChatSkill(message: CreateSkillChatCreateMessage) {
 		const workspaceFolder = vscode.workspace.workspaceFolders?.[0];
 		if (!workspaceFolder) {
-			await vscode.window.showErrorMessage('Open a workspace first to create a skill.');
+			await vscode.window.showErrorMessage(vscode.l10n.t('Open a workspace first to create a skill.'));
 			return;
 		}
 
@@ -375,7 +375,7 @@ export class MySkillsViewProvider implements vscode.WebviewViewProvider {
 		} catch (err) {
 			console.error(`[MySkills] Failed to create chat skill: ${err}`);
 			await this._postCreateSkillResult(false, 'Failed to create skill. Check output logs.');
-			await vscode.window.showErrorMessage('Failed to create skill. Check output logs.');
+			await vscode.window.showErrorMessage(vscode.l10n.t('Failed to create skill. Check output logs.'));
 		} finally {
 			resetFastContext();
 		}
@@ -742,7 +742,7 @@ export class MySkillsViewProvider implements vscode.WebviewViewProvider {
 	private async _installMarketplaceSkill(message: InstallSkillInstallMessage) {
 		const skill = this._findMarketplaceSkill(message.id);
 		if (!skill) {
-			void vscode.window.showErrorMessage('My Skills could not find this skill in the marketplace list.');
+			void vscode.window.showErrorMessage(vscode.l10n.t('My Skills could not find this skill in the marketplace list.'));
 			return;
 		}
 
@@ -799,7 +799,7 @@ export class MySkillsViewProvider implements vscode.WebviewViewProvider {
 			await setWorkspaceRootSkillEnabled(message.id, message.enabled);
 		} catch (err) {
 			console.error(`[MySkills] Failed to update .gitignore: ${err}`);
-			void vscode.window.showErrorMessage('My Skills could not update .gitignore.');
+			void vscode.window.showErrorMessage(vscode.l10n.t('My Skills could not update .gitignore.'));
 		} finally {
 			await this._postLocalSkills();
 			this._onDidSkillsChange.fire();
@@ -808,8 +808,8 @@ export class MySkillsViewProvider implements vscode.WebviewViewProvider {
 
 	private async _deleteLocalSkill(message: LocalSkillDeleteMessage) {
 		const confirmed = await vscode.window.showWarningMessage(
-			`Delete ${message.id}?`,
-			{ modal: true, detail: 'The item will be moved to the trash when possible.' },
+			vscode.l10n.t('Delete {0}?', message.id),
+			{ modal: true, detail: vscode.l10n.t('The item will be moved to the trash when possible.') },
 			'Delete',
 		);
 
@@ -821,7 +821,7 @@ export class MySkillsViewProvider implements vscode.WebviewViewProvider {
 			await deleteWorkspaceRootSkill(message.id);
 		} catch (err) {
 			console.error(`[MySkills] Failed to delete local skill: ${err}`);
-			void vscode.window.showErrorMessage('My Skills could not delete this item.');
+			void vscode.window.showErrorMessage(vscode.l10n.t('My Skills could not delete this item.'));
 		} finally {
 			await this._postLocalSkills();
 			this._onDidSkillsChange.fire();
@@ -844,7 +844,7 @@ export class MySkillsViewProvider implements vscode.WebviewViewProvider {
 			await vscode.commands.executeCommand('vscode.open', skillUri);
 		} catch (err) {
 			console.error(`[MySkills] Failed to open skill: ${err}`);
-			void vscode.window.showErrorMessage('My Skills could not open this skill.');
+			void vscode.window.showErrorMessage(vscode.l10n.t('My Skills could not open this skill.'));
 		}
 	}
 
@@ -858,10 +858,10 @@ export class MySkillsViewProvider implements vscode.WebviewViewProvider {
 
 		try {
 			await saveSkill(this._globalStorageUri, workspaceFolder.uri, message.id);
-			void vscode.window.showInformationMessage(`Skill '${skillName}' saved successfully ✅.`);
+			void vscode.window.showInformationMessage(vscode.l10n.t("Skill '{0}' saved successfully ✅.", skillName));
 		} catch (err) {
 			console.error(`[MySkills] Failed to save skill: ${err}`);
-			void vscode.window.showErrorMessage('My Skills could not save this skill.');
+			void vscode.window.showErrorMessage(vscode.l10n.t('My Skills could not save this skill.'));
 		} finally {
 			await this._postSavedSkills();
 		}
@@ -906,10 +906,10 @@ export class MySkillsViewProvider implements vscode.WebviewViewProvider {
 
 		try {
 			await enableSavedSkill(this._globalStorageUri, workspaceFolder.uri, message.id, choice.target);
-			void vscode.window.showInformationMessage(`Skill '${skillName}' enabled in ${choice.target === 'agents' ? '.agents/skills' : '.claude/skills'} ✅.`);
+			void vscode.window.showInformationMessage(vscode.l10n.t("Skill '{0}' enabled in {1} ✅.", skillName, choice.target === 'agents' ? '.agents/skills' : '.claude/skills'));
 		} catch (err) {
 			console.error(`[MySkills] Failed to enable skill: ${err}`);
-			void vscode.window.showErrorMessage(`My Skills could not enable '${skillName}'. ${err instanceof Error ? err.message : ''}`);
+			void vscode.window.showErrorMessage(vscode.l10n.t("My Skills could not enable '{0}'. {1}", skillName, err instanceof Error ? err.message : ''));
 		} finally {
 			await this._postLocalSkills();
 			await this._postSavedSkills();
@@ -918,8 +918,8 @@ export class MySkillsViewProvider implements vscode.WebviewViewProvider {
 
 	private async _deleteSavedSkill(message: LocalSkillDeleteSavedMessage) {
 		const confirmed = await vscode.window.showWarningMessage(
-			`Delete saved skill '${message.id}'?`,
-			{ modal: true, detail: 'This will permanently remove the skill from your saved library.' },
+			vscode.l10n.t("Delete saved skill '{0}'?", message.id),
+			{ modal: true, detail: vscode.l10n.t('This will permanently remove the skill from your saved library.') },
 			'Delete',
 		);
 
@@ -931,7 +931,7 @@ export class MySkillsViewProvider implements vscode.WebviewViewProvider {
 			await deleteSavedSkill(this._globalStorageUri, message.id);
 		} catch (err) {
 			console.error(`[MySkills] Failed to delete saved skill: ${err}`);
-			void vscode.window.showErrorMessage('My Skills could not delete this saved skill.');
+			void vscode.window.showErrorMessage(vscode.l10n.t('My Skills could not delete this saved skill.'));
 		} finally {
 			await this._postSavedSkills();
 		}

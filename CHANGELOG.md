@@ -1,16 +1,20 @@
-# F1 
+# F1
 
-Allows you to control editor functions and manage extensions directly from the keyboard, streamlining your workflow with configurable shortcuts.
+⚡ **One Hotkey. Every AI CLI.** ⚡
+
+All-in-One (F1 [AI] composer) — turn VS Code into a hub for AI coding agents. Open Claude Code, Codex, Copilot, Cursor, Kiro, Grok, Antigravity, or any custom CLI in embedded terminals, switch between them instantly, write better prompts in your own language, and keep your project's context cheap to load for every agent.
 
 ## Features
 
-- **Custom Shortcuts (Create Shortcut & My List)** — Create and assign quick bindings; includes defaults like Toggle Word Wrap (F1) and AI Suggestion (disable/enable) (Shift+F1).
-- **Editor Controls** — Per-control toggles for Minimap, Code Folding, Line Numbers, Cursor Blinking, Color Decorators, Indent Guides, Sticky Scroll, Cursor Smooth Caret Animation, and Terminal Suggest.
-- **Extension Compatibility** — Verified compatibility with popular extensions shown in the UI (GitHub Copilot, GitHub Copilot Chat, Error Lens, ESLint, Live Server, Image Preview, Bracket Lynx, etc.).
+- **9 Built-in Agents + Custom**: Claude Code, Codex, Cursor, Copilot, OpenCode, Antigravity, Kiro, Kilo Code, Grok — plus any command you bring
+- **Skills Marketplace**: Install, create, and manage reusable skills (AGENTS.md / CLAUDE.md / DESIGN.md) per workspace
+- **My Memory**: Committed `.f1/` project context so every CLI starts with shared knowledge — cheaper tokens, faster onboarding
+- **Smart Prompt Composer**: 5-language source picker (en / es / zh / pt / ru), @-file mentions, image paste, live spellcheck, auto-translate to English before sending
+- **Built-in Tools**: Prompt · Translator · Status · Keymaps · Commands — all one keystroke away
+- **Voice & Finish Cue**: Read terminal output aloud, plus an optional "ding" when an agent finishes
+- **12 Locales**: Fully translated UI in en, es, de, fr, ja, ko, pt-br, ru, vi, hi, ar, zh-cn
 
-  Discover more extensions [here](https://gohit.xyz/)
-
-
+  Discover more extensions [here](https://gohit.xyz/extensions)
 
 ## Changelog
 
@@ -20,69 +24,17 @@ Following VS Code best practices, F1 uses semantic versioning for all releases.
 <!-- --- -->
 
 ---
-## [1.0.0] - 2026-05-27
+## [1.0.0] - 2026-06-22
 
-### new
-- **F1 CLI Hub**: Refactor focus project
-
-## [0.3.2] - 2025-10-04
-
-### Added
-- Code improvements and cleanup for better maintainability and performance.
-- Smooth color transition animations when toggling editor configurations, such as activating or deactivating the minimap, for enhanced user experience.
-
-### Changed
-- Updated internal code structure to support new animations and ensure cleaner, more efficient operations.
-
-### Fixed
-- Minor bugs related to configuration toggles and UI responsiveness.
+### 🎉 Initial Release
+- **CLI Hub**: 9 built-in agents (Claude Code, Codex, Cursor, Copilot, OpenCode, Antigravity, Kiro, Kilo Code, Grok) plus a Custom CLI launcher.
+- **Slash-Commands Palette**: Per-CLI `/` command browser at `Alt + F1`, with search and one-click send.
+- **Skills Marketplace**: Install from All-time, Trending (24h), 🔥 Flame, and Official sources. Create new skills with guided generators for `AGENTS.md`, `CLAUDE.md`, and `DESIGN.md`.
+- **My Memory**: Committed `.f1/` project map and symbol graph; per-workspace toggle; git tree-SHA staleness detection.
+- **Prompt Composer**: 5-language source picker (en / es / zh / pt / ru) with auto-translate to English, live spellcheck for en/es/pt/ru, and `@`-file mentions + image paste.
+- **Built-in Tools**: Prompt (`Shift + F1`), Translator (`Shift + F2`), Status / use (`Shift + F3`), Keymaps (`Shift + F4`), Commands (`Alt + F1`).
+- **Voice**: Read terminal output and agent replies aloud, with an optional finish-ding cue when an agent completes.
+- **Localization**: 12-locale identity strings (`package.nls.*.json`) + 11-locale runtime notification bundles via `vscode.l10n` (`l10n/bundle.l10n.*.json`).
+- **Tutorials**: In-editor walkthroughs for the CLI Hub and Skills surfaces.
 
 ---
-
-## [0.3.1] - 2025-09-13
-
-### Added
-- "Create Shortcut" (beta) integration and "My List" custom shortcuts UI.
-    - Included default quick bindings shown in UI: Toggle Word Wrap (F1), AI Suggestion (disable/enable) (Shift+F1).
-- Full Editor Controls panel with individual toggles:
-    - Minimap, Code Folding, Line Numbers, Cursor Blinking, Color Decorators, Indent Guides, Sticky Scroll.
-    - Cursor Smooth Caret Animation toggle.
-    - Terminal Suggest (new) entry and UX for enabling/disabling terminal suggestions.
-- Bracket colorization improvements:
-    - Bracket LINE Colorization and Bracket PAIR Colorization support.
-- Extension compatibility matrix and icons support:
-    - Tested/verified compatibility with common extensions visible in UI: GitHub Copilot, GitHub Copilot Chat, Error Lens, ESLint, Code Spell Checker, Live Server, Image Preview, Astro, Bracket Lynx, Lynx Keymap (75% Keyboard), F1 helper, esbuild Problem Matchers, Extension Test Runner.
-- Visual and UX polish:
-    - New sidebar compact lists, improved spacing, and explicit “new” badges where applicable.
-
-### Changed
-- Refactored theme internals and settings structure to support per-control toggles and extension-driven UI entries.
-- Consolidated keybinding visuals and documentation to match displayed in-app shortcuts.
-- Improved contrast and spacing for the editor controls panel to match screenshot layout and accessibility guidelines.
-
-### Fixed
-- Resolved inconsistent bracket coloring across scopes.
-- Fixed issues with cursor animation and sticky-scroll interaction.
-- Fixed edge cases where Terminal Suggest entries did not render when certain extensions are present.
-
-### Notes
-- One-time registration flow remains the same; extension compatibility was validated on VS Code builds concurrent with listed extension versions.
-- If you use custom keymaps, re-check bindings after update; use "Create Shortcut" (beta) to reassign quickly.
-- For feedback or to report regressions, open an issue on the repository with reproducible steps.
-
-## [0.2.1] - 2025-07-22
-
-### Added
-- **Editor Controls**: Enhanced editor features including:
-- (disable/enable)
-- Improved compatibility with VS Code extensions.
-- Enhanced UI for better coding experience.
-
----
-
-## [0.0.1] - 2025-07-10
-
-### Initial Release
-- Initial release of F1
-- Basic F1 visual ad keymaps
-- Core theme infrastructure and settings

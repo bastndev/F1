@@ -1,0 +1,33 @@
+{
+  "{0} is not installed or is not available in PATH.": "{0}이(가) 설치되어 있지 않거나 PATH에서 사용할 수 없습니다.",
+  "{0} is not installed. You can install it now in an integrated terminal.": "{0}이(가) 설치되어 있지 않습니다. 통합 터미널에서 지금 설치할 수 있습니다.",
+  "Lynx Keymap shortcuts aren’t active. Install the extension to enable them.": "Lynx Keymap 단축키가 활성화되지 않았습니다. 확장을 설치하여 활성화하세요.",
+
+  "My Memory: open a folder before building project context.": "My Memory: 프로젝트 컨텍스트를 생성하기 전에 폴더를 여세요.",
+  "Install (Python + Graphify) to enable project graph generation. One-time setup 📥.": "프로젝트 그래프 생성을 활성화하려면 (Python + Graphify)를 설치하세요. 일회성 설정 📥.",
+  "My Memory: graphify install failed. {0}": "My Memory: graphify 설치 실패. {0}",
+  "Memory updated · Instruction files synced. ✔": "Memory 업데이트됨 · 지시 파일 동기화 완료. ✔",
+  "My Memory failed: {0}": "My Memory 실패: {0}",
+
+  "Open a workspace first to create a skill.": "스킬을 만들려면 먼저 워크스페이스를 여세요.",
+  "Failed to create skill. Check output logs.": "스킬 생성에 실패했습니다. 출력 로그를 확인하세요.",
+  "My Skills could not find this skill in the marketplace list.": "My Skills가 마켓플레이스에서 이 스킬을 찾을 수 없습니다.",
+  "My Skills could not update .gitignore.": "My Skills가 .gitignore를 업데이트할 수 없습니다.",
+  "Delete {0}?": "{0}을(를) 삭제하시겠습니까?",
+  "The item will be moved to the trash when possible.": "가능한 경우 항목이 휴지통으로 이동됩니다.",
+  "My Skills could not delete this item.": "My Skills가 이 항목을 삭제할 수 없습니다.",
+  "My Skills could not open this skill.": "My Skills가 이 스킬을 열 수 없습니다.",
+  "Skill '{0}' saved successfully ✅.": "스킬 '{0}'을(를) 성공적으로 저장했습니다 ✅.",
+  "My Skills could not save this skill.": "My Skills가 이 스킬을 저장할 수 없습니다.",
+  "Skill '{0}' enabled in {1} ✅.": "스킬 '{0}'을(를) {1}에서 활성화했습니다 ✅.",
+  "My Skills could not enable '{0}'. {1}": "My Skills가 '{0}'을(를) 활성화할 수 없습니다. {1}",
+  "Delete saved skill '{0}'?": "저장된 스킬 '{0}'을(를) 삭제하시겠습니까?",
+  "This will permanently remove the skill from your saved library.": "저장된 라이브러리에서 스킬이 영구적으로 제거됩니다.",
+  "My Skills could not delete this saved skill.": "My Skills가 이 저장된 스킬을 삭제할 수 없습니다.",
+
+  "[My Skills] Install failed: invalid marketplace skill reference.": "[My Skills] 설치 실패: 잘못된 마켓플레이스 스킬 참조.",
+  "[My Skills] Open a workspace before installing project skills.": "[My Skills] 프로젝트 스킬을 설치하기 전에 워크스페이스를 여세요.",
+  "[My Skills] Install failed: {0}": "[My Skills] 설치 실패: {0}",
+  "Skill [{0}] installed ✅": "Skill [{0}] 설치됨 ✅",
+  "[My Skills] Install failed with code {0}": "[My Skills] 설치 실패 코드 {0}"
+}

@@ -147,7 +147,7 @@ export class MyCliViewProvider implements vscode.WebviewViewProvider, vscode.Dis
 				const install = 'Install';
 				const openPage = 'Open Extension';
 				const choice = await vscode.window.showInformationMessage(
-					'Lynx Keymap shortcuts aren’t active. Install the extension to enable them.',
+					vscode.l10n.t('Lynx Keymap shortcuts aren’t active. Install the extension to enable them.'),
 					install,
 					openPage,
 				);
@@ -862,14 +862,14 @@ export class MyCliViewProvider implements vscode.WebviewViewProvider, vscode.Dis
 		const root = this._getMemoryWorkspaceRoot();
 		if (!root) {
 			await webview.postMessage({ type: 'memory.buildError', id, error: 'Open a folder to build project memory.' });
-			vscode.window.showWarningMessage('My Memory: open a folder before building project context.');
+			vscode.window.showWarningMessage(vscode.l10n.t('My Memory: open a folder before building project context.'));
 			await this._memoryDisable(webview);
 			return;
 		}
 
 		if (!this.memoryService.hasToolchain()) {
 			const choice = await vscode.window.showInformationMessage(
-				'Install (Python + Graphify) to enable project graph generation. One-time setup 📥.',
+				vscode.l10n.t('Install (Python + Graphify) to enable project graph generation. One-time setup 📥.'),
 				'Install',
 				'Cancel'
 			);
@@ -890,7 +890,7 @@ export class MyCliViewProvider implements vscode.WebviewViewProvider, vscode.Dis
 			} catch (installError) {
 				const err = installError instanceof Error ? installError.message : String(installError);
 				await webview.postMessage({ type: 'memory.buildError', id, error: err });
-				vscode.window.showErrorMessage(`My Memory: graphify install failed. ${err}`);
+				vscode.window.showErrorMessage(vscode.l10n.t('My Memory: graphify install failed. {0}', err));
 				await this._memoryDisable(webview);
 				return;
 			}
@@ -909,10 +909,10 @@ export class MyCliViewProvider implements vscode.WebviewViewProvider, vscode.Dis
 
 		if (result.success) {
 			await webview.postMessage({ type: 'memory.buildComplete', id, result });
-			vscode.window.showInformationMessage('Memory updated · Instruction files synced. ✔');
+			vscode.window.showInformationMessage(vscode.l10n.t('Memory updated · Instruction files synced. ✔'));
 		} else {
 			await webview.postMessage({ type: 'memory.buildError', id, error: result.error || result.message });
-			vscode.window.showErrorMessage(`My Memory failed: ${result.error || result.message}`);
+			vscode.window.showErrorMessage(vscode.l10n.t('My Memory failed: {0}', result.error || result.message));
 		}
 	}
 

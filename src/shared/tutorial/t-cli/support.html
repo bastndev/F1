@@ -210,8 +210,9 @@
           <div class="clihub-tool-name">Prompt</div>
           <div class="clihub-tool-desc">
             A rich composer with <strong>@-file mentions</strong>, image paste,
-            reusable skills, and automatic Spanish→English before your message
-            reaches the CLI.
+            reusable skills, and a 5-language source picker
+            (<strong>en · es · zh · pt · ru</strong>) that auto-translates your
+            prompt to English before it reaches the CLI.
           </div>
           <span class="clihub-key-combo">
             <kbd class="clihub-kbd">Shift</kbd><span class="clihub-key-plus">+</span><kbd class="clihub-kbd">F1</kbd>
@@ -220,8 +221,8 @@
         <div class="clihub-tool">
           <div class="clihub-tool-name">Translator</div>
           <div class="clihub-tool-desc">
-            Select any terminal output and read it in <strong>Spanish</strong> —
-            with an optional voice that reads it aloud.
+            Select any terminal output and read it in <strong>your picked
+            language</strong> — with an optional voice that reads it aloud.
           </div>
           <span class="clihub-key-combo">
             <kbd class="clihub-kbd">Shift</kbd><span class="clihub-key-plus">+</span><kbd class="clihub-kbd">F2</kbd>
@@ -243,6 +244,19 @@
           </div>
           <span class="clihub-key-combo">
             <kbd class="clihub-kbd">Shift</kbd><span class="clihub-key-plus">+</span><kbd class="clihub-kbd">F4</kbd>
+          </span>
+        </div>
+        <div class="clihub-tool">
+          <div class="clihub-tool-name">Commands</div>
+          <div class="clihub-tool-desc">
+            Slash-command palette for the active CLI — browse every
+            <span class="clihub-code">/model</span>,
+            <span class="clihub-code">/help</span>,
+            <span class="clihub-code">/clear</span>… built into your agent,
+            search by name, click to send.
+          </div>
+          <span class="clihub-key-combo">
+            <kbd class="clihub-kbd">Alt</kbd><span class="clihub-key-plus">+</span><kbd class="clihub-kbd">F1</kbd>
           </span>
         </div>
       </div>
@@ -278,7 +292,7 @@
         </div>
         <div class="clihub-key-row">
           <span class="clihub-key-label">Open the CLI selector</span>
-          <span class="clihub-key-combo"><kbd class="clihub-kbd">CapsLock</kbd></span>
+          <span class="clihub-key-combo"><kbd class="clihub-kbd">Ctrl</kbd><span class="clihub-key-plus">+</span><kbd class="clihub-kbd">Tab</kbd></span>
         </div>
         <div class="clihub-key-row">
           <span class="clihub-key-label">Toggle the Prompt filter</span>
@@ -287,6 +301,14 @@
         <div class="clihub-key-row">
           <span class="clihub-key-label">Prompt · Translator · Status · Keymaps</span>
           <span class="clihub-key-combo"><kbd class="clihub-kbd">Shift</kbd><span class="clihub-key-plus">+</span><kbd class="clihub-kbd">F1</kbd><span class="clihub-key-plus">…</span><kbd class="clihub-kbd">F4</kbd></span>
+        </div>
+        <div class="clihub-key-row">
+          <span class="clihub-key-label">Slash-Commands palette</span>
+          <span class="clihub-key-combo"><kbd class="clihub-kbd">Alt</kbd><span class="clihub-key-plus">+</span><kbd class="clihub-kbd">F1</kbd></span>
+        </div>
+        <div class="clihub-key-row">
+          <span class="clihub-key-label">Move panel side (L/R)</span>
+          <span class="clihub-key-combo"><kbd class="clihub-kbd">Ctrl</kbd><span class="clihub-key-plus">+</span><kbd class="clihub-kbd">CapsLock</kbd></span>
         </div>
       </div>
     </section>
@@ -344,6 +366,16 @@
             A way to launch any command that isn't in the built-in list — handy
             for a private agent or a wrapper script. Pick Custom CLI from the
             launcher and type the command.
+          </p>
+        </details>
+        <details class="clihub-faq-item">
+          <summary>How do I see every <span class="clihub-code">/</span> command an agent supports?</summary>
+          <p>
+            Press <strong>Alt&nbsp;+&nbsp;F1</strong> (or open the <strong>Commands</strong> tool)
+            for a searchable palette of every slash-command the active CLI ships
+            with — <span class="clihub-code">/model</span>,
+            <span class="clihub-code">/clear</span>,
+            <span class="clihub-code">/help</span>, and so on. Click one to send it.
           </p>
         </details>
         <details class="clihub-faq-item">

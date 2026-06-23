@@ -1,0 +1,33 @@
+{
+  "{0} is not installed or is not available in PATH.": "{0} chưa được cài đặt hoặc không có sẵn trong PATH.",
+  "{0} is not installed. You can install it now in an integrated terminal.": "{0} chưa được cài đặt. Bạn có thể cài đặt ngay trong terminal tích hợp.",
+  "Lynx Keymap shortcuts aren’t active. Install the extension to enable them.": "Phím tắt Lynx Keymap chưa được kích hoạt. Cài đặt tiện ích mở rộng để bật chúng.",
+
+  "My Memory: open a folder before building project context.": "My Memory: mở một thư mục trước khi tạo ngữ cảnh dự án.",
+  "Install (Python + Graphify) to enable project graph generation. One-time setup 📥.": "Cài đặt (Python + Graphify) để bật tạo đồ thị dự án. Thiết lập một lần 📥.",
+  "My Memory: graphify install failed. {0}": "My Memory: cài đặt graphify thất bại. {0}",
+  "Memory updated · Instruction files synced. ✔": "Memory đã cập nhật · Tệp hướng dẫn đã đồng bộ. ✔",
+  "My Memory failed: {0}": "My Memory thất bại: {0}",
+
+  "Open a workspace first to create a skill.": "Mở một workspace trước để tạo skill.",
+  "Failed to create skill. Check output logs.": "Không thể tạo skill. Kiểm tra logs đầu ra.",
+  "My Skills could not find this skill in the marketplace list.": "My Skills không tìm thấy skill này trong marketplace.",
+  "My Skills could not update .gitignore.": "My Skills không thể cập nhật .gitignore.",
+  "Delete {0}?": "Xóa {0}?",
+  "The item will be moved to the trash when possible.": "Mục sẽ được chuyển vào thùng rác khi có thể.",
+  "My Skills could not delete this item.": "My Skills không thể xóa mục này.",
+  "My Skills could not open this skill.": "My Skills không thể mở skill này.",
+  "Skill '{0}' saved successfully ✅.": "Skill '{0}' đã lưu thành công ✅.",
+  "My Skills could not save this skill.": "My Skills không thể lưu skill này.",
+  "Skill '{0}' enabled in {1} ✅.": "Skill '{0}' đã bật trong {1} ✅.",
+  "My Skills could not enable '{0}'. {1}": "My Skills không thể bật '{0}'. {1}",
+  "Delete saved skill '{0}'?": "Xóa skill đã lưu '{0}'?",
+  "This will permanently remove the skill from your saved library.": "Điều này sẽ xóa skill vĩnh viễn khỏi thư viện đã lưu của bạn.",
+  "My Skills could not delete this saved skill.": "My Skills không thể xóa skill đã lưu này.",
+
+  "[My Skills] Install failed: invalid marketplace skill reference.": "[My Skills] Cài đặt thất bại: tham chiếu skill marketplace không hợp lệ.",
+  "[My Skills] Open a workspace before installing project skills.": "[My Skills] Mở một workspace trước khi cài đặt skills dự án.",
+  "[My Skills] Install failed: {0}": "[My Skills] Cài đặt thất bại: {0}",
+  "Skill [{0}] installed ✅": "Skill [{0}] đã được cài đặt ✅",
+  "[My Skills] Install failed with code {0}": "[My Skills] Cài đặt thất bại với mã {0}"
+}

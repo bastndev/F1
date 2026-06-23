@@ -3,10 +3,9 @@ import * as os from 'os';
 import * as vscode from 'vscode';
 import type { CliAgent } from '../../shared/agents';
 import { getCliInstaller, type CliInstaller } from './cli-installers';
-import { uiStrings } from '../../shared/ui-strings';
 
-const installAction = uiStrings.install.installAction;
-const cancelAction = uiStrings.install.cancelAction;
+const installAction = 'Install';
+const cancelAction = 'Cancel';
 
 const commandExists = (command: string) => {
 	return new Promise<boolean>((resolve) => {
@@ -25,7 +24,7 @@ const commandExists = (command: string) => {
 };
 
 const openInstallTerminal = (label: string, installCommand: string) => {
-	const terminal = vscode.window.createTerminal({ name: uiStrings.install.terminalName(label) });
+	const terminal = vscode.window.createTerminal({ name: `Install ${label}` });
 	terminal.show(true);
 	terminal.sendText(installCommand);
 };
@@ -50,14 +49,14 @@ export const ensureCliInstalled = async (agent: CliAgent) => {
 	const installer = getCliInstaller(agent.label);
 	if (!installer) {
 		void vscode.window.showWarningMessage(
-			uiStrings.install.notInstalledNoInstaller(agent.label),
+			vscode.l10n.t('{0} is not installed or is not available in PATH.', agent.label),
 			cancelAction
 		);
 		return false;
 	}
 
 	const choice = await vscode.window.showWarningMessage(
-		uiStrings.install.notInstalledOffer(agent.label),
+		vscode.l10n.t('{0} is not installed. You can install it now in an integrated terminal.', agent.label),
 		cancelAction,
 		installAction
 	);
