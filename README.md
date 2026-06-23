@@ -80,33 +80,82 @@ F1 turns VS Code into a hub for AI coding agents. Open **Claude Code, Codex, Cop
 
 ---
 
----
+## Installation
+
+Launch _Quick Open_ depending on your operating system:
+
+- <img src="https://www.kernel.org/theme/images/logos/favicon.png" width=16 height=16/> Linux `Ctrl+P`
+- <img src="https://developer.apple.com/favicon.ico" width=16 height=16/> macOS `⌘P`
+- <img src="https://www.microsoft.com/favicon.ico" width=16 height=16/> Windows `Ctrl+P`
+
+Paste the following command and press `Enter`:
+
+```bash
+ext install bastndev.f1
+```
+
+### Method 2 — Extensions View
+
+1. Open Extensions (`Ctrl+Shift+X` / `⌘+Shift+X`)
+2. Search **"Lynx Theme Pro"**
+3. Click **Install**
 
 <br>
 
-## 📋 Requirements
+---
 
-- VS Code `^1.75.0` (or a compatible fork: Cursor, Windsurf, Trae.ai, Kiro, Firebase Studio).
-- The AI CLI you want to use (F1 can install supported ones on first launch).
+## About Me
 
-## 🛠️ Development
+| [![gohitx](https://github.com/gohitx.png?size=100)](https://gohit.xyz) |
+| :--------------------------------------------------------------------: |
+|                  **[Gohit X](https://gohit.xyz/me)**                   |
+|                         _Creator & Maintainer_                         |
 
-This repo uses [Bun](https://bun.sh/) and [esbuild](https://esbuild.github.io/).
+- 🐦 **[X](https://x.com/intent/follow?screen_name=gohitx)** : For questions and discussions.
+- 🌱 **[IG](https://instagram.com/gohitx)** : **`new`** – Project previews & life updates.
+- 🔴 **[YouTube](https://www.youtube.com/@gohitx?sub_confirmation=1)** : Code, Software and development insights.
 
-```bash
-bun install          # install dependencies
-bun run compile      # type-check + lint + bundle (the full gate)
-bun run watch        # rebuild on change (esbuild + tsc)
-```
+<br>
 
-Press **F5** in VS Code to launch the Extension Development Host.
+---
 
-The codebase is organized into three products under `src/` — `my-cli/`, `my-skills/`, `my-memory/` — plus a shared layer. See [`AGENTS.md`](AGENTS.md) for the full architecture (layout, build targets, message protocol, and how to add a new CLI agent).
+## Sponsors
 
-## 🤝 Contributing
+Thank you to everyone who supports this project! Your contributions make updates and new extensions possible.
 
-Issues and pull requests are welcome — please open them on the [GitHub repository](https://github.com/bastndev/F1). Run `bun run compile` before submitting.
+<div align="center">
+  <table>
+    <tr>
+      <td align="center" width="20%">
+        <img src="https://avatars.githubusercontent.com/u/22199520?v=4" width="80" height="80" style="border-radius: 50%;" alt="Sponsor M"/>
+        <br><b>M</b>
+      </td>
+    </tr>
+  </table>
+  <br>
+  <em>Thank you to all our amazing sponsors! 💖</em><br>
+  <a href="https://github.com/sponsors/bastndev"><b>👉 Become a sponsor</b></a>
+</div>
 
-## 📄 License
+<br>
 
-[MIT](LICENSE) © [Gohit (X) Bastian](https://www.gohit.xyz/me)
+<h2 align="center">
+  Complementary Extensions 🧩 
+</h2>
+
+| Extension                                                                                                                                                                                                         | Name/>                                                         | Description                                                                                                                                                                                                                       |
+| ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [![Lynx Theme Pro](https://bastndev.gallerycdn.vsassets.io/extensions/bastndev/lynx-theme/5.0.1/1777191854738/Microsoft.VisualStudio.Services.Icons.Default)](https://open-vsx.org/extension/bastndev/lynx-theme) | [Lynx Theme Pro](https://github.com/bastndev/Lynx-Theme)       | A professional extension with six available themes: Dark, Light, Night, Ghibli, Coffee, and Kiro—with integrated icons. Each theme is optimized to offer a more pleasant visual experience.                                       |
+| [![Lynx Keymap Pro](https://open-vsx.org/api/bastndev/lynx-keymap/2.6.0/file/icon.png)](https://open-vsx.org/extension/bastndev/lynx-keymap)                                                                      | [Lynx Keymap Pro](https://github.com/bastndev/Lynx-Keymap-Pro) | Standardizes keyboard shortcuts across all code editors, giving you instant access to any functionality with a single key combination — boosting your workflow and dev experience. **`Now includes shortcuts for 75% keyboards`** |
+| [![ATM](https://open-vsx.org/api/bastndev/atm/1.9.4/file/icon.png)](https://open-vsx.org/extension/bastndev/atm)                                                                                                  | [ATM](https://github.com/bastndev/atm)                         | An all-in-one toolkit 👻 that supercharges your workflow with essential features like Error Lens, Git Blame, Env Protection, and code screenshots across major editors.                                                           |
+
+<br>
+
+<div align="center">
+  
+  **Enjoy 🎉 (Lynx Theme Pro) is now installed!**  
+  *If you find any bugs or have feedback, feel free to [open an issue](https://github.com/bastndev/F1/issues/new).*
+
+<sub>Made in 🇵🇪 by <a href="https://gohit.xyz">Gohit X</a> · Licensed under <a href="https://github.com/bastndev/Lynx-Theme-Pro/blob/main/LICENSE">`MIT`</a></sub>
+
+</div>
