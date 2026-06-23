@@ -1,7 +1,7 @@
 {
   "name": "f1",
-  "displayName": "F1",
-  "description": "All-in-One (F1 [AI] composer) — One hotkey to launch & switch Claude Code, Codex, Copilot, Cursor, Kiro, Grok, Antigravity or any AI CLI. Built-in Skills, Memory & Prompt tools. 雨",
+  "displayName": "%displayName%",
+  "description": "%description%",
   "version": "1.0.0",
   "publisher": "bastndev",
   "license": "MIT",
