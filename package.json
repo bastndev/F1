@@ -145,7 +145,7 @@
     "typescript-eslint": "^8.32.1"
   },
   "dependencies": {
-    "fixnow": "^2.0.2",
+    "fixnow": "^2.0.4",
     "node-pty": "1.1.0"
   }
 }
