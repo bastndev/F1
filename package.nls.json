@@ -1,37 +1,4 @@
 {
   "displayName": "F1",
-  "description": "All-in-One (F1 [AI] composer) — One hotkey to launch & switch Claude Code, Codex, Copilot, Cursor, Kiro, Grok, Antigravity or any AI CLI. Built-in Skills, Memory & Prompt tools. 雨",
-
-
-  "notification.cli.notInstalled": "{0} is not installed or is not available in PATH.",
-  "notification.cli.installOffer": "{0} is not installed. You can install it now in an integrated terminal.",
-  "notification.cli.lynxKeymapMissing": "Lynx Keymap shortcuts aren't active. Install the extension to enable them.",
-
-  "notification.memory.openFolder": "My Memory: open a folder before building project context.",
-  "notification.memory.installGraphify": "Install (Python + Graphify) to enable project graph generation. One-time setup 📥.",
-  "notification.memory.installFailed": "My Memory: graphify install failed. {0}",
-  "notification.memory.synced": "Memory updated · Instruction files synced. ✔",
-  "notification.memory.failed": "My Memory failed: {0}",
-
-  "notification.skills.openWorkspaceCreate": "Open a workspace first to create a skill.",
-  "notification.skills.createFailed": "Failed to create skill. Check output logs.",
-  "notification.skills.notInMarketplace": "My Skills could not find this skill in the marketplace list.",
-  "notification.skills.gitignoreFailed": "My Skills could not update .gitignore.",
-  "notification.skills.deleteConfirm": "Delete {0}?",
-  "notification.skills.deleteDetail": "The item will be moved to the trash when possible.",
-  "notification.skills.deleteFailed": "My Skills could not delete this item.",
-  "notification.skills.openFailed": "My Skills could not open this skill.",
-  "notification.skills.saved": "Skill '{0}' saved successfully ✅.",
-  "notification.skills.saveFailed": "My Skills could not save this skill.",
-  "notification.skills.enabled": "Skill '{0}' enabled in {1} ✅.",
-  "notification.skills.enableFailed": "My Skills could not enable '{0}'. {1}",
-  "notification.skills.deleteSavedConfirm": "Delete saved skill '{0}'?",
-  "notification.skills.deleteSavedDetail": "This will permanently remove the skill from your saved library.",
-  "notification.skills.deleteSavedFailed": "My Skills could not delete this saved skill.",
-
-  "notification.install.invalidRef": "[My Skills] Install failed: invalid marketplace skill reference.",
-  "notification.install.openWorkspace": "[My Skills] Open a workspace before installing project skills.",
-  "notification.install.failed": "[My Skills] Install failed: {0}",
-  "notification.install.success": "[My Skills] {0} installed ✅.",
-  "notification.install.failedCode": "[My Skills] Install failed with code {0}"
+  "description": "All-in-One (F1 [AI] composer) — One hotkey to launch & switch Claude Code, Codex, Copilot, Cursor, Kiro, Grok, Antigravity or any AI CLI. Built-in Skills, Memory & Prompt tools. 雨"
 }

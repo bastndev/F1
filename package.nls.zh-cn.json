@@ -1,37 +1,4 @@
 {
   "displayName": "F1 [AI] composer",
-  "description": "一体化 (F1 [AI] composer) — 一键启动并切换 Claude Code、Codex、Copilot、Cursor、Kiro、Grok、Antigravity 或任何 AI CLI。内置 Skills、Memory 和 Prompt 工具。雨",
-
-
-  "notification.cli.notInstalled": "{0} 未安装或在 PATH 中不可用。",
-  "notification.cli.installOffer": "{0} 未安装。你可以现在在集成终端中安装。",
-  "notification.cli.lynxKeymapMissing": "Lynx Keymap 快捷键未激活。安装扩展以启用它们。",
-
-  "notification.memory.openFolder": "My Memory：在生成项目上下文之前请先打开一个文件夹。",
-  "notification.memory.installGraphify": "安装 (Python + Graphify) 以启用项目图谱生成。一次性设置 📥。",
-  "notification.memory.installFailed": "My Memory：graphify 安装失败。{0}",
-  "notification.memory.synced": "Memory 已更新 · 指令文件已同步。✔",
-  "notification.memory.failed": "My Memory 失败：{0}",
-
-  "notification.skills.openWorkspaceCreate": "请先打开一个工作区以创建技能。",
-  "notification.skills.createFailed": "创建技能失败。请查看输出日志。",
-  "notification.skills.notInMarketplace": "My Skills 在市场列表中未找到此技能。",
-  "notification.skills.gitignoreFailed": "My Skills 无法更新 .gitignore。",
-  "notification.skills.deleteConfirm": "删除 {0}?",
-  "notification.skills.deleteDetail": "项目将在可能时被移至回收站。",
-  "notification.skills.deleteFailed": "My Skills 无法删除此项目。",
-  "notification.skills.openFailed": "My Skills 无法打开此技能。",
-  "notification.skills.saved": "技能 '{0}' 保存成功 ✅。",
-  "notification.skills.saveFailed": "My Skills 无法保存此技能。",
-  "notification.skills.enabled": "技能 '{0}' 已在 {1} 中启用 ✅。",
-  "notification.skills.enableFailed": "My Skills 无法启用 '{0}'。{1}",
-  "notification.skills.deleteSavedConfirm": "删除已保存的技能 '{0}'?",
-  "notification.skills.deleteSavedDetail": "这将从你的已保存库中永久删除此技能。",
-  "notification.skills.deleteSavedFailed": "My Skills 无法删除此已保存的技能。",
-
-  "notification.install.invalidRef": "[My Skills] 安装失败：市场技能引用无效。",
-  "notification.install.openWorkspace": "[My Skills] 在安装项目技能之前请打开一个工作区。",
-  "notification.install.failed": "[My Skills] 安装失败：{0}",
-  "notification.install.success": "[My Skills] {0} 已安装 ✅。",
-  "notification.install.failedCode": "[My Skills] 安装失败 代码 {0}"
+  "description": "一体化 (F1 [AI] composer) — 一键启动并切换 Claude Code、Codex、Copilot、Cursor、Kiro、Grok、Antigravity 或任何 AI CLI。内置 Skills、Memory 和 Prompt 工具。雨"
 }

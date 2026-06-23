@@ -1,0 +1,33 @@
+{
+  "{0} is not installed or is not available in PATH.": "{0} غير مثبت أو غير متاح في PATH.",
+  "{0} is not installed. You can install it now in an integrated terminal.": "{0} غير مثبت. يمكنك تثبيته الآن في وحدة طرفية متكاملة.",
+  "Lynx Keymap shortcuts aren’t active. Install the extension to enable them.": "اختصارات Lynx Keymap غير نشطة. ثبّت الإضافة لتمكينها.",
+
+  "My Memory: open a folder before building project context.": "My Memory: افتح مجلدًا قبل إنشاء سياق المشروع.",
+  "Install (Python + Graphify) to enable project graph generation. One-time setup 📥.": "ثبّت (Python + Graphify) لتفعيل إنشاء رسم المشروع. إعداد لمرة واحدة 📥.",
+  "My Memory: graphify install failed. {0}": "My Memory: فشل تثبيت graphify. {0}",
+  "Memory updated · Instruction files synced. ✔": "تم تحديث Memory · تمت مزامنة ملفات التعليمات. ✔",
+  "My Memory failed: {0}": "فشل My Memory: {0}",
+
+  "Open a workspace first to create a skill.": "افتح مساحة عمل أولاً لإنشاء مهارة.",
+  "Failed to create skill. Check output logs.": "فشل إنشاء المهارة. راجع سجلات الإخراج.",
+  "My Skills could not find this skill in the marketplace list.": "لم يتمكن My Skills من العثور على هذه المهارة في السوق.",
+  "My Skills could not update .gitignore.": "لم يتمكن My Skills من تحديث .gitignore.",
+  "Delete {0}?": "حذف {0}؟",
+  "The item will be moved to the trash when possible.": "سيتم نقل العنصر إلى سلة المهملات عند الإمكان.",
+  "My Skills could not delete this item.": "لم يتمكن My Skills من حذف هذا العنصر.",
+  "My Skills could not open this skill.": "لم يتمكن My Skills من فتح هذه المهارة.",
+  "Skill '{0}' saved successfully ✅.": "تم حفظ المهارة '{0}' بنجاح ✅.",
+  "My Skills could not save this skill.": "لم يتمكن My Skills من حفظ هذه المهارة.",
+  "Skill '{0}' enabled in {1} ✅.": "تم تفعيل المهارة '{0}' في {1} ✅.",
+  "My Skills could not enable '{0}'. {1}": "لم يتمكن My Skills من تفعيل '{0}'. {1}",
+  "Delete saved skill '{0}'?": "حذف المهارة المحفوظة '{0}'؟",
+  "This will permanently remove the skill from your saved library.": "سيؤدي هذا إلى إزالة المهارة نهائيًا من مكتبتك المحفوظة.",
+  "My Skills could not delete this saved skill.": "لم يتمكن My Skills من حذف هذه المهارة المحفوظة.",
+
+  "[My Skills] Install failed: invalid marketplace skill reference.": "[My Skills] فشل التثبيت: مرجع مهارة سوق غير صالح.",
+  "[My Skills] Open a workspace before installing project skills.": "[My Skills] افتح مساحة عمل قبل تثبيت مهارات المشروع.",
+  "[My Skills] Install failed: {0}": "[My Skills] فشل التثبيت: {0}",
+  "[My Skills] {0} installed ✅.": "[My Skills] تم تثبيت {0} ✅.",
+  "[My Skills] Install failed with code {0}": "[My Skills] فشل التثبيت برمز {0}"
+}

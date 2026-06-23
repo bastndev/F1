@@ -1,0 +1,33 @@
+{
+  "{0} is not installed or is not available in PATH.": "{0} n'est pas installé ou n'est pas disponible dans le PATH.",
+  "{0} is not installed. You can install it now in an integrated terminal.": "{0} n'est pas installé. Vous pouvez l'installer maintenant dans un terminal intégré.",
+  "Lynx Keymap shortcuts aren’t active. Install the extension to enable them.": "Les raccourcis Lynx Keymap ne sont pas actifs. Installez l'extension pour les activer.",
+
+  "My Memory: open a folder before building project context.": "My Memory : ouvrez un dossier avant de générer le contexte du projet.",
+  "Install (Python + Graphify) to enable project graph generation. One-time setup 📥.": "Installez (Python + Graphify) pour activer la génération du graphe de projet. Configuration unique 📥.",
+  "My Memory: graphify install failed. {0}": "My Memory : échec de l'installation de graphify. {0}",
+  "Memory updated · Instruction files synced. ✔": "Memory mis à jour · Fichiers d'instructions synchronisés. ✔",
+  "My Memory failed: {0}": "Échec de My Memory : {0}",
+
+  "Open a workspace first to create a skill.": "Ouvrez d'abord un workspace pour créer une skill.",
+  "Failed to create skill. Check output logs.": "Échec de la création de la skill. Vérifiez les logs de sortie.",
+  "My Skills could not find this skill in the marketplace list.": "My Skills n'a pas trouvé cette skill dans le marketplace.",
+  "My Skills could not update .gitignore.": "My Skills n'a pas pu mettre à jour .gitignore.",
+  "Delete {0}?": "Supprimer {0} ?",
+  "The item will be moved to the trash when possible.": "L'élément sera déplacé dans la corbeille si possible.",
+  "My Skills could not delete this item.": "My Skills n'a pas pu supprimer cet élément.",
+  "My Skills could not open this skill.": "My Skills n'a pas pu ouvrir cette skill.",
+  "Skill '{0}' saved successfully ✅.": "Skill '{0}' enregistrée avec succès ✅.",
+  "My Skills could not save this skill.": "My Skills n'a pas pu enregistrer cette skill.",
+  "Skill '{0}' enabled in {1} ✅.": "Skill '{0}' activée dans {1} ✅.",
+  "My Skills could not enable '{0}'. {1}": "My Skills n'a pas pu activer '{0}'. {1}",
+  "Delete saved skill '{0}'?": "Supprimer la skill enregistrée '{0}' ?",
+  "This will permanently remove the skill from your saved library.": "Cela supprimera définitivement la skill de votre bibliothèque enregistrée.",
+  "My Skills could not delete this saved skill.": "My Skills n'a pas pu supprimer cette skill enregistrée.",
+
+  "[My Skills] Install failed: invalid marketplace skill reference.": "[My Skills] Échec de l'installation : référence de skill du marketplace invalide.",
+  "[My Skills] Open a workspace before installing project skills.": "[My Skills] Ouvrez un workspace avant d'installer des skills de projet.",
+  "[My Skills] Install failed: {0}": "[My Skills] Échec de l'installation : {0}",
+  "[My Skills] {0} installed ✅.": "[My Skills] {0} installée ✅.",
+  "[My Skills] Install failed with code {0}": "[My Skills] Échec de l'installation avec le code {0}"
+}

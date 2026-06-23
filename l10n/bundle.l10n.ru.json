@@ -1,0 +1,33 @@
+{
+  "{0} is not installed or is not available in PATH.": "{0} не установлен или недоступен в PATH.",
+  "{0} is not installed. You can install it now in an integrated terminal.": "{0} не установлен. Вы можете установить его сейчас в интегрированном терминале.",
+  "Lynx Keymap shortcuts aren’t active. Install the extension to enable them.": "Сочетания клавиш Lynx Keymap не активны. Установите расширение, чтобы их включить.",
+
+  "My Memory: open a folder before building project context.": "My Memory: откройте папку перед созданием контекста проекта.",
+  "Install (Python + Graphify) to enable project graph generation. One-time setup 📥.": "Установите (Python + Graphify), чтобы включить генерацию графа проекта. Однократная настройка 📥.",
+  "My Memory: graphify install failed. {0}": "My Memory: установка graphify не удалась. {0}",
+  "Memory updated · Instruction files synced. ✔": "Memory обновлено · Файлы инструкций синхронизированы. ✔",
+  "My Memory failed: {0}": "Ошибка My Memory: {0}",
+
+  "Open a workspace first to create a skill.": "Сначала откройте рабочую область, чтобы создать скилл.",
+  "Failed to create skill. Check output logs.": "Не удалось создать скилл. Проверьте журналы вывода.",
+  "My Skills could not find this skill in the marketplace list.": "My Skills не удалось найти этот скилл в маркетплейсе.",
+  "My Skills could not update .gitignore.": "My Skills не удалось обновить .gitignore.",
+  "Delete {0}?": "Удалить {0}?",
+  "The item will be moved to the trash when possible.": "Элемент будет перемещён в корзину, если это возможно.",
+  "My Skills could not delete this item.": "My Skills не удалось удалить этот элемент.",
+  "My Skills could not open this skill.": "My Skills не удалось открыть этот скилл.",
+  "Skill '{0}' saved successfully ✅.": "Скилл '{0}' успешно сохранён ✅.",
+  "My Skills could not save this skill.": "My Skills не удалось сохранить этот скилл.",
+  "Skill '{0}' enabled in {1} ✅.": "Скилл '{0}' включён в {1} ✅.",
+  "My Skills could not enable '{0}'. {1}": "My Skills не удалось включить '{0}'. {1}",
+  "Delete saved skill '{0}'?": "Удалить сохранённый скилл '{0}'?",
+  "This will permanently remove the skill from your saved library.": "Это навсегда удалит скилл из вашей сохранённой библиотеки.",
+  "My Skills could not delete this saved skill.": "My Skills не удалось удалить этот сохранённый скилл.",
+
+  "[My Skills] Install failed: invalid marketplace skill reference.": "[My Skills] Установка не удалась: неверная ссылка на скилл маркетплейса.",
+  "[My Skills] Open a workspace before installing project skills.": "[My Skills] Откройте рабочую область перед установкой скиллов проекта.",
+  "[My Skills] Install failed: {0}": "[My Skills] Установка не удалась: {0}",
+  "[My Skills] {0} installed ✅.": "[My Skills] {0} установлен ✅.",
+  "[My Skills] Install failed with code {0}": "[My Skills] Установка не удалась с кодом {0}"
+}

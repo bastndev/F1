@@ -1,37 +1,4 @@
 {
   "displayName": "F1 [AI] composer",
-  "description": "オールインワン (F1 [AI] composer) — ワンキーで Claude Code、Codex、Copilot、Cursor、Kiro、Grok、Antigravity または任意の AI CLI を起動・切替。Skills、Memory、Prompt ツール内蔵。雨",
-
-
-  "notification.cli.notInstalled": "{0} はインストールされていないか、PATH で利用できません。",
-  "notification.cli.installOffer": "{0} はインストールされていません。統合ターミナルで今すぐインストールできます。",
-  "notification.cli.lynxKeymapMissing": "Lynx Keymap ショートカットが有効ではありません。拡張機能をインストールして有効化してください。",
-
-  "notification.memory.openFolder": "My Memory: プロジェクトコンテキストを生成する前にフォルダーを開いてください。",
-  "notification.memory.installGraphify": "プロジェクトグラフ生成を有効にするには (Python + Graphify) をインストールしてください。一度きりのセットアップ 📥。",
-  "notification.memory.installFailed": "My Memory: graphify のインストールに失敗しました。{0}",
-  "notification.memory.synced": "Memory を更新しました · 指示ファイルを同期しました。✔",
-  "notification.memory.failed": "My Memory が失敗しました: {0}",
-
-  "notification.skills.openWorkspaceCreate": "スキルを作成するには、まずワークスペースを開いてください。",
-  "notification.skills.createFailed": "スキルの作成に失敗しました。出力ログを確認してください。",
-  "notification.skills.notInMarketplace": "My Skills はこのスキルをマーケットプレイスで見つけられませんでした。",
-  "notification.skills.gitignoreFailed": "My Skills は .gitignore を更新できませんでした。",
-  "notification.skills.deleteConfirm": "{0} を削除しますか?",
-  "notification.skills.deleteDetail": "可能な場合、項目はゴミ箱に移動されます。",
-  "notification.skills.deleteFailed": "My Skills はこの項目を削除できませんでした。",
-  "notification.skills.openFailed": "My Skills はこのスキルを開けませんでした。",
-  "notification.skills.saved": "スキル '{0}' を保存しました ✅。",
-  "notification.skills.saveFailed": "My Skills はこのスキルを保存できませんでした。",
-  "notification.skills.enabled": "スキル '{0}' を {1} で有効化しました ✅。",
-  "notification.skills.enableFailed": "My Skills は '{0}' を有効化できませんでした。{1}",
-  "notification.skills.deleteSavedConfirm": "保存済みスキル '{0}' を削除しますか?",
-  "notification.skills.deleteSavedDetail": "保存済みライブラリからスキルを完全に削除します。",
-  "notification.skills.deleteSavedFailed": "My Skills はこの保存済みスキルを削除できませんでした。",
-
-  "notification.install.invalidRef": "[My Skills] インストール失敗: 無効なマーケットプレイススキル参照。",
-  "notification.install.openWorkspace": "[My Skills] プロジェクトスキルをインストールする前にワークスペースを開いてください。",
-  "notification.install.failed": "[My Skills] インストール失敗: {0}",
-  "notification.install.success": "[My Skills] {0} をインストールしました ✅。",
-  "notification.install.failedCode": "[My Skills] インストール失敗 コード {0}"
+  "description": "オールインワン (F1 [AI] composer) — ワンキーで Claude Code、Codex、Copilot、Cursor、Kiro、Grok、Antigravity または任意の AI CLI を起動・切替。Skills、Memory、Prompt ツール内蔵。雨"
 }

@@ -1,0 +1,33 @@
+{
+  "{0} is not installed or is not available in PATH.": "{0} はインストールされていないか、PATH で利用できません。",
+  "{0} is not installed. You can install it now in an integrated terminal.": "{0} はインストールされていません。統合ターミナルで今すぐインストールできます。",
+  "Lynx Keymap shortcuts aren’t active. Install the extension to enable them.": "Lynx Keymap ショートカットが有効ではありません。拡張機能をインストールして有効化してください。",
+
+  "My Memory: open a folder before building project context.": "My Memory: プロジェクトコンテキストを生成する前にフォルダーを開いてください。",
+  "Install (Python + Graphify) to enable project graph generation. One-time setup 📥.": "プロジェクトグラフ生成を有効にするには (Python + Graphify) をインストールしてください。一度きりのセットアップ 📥。",
+  "My Memory: graphify install failed. {0}": "My Memory: graphify のインストールに失敗しました。{0}",
+  "Memory updated · Instruction files synced. ✔": "Memory を更新しました · 指示ファイルを同期しました。✔",
+  "My Memory failed: {0}": "My Memory が失敗しました: {0}",
+
+  "Open a workspace first to create a skill.": "スキルを作成するには、まずワークスペースを開いてください。",
+  "Failed to create skill. Check output logs.": "スキルの作成に失敗しました。出力ログを確認してください。",
+  "My Skills could not find this skill in the marketplace list.": "My Skills はこのスキルをマーケットプレイスで見つけられませんでした。",
+  "My Skills could not update .gitignore.": "My Skills は .gitignore を更新できませんでした。",
+  "Delete {0}?": "{0} を削除しますか?",
+  "The item will be moved to the trash when possible.": "可能な場合、項目はゴミ箱に移動されます。",
+  "My Skills could not delete this item.": "My Skills はこの項目を削除できませんでした。",
+  "My Skills could not open this skill.": "My Skills はこのスキルを開けませんでした。",
+  "Skill '{0}' saved successfully ✅.": "スキル '{0}' を保存しました ✅。",
+  "My Skills could not save this skill.": "My Skills はこのスキルを保存できませんでした。",
+  "Skill '{0}' enabled in {1} ✅.": "スキル '{0}' を {1} で有効化しました ✅。",
+  "My Skills could not enable '{0}'. {1}": "My Skills は '{0}' を有効化できませんでした。{1}",
+  "Delete saved skill '{0}'?": "保存済みスキル '{0}' を削除しますか?",
+  "This will permanently remove the skill from your saved library.": "保存済みライブラリからスキルを完全に削除します。",
+  "My Skills could not delete this saved skill.": "My Skills はこの保存済みスキルを削除できませんでした。",
+
+  "[My Skills] Install failed: invalid marketplace skill reference.": "[My Skills] インストール失敗: 無効なマーケットプレイススキル参照。",
+  "[My Skills] Open a workspace before installing project skills.": "[My Skills] プロジェクトスキルをインストールする前にワークスペースを開いてください。",
+  "[My Skills] Install failed: {0}": "[My Skills] インストール失敗: {0}",
+  "[My Skills] {0} installed ✅.": "[My Skills] {0} をインストールしました ✅。",
+  "[My Skills] Install failed with code {0}": "[My Skills] インストール失敗 コード {0}"
+}

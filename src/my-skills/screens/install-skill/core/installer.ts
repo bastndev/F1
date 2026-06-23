@@ -16,7 +16,7 @@ const TELEMETRY_REPORTING_OWNERS = new Set(['bastndev']);
 
 export async function installMarketplaceSkill(skill: InstallMarketplaceSkill): Promise<boolean> {
 	if (!isSafeMarketplaceSkillReference(skill)) {
-		void vscode.window.showErrorMessage('[My Skills] Install failed: invalid marketplace skill reference.');
+		void vscode.window.showErrorMessage(vscode.l10n.t('[My Skills] Install failed: invalid marketplace skill reference.'));
 		return false;
 	}
 
@@ -55,7 +55,7 @@ async function pickInstallTarget(skill: InstallMarketplaceSkill): Promise<Instal
 async function runSkillsInstall(skill: InstallMarketplaceSkill, choice: InstallChoice): Promise<boolean> {
 	const workspaceRoot = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath;
 	if (!workspaceRoot) {
-		void vscode.window.showWarningMessage('[My Skills] Open a workspace before installing project skills.');
+		void vscode.window.showWarningMessage(vscode.l10n.t('[My Skills] Open a workspace before installing project skills.'));
 		return false;
 	}
 
@@ -98,20 +98,22 @@ async function runSkillsInstall(skill: InstallMarketplaceSkill, choice: InstallC
 				});
 
 				child.on('error', error => {
-					void vscode.window.showErrorMessage(`[My Skills] Install failed: ${error.message}`);
+					void vscode.window.showErrorMessage(vscode.l10n.t('[My Skills] Install failed: {0}', error.message));
 					resolve(false);
 				});
 
 				child.on('close', code => {
 					if (code === 0) {
-						void vscode.window.showInformationMessage(`[My Skills] ${skill.name} installed ✅.`);
+						void vscode.window.showInformationMessage(vscode.l10n.t('[My Skills] {0} installed ✅.', skill.name));
 						resolve(true);
 						return;
 					}
 
 					const detail = stderr.trim();
 					void vscode.window.showErrorMessage(
-						detail ? `[My Skills] Install failed: ${cleanCliOutput(detail)}` : `[My Skills] Install failed with code ${code}`,
+						detail
+							? vscode.l10n.t('[My Skills] Install failed: {0}', cleanCliOutput(detail))
+							: vscode.l10n.t('[My Skills] Install failed with code {0}', String(code)),
 					);
 					resolve(false);
 				});

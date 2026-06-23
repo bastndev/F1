@@ -1,37 +1,4 @@
 {
   "displayName": "F1 [AI] composer",
-  "description": "الكل في واحد (F1 [AI] composer) — اختصار واحد لتشغيل والتبديل بين Claude Code وCodex وCopilot وCursor وKiro وGrok وAntigravity أو أي CLI للذكاء الاصطناعي. أدوات Skills وMemory وPrompt مدمجة. 雨",
-
-
-  "notification.cli.notInstalled": "{0} غير مثبت أو غير متاح في PATH.",
-  "notification.cli.installOffer": "{0} غير مثبت. يمكنك تثبيته الآن في وحدة طرفية متكاملة.",
-  "notification.cli.lynxKeymapMissing": "اختصارات Lynx Keymap غير نشطة. ثبّت الإضافة لتمكينها.",
-
-  "notification.memory.openFolder": "My Memory: افتح مجلدًا قبل إنشاء سياق المشروع.",
-  "notification.memory.installGraphify": "ثبّت (Python + Graphify) لتفعيل إنشاء رسم المشروع. إعداد لمرة واحدة 📥.",
-  "notification.memory.installFailed": "My Memory: فشل تثبيت graphify. {0}",
-  "notification.memory.synced": "تم تحديث Memory · تمت مزامنة ملفات التعليمات. ✔",
-  "notification.memory.failed": "فشل My Memory: {0}",
-
-  "notification.skills.openWorkspaceCreate": "افتح مساحة عمل أولاً لإنشاء مهارة.",
-  "notification.skills.createFailed": "فشل إنشاء المهارة. راجع سجلات الإخراج.",
-  "notification.skills.notInMarketplace": "لم يتمكن My Skills من العثور على هذه المهارة في السوق.",
-  "notification.skills.gitignoreFailed": "لم يتمكن My Skills من تحديث .gitignore.",
-  "notification.skills.deleteConfirm": "حذف {0}؟",
-  "notification.skills.deleteDetail": "سيتم نقل العنصر إلى سلة المهملات عند الإمكان.",
-  "notification.skills.deleteFailed": "لم يتمكن My Skills من حذف هذا العنصر.",
-  "notification.skills.openFailed": "لم يتمكن My Skills من فتح هذه المهارة.",
-  "notification.skills.saved": "تم حفظ المهارة '{0}' بنجاح ✅.",
-  "notification.skills.saveFailed": "لم يتمكن My Skills من حفظ هذه المهارة.",
-  "notification.skills.enabled": "تم تفعيل المهارة '{0}' في {1} ✅.",
-  "notification.skills.enableFailed": "لم يتمكن My Skills من تفعيل '{0}'. {1}",
-  "notification.skills.deleteSavedConfirm": "حذف المهارة المحفوظة '{0}'؟",
-  "notification.skills.deleteSavedDetail": "سيؤدي هذا إلى إزالة المهارة نهائيًا من مكتبتك المحفوظة.",
-  "notification.skills.deleteSavedFailed": "لم يتمكن My Skills من حذف هذه المهارة المحفوظة.",
-
-  "notification.install.invalidRef": "[My Skills] فشل التثبيت: مرجع مهارة سوق غير صالح.",
-  "notification.install.openWorkspace": "[My Skills] افتح مساحة عمل قبل تثبيت مهارات المشروع.",
-  "notification.install.failed": "[My Skills] فشل التثبيت: {0}",
-  "notification.install.success": "[My Skills] تم تثبيت {0} ✅.",
-  "notification.install.failedCode": "[My Skills] فشل التثبيت برمز {0}"
+  "description": "الكل في واحد (F1 [AI] composer) — اختصار واحد لتشغيل والتبديل بين Claude Code وCodex وCopilot وCursor وKiro وGrok وAntigravity أو أي CLI للذكاء الاصطناعي. أدوات Skills وMemory وPrompt مدمجة. 雨"
 }

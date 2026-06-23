@@ -1,0 +1,33 @@
+{
+  "{0} is not installed or is not available in PATH.": "{0} इंस्टॉल नहीं है या PATH में उपलब्ध नहीं है।",
+  "{0} is not installed. You can install it now in an integrated terminal.": "{0} इंस्टॉल नहीं है। आप इसे अभी इंटीग्रेटेड टर्मिनल में इंस्टॉल कर सकते हैं।",
+  "Lynx Keymap shortcuts aren’t active. Install the extension to enable them.": "Lynx Keymap शॉर्टकट सक्रिय नहीं हैं। उन्हें सक्षम करने के लिए एक्सटेंशन इंस्टॉल करें।",
+
+  "My Memory: open a folder before building project context.": "My Memory: प्रोजेक्ट कॉन्टेक्स्ट बनाने से पहले एक फ़ोल्डर खोलें।",
+  "Install (Python + Graphify) to enable project graph generation. One-time setup 📥.": "प्रोजेक्ट ग्राफ़ जनरेशन को सक्षम करने के लिए (Python + Graphify) इंस्टॉल करें। एक बार का सेटअप 📥।",
+  "My Memory: graphify install failed. {0}": "My Memory: graphify इंस्टॉल विफल। {0}",
+  "Memory updated · Instruction files synced. ✔": "Memory अपडेट किया · निर्देश फ़ाइलें सिंक की गईं। ✔",
+  "My Memory failed: {0}": "My Memory विफल: {0}",
+
+  "Open a workspace first to create a skill.": "स्किल बनाने के लिए पहले एक वर्कस्पेस खोलें।",
+  "Failed to create skill. Check output logs.": "स्किल बनाने में विफल। आउटपुट लॉग देखें।",
+  "My Skills could not find this skill in the marketplace list.": "My Skills इस स्किल को मार्केटप्लेस में नहीं ढूंढ सका।",
+  "My Skills could not update .gitignore.": "My Skills .gitignore को अपडेट नहीं कर सका।",
+  "Delete {0}?": "{0} हटाएं?",
+  "The item will be moved to the trash when possible.": "संभव होने पर आइटम को ट्रैश में ले जाया जाएगा।",
+  "My Skills could not delete this item.": "My Skills इस आइटम को हटा नहीं सका।",
+  "My Skills could not open this skill.": "My Skills इस स्किल को नहीं खोल सका।",
+  "Skill '{0}' saved successfully ✅.": "स्किल '{0}' सफलतापूर्वक सहेजी गई ✅।",
+  "My Skills could not save this skill.": "My Skills इस स्किल को सहेज नहीं सका।",
+  "Skill '{0}' enabled in {1} ✅.": "स्किल '{0}' {1} में सक्षम की गई ✅।",
+  "My Skills could not enable '{0}'. {1}": "My Skills '{0}' को सक्षम नहीं कर सका। {1}",
+  "Delete saved skill '{0}'?": "सहेजी गई स्किल '{0}' हटाएं?",
+  "This will permanently remove the skill from your saved library.": "यह आपकी सहेजी गई लाइब्रेरी से स्किल को स्थायी रूप से हटा देगा।",
+  "My Skills could not delete this saved skill.": "My Skills इस सहेजी गई स्किल को हटा नहीं सका।",
+
+  "[My Skills] Install failed: invalid marketplace skill reference.": "[My Skills] इंस्टॉल विफल: अमान्य मार्केटप्लेस स्किल संदर्भ।",
+  "[My Skills] Open a workspace before installing project skills.": "[My Skills] प्रोजेक्ट स्किल्स इंस्टॉल करने से पहले एक वर्कस्पेस खोलें।",
+  "[My Skills] Install failed: {0}": "[My Skills] इंस्टॉल विफल: {0}",
+  "[My Skills] {0} installed ✅.": "[My Skills] {0} इंस्टॉल हो गई ✅।",
+  "[My Skills] Install failed with code {0}": "[My Skills] इंस्टॉल विफल कोड {0}"
+}

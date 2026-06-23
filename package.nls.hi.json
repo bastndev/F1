@@ -1,37 +1,4 @@
 {
   "displayName": "F1 [AI] composer",
-  "description": "ऑल-इन-वन (F1 [AI] composer) — एक हॉटकी से Claude Code, Codex, Copilot, Cursor, Kiro, Grok, Antigravity या किसी भी AI CLI को लॉन्च और स्विच करें। बिल्ट-इन Skills, Memory और Prompt टूल्स। 雨",
-
-
-  "notification.cli.notInstalled": "{0} इंस्टॉल नहीं है या PATH में उपलब्ध नहीं है।",
-  "notification.cli.installOffer": "{0} इंस्टॉल नहीं है। आप इसे अभी इंटीग्रेटेड टर्मिनल में इंस्टॉल कर सकते हैं।",
-  "notification.cli.lynxKeymapMissing": "Lynx Keymap शॉर्टकट सक्रिय नहीं हैं। उन्हें सक्षम करने के लिए एक्सटेंशन इंस्टॉल करें।",
-
-  "notification.memory.openFolder": "My Memory: प्रोजेक्ट कॉन्टेक्स्ट बनाने से पहले एक फ़ोल्डर खोलें।",
-  "notification.memory.installGraphify": "प्रोजेक्ट ग्राफ़ जनरेशन को सक्षम करने के लिए (Python + Graphify) इंस्टॉल करें। एक बार का सेटअप 📥।",
-  "notification.memory.installFailed": "My Memory: graphify इंस्टॉल विफल। {0}",
-  "notification.memory.synced": "Memory अपडेट किया · निर्देश फ़ाइलें सिंक की गईं। ✔",
-  "notification.memory.failed": "My Memory विफल: {0}",
-
-  "notification.skills.openWorkspaceCreate": "स्किल बनाने के लिए पहले एक वर्कस्पेस खोलें।",
-  "notification.skills.createFailed": "स्किल बनाने में विफल। आउटपुट लॉग देखें।",
-  "notification.skills.notInMarketplace": "My Skills इस स्किल को मार्केटप्लेस में नहीं ढूंढ सका।",
-  "notification.skills.gitignoreFailed": "My Skills .gitignore को अपडेट नहीं कर सका।",
-  "notification.skills.deleteConfirm": "{0} हटाएं?",
-  "notification.skills.deleteDetail": "संभव होने पर आइटम को ट्रैश में ले जाया जाएगा।",
-  "notification.skills.deleteFailed": "My Skills इस आइटम को हटा नहीं सका।",
-  "notification.skills.openFailed": "My Skills इस स्किल को नहीं खोल सका।",
-  "notification.skills.saved": "स्किल '{0}' सफलतापूर्वक सहेजी गई ✅।",
-  "notification.skills.saveFailed": "My Skills इस स्किल को सहेज नहीं सका।",
-  "notification.skills.enabled": "स्किल '{0}' {1} में सक्षम की गई ✅।",
-  "notification.skills.enableFailed": "My Skills '{0}' को सक्षम नहीं कर सका। {1}",
-  "notification.skills.deleteSavedConfirm": "सहेजी गई स्किल '{0}' हटाएं?",
-  "notification.skills.deleteSavedDetail": "यह आपकी सहेजी गई लाइब्रेरी से स्किल को स्थायी रूप से हटा देगा।",
-  "notification.skills.deleteSavedFailed": "My Skills इस सहेजी गई स्किल को हटा नहीं सका।",
-
-  "notification.install.invalidRef": "[My Skills] इंस्टॉल विफल: अमान्य मार्केटप्लेस स्किल संदर्भ।",
-  "notification.install.openWorkspace": "[My Skills] प्रोजेक्ट स्किल्स इंस्टॉल करने से पहले एक वर्कस्पेस खोलें।",
-  "notification.install.failed": "[My Skills] इंस्टॉल विफल: {0}",
-  "notification.install.success": "[My Skills] {0} इंस्टॉल हो गई ✅।",
-  "notification.install.failedCode": "[My Skills] इंस्टॉल विफल कोड {0}"
+  "description": "ऑल-इन-वन (F1 [AI] composer) — एक हॉटकी से Claude Code, Codex, Copilot, Cursor, Kiro, Grok, Antigravity या किसी भी AI CLI को लॉन्च और स्विच करें। बिल्ट-इन Skills, Memory और Prompt टूल्स। 雨"
 }
