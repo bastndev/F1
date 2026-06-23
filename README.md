@@ -35,11 +35,11 @@ F1 turns VS Code into a hub for AI coding agents. Open **Claude Code, Codex, Cop
 
 | Command                   | 🍎 macOS            | 🟦 Windows             | 🐧 Linux               | Supported |
 | :------------------------ | :------------------ | :--------------------- | :--------------------- | --------- |
-| Focus the CLI             | `F1`                | `F1`                   | `F1`                   | ✅        |
-| Focus the Skills          | `⌘ + 3`             | `Ctrl + 3`             | `Ctrl + 3`             | ✅        |
-| Maximize / Minimize Panel | <code>⌘ + \`</code> | <code>Ctrl + \`</code> | <code>Ctrl + \`</code> | ✅        |
+| Focus the CLI             | `F1`                | `F1`                   | `F1`                   | ㅤㅤ✅    |
+| Focus the Skills          | `⌘ + 3`             | `Ctrl + 3`             | `Ctrl + 3`             | ㅤㅤ✅    |
+| Maximize / Minimize Panel | <code>⌘ + \`</code> | <code>Ctrl + \`</code> | <code>Ctrl + \`</code> | ㅤㅤ✅    |
 | -                         | -                   | -                      | -                      |           |
-| Side Panel (R/L)          | `⌘ + CapsLock`      | `Ctrl + CapsLock`      | `Ctrl + CapsLock`      | ✅        |
+| Side Panel (R/L)          | `⌘ + CapsLock`      | `Ctrl + CapsLock`      | `Ctrl + CapsLock`      | ㅤㅤ✅    |
 
 ---
 
@@ -82,6 +82,8 @@ F1 turns VS Code into a hub for AI coding agents. Open **Claude Code, Codex, Cop
 
 ## Installation
 
+### Method 1 — Quick Open
+
 Launch _Quick Open_ depending on your operating system:
 
 - <img src="https://www.kernel.org/theme/images/logos/favicon.png" width=16 height=16/> Linux `Ctrl+P`
@@ -97,7 +99,7 @@ ext install bastndev.f1
 ### Method 2 — Extensions View
 
 1. Open Extensions (`Ctrl+Shift+X` / `⌘+Shift+X`)
-2. Search **"Lynx Theme Pro"**
+2. Search **"F1"** (publisher: `bastndev`)
 3. Click **Install**
 
 <br>
@@ -143,7 +145,7 @@ Thank you to everyone who supports this project! Your contributions make updates
   Complementary Extensions 🧩 
 </h2>
 
-| Extension                                                                                                                                                                                                         | Name/>                                                         | Description                                                                                                                                                                                                                       |
+| Extension                                                                                                                                                                                                         | Name                                                           | Description                                                                                                                                                                                                                       |
 | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | [![Lynx Theme Pro](https://bastndev.gallerycdn.vsassets.io/extensions/bastndev/lynx-theme/5.0.1/1777191854738/Microsoft.VisualStudio.Services.Icons.Default)](https://open-vsx.org/extension/bastndev/lynx-theme) | [Lynx Theme Pro](https://github.com/bastndev/Lynx-Theme)       | A professional extension with six available themes: Dark, Light, Night, Ghibli, Coffee, and Kiro—with integrated icons. Each theme is optimized to offer a more pleasant visual experience.                                       |
 | [![Lynx Keymap Pro](https://open-vsx.org/api/bastndev/lynx-keymap/2.6.0/file/icon.png)](https://open-vsx.org/extension/bastndev/lynx-keymap)                                                                      | [Lynx Keymap Pro](https://github.com/bastndev/Lynx-Keymap-Pro) | Standardizes keyboard shortcuts across all code editors, giving you instant access to any functionality with a single key combination — boosting your workflow and dev experience. **`Now includes shortcuts for 75% keyboards`** |
@@ -153,9 +155,9 @@ Thank you to everyone who supports this project! Your contributions make updates
 
 <div align="center">
   
-  **Enjoy 🎉 (Lynx Theme Pro) is now installed!**  
+  **Enjoy 🎉 — (F1) is now installed!**  
   *If you find any bugs or have feedback, feel free to [open an issue](https://github.com/bastndev/F1/issues/new).*
 
-<sub>Made in 🇵🇪 by <a href="https://gohit.xyz">Gohit X</a> · Licensed under <a href="https://github.com/bastndev/Lynx-Theme-Pro/blob/main/LICENSE">`MIT`</a></sub>
+<sub>Made in 🇵🇪 by <a href="https://gohit.xyz">Gohit X</a> · Licensed under <a href="https://github.com/bastndev/F1/blob/main/LICENSE">`MIT`</a></sub>
 
 </div>
