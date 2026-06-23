@@ -1,6 +1,7 @@
 import * as vscode from 'vscode';
 import { MyCliViewProvider } from './my-cli/my-cli';
 import { MySkillsViewProvider } from './my-skills/my-skills';
+import { registerLynxKeymapPrompt } from './shared/keymaps/lynx-keymap/alt-capslock';
 
 export function activate(context: vscode.ExtensionContext) {
 	const myCliProvider = new MyCliViewProvider(context.extensionUri, context);
@@ -23,6 +24,8 @@ export function activate(context: vscode.ExtensionContext) {
 			{ webviewOptions: { retainContextWhenHidden: true } }
 		)
 	);
+
+	registerLynxKeymapPrompt(context);
 
 	console.log('🎉 [F1] My CLI / My Skills / My Memory — activated');
 }
