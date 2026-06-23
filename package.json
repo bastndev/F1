@@ -67,7 +67,6 @@
     "url": "https://github.com/sponsors/bastndev"
   },
 
-  "l10n": "./l10n",
   "activationEvents": [],
   "main": "./dist/extension.js",
 

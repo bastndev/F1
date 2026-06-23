@@ -1,7 +1,8 @@
 {
   "{0} is not installed or is not available in PATH.": "{0} غير مثبت أو غير متاح في PATH.",
   "{0} is not installed. You can install it now in an integrated terminal.": "{0} غير مثبت. يمكنك تثبيته الآن في وحدة طرفية متكاملة.",
-  "Lynx Keymap shortcuts aren’t active. Install the extension to enable them.": "اختصارات Lynx Keymap غير نشطة. ثبّت الإضافة لتمكينها.",
+  "Get smarter keybindings for AI tools — Lynx Keymap adds optimized shortcuts for Claude, Cursor, Copilot and more.": "احصل على اختصارات لوحة مفاتيح أذكى لأدوات الذكاء الاصطناعي — يضيف Lynx Keymap اختصارات محسّنة لـ Claude وCursor وCopilot والمزيد.",
+  "Install": "تثبيت",
 
   "My Memory: open a folder before building project context.": "My Memory: افتح مجلدًا قبل إنشاء سياق المشروع.",
   "Install (Python + Graphify) to enable project graph generation. One-time setup 📥.": "ثبّت (Python + Graphify) لتفعيل إنشاء رسم المشروع. إعداد لمرة واحدة 📥.",
