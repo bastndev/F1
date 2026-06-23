@@ -43,7 +43,7 @@ F1 convierte VS Code en un centro para agentes de programación de IA. Abra **Cl
 
 ---
 
-<h2 align="center">:: Características ::</h2>
+<h2 align="center"> Características </h2>
 
 ### 🖥️ CLI Hub
 

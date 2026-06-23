@@ -43,7 +43,7 @@ F1 将 VS Code 变成了 AI 编程代理的枢纽。在嵌入式终端中打开 
 
 ---
 
-<h2 align="center">:: 特性 ::</h2>
+<h2 align="center"> 特性 </h2>
 
 ### 🖥️ CLI Hub
 

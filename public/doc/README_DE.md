@@ -43,7 +43,7 @@ F1 macht VS Code zu einem Hub für KI-Programmieragenten. Öffnen Sie **Claude C
 
 ---
 
-<h2 align="center">:: Eigenschaften ::</h2>
+<h2 align="center"> Eigenschaften </h2>
 
 ### 🖥️ CLI Hub
 
