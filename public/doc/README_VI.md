@@ -43,6 +43,8 @@ F1 biến VS Code thành trung tâm cho các tác nhân lập trình AI. Mở **
 
 ---
 
+<br>
+
 <h2 align="center"> Tính năng </h2>
 
 ### 🖥️ CLI Hub

@@ -43,6 +43,8 @@ F1 transforme VS Code en un hub pour les agents de codage IA. Ouvrez **Claude Co
 
 ---
 
+<br>
+
 <h2 align="center"> Fonctionnalités </h2>
 
 ### 🖥️ CLI Hub

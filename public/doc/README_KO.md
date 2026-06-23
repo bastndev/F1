@@ -43,6 +43,8 @@ F1은 VS Code를 AI 코딩 에이전트의 허브로 바꿉니다. 내장된 터
 
 ---
 
+<br>
+
 <h2 align="center"> 기능 </h2>
 
 ### 🖥️ CLI Hub
