@@ -14,7 +14,7 @@ All-in-One (F1 [AI] composer) — turn VS Code into a hub for AI coding agents. 
 - **Voice & Finish Cue**: Read terminal output aloud, plus an optional "ding" when an agent finishes
 - **12 Locales**: Fully translated UI in en, es, de, fr, ja, ko, pt-br, ru, vi, hi, ar, zh-cn
 
-  Discover more extensions [here](https://gohit.xyz/)
+  Discover more extensions [here](https://gohit.xyz/extensions)
 
 ## Changelog
 
