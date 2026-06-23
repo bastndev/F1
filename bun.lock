@@ -5,7 +5,7 @@
     "": {
       "name": "shuu",
       "dependencies": {
-        "fixnow": "^2.0.2",
+        "fixnow": "^2.0.4",
         "node-pty": "1.1.0",
       },
       "devDependencies": {
@@ -234,7 +234,7 @@
 
     "find-up": ["find-up@5.0.0", "", { "dependencies": { "locate-path": "^6.0.0", "path-exists": "^4.0.0" } }, "sha512-78/PXT1wlLLDgTzDs7sjq9hzz0vXD+zn+7wypEe4fXQxCmdmqfGsEPQxmiCSQI3ajFV91bVSsvNtrJRiW6nGng=="],
 
-    "fixnow": ["fixnow@2.0.2", "", {}, "sha512-n37mfUPC3P7kmP4JiteN4TOKPaE8unB6LLQ+6c7P2sRRla/hDtt8hPikkAGZEQrSzM513XxNJTRMVC36DyZ+lQ=="],
+    "fixnow": ["fixnow@2.0.4", "", {}, "sha512-Du7CwdE3MibFok3snvBcCCPb67/OWfiGRNNTerbaujT7UDIPlm4LpFyriB2m3YfCCdJgasmcqi6w4zzHb2UXJA=="],
 
     "flat-cache": ["flat-cache@4.0.1", "", { "dependencies": { "flatted": "^3.2.9", "keyv": "^4.5.4" } }, "sha512-f7ccFPK3SXFHpx15UIGyRJ/FJQctuKZ0zVuN3frBo4HnK3cay9VEW0R6yPYFHC0AgqhukPzKjq22t5DmAyqGyw=="],
 
