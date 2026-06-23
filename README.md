@@ -43,7 +43,9 @@ F1 turns VS Code into a hub for AI coding agents. Open **Claude Code, Codex, Cop
 
 ---
 
-<h2 align="center">:: Features ::</h2>
+<br>
+
+<h2 align="center"> Features </h2>
 
 ### 🖥️ CLI Hub
 
