@@ -1,10 +1,9 @@
 import { getAgentSlug as resolveAgentSlug } from '../../shared/agents';
-import { isAltCapsLock, LYNX_KEYMAP_EXTENSION_ID } from '../../../shared/keymaps/lynx-keymap/index';
 
 type VsCodeApi = {
 	getState: () => unknown;
 	setState: (state: LauncherState) => void;
-	postMessage: (message: { type: 'openAgent'; agent: string } | { type: 'customCli.open'; source: 'launcher' } | { type: 'cli.openTutorial' } | { type: 'cli.installExtension'; extensionId: string }) => void;
+	postMessage: (message: { type: 'openAgent'; agent: string } | { type: 'customCli.open'; source: 'launcher' } | { type: 'cli.openTutorial' }) => void;
 };
 
 type LauncherModel = {
@@ -485,13 +484,6 @@ cliInput.addEventListener('keydown', (event) => {
 	if (event.key === 'Escape' && paletteOpen) {
 		event.preventDefault();
 		setPaletteOpen(false);
-	}
-});
-
-window.addEventListener('keydown', (event) => {
-	if (isAltCapsLock(event)) {
-		event.preventDefault();
-		vscode.postMessage({ type: 'cli.installExtension', extensionId: LYNX_KEYMAP_EXTENSION_ID });
 	}
 });
 

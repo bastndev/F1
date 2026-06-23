@@ -1,7 +1,8 @@
 {
   "{0} is not installed or is not available in PATH.": "{0} इंस्टॉल नहीं है या PATH में उपलब्ध नहीं है।",
   "{0} is not installed. You can install it now in an integrated terminal.": "{0} इंस्टॉल नहीं है। आप इसे अभी इंटीग्रेटेड टर्मिनल में इंस्टॉल कर सकते हैं।",
-  "Lynx Keymap shortcuts aren’t active. Install the extension to enable them.": "Lynx Keymap शॉर्टकट सक्रिय नहीं हैं। उन्हें सक्षम करने के लिए एक्सटेंशन इंस्टॉल करें।",
+  "Get smarter keybindings for AI tools — Lynx Keymap adds optimized shortcuts for Claude, Cursor, Copilot and more.": "AI टूल्स के लिए स्मार्ट कीबाइंडिंग पाएं — Lynx Keymap, Claude, Cursor, Copilot और अन्य के लिए अनुकूलित शॉर्टकट जोड़ता है।",
+  "Install": "इंस्टॉल करें",
 
   "My Memory: open a folder before building project context.": "My Memory: प्रोजेक्ट कॉन्टेक्स्ट बनाने से पहले एक फ़ोल्डर खोलें।",
   "Install (Python + Graphify) to enable project graph generation. One-time setup 📥.": "प्रोजेक्ट ग्राफ़ जनरेशन को सक्षम करने के लिए (Python + Graphify) इंस्टॉल करें। एक बार का सेटअप 📥।",

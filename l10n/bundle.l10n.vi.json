@@ -1,7 +1,8 @@
 {
   "{0} is not installed or is not available in PATH.": "{0} chưa được cài đặt hoặc không có sẵn trong PATH.",
   "{0} is not installed. You can install it now in an integrated terminal.": "{0} chưa được cài đặt. Bạn có thể cài đặt ngay trong terminal tích hợp.",
-  "Lynx Keymap shortcuts aren’t active. Install the extension to enable them.": "Phím tắt Lynx Keymap chưa được kích hoạt. Cài đặt tiện ích mở rộng để bật chúng.",
+  "Get smarter keybindings for AI tools — Lynx Keymap adds optimized shortcuts for Claude, Cursor, Copilot and more.": "Nhận phím tắt thông minh hơn cho các công cụ AI — Lynx Keymap thêm các phím tắt được tối ưu cho Claude, Cursor, Copilot và nhiều hơn nữa.",
+  "Install": "Cài đặt",
 
   "My Memory: open a folder before building project context.": "My Memory: mở một thư mục trước khi tạo ngữ cảnh dự án.",
   "Install (Python + Graphify) to enable project graph generation. One-time setup 📥.": "Cài đặt (Python + Graphify) để bật tạo đồ thị dự án. Thiết lập một lần 📥.",

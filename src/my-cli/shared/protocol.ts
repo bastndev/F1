@@ -74,8 +74,7 @@ export type WebviewToHostMessage =
 	| { type: 'voice.query' }
 	| { type: 'clipboard.read'; id: string }
 	| { type: 'memory.getSnapshot'; id: string; enabled?: boolean; restore?: boolean }
-	| { type: 'memory.rebuild'; id: string }
-	| { type: 'cli.installExtension'; extensionId: string };
+	| { type: 'memory.rebuild'; id: string };
 
 /** Extension host → webview. */
 export type HostToWebviewMessage =

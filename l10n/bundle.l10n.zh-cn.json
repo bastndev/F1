@@ -1,7 +1,8 @@
 {
   "{0} is not installed or is not available in PATH.": "{0} 未安装或在 PATH 中不可用。",
   "{0} is not installed. You can install it now in an integrated terminal.": "{0} 未安装。你可以现在在集成终端中安装。",
-  "Lynx Keymap shortcuts aren’t active. Install the extension to enable them.": "Lynx Keymap 快捷键未激活。安装扩展以启用它们。",
+  "Get smarter keybindings for AI tools — Lynx Keymap adds optimized shortcuts for Claude, Cursor, Copilot and more.": "为 AI 工具获取更智能的快捷键 — Lynx Keymap 为 Claude、Cursor、Copilot 等添加优化的快捷键。",
+  "Install": "安装",
 
   "My Memory: open a folder before building project context.": "My Memory:在生成项目上下文之前请先打开一个文件夹。",
   "Install (Python + Graphify) to enable project graph generation. One-time setup 📥.": "安装 (Python + Graphify) 以启用项目图谱生成。一次性设置 📥。",

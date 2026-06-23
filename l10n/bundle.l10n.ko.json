@@ -1,7 +1,8 @@
 {
   "{0} is not installed or is not available in PATH.": "{0}이(가) 설치되어 있지 않거나 PATH에서 사용할 수 없습니다.",
   "{0} is not installed. You can install it now in an integrated terminal.": "{0}이(가) 설치되어 있지 않습니다. 통합 터미널에서 지금 설치할 수 있습니다.",
-  "Lynx Keymap shortcuts aren’t active. Install the extension to enable them.": "Lynx Keymap 단축키가 활성화되지 않았습니다. 확장을 설치하여 활성화하세요.",
+  "Get smarter keybindings for AI tools — Lynx Keymap adds optimized shortcuts for Claude, Cursor, Copilot and more.": "AI 도구를 위한 더 스마트한 단축키를 사용하세요 — Lynx Keymap은 Claude, Cursor, Copilot 등에 최적화된 단축키를 추가합니다.",
+  "Install": "설치",
 
   "My Memory: open a folder before building project context.": "My Memory: 프로젝트 컨텍스트를 생성하기 전에 폴더를 여세요.",
   "Install (Python + Graphify) to enable project graph generation. One-time setup 📥.": "프로젝트 그래프 생성을 활성화하려면 (Python + Graphify)를 설치하세요. 일회성 설정 📥.",
