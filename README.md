@@ -33,13 +33,13 @@ F1 turns VS Code into a hub for AI coding agents. Open **Claude Code, Codex, Cop
 
 ## ⌨️ Keyboard shortcuts
 
-| Shortcut            | Action                    |     |
-| ------------------- | ------------------------- | --- |
-| `F1`                | Focus the CLI Hub panel   | ✅  |
-| `Ctrl` + `3`        | Focus the My Skills panel | ✅  |
-| `Ctrl` + `          | Toggle maximized panel    | ✅  |
-| -                   | -                         | -   |
-| `Ctrl` + `Capslock` | Side Panel                | ✅  |
+| Command                   | 🍎 macOS            | 🟦 Windows             | 🐧 Linux               | Supported |
+| :------------------------ | :------------------ | :--------------------- | :--------------------- | --------- |
+| Focus the CLI             | `F1`                | `F1`                   | `F1`                   | ✅        |
+| Focus the Skills          | `⌘ + 3`             | `Ctrl + 3`             | `Ctrl + 3`             | ✅        |
+| Maximize / Minimize Panel | <code>⌘ + \`</code> | <code>Ctrl + \`</code> | <code>Ctrl + \`</code> | ✅        |
+| -                         | -                   | -                      | -                      |           |
+| Side Panel (R/L)          | `⌘ + CapsLock`      | `Ctrl + CapsLock`      | `Ctrl + CapsLock`      | ✅        |
 
 ---
 
