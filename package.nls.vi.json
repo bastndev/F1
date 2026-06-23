@@ -1,4 +1,37 @@
 {
   "displayName": "F1 [AI] composer",
-  "description": "Tất-Cả-Trong-Một (F1 [AI] composer) — Một phím tắt để khởi chạy và chuyển đổi giữa Claude Code, Codex, Copilot, Cursor, Kiro, Grok, Antigravity hoặc bất kỳ AI CLI nào. Tích hợp công cụ Skills, Memory và Prompt. 雨"
+  "description": "Tất-Cả-Trong-Một (F1 [AI] composer) — Một phím tắt để khởi chạy và chuyển đổi giữa Claude Code, Codex, Copilot, Cursor, Kiro, Grok, Antigravity hoặc bất kỳ AI CLI nào. Tích hợp công cụ Skills, Memory và Prompt. 雨",
+
+
+  "notification.cli.notInstalled": "{0} chưa được cài đặt hoặc không có sẵn trong PATH.",
+  "notification.cli.installOffer": "{0} chưa được cài đặt. Bạn có thể cài đặt ngay trong terminal tích hợp.",
+  "notification.cli.lynxKeymapMissing": "Phím tắt Lynx Keymap chưa được kích hoạt. Cài đặt tiện ích mở rộng để bật chúng.",
+
+  "notification.memory.openFolder": "My Memory: mở một thư mục trước khi tạo ngữ cảnh dự án.",
+  "notification.memory.installGraphify": "Cài đặt (Python + Graphify) để bật tạo đồ thị dự án. Thiết lập một lần 📥.",
+  "notification.memory.installFailed": "My Memory: cài đặt graphify thất bại. {0}",
+  "notification.memory.synced": "Memory đã cập nhật · Tệp hướng dẫn đã đồng bộ. ✔",
+  "notification.memory.failed": "My Memory thất bại: {0}",
+
+  "notification.skills.openWorkspaceCreate": "Mở một workspace trước để tạo skill.",
+  "notification.skills.createFailed": "Không thể tạo skill. Kiểm tra logs đầu ra.",
+  "notification.skills.notInMarketplace": "My Skills không tìm thấy skill này trong marketplace.",
+  "notification.skills.gitignoreFailed": "My Skills không thể cập nhật .gitignore.",
+  "notification.skills.deleteConfirm": "Xóa {0}?",
+  "notification.skills.deleteDetail": "Mục sẽ được chuyển vào thùng rác khi có thể.",
+  "notification.skills.deleteFailed": "My Skills không thể xóa mục này.",
+  "notification.skills.openFailed": "My Skills không thể mở skill này.",
+  "notification.skills.saved": "Skill '{0}' đã lưu thành công ✅.",
+  "notification.skills.saveFailed": "My Skills không thể lưu skill này.",
+  "notification.skills.enabled": "Skill '{0}' đã bật trong {1} ✅.",
+  "notification.skills.enableFailed": "My Skills không thể bật '{0}'. {1}",
+  "notification.skills.deleteSavedConfirm": "Xóa skill đã lưu '{0}'?",
+  "notification.skills.deleteSavedDetail": "Điều này sẽ xóa skill vĩnh viễn khỏi thư viện đã lưu của bạn.",
+  "notification.skills.deleteSavedFailed": "My Skills không thể xóa skill đã lưu này.",
+
+  "notification.install.invalidRef": "[My Skills] Cài đặt thất bại: tham chiếu skill marketplace không hợp lệ.",
+  "notification.install.openWorkspace": "[My Skills] Mở một workspace trước khi cài đặt skills dự án.",
+  "notification.install.failed": "[My Skills] Cài đặt thất bại: {0}",
+  "notification.install.success": "[My Skills] {0} đã được cài đặt ✅.",
+  "notification.install.failedCode": "[My Skills] Cài đặt thất bại với mã {0}"
 }

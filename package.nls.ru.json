@@ -1,4 +1,37 @@
 {
   "displayName": "F1 [AI] composer",
-  "description": "Всё-в-Одном (F1 [AI] composer) — Одна клавиша для запуска и переключения между Claude Code, Codex, Copilot, Cursor, Kiro, Grok, Antigravity или любым AI CLI. Встроенные инструменты Skills, Memory и Prompt. 雨"
+  "description": "Всё-в-Одном (F1 [AI] composer) — Одна клавиша для запуска и переключения между Claude Code, Codex, Copilot, Cursor, Kiro, Grok, Antigravity или любым AI CLI. Встроенные инструменты Skills, Memory и Prompt. 雨",
+
+
+  "notification.cli.notInstalled": "{0} не установлен или недоступен в PATH.",
+  "notification.cli.installOffer": "{0} не установлен. Вы можете установить его сейчас в интегрированном терминале.",
+  "notification.cli.lynxKeymapMissing": "Сочетания клавиш Lynx Keymap не активны. Установите расширение, чтобы их включить.",
+
+  "notification.memory.openFolder": "My Memory: откройте папку перед созданием контекста проекта.",
+  "notification.memory.installGraphify": "Установите (Python + Graphify), чтобы включить генерацию графа проекта. Однократная настройка 📥.",
+  "notification.memory.installFailed": "My Memory: установка graphify не удалась. {0}",
+  "notification.memory.synced": "Memory обновлено · Файлы инструкций синхронизированы. ✔",
+  "notification.memory.failed": "Ошибка My Memory: {0}",
+
+  "notification.skills.openWorkspaceCreate": "Сначала откройте рабочую область, чтобы создать скилл.",
+  "notification.skills.createFailed": "Не удалось создать скилл. Проверьте журналы вывода.",
+  "notification.skills.notInMarketplace": "My Skills не удалось найти этот скилл в маркетплейсе.",
+  "notification.skills.gitignoreFailed": "My Skills не удалось обновить .gitignore.",
+  "notification.skills.deleteConfirm": "Удалить {0}?",
+  "notification.skills.deleteDetail": "Элемент будет перемещён в корзину, если это возможно.",
+  "notification.skills.deleteFailed": "My Skills не удалось удалить этот элемент.",
+  "notification.skills.openFailed": "My Skills не удалось открыть этот скилл.",
+  "notification.skills.saved": "Скилл '{0}' успешно сохранён ✅.",
+  "notification.skills.saveFailed": "My Skills не удалось сохранить этот скилл.",
+  "notification.skills.enabled": "Скилл '{0}' включён в {1} ✅.",
+  "notification.skills.enableFailed": "My Skills не удалось включить '{0}'. {1}",
+  "notification.skills.deleteSavedConfirm": "Удалить сохранённый скилл '{0}'?",
+  "notification.skills.deleteSavedDetail": "Это навсегда удалит скилл из вашей сохранённой библиотеки.",
+  "notification.skills.deleteSavedFailed": "My Skills не удалось удалить этот сохранённый скилл.",
+
+  "notification.install.invalidRef": "[My Skills] Установка не удалась: неверная ссылка на скилл маркетплейса.",
+  "notification.install.openWorkspace": "[My Skills] Откройте рабочую область перед установкой скиллов проекта.",
+  "notification.install.failed": "[My Skills] Установка не удалась: {0}",
+  "notification.install.success": "[My Skills] {0} установлен ✅.",
+  "notification.install.failedCode": "[My Skills] Установка не удалась с кодом {0}"
 }

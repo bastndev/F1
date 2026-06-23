@@ -1,4 +1,37 @@
 {
   "displayName": "F1 [AI] composer",
-  "description": "올인원 (F1 [AI] composer) — 단축키 하나로 Claude Code, Codex, Copilot, Cursor, Kiro, Grok, Antigravity 또는 모든 AI CLI를 실행하고 전환하세요. Skills, Memory, Prompt 도구 내장. 雨"
+  "description": "올인원 (F1 [AI] composer) — 단축키 하나로 Claude Code, Codex, Copilot, Cursor, Kiro, Grok, Antigravity 또는 모든 AI CLI를 실행하고 전환하세요. Skills, Memory, Prompt 도구 내장. 雨",
+
+
+  "notification.cli.notInstalled": "{0}이(가) 설치되어 있지 않거나 PATH에서 사용할 수 없습니다.",
+  "notification.cli.installOffer": "{0}이(가) 설치되어 있지 않습니다. 통합 터미널에서 지금 설치할 수 있습니다.",
+  "notification.cli.lynxKeymapMissing": "Lynx Keymap 단축키가 활성화되지 않았습니다. 확장을 설치하여 활성화하세요.",
+
+  "notification.memory.openFolder": "My Memory: 프로젝트 컨텍스트를 생성하기 전에 폴더를 여세요.",
+  "notification.memory.installGraphify": "프로젝트 그래프 생성을 활성화하려면 (Python + Graphify)를 설치하세요. 일회성 설정 📥.",
+  "notification.memory.installFailed": "My Memory: graphify 설치 실패. {0}",
+  "notification.memory.synced": "Memory 업데이트됨 · 지시 파일 동기화 완료. ✔",
+  "notification.memory.failed": "My Memory 실패: {0}",
+
+  "notification.skills.openWorkspaceCreate": "스킬을 만들려면 먼저 워크스페이스를 여세요.",
+  "notification.skills.createFailed": "스킬 생성에 실패했습니다. 출력 로그를 확인하세요.",
+  "notification.skills.notInMarketplace": "My Skills가 마켓플레이스에서 이 스킬을 찾을 수 없습니다.",
+  "notification.skills.gitignoreFailed": "My Skills가 .gitignore를 업데이트할 수 없습니다.",
+  "notification.skills.deleteConfirm": "{0}을(를) 삭제하시겠습니까?",
+  "notification.skills.deleteDetail": "가능한 경우 항목이 휴지통으로 이동됩니다.",
+  "notification.skills.deleteFailed": "My Skills가 이 항목을 삭제할 수 없습니다.",
+  "notification.skills.openFailed": "My Skills가 이 스킬을 열 수 없습니다.",
+  "notification.skills.saved": "스킬 '{0}'을(를) 성공적으로 저장했습니다 ✅.",
+  "notification.skills.saveFailed": "My Skills가 이 스킬을 저장할 수 없습니다.",
+  "notification.skills.enabled": "스킬 '{0}'을(를) {1}에서 활성화했습니다 ✅.",
+  "notification.skills.enableFailed": "My Skills가 '{0}'을(를) 활성화할 수 없습니다. {1}",
+  "notification.skills.deleteSavedConfirm": "저장된 스킬 '{0}'을(를) 삭제하시겠습니까?",
+  "notification.skills.deleteSavedDetail": "저장된 라이브러리에서 스킬이 영구적으로 제거됩니다.",
+  "notification.skills.deleteSavedFailed": "My Skills가 이 저장된 스킬을 삭제할 수 없습니다.",
+
+  "notification.install.invalidRef": "[My Skills] 설치 실패: 잘못된 마켓플레이스 스킬 참조.",
+  "notification.install.openWorkspace": "[My Skills] 프로젝트 스킬을 설치하기 전에 워크스페이스를 여세요.",
+  "notification.install.failed": "[My Skills] 설치 실패: {0}",
+  "notification.install.success": "[My Skills] {0} 설치됨 ✅.",
+  "notification.install.failedCode": "[My Skills] 설치 실패 코드 {0}"
 }

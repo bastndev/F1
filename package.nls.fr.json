@@ -1,4 +1,37 @@
 {
   "displayName": "F1 [AI] composer",
-  "description": "Tout-en-Un (F1 [AI] composer) — Une touche pour lancer et basculer entre Claude Code, Codex, Copilot, Cursor, Kiro, Grok, Antigravity ou toute CLI d'IA. Outils Skills, Memory et Prompt intégrés. 雨"
+  "description": "Tout-en-Un (F1 [AI] composer) — Une touche pour lancer et basculer entre Claude Code, Codex, Copilot, Cursor, Kiro, Grok, Antigravity ou toute CLI d'IA. Outils Skills, Memory et Prompt intégrés. 雨",
+
+
+  "notification.cli.notInstalled": "{0} n'est pas installé ou n'est pas disponible dans le PATH.",
+  "notification.cli.installOffer": "{0} n'est pas installé. Vous pouvez l'installer maintenant dans un terminal intégré.",
+  "notification.cli.lynxKeymapMissing": "Les raccourcis Lynx Keymap ne sont pas actifs. Installez l'extension pour les activer.",
+
+  "notification.memory.openFolder": "My Memory : ouvrez un dossier avant de générer le contexte du projet.",
+  "notification.memory.installGraphify": "Installez (Python + Graphify) pour activer la génération du graphe de projet. Configuration unique 📥.",
+  "notification.memory.installFailed": "My Memory : échec de l'installation de graphify. {0}",
+  "notification.memory.synced": "Memory mis à jour · Fichiers d'instructions synchronisés. ✔",
+  "notification.memory.failed": "Échec de My Memory : {0}",
+
+  "notification.skills.openWorkspaceCreate": "Ouvrez d'abord un workspace pour créer une skill.",
+  "notification.skills.createFailed": "Échec de la création de la skill. Vérifiez les logs de sortie.",
+  "notification.skills.notInMarketplace": "My Skills n'a pas trouvé cette skill dans le marketplace.",
+  "notification.skills.gitignoreFailed": "My Skills n'a pas pu mettre à jour .gitignore.",
+  "notification.skills.deleteConfirm": "Supprimer {0} ?",
+  "notification.skills.deleteDetail": "L'élément sera déplacé dans la corbeille si possible.",
+  "notification.skills.deleteFailed": "My Skills n'a pas pu supprimer cet élément.",
+  "notification.skills.openFailed": "My Skills n'a pas pu ouvrir cette skill.",
+  "notification.skills.saved": "Skill '{0}' enregistrée avec succès ✅.",
+  "notification.skills.saveFailed": "My Skills n'a pas pu enregistrer cette skill.",
+  "notification.skills.enabled": "Skill '{0}' activée dans {1} ✅.",
+  "notification.skills.enableFailed": "My Skills n'a pas pu activer '{0}'. {1}",
+  "notification.skills.deleteSavedConfirm": "Supprimer la skill enregistrée '{0}' ?",
+  "notification.skills.deleteSavedDetail": "Cela supprimera définitivement la skill de votre bibliothèque enregistrée.",
+  "notification.skills.deleteSavedFailed": "My Skills n'a pas pu supprimer cette skill enregistrée.",
+
+  "notification.install.invalidRef": "[My Skills] Échec de l'installation : référence de skill du marketplace invalide.",
+  "notification.install.openWorkspace": "[My Skills] Ouvrez un workspace avant d'installer des skills de projet.",
+  "notification.install.failed": "[My Skills] Échec de l'installation : {0}",
+  "notification.install.success": "[My Skills] {0} installée ✅.",
+  "notification.install.failedCode": "[My Skills] Échec de l'installation avec le code {0}"
 }
