@@ -28,6 +28,6 @@
   "[My Skills] Install failed: invalid marketplace skill reference.": "[My Skills] 安装失败:市场技能引用无效。",
   "[My Skills] Open a workspace before installing project skills.": "[My Skills] 在安装项目技能之前请打开一个工作区。",
   "[My Skills] Install failed: {0}": "[My Skills] 安装失败:{0}",
-  "[My Skills] {0} installed ✅.": "[My Skills] {0} 已安装 ✅。",
+  "Skill [{0}] installed ✅": "Skill [{0}] 已安装 ✅",
   "[My Skills] Install failed with code {0}": "[My Skills] 安装失败 代码 {0}"
 }

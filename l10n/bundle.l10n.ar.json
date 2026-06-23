@@ -28,6 +28,6 @@
   "[My Skills] Install failed: invalid marketplace skill reference.": "[My Skills] فشل التثبيت: مرجع مهارة سوق غير صالح.",
   "[My Skills] Open a workspace before installing project skills.": "[My Skills] افتح مساحة عمل قبل تثبيت مهارات المشروع.",
   "[My Skills] Install failed: {0}": "[My Skills] فشل التثبيت: {0}",
-  "[My Skills] {0} installed ✅.": "[My Skills] تم تثبيت {0} ✅.",
+  "Skill [{0}] installed ✅": "Skill [{0}] تم تثبيته ✅",
   "[My Skills] Install failed with code {0}": "[My Skills] فشل التثبيت برمز {0}"
 }

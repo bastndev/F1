@@ -104,7 +104,7 @@ async function runSkillsInstall(skill: InstallMarketplaceSkill, choice: InstallC
 
 				child.on('close', code => {
 					if (code === 0) {
-						void vscode.window.showInformationMessage(vscode.l10n.t('[My Skills] {0} installed ✅.', skill.name));
+						void vscode.window.showInformationMessage(vscode.l10n.t('Skill [{0}] installed ✅', skill.name));
 						resolve(true);
 						return;
 					}

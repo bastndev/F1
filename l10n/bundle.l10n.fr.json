@@ -28,6 +28,6 @@
   "[My Skills] Install failed: invalid marketplace skill reference.": "[My Skills] Échec de l'installation : référence de skill du marketplace invalide.",
   "[My Skills] Open a workspace before installing project skills.": "[My Skills] Ouvrez un workspace avant d'installer des skills de projet.",
   "[My Skills] Install failed: {0}": "[My Skills] Échec de l'installation : {0}",
-  "[My Skills] {0} installed ✅.": "[My Skills] {0} installée ✅.",
+  "Skill [{0}] installed ✅": "Skill [{0}] installée ✅",
   "[My Skills] Install failed with code {0}": "[My Skills] Échec de l'installation avec le code {0}"
 }

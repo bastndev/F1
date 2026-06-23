@@ -28,6 +28,6 @@
   "[My Skills] Install failed: invalid marketplace skill reference.": "[My Skills] Cài đặt thất bại: tham chiếu skill marketplace không hợp lệ.",
   "[My Skills] Open a workspace before installing project skills.": "[My Skills] Mở một workspace trước khi cài đặt skills dự án.",
   "[My Skills] Install failed: {0}": "[My Skills] Cài đặt thất bại: {0}",
-  "[My Skills] {0} installed ✅.": "[My Skills] {0} đã được cài đặt ✅.",
+  "Skill [{0}] installed ✅": "Skill [{0}] đã được cài đặt ✅",
   "[My Skills] Install failed with code {0}": "[My Skills] Cài đặt thất bại với mã {0}"
 }

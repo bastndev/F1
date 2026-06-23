@@ -28,6 +28,6 @@
   "[My Skills] Install failed: invalid marketplace skill reference.": "[My Skills] 설치 실패: 잘못된 마켓플레이스 스킬 참조.",
   "[My Skills] Open a workspace before installing project skills.": "[My Skills] 프로젝트 스킬을 설치하기 전에 워크스페이스를 여세요.",
   "[My Skills] Install failed: {0}": "[My Skills] 설치 실패: {0}",
-  "[My Skills] {0} installed ✅.": "[My Skills] {0} 설치됨 ✅.",
+  "Skill [{0}] installed ✅": "Skill [{0}] 설치됨 ✅",
   "[My Skills] Install failed with code {0}": "[My Skills] 설치 실패 코드 {0}"
 }
