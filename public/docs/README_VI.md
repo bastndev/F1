@@ -31,38 +31,40 @@
 
 F1 biến VS Code thành trung tâm cho các tác nhân lập trình AI. Mở **Claude Code, Codex, Copilot, Cursor, Kiro, Kilo Code, OpenCode, Grok, Antigravity** — hoặc bất kỳ CLI tùy chỉnh nào — trong các terminal nhúng, chuyển đổi giữa chúng ngay lập tức, viết prompt tốt hơn và giữ cho ngữ cảnh dự án của bạn dễ dàng tải cho mọi tác nhân.
 
+<br>
+
 ## ⌨️ Phím tắt - Tập trung `[`CLI Hub`]`
 
-| Lệnh                            | 🍎 macOS            | 🟦 Windows             | 🐧 Linux               | Hỗ trợ |
-| :--------------------------------- | :------------------ | :--------------------- | :--------------------- | --------- |
-| `[`🌐`]` Tập trung vào CLI             | `F1`                | `F1`                   | `F1`                   | ㅤㅤ✅    |
-| `[`🌐`]` Tập trung vào Skills          | `⌘ + 3`             | `Ctrl + 3`             | `Ctrl + 3`             | ㅤㅤ✅    |
-| `[`🌐`]` Phóng to / Thu nhỏ Bảng | <code>⌘ + \`</code> | <code>Ctrl + \`</code> | <code>Ctrl + \`</code> | ㅤㅤ✅    |
-| `[`🌐`]` Bảng điều khiển bên (P/T) - [1]    | `Alt + CapsLock`    | `Alt + CapsLock`       | `Alt + CapsLock`       | ㅤㅤ✅    |
-| Tập trung vào Bảng CLI Hub `[`🌐`]` - [2] | `Alt + E`           | `Alt + E`              | `Alt + E`              | ㅤㅤ✅    |
-| -                                  | -                   | -                      | -                      |           |
-| Mở công cụ Prompt                   | `Shift + F1`        | `Shift + F1`           | `Shift + F1`           | ㅤㅤ✅    |
-| Mở công cụ Translate                | `Shift + F2`        | `Shift + F2`           | `Shift + F2`           | ㅤㅤ✅    |
-| Mở công cụ Status/use               | `Shift + F3`        | `Shift + F3`           | `Shift + F3`           | ㅤㅤ✅    |
-| Mở công cụ Keymaps                  | `Shift + F4`        | `Shift + F4`           | `Shift + F4`           | ㅤㅤ✅    |
-| -                                  | -                   | -                      | -                      |           |
-| Mở công cụ Commands                 | `Alt + F1`          | `Alt + F1`             | `Alt + F1`             | ㅤㅤ✅    |
-| Thực thi prompt                     | `⌘ + Enter`         | `Ctrl + Enter`         | `Ctrl + Enter`         | ㅤㅤ✅    |
-| Chuyển đổi bộ lọc Prompt               | `Ctrl + Space`      | `Ctrl + Space`         | `Ctrl + Space`         | ㅤㅤ✅    |
-| Phiên trước                   | `Shift + Tab`       | `Shift + Tab`          | `Shift + Tab`          | ㅤㅤ✅    |
-| -                                  | -                   | -                      | -                      |           |
-| Phiên tiếp theo                       | `Tab`               | `Tab`                  | `Tab`                  | ㅤㅤ✅    |
-| Phát / tạm dừng Nghe                | `Space`             | `Space`                | `Space`                | ㅤㅤ✅    |
-| Chuyển đổi bảng tác nhân              | `Tab`               | `Tab`                  | `Tab`                  | ㅤㅤ✅    |
-| Đóng bảng tác nhân               | `Escape`            | `Escape`               | `Escape`               | ㅤㅤ✅    |
-| Mở bộ chọn CLI                  | `CapsLock`          | `CapsLock`             | `CapsLock`             | ㅤㅤ✅    |
-| -                                  | -                   | -                      | -                      |           |
-| Đóng phiên hiện tại              | `Alt + -`           | `Alt + -`              | `Alt + -`              | ㅤㅤ✅    |
-| Phiên CLI mới                    | `Alt + +`           | `Alt + +`              | `Alt + +`              | ㅤㅤ✅    |
-| -                                  | -                   | -                      | -                      |           |
-| `[`Skill`]` - Chuyển đến tab Tạo     | `Alt + 1`           | `Alt + 1`              | `Alt + 1`              | ㅤㅤ✅    |
-| `[`Skill`]` - Chuyển đến tab Cài đặt    | `Alt + 2`           | `Alt + 2`              | `Alt + 2`              | ㅤㅤ✅    |
-| `[`Skill`]` - Chuyển đến tab Cục bộ      | `Alt + 3`           | `Alt + 3`              | `Alt + 3`              | ㅤㅤ✅    |
+| Lệnh                                      | 🍎 macOS            | 🟦 Windows             | 🐧 Linux               | Hỗ trợ |
+| :---------------------------------------- | :------------------ | :--------------------- | :--------------------- | ------ |
+| `[`🌐`]` Tập trung vào CLI                | `F1`                | `F1`                   | `F1`                   | ㅤㅤ✅ |
+| `[`🌐`]` Tập trung vào Skills             | `⌘ + 3`             | `Ctrl + 3`             | `Ctrl + 3`             | ㅤㅤ✅ |
+| `[`🌐`]` Phóng to / Thu nhỏ Bảng          | <code>⌘ + \`</code> | <code>Ctrl + \`</code> | <code>Ctrl + \`</code> | ㅤㅤ✅ |
+| `[`🌐`]` Bảng điều khiển bên (P/T) - [1]  | `Alt + CapsLock`    | `Alt + CapsLock`       | `Alt + CapsLock`       | ㅤㅤ✅ |
+| Tập trung vào Bảng CLI Hub `[`🌐`]` - [2] | `Alt + E`           | `Alt + E`              | `Alt + E`              | ㅤㅤ✅ |
+| -                                         | -                   | -                      | -                      |        |
+| Mở công cụ Prompt                         | `Shift + F1`        | `Shift + F1`           | `Shift + F1`           | ㅤㅤ✅ |
+| Mở công cụ Translate                      | `Shift + F2`        | `Shift + F2`           | `Shift + F2`           | ㅤㅤ✅ |
+| Mở công cụ Status/use                     | `Shift + F3`        | `Shift + F3`           | `Shift + F3`           | ㅤㅤ✅ |
+| Mở công cụ Keymaps                        | `Shift + F4`        | `Shift + F4`           | `Shift + F4`           | ㅤㅤ✅ |
+| -                                         | -                   | -                      | -                      |        |
+| Mở công cụ Commands                       | `Alt + F1`          | `Alt + F1`             | `Alt + F1`             | ㅤㅤ✅ |
+| Thực thi prompt                           | `⌘ + Enter`         | `Ctrl + Enter`         | `Ctrl + Enter`         | ㅤㅤ✅ |
+| Chuyển đổi bộ lọc Prompt                  | `Ctrl + Space`      | `Ctrl + Space`         | `Ctrl + Space`         | ㅤㅤ✅ |
+| Phiên trước                               | `Shift + Tab`       | `Shift + Tab`          | `Shift + Tab`          | ㅤㅤ✅ |
+| -                                         | -                   | -                      | -                      |        |
+| Phiên tiếp theo                           | `Tab`               | `Tab`                  | `Tab`                  | ㅤㅤ✅ |
+| Phát / tạm dừng Nghe                      | `Space`             | `Space`                | `Space`                | ㅤㅤ✅ |
+| Chuyển đổi bảng tác nhân                  | `Tab`               | `Tab`                  | `Tab`                  | ㅤㅤ✅ |
+| Đóng bảng tác nhân                        | `Escape`            | `Escape`               | `Escape`               | ㅤㅤ✅ |
+| Mở bộ chọn CLI                            | `CapsLock`          | `CapsLock`             | `CapsLock`             | ㅤㅤ✅ |
+| -                                         | -                   | -                      | -                      |        |
+| Đóng phiên hiện tại                       | `Alt + -`           | `Alt + -`              | `Alt + -`              | ㅤㅤ✅ |
+| Phiên CLI mới                             | `Alt + +`           | `Alt + +`              | `Alt + +`              | ㅤㅤ✅ |
+| -                                         | -                   | -                      | -                      |        |
+| `[`Skill`]` - Chuyển đến tab Tạo          | `Alt + 1`           | `Alt + 1`              | `Alt + 1`              | ㅤㅤ✅ |
+| `[`Skill`]` - Chuyển đến tab Cài đặt      | `Alt + 2`           | `Alt + 2`              | `Alt + 2`              | ㅤㅤ✅ |
+| `[`Skill`]` - Chuyển đến tab Cục bộ       | `Alt + 3`           | `Alt + 3`              | `Alt + 3`              | ㅤㅤ✅ |
 
 ---
 
@@ -136,7 +138,7 @@ ext install bastndev.f1
 | [![gohitx](https://github.com/gohitx.png?size=100)](https://gohit.xyz) |
 | :--------------------------------------------------------------------: |
 |                  **[Gohit X](https://gohit.xyz/me)**                   |
-|                         _Người tạo & Người bảo trì_                        |
+|                      _Người tạo & Người bảo trì_                       |
 
 - 🐦 **[X](https://x.com/intent/follow?screen_name=gohitx)** : Dành cho các câu hỏi và thảo luận.
 - 🌱 **[IG](https://instagram.com/gohitx)** : **`mới`** – Xem trước dự án & cập nhật cuộc sống.
@@ -170,11 +172,11 @@ Cảm ơn tất cả mọi người đã ủng hộ dự án này! Những đón
   Các Tiện Ích Bổ Sung 🧩 
 </h2>
 
-| Tiện ích                                                                                                                                                                                                         | Tên                                                           | Mô tả                                                                                                                                                                                                                       |
-| ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| [![Lynx Theme Pro](https://open-vsx.org/api/bastndev/lynx-theme/5.0.0/file/icon.png)](https://open-vsx.org/extension/bastndev/lynx-theme) | [Lynx Theme Pro](https://github.com/bastndev/Lynx-Theme)       | Một tiện ích mở rộng chuyên nghiệp với sáu chủ đề có sẵn: Dark, Light, Night, Ghibli, Coffee và Kiro—với các biểu tượng được tích hợp. Mỗi chủ đề được tối ưu hóa để mang lại trải nghiệm thị giác dễ chịu hơn.                                       |
-| [![Lynx Keymap Pro](https://open-vsx.org/api/bastndev/lynx-keymap/2.6.0/file/icon.png)](https://open-vsx.org/extension/bastndev/lynx-keymap)                                                                      | [Lynx Keymap Pro](https://github.com/bastndev/Lynx-Keymap-Pro) | Tiêu chuẩn hóa các phím tắt trên tất cả các trình chỉnh sửa mã, cho phép bạn truy cập tức thì vào bất kỳ tính năng nào bằng một tổ hợp phím duy nhất — thúc đẩy quy trình làm việc và trải nghiệm phát triển của bạn. **`Hiện bao gồm các phím tắt cho bàn phím 75%`** |
-| [![ATM](https://open-vsx.org/api/bastndev/atm/1.9.4/file/icon.png)](https://open-vsx.org/extension/bastndev/atm)                                                                                                  | [ATM](https://github.com/bastndev/atm)                         | Một bộ công cụ tất cả-trong-một 👻 giúp tăng tốc quy trình làm việc của bạn với các tính năng thiết yếu như Error Lens, Git Blame, Env Protection và ảnh chụp màn hình mã trên các trình chỉnh sửa lớn.                                                           |
+| Tiện ích                                                                                                                                     | Tên                                                            | Mô tả                                                                                                                                                                                                                                                                  |
+| -------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [![Lynx Theme Pro](https://open-vsx.org/api/bastndev/lynx-theme/5.0.0/file/icon.png)](https://open-vsx.org/extension/bastndev/lynx-theme)    | [Lynx Theme Pro](https://github.com/bastndev/Lynx-Theme)       | Một tiện ích mở rộng chuyên nghiệp với sáu chủ đề có sẵn: Dark, Light, Night, Ghibli, Coffee và Kiro—với các biểu tượng được tích hợp. Mỗi chủ đề được tối ưu hóa để mang lại trải nghiệm thị giác dễ chịu hơn.                                                        |
+| [![Lynx Keymap Pro](https://open-vsx.org/api/bastndev/lynx-keymap/2.6.0/file/icon.png)](https://open-vsx.org/extension/bastndev/lynx-keymap) | [Lynx Keymap Pro](https://github.com/bastndev/Lynx-Keymap-Pro) | Tiêu chuẩn hóa các phím tắt trên tất cả các trình chỉnh sửa mã, cho phép bạn truy cập tức thì vào bất kỳ tính năng nào bằng một tổ hợp phím duy nhất — thúc đẩy quy trình làm việc và trải nghiệm phát triển của bạn. **`Hiện bao gồm các phím tắt cho bàn phím 75%`** |
+| [![ATM](https://open-vsx.org/api/bastndev/atm/1.9.4/file/icon.png)](https://open-vsx.org/extension/bastndev/atm)                             | [ATM](https://github.com/bastndev/atm)                         | Một bộ công cụ tất cả-trong-một 👻 giúp tăng tốc quy trình làm việc của bạn với các tính năng thiết yếu như Error Lens, Git Blame, Env Protection và ảnh chụp màn hình mã trên các trình chỉnh sửa lớn.                                                                |
 
 <br>
 

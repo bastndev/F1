@@ -31,38 +31,40 @@
 
 F1 macht VS Code zu einem Hub für KI-Programmieragenten. Öffnen Sie **Claude Code, Codex, Copilot, Cursor, Kiro, Kilo Code, OpenCode, Grok, Antigravity** — oder jedes benutzerdefinierte CLI — in eingebetteten Terminals, wechseln Sie sofort zwischen ihnen, schreiben Sie bessere Prompts und halten Sie den Kontext Ihres Projekts für jeden Agenten günstig zum Laden.
 
+<br>
+
 ## ⌨️ Tastaturkürzel - Fokus `[`CLI Hub`]`
 
-| Befehl                            | 🍎 macOS            | 🟦 Windows             | 🐧 Linux               | Unterstützt |
-| :--------------------------------- | :------------------ | :--------------------- | :--------------------- | --------- |
-| `[`🌐`]` Fokus auf CLI             | `F1`                | `F1`                   | `F1`                   | ㅤㅤ✅    |
-| `[`🌐`]` Fokus auf Skills          | `⌘ + 3`             | `Ctrl + 3`             | `Ctrl + 3`             | ㅤㅤ✅    |
-| `[`🌐`]` Panel maximieren / minimieren | <code>⌘ + \`</code> | <code>Ctrl + \`</code> | <code>Ctrl + \`</code> | ㅤㅤ✅    |
-| `[`🌐`]` Seitenpanel (R/L) - [1]    | `Alt + CapsLock`    | `Alt + CapsLock`       | `Alt + CapsLock`       | ㅤㅤ✅    |
-| Fokus CLI Hub Panel `[`🌐`]` - [2] | `Alt + E`           | `Alt + E`              | `Alt + E`              | ㅤㅤ✅    |
-| -                                  | -                   | -                      | -                      |           |
-| Prompt-Tool öffnen                   | `Shift + F1`        | `Shift + F1`           | `Shift + F1`           | ㅤㅤ✅    |
-| Translate-Tool öffnen                | `Shift + F2`        | `Shift + F2`           | `Shift + F2`           | ㅤㅤ✅    |
-| Status/use-Tool öffnen               | `Shift + F3`        | `Shift + F3`           | `Shift + F3`           | ㅤㅤ✅    |
-| Keymaps-Tool öffnen                  | `Shift + F4`        | `Shift + F4`           | `Shift + F4`           | ㅤㅤ✅    |
-| -                                  | -                   | -                      | -                      |           |
-| Commands-Tool öffnen                 | `Alt + F1`          | `Alt + F1`             | `Alt + F1`             | ㅤㅤ✅    |
-| Prompt ausführen                     | `⌘ + Enter`         | `Ctrl + Enter`         | `Ctrl + Enter`         | ㅤㅤ✅    |
-| Prompt-Filter umschalten               | `Ctrl + Space`      | `Ctrl + Space`         | `Ctrl + Space`         | ㅤㅤ✅    |
-| Vorherige Sitzung                   | `Shift + Tab`       | `Shift + Tab`          | `Shift + Tab`          | ㅤㅤ✅    |
-| -                                  | -                   | -                      | -                      |           |
-| Nächste Sitzung                       | `Tab`               | `Tab`                  | `Tab`                  | ㅤㅤ✅    |
-| Zuhören abspielen / pausieren                | `Space`             | `Space`                | `Space`                | ㅤㅤ✅    |
-| Agenten-Palette umschalten              | `Tab`               | `Tab`                  | `Tab`                  | ㅤㅤ✅    |
-| Agenten-Palette schließen               | `Escape`            | `Escape`               | `Escape`               | ㅤㅤ✅    |
-| CLI-Auswahl öffnen                  | `CapsLock`          | `CapsLock`             | `CapsLock`             | ㅤㅤ✅    |
-| -                                  | -                   | -                      | -                      |           |
-| Aktuelle Sitzung schließen              | `Alt + -`           | `Alt + -`              | `Alt + -`              | ㅤㅤ✅    |
-| Neue CLI-Sitzung                    | `Alt + +`           | `Alt + +`              | `Alt + +`              | ㅤㅤ✅    |
-| -                                  | -                   | -                      | -                      |           |
-| `[`Skill`]` - Zum Reiter Erstellen     | `Alt + 1`           | `Alt + 1`              | `Alt + 1`              | ㅤㅤ✅    |
-| `[`Skill`]` - Zum Reiter Installieren    | `Alt + 2`           | `Alt + 2`              | `Alt + 2`              | ㅤㅤ✅    |
-| `[`Skill`]` - Zum Reiter Lokal      | `Alt + 3`           | `Alt + 3`              | `Alt + 3`              | ㅤㅤ✅    |
+| Befehl                                 | 🍎 macOS            | 🟦 Windows             | 🐧 Linux               | Unterstützt |
+| :------------------------------------- | :------------------ | :--------------------- | :--------------------- | ----------- |
+| `[`🌐`]` Fokus auf CLI                 | `F1`                | `F1`                   | `F1`                   | ㅤㅤ✅      |
+| `[`🌐`]` Fokus auf Skills              | `⌘ + 3`             | `Ctrl + 3`             | `Ctrl + 3`             | ㅤㅤ✅      |
+| `[`🌐`]` Panel maximieren / minimieren | <code>⌘ + \`</code> | <code>Ctrl + \`</code> | <code>Ctrl + \`</code> | ㅤㅤ✅      |
+| `[`🌐`]` Seitenpanel (R/L) - [1]       | `Alt + CapsLock`    | `Alt + CapsLock`       | `Alt + CapsLock`       | ㅤㅤ✅      |
+| Fokus CLI Hub Panel `[`🌐`]` - [2]     | `Alt + E`           | `Alt + E`              | `Alt + E`              | ㅤㅤ✅      |
+| -                                      | -                   | -                      | -                      |             |
+| Prompt-Tool öffnen                     | `Shift + F1`        | `Shift + F1`           | `Shift + F1`           | ㅤㅤ✅      |
+| Translate-Tool öffnen                  | `Shift + F2`        | `Shift + F2`           | `Shift + F2`           | ㅤㅤ✅      |
+| Status/use-Tool öffnen                 | `Shift + F3`        | `Shift + F3`           | `Shift + F3`           | ㅤㅤ✅      |
+| Keymaps-Tool öffnen                    | `Shift + F4`        | `Shift + F4`           | `Shift + F4`           | ㅤㅤ✅      |
+| -                                      | -                   | -                      | -                      |             |
+| Commands-Tool öffnen                   | `Alt + F1`          | `Alt + F1`             | `Alt + F1`             | ㅤㅤ✅      |
+| Prompt ausführen                       | `⌘ + Enter`         | `Ctrl + Enter`         | `Ctrl + Enter`         | ㅤㅤ✅      |
+| Prompt-Filter umschalten               | `Ctrl + Space`      | `Ctrl + Space`         | `Ctrl + Space`         | ㅤㅤ✅      |
+| Vorherige Sitzung                      | `Shift + Tab`       | `Shift + Tab`          | `Shift + Tab`          | ㅤㅤ✅      |
+| -                                      | -                   | -                      | -                      |             |
+| Nächste Sitzung                        | `Tab`               | `Tab`                  | `Tab`                  | ㅤㅤ✅      |
+| Zuhören abspielen / pausieren          | `Space`             | `Space`                | `Space`                | ㅤㅤ✅      |
+| Agenten-Palette umschalten             | `Tab`               | `Tab`                  | `Tab`                  | ㅤㅤ✅      |
+| Agenten-Palette schließen              | `Escape`            | `Escape`               | `Escape`               | ㅤㅤ✅      |
+| CLI-Auswahl öffnen                     | `CapsLock`          | `CapsLock`             | `CapsLock`             | ㅤㅤ✅      |
+| -                                      | -                   | -                      | -                      |             |
+| Aktuelle Sitzung schließen             | `Alt + -`           | `Alt + -`              | `Alt + -`              | ㅤㅤ✅      |
+| Neue CLI-Sitzung                       | `Alt + +`           | `Alt + +`              | `Alt + +`              | ㅤㅤ✅      |
+| -                                      | -                   | -                      | -                      |             |
+| `[`Skill`]` - Zum Reiter Erstellen     | `Alt + 1`           | `Alt + 1`              | `Alt + 1`              | ㅤㅤ✅      |
+| `[`Skill`]` - Zum Reiter Installieren  | `Alt + 2`           | `Alt + 2`              | `Alt + 2`              | ㅤㅤ✅      |
+| `[`Skill`]` - Zum Reiter Lokal         | `Alt + 3`           | `Alt + 3`              | `Alt + 3`              | ㅤㅤ✅      |
 
 ---
 
@@ -136,7 +138,7 @@ ext install bastndev.f1
 | [![gohitx](https://github.com/gohitx.png?size=100)](https://gohit.xyz) |
 | :--------------------------------------------------------------------: |
 |                  **[Gohit X](https://gohit.xyz/me)**                   |
-|                         _Entwickler & Betreuer_                        |
+|                        _Entwickler & Betreuer_                         |
 
 - 🐦 **[X](https://x.com/intent/follow?screen_name=gohitx)** : Für Fragen und Diskussionen.
 - 🌱 **[IG](https://instagram.com/gohitx)** : **`neu`** – Projektvorschauen & Updates.
@@ -170,11 +172,11 @@ Danke an alle, die dieses Projekt unterstützen! Eure Beiträge machen Updates u
   Ergänzende Erweiterungen 🧩 
 </h2>
 
-| Erweiterung                                                                                                                                                                                                         | Name                                                           | Beschreibung                                                                                                                                                                                                                       |
-| ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| [![Lynx Theme Pro](https://open-vsx.org/api/bastndev/lynx-theme/5.0.0/file/icon.png)](https://open-vsx.org/extension/bastndev/lynx-theme) | [Lynx Theme Pro](https://github.com/bastndev/Lynx-Theme)       | Eine professionelle Erweiterung mit sechs Themen: Dark, Light, Night, Ghibli, Coffee und Kiro—mit integrierten Icons. Jedes Thema ist optimiert für ein angenehmeres visuelles Erlebnis.                                       |
-| [![Lynx Keymap Pro](https://open-vsx.org/api/bastndev/lynx-keymap/2.6.0/file/icon.png)](https://open-vsx.org/extension/bastndev/lynx-keymap)                                                                      | [Lynx Keymap Pro](https://github.com/bastndev/Lynx-Keymap-Pro) | Standardisiert Tastaturkürzel in allen Code-Editoren, was Ihnen sofortigen Zugriff auf Funktionen mit nur einer Kombination bietet — verbessert Ihren Workflow. **`Jetzt mit Kürzeln für 75%-Tastaturen`** |
-| [![ATM](https://open-vsx.org/api/bastndev/atm/1.9.4/file/icon.png)](https://open-vsx.org/extension/bastndev/atm)                                                                                                  | [ATM](https://github.com/bastndev/atm)                         | Ein All-in-One-Toolkit 👻, das Ihren Workflow mit essenziellen Funktionen wie Error Lens, Git Blame, Env Protection und Code-Screenshots über wichtige Editoren hinweg beschleunigt.                                                           |
+| Erweiterung                                                                                                                                  | Name                                                           | Beschreibung                                                                                                                                                                                               |
+| -------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [![Lynx Theme Pro](https://open-vsx.org/api/bastndev/lynx-theme/5.0.0/file/icon.png)](https://open-vsx.org/extension/bastndev/lynx-theme)    | [Lynx Theme Pro](https://github.com/bastndev/Lynx-Theme)       | Eine professionelle Erweiterung mit sechs Themen: Dark, Light, Night, Ghibli, Coffee und Kiro—mit integrierten Icons. Jedes Thema ist optimiert für ein angenehmeres visuelles Erlebnis.                   |
+| [![Lynx Keymap Pro](https://open-vsx.org/api/bastndev/lynx-keymap/2.6.0/file/icon.png)](https://open-vsx.org/extension/bastndev/lynx-keymap) | [Lynx Keymap Pro](https://github.com/bastndev/Lynx-Keymap-Pro) | Standardisiert Tastaturkürzel in allen Code-Editoren, was Ihnen sofortigen Zugriff auf Funktionen mit nur einer Kombination bietet — verbessert Ihren Workflow. **`Jetzt mit Kürzeln für 75%-Tastaturen`** |
+| [![ATM](https://open-vsx.org/api/bastndev/atm/1.9.4/file/icon.png)](https://open-vsx.org/extension/bastndev/atm)                             | [ATM](https://github.com/bastndev/atm)                         | Ein All-in-One-Toolkit 👻, das Ihren Workflow mit essenziellen Funktionen wie Error Lens, Git Blame, Env Protection und Code-Screenshots über wichtige Editoren hinweg beschleunigt.                       |
 
 <br>
 
