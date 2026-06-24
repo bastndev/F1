@@ -31,6 +31,8 @@
 
 F1 turns VS Code into a hub for AI coding agents. Open **Claude Code, Codex, Copilot, Cursor, Kiro, Kilo Code, OpenCode, Grok, Antigravity** — or any custom CLI — in embedded terminals, switch between them instantly, write better prompts, and keep your project's context cheap to load for every agent.
 
+<br>
+
 ## ⌨️ Keyboard shortcuts - Focus `[`CLI Hub`]`
 
 | Command                            | 🍎 macOS            | 🟦 Windows             | 🐧 Linux               | Supported |

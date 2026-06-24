@@ -31,38 +31,40 @@
 
 F1 は、VS Code を AI コーディングエージェントのハブに変えます。埋め込みターミナルで **Claude Code、Codex、Copilot、Cursor、Kiro、Kilo Code、OpenCode、Grok、Antigravity** — または任意のカスタム CLI — を開き、それらを瞬時に切り替え、より良いプロンプトを書き、すべてのエージェントがプロジェクトのコンテキストを安価に読み込めるようにします。
 
+<br>
+
 ## ⌨️ キーボードショートカット - フォーカス `[`CLI Hub`]`
 
-| コマンド                            | 🍎 macOS            | 🟦 Windows             | 🐧 Linux               | サポート |
-| :--------------------------------- | :------------------ | :--------------------- | :--------------------- | --------- |
-| `[`🌐`]` CLIにフォーカス             | `F1`                | `F1`                   | `F1`                   | ㅤㅤ✅    |
-| `[`🌐`]` Skillsにフォーカス          | `⌘ + 3`             | `Ctrl + 3`             | `Ctrl + 3`             | ㅤㅤ✅    |
-| `[`🌐`]` パネルの最大化 / 最小化 | <code>⌘ + \`</code> | <code>Ctrl + \`</code> | <code>Ctrl + \`</code> | ㅤㅤ✅    |
-| `[`🌐`]` サイドパネル (右/左) - [1]    | `Alt + CapsLock`    | `Alt + CapsLock`       | `Alt + CapsLock`       | ㅤㅤ✅    |
-| CLI Hub パネルにフォーカス `[`🌐`]` - [2] | `Alt + E`           | `Alt + E`              | `Alt + E`              | ㅤㅤ✅    |
-| -                                  | -                   | -                      | -                      |           |
-| Prompt ツールを開く                   | `Shift + F1`        | `Shift + F1`           | `Shift + F1`           | ㅤㅤ✅    |
-| Translate ツールを開く                | `Shift + F2`        | `Shift + F2`           | `Shift + F2`           | ㅤㅤ✅    |
-| Status/use ツールを開く               | `Shift + F3`        | `Shift + F3`           | `Shift + F3`           | ㅤㅤ✅    |
-| Keymaps ツールを開く                  | `Shift + F4`        | `Shift + F4`           | `Shift + F4`           | ㅤㅤ✅    |
-| -                                  | -                   | -                      | -                      |           |
-| Commands ツールを開く                 | `Alt + F1`          | `Alt + F1`             | `Alt + F1`             | ㅤㅤ✅    |
-| プロンプトを実行                     | `⌘ + Enter`         | `Ctrl + Enter`         | `Ctrl + Enter`         | ㅤㅤ✅    |
-| Prompt フィルターの切り替え               | `Ctrl + Space`      | `Ctrl + Space`         | `Ctrl + Space`         | ㅤㅤ✅    |
-| 前のセッション                   | `Shift + Tab`       | `Shift + Tab`          | `Shift + Tab`          | ㅤㅤ✅    |
-| -                                  | -                   | -                      | -                      |           |
-| 次のセッション                       | `Tab`               | `Tab`                  | `Tab`                  | ㅤㅤ✅    |
-| 再生 / 一時停止 (聞く)                | `Space`             | `Space`                | `Space`                | ㅤㅤ✅    |
-| エージェントパレットの切り替え              | `Tab`               | `Tab`                  | `Tab`                  | ㅤㅤ✅    |
-| エージェントパレットを閉じる               | `Escape`            | `Escape`               | `Escape`               | ㅤㅤ✅    |
-| CLI セレクターを開く                  | `CapsLock`          | `CapsLock`             | `CapsLock`             | ㅤㅤ✅    |
-| -                                  | -                   | -                      | -                      |           |
-| 現在のセッションを閉じる              | `Alt + -`           | `Alt + -`              | `Alt + -`              | ㅤㅤ✅    |
-| 新しい CLI セッション                    | `Alt + +`           | `Alt + +`              | `Alt + +`              | ㅤㅤ✅    |
-| -                                  | -                   | -                      | -                      |           |
-| `[`Skill`]` - 作成タブへ移動     | `Alt + 1`           | `Alt + 1`              | `Alt + 1`              | ㅤㅤ✅    |
-| `[`Skill`]` - インストールタブへ移動    | `Alt + 2`           | `Alt + 2`              | `Alt + 2`              | ㅤㅤ✅    |
-| `[`Skill`]` - ローカルタブへ移動      | `Alt + 3`           | `Alt + 3`              | `Alt + 3`              | ㅤㅤ✅    |
+| コマンド                                  | 🍎 macOS            | 🟦 Windows             | 🐧 Linux               | サポート |
+| :---------------------------------------- | :------------------ | :--------------------- | :--------------------- | -------- |
+| `[`🌐`]` CLIにフォーカス                  | `F1`                | `F1`                   | `F1`                   | ㅤㅤ✅   |
+| `[`🌐`]` Skillsにフォーカス               | `⌘ + 3`             | `Ctrl + 3`             | `Ctrl + 3`             | ㅤㅤ✅   |
+| `[`🌐`]` パネルの最大化 / 最小化          | <code>⌘ + \`</code> | <code>Ctrl + \`</code> | <code>Ctrl + \`</code> | ㅤㅤ✅   |
+| `[`🌐`]` サイドパネル (右/左) - [1]       | `Alt + CapsLock`    | `Alt + CapsLock`       | `Alt + CapsLock`       | ㅤㅤ✅   |
+| CLI Hub パネルにフォーカス `[`🌐`]` - [2] | `Alt + E`           | `Alt + E`              | `Alt + E`              | ㅤㅤ✅   |
+| -                                         | -                   | -                      | -                      |          |
+| Prompt ツールを開く                       | `Shift + F1`        | `Shift + F1`           | `Shift + F1`           | ㅤㅤ✅   |
+| Translate ツールを開く                    | `Shift + F2`        | `Shift + F2`           | `Shift + F2`           | ㅤㅤ✅   |
+| Status/use ツールを開く                   | `Shift + F3`        | `Shift + F3`           | `Shift + F3`           | ㅤㅤ✅   |
+| Keymaps ツールを開く                      | `Shift + F4`        | `Shift + F4`           | `Shift + F4`           | ㅤㅤ✅   |
+| -                                         | -                   | -                      | -                      |          |
+| Commands ツールを開く                     | `Alt + F1`          | `Alt + F1`             | `Alt + F1`             | ㅤㅤ✅   |
+| プロンプトを実行                          | `⌘ + Enter`         | `Ctrl + Enter`         | `Ctrl + Enter`         | ㅤㅤ✅   |
+| Prompt フィルターの切り替え               | `Ctrl + Space`      | `Ctrl + Space`         | `Ctrl + Space`         | ㅤㅤ✅   |
+| 前のセッション                            | `Shift + Tab`       | `Shift + Tab`          | `Shift + Tab`          | ㅤㅤ✅   |
+| -                                         | -                   | -                      | -                      |          |
+| 次のセッション                            | `Tab`               | `Tab`                  | `Tab`                  | ㅤㅤ✅   |
+| 再生 / 一時停止 (聞く)                    | `Space`             | `Space`                | `Space`                | ㅤㅤ✅   |
+| エージェントパレットの切り替え            | `Tab`               | `Tab`                  | `Tab`                  | ㅤㅤ✅   |
+| エージェントパレットを閉じる              | `Escape`            | `Escape`               | `Escape`               | ㅤㅤ✅   |
+| CLI セレクターを開く                      | `CapsLock`          | `CapsLock`             | `CapsLock`             | ㅤㅤ✅   |
+| -                                         | -                   | -                      | -                      |          |
+| 現在のセッションを閉じる                  | `Alt + -`           | `Alt + -`              | `Alt + -`              | ㅤㅤ✅   |
+| 新しい CLI セッション                     | `Alt + +`           | `Alt + +`              | `Alt + +`              | ㅤㅤ✅   |
+| -                                         | -                   | -                      | -                      |          |
+| `[`Skill`]` - 作成タブへ移動              | `Alt + 1`           | `Alt + 1`              | `Alt + 1`              | ㅤㅤ✅   |
+| `[`Skill`]` - インストールタブへ移動      | `Alt + 2`           | `Alt + 2`              | `Alt + 2`              | ㅤㅤ✅   |
+| `[`Skill`]` - ローカルタブへ移動          | `Alt + 3`           | `Alt + 3`              | `Alt + 3`              | ㅤㅤ✅   |
 
 ---
 
@@ -136,7 +138,7 @@ ext install bastndev.f1
 | [![gohitx](https://github.com/gohitx.png?size=100)](https://gohit.xyz) |
 | :--------------------------------------------------------------------: |
 |                  **[Gohit X](https://gohit.xyz/me)**                   |
-|                         _クリエイター & メンテナー_                         |
+|                      _クリエイター & メンテナー_                       |
 
 - 🐦 **[X](https://x.com/intent/follow?screen_name=gohitx)** : 質問やディスカッション用。
 - 🌱 **[IG](https://instagram.com/gohitx)** : **`new`** – プロジェクトのプレビューや近況報告。
@@ -170,11 +172,11 @@ ext install bastndev.f1
   補完的な拡張機能 🧩 
 </h2>
 
-| 拡張機能                                                                                                                                                                                                         | 名前                                                           | 説明                                                                                                                                                                                                                       |
-| ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| [![Lynx Theme Pro](https://open-vsx.org/api/bastndev/lynx-theme/5.0.0/file/icon.png)](https://open-vsx.org/extension/bastndev/lynx-theme) | [Lynx Theme Pro](https://github.com/bastndev/Lynx-Theme)       | 6つのテーマが利用可能なプロフェッショナルな拡張機能：Dark、Light、Night、Ghibli、Coffee、Kiro—アイコン統合。各テーマは、より快適な視覚体験を提供するために最適化されています。                                       |
-| [![Lynx Keymap Pro](https://open-vsx.org/api/bastndev/lynx-keymap/2.6.0/file/icon.png)](https://open-vsx.org/extension/bastndev/lynx-keymap)                                                                      | [Lynx Keymap Pro](https://github.com/bastndev/Lynx-Keymap-Pro) | すべてのコードエディタ間でキーボードショートカットを標準化し、1つのキーの組み合わせで任意の機能に瞬時にアクセスできるようにします — ワークフローと開発体験を向上させます。 **`75%キーボードのショートカットが含まれるようになりました`** |
-| [![ATM](https://open-vsx.org/api/bastndev/atm/1.9.4/file/icon.png)](https://open-vsx.org/extension/bastndev/atm)                                                                                                  | [ATM](https://github.com/bastndev/atm)                         | Error Lens、Git Blame、Env Protection、主要なエディタ間でのコードスクリーンショットなどの必須機能でワークフローを強化するオールインワンツールキット👻。                                                           |
+| 拡張機能                                                                                                                                     | 名前                                                           | 説明                                                                                                                                                                                                                                     |
+| -------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [![Lynx Theme Pro](https://open-vsx.org/api/bastndev/lynx-theme/5.0.0/file/icon.png)](https://open-vsx.org/extension/bastndev/lynx-theme)    | [Lynx Theme Pro](https://github.com/bastndev/Lynx-Theme)       | 6つのテーマが利用可能なプロフェッショナルな拡張機能：Dark、Light、Night、Ghibli、Coffee、Kiro—アイコン統合。各テーマは、より快適な視覚体験を提供するために最適化されています。                                                           |
+| [![Lynx Keymap Pro](https://open-vsx.org/api/bastndev/lynx-keymap/2.6.0/file/icon.png)](https://open-vsx.org/extension/bastndev/lynx-keymap) | [Lynx Keymap Pro](https://github.com/bastndev/Lynx-Keymap-Pro) | すべてのコードエディタ間でキーボードショートカットを標準化し、1つのキーの組み合わせで任意の機能に瞬時にアクセスできるようにします — ワークフローと開発体験を向上させます。 **`75%キーボードのショートカットが含まれるようになりました`** |
+| [![ATM](https://open-vsx.org/api/bastndev/atm/1.9.4/file/icon.png)](https://open-vsx.org/extension/bastndev/atm)                             | [ATM](https://github.com/bastndev/atm)                         | Error Lens、Git Blame、Env Protection、主要なエディタ間でのコードスクリーンショットなどの必須機能でワークフローを強化するオールインワンツールキット👻。                                                                                  |
 
 <br>
 

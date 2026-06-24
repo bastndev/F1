@@ -31,38 +31,40 @@
 
 يجعل F1 من VS Code مركزاً لوكلاء برمجة الذكاء الاصطناعي. افتح **Claude Code، Codex، Copilot، Cursor، Kiro، Kilo Code، OpenCode، Grok، Antigravity** — أو أي واجهة سطر أوامر مخصصة — في أجهزة طرفية مضمنة، وقم بالتبديل بينها على الفور، واكتب مطالبات أفضل، وحافظ على سياق مشروعك خفيفاً للتحميل لكل وكيل.
 
+<br>
+
 ## ⌨️ اختصارات لوحة المفاتيح - التركيز `[`CLI Hub`]`
 
-| الأمر                            | 🍎 macOS            | 🟦 Windows             | 🐧 Linux               | مدعوم |
-| :--------------------------------- | :------------------ | :--------------------- | :--------------------- | --------- |
-| `[`🌐`]` التركيز على CLI             | `F1`                | `F1`                   | `F1`                   | ㅤㅤ✅    |
-| `[`🌐`]` التركيز على Skills          | `⌘ + 3`             | `Ctrl + 3`             | `Ctrl + 3`             | ㅤㅤ✅    |
-| `[`🌐`]` تكبير / تصغير اللوحة | <code>⌘ + \`</code> | <code>Ctrl + \`</code> | <code>Ctrl + \`</code> | ㅤㅤ✅    |
-| `[`🌐`]` اللوحة الجانبية (يمين/يسار) - [1]    | `Alt + CapsLock`    | `Alt + CapsLock`       | `Alt + CapsLock`       | ㅤㅤ✅    |
-| التركيز على لوحة CLI Hub `[`🌐`]` - [2] | `Alt + E`           | `Alt + E`              | `Alt + E`              | ㅤㅤ✅    |
-| -                                  | -                   | -                      | -                      |           |
-| فتح أداة Prompt                   | `Shift + F1`        | `Shift + F1`           | `Shift + F1`           | ㅤㅤ✅    |
-| فتح أداة Translate                | `Shift + F2`        | `Shift + F2`           | `Shift + F2`           | ㅤㅤ✅    |
-| فتح أداة Status/use               | `Shift + F3`        | `Shift + F3`           | `Shift + F3`           | ㅤㅤ✅    |
-| فتح أداة Keymaps                  | `Shift + F4`        | `Shift + F4`           | `Shift + F4`           | ㅤㅤ✅    |
-| -                                  | -                   | -                      | -                      |           |
-| فتح أداة Commands                 | `Alt + F1`          | `Alt + F1`             | `Alt + F1`             | ㅤㅤ✅    |
-| تنفيذ prompt                     | `⌘ + Enter`         | `Ctrl + Enter`         | `Ctrl + Enter`         | ㅤㅤ✅    |
-| تبديل فلتر Prompt               | `Ctrl + Space`      | `Ctrl + Space`         | `Ctrl + Space`         | ㅤㅤ✅    |
-| الجلسة السابقة                   | `Shift + Tab`       | `Shift + Tab`          | `Shift + Tab`          | ㅤㅤ✅    |
-| -                                  | -                   | -                      | -                      |           |
-| الجلسة التالية                       | `Tab`               | `Tab`                  | `Tab`                  | ㅤㅤ✅    |
-| تشغيل / إيقاف الاستماع                | `Space`             | `Space`                | `Space`                | ㅤㅤ✅    |
-| تبديل لوحة الوكلاء              | `Tab`               | `Tab`                  | `Tab`                  | ㅤㅤ✅    |
-| إغلاق لوحة الوكلاء               | `Escape`            | `Escape`               | `Escape`               | ㅤㅤ✅    |
-| فتح محدد CLI                  | `CapsLock`          | `CapsLock`             | `CapsLock`             | ㅤㅤ✅    |
-| -                                  | -                   | -                      | -                      |           |
-| إغلاق الجلسة الحالية              | `Alt + -`           | `Alt + -`              | `Alt + -`              | ㅤㅤ✅    |
-| جلسة CLI جديدة                    | `Alt + +`           | `Alt + +`              | `Alt + +`              | ㅤㅤ✅    |
-| -                                  | -                   | -                      | -                      |           |
-| `[`Skill`]` - الذهاب إلى علامة التبويب إنشاء     | `Alt + 1`           | `Alt + 1`              | `Alt + 1`              | ㅤㅤ✅    |
-| `[`Skill`]` - الذهاب إلى علامة التبويب تثبيت    | `Alt + 2`           | `Alt + 2`              | `Alt + 2`              | ㅤㅤ✅    |
-| `[`Skill`]` - الذهاب إلى علامة التبويب محلي      | `Alt + 3`           | `Alt + 3`              | `Alt + 3`              | ㅤㅤ✅    |
+| الأمر                                        | 🍎 macOS            | 🟦 Windows             | 🐧 Linux               | مدعوم  |
+| :------------------------------------------- | :------------------ | :--------------------- | :--------------------- | ------ |
+| `[`🌐`]` التركيز على CLI                     | `F1`                | `F1`                   | `F1`                   | ㅤㅤ✅ |
+| `[`🌐`]` التركيز على Skills                  | `⌘ + 3`             | `Ctrl + 3`             | `Ctrl + 3`             | ㅤㅤ✅ |
+| `[`🌐`]` تكبير / تصغير اللوحة                | <code>⌘ + \`</code> | <code>Ctrl + \`</code> | <code>Ctrl + \`</code> | ㅤㅤ✅ |
+| `[`🌐`]` اللوحة الجانبية (يمين/يسار) - [1]   | `Alt + CapsLock`    | `Alt + CapsLock`       | `Alt + CapsLock`       | ㅤㅤ✅ |
+| التركيز على لوحة CLI Hub `[`🌐`]` - [2]      | `Alt + E`           | `Alt + E`              | `Alt + E`              | ㅤㅤ✅ |
+| -                                            | -                   | -                      | -                      |        |
+| فتح أداة Prompt                              | `Shift + F1`        | `Shift + F1`           | `Shift + F1`           | ㅤㅤ✅ |
+| فتح أداة Translate                           | `Shift + F2`        | `Shift + F2`           | `Shift + F2`           | ㅤㅤ✅ |
+| فتح أداة Status/use                          | `Shift + F3`        | `Shift + F3`           | `Shift + F3`           | ㅤㅤ✅ |
+| فتح أداة Keymaps                             | `Shift + F4`        | `Shift + F4`           | `Shift + F4`           | ㅤㅤ✅ |
+| -                                            | -                   | -                      | -                      |        |
+| فتح أداة Commands                            | `Alt + F1`          | `Alt + F1`             | `Alt + F1`             | ㅤㅤ✅ |
+| تنفيذ prompt                                 | `⌘ + Enter`         | `Ctrl + Enter`         | `Ctrl + Enter`         | ㅤㅤ✅ |
+| تبديل فلتر Prompt                            | `Ctrl + Space`      | `Ctrl + Space`         | `Ctrl + Space`         | ㅤㅤ✅ |
+| الجلسة السابقة                               | `Shift + Tab`       | `Shift + Tab`          | `Shift + Tab`          | ㅤㅤ✅ |
+| -                                            | -                   | -                      | -                      |        |
+| الجلسة التالية                               | `Tab`               | `Tab`                  | `Tab`                  | ㅤㅤ✅ |
+| تشغيل / إيقاف الاستماع                       | `Space`             | `Space`                | `Space`                | ㅤㅤ✅ |
+| تبديل لوحة الوكلاء                           | `Tab`               | `Tab`                  | `Tab`                  | ㅤㅤ✅ |
+| إغلاق لوحة الوكلاء                           | `Escape`            | `Escape`               | `Escape`               | ㅤㅤ✅ |
+| فتح محدد CLI                                 | `CapsLock`          | `CapsLock`             | `CapsLock`             | ㅤㅤ✅ |
+| -                                            | -                   | -                      | -                      |        |
+| إغلاق الجلسة الحالية                         | `Alt + -`           | `Alt + -`              | `Alt + -`              | ㅤㅤ✅ |
+| جلسة CLI جديدة                               | `Alt + +`           | `Alt + +`              | `Alt + +`              | ㅤㅤ✅ |
+| -                                            | -                   | -                      | -                      |        |
+| `[`Skill`]` - الذهاب إلى علامة التبويب إنشاء | `Alt + 1`           | `Alt + 1`              | `Alt + 1`              | ㅤㅤ✅ |
+| `[`Skill`]` - الذهاب إلى علامة التبويب تثبيت | `Alt + 2`           | `Alt + 2`              | `Alt + 2`              | ㅤㅤ✅ |
+| `[`Skill`]` - الذهاب إلى علامة التبويب محلي  | `Alt + 3`           | `Alt + 3`              | `Alt + 3`              | ㅤㅤ✅ |
 
 ---
 
@@ -136,7 +138,7 @@ ext install bastndev.f1
 | [![gohitx](https://github.com/gohitx.png?size=100)](https://gohit.xyz) |
 | :--------------------------------------------------------------------: |
 |                  **[Gohit X](https://gohit.xyz/me)**                   |
-|                         _المُنشئ والمسؤول_                         |
+|                           _المُنشئ والمسؤول_                           |
 
 - 🐦 **[X](https://x.com/intent/follow?screen_name=gohitx)** : للأسئلة والمناقشات.
 - 🌱 **[IG](https://instagram.com/gohitx)** : **`جديد`** – معاينات المشروع وتحديثات الحياة.
@@ -170,11 +172,11 @@ ext install bastndev.f1
   إضافات تكميلية 🧩 
 </h2>
 
-| الإضافة                                                                                                                                                                                                         | الاسم                                                           | الوصف                                                                                                                                                                                                                       |
-| ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| [![Lynx Theme Pro](https://open-vsx.org/api/bastndev/lynx-theme/5.0.0/file/icon.png)](https://open-vsx.org/extension/bastndev/lynx-theme) | [Lynx Theme Pro](https://github.com/bastndev/Lynx-Theme)       | إضافة احترافية تحتوي على ستة سمات متاحة: Dark، Light، Night، Ghibli، Coffee، و Kiro—مع أيقونات مدمجة. تم تحسين كل سمة لتقديم تجربة بصرية أكثر إمتاعاً.                                       |
-| [![Lynx Keymap Pro](https://open-vsx.org/api/bastndev/lynx-keymap/2.6.0/file/icon.png)](https://open-vsx.org/extension/bastndev/lynx-keymap)                                                                      | [Lynx Keymap Pro](https://github.com/bastndev/Lynx-Keymap-Pro) | يوحد اختصارات لوحة المفاتيح عبر جميع محرري الأكواد، مما يمنحك وصولاً فورياً إلى أي ميزة بتركيبة مفاتيح واحدة — مما يعزز سير عملك وتجربة التطوير. **`يتضمن الآن اختصارات للوحات مفاتيح 75٪`** |
-| [![ATM](https://open-vsx.org/api/bastndev/atm/1.9.4/file/icon.png)](https://open-vsx.org/extension/bastndev/atm)                                                                                                  | [ATM](https://github.com/bastndev/atm)                         | مجموعة أدوات شاملة 👻 تعزز سير عملك بميزات أساسية مثل Error Lens و Git Blame و Env Protection ولقطات شاشة للكود عبر المحررين الرئيسيين.                                                           |
+| الإضافة                                                                                                                                      | الاسم                                                          | الوصف                                                                                                                                                                                        |
+| -------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [![Lynx Theme Pro](https://open-vsx.org/api/bastndev/lynx-theme/5.0.0/file/icon.png)](https://open-vsx.org/extension/bastndev/lynx-theme)    | [Lynx Theme Pro](https://github.com/bastndev/Lynx-Theme)       | إضافة احترافية تحتوي على ستة سمات متاحة: Dark، Light، Night، Ghibli، Coffee، و Kiro—مع أيقونات مدمجة. تم تحسين كل سمة لتقديم تجربة بصرية أكثر إمتاعاً.                                       |
+| [![Lynx Keymap Pro](https://open-vsx.org/api/bastndev/lynx-keymap/2.6.0/file/icon.png)](https://open-vsx.org/extension/bastndev/lynx-keymap) | [Lynx Keymap Pro](https://github.com/bastndev/Lynx-Keymap-Pro) | يوحد اختصارات لوحة المفاتيح عبر جميع محرري الأكواد، مما يمنحك وصولاً فورياً إلى أي ميزة بتركيبة مفاتيح واحدة — مما يعزز سير عملك وتجربة التطوير. **`يتضمن الآن اختصارات للوحات مفاتيح 75٪`** |
+| [![ATM](https://open-vsx.org/api/bastndev/atm/1.9.4/file/icon.png)](https://open-vsx.org/extension/bastndev/atm)                             | [ATM](https://github.com/bastndev/atm)                         | مجموعة أدوات شاملة 👻 تعزز سير عملك بميزات أساسية مثل Error Lens و Git Blame و Env Protection ولقطات شاشة للكود عبر المحررين الرئيسيين.                                                      |
 
 <br>
 

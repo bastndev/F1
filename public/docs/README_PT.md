@@ -31,38 +31,40 @@
 
 O F1 transforma o VS Code em um hub para agentes de codificação de IA. Abra **Claude Code, Codex, Copilot, Cursor, Kiro, Kilo Code, OpenCode, Grok, Antigravity** — ou qualquer CLI personalizado — em terminais incorporados, alterne entre eles instantaneamente, escreva prompts melhores e mantenha o contexto do seu projeto leve para carregar para cada agente.
 
+<br>
+
 ## ⌨️ Atalhos de teclado - Foco `[`CLI Hub`]`
 
-| Comando                            | 🍎 macOS            | 🟦 Windows             | 🐧 Linux               | Suportado |
-| :--------------------------------- | :------------------ | :--------------------- | :--------------------- | --------- |
-| `[`🌐`]` Focar no CLI             | `F1`                | `F1`                   | `F1`                   | ㅤㅤ✅    |
-| `[`🌐`]` Focar nas Skills          | `⌘ + 3`             | `Ctrl + 3`             | `Ctrl + 3`             | ㅤㅤ✅    |
+| Comando                               | 🍎 macOS            | 🟦 Windows             | 🐧 Linux               | Suportado |
+| :------------------------------------ | :------------------ | :--------------------- | :--------------------- | --------- |
+| `[`🌐`]` Focar no CLI                 | `F1`                | `F1`                   | `F1`                   | ㅤㅤ✅    |
+| `[`🌐`]` Focar nas Skills             | `⌘ + 3`             | `Ctrl + 3`             | `Ctrl + 3`             | ㅤㅤ✅    |
 | `[`🌐`]` Maximizar / Minimizar Painel | <code>⌘ + \`</code> | <code>Ctrl + \`</code> | <code>Ctrl + \`</code> | ㅤㅤ✅    |
-| `[`🌐`]` Painel Lateral (D/E) - [1]    | `Alt + CapsLock`    | `Alt + CapsLock`       | `Alt + CapsLock`       | ㅤㅤ✅    |
-| Focar Painel CLI Hub `[`🌐`]` - [2] | `Alt + E`           | `Alt + E`              | `Alt + E`              | ㅤㅤ✅    |
-| -                                  | -                   | -                      | -                      |           |
-| Abrir ferramenta Prompt                   | `Shift + F1`        | `Shift + F1`           | `Shift + F1`           | ㅤㅤ✅    |
-| Abrir ferramenta Translate                | `Shift + F2`        | `Shift + F2`           | `Shift + F2`           | ㅤㅤ✅    |
-| Abrir ferramenta Status/use               | `Shift + F3`        | `Shift + F3`           | `Shift + F3`           | ㅤㅤ✅    |
-| Abrir ferramenta Keymaps                  | `Shift + F4`        | `Shift + F4`           | `Shift + F4`           | ㅤㅤ✅    |
-| -                                  | -                   | -                      | -                      |           |
-| Abrir ferramenta Commands                 | `Alt + F1`          | `Alt + F1`             | `Alt + F1`             | ㅤㅤ✅    |
-| Executar prompt                     | `⌘ + Enter`         | `Ctrl + Enter`         | `Ctrl + Enter`         | ㅤㅤ✅    |
-| Alternar filtro de Prompt               | `Ctrl + Space`      | `Ctrl + Space`         | `Ctrl + Space`         | ㅤㅤ✅    |
-| Sessão anterior                   | `Shift + Tab`       | `Shift + Tab`          | `Shift + Tab`          | ㅤㅤ✅    |
-| -                                  | -                   | -                      | -                      |           |
-| Próxima sessão                       | `Tab`               | `Tab`                  | `Tab`                  | ㅤㅤ✅    |
-| Reproduzir / pausar Ouvir                | `Space`             | `Space`                | `Space`                | ㅤㅤ✅    |
-| Alternar paleta de agentes              | `Tab`               | `Tab`                  | `Tab`                  | ㅤㅤ✅    |
-| Fechar paleta de agentes               | `Escape`            | `Escape`               | `Escape`               | ㅤㅤ✅    |
+| `[`🌐`]` Painel Lateral (D/E) - [1]   | `Alt + CapsLock`    | `Alt + CapsLock`       | `Alt + CapsLock`       | ㅤㅤ✅    |
+| Focar Painel CLI Hub `[`🌐`]` - [2]   | `Alt + E`           | `Alt + E`              | `Alt + E`              | ㅤㅤ✅    |
+| -                                     | -                   | -                      | -                      |           |
+| Abrir ferramenta Prompt               | `Shift + F1`        | `Shift + F1`           | `Shift + F1`           | ㅤㅤ✅    |
+| Abrir ferramenta Translate            | `Shift + F2`        | `Shift + F2`           | `Shift + F2`           | ㅤㅤ✅    |
+| Abrir ferramenta Status/use           | `Shift + F3`        | `Shift + F3`           | `Shift + F3`           | ㅤㅤ✅    |
+| Abrir ferramenta Keymaps              | `Shift + F4`        | `Shift + F4`           | `Shift + F4`           | ㅤㅤ✅    |
+| -                                     | -                   | -                      | -                      |           |
+| Abrir ferramenta Commands             | `Alt + F1`          | `Alt + F1`             | `Alt + F1`             | ㅤㅤ✅    |
+| Executar prompt                       | `⌘ + Enter`         | `Ctrl + Enter`         | `Ctrl + Enter`         | ㅤㅤ✅    |
+| Alternar filtro de Prompt             | `Ctrl + Space`      | `Ctrl + Space`         | `Ctrl + Space`         | ㅤㅤ✅    |
+| Sessão anterior                       | `Shift + Tab`       | `Shift + Tab`          | `Shift + Tab`          | ㅤㅤ✅    |
+| -                                     | -                   | -                      | -                      |           |
+| Próxima sessão                        | `Tab`               | `Tab`                  | `Tab`                  | ㅤㅤ✅    |
+| Reproduzir / pausar Ouvir             | `Space`             | `Space`                | `Space`                | ㅤㅤ✅    |
+| Alternar paleta de agentes            | `Tab`               | `Tab`                  | `Tab`                  | ㅤㅤ✅    |
+| Fechar paleta de agentes              | `Escape`            | `Escape`               | `Escape`               | ㅤㅤ✅    |
 | Abrir seletor de CLI                  | `CapsLock`          | `CapsLock`             | `CapsLock`             | ㅤㅤ✅    |
-| -                                  | -                   | -                      | -                      |           |
-| Fechar sessão atual              | `Alt + -`           | `Alt + -`              | `Alt + -`              | ㅤㅤ✅    |
-| Nova sessão CLI                    | `Alt + +`           | `Alt + +`              | `Alt + +`              | ㅤㅤ✅    |
-| -                                  | -                   | -                      | -                      |           |
+| -                                     | -                   | -                      | -                      |           |
+| Fechar sessão atual                   | `Alt + -`           | `Alt + -`              | `Alt + -`              | ㅤㅤ✅    |
+| Nova sessão CLI                       | `Alt + +`           | `Alt + +`              | `Alt + +`              | ㅤㅤ✅    |
+| -                                     | -                   | -                      | -                      |           |
 | `[`Skill`]` - Ir para a aba Criar     | `Alt + 1`           | `Alt + 1`              | `Alt + 1`              | ㅤㅤ✅    |
-| `[`Skill`]` - Ir para a aba Instalar    | `Alt + 2`           | `Alt + 2`              | `Alt + 2`              | ㅤㅤ✅    |
-| `[`Skill`]` - Ir para a aba Local      | `Alt + 3`           | `Alt + 3`              | `Alt + 3`              | ㅤㅤ✅    |
+| `[`Skill`]` - Ir para a aba Instalar  | `Alt + 2`           | `Alt + 2`              | `Alt + 2`              | ㅤㅤ✅    |
+| `[`Skill`]` - Ir para a aba Local     | `Alt + 3`           | `Alt + 3`              | `Alt + 3`              | ㅤㅤ✅    |
 
 ---
 
@@ -170,11 +172,11 @@ Obrigado a todos que apoiam este projeto! Suas contribuições tornam atualizaç
   Extensões Complementares 🧩 
 </h2>
 
-| Extensão                                                                                                                                                                                                         | Nome                                                           | Descrição                                                                                                                                                                                                                       |
-| ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| [![Lynx Theme Pro](https://open-vsx.org/api/bastndev/lynx-theme/5.0.0/file/icon.png)](https://open-vsx.org/extension/bastndev/lynx-theme) | [Lynx Theme Pro](https://github.com/bastndev/Lynx-Theme)       | Uma extensão profissional com seis temas disponíveis: Dark, Light, Night, Ghibli, Coffee e Kiro—com ícones integrados. Cada tema é otimizado para oferecer uma experiência visual mais agradável.                                       |
-| [![Lynx Keymap Pro](https://open-vsx.org/api/bastndev/lynx-keymap/2.6.0/file/icon.png)](https://open-vsx.org/extension/bastndev/lynx-keymap)                                                                      | [Lynx Keymap Pro](https://github.com/bastndev/Lynx-Keymap-Pro) | Padroniza atalhos de teclado em todos os editores de código, dando-lhe acesso instantâneo a qualquer funcionalidade com uma única combinação de teclas — melhorando seu fluxo de trabalho e experiência de desenvolvimento. **`Agora inclui atalhos para teclados de 75%`** |
-| [![ATM](https://open-vsx.org/api/bastndev/atm/1.9.4/file/icon.png)](https://open-vsx.org/extension/bastndev/atm)                                                                                                  | [ATM](https://github.com/bastndev/atm)                         | Um kit de ferramentas completo 👻 que aprimora seu fluxo de trabalho com recursos essenciais como Error Lens, Git Blame, Env Protection e capturas de tela de código nos principais editores.                                                           |
+| Extensão                                                                                                                                     | Nome                                                           | Descrição                                                                                                                                                                                                                                                                   |
+| -------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [![Lynx Theme Pro](https://open-vsx.org/api/bastndev/lynx-theme/5.0.0/file/icon.png)](https://open-vsx.org/extension/bastndev/lynx-theme)    | [Lynx Theme Pro](https://github.com/bastndev/Lynx-Theme)       | Uma extensão profissional com seis temas disponíveis: Dark, Light, Night, Ghibli, Coffee e Kiro—com ícones integrados. Cada tema é otimizado para oferecer uma experiência visual mais agradável.                                                                           |
+| [![Lynx Keymap Pro](https://open-vsx.org/api/bastndev/lynx-keymap/2.6.0/file/icon.png)](https://open-vsx.org/extension/bastndev/lynx-keymap) | [Lynx Keymap Pro](https://github.com/bastndev/Lynx-Keymap-Pro) | Padroniza atalhos de teclado em todos os editores de código, dando-lhe acesso instantâneo a qualquer funcionalidade com uma única combinação de teclas — melhorando seu fluxo de trabalho e experiência de desenvolvimento. **`Agora inclui atalhos para teclados de 75%`** |
+| [![ATM](https://open-vsx.org/api/bastndev/atm/1.9.4/file/icon.png)](https://open-vsx.org/extension/bastndev/atm)                             | [ATM](https://github.com/bastndev/atm)                         | Um kit de ferramentas completo 👻 que aprimora seu fluxo de trabalho com recursos essenciais como Error Lens, Git Blame, Env Protection e capturas de tela de código nos principais editores.                                                                               |
 
 <br>
 
