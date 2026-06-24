@@ -24,6 +24,11 @@ Following VS Code best practices, F1 uses semantic versioning for all releases.
 <!-- --- -->
 
 ---
+## [1.1.1] - 2026-06-23
+- **New**: Keymaps add in README.md
+
+
+---
 ## [1.0.1] - 2026-06-23
 - **Add**: l10n
 - **BETTER**: Readme, ctrl+capslock, flame confirmation & ARCHITECTURE.md
