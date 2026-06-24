@@ -38,8 +38,27 @@ F1 turns VS Code into a hub for AI coding agents. Open **Claude Code, Codex, Cop
 | Focus the CLI             | `F1`                | `F1`                   | `F1`                   | ㅤㅤ✅    |
 | Focus the Skills          | `⌘ + 3`             | `Ctrl + 3`             | `Ctrl + 3`             | ㅤㅤ✅    |
 | Maximize / Minimize Panel | <code>⌘ + \`</code> | <code>Ctrl + \`</code> | <code>Ctrl + \`</code> | ㅤㅤ✅    |
+| Side Panel (R/L)          | `Alt + CapsLock`    | `Alt + CapsLock`       | `Alt + CapsLock`       | ㅤㅤ✅    |
 | -                         | -                   | -                      | -                      |           |
-| Side Panel (R/L)          | `⌘ + CapsLock`      | `Ctrl + CapsLock`      | `Ctrl + CapsLock`      | ㅤㅤ✅    |
+| New CLI session           | `Alt + +`           | `Alt + +`              | `Alt + +`              | ㅤㅤ✅    |
+| Close current session     | `Alt + -`           | `Alt + -`              | `Alt + -`              | ㅤㅤ✅    |
+| Open CLI selector         | `CapsLock`          | `CapsLock`             | `CapsLock`             | ㅤㅤ✅    |
+| Toggle Prompt filter      | `Ctrl + Space`      | `Ctrl + Space`         | `Ctrl + Space`         | ㅤㅤ✅    |
+| Next session              | `Tab`               | `Tab`                  | `Tab`                  | ㅤㅤ✅    |
+| Previous session          | `Shift + Tab`       | `Shift + Tab`          | `Shift + Tab`          | ㅤㅤ✅    |
+| Open Prompt tool          | `Shift + F1`        | `Shift + F1`           | `Shift + F1`           | ㅤㅤ✅    |
+| Open Translate tool       | `Shift + F2`        | `Shift + F2`           | `Shift + F2`           | ㅤㅤ✅    |
+| Open Status/use tool      | `Shift + F3`        | `Shift + F3`           | `Shift + F3`           | ㅤㅤ✅    |
+| Open Keymaps tool         | `Shift + F4`        | `Shift + F4`           | `Shift + F4`           | ㅤㅤ✅    |
+| Open Commands tool        | `Alt + F1`          | `Alt + F1`             | `Alt + F1`             | ㅤㅤ✅    |
+| Play / pause Listen       | `Space`             | `Space`                | `Space`                | ㅤㅤ✅    |
+| Execute prompt            | `⌘ + Enter`         | `Ctrl + Enter`         | `Ctrl + Enter`         | ㅤㅤ✅    |
+| Toggle agents palette     | `Tab`               | `Tab`                  | `Tab`                  | ㅤㅤ✅    |
+| Close agents palette      | `Escape`            | `Escape`               | `Escape`               | ㅤㅤ✅    |
+| -                         | -                   | -                      | -                      |           |
+| Go to Create tab          | `Alt + 1`           | `Alt + 1`              | `Alt + 1`              | ㅤㅤ✅    |
+| Go to Install tab         | `Alt + 2`           | `Alt + 2`              | `Alt + 2`              | ㅤㅤ✅    |
+| Go to Local tab           | `Alt + 3`           | `Alt + 3`              | `Alt + 3`              | ㅤㅤ✅    |
 
 ---
 
