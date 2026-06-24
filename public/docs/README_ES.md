@@ -31,15 +31,38 @@
 
 F1 convierte VS Code en un centro para agentes de programación de IA. Abra **Claude Code, Codex, Copilot, Cursor, Kiro, Kilo Code, OpenCode, Grok, Antigravity** — o cualquier CLI personalizado — en terminales integrados, cambie entre ellos instantáneamente, escriba mejores prompts, y mantenga el contexto de su proyecto fácil de cargar para cada agente.
 
-## ⌨️ Atajos de teclado
+## ⌨️ Atajos de teclado - Enfocar `[`CLI Hub`]`
 
-| Comando                   | 🍎 macOS            | 🟦 Windows             | 🐧 Linux               | Soportado |
-| :------------------------ | :------------------ | :--------------------- | :--------------------- | --------- |
-| Enfocar el CLI            | `F1`                | `F1`                   | `F1`                   | ㅤㅤ✅    |
-| Enfocar las Skills        | `⌘ + 3`             | `Ctrl + 3`             | `Ctrl + 3`             | ㅤㅤ✅    |
-| Maximizar / Minimizar Panel | <code>⌘ + \`</code> | <code>Ctrl + \`</code> | <code>Ctrl + \`</code> | ㅤㅤ✅    |
-| -                         | -                   | -                      | -                      |           |
-| Panel Lateral (D/I)          | `⌘ + CapsLock`      | `Ctrl + CapsLock`      | `Ctrl + CapsLock`      | ㅤㅤ✅    |
+| Comando                            | 🍎 macOS            | 🟦 Windows             | 🐧 Linux               | Soportado |
+| :--------------------------------- | :------------------ | :--------------------- | :--------------------- | --------- |
+| `[`🌐`]` Enfocar el CLI             | `F1`                | `F1`                   | `F1`                   | ㅤㅤ✅    |
+| `[`🌐`]` Enfocar las Skills          | `⌘ + 3`             | `Ctrl + 3`             | `Ctrl + 3`             | ㅤㅤ✅    |
+| `[`🌐`]` Maximizar / Minimizar Panel | <code>⌘ + \`</code> | <code>Ctrl + \`</code> | <code>Ctrl + \`</code> | ㅤㅤ✅    |
+| `[`🌐`]` Panel Lateral (D/I) - [1]    | `Alt + CapsLock`    | `Alt + CapsLock`       | `Alt + CapsLock`       | ㅤㅤ✅    |
+| Enfocar Panel CLI Hub `[`🌐`]` - [2] | `Alt + E`           | `Alt + E`              | `Alt + E`              | ㅤㅤ✅    |
+| -                                  | -                   | -                      | -                      |           |
+| Abrir herramienta Prompt                   | `Shift + F1`        | `Shift + F1`           | `Shift + F1`           | ㅤㅤ✅    |
+| Abrir herramienta Translate                | `Shift + F2`        | `Shift + F2`           | `Shift + F2`           | ㅤㅤ✅    |
+| Abrir herramienta Status/use               | `Shift + F3`        | `Shift + F3`           | `Shift + F3`           | ㅤㅤ✅    |
+| Abrir herramienta Keymaps                  | `Shift + F4`        | `Shift + F4`           | `Shift + F4`           | ㅤㅤ✅    |
+| -                                  | -                   | -                      | -                      |           |
+| Abrir herramienta Commands                 | `Alt + F1`          | `Alt + F1`             | `Alt + F1`             | ㅤㅤ✅    |
+| Ejecutar prompt                     | `⌘ + Enter`         | `Ctrl + Enter`         | `Ctrl + Enter`         | ㅤㅤ✅    |
+| Alternar filtro de Prompt               | `Ctrl + Space`      | `Ctrl + Space`         | `Ctrl + Space`         | ㅤㅤ✅    |
+| Sesión anterior                   | `Shift + Tab`       | `Shift + Tab`          | `Shift + Tab`          | ㅤㅤ✅    |
+| -                                  | -                   | -                      | -                      |           |
+| Siguiente sesión                       | `Tab`               | `Tab`                  | `Tab`                  | ㅤㅤ✅    |
+| Reproducir / pausar Escuchar                | `Space`             | `Space`                | `Space`                | ㅤㅤ✅    |
+| Alternar paleta de agentes              | `Tab`               | `Tab`                  | `Tab`                  | ㅤㅤ✅    |
+| Cerrar paleta de agentes               | `Escape`            | `Escape`               | `Escape`               | ㅤㅤ✅    |
+| Abrir selector de CLI                  | `CapsLock`          | `CapsLock`             | `CapsLock`             | ㅤㅤ✅    |
+| -                                  | -                   | -                      | -                      |           |
+| Cerrar sesión actual              | `Alt + -`           | `Alt + -`              | `Alt + -`              | ㅤㅤ✅    |
+| Nueva sesión CLI                    | `Alt + +`           | `Alt + +`              | `Alt + +`              | ㅤㅤ✅    |
+| -                                  | -                   | -                      | -                      |           |
+| `[`Skill`]` - Ir a pestaña Crear     | `Alt + 1`           | `Alt + 1`              | `Alt + 1`              | ㅤㅤ✅    |
+| `[`Skill`]` - Ir a pestaña Instalar    | `Alt + 2`           | `Alt + 2`              | `Alt + 2`              | ㅤㅤ✅    |
+| `[`Skill`]` - Ir a pestaña Local      | `Alt + 3`           | `Alt + 3`              | `Alt + 3`              | ㅤㅤ✅    |
 
 ---
 

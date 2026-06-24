@@ -31,15 +31,38 @@
 
 F1은 VS Code를 AI 코딩 에이전트의 허브로 바꿉니다. 내장된 터미널에서 **Claude Code, Codex, Copilot, Cursor, Kiro, Kilo Code, OpenCode, Grok, Antigravity** — 또는 사용자 정의 CLI —를 열고 즉시 전환하며, 더 나은 프롬프트를 작성하고, 모든 에이전트가 저렴하게 불러올 수 있도록 프로젝트 컨텍스트를 유지하세요.
 
-## ⌨️ 키보드 단축키
+## ⌨️ 키보드 단축키 - 포커스 `[`CLI Hub`]`
 
-| 명령                    | 🍎 macOS            | 🟦 Windows             | 🐧 Linux               | 지원 |
-| :------------------------ | :------------------ | :--------------------- | :--------------------- | --------- |
-| CLI 포커스              | `F1`                | `F1`                   | `F1`                   | ㅤㅤ✅    |
-| 스킬 포커스           | `⌘ + 3`             | `Ctrl + 3`             | `Ctrl + 3`             | ㅤㅤ✅    |
-| 패널 최대화 / 최소화 | <code>⌘ + \`</code> | <code>Ctrl + \`</code> | <code>Ctrl + \`</code> | ㅤㅤ✅    |
-| -                         | -                   | -                      | -                      |           |
-| 측면 패널 (우/좌)        | `⌘ + CapsLock`      | `Ctrl + CapsLock`      | `Ctrl + CapsLock`      | ㅤㅤ✅    |
+| 명령어                            | 🍎 macOS            | 🟦 Windows             | 🐧 Linux               | 지원됨 |
+| :--------------------------------- | :------------------ | :--------------------- | :--------------------- | --------- |
+| `[`🌐`]` CLI에 포커스             | `F1`                | `F1`                   | `F1`                   | ㅤㅤ✅    |
+| `[`🌐`]` Skills에 포커스          | `⌘ + 3`             | `Ctrl + 3`             | `Ctrl + 3`             | ㅤㅤ✅    |
+| `[`🌐`]` 패널 최대화 / 최소화 | <code>⌘ + \`</code> | <code>Ctrl + \`</code> | <code>Ctrl + \`</code> | ㅤㅤ✅    |
+| `[`🌐`]` 사이드 패널 (우/좌) - [1]    | `Alt + CapsLock`    | `Alt + CapsLock`       | `Alt + CapsLock`       | ㅤㅤ✅    |
+| CLI Hub 패널 포커스 `[`🌐`]` - [2] | `Alt + E`           | `Alt + E`              | `Alt + E`              | ㅤㅤ✅    |
+| -                                  | -                   | -                      | -                      |           |
+| Prompt 도구 열기                   | `Shift + F1`        | `Shift + F1`           | `Shift + F1`           | ㅤㅤ✅    |
+| Translate 도구 열기                | `Shift + F2`        | `Shift + F2`           | `Shift + F2`           | ㅤㅤ✅    |
+| Status/use 도구 열기               | `Shift + F3`        | `Shift + F3`           | `Shift + F3`           | ㅤㅤ✅    |
+| Keymaps 도구 열기                  | `Shift + F4`        | `Shift + F4`           | `Shift + F4`           | ㅤㅤ✅    |
+| -                                  | -                   | -                      | -                      |           |
+| Commands 도구 열기                 | `Alt + F1`          | `Alt + F1`             | `Alt + F1`             | ㅤㅤ✅    |
+| 프롬프트 실행                     | `⌘ + Enter`         | `Ctrl + Enter`         | `Ctrl + Enter`         | ㅤㅤ✅    |
+| Prompt 필터 전환               | `Ctrl + Space`      | `Ctrl + Space`         | `Ctrl + Space`         | ㅤㅤ✅    |
+| 이전 세션                   | `Shift + Tab`       | `Shift + Tab`          | `Shift + Tab`          | ㅤㅤ✅    |
+| -                                  | -                   | -                      | -                      |           |
+| 다음 세션                       | `Tab`               | `Tab`                  | `Tab`                  | ㅤㅤ✅    |
+| 재생 / 일시정지 (듣기)                | `Space`             | `Space`                | `Space`                | ㅤㅤ✅    |
+| 에이전트 팔레트 전환              | `Tab`               | `Tab`                  | `Tab`                  | ㅤㅤ✅    |
+| 에이전트 팔레트 닫기               | `Escape`            | `Escape`               | `Escape`               | ㅤㅤ✅    |
+| CLI 선택기 열기                  | `CapsLock`          | `CapsLock`             | `CapsLock`             | ㅤㅤ✅    |
+| -                                  | -                   | -                      | -                      |           |
+| 현재 세션 닫기              | `Alt + -`           | `Alt + -`              | `Alt + -`              | ㅤㅤ✅    |
+| 새 CLI 세션                    | `Alt + +`           | `Alt + +`              | `Alt + +`              | ㅤㅤ✅    |
+| -                                  | -                   | -                      | -                      |           |
+| `[`Skill`]` - 생성 탭으로 이동     | `Alt + 1`           | `Alt + 1`              | `Alt + 1`              | ㅤㅤ✅    |
+| `[`Skill`]` - 설치 탭으로 이동    | `Alt + 2`           | `Alt + 2`              | `Alt + 2`              | ㅤㅤ✅    |
+| `[`Skill`]` - 로컬 탭으로 이동      | `Alt + 3`           | `Alt + 3`              | `Alt + 3`              | ㅤㅤ✅    |
 
 ---
 

@@ -31,15 +31,38 @@
 
 F1 は、VS Code を AI コーディングエージェントのハブに変えます。埋め込みターミナルで **Claude Code、Codex、Copilot、Cursor、Kiro、Kilo Code、OpenCode、Grok、Antigravity** — または任意のカスタム CLI — を開き、それらを瞬時に切り替え、より良いプロンプトを書き、すべてのエージェントがプロジェクトのコンテキストを安価に読み込めるようにします。
 
-## ⌨️ キーボードショートカット
+## ⌨️ キーボードショートカット - フォーカス `[`CLI Hub`]`
 
-| コマンド                   | 🍎 macOS            | 🟦 Windows             | 🐧 Linux               | サポート |
-| :------------------------ | :------------------ | :--------------------- | :--------------------- | --------- |
-| CLI にフォーカス            | `F1`                | `F1`                   | `F1`                   | ㅤㅤ✅    |
-| スキルにフォーカス         | `⌘ + 3`             | `Ctrl + 3`             | `Ctrl + 3`             | ㅤㅤ✅    |
-| パネルの最大化 / 最小化 | <code>⌘ + \`</code> | <code>Ctrl + \`</code> | <code>Ctrl + \`</code> | ㅤㅤ✅    |
-| -                         | -                   | -                      | -                      |           |
-| サイドパネル (右/左)          | `⌘ + CapsLock`      | `Ctrl + CapsLock`      | `Ctrl + CapsLock`      | ㅤㅤ✅    |
+| コマンド                            | 🍎 macOS            | 🟦 Windows             | 🐧 Linux               | サポート |
+| :--------------------------------- | :------------------ | :--------------------- | :--------------------- | --------- |
+| `[`🌐`]` CLIにフォーカス             | `F1`                | `F1`                   | `F1`                   | ㅤㅤ✅    |
+| `[`🌐`]` Skillsにフォーカス          | `⌘ + 3`             | `Ctrl + 3`             | `Ctrl + 3`             | ㅤㅤ✅    |
+| `[`🌐`]` パネルの最大化 / 最小化 | <code>⌘ + \`</code> | <code>Ctrl + \`</code> | <code>Ctrl + \`</code> | ㅤㅤ✅    |
+| `[`🌐`]` サイドパネル (右/左) - [1]    | `Alt + CapsLock`    | `Alt + CapsLock`       | `Alt + CapsLock`       | ㅤㅤ✅    |
+| CLI Hub パネルにフォーカス `[`🌐`]` - [2] | `Alt + E`           | `Alt + E`              | `Alt + E`              | ㅤㅤ✅    |
+| -                                  | -                   | -                      | -                      |           |
+| Prompt ツールを開く                   | `Shift + F1`        | `Shift + F1`           | `Shift + F1`           | ㅤㅤ✅    |
+| Translate ツールを開く                | `Shift + F2`        | `Shift + F2`           | `Shift + F2`           | ㅤㅤ✅    |
+| Status/use ツールを開く               | `Shift + F3`        | `Shift + F3`           | `Shift + F3`           | ㅤㅤ✅    |
+| Keymaps ツールを開く                  | `Shift + F4`        | `Shift + F4`           | `Shift + F4`           | ㅤㅤ✅    |
+| -                                  | -                   | -                      | -                      |           |
+| Commands ツールを開く                 | `Alt + F1`          | `Alt + F1`             | `Alt + F1`             | ㅤㅤ✅    |
+| プロンプトを実行                     | `⌘ + Enter`         | `Ctrl + Enter`         | `Ctrl + Enter`         | ㅤㅤ✅    |
+| Prompt フィルターの切り替え               | `Ctrl + Space`      | `Ctrl + Space`         | `Ctrl + Space`         | ㅤㅤ✅    |
+| 前のセッション                   | `Shift + Tab`       | `Shift + Tab`          | `Shift + Tab`          | ㅤㅤ✅    |
+| -                                  | -                   | -                      | -                      |           |
+| 次のセッション                       | `Tab`               | `Tab`                  | `Tab`                  | ㅤㅤ✅    |
+| 再生 / 一時停止 (聞く)                | `Space`             | `Space`                | `Space`                | ㅤㅤ✅    |
+| エージェントパレットの切り替え              | `Tab`               | `Tab`                  | `Tab`                  | ㅤㅤ✅    |
+| エージェントパレットを閉じる               | `Escape`            | `Escape`               | `Escape`               | ㅤㅤ✅    |
+| CLI セレクターを開く                  | `CapsLock`          | `CapsLock`             | `CapsLock`             | ㅤㅤ✅    |
+| -                                  | -                   | -                      | -                      |           |
+| 現在のセッションを閉じる              | `Alt + -`           | `Alt + -`              | `Alt + -`              | ㅤㅤ✅    |
+| 新しい CLI セッション                    | `Alt + +`           | `Alt + +`              | `Alt + +`              | ㅤㅤ✅    |
+| -                                  | -                   | -                      | -                      |           |
+| `[`Skill`]` - 作成タブへ移動     | `Alt + 1`           | `Alt + 1`              | `Alt + 1`              | ㅤㅤ✅    |
+| `[`Skill`]` - インストールタブへ移動    | `Alt + 2`           | `Alt + 2`              | `Alt + 2`              | ㅤㅤ✅    |
+| `[`Skill`]` - ローカルタブへ移動      | `Alt + 3`           | `Alt + 3`              | `Alt + 3`              | ㅤㅤ✅    |
 
 ---
 
