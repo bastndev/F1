@@ -31,15 +31,38 @@
 
 F1 将 VS Code 变成了 AI 编程代理的枢纽。在嵌入式终端中打开 **Claude Code, Codex, Copilot, Cursor, Kiro, Kilo Code, OpenCode, Grok, Antigravity** — 或任何自定义 CLI —，在它们之间瞬间切换，编写更好的提示，并让您的项目上下文对每个代理加载起来都很轻量级。
 
-## ⌨️ 键盘快捷键
+## ⌨️ 键盘快捷键 - 聚焦 `[`CLI Hub`]`
 
-| 命令                   | 🍎 macOS            | 🟦 Windows             | 🐧 Linux               | 支持 |
-| :------------------------ | :------------------ | :--------------------- | :--------------------- | --------- |
-| 聚焦 CLI            | `F1`                | `F1`                   | `F1`                   | ㅤㅤ✅    |
-| 聚焦 Skills        | `⌘ + 3`             | `Ctrl + 3`             | `Ctrl + 3`             | ㅤㅤ✅    |
-| 最大化 / 最小化面板 | <code>⌘ + \`</code> | <code>Ctrl + \`</code> | <code>Ctrl + \`</code> | ㅤㅤ✅    |
-| -                         | -                   | -                      | -                      |           |
-| 侧边面板 (右/左)          | `⌘ + CapsLock`      | `Ctrl + CapsLock`      | `Ctrl + CapsLock`      | ㅤㅤ✅    |
+| 命令                            | 🍎 macOS            | 🟦 Windows             | 🐧 Linux               | 支持 |
+| :--------------------------------- | :------------------ | :--------------------- | :--------------------- | --------- |
+| `[`🌐`]` 聚焦 CLI             | `F1`                | `F1`                   | `F1`                   | ㅤㅤ✅    |
+| `[`🌐`]` 聚焦 Skills          | `⌘ + 3`             | `Ctrl + 3`             | `Ctrl + 3`             | ㅤㅤ✅    |
+| `[`🌐`]` 最大化 / 最小化面板 | <code>⌘ + \`</code> | <code>Ctrl + \`</code> | <code>Ctrl + \`</code> | ㅤㅤ✅    |
+| `[`🌐`]` 侧边面板 (右/左) - [1]    | `Alt + CapsLock`    | `Alt + CapsLock`       | `Alt + CapsLock`       | ㅤㅤ✅    |
+| 聚焦 CLI Hub 面板 `[`🌐`]` - [2] | `Alt + E`           | `Alt + E`              | `Alt + E`              | ㅤㅤ✅    |
+| -                                  | -                   | -                      | -                      |           |
+| 打开 Prompt 工具                   | `Shift + F1`        | `Shift + F1`           | `Shift + F1`           | ㅤㅤ✅    |
+| 打开 Translate 工具                | `Shift + F2`        | `Shift + F2`           | `Shift + F2`           | ㅤㅤ✅    |
+| 打开 Status/use 工具               | `Shift + F3`        | `Shift + F3`           | `Shift + F3`           | ㅤㅤ✅    |
+| 打开 Keymaps 工具                  | `Shift + F4`        | `Shift + F4`           | `Shift + F4`           | ㅤㅤ✅    |
+| -                                  | -                   | -                      | -                      |           |
+| 打开 Commands 工具                 | `Alt + F1`          | `Alt + F1`             | `Alt + F1`             | ㅤㅤ✅    |
+| 执行 prompt                     | `⌘ + Enter`         | `Ctrl + Enter`         | `Ctrl + Enter`         | ㅤㅤ✅    |
+| 切换 Prompt 过滤器               | `Ctrl + Space`      | `Ctrl + Space`         | `Ctrl + Space`         | ㅤㅤ✅    |
+| 上一个会话                   | `Shift + Tab`       | `Shift + Tab`          | `Shift + Tab`          | ㅤㅤ✅    |
+| -                                  | -                   | -                      | -                      |           |
+| 下一个会话                       | `Tab`               | `Tab`                  | `Tab`                  | ㅤㅤ✅    |
+| 播放 / 暂停聆听                | `Space`             | `Space`                | `Space`                | ㅤㅤ✅    |
+| 切换代理面板              | `Tab`               | `Tab`                  | `Tab`                  | ㅤㅤ✅    |
+| 关闭代理面板               | `Escape`            | `Escape`               | `Escape`               | ㅤㅤ✅    |
+| 打开 CLI 选择器                  | `CapsLock`          | `CapsLock`             | `CapsLock`             | ㅤㅤ✅    |
+| -                                  | -                   | -                      | -                      |           |
+| 关闭当前会话              | `Alt + -`           | `Alt + -`              | `Alt + -`              | ㅤㅤ✅    |
+| 新建 CLI 会话                    | `Alt + +`           | `Alt + +`              | `Alt + +`              | ㅤㅤ✅    |
+| -                                  | -                   | -                      | -                      |           |
+| `[`Skill`]` - 转到 Create 标签页     | `Alt + 1`           | `Alt + 1`              | `Alt + 1`              | ㅤㅤ✅    |
+| `[`Skill`]` - 转到 Install 标签页    | `Alt + 2`           | `Alt + 2`              | `Alt + 2`              | ㅤㅤ✅    |
+| `[`Skill`]` - 转到 Local 标签页      | `Alt + 3`           | `Alt + 3`              | `Alt + 3`              | ㅤㅤ✅    |
 
 ---
 

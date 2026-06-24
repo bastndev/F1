@@ -31,15 +31,38 @@
 
 F1 biến VS Code thành trung tâm cho các tác nhân lập trình AI. Mở **Claude Code, Codex, Copilot, Cursor, Kiro, Kilo Code, OpenCode, Grok, Antigravity** — hoặc bất kỳ CLI tùy chỉnh nào — trong các terminal nhúng, chuyển đổi giữa chúng ngay lập tức, viết prompt tốt hơn và giữ cho ngữ cảnh dự án của bạn dễ dàng tải cho mọi tác nhân.
 
-## ⌨️ Phím tắt
+## ⌨️ Phím tắt - Tập trung `[`CLI Hub`]`
 
-| Lệnh                   | 🍎 macOS            | 🟦 Windows             | 🐧 Linux               | Hỗ trợ |
-| :------------------------ | :------------------ | :--------------------- | :--------------------- | --------- |
-| Tập trung vào CLI         | `F1`                | `F1`                   | `F1`                   | ㅤㅤ✅    |
-| Tập trung vào Skills      | `⌘ + 3`             | `Ctrl + 3`             | `Ctrl + 3`             | ㅤㅤ✅    |
-| Phóng to / Thu nhỏ Bảng điều khiển | <code>⌘ + \`</code> | <code>Ctrl + \`</code> | <code>Ctrl + \`</code> | ㅤㅤ✅    |
-| -                         | -                   | -                      | -                      |           |
-| Bảng điều khiển bên (P/T) | `⌘ + CapsLock`      | `Ctrl + CapsLock`      | `Ctrl + CapsLock`      | ㅤㅤ✅    |
+| Lệnh                            | 🍎 macOS            | 🟦 Windows             | 🐧 Linux               | Hỗ trợ |
+| :--------------------------------- | :------------------ | :--------------------- | :--------------------- | --------- |
+| `[`🌐`]` Tập trung vào CLI             | `F1`                | `F1`                   | `F1`                   | ㅤㅤ✅    |
+| `[`🌐`]` Tập trung vào Skills          | `⌘ + 3`             | `Ctrl + 3`             | `Ctrl + 3`             | ㅤㅤ✅    |
+| `[`🌐`]` Phóng to / Thu nhỏ Bảng | <code>⌘ + \`</code> | <code>Ctrl + \`</code> | <code>Ctrl + \`</code> | ㅤㅤ✅    |
+| `[`🌐`]` Bảng điều khiển bên (P/T) - [1]    | `Alt + CapsLock`    | `Alt + CapsLock`       | `Alt + CapsLock`       | ㅤㅤ✅    |
+| Tập trung vào Bảng CLI Hub `[`🌐`]` - [2] | `Alt + E`           | `Alt + E`              | `Alt + E`              | ㅤㅤ✅    |
+| -                                  | -                   | -                      | -                      |           |
+| Mở công cụ Prompt                   | `Shift + F1`        | `Shift + F1`           | `Shift + F1`           | ㅤㅤ✅    |
+| Mở công cụ Translate                | `Shift + F2`        | `Shift + F2`           | `Shift + F2`           | ㅤㅤ✅    |
+| Mở công cụ Status/use               | `Shift + F3`        | `Shift + F3`           | `Shift + F3`           | ㅤㅤ✅    |
+| Mở công cụ Keymaps                  | `Shift + F4`        | `Shift + F4`           | `Shift + F4`           | ㅤㅤ✅    |
+| -                                  | -                   | -                      | -                      |           |
+| Mở công cụ Commands                 | `Alt + F1`          | `Alt + F1`             | `Alt + F1`             | ㅤㅤ✅    |
+| Thực thi prompt                     | `⌘ + Enter`         | `Ctrl + Enter`         | `Ctrl + Enter`         | ㅤㅤ✅    |
+| Chuyển đổi bộ lọc Prompt               | `Ctrl + Space`      | `Ctrl + Space`         | `Ctrl + Space`         | ㅤㅤ✅    |
+| Phiên trước                   | `Shift + Tab`       | `Shift + Tab`          | `Shift + Tab`          | ㅤㅤ✅    |
+| -                                  | -                   | -                      | -                      |           |
+| Phiên tiếp theo                       | `Tab`               | `Tab`                  | `Tab`                  | ㅤㅤ✅    |
+| Phát / tạm dừng Nghe                | `Space`             | `Space`                | `Space`                | ㅤㅤ✅    |
+| Chuyển đổi bảng tác nhân              | `Tab`               | `Tab`                  | `Tab`                  | ㅤㅤ✅    |
+| Đóng bảng tác nhân               | `Escape`            | `Escape`               | `Escape`               | ㅤㅤ✅    |
+| Mở bộ chọn CLI                  | `CapsLock`          | `CapsLock`             | `CapsLock`             | ㅤㅤ✅    |
+| -                                  | -                   | -                      | -                      |           |
+| Đóng phiên hiện tại              | `Alt + -`           | `Alt + -`              | `Alt + -`              | ㅤㅤ✅    |
+| Phiên CLI mới                    | `Alt + +`           | `Alt + +`              | `Alt + +`              | ㅤㅤ✅    |
+| -                                  | -                   | -                      | -                      |           |
+| `[`Skill`]` - Chuyển đến tab Tạo     | `Alt + 1`           | `Alt + 1`              | `Alt + 1`              | ㅤㅤ✅    |
+| `[`Skill`]` - Chuyển đến tab Cài đặt    | `Alt + 2`           | `Alt + 2`              | `Alt + 2`              | ㅤㅤ✅    |
+| `[`Skill`]` - Chuyển đến tab Cục bộ      | `Alt + 3`           | `Alt + 3`              | `Alt + 3`              | ㅤㅤ✅    |
 
 ---
 
