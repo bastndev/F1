@@ -41,7 +41,7 @@ F1 biến VS Code thành trung tâm cho các tác nhân lập trình AI. Mở **
 | `[`🌐`]` Tập trung vào Skills             | `⌘ + 3`             | `Ctrl + 3`             | `Ctrl + 3`             | ㅤㅤ✅ |
 | `[`🌐`]` Phóng to / Thu nhỏ Bảng          | <code>⌘ + \`</code> | <code>Ctrl + \`</code> | <code>Ctrl + \`</code> | ㅤㅤ✅ |
 | `[`🌐`]` Bảng điều khiển bên (P/T) - [1]  | `Alt + CapsLock`    | `Alt + CapsLock`       | `Alt + CapsLock`       | ㅤㅤ✅ |
-| Tập trung vào Bảng CLI Hub `[`🌐`]` - [2] | `Alt + E`           | `Alt + E`              | `Alt + E`              | ㅤㅤ✅ |
+| Tập trung vào Bảng CLI `[`🌐`]` - [2] | `Alt + E`           | `Alt + E`              | `Alt + E`              | ㅤㅤ✅ |
 | -                                         | -                   | -                      | -                      |        |
 | Mở công cụ Prompt                         | `Shift + F1`        | `Shift + F1`           | `Shift + F1`           | ㅤㅤ✅ |
 | Mở công cụ Translate                      | `Shift + F2`        | `Shift + F2`           | `Shift + F2`           | ㅤㅤ✅ |
@@ -68,6 +68,14 @@ F1 biến VS Code thành trung tâm cho các tác nhân lập trình AI. Mở **
 
 ---
 
+## 🚀 Bắt đầu
+
+1. Nhấn **`F1`** để mở bảng điều khiển **CLI Hub**.
+2. Chọn một tác nhân từ trình khởi chạy (hoặc **Custom CLI** để chạy lệnh của riêng bạn).
+3. Mở **My Skills** từ thanh hoạt động (**`Ctrl+3`**) để cài đặt hoặc tạo skills.
+
+> Để sử dụng (**`Alt + E`**) & (**`Ctrl + 3`**) , bạn cần cài đặt **[Lynx Keymap Pro](https://open-vsx.org/extension/bastndev/Lynx-Keymap)**.
+
 <br>
 
 <h2 align="center"> Tính năng </h2>
@@ -93,15 +101,6 @@ F1 biến VS Code thành trung tâm cho các tác nhân lập trình AI. Mở **
 
 - Tạo bản đồ ngữ cảnh dự án `.f1/` đã cam kết để bất kỳ CLI nào cũng khởi chạy với ngữ cảnh được chia sẻ và giá rẻ.
 - Chuyển đổi theo dự án; các tệp hướng dẫn (`AGENTS.md` / `CLAUDE.md`) vẫn được trỏ tới ngữ cảnh.
-
-## 🚀 Bắt đầu
-
-1. Cài đặt **F1** từ [VS Code Marketplace](https://marketplace.visualstudio.com/items?itemName=bastndev.f1).
-2. Nhấn **`F1`** để mở bảng điều khiển **CLI Hub**.
-3. Chọn một tác nhân từ trình khởi chạy (hoặc **Custom CLI** để chạy lệnh của riêng bạn).
-4. Mở **My Skills** từ thanh hoạt động (**`Ctrl+3`**) để cài đặt hoặc tạo skills.
-
-> Lần khởi chạy đầu tiên của một tác nhân sẽ cài đặt CLI của nó nếu nó chưa có trên `PATH` của bạn.
 
 <br>
 

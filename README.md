@@ -41,7 +41,7 @@ F1 turns VS Code into a hub for AI coding agents. Open **Claude Code, Codex, Cop
 | `[`🌐`]` Focus the Skills          | `⌘ + 3`             | `Ctrl + 3`             | `Ctrl + 3`             | ㅤㅤ✅    |
 | `[`🌐`]` Maximize / Minimize Panel | <code>⌘ + \`</code> | <code>Ctrl + \`</code> | <code>Ctrl + \`</code> | ㅤㅤ✅    |
 | `[`🌐`]` Side Panel (R/L) - [1]    | `Alt + CapsLock`    | `Alt + CapsLock`       | `Alt + CapsLock`       | ㅤㅤ✅    |
-| Focus CLI Hub Panel `[`🌐`]` - [2] | `Alt + E`           | `Alt + E`              | `Alt + E`              | ㅤㅤ✅    |
+| Focus CLI Panel `[`🌐`]` - [2]     | `Alt + E`           | `Alt + E`              | `Alt + E`              | ㅤㅤ✅    |
 | -                                  | -                   | -                      | -                      |           |
 | Open Prompt tool                   | `Shift + F1`        | `Shift + F1`           | `Shift + F1`           | ㅤㅤ✅    |
 | Open Translate tool                | `Shift + F2`        | `Shift + F2`           | `Shift + F2`           | ㅤㅤ✅    |
@@ -68,6 +68,14 @@ F1 turns VS Code into a hub for AI coding agents. Open **Claude Code, Codex, Cop
 
 ---
 
+## 🚀 Getting started
+
+1. Press **`F1`** to open the **CLI Hub** panel.
+2. Pick an agent from the launcher (or **Custom CLI** to run your own command).
+3. Open **My Skills** from the activity bar (**`Ctrl+3`**) to install or create skills.
+
+> To use (**`Alt + E`**) & (**`Ctrl + 3`**) , you need to have **[Lynx Keymap Pro](https://open-vsx.org/extension/bastndev/Lynx-Keymap)** installed.
+
 <br>
 
 <h2 align="center"> 𝙵𝚎𝚊𝚝𝚞𝚛𝚎𝚜 </h2>
@@ -93,15 +101,6 @@ F1 turns VS Code into a hub for AI coding agents. Open **Claude Code, Codex, Cop
 
 - Generate a committed `.f1/` project‑context map so any CLI starts with cheap, shared context.
 - Per‑project toggle; instruction files (`AGENTS.md` / `CLAUDE.md`) stay pointed at the context.
-
-## 🚀 Getting started
-
-1. Install **F1** from the [VS Code Marketplace](https://marketplace.visualstudio.com/items?itemName=bastndev.f1).
-2. Press **`F1`** to open the **CLI Hub** panel.
-3. Pick an agent from the launcher (or **Custom CLI** to run your own command).
-4. Open **My Skills** from the activity bar (**`Ctrl+3`**) to install or create skills.
-
-> The first launch of an agent installs its CLI if it isn't already on your `PATH`.
 
 <br>
 

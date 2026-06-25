@@ -41,7 +41,7 @@ O F1 transforma o VS Code em um hub para agentes de codificação de IA. Abra **
 | `[`🌐`]` Focar nas Skills             | `⌘ + 3`             | `Ctrl + 3`             | `Ctrl + 3`             | ㅤㅤ✅    |
 | `[`🌐`]` Maximizar / Minimizar Painel | <code>⌘ + \`</code> | <code>Ctrl + \`</code> | <code>Ctrl + \`</code> | ㅤㅤ✅    |
 | `[`🌐`]` Painel Lateral (D/E) - [1]   | `Alt + CapsLock`    | `Alt + CapsLock`       | `Alt + CapsLock`       | ㅤㅤ✅    |
-| Focar Painel CLI Hub `[`🌐`]` - [2]   | `Alt + E`           | `Alt + E`              | `Alt + E`              | ㅤㅤ✅    |
+| Focar Painel CLI `[`🌐`]` - [2]   | `Alt + E`           | `Alt + E`              | `Alt + E`              | ㅤㅤ✅    |
 | -                                     | -                   | -                      | -                      |           |
 | Abrir ferramenta Prompt               | `Shift + F1`        | `Shift + F1`           | `Shift + F1`           | ㅤㅤ✅    |
 | Abrir ferramenta Translate            | `Shift + F2`        | `Shift + F2`           | `Shift + F2`           | ㅤㅤ✅    |
@@ -68,6 +68,14 @@ O F1 transforma o VS Code em um hub para agentes de codificação de IA. Abra **
 
 ---
 
+## 🚀 Começando
+
+1. Pressione **`F1`** para abrir o painel **CLI Hub**.
+2. Escolha um agente no lançador (ou **Custom CLI** para executar seu próprio comando).
+3. Abra **My Skills** na barra de atividades (**`Ctrl+3`**) para instalar ou criar skills.
+
+> Para usar (**`Alt + E`**) & (**`Ctrl + 3`**) , você precisa ter o **[Lynx Keymap Pro](https://open-vsx.org/extension/bastndev/Lynx-Keymap)** instalado.
+
 <br>
 
 <h2 align="center"> Recursos </h2>
@@ -93,15 +101,6 @@ O F1 transforma o VS Code em um hub para agentes de codificação de IA. Abra **
 
 - Gere um mapa de contexto de projeto `.f1/` comprometido para que qualquer CLI inicie com um contexto compartilhado e leve.
 - Alternância por projeto; arquivos de instrução (`AGENTS.md` / `CLAUDE.md`) permanecem apontados para o contexto.
-
-## 🚀 Começando
-
-1. Instale o **F1** no [VS Code Marketplace](https://marketplace.visualstudio.com/items?itemName=bastndev.f1).
-2. Pressione **`F1`** para abrir o painel **CLI Hub**.
-3. Escolha um agente no lançador (ou **Custom CLI** para executar seu próprio comando).
-4. Abra **My Skills** na barra de atividades (**`Ctrl+3`**) para instalar ou criar skills.
-
-> A primeira inicialização de um agente instala sua CLI se ela ainda não estiver em seu `PATH`.
 
 <br>
 
