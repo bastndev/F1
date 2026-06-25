@@ -41,7 +41,7 @@ F1 transforme VS Code en un hub pour les agents de codage IA. Ouvrez **Claude Co
 | `[`🌐`]` Focus sur les Skills               | `⌘ + 3`             | `Ctrl + 3`             | `Ctrl + 3`             | ㅤㅤ✅   |
 | `[`🌐`]` Maximiser / Minimiser le panneau   | <code>⌘ + \`</code> | <code>Ctrl + \`</code> | <code>Ctrl + \`</code> | ㅤㅤ✅   |
 | `[`🌐`]` Panneau latéral (D/G) - [1]        | `Alt + CapsLock`    | `Alt + CapsLock`       | `Alt + CapsLock`       | ㅤㅤ✅   |
-| Focus sur le panneau CLI Hub `[`🌐`]` - [2] | `Alt + E`           | `Alt + E`              | `Alt + E`              | ㅤㅤ✅   |
+| Focus sur le panneau CLI `[`🌐`]` - [2] | `Alt + E`           | `Alt + E`              | `Alt + E`              | ㅤㅤ✅   |
 | -                                           | -                   | -                      | -                      |          |
 | Ouvrir l'outil Prompt                       | `Shift + F1`        | `Shift + F1`           | `Shift + F1`           | ㅤㅤ✅   |
 | Ouvrir l'outil Translate                    | `Shift + F2`        | `Shift + F2`           | `Shift + F2`           | ㅤㅤ✅   |
@@ -68,6 +68,14 @@ F1 transforme VS Code en un hub pour les agents de codage IA. Ouvrez **Claude Co
 
 ---
 
+## 🚀 Pour commencer
+
+1. Appuyez sur **`F1`** pour ouvrir le panneau **CLI Hub**.
+2. Choisissez un agent depuis le lanceur (ou **Custom CLI** pour exécuter votre propre commande).
+3. Ouvrez **My Skills** depuis la barre d'activité (**`Ctrl+3`**) pour installer ou créer des skills.
+
+> Pour utiliser (**`Alt + E`**) & (**`Ctrl + 3`**) , vous devez avoir installé **[Lynx Keymap Pro](https://open-vsx.org/extension/bastndev/Lynx-Keymap)**.
+
 <br>
 
 <h2 align="center"> Fonctionnalités </h2>
@@ -93,15 +101,6 @@ F1 transforme VS Code en un hub pour les agents de codage IA. Ouvrez **Claude Co
 
 - Générez une carte de contexte `.f1/` sauvegardée pour que n'importe quel CLI démarre avec un contexte partagé et léger.
 - Bascule par projet ; les fichiers d'instructions (`AGENTS.md` / `CLAUDE.md`) restent pointés sur le contexte.
-
-## 🚀 Pour commencer
-
-1. Installez **F1** depuis le [VS Code Marketplace](https://marketplace.visualstudio.com/items?itemName=bastndev.f1).
-2. Appuyez sur **`F1`** pour ouvrir le panneau **CLI Hub**.
-3. Choisissez un agent depuis le lanceur (ou **Custom CLI** pour exécuter votre propre commande).
-4. Ouvrez **My Skills** depuis la barre d'activité (**`Ctrl+3`**) pour installer ou créer des skills.
-
-> Le premier lancement d'un agent installe son CLI s'il n'est pas déjà dans votre `PATH`.
 
 <br>
 

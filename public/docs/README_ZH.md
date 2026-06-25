@@ -41,7 +41,7 @@ F1 将 VS Code 变成了 AI 编程代理的枢纽。在嵌入式终端中打开 
 | `[`🌐`]` 聚焦 Skills              | `⌘ + 3`             | `Ctrl + 3`             | `Ctrl + 3`             | ㅤㅤ✅ |
 | `[`🌐`]` 最大化 / 最小化面板      | <code>⌘ + \`</code> | <code>Ctrl + \`</code> | <code>Ctrl + \`</code> | ㅤㅤ✅ |
 | `[`🌐`]` 侧边面板 (右/左) - [1]   | `Alt + CapsLock`    | `Alt + CapsLock`       | `Alt + CapsLock`       | ㅤㅤ✅ |
-| 聚焦 CLI Hub 面板 `[`🌐`]` - [2]  | `Alt + E`           | `Alt + E`              | `Alt + E`              | ㅤㅤ✅ |
+| 聚焦 CLI 面板 `[`🌐`]` - [2]  | `Alt + E`           | `Alt + E`              | `Alt + E`              | ㅤㅤ✅ |
 | -                                 | -                   | -                      | -                      |        |
 | 打开 Prompt 工具                  | `Shift + F1`        | `Shift + F1`           | `Shift + F1`           | ㅤㅤ✅ |
 | 打开 Translate 工具               | `Shift + F2`        | `Shift + F2`           | `Shift + F2`           | ㅤㅤ✅ |
@@ -68,6 +68,14 @@ F1 将 VS Code 变成了 AI 编程代理的枢纽。在嵌入式终端中打开 
 
 ---
 
+## 🚀 快速入门
+
+1. 按 **`F1`** 打开 **CLI Hub** 面板。
+2. 从启动器选择一个代理（或 **Custom CLI** 来运行您自己的命令）。
+3. 从活动栏 (**`Ctrl+3`**) 打开 **My Skills** 以安装或创建技能。
+
+> 要使用 (**`Alt + E`**) & (**`Ctrl + 3`**) ，您需要安装 **[Lynx Keymap Pro](https://open-vsx.org/extension/bastndev/Lynx-Keymap)**。
+
 <br>
 
 <h2 align="center"> 特性 </h2>
@@ -93,15 +101,6 @@ F1 将 VS Code 变成了 AI 编程代理的枢纽。在嵌入式终端中打开 
 
 - 生成一个已提交的 `.f1/` 项目上下文映射，以便任何 CLI 都以廉价、共享的上下文启动。
 - 每个项目切换；指令文件 (`AGENTS.md` / `CLAUDE.md`) 保持指向上下文。
-
-## 🚀 快速入门
-
-1. 从 [VS Code Marketplace](https://marketplace.visualstudio.com/items?itemName=bastndev.f1) 安装 **F1**。
-2. 按 **`F1`** 打开 **CLI Hub** 面板。
-3. 从启动器选择一个代理（或 **Custom CLI** 来运行您自己的命令）。
-4. 从活动栏 (**`Ctrl+3`**) 打开 **My Skills** 以安装或创建技能。
-
-> 如果其 CLI 尚不在您的 `PATH` 中，第一次启动代理会安装其 CLI。
 
 <br>
 

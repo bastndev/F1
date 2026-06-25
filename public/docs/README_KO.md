@@ -41,7 +41,7 @@ F1은 VS Code를 AI 코딩 에이전트의 허브로 바꿉니다. 내장된 터
 | `[`🌐`]` Skills에 포커스           | `⌘ + 3`             | `Ctrl + 3`             | `Ctrl + 3`             | ㅤㅤ✅ |
 | `[`🌐`]` 패널 최대화 / 최소화      | <code>⌘ + \`</code> | <code>Ctrl + \`</code> | <code>Ctrl + \`</code> | ㅤㅤ✅ |
 | `[`🌐`]` 사이드 패널 (우/좌) - [1] | `Alt + CapsLock`    | `Alt + CapsLock`       | `Alt + CapsLock`       | ㅤㅤ✅ |
-| CLI Hub 패널 포커스 `[`🌐`]` - [2] | `Alt + E`           | `Alt + E`              | `Alt + E`              | ㅤㅤ✅ |
+| CLI 패널 포커스 `[`🌐`]` - [2] | `Alt + E`           | `Alt + E`              | `Alt + E`              | ㅤㅤ✅ |
 | -                                  | -                   | -                      | -                      |        |
 | Prompt 도구 열기                   | `Shift + F1`        | `Shift + F1`           | `Shift + F1`           | ㅤㅤ✅ |
 | Translate 도구 열기                | `Shift + F2`        | `Shift + F2`           | `Shift + F2`           | ㅤㅤ✅ |
@@ -68,6 +68,14 @@ F1은 VS Code를 AI 코딩 에이전트의 허브로 바꿉니다. 내장된 터
 
 ---
 
+## 🚀 시작하기
+
+1. **`F1`**을 눌러 **CLI Hub** 패널을 여세요.
+2. 런처에서 에이전트를 선택하세요 (또는 고유한 명령을 실행하려면 **Custom CLI**를 선택하세요).
+3. 활동 막대에서 **My Skills**를 열어(**`Ctrl+3`**) 스킬을 설치하거나 생성하세요.
+
+> (**`Alt + E`**) 및 (**`Ctrl + 3`**) 를 사용하려면 **[Lynx Keymap 시Pro](https://open-vsx.org/extension/bastndev/Lynx-Keymap)** 가 설치되어 있어야 합니다.
+
 <br>
 
 <h2 align="center"> 기능 </h2>
@@ -93,15 +101,6 @@ F1은 VS Code를 AI 코딩 에이전트의 허브로 바꿉니다. 내장된 터
 
 - 모든 CLI가 저렴한 공유 컨텍스트로 시작할 수 있도록 커밋된 `.f1/` 프로젝트 컨텍스트 맵을 생성하세요.
 - 프로젝트별 토글; 명령어 파일(`AGENTS.md` / `CLAUDE.md`)은 계속해서 컨텍스트를 가리킵니다.
-
-## 🚀 시작하기
-
-1. [VS Code Marketplace](https://marketplace.visualstudio.com/items?itemName=bastndev.f1)에서 **F1**을 설치하세요.
-2. **`F1`**을 눌러 **CLI Hub** 패널을 여세요.
-3. 런처에서 에이전트를 선택하세요 (또는 고유한 명령을 실행하려면 **Custom CLI**를 선택하세요).
-4. 활동 막대에서 **My Skills**를 열어(**`Ctrl+3`**) 스킬을 설치하거나 생성하세요.
-
-> 에이전트를 처음 실행할 때 `PATH`에 CLI가 아직 없으면 설치됩니다.
 
 <br>
 
