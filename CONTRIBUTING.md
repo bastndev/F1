@@ -6,6 +6,8 @@ Before contributing, read the **[Architecture Guide](https://github.com/bastndev
 
 ## Quick Start
 
+> **Important:** To develop, package, or contribute to this project, you must install the [ATM extension](https://open-vsx.org/extension/bastndev/atm).
+
 1. **[Fork the repository](https://github.com/bastndev/F1/fork)** on GitHub
 2. Clone your fork and set up:
 
