@@ -118,7 +118,8 @@ const createUsageBar = (bar: UsageBar) => {
 	label.title = bar.label;
 
 	const value = document.createElement('span');
-	if (bar.percent <= 0) {
+	const isExhausted = bar.percent < 1;
+	if (isExhausted) {
 		value.textContent = 'Quota exhausted';
 		value.classList.add('is-exhausted-text');
 	} else {
@@ -130,7 +131,7 @@ const createUsageBar = (bar: UsageBar) => {
 
 	const track = document.createElement('div');
 	track.className = 'use-usage-bar';
-	if (bar.percent <= 0) {
+	if (isExhausted) {
 		track.classList.add('is-empty');
 	}
 	track.setAttribute('aria-hidden', 'true');
@@ -208,6 +209,12 @@ const renderUsageSnapshot = (host: HTMLElement, snapshot: CliUsageSnapshot | und
 		meta.replaceChildren(...parsed.metrics.map(createUsageMetric));
 	}
 
+	// Mark the modal as exhausted if ANY bar is at/near zero — drives the
+	// red top-accent-line effect via CSS [data-exhausted].
+	const modal = host.querySelector<HTMLElement>('.use-modal');
+	const anyExhausted = parsed.bars.some((bar) => bar.percent < 1);
+	modal?.setAttribute('data-exhausted', String(anyExhausted));
+
 	// Nice appear transition + animated bar fills (prevents jarring pop-in)
 	if (result) {
 		result.style.opacity = '0';
@@ -224,7 +231,9 @@ const renderUsageSnapshot = (host: HTMLElement, snapshot: CliUsageSnapshot | und
 				if (fills[i]) {
 					fills[i].style.width = `${clampPercent(bar.percent)}%`;
 					fills[i].className = '';
-					if (bar.percent <= 15) {
+					if (bar.percent < 1) {
+						// Already styled as exhausted via is-empty on the track
+					} else if (bar.percent <= 15) {
 						fills[i].classList.add('is-danger');
 					} else if (bar.percent <= 59) {
 						fills[i].classList.add('is-warning');

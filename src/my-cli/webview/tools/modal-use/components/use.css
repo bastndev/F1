@@ -33,6 +33,29 @@
 	opacity: 0.55;
 	z-index: 10;
 	pointer-events: none;
+	transition: background 400ms ease, opacity 400ms ease;
+}
+
+/* When any quota group is exhausted: top accent line turns red and pulses */
+.use-modal[data-exhausted="true"]::before {
+	height: 2px;
+	background: linear-gradient(
+		90deg,
+		transparent 0%,
+		color-mix(in srgb, #ef4444 60%, transparent) 15%,
+		#ef4444 35%,
+		color-mix(in srgb, #ef4444 80%, #fff 20%) 50%,
+		#ef4444 65%,
+		color-mix(in srgb, #ef4444 60%, transparent) 85%,
+		transparent 100%
+	);
+	opacity: 1;
+	animation: use-exhausted-line-pulse 2s ease-in-out infinite;
+}
+
+@keyframes use-exhausted-line-pulse {
+	0%, 100% { opacity: 1; filter: brightness(1); }
+	50% { opacity: 0.55; filter: brightness(1.4); }
 }
 
 .use-header {
