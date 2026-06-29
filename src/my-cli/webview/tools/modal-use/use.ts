@@ -118,7 +118,7 @@ const createUsageBar = (bar: UsageBar) => {
 	label.title = bar.label;
 
 	const value = document.createElement('span');
-	value.textContent = `${formatPercent(bar.percent)} used`;
+	value.textContent = `${formatPercent(bar.percent)} available`;
 	value.title = value.textContent;
 
 	header.append(label, value);
@@ -215,6 +215,12 @@ const renderUsageSnapshot = (host: HTMLElement, snapshot: CliUsageSnapshot | und
 			parsed.bars.forEach((bar, i) => {
 				if (fills[i]) {
 					fills[i].style.width = `${clampPercent(bar.percent)}%`;
+					fills[i].className = '';
+					if (bar.percent <= 15) {
+						fills[i].classList.add('is-danger');
+					} else if (bar.percent <= 59) {
+						fills[i].classList.add('is-warning');
+					}
 				}
 			});
 		});

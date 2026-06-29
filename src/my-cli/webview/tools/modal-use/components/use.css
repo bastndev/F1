@@ -492,19 +492,28 @@
 	background: color-mix(in srgb, var(--vscode-editorGroup-border, rgba(128, 128, 128, 0.18)) 82%, transparent);
 }
 
+.use-usage-bar span.is-warning {
+	--bar-color: #f59e0b;
+}
+
+.use-usage-bar span.is-danger {
+	--bar-color: #ef4444;
+}
+
 .use-usage-bar span {
 	display: block;
 	width: 0%;
 	height: 100%;
 	border-radius: inherit;
+	--bar-color: var(--agent-accent, #10b981);
 	background: linear-gradient(
 		90deg,
-		color-mix(in srgb, var(--agent-accent, #AFA9EC) 70%, #ffffff 18%),
-		var(--agent-accent, #AFA9EC),
-		color-mix(in srgb, var(--agent-accent, #AFA9EC) 72%, #000000 16%)
+		color-mix(in srgb, var(--bar-color) 70%, #ffffff 18%),
+		var(--bar-color),
+		color-mix(in srgb, var(--bar-color) 72%, #000000 16%)
 	);
-	box-shadow: 0 0 12px color-mix(in srgb, var(--agent-accent, #AFA9EC) 34%, transparent);
-	transition: width 180ms ease;
+	box-shadow: 0 0 12px color-mix(in srgb, var(--bar-color) 34%, transparent);
+	transition: width 180ms ease, background 180ms ease, box-shadow 180ms ease;
 }
 
 .use-usage-grid {

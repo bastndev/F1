@@ -29,8 +29,8 @@ export const parseClaudeUsage = (raw: string): ParsedUsage => {
 		title: 'Claude usage',
 		summary: `${formatPercent(weekPercent)} week`,
 		bars: [
-			{ label: 'Current session', percent: sessionPercent, detail: `resets ${sessionReset}` },
-			{ label: 'Current week', percent: weekPercent, detail: `resets ${weekReset}` }
+			{ label: 'Current session', percent: 100 - sessionPercent, detail: `resets ${sessionReset}` },
+			{ label: 'Current week', percent: 100 - weekPercent, detail: `resets ${weekReset}` }
 		],
 		metrics: [
 			{ label: 'session', value: `${formatPercent(sessionPercent)} used` },
