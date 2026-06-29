@@ -21,14 +21,14 @@ export type CliAgent = {
 
 export const cliAgents: CliAgent[] = [
 	{ label: 'OpenCode', command: 'opencode', args: [], slug: 'opencode', aliases: ['opencode', 'open code', 'op'], iconFile: 'opencode.svg', lightIcon: true },
-	{ label: 'Codex CLI', command: 'codex', args: [], slug: 'codex', aliases: ['codex', 'codex cli', 'code', 'co', 'c'], iconFile: 'codex.svg' },
 	{ label: 'Claude Code', command: 'claude', args: [], slug: 'claude', aliases: ['claude', 'claude code'], iconFile: 'claudecode.svg' },
+	{ label: 'Codex CLI', command: 'codex', args: [], slug: 'codex', aliases: ['codex', 'codex cli', 'code', 'co', 'c'], iconFile: 'codex.svg' },
 	{ label: 'Antigravity CLI', command: 'agy', args: [], slug: 'antigravity', aliases: ['antigravity', 'antigravity cli', 'agy', 'an', 'ant'], iconFile: 'Antigravity_cli.svg' },
-	{ label: 'Copilot CLI', command: 'copilot', args: [], slug: 'copilot', aliases: ['github copilot', 'copilot', 'copilot cli'], iconFile: 'github-copilot.svg', darkIcon: true },
-	{ label: 'Cursor', command: 'cursor', args: ['agent'], slug: 'cursor', aliases: ['cursor'], iconFile: 'cursor.svg', darkIcon: true },
 	{ label: 'Kiro CLI', command: 'kiro-cli', args: [], slug: 'kiro', aliases: ['kiro', 'kiro cli'], iconFile: 'kiro.svg' },
+	{ label: 'Cursor', command: 'cursor', args: ['agent'], slug: 'cursor', aliases: ['cursor'], iconFile: 'cursor.svg', darkIcon: true },
+	{ label: 'Grok', command: 'grok', args: [], slug: 'grok', aliases: ['grok'], iconFile: 'grok.svg', darkIcon: true },
 	{ label: 'Kilo Code', command: 'kilo', args: [], slug: 'kilocode', aliases: ['kilo', 'kilo code', 'code', 'k'], iconFile: 'kilocode.svg', darkIcon: true },
-	{ label: 'Grok', command: 'grok', args: [], slug: 'grok', aliases: ['grok'], iconFile: 'grok.svg', darkIcon: true }
+	{ label: 'Copilot CLI', command: 'copilot', args: [], slug: 'copilot', aliases: ['github copilot', 'copilot', 'copilot cli'], iconFile: 'github-copilot.svg', darkIcon: true }
 ];
 
 export const allowedAgents = new Set(cliAgents.map((agent) => agent.label));
