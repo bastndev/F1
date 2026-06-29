@@ -276,17 +276,7 @@ const getPaletteOptions = () => {
 	return Array.from(agentIconPalette.querySelectorAll<HTMLButtonElement>('.agent-icon-option'));
 };
 
-const getPaletteModels = () => {
-	const paletteModels = [...models];
-	const kiroIndex = paletteModels.findIndex((model) => model.label === 'Kiro CLI');
-	if (kiroIndex < 0) {
-		return paletteModels;
-	}
 
-	const [kiroModel] = paletteModels.splice(kiroIndex, 1);
-	paletteModels.push(kiroModel);
-	return paletteModels;
-};
 
 const handlePaletteOptionKeydown = (
 	event: KeyboardEvent,
@@ -364,7 +354,7 @@ const setPaletteOpen = (isOpen: boolean, shouldFocus = false, shouldAnimate = tr
 const renderIconPalette = () => {
 	agentIconPalette.replaceChildren();
 
-	for (const model of getPaletteModels()) {
+	for (const [index, model] of models.entries()) {
 		const option = document.createElement('button');
 		option.className = 'agent-icon-option';
 		option.classList.toggle('is-installed', model.installed);
@@ -389,7 +379,11 @@ const renderIconPalette = () => {
 		status.className = 'agent-icon-status';
 		status.textContent = model.installed ? 'Ready' : 'Missing';
 
-		option.append(image, status);
+		const badge = document.createElement('span');
+		badge.className = 'agent-icon-number';
+		badge.textContent = String(index + 1);
+
+		option.append(image, status, badge);
 		option.addEventListener('click', () => openModel(model));
 		option.addEventListener('focus', () => {
 			const matches = [{ model, score: 100 }];
@@ -487,18 +481,24 @@ cliInput.addEventListener('keydown', (event) => {
 	}
 });
 
-selectedOption.addEventListener('click', openSelectedModel);
-selectedOption.addEventListener('keydown', (event) => {
-	if (event.key === 'Enter' || event.key === ' ') {
-		event.preventDefault();
-		openSelectedModel();
-	}
-});
-
 const tutorialButton = document.getElementById('cli-tutorial-button');
 tutorialButton?.addEventListener('click', () => {
 	vscode.postMessage({ type: 'cli.openTutorial' });
 });
+
+// Footer pill toggle (visual only — functionality to be wired later)
+const footerToggle = document.getElementById('footer-mode-toggle') as HTMLButtonElement | null;
+const footerToggleLabel = footerToggle?.querySelector<HTMLSpanElement>('.footer-toggle-label');
+if (footerToggle && footerToggleLabel) {
+	footerToggle.addEventListener('click', () => {
+		const isOn = footerToggle.classList.toggle('is-on');
+		footerToggle.setAttribute('aria-pressed', String(isOn));
+		document.body.classList.toggle('is-smart-mode', isOn);
+		footerToggleLabel.textContent = isOn
+			? (footerToggleLabel.dataset.on ?? 'Smart + Skills')
+			: (footerToggleLabel.dataset.off ?? '');
+	});
+}
 
 const scheduleCycle = () => {
 	setTimeout(() => {

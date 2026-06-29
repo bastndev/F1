@@ -20,8 +20,16 @@
 			<div class="input-wrapper">
 				<input id="cli-input" type="text" placeholder="Type or select one of the options..." autocomplete="off" spellcheck="false" autofocus>
 			</div>
-			<div id="selected-option" class="input-footer" role="button" tabindex="0">
+			<div id="selected-option" class="input-footer">
 				<span class="highlight">Build</span> &middot; <span id="ai-model-name" class="animated-text">OpenCode</span><span id="secondary-suggestions" class="secondary-suggestions"></span>
+				<div class="footer-toggle-wrap" role="none">
+					<button id="footer-mode-toggle" class="footer-toggle" type="button" aria-label="Toggle mode" aria-pressed="false" tabindex="0" onclick="event.stopPropagation()">
+						<span class="footer-toggle-label" data-off="" data-on="Smart + Skills"></span>
+						<span class="footer-toggle-track">
+							<span class="footer-toggle-thumb"></span>
+						</span>
+					</button>
+				</div>
 			</div>
 		</div>
 
