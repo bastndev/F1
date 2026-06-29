@@ -31,6 +31,8 @@ export const PERSONAL_MISTAKES: Record<string, string> = {
 	'ocure': 'ocurre',
 	'desactibe': 'desactive',
 	'traducion': 'traduccion',
+	'abarillo': 'amarillo',
+	'aslo': 'as lo',
 
 
     // world 
