@@ -1,4 +1,28 @@
 export const PERSONAL_MISTAKES: Record<string, string> = {
+	// NOTES
+	'empesar': 'empezar',
+	'empesaremos': 'empezaremos',
+	'rchivos': 'archivos',
+	'preciona': 'presiona',
+	'rediresionara': 'redireccionará',
+	'redirecionara': 'redireccionará',
+	'sustentalo': 'susténtalo',
+	'tines': 'tienes',
+	'pequeno': 'pequeño',
+	'senal': 'señal',
+	'packete': 'paquete',
+	'rebises': 'revises',
+	'mobia': 'movia',
+	'tube': 'tuve',
+	'vervel': 'vercel',
+	'desicion': 'decision',
+	'aceso': 'acceso',
+	'apr': 'para',
+	'aga': 'haga',
+	'promot': 'prompt',
+	'traducion': 'traduccion',
+
+
     // world 
 	'ideomas': 'idiomas',
 	'mejroa': 'mejora',
