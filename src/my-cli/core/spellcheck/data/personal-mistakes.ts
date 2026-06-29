@@ -3,7 +3,6 @@ export const PERSONAL_MISTAKES: Record<string, string> = {
 	'empesar': 'empezar',
 	'empesaremos': 'empezaremos',
 	'rchivos': 'archivos',
-	'preciona': 'presiona',
 	'rediresionara': 'redireccionará',
 	'redirecionara': 'redireccionará',
 	'sustentalo': 'susténtalo',
@@ -34,6 +33,9 @@ export const PERSONAL_MISTAKES: Record<string, string> = {
 	'traducion': 'traduccion',
 	'abarillo': 'amarillo',
 	'aslo': 'as lo',
+	'pco': 'poco',
+	'preciono': 'presiono',
+	'preciona': 'presionar',
 	'amejorar': 'mejorar',
 
 
@@ -163,7 +165,6 @@ export const PERSONAL_MISTAKES: Record<string, string> = {
 	'segudnos': 'segundos',
 	'segundoass': 'segundos',
 	'domora': 'demora',
-	'preciono': 'presiono',
 
 	// Fast-typing word merges and drops
 	'quieroq ue': 'quiero que',
