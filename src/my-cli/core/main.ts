@@ -130,7 +130,7 @@ export class MyCliViewProvider implements vscode.WebviewViewProvider, vscode.Dis
 			}
 
 			if (message.type === 'cli.openTutorial') {
-				this.openTutorial();
+				void vscode.env.openExternal(vscode.Uri.parse('https://www.gohit.xyz/extension/f1'));
 				return;
 			}
 

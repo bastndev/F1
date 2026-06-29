@@ -1,4 +1,5 @@
 import { getAgentSlug as resolveAgentSlug } from '../../shared/agents';
+import { matchAgentShortcut } from '../../../shared/keymaps/cli';
 
 type VsCodeApi = {
 	getState: () => unknown;
@@ -98,7 +99,7 @@ let currentIndex = typeof persistedState?.currentIndex === 'number'
 	: 0;
 let selectedModel: LauncherModel | undefined = models.find((model) => model.label === persistedState?.selectedAgent) || models[currentIndex] || models[0];
 let selectedCustomCli = false;
-let paletteOpen = true;
+let savedInputValue = '';
 let invalidInputTimer: ReturnType<typeof setTimeout> | undefined;
 
 const textElement = getRequiredElement<HTMLSpanElement>('ai-model-name');
@@ -286,13 +287,6 @@ const handlePaletteOptionKeydown = (
 	const options = getPaletteOptions();
 	const index = options.indexOf(option);
 
-	if (event.key === 'Tab') {
-		event.preventDefault();
-		setPaletteOpen(false);
-		cliInput.focus();
-		return;
-	}
-
 	if (event.key === 'Enter' || event.key === ' ') {
 		event.preventDefault();
 		activate();
@@ -301,7 +295,6 @@ const handlePaletteOptionKeydown = (
 
 	if (event.key === 'Escape') {
 		event.preventDefault();
-		setPaletteOpen(false);
 		cliInput.focus();
 		return;
 	}
@@ -318,39 +311,6 @@ const handlePaletteOptionKeydown = (
 	}
 };
 
-const setPaletteOpen = (isOpen: boolean, shouldFocus = false, shouldAnimate = true) => {
-	paletteOpen = isOpen;
-	if (!shouldAnimate) {
-		agentIconPalette.style.transition = 'none';
-	}
-
-	document.body.classList.toggle('has-agent-palette', isOpen);
-	agentIconPalette.classList.toggle('is-open', isOpen);
-	agentIconPalette.setAttribute('aria-hidden', isOpen ? 'false' : 'true');
-	saveLauncherState();
-
-	if (!shouldAnimate) {
-		agentIconPalette.offsetHeight;
-		requestAnimationFrame(() => {
-			agentIconPalette.style.transition = '';
-		});
-	}
-
-	for (const option of Array.from(agentIconPalette.querySelectorAll<HTMLButtonElement>('.agent-icon-option'))) {
-		option.tabIndex = isOpen ? 0 : -1;
-	}
-
-	if (!isOpen) {
-		return;
-	}
-
-	if (shouldFocus) {
-		agentIconPalette.querySelector<HTMLElement>('.agent-icon-option')?.focus();
-	}
-
-	syncPreviewIndicator();
-};
-
 const renderIconPalette = () => {
 	agentIconPalette.replaceChildren();
 
@@ -362,7 +322,7 @@ const renderIconPalette = () => {
 		option.classList.toggle('has-dark-icon', model.darkIcon === true);
 		option.classList.toggle('has-light-icon', model.lightIcon === true);
 		option.type = 'button';
-		option.tabIndex = -1;
+		option.tabIndex = 0;
 		option.dataset.agent = model.label;
 		option.title = model.installed ? model.label : `${model.label} is not installed`;
 		option.setAttribute('aria-label', option.title);
@@ -397,7 +357,7 @@ const renderIconPalette = () => {
 	const customOption = document.createElement('button');
 	customOption.className = 'agent-icon-option agent-icon-option--custom is-installed';
 	customOption.type = 'button';
-	customOption.tabIndex = -1;
+	customOption.tabIndex = 0;
 	customOption.dataset.customCli = 'true';
 	customOption.title = `Open ${customCliLabel}`;
 	customOption.setAttribute('aria-label', customOption.title);
@@ -431,7 +391,10 @@ if (restoreQuery) {
 } else {
 	setSelectedModel(selectedModel, false);
 }
-setPaletteOpen(paletteOpen, false, false);
+document.body.classList.add('has-agent-palette');
+agentIconPalette.classList.add('is-open');
+agentIconPalette.setAttribute('aria-hidden', 'false');
+syncPreviewIndicator();
 
 cliInput.addEventListener('input', () => {
 	const lowerValue = cliInput.value.toLowerCase();
@@ -456,28 +419,33 @@ cliInput.addEventListener('input', () => {
 	}
 });
 
+window.addEventListener('keydown', (event) => {
+	if (event.key === 'Tab') {
+		event.preventDefault();
+		footerToggle?.click();
+		return;
+	}
+
+	if (document.body.classList.contains('is-smart-mode')) {
+		const shortcutMatch = matchAgentShortcut(event);
+		if (shortcutMatch) {
+			event.preventDefault();
+			const matchedModel = models.find((m) => m.label === shortcutMatch.agentLabel);
+			if (matchedModel) {
+				openModel(matchedModel);
+			}
+		}
+	}
+});
+
 cliInput.addEventListener('keydown', (event) => {
 	if (event.key === 'Enter') {
 		openSelectedModel();
 		return;
 	}
 
-	if (event.key === 'Tab') {
-		if (!event.shiftKey) {
-			event.preventDefault();
-			setPaletteOpen(!paletteOpen);
-			return;
-		}
-
-		if (paletteOpen) {
-			event.preventDefault();
-			setPaletteOpen(false);
-		}
-	}
-
-	if (event.key === 'Escape' && paletteOpen) {
+	if (event.key === 'Escape') {
 		event.preventDefault();
-		setPaletteOpen(false);
 	}
 });
 
@@ -497,6 +465,18 @@ if (footerToggle && footerToggleLabel) {
 		footerToggleLabel.textContent = isOn
 			? (footerToggleLabel.dataset.on ?? 'Smart + Skills')
 			: (footerToggleLabel.dataset.off ?? '');
+
+		if (isOn) {
+			savedInputValue = cliInput.value;
+			cliInput.value = '';
+			cliInput.disabled = true;
+			cliInput.dispatchEvent(new Event('input'));
+		} else {
+			cliInput.disabled = false;
+			cliInput.value = savedInputValue;
+			cliInput.dispatchEvent(new Event('input'));
+			cliInput.focus();
+		}
 	});
 }
 
