@@ -1,6 +1,6 @@
 export const PROTECTED_TERMS = new Set<string>([
 	// Word
-	'analizalo', 'banderitas', 'voice-tts', 'voice tts', 'play', 'cositas','autorizacion','automaticamente', 'telemetria', 'especificamente', 'inspirate',	'susténtalo', 'sustentalo', 'redireccionará', 'mobile', 'footer', 'header', 'link', 'mejoralo', 'blur', 'revisalo', 'vistaz', 'peru', 'links', 'google translate', 'dev', 'Mejorame', 'google', 'scroll', 'translate', 'hover', 'copy','Smart',
+	'analizalo', 'banderitas', 'voice-tts', 'voice tts', 'play', 'cositas','autorizacion','automaticamente', 'telemetria', 'especificamente', 'inspirate',	'susténtalo', 'sustentalo', 'redireccionará', 'mobile', 'footer', 'header', 'link', 'mejoralo', 'blur', 'revisalo', 'vistaz', 'peru', 'links', 'google translate', 'dev', 'Mejorame', 'google', 'scroll', 'translate', 'hover', 'copy','Smart', 'hagamoslo',
 
 	// Frameworks & libraries
 	'react', 'vue', 'angular', 'svelte', 'solid', 'nextjs', 'nuxt', 'astro', 'remix',
