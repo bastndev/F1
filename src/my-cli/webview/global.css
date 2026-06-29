@@ -354,7 +354,7 @@ body.is-smart-mode .agent-icon-option.is-preview .agent-icon-status {
 	padding: 0 4px;
 	height: 14px;
 	border-radius: 4px 0 8px 0;
-	background: #f1f5f9;
+	background: #d4d4d8; /* Silver */
 	color: #000000;
 	font-family: var(--font-family);
 	font-size: 9px;
