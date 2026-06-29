@@ -19,6 +19,7 @@ export const PERSONAL_MISTAKES: Record<string, string> = {
 	'aceso': 'acceso',
 	'apr': 'para',
 	'aga': 'haga',
+	'promot': 'prompt',
 	'traducion': 'traduccion',
 
 
