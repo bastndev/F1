@@ -9,7 +9,6 @@ import { createToolsController, type CliUsageSnapshot } from '../tools/tools';
 import { USAGE_BUSY_ERROR, isUsageAgentBusy, isUsageViewInline } from '../tools/modal-use/agents';
 import { detectModelName } from '../../shared/model-detect';
 import { createRpcChannel } from './host-rpc';
-import { initMemoryHandler, handleMemoryMessage } from '../memory-handler';
 import { createBootSkeletons } from './boot-skeleton';
 import { createCopyToTranslateWatcher } from './copy-to-translate';
 import { getTerminalFontFamily, getTerminalTheme } from './terminal-theme';
@@ -1109,16 +1108,6 @@ window.addEventListener('message', (event: MessageEvent<ServerMessage>) => {
 		return;
 	}
 
-	if (message.type === 'memory.initialState') {
-		tabController.setMemoryState(message.enabled);
-		return;
-	}
-
-	if (message.type?.startsWith('memory.')) {
-		handleMemoryMessage(message);
-		return;
-	}
-
 	if (message.type === 'cli.visible') {
 		repaintActiveTerminal();
 		return;
@@ -1196,8 +1185,6 @@ document.addEventListener('visibilitychange', () => {
 		repaintActiveTerminal();
 	}
 });
-
-initMemoryHandler((message) => vscode.postMessage(message));
 
 // Seed the host with the persisted Voice Finish state on load — the host's copy
 // resets each time this (non-retained) webview is rebuilt on a panel switch.

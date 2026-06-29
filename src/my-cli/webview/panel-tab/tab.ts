@@ -16,7 +16,6 @@ export type CliSessionSummary = {
 
 import type { CliAgentOption } from '../../shared/protocol';
 import { consumeShortcut, matchesShortcut } from '../../../shared/keymaps/cli';
-import { notifyMemoryToggle, onMemoryForceDisable } from '../memory-handler';
 
 export type CliToolId = 'translate' | 'keymaps' | 'prompt' | 'use' | 'commands';
 
@@ -111,9 +110,7 @@ export const createTabController = (options: TabControllerOptions) => {
 	const toolsButton = getRequiredElement<HTMLButtonElement>('cli-tools-button');
 	const toolsPopover = getRequiredElement<HTMLDivElement>('cli-tools-popover');
 	const promptFilterToggle = getRequiredElement<HTMLInputElement>('cli-prompt-filter-toggle');
-	const memoryToggle = getRequiredElement<HTMLInputElement>('cli-memory-toggle');
 	const voiceFinishToggle = getRequiredElement<HTMLInputElement>('cli-voice-finish-toggle');
-	const memoryActionButton = getRequiredElement<HTMLButtonElement>('cli-memory-action-button');
 	const agentButton = getRequiredElement<HTMLButtonElement>('cli-agent-button');
 	const agentLabel = getRequiredElement<HTMLSpanElement>('cli-agent-label');
 	const agentMenu = getRequiredElement<HTMLDivElement>('cli-agent-menu');
@@ -130,22 +127,6 @@ export const createTabController = (options: TabControllerOptions) => {
 	let isAltPressed = false;
 	let isPromptFilterEnabled = readPromptFilterPreference();
 	let promptFilterToastTimer: number | undefined;
-	let isMemoryEnabled = false;
-
-	const setMemoryEnabled = (enabled: boolean, notify = true) => {
-		isMemoryEnabled = enabled;
-		memoryToggle.checked = enabled;
-
-		memoryActionButton.style.display = enabled ? 'inline-flex' : 'none';
-
-		if (notify) {
-			notifyMemoryToggle(enabled);
-		}
-	};
-
-	// If the host backs out (graphify install cancelled or failed) it tells us
-	// to turn the feature back off and drop the button.
-	onMemoryForceDisable(() => setMemoryEnabled(false, false));
 
 	const setAgentMenuOpen = (isOpen: boolean) => {
 		isAgentMenuOpen = isOpen;
@@ -505,11 +486,6 @@ export const createTabController = (options: TabControllerOptions) => {
 		setPromptFilterEnabled(promptFilterToggle.checked);
 	});
 
-	memoryToggle.addEventListener('change', () => {
-		setMemoryEnabled(memoryToggle.checked);
-		setToolsPopoverOpen(false);
-	});
-
 	voiceFinishToggle.addEventListener('change', () => {
 		const enabled = voiceFinishToggle.checked;
 		writeVoiceFinishPreference(enabled);
@@ -529,7 +505,6 @@ export const createTabController = (options: TabControllerOptions) => {
 	});
 
 	setPromptFilterEnabled(isPromptFilterEnabled, false);
-	setMemoryEnabled(false, false);
 	// Restore the persisted Voice Finish state into the checkbox; the host is
 	// (re)synced separately from terminal.ts so it also has the current language.
 	voiceFinishToggle.checked = readVoiceFinishPreference();
@@ -781,17 +756,9 @@ export const createTabController = (options: TabControllerOptions) => {
 		sessionList.replaceChildren(fragment);
 	};
 
-	const setMemoryState = (enabled: boolean) => {
-		setMemoryEnabled(enabled, false);
-		if (enabled) {
-			notifyMemoryToggle(true, true);
-		}
-	};
-
 	return {
 		handleKeyboardShortcut,
 		render,
-		setAgents,
-		setMemoryState
+		setAgents
 	};
 };
