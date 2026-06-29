@@ -230,10 +230,11 @@ body {
 
 .agent-icon-option:hover {
 	z-index: 1;
-	border-color: color-mix(in srgb, var(--accent-color) 46%, transparent);
-	background: color-mix(in srgb, var(--accent-color) 12%, var(--vscode-input-background, rgba(128, 128, 128, 0.1)));
+	border-color: color-mix(in srgb, #b8860b 40%, transparent);
+	background: color-mix(in srgb, #b8860b 10%, var(--vscode-input-background, rgba(128, 128, 128, 0.1)));
 	outline: none;
 	transform: translateY(-1px);
+	box-shadow: 0 2px 10px color-mix(in srgb, #b8860b 12%, transparent);
 }
 
 .agent-icon-option:focus-visible {
