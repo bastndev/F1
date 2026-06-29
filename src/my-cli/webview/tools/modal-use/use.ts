@@ -118,13 +118,21 @@ const createUsageBar = (bar: UsageBar) => {
 	label.title = bar.label;
 
 	const value = document.createElement('span');
-	value.textContent = `${formatPercent(bar.percent)} available`;
+	if (bar.percent <= 0) {
+		value.textContent = 'Quota exhausted';
+		value.classList.add('is-exhausted-text');
+	} else {
+		value.textContent = `${formatPercent(bar.percent)} available`;
+	}
 	value.title = value.textContent;
 
 	header.append(label, value);
 
 	const track = document.createElement('div');
 	track.className = 'use-usage-bar';
+	if (bar.percent <= 0) {
+		track.classList.add('is-empty');
+	}
 	track.setAttribute('aria-hidden', 'true');
 
 	const fill = document.createElement('span');
