@@ -99,6 +99,7 @@ let currentIndex = typeof persistedState?.currentIndex === 'number'
 	: 0;
 let selectedModel: LauncherModel | undefined = models.find((model) => model.label === persistedState?.selectedAgent) || models[currentIndex] || models[0];
 let selectedCustomCli = false;
+let savedInputValue = '';
 let invalidInputTimer: ReturnType<typeof setTimeout> | undefined;
 
 const textElement = getRequiredElement<HTMLSpanElement>('ai-model-name');
@@ -286,13 +287,6 @@ const handlePaletteOptionKeydown = (
 	const options = getPaletteOptions();
 	const index = options.indexOf(option);
 
-	if (event.key === 'Tab') {
-		event.preventDefault();
-		footerToggle?.click();
-		cliInput.focus();
-		return;
-	}
-
 	if (event.key === 'Enter' || event.key === ' ') {
 		event.preventDefault();
 		activate();
@@ -426,6 +420,12 @@ cliInput.addEventListener('input', () => {
 });
 
 window.addEventListener('keydown', (event) => {
+	if (event.key === 'Tab') {
+		event.preventDefault();
+		footerToggle?.click();
+		return;
+	}
+
 	if (document.body.classList.contains('is-smart-mode')) {
 		const shortcutMatch = matchAgentShortcut(event);
 		if (shortcutMatch) {
@@ -441,12 +441,6 @@ window.addEventListener('keydown', (event) => {
 cliInput.addEventListener('keydown', (event) => {
 	if (event.key === 'Enter') {
 		openSelectedModel();
-		return;
-	}
-
-	if (event.key === 'Tab') {
-		event.preventDefault();
-		footerToggle?.click();
 		return;
 	}
 
@@ -471,6 +465,18 @@ if (footerToggle && footerToggleLabel) {
 		footerToggleLabel.textContent = isOn
 			? (footerToggleLabel.dataset.on ?? 'Smart + Skills')
 			: (footerToggleLabel.dataset.off ?? '');
+
+		if (isOn) {
+			savedInputValue = cliInput.value;
+			cliInput.value = '';
+			cliInput.disabled = true;
+			cliInput.dispatchEvent(new Event('input'));
+		} else {
+			cliInput.disabled = false;
+			cliInput.value = savedInputValue;
+			cliInput.dispatchEvent(new Event('input'));
+			cliInput.focus();
+		}
 	});
 }
 

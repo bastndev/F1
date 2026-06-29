@@ -28,6 +28,7 @@ export const PERSONAL_MISTAKES: Record<string, string> = {
 	'agreges': 'agregues',
 	'promot': 'prompt',
 	'actibe': 'active',
+	'ocure': 'ocurre',
 	'desactibe': 'desactive',
 	'traducion': 'traduccion',
 
