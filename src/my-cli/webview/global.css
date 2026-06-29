@@ -587,8 +587,8 @@ body.is-smart-mode .agent-icon-number {
 
 .cli-tutorial-button:hover {
 	color: var(--vscode-button-foreground, #ffffff);
-	background: var(--accent-color);
-	border-color: var(--accent-color);
+	background: #b8860b;
+	border-color: #b8860b;
 }
 
 .cli-tutorial-button:focus-visible {
