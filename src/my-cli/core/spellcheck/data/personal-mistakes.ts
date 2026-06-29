@@ -21,11 +21,14 @@ export const PERSONAL_MISTAKES: Record<string, string> = {
 	'agamoslo': 'hagamoslo',
 	'tine': 'tiene',
 	'aga': 'haga',
+	'limpes': 'limpies',
 	'txto': 'texto',
 	'amrillo': 'amarillo',
 	'sierto': 'cierto',
 	'agreges': 'agregues',
 	'promot': 'prompt',
+	'actibe': 'active',
+	'desactibe': 'desactive',
 	'traducion': 'traduccion',
 
 
