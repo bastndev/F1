@@ -201,6 +201,7 @@ export const mountTranslatorPanel = (host: HTMLElement, context: ToolContext) =>
 };
 
 function initializeTranslator(host: HTMLElement, context: ToolContext) {
+	let isMounted = true;
 	const speakBtn = host.querySelector<HTMLButtonElement>('#speakBtn');
 	const voiceControl = host.querySelector<HTMLElement>('#voiceControl');
 	const voiceExtraBtn = host.querySelector<HTMLButtonElement>('#voiceExtraBtn');
@@ -405,11 +406,13 @@ function initializeTranslator(host: HTMLElement, context: ToolContext) {
 				provider ??= result.provider;
 				renderedParts.push(value);
 				copyParts.push(value);
-				// Populate the paragraph cache so a later single-paragraph selection of
-				// this block reuses the translation. Only when we actually got one.
 				if (result.text.trim()) {
 					cacheParagraphPairs(targetLang, segment.content, result.text);
 				}
+			}
+
+			if (!isMounted) {
+				return;
 			}
 
 			const renderedMarkdown = renderedParts.join('\n\n');
@@ -422,6 +425,9 @@ function initializeTranslator(host: HTMLElement, context: ToolContext) {
 			// Remember this exact selection so revisiting it skips the round-trip.
 			setCachedTranslation(targetLang, extracted, { rendered: renderedMarkdown, copyText, status: resultStatus });
 		} catch (err) {
+			if (!isMounted) {
+				return;
+			}
 			console.error('[Translator] EN->ES failed:', err);
 			copyText = extracted;
 			revealText(textEl, extracted);
@@ -711,13 +717,16 @@ function initializeTranslator(host: HTMLElement, context: ToolContext) {
 		});
 
 		return () => {
+			isMounted = false;
 			document.removeEventListener('keydown', handleSpaceShortcut);
 			disposeVoiceState?.();
 			clearVoiceHighlights(activeVoiceChunks);
 		};
 	}
 
-	return undefined;
+	return () => {
+		isMounted = false;
+	};
 }
 
 function extractTextToTranslate(context: ToolContext): string {

@@ -63,7 +63,7 @@ const getCodexPercentBars = (text: string): UsageBar[] => {
 
 		const rawPercent = parsePercent(percentMatch[1]);
 		const mode = percentMatch[2]?.toLowerCase();
-		const percent = mode === 'remaining' || mode === 'left' ? 100 - rawPercent : rawPercent;
+		const percent = mode === 'remaining' || mode === 'left' ? rawPercent : 100 - rawPercent;
 		const labelSource = cleanLine
 			.replace(percentMatch[0], '')
 			.replace(/\b(used|remaining|left)\b/gi, '')
@@ -107,7 +107,7 @@ const getCodexTokenBar = (text: string): UsageBar | undefined => {
 
 	return {
 		label: /context/i.test(tokenLine ?? '') ? 'Context' : 'Tokens',
-		percent: clampPercent((used / total) * 100),
+		percent: 100 - clampPercent((used / total) * 100),
 		detail: `${match[1].trim()} of ${match[2].trim()}`
 	};
 };

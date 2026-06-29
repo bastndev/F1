@@ -3,7 +3,6 @@ export const PERSONAL_MISTAKES: Record<string, string> = {
 	'empesar': 'empezar',
 	'empesaremos': 'empezaremos',
 	'rchivos': 'archivos',
-	'preciona': 'presiona',
 	'rediresionara': 'redireccionará',
 	'redirecionara': 'redireccionará',
 	'sustentalo': 'susténtalo',
@@ -29,11 +28,19 @@ export const PERSONAL_MISTAKES: Record<string, string> = {
 	'promot': 'prompt',
 	'actibe': 'active',
 	'ocure': 'ocurre',
+	'deside': 'decide',
 	'desactibe': 'desactive',
 	'traducion': 'traduccion',
 	'abarillo': 'amarillo',
 	'aslo': 'as lo',
+	'pco': 'poco',
+	'lugo': 'luego',
+	'gacer': 'hacer',
+	'tamcopo': 'tampoco',
+	'preciono': 'presiono',
+	'preciona': 'presionar',
 	'amejorar': 'mejorar',
+	'obiamnte': 'obviamente',
 
 
     // world 
@@ -162,7 +169,6 @@ export const PERSONAL_MISTAKES: Record<string, string> = {
 	'segudnos': 'segundos',
 	'segundoass': 'segundos',
 	'domora': 'demora',
-	'preciono': 'presiono',
 
 	// Fast-typing word merges and drops
 	'quieroq ue': 'quiero que',

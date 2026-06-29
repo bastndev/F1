@@ -42,23 +42,24 @@ export const parseAntigravityUsage = (raw: string): ParsedUsage => {
 			continue;
 		}
 
-		const remainingMatch = cleanLine.match(/(\d+(?:\.\d+)?)\s*%\s*(remaining|left)/i);
-		if (!remainingMatch) {
+		const infoMatch = cleanLine.match(/(?:(\d+(?:\.\d+)?)\s*%\s*(?:remaining|left))|(?:quota\s+available)/i);
+		if (!infoMatch) {
 			continue;
 		}
 
+		const isQuotaAvailable = /quota\s+available/i.test(cleanLine);
 		const previousLinePercent = stripUsageVisualBar(lines[index - 1] ?? '')
 			.match(/(\d+(?:\.\d+)?)\s*%/)?.[1];
-		const remaining = parsePercent(previousLinePercent ?? remainingMatch[1]);
+		const remaining = parsePercent(isQuotaAvailable ? (previousLinePercent ?? '100') : (previousLinePercent ?? infoMatch[1]));
 		const refresh = cleanLine.match(/refreshes?\s+in\s+([^·\r\n]+)/i)?.[1]?.trim();
 		const detail = [
-			`${formatPercent(remaining)} remaining`,
+			isQuotaAvailable ? 'Quota available' : `${formatPercent(remaining)} remaining`,
 			refresh ? `refreshes in ${refresh}` : undefined
 		].filter((part): part is string => !!part).join(' - ');
 
 		bars.push({
 			label: groupLabel,
-			percent: 100 - remaining,
+			percent: remaining,
 			detail,
 			reset: refresh
 		});

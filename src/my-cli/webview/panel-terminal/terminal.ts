@@ -338,7 +338,7 @@ const requestActiveUsage = () => new Promise<CliUsageSnapshot>((resolve, reject)
 		vscode.postMessage({
 			type: 'cli.input',
 			sessionId: session.id,
-			data: getUsageInputData(view, command)
+			data: getUsageInputData(view, `\x15${command}`)
 		});
 		window.setTimeout(() => {
 			if (sessions.get(session.id)?.status === 'running') {
@@ -355,7 +355,7 @@ const requestActiveUsage = () => new Promise<CliUsageSnapshot>((resolve, reject)
 	vscode.postMessage({
 		type: 'cli.input',
 		sessionId: session.id,
-		data: getUsageInputData(view, `${command}\r`)
+		data: getUsageInputData(view, `\x15${command}\r`)
 	});
 });
 
