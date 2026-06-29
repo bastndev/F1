@@ -1,4 +1,5 @@
 import { getAgentSlug as resolveAgentSlug } from '../../shared/agents';
+import { matchAgentShortcut } from '../../../shared/keymaps/cli';
 
 type VsCodeApi = {
 	getState: () => unknown;
@@ -453,6 +454,19 @@ cliInput.addEventListener('input', () => {
 		setSelectedModel(match, true, matches);
 	} else {
 		setNoMatch();
+	}
+});
+
+window.addEventListener('keydown', (event) => {
+	if (document.body.classList.contains('is-smart-mode')) {
+		const shortcutMatch = matchAgentShortcut(event);
+		if (shortcutMatch) {
+			event.preventDefault();
+			const matchedModel = models.find((m) => m.label === shortcutMatch.agentLabel);
+			if (matchedModel) {
+				openModel(matchedModel);
+			}
+		}
 	}
 });
 

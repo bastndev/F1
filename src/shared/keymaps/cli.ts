@@ -1,3 +1,5 @@
+import { getCliAgent, cliAgents } from '../../my-cli/shared/agents';
+
 // ─── Matcher factories ────────────────────────────────────────────────────────
 
 function altKey(targetKey: string): (event: KeyboardEvent) => boolean {
@@ -219,4 +221,42 @@ export function consumeShortcut(event: KeyboardEvent, id: ShortcutId): boolean {
     return true;
   }
   return false;
+}
+
+// ─── Agent Shortcuts ────────────────────────────────────────────────────────
+// Number 1-9 shortcuts to open specific agents in the launcher.
+
+function numKey(num: number): (event: KeyboardEvent) => boolean {
+  return (e: KeyboardEvent) => {
+    // We want plain numbers 1-9 without modifiers
+    if (e.altKey || e.ctrlKey || e.metaKey) { return false; }
+    // Accept main keyboard number or numpad number
+    return e.key === String(num) || e.code === `Numpad${num}`;
+  };
+}
+
+export type AgentShortcutDefinition = {
+  id: string;
+  label: string;
+  agentLabel: string;
+  match: (event: KeyboardEvent) => boolean;
+};
+
+export const agentShortcuts: AgentShortcutDefinition[] = [];
+
+// Create shortcuts dynamically based on the current order of cliAgents
+cliAgents.forEach((agent, index) => {
+  const num = index + 1;
+  if (num <= 9) {
+    agentShortcuts.push({
+      id: `openAgent${num}`,
+      label: `Open ${agent.label}`,
+      agentLabel: agent.label,
+      match: numKey(num),
+    });
+  }
+});
+
+export function matchAgentShortcut(event: KeyboardEvent): AgentShortcutDefinition | undefined {
+  return agentShortcuts.find((s) => s.match(event));
 }
