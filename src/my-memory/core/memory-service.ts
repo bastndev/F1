@@ -14,7 +14,7 @@
 
 import * as fs from 'fs';
 import * as path from 'path';
-import { MEMORY_CONFIG_FILE, MEMORY_DIR, MEMORY_MAP_FILE } from './memory-paths';
+import { MEMORY_CONFIG_FILE, MEMORY_DIR, MEMORY_MAP_FILE, RULES_FILE } from './memory-paths';
 import { scanProject } from '../tier1-map/scan-project';
 import { writeProjectMap } from '../tier1-map/write-project-map';
 import { removeAllInstructionBlocks, syncInstructionFileForSlug } from '../tier1-map/sync-instructions';
@@ -48,6 +48,22 @@ export class MemoryService {
 			syncInstructionFileForSlug(root, slug);
 		} catch (error) {
 			console.error('[my-memory] onLaunch failed:', error);
+		}
+	}
+
+	/** Write the built-in rules file into `.f1/` (idempotent; ensures the dir). */
+	public writeRules(root: string | undefined, content: string): boolean {
+		if (!root || !content) {
+			return false;
+		}
+		try {
+			const dir = path.join(root, MEMORY_DIR);
+			fs.mkdirSync(dir, { recursive: true });
+			fs.writeFileSync(path.join(dir, RULES_FILE), content, 'utf8');
+			return true;
+		} catch (error) {
+			console.error('[my-memory] writeRules failed:', error);
+			return false;
 		}
 	}
 

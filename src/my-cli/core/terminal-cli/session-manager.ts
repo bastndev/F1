@@ -114,25 +114,25 @@ export class CliSessionManager implements vscode.Disposable {
 		this.finishSoundSuppressed = suppressed;
 	}
 
-	public async createSession(agentLabel: string) {
+	public async createSession(agentLabel: string, options: { readyNotice?: string } = {}): Promise<string | undefined> {
 		const agent = getCliAgent(agentLabel);
 		if (!agent) {
 			this.postError(`Unknown CLI: ${agentLabel}`);
-			return;
+			return undefined;
 		}
 
 		if (!(await ensureCliInstalled(agent))) {
-			return;
+			return undefined;
 		}
 
-		this.createSessionFromCommand(agent.label, agent.command, agent.args);
+		return this.createSessionFromCommand(agent.label, agent.command, agent.args, options.readyNotice);
 	}
 
 	public createCustomSession(customCli: CustomCliLaunch) {
 		this.createSessionFromCommand(customCli.label, customCli.command, customCli.args);
 	}
 
-	private createSessionFromCommand(label: string, command: string, args: string[]) {
+	private createSessionFromCommand(label: string, command: string, args: string[], readyNotice?: string): string {
 		const id = `cli-${this.nextSessionId++}`;
 		const cwd = getWorkspaceCwd();
 		const session: CliSession = {
@@ -152,6 +152,9 @@ export class CliSessionManager implements vscode.Disposable {
 		this.sessions.set(id, session);
 		this.activeSessionId = id;
 		appendToBuffer(session, `\x1b[90mCLI Hub: starting ${session.commandLine}\x1b[0m\r\n`);
+		if (readyNotice) {
+			appendToBuffer(session, `\x1b[32m${readyNotice}\x1b[0m\r\n`);
+		}
 		this.postState();
 
 		try {
@@ -164,6 +167,8 @@ export class CliSessionManager implements vscode.Disposable {
 			this.postMessage({ type: 'cli.output', sessionId: session.id, data: output });
 			this.postState();
 		}
+
+		return id;
 	}
 
 	public hasRunningSessionForAgent(agentLabel: string) {

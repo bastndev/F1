@@ -4,7 +4,7 @@ import { matchAgentShortcut } from '../../../shared/keymaps/cli';
 type VsCodeApi = {
 	getState: () => unknown;
 	setState: (state: LauncherState) => void;
-	postMessage: (message: { type: 'openAgent'; agent: string } | { type: 'customCli.open'; source: 'launcher' } | { type: 'cli.openTutorial' }) => void;
+	postMessage: (message: { type: 'openAgent'; agent: string; smart?: boolean } | { type: 'customCli.open'; source: 'launcher' } | { type: 'cli.openTutorial' }) => void;
 };
 
 type LauncherModel = {
@@ -251,7 +251,8 @@ const openModel = (model: LauncherModel | undefined) => {
 
 	vscode.postMessage({
 		type: 'openAgent',
-		agent: model.label
+		agent: model.label,
+		smart: document.body.classList.contains('is-smart-mode')
 	});
 };
 

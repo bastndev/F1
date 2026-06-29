@@ -29,12 +29,15 @@ import {
 	type AgentLaunchExtensionMode,
 	type AgentLaunchSource
 } from '../shared/agent-launch-guard';
+import { SmartService, SMART_READY_MESSAGE, SMART_CLEANUP_DELAY_MS } from '../../my-smart/my-smart';
 
 export class MyCliViewProvider implements vscode.WebviewViewProvider, vscode.Disposable {
 	public static readonly viewType = 'f1.myCli';
 	private readonly sessionManager = new CliSessionManager();
+	private readonly smartService = new SmartService();
 	private readonly launcherStateSessionId = crypto.randomBytes(16).toString('hex');
 	private pendingInitialAgent?: string;
+	private pendingInitialSmart = false;
 	private pendingInitialCustomCli?: CustomCliLaunch;
 	private activePromptTranslation?: AbortController;
 	private activeVoiceSession?: ActiveVoiceSession;
@@ -104,6 +107,7 @@ export class MyCliViewProvider implements vscode.WebviewViewProvider, vscode.Dis
 				}
 
 				this.pendingInitialAgent = message.agent;
+				this.pendingInitialSmart = message.smart === true;
 				webviewView.webview.html = this._getAgentHtmlForWebview(webviewView.webview, message.agent);
 				return;
 			}
@@ -137,8 +141,11 @@ export class MyCliViewProvider implements vscode.WebviewViewProvider, vscode.Dis
 					this.sessionManager.createCustomSession(this.pendingInitialCustomCli);
 					this.pendingInitialCustomCli = undefined;
 				} else if (this.pendingInitialAgent) {
-					void this.sessionManager.createSession(this.pendingInitialAgent);
+					const agentLabel = this.pendingInitialAgent;
+					const smart = this.pendingInitialSmart;
 					this.pendingInitialAgent = undefined;
+					this.pendingInitialSmart = false;
+					void this._launchInitialAgent(agentLabel, smart);
 				} else {
 					this.sessionManager.postState();
 				}
@@ -323,6 +330,41 @@ export class MyCliViewProvider implements vscode.WebviewViewProvider, vscode.Dis
 		this.activePromptTranslation?.abort();
 		stopVoicePlayback();
 		this.sessionManager.dispose();
+	}
+
+	/**
+	 * Smart-mode launch: write rules + project context, start the CLI showing the
+	 * "ready" line, then auto-clean the generated .f1/ once it has been read.
+	 */
+	private async _launchInitialAgent(agentLabel: string, smart: boolean) {
+		let readyNotice: string | undefined;
+		if (smart) {
+			const root = this._workspaceRoot();
+			const prepared = this.smartService.prepareLaunch(root, getAgentSlug(agentLabel), this._readSmartRules());
+			if (prepared.ok) {
+				readyNotice = SMART_READY_MESSAGE;
+			}
+		}
+
+		const sessionId = await this.sessionManager.createSession(agentLabel, { readyNotice });
+
+		if (smart && sessionId) {
+			setTimeout(() => this.smartService.cleanup(this._workspaceRoot()), SMART_CLEANUP_DELAY_MS);
+		}
+	}
+
+	private _workspaceRoot(): string | undefined {
+		return vscode.workspace.workspaceFolders?.[0]?.uri.fsPath;
+	}
+
+	/** The built-in rules asset shipped with the extension (undefined if unreadable). */
+	private _readSmartRules(): string | undefined {
+		try {
+			const rulesUri = vscode.Uri.joinPath(this._extensionUri, 'src', 'my-smart', 'assets', 'smart-rules.md');
+			return fs.readFileSync(rulesUri.fsPath, 'utf8');
+		} catch {
+			return undefined;
+		}
 	}
 
 	private _getAgentLaunchExtensionMode(): AgentLaunchExtensionMode {

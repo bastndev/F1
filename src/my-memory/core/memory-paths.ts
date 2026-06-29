@@ -8,6 +8,8 @@
 export const MEMORY_DIR = '.f1';
 /** Compact, AI-readable project summary inside MEMORY_DIR. */
 export const MEMORY_MAP_FILE = 'project-map.md';
+/** Built-in working rules inside MEMORY_DIR (content provided by Smart + Skills). */
+export const RULES_FILE = 'smart-rules.md';
 /** Feature config/state inside MEMORY_DIR. */
 export const MEMORY_CONFIG_FILE = 'memory.json';
 

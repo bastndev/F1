@@ -21,16 +21,18 @@ import {
 	CLAUDE_SLUG,
 	HUB_FILE,
 	MEMORY_DIR,
-	MEMORY_MAP_FILE
+	MEMORY_MAP_FILE,
+	RULES_FILE
 } from '../core/memory-paths';
 
 const buildBlock = (): string => {
 	return [
 		BLOCK_START,
-		'## Project context (F1 My Memory)',
+		'## Project context (F1 Smart + Skills)',
 		'',
-		`This project ships a prebuilt context map at \`./${MEMORY_DIR}/${MEMORY_MAP_FILE}\`.`,
-		'Read it first to understand the project before scanning files — it saves tokens.',
+		'Before scanning files, read these first — they define how to work here and save tokens:',
+		`- \`./${MEMORY_DIR}/${RULES_FILE}\` — working rules: how to behave in this project.`,
+		`- \`./${MEMORY_DIR}/${MEMORY_MAP_FILE}\` — a prebuilt structural map of the project.`,
 		BLOCK_END
 	].join('\n');
 };

@@ -49,7 +49,7 @@ export type CustomCliLaunch = {
 
 /** Webview → extension host. */
 export type WebviewToHostMessage =
-	| { type: 'openAgent'; agent: string }
+	| { type: 'openAgent'; agent: string; smart?: boolean }
 	| { type: 'cli.ready' }
 	| { type: 'cli.create'; agent: string; launchGuard?: AgentLaunchGuardMessage }
 	| { type: 'customCli.open'; source: 'launcher' | 'panel' }
@@ -106,6 +106,7 @@ export type HostToWebviewMessage =
 export type InboundWebviewMessage = {
 	type?: string;
 	agent?: string;
+	smart?: boolean;
 	launchGuard?: AgentLaunchGuardMessage;
 	source?: string;
 	id?: string;
