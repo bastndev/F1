@@ -499,6 +499,7 @@ if (footerToggle && footerToggleLabel) {
 	footerToggle.addEventListener('click', () => {
 		const isOn = footerToggle.classList.toggle('is-on');
 		footerToggle.setAttribute('aria-pressed', String(isOn));
+		document.body.classList.toggle('is-smart-mode', isOn);
 		footerToggleLabel.textContent = isOn
 			? (footerToggleLabel.dataset.on ?? 'Smart + Skills')
 			: (footerToggleLabel.dataset.off ?? '');

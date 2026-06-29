@@ -334,6 +334,18 @@ body {
 		0 0 8px color-mix(in srgb, var(--accent-color) 70%, transparent);
 }
 
+/* Smart mode */
+body.is-smart-mode .agent-icon-status {
+	background: #3b82f6;
+}
+
+body.is-smart-mode .agent-icon-option.is-preview .agent-icon-status {
+	background: #3b82f6;
+	box-shadow:
+		0 0 0 1px var(--bg-color),
+		0 0 8px color-mix(in srgb, #3b82f6 70%, transparent);
+}
+
 .selected-model {
 	background-color: color-mix(in srgb, var(--vscode-testing-iconPassed, #73c991) 20%, transparent);
 	border-radius: 5px;
@@ -474,9 +486,9 @@ body {
 
 /* === ON state === */
 .footer-toggle.is-on .footer-toggle-track {
-	background: color-mix(in srgb, var(--accent-color) 72%, transparent);
-	border-color: color-mix(in srgb, var(--accent-color) 54%, transparent);
-	box-shadow: 0 0 8px color-mix(in srgb, var(--accent-color) 38%, transparent);
+	background: color-mix(in srgb, #3b82f6 72%, transparent);
+	border-color: color-mix(in srgb, #3b82f6 54%, transparent);
+	box-shadow: 0 0 8px color-mix(in srgb, #3b82f6 38%, transparent);
 }
 
 .footer-toggle.is-on .footer-toggle-thumb {
@@ -484,15 +496,15 @@ body {
 	background: #ffffff;
 	box-shadow:
 		0 1px 4px rgba(0, 0, 0, 0.4),
-		0 0 6px color-mix(in srgb, var(--accent-color) 60%, transparent);
+		0 0 6px color-mix(in srgb, #3b82f6 60%, transparent);
 }
 
 .footer-toggle.is-on .footer-toggle-label {
-	color: var(--accent-color);
+	color: var(--vscode-descriptionForeground, rgba(128, 128, 128, 0.8));
 }
 
 .footer-toggle.is-on {
-	color: var(--accent-color);
+	color: var(--vscode-descriptionForeground, rgba(128, 128, 128, 0.8));
 }
 
 /* Hover glow on track */
@@ -501,7 +513,8 @@ body {
 }
 
 .footer-toggle.is-on:hover .footer-toggle-track {
-	box-shadow: 0 0 12px color-mix(in srgb, var(--accent-color) 50%, transparent);
+	box-shadow: 0 0 12px color-mix(in srgb, #3b82f6 50%, transparent);
+	border-color: color-mix(in srgb, #3b82f6 60%, transparent);
 }
 /* ── End footer pill toggle ─────────────────────────────────── */
 
