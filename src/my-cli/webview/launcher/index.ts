@@ -500,8 +500,8 @@ if (footerToggle && footerToggleLabel) {
 		const isOn = footerToggle.classList.toggle('is-on');
 		footerToggle.setAttribute('aria-pressed', String(isOn));
 		footerToggleLabel.textContent = isOn
-			? (footerToggleLabel.dataset.on ?? 'Manual')
-			: (footerToggleLabel.dataset.off ?? 'Auto');
+			? (footerToggleLabel.dataset.on ?? 'Smart + Skills')
+			: (footerToggleLabel.dataset.off ?? '');
 	});
 }
 

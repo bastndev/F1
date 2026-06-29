@@ -466,8 +466,10 @@ body {
 
 /* Label text */
 .footer-toggle-label {
-	min-width: 36px;
 	transition: color 180ms ease;
+}
+.footer-toggle-label:empty {
+	display: none;
 }
 
 /* === ON state === */
