@@ -191,15 +191,6 @@ body {
 	color: var(--accent-color);
 }
 
-.input-footer[role="button"] {
-	cursor: pointer;
-}
-
-.input-footer[role="button"]:focus-visible {
-	outline: 1px solid var(--accent-color);
-	outline-offset: 3px;
-}
-
 .agent-icon-palette {
 	width: 100%;
 	max-height: 0;

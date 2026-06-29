@@ -487,14 +487,6 @@ cliInput.addEventListener('keydown', (event) => {
 	}
 });
 
-selectedOption.addEventListener('click', openSelectedModel);
-selectedOption.addEventListener('keydown', (event) => {
-	if (event.key === 'Enter' || event.key === ' ') {
-		event.preventDefault();
-		openSelectedModel();
-	}
-});
-
 const tutorialButton = document.getElementById('cli-tutorial-button');
 tutorialButton?.addEventListener('click', () => {
 	vscode.postMessage({ type: 'cli.openTutorial' });
