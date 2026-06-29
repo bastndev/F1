@@ -276,17 +276,7 @@ const getPaletteOptions = () => {
 	return Array.from(agentIconPalette.querySelectorAll<HTMLButtonElement>('.agent-icon-option'));
 };
 
-const getPaletteModels = () => {
-	const paletteModels = [...models];
-	const kiroIndex = paletteModels.findIndex((model) => model.label === 'Kiro CLI');
-	if (kiroIndex < 0) {
-		return paletteModels;
-	}
 
-	const [kiroModel] = paletteModels.splice(kiroIndex, 1);
-	paletteModels.push(kiroModel);
-	return paletteModels;
-};
 
 const handlePaletteOptionKeydown = (
 	event: KeyboardEvent,
@@ -364,7 +354,7 @@ const setPaletteOpen = (isOpen: boolean, shouldFocus = false, shouldAnimate = tr
 const renderIconPalette = () => {
 	agentIconPalette.replaceChildren();
 
-	for (const model of getPaletteModels()) {
+	for (const model of models) {
 		const option = document.createElement('button');
 		option.className = 'agent-icon-option';
 		option.classList.toggle('is-installed', model.installed);
