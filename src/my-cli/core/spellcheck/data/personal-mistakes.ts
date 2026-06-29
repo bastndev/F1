@@ -34,6 +34,8 @@ export const PERSONAL_MISTAKES: Record<string, string> = {
 	'abarillo': 'amarillo',
 	'aslo': 'as lo',
 	'pco': 'poco',
+	'lugo': 'luego',
+	'gacer': 'hacer',
 	'tamcopo': 'tampoco',
 	'preciono': 'presiono',
 	'preciona': 'presionar',
