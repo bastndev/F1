@@ -404,6 +404,114 @@ body {
 	font-weight: normal;
 }
 
+/* ── Footer pill toggle ─────────────────────────────────────── */
+.footer-toggle-wrap {
+	margin-left: auto;
+	flex-shrink: 0;
+	display: flex;
+	align-items: center;
+}
+
+.footer-toggle {
+	display: inline-flex;
+	align-items: center;
+	gap: 7px;
+	background: transparent;
+	border: none;
+	padding: 0;
+	cursor: pointer;
+	color: var(--vscode-descriptionForeground, rgba(128, 128, 128, 0.8));
+	font-family: var(--font-family);
+	font-size: 12px;
+	line-height: 1;
+	user-select: none;
+	-webkit-user-select: none;
+	transition: color 180ms ease;
+	outline: none;
+}
+
+.footer-toggle:focus-visible {
+	outline: 1px solid var(--accent-color);
+	outline-offset: 3px;
+	border-radius: 4px;
+}
+
+.footer-toggle:hover {
+	color: var(--text-color);
+}
+
+/* Track — the pill background */
+.footer-toggle-track {
+	position: relative;
+	display: inline-flex;
+	align-items: center;
+	width: 30px;
+	height: 16px;
+	border-radius: 999px;
+	background: color-mix(in srgb, var(--vscode-descriptionForeground, rgba(128,128,128,0.8)) 28%, transparent);
+	border: 1px solid color-mix(in srgb, var(--vscode-descriptionForeground, rgba(128,128,128,0.8)) 36%, transparent);
+	transition:
+		background 220ms cubic-bezier(0.4, 0, 0.2, 1),
+		border-color 220ms cubic-bezier(0.4, 0, 0.2, 1),
+		box-shadow 220ms cubic-bezier(0.4, 0, 0.2, 1);
+	flex-shrink: 0;
+}
+
+/* Thumb — the sliding circle */
+.footer-toggle-thumb {
+	position: absolute;
+	left: 2px;
+	width: 10px;
+	height: 10px;
+	border-radius: 50%;
+	background: var(--vscode-descriptionForeground, rgba(180, 180, 180, 0.9));
+	box-shadow: 0 1px 3px rgba(0, 0, 0, 0.35);
+	transition:
+		transform 220ms cubic-bezier(0.4, 0, 0.2, 1),
+		background 220ms cubic-bezier(0.4, 0, 0.2, 1),
+		box-shadow 220ms cubic-bezier(0.4, 0, 0.2, 1);
+	will-change: transform;
+}
+
+/* Label text */
+.footer-toggle-label {
+	min-width: 36px;
+	transition: color 180ms ease;
+}
+
+/* === ON state === */
+.footer-toggle.is-on .footer-toggle-track {
+	background: color-mix(in srgb, var(--accent-color) 72%, transparent);
+	border-color: color-mix(in srgb, var(--accent-color) 54%, transparent);
+	box-shadow: 0 0 8px color-mix(in srgb, var(--accent-color) 38%, transparent);
+}
+
+.footer-toggle.is-on .footer-toggle-thumb {
+	transform: translateX(14px);
+	background: #ffffff;
+	box-shadow:
+		0 1px 4px rgba(0, 0, 0, 0.4),
+		0 0 6px color-mix(in srgb, var(--accent-color) 60%, transparent);
+}
+
+.footer-toggle.is-on .footer-toggle-label {
+	color: var(--accent-color);
+}
+
+.footer-toggle.is-on {
+	color: var(--accent-color);
+}
+
+/* Hover glow on track */
+.footer-toggle:hover .footer-toggle-track {
+	border-color: color-mix(in srgb, var(--accent-color) 42%, transparent);
+}
+
+.footer-toggle.is-on:hover .footer-toggle-track {
+	box-shadow: 0 0 12px color-mix(in srgb, var(--accent-color) 50%, transparent);
+}
+/* ── End footer pill toggle ─────────────────────────────────── */
+
 .workspace-path {
 	position: absolute;
 	bottom: 12px;

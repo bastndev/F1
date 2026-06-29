@@ -500,6 +500,19 @@ tutorialButton?.addEventListener('click', () => {
 	vscode.postMessage({ type: 'cli.openTutorial' });
 });
 
+// Footer pill toggle (visual only — functionality to be wired later)
+const footerToggle = document.getElementById('footer-mode-toggle') as HTMLButtonElement | null;
+const footerToggleLabel = footerToggle?.querySelector<HTMLSpanElement>('.footer-toggle-label');
+if (footerToggle && footerToggleLabel) {
+	footerToggle.addEventListener('click', () => {
+		const isOn = footerToggle.classList.toggle('is-on');
+		footerToggle.setAttribute('aria-pressed', String(isOn));
+		footerToggleLabel.textContent = isOn
+			? (footerToggleLabel.dataset.on ?? 'Manual')
+			: (footerToggleLabel.dataset.off ?? 'Auto');
+	});
+}
+
 const scheduleCycle = () => {
 	setTimeout(() => {
 		if (document.hidden || cliInput.value.trim() || models.length === 0) {
