@@ -354,7 +354,7 @@ const setPaletteOpen = (isOpen: boolean, shouldFocus = false, shouldAnimate = tr
 const renderIconPalette = () => {
 	agentIconPalette.replaceChildren();
 
-	for (const model of models) {
+	for (const [index, model] of models.entries()) {
 		const option = document.createElement('button');
 		option.className = 'agent-icon-option';
 		option.classList.toggle('is-installed', model.installed);
@@ -379,7 +379,11 @@ const renderIconPalette = () => {
 		status.className = 'agent-icon-status';
 		status.textContent = model.installed ? 'Ready' : 'Missing';
 
-		option.append(image, status);
+		const badge = document.createElement('span');
+		badge.className = 'agent-icon-number';
+		badge.textContent = String(index + 1);
+
+		option.append(image, status, badge);
 		option.addEventListener('click', () => openModel(model));
 		option.addEventListener('focus', () => {
 			const matches = [{ model, score: 100 }];
