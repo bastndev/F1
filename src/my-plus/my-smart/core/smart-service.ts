@@ -12,12 +12,13 @@ import { spawn } from 'child_process';
 import * as fs from 'fs';
 import * as path from 'path';
 import { MemoryService } from '../../my-memory/my-memory';
-import { SMART_READY_MESSAGE } from './smart-paths';
+import { buildPrimingPrompt } from '../../shared/instruction-builder';
+import { extractSkillBody, findMissingRuleInvariants } from './skill';
 
 const GRAPHIFY_OUT_DIR = 'graphify-out';
 const GRAPH_REPORT_REL = 'graphify-out/GRAPH_REPORT.md';
-const RULES_REL = '.f1/smart-rules.md';
 const GRAPH_BUILD_TIMEOUT_MS = 30000;
+const RULES_ASSET_REL = path.join('src', 'my-plus', 'my-smart', 'assets', 'skills', 'default', 'SKILL.md');
 
 export class SmartService {
 	private readonly memory = new MemoryService();
@@ -26,6 +27,28 @@ export class SmartService {
 	public writeRules(root: string | undefined, rulesContent: string | undefined): void {
 		if (rulesContent) {
 			this.memory.writeRules(root, rulesContent);
+		}
+	}
+
+	/**
+	 * Read the built-in rules asset (`assets/skills/default/SKILL.md`) under the
+	 * extension root, strip its YAML frontmatter, and return the rules body.
+	 * Best-effort: undefined if the asset can't be read.
+	 */
+	public loadRules(extensionFsPath: string | undefined): string | undefined {
+		if (!extensionFsPath) {
+			return undefined;
+		}
+		try {
+			const body = extractSkillBody(fs.readFileSync(path.join(extensionFsPath, RULES_ASSET_REL), 'utf8'));
+			const missing = findMissingRuleInvariants(body);
+			if (missing.length) {
+				console.error('[smart] rules asset is missing required phrases:', missing);
+			}
+			return body;
+		} catch (error) {
+			console.error('[smart] loadRules failed:', error);
+			return undefined;
 		}
 	}
 
@@ -72,14 +95,7 @@ export class SmartService {
 
 	/** The single-line prompt the host types into the CLI on launch. */
 	public composePrompt(hasGraph: boolean): string {
-		const parts = [
-			`Before we start, read \`./${RULES_REL}\` for how I want you to work in this project, and follow those rules from now on.`,
-			hasGraph
-				? `Also read \`./${GRAPH_REPORT_REL}\` — a compact code-graph of this project — so you grasp the structure without scanning every file.`
-				: 'Take a quick look at the project structure so you understand it.',
-			`Keep this first reply short, then end it with exactly: ${SMART_READY_MESSAGE}`
-		];
-		return parts.join(' ');
+		return buildPrimingPrompt({ graphReportRef: hasGraph ? `./${GRAPH_REPORT_REL}` : undefined });
 	}
 
 	/** Remove the generated .f1/ and graphify-out/ once the agent has read them. */

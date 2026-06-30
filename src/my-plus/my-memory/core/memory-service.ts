@@ -15,6 +15,9 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import { MEMORY_CONFIG_FILE, MEMORY_DIR, MEMORY_MAP_FILE, RULES_FILE } from './memory-paths';
+import { resolveConfig, type ResolvedConfig } from './config';
+import { writeFileIfChanged } from './atomic-write';
+import { writeJsonSettings } from './settings';
 import { scanProject } from '../tier1-map/scan-project';
 import { writeProjectMap } from '../tier1-map/write-project-map';
 import { removeAllInstructionBlocks, syncInstructionFileForSlug } from '../tier1-map/sync-instructions';
@@ -40,10 +43,11 @@ export class MemoryService {
 			return;
 		}
 		try {
-			this.ensureConfig(root);
+			const config = resolveConfig(root);
+			this.ensureConfig(root, config);
 			const mapPath = path.join(root, MEMORY_DIR, MEMORY_MAP_FILE);
 			if (!fs.existsSync(mapPath)) {
-				writeProjectMap(root, scanProject(root));
+				writeProjectMap(root, scanProject(root, config.ignoreDirs));
 			}
 			syncInstructionFileForSlug(root, slug);
 		} catch (error) {
@@ -51,16 +55,13 @@ export class MemoryService {
 		}
 	}
 
-	/** Write the built-in rules file into `.f1/` (idempotent; ensures the dir). */
+	/** Write the built-in rules file into `.f1/` (atomic, idempotent; ensures the dir). */
 	public writeRules(root: string | undefined, content: string): boolean {
 		if (!root || !content) {
 			return false;
 		}
 		try {
-			const dir = path.join(root, MEMORY_DIR);
-			fs.mkdirSync(dir, { recursive: true });
-			fs.writeFileSync(path.join(dir, RULES_FILE), content, 'utf8');
-			return true;
+			return writeFileIfChanged(path.join(root, MEMORY_DIR, RULES_FILE), content);
 		} catch (error) {
 			console.error('[my-memory] writeRules failed:', error);
 			return false;
@@ -93,18 +94,18 @@ export class MemoryService {
 	}
 
 	/** Create `.f1/` + `memory.json` if missing (idempotent). */
-	private ensureConfig(root: string): void {
+	private ensureConfig(root: string, config: ResolvedConfig): void {
 		const dir = path.join(root, MEMORY_DIR);
 		fs.mkdirSync(dir, { recursive: true });
 
 		const configPath = path.join(dir, MEMORY_CONFIG_FILE);
 		if (!fs.existsSync(configPath)) {
-			const config = {
+			writeJsonSettings(configPath, {
 				version: 1,
+				mode: config.mode,
 				createdAt: new Date().toISOString(),
 				note: 'F1 project context (generated). Managed by F1.'
-			};
-			fs.writeFileSync(configPath, JSON.stringify(config, null, 2) + '\n', 'utf8');
+			});
 		}
 	}
 }

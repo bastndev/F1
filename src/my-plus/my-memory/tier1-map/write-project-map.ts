@@ -3,9 +3,9 @@
  * Pure string building + a single fs write — no Python, no AI tokens.
  */
 
-import * as fs from 'fs';
 import * as path from 'path';
 import { MEMORY_DIR, MEMORY_MAP_FILE } from '../core/memory-paths';
+import { writeFileIfChanged } from '../core/atomic-write';
 import type { ProjectScan } from './scan-project';
 
 const MAX_DEPS = 20;
@@ -54,10 +54,9 @@ export const renderProjectMap = (scan: ProjectScan): string => {
 	return lines.join('\n');
 };
 
-/** Write `.f1/project-map.md`, overwriting any existing map. */
+/** Write `.f1/project-map.md` atomically, skipping the write if unchanged. */
 export const writeProjectMap = (root: string, scan: ProjectScan): string => {
 	const mapPath = path.join(root, MEMORY_DIR, MEMORY_MAP_FILE);
-	fs.mkdirSync(path.dirname(mapPath), { recursive: true });
-	fs.writeFileSync(mapPath, renderProjectMap(scan), 'utf8');
+	writeFileIfChanged(mapPath, renderProjectMap(scan));
 	return mapPath;
 };

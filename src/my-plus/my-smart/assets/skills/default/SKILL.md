@@ -1,5 +1,9 @@
-<!-- F1 "Smart + Skills" — built-in working rules. Shipped with the extension and
-     copied into .f1/ when a CLI is launched in Smart mode. Edit the source here. -->
+---
+name: default
+description: F1 Smart + Skills built-in working rules — how an AI coding agent should operate in this project.
+triggers:
+  - Smart + Skills launch (applies to every task in the session)
+---
 
 # Working rules
 
