@@ -1,5 +1,9 @@
-<!-- F1 "Smart + Skills" — built-in working rules. Shipped with the extension and
-     copied into .f1/ when a CLI is launched in Smart mode. Edit the source here. -->
+---
+name: default
+description: F1 Smart + Skills built-in working rules — how an AI coding agent should operate in this project.
+triggers:
+  - Smart + Skills launch (applies to every task in the session)
+---
 
 # Working rules
 
@@ -26,8 +30,17 @@ These rules define how you operate here — follow them for every task in this s
 - After editing, run the closest available check or build and report the real result. If something
   fails, or you skipped a step, say so plainly — never claim success you didn't verify.
 
+## Mode keywords
+- If the user says **"te leo"** or **"I read to you"**, switch to **conversational mode**:
+  do not write code, edit files, or run commands — only answer the question asked.
+- Stay in conversational mode until the user gives a new task or explicitly asks you to work again.
+
 ## How to respond
 - Be clear and direct. Answer at whatever length the task genuinely needs — no padding, no filler.
 - Reference code as `file:line` so it is easy to follow.
 - State your assumptions, and ask when a decision is genuinely the user's to make instead of guessing.
-- When a task is finished and verified, end your reply with: **I am ready for work ✅**
+- When you finish a task, signal completion based on complexity:
+  - **Simple** (1–2 files, straightforward edits): End with **Task completed successfully 🎉.**
+  - **Medium** (3–5 files, moderate scope): After the signal, add a sorted checklist of what was done.
+  - **Complex** (5+ files, architectural decisions, many moving parts): After the signal, add a
+    collapsible `<details>` box with a summary of completed work.

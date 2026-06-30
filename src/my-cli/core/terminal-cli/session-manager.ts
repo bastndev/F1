@@ -46,6 +46,21 @@ const responseSettleMs = 1500;
 // "booted and waiting for input" — the moment the Smart auto-prompt is typed in.
 const bootIdleMs = 1200;
 
+// Gap between typing the auto-prompt and sending the Enter that submits it. TUI
+// CLIs (opencode, kilocode, copilot…) read a fast "text\r" burst as a single
+// paste and fold the trailing Return into the input as a literal newline instead
+// of submitting. Sending Enter as its own delayed keystroke makes it a real
+// "submit" key. It's hidden behind the Smart overlay, so it costs no UX latency.
+const submitEnterDelayMs = 250;
+
+// opencode and its fork kilocode drop a whole-prompt burst on their bubbletea
+// input — the box stays empty (placeholder still showing). For those agents we
+// type the prompt one code point at a time (after a short lead-in) so each lands
+// as a genuine keystroke their input always accepts. Hidden behind the overlay.
+const incrementalTypeSlugs = new Set(['opencode', 'kilocode']);
+const incrementalLeadInMs = 400;
+const perCharTypeMs = 8;
+
 const getWorkspaceCwd = () => {
 	return vscode.workspace.workspaceFolders?.[0]?.uri.fsPath || os.homedir();
 };
@@ -368,8 +383,47 @@ export class CliSessionManager implements vscode.Disposable {
 			return;
 		}
 		session.awaitingResponse = true;
+
+		// Bubbletea CLIs (opencode/kilocode) ignore a whole-prompt burst, so type
+		// it out as real keystrokes. Everyone else takes the single write fine.
+		const slug = getCliAgent(session.label)?.slug;
+		if (slug && incrementalTypeSlugs.has(slug)) {
+			this.typePromptIncrementally(sessionId, Array.from(text), 0);
+			return;
+		}
+
 		this.sendPtyHostCommand(session, { type: 'input', data: text });
-		this.sendPtyHostCommand(session, { type: 'input', data: '\r' });
+		this.submitPromptAfterDelay(sessionId);
+	}
+
+	// Send the prompt one code point at a time (Array.from keeps "—"/"✅" intact),
+	// then submit. Each keystroke is its own pty write, so it's never mistaken for
+	// a paste and the input box actually fills.
+	private typePromptIncrementally(sessionId: string, chars: string[], index: number) {
+		if (index >= chars.length) {
+			this.submitPromptAfterDelay(sessionId);
+			return;
+		}
+		setTimeout(() => {
+			const session = this.sessions.get(sessionId);
+			if (!session || session.status !== 'running' || session.closing) {
+				return;
+			}
+			this.sendPtyHostCommand(session, { type: 'input', data: chars[index] });
+			this.typePromptIncrementally(sessionId, chars, index + 1);
+		}, index === 0 ? incrementalLeadInMs : perCharTypeMs);
+	}
+
+	// Send the Enter that submits a host-typed prompt, on a separate delayed write
+	// so TUI CLIs read it as a real submit key instead of folding it into the text.
+	private submitPromptAfterDelay(sessionId: string) {
+		setTimeout(() => {
+			const session = this.sessions.get(sessionId);
+			if (!session || session.status !== 'running' || session.closing) {
+				return;
+			}
+			this.sendPtyHostCommand(session, { type: 'input', data: '\r' });
+		}, submitEnterDelayMs);
 	}
 
 	/** Run `callback` once, when the response after the next host-sent prompt settles. */

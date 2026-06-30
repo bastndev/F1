@@ -7,7 +7,7 @@
 import * as fs from 'fs';
 import * as path from 'path';
 
-const IGNORED_DIRS = new Set([
+const BASE_IGNORED_DIRS = [
 	'node_modules',
 	'dist',
 	'out',
@@ -18,7 +18,18 @@ const IGNORED_DIRS = new Set([
 	'.git',
 	'.f1',
 	'graphify-out'
-]);
+];
+
+/** Base ignores plus any extra directory names supplied via config. */
+const buildIgnoredDirs = (extra?: string[]): Set<string> => {
+	const ignored = new Set(BASE_IGNORED_DIRS);
+	for (const name of extra ?? []) {
+		if (typeof name === 'string' && name.trim()) {
+			ignored.add(name.trim());
+		}
+	}
+	return ignored;
+};
 
 export type ProjectScan = {
 	name?: string;
@@ -42,11 +53,11 @@ const objectKeys = (value: unknown): string[] => {
 	return value && typeof value === 'object' ? Object.keys(value as object) : [];
 };
 
-const listTopLevelFolders = (root: string): string[] => {
+const listTopLevelFolders = (root: string, ignored: Set<string>): string[] => {
 	try {
 		return fs
 			.readdirSync(root, { withFileTypes: true })
-			.filter((entry) => entry.isDirectory() && !entry.name.startsWith('.') && !IGNORED_DIRS.has(entry.name))
+			.filter((entry) => entry.isDirectory() && !entry.name.startsWith('.') && !ignored.has(entry.name))
 			.map((entry) => entry.name)
 			.sort();
 	} catch {
@@ -54,8 +65,11 @@ const listTopLevelFolders = (root: string): string[] => {
 	}
 };
 
-/** Scan the workspace into a plain data object (best-effort, never throws). */
-export const scanProject = (root: string): ProjectScan => {
+/**
+ * Scan the workspace into a plain data object (best-effort, never throws).
+ * `extraIgnoredDirs` (from the config cascade) is merged onto the base ignore set.
+ */
+export const scanProject = (root: string, extraIgnoredDirs?: string[]): ProjectScan => {
 	const pkg = readPackageJson(root);
 	const asString = (value: unknown): string | undefined =>
 		typeof value === 'string' && value.trim() ? value : undefined;
@@ -67,6 +81,6 @@ export const scanProject = (root: string): ProjectScan => {
 		entryPoint: asString(pkg?.main) ?? asString(pkg?.module),
 		scripts: objectKeys(pkg?.scripts),
 		dependencies: objectKeys(pkg?.dependencies),
-		topLevelFolders: listTopLevelFolders(root)
+		topLevelFolders: listTopLevelFolders(root, buildIgnoredDirs(extraIgnoredDirs))
 	};
 };

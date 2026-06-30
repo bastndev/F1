@@ -357,7 +357,7 @@ export class MyCliViewProvider implements vscode.WebviewViewProvider, vscode.Dis
 		const [hasGraph] = await Promise.all([graphReady, this.sessionManager.waitForFirstIdle(sessionId)]);
 
 		// Write the rules, then type one prompt so the agent reads the rules + graph.
-		this.smartService.writeRules(root, this._readSmartRules());
+		this.smartService.writeRules(root, this.smartService.loadRules(this._extensionUri.fsPath));
 		this.sessionManager.sendText(sessionId, this.smartService.composePrompt(hasGraph));
 
 		// Keep the loading overlay up through the whole internal prep: when the agent's
@@ -378,16 +378,6 @@ export class MyCliViewProvider implements vscode.WebviewViewProvider, vscode.Dis
 
 	private _workspaceRoot(): string | undefined {
 		return vscode.workspace.workspaceFolders?.[0]?.uri.fsPath;
-	}
-
-	/** The built-in rules asset shipped with the extension (undefined if unreadable). */
-	private _readSmartRules(): string | undefined {
-		try {
-			const rulesUri = vscode.Uri.joinPath(this._extensionUri, 'src', 'my-plus', 'my-smart', 'assets', 'smart-rules.md');
-			return fs.readFileSync(rulesUri.fsPath, 'utf8');
-		} catch {
-			return undefined;
-		}
 	}
 
 	private _getAgentLaunchExtensionMode(): AgentLaunchExtensionMode {

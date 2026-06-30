@@ -5,13 +5,9 @@
 
 import { SmartService } from '../my-plus/my-smart/my-smart';
 import { SMART_READY_MESSAGE } from '../my-plus/my-smart/core/smart-paths';
-import type { SmartPrepResult } from '../my-plus/my-smart/smart-types';
 
 // smart-paths.ts — constant exists and is a string
 const readyMsg: string = SMART_READY_MESSAGE;
-
-// smart-types.ts — type is usable
-const prep: SmartPrepResult = { ok: true, rulesWritten: true };
 
 // smart-service.ts — class compiles and methods exist
 const smart = new SmartService();
@@ -21,5 +17,4 @@ smart.prepareContext(root, 'claude');
 smart.cleanup(root);
 
 void readyMsg;
-void prep;
 void root;

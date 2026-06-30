@@ -10,8 +10,10 @@ export const MEMORY_DIR = '.f1';
 export const MEMORY_MAP_FILE = 'project-map.md';
 /** Built-in working rules inside MEMORY_DIR (content provided by Smart + Skills). */
 export const RULES_FILE = 'smart-rules.md';
-/** Feature config/state inside MEMORY_DIR. */
+/** Feature config/state inside MEMORY_DIR (generated). */
 export const MEMORY_CONFIG_FILE = 'memory.json';
+/** Optional hand-authored config inside MEMORY_DIR (read by the config cascade). */
+export const MEMORY_USER_CONFIG_FILE = 'config.json';
 
 /** Markers for the idempotent managed block we write into instruction files. */
 export const BLOCK_START = '<!-- F1-MEMORY:START -->';
