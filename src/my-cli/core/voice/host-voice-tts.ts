@@ -236,8 +236,8 @@ async function loadVoicesCatalog(context: vscode.ExtensionContext): Promise<Voic
 			try {
 				voicesCatalogCache = JSON.parse(await fs.promises.readFile(candidate, 'utf8')) as VoicesCatalog;
 				return voicesCatalogCache;
-			} catch {
-				// Corrupt copy — fall through to a fresh download.
+			} catch (error) {
+				console.warn('[f1-voice] Corrupt voices.json cache, re-downloading:', error);
 			}
 		}
 	}
