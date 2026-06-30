@@ -1,4 +1,4 @@
-/* Smart + Skills — Smart Mode Skeleton v5 */
+/* Smart + Skills — Smart Mode Skeleton v6 */
 
 .smart-overlay {
 	position: fixed;
@@ -21,8 +21,8 @@
 	position: absolute;
 	inset: 0;
 	background-image:
-		linear-gradient(rgba(99,102,241,.04) 1px, transparent 1px),
-		linear-gradient(90deg, rgba(99,102,241,.04) 1px, transparent 1px);
+		linear-gradient(rgba(0,120,212,.04) 1px, transparent 1px),
+		linear-gradient(90deg, rgba(0,120,212,.04) 1px, transparent 1px);
 	background-size: 32px 32px;
 	pointer-events: none;
 }
@@ -35,7 +35,7 @@
 	transform: translateX(-50%);
 	width: 420px;
 	height: 220px;
-	background: radial-gradient(ellipse, rgba(99,102,241,.10) 0%, transparent 70%);
+	background: radial-gradient(ellipse, rgba(0,120,212,.08) 0%, transparent 70%);
 	pointer-events: none;
 }
 
@@ -45,8 +45,8 @@
 	left: 0;
 	right: 0;
 	height: 1px;
-	background: linear-gradient(90deg, transparent, rgba(129,140,248,.5), transparent);
-	animation: smart-scan 3s ease-in-out infinite;
+	background: linear-gradient(90deg, transparent, rgba(0,120,212,.6), transparent);
+	animation: smart-scan 6s ease-in-out infinite;
 	z-index: 1;
 	pointer-events: none;
 }
@@ -82,18 +82,18 @@
 	width: 9px;
 	height: 9px;
 	border-radius: 50%;
-	background: #818cf8;
+	background: var(--vscode-focusBorder, #0078d4);
 	position: absolute;
 	inset: 0;
-	animation: smart-pulse 2.4s ease-in-out infinite;
+	animation: smart-pulse 4s ease-in-out infinite;
 }
 
 .smart-overlay-spark-ring {
 	position: absolute;
 	inset: -4px;
 	border-radius: 50%;
-	border: 1px solid rgba(129,140,248,.35);
-	animation: smart-ring 2.4s ease-in-out infinite;
+	border: 1px solid rgba(0,120,212,.4);
+	animation: smart-ring 4s ease-in-out infinite;
 }
 
 .smart-overlay-title {
@@ -101,7 +101,7 @@
 	font-size: 11px;
 	letter-spacing: .6px;
 	text-transform: uppercase;
-	color: var(--vscode-descriptionForeground, rgba(129,140,248,.85));
+	color: var(--vscode-descriptionForeground, rgba(0,120,212,.9));
 }
 
 .smart-overlay-phase {
@@ -110,8 +110,8 @@
 	font-size: 10px;
 	letter-spacing: .4px;
 	text-transform: uppercase;
-	color: var(--vscode-descriptionForeground, rgba(129,140,248,.4));
-	opacity: .6;
+	color: var(--vscode-descriptionForeground, #cccccc);
+	opacity: .4;
 }
 
 /* ── SKELETON ROWS ── */
@@ -129,26 +129,27 @@
 	gap: 10px;
 	padding: 9px 10px;
 	border-radius: 8px;
-	border: 1px solid rgba(99,102,241,.1);
-	background: rgba(99,102,241,.04);
-	animation: smart-row-in .5s ease both;
+	border: 1px solid rgba(0,120,212,.1);
+	background: rgba(0,120,212,.04);
+	opacity: 0;
+	animation: smart-row-in 1s ease forwards;
 }
 
-.smart-skel-row:nth-child(1) { animation-delay: .05s; }
-.smart-skel-row:nth-child(2) { animation-delay: .12s; }
-.smart-skel-row:nth-child(3) { animation-delay: .19s; }
-.smart-skel-row:nth-child(4) { animation-delay: .26s; }
-.smart-skel-row:nth-child(5) { animation-delay: .33s; }
-.smart-skel-row:nth-child(6) { animation-delay: .40s; }
-.smart-skel-row:nth-child(7) { animation-delay: .47s; }
+.smart-skel-row:nth-child(1) { animation-delay: .1s; }
+.smart-skel-row:nth-child(2) { animation-delay: .5s; }
+.smart-skel-row:nth-child(3) { animation-delay: .9s; }
+.smart-skel-row:nth-child(4) { animation-delay: 1.3s; }
+.smart-skel-row:nth-child(5) { animation-delay: 1.7s; }
+.smart-skel-row:nth-child(6) { animation-delay: 2.1s; }
+.smart-skel-row:nth-child(7) { animation-delay: 2.5s; }
 
 .smart-skel-accent {
 	flex: 0 0 26px;
 	width: 26px;
 	height: 26px;
 	border-radius: 6px;
-	background: rgba(99,102,241,.12);
-	border: 1px solid rgba(99,102,241,.18);
+	background: rgba(0,120,212,.12);
+	border: 1px solid rgba(0,120,212,.2);
 	position: relative;
 	overflow: hidden;
 }
@@ -158,12 +159,12 @@
 	position: absolute;
 	inset: 0;
 	transform: translateX(-100%);
-	background: linear-gradient(90deg, transparent, rgba(129,140,248,.22), transparent);
-	animation: smart-shimmer 1.8s linear infinite;
+	background: linear-gradient(90deg, transparent, rgba(0,120,212,.25), transparent);
+	animation: smart-shimmer 3s linear infinite;
 }
 
-.smart-skel-row:nth-child(2n) .smart-skel-accent::after { animation-delay: -.6s; }
-.smart-skel-row:nth-child(3n) .smart-skel-accent::after { animation-delay: -1.2s; }
+.smart-skel-row:nth-child(2n) .smart-skel-accent::after { animation-delay: -1s; }
+.smart-skel-row:nth-child(3n) .smart-skel-accent::after { animation-delay: -2s; }
 
 .smart-skel-lines {
 	flex: 1;
@@ -175,7 +176,7 @@
 .smart-skel-bar {
 	height: 8px;
 	border-radius: 999px;
-	background: rgba(129,140,248,.08);
+	background: rgba(0,120,212,.09);
 	position: relative;
 	overflow: hidden;
 }
@@ -185,11 +186,11 @@
 	position: absolute;
 	inset: 0;
 	transform: translateX(-100%);
-	background: linear-gradient(90deg, transparent, rgba(129,140,248,.2), transparent);
-	animation: smart-shimmer 1.8s linear infinite;
+	background: linear-gradient(90deg, transparent, rgba(0,120,212,.22), transparent);
+	animation: smart-shimmer 3s linear infinite;
 }
 
-.smart-skel-bar:nth-child(2)::after { animation-delay: -.4s; }
+.smart-skel-bar:nth-child(2)::after { animation-delay: -.8s; }
 
 .smart-skel-bar.w-long  { width: 70%; }
 .smart-skel-bar.w-mid   { width: 46%; height: 6px; opacity: .65; }
@@ -205,7 +206,7 @@
 	align-items: center;
 	gap: 8px;
 	padding-top: 12px;
-	border-top: 1px solid rgba(99,102,241,.1);
+	border-top: 1px solid rgba(0,120,212,.1);
 	margin-top: 12px;
 }
 
@@ -214,7 +215,7 @@
 	font-size: 10px;
 	letter-spacing: .5px;
 	text-transform: uppercase;
-	color: var(--vscode-descriptionForeground, rgba(129,140,248,.6));
+	color: var(--vscode-descriptionForeground, rgba(0,120,212,.7));
 	white-space: nowrap;
 	flex-shrink: 0;
 }
@@ -222,7 +223,7 @@
 .smart-status-track {
 	flex: 1;
 	height: 1px;
-	background: rgba(99,102,241,.15);
+	background: rgba(0,120,212,.15);
 	border-radius: 999px;
 	overflow: hidden;
 }
@@ -230,16 +231,17 @@
 .smart-status-fill {
 	height: 100%;
 	width: 0%;
-	background: var(--vscode-focusBorder, rgba(129,140,248,.7));
+	background: var(--vscode-focusBorder, #0078d4);
 	border-radius: 999px;
-	transition: width .25s linear;
+	transition: width .4s linear;
 }
 
 .smart-status-pct {
 	font-family: var(--vscode-editor-font-family, monospace);
 	font-size: 10px;
 	letter-spacing: .5px;
-	color: var(--vscode-descriptionForeground, rgba(129,140,248,.8));
+	color: var(--vscode-descriptionForeground, #cccccc);
+	opacity: .7;
 	min-width: 32px;
 	text-align: right;
 	flex-shrink: 0;
@@ -262,7 +264,7 @@
 }
 
 @keyframes smart-row-in {
-	from { opacity: 0; transform: translateY(4px); }
+	from { opacity: 0; transform: translateY(6px); }
 	to   { opacity: 1; transform: translateY(0); }
 }
 
@@ -279,6 +281,10 @@
 	.smart-scan,
 	.smart-skel-accent::after,
 	.smart-skel-bar::after {
+		animation: none;
+	}
+	.smart-skel-row {
+		opacity: 1;
 		animation: none;
 	}
 }
