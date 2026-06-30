@@ -29,7 +29,7 @@ import {
 	type AgentLaunchExtensionMode,
 	type AgentLaunchSource
 } from '../shared/agent-launch-guard';
-import { SmartService } from '../../my-smart/my-smart';
+import { SmartService } from '../../my-plus/my-smart/my-smart';
 
 export class MyCliViewProvider implements vscode.WebviewViewProvider, vscode.Disposable {
 	public static readonly viewType = 'f1.myCli';
@@ -384,7 +384,7 @@ export class MyCliViewProvider implements vscode.WebviewViewProvider, vscode.Dis
 	/** The built-in rules asset shipped with the extension (undefined if unreadable). */
 	private _readSmartRules(): string | undefined {
 		try {
-			const rulesUri = vscode.Uri.joinPath(this._extensionUri, 'src', 'my-smart', 'assets', 'smart-rules.md');
+			const rulesUri = vscode.Uri.joinPath(this._extensionUri, 'src', 'my-plus', 'my-smart', 'assets', 'smart-rules.md');
 			return fs.readFileSync(rulesUri.fsPath, 'utf8');
 		} catch {
 			return undefined;

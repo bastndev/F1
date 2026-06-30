@@ -10,7 +10,7 @@ import { USAGE_BUSY_ERROR, isUsageAgentBusy, isUsageViewInline } from '../tools/
 import { detectModelName } from '../../shared/model-detect';
 import { createRpcChannel } from './host-rpc';
 import { createBootSkeletons } from './boot-skeleton';
-import { createSmartSkeleton, type SmartSkeletonController } from '../../../my-smart/webview/smart-skeleton';
+import { createSmartSkeleton, type SmartSkeletonController } from '../../../my-plus/my-smart/webview/smart-skeleton';
 import { createCopyToTranslateWatcher } from './copy-to-translate';
 import { getTerminalFontFamily, getTerminalTheme } from './terminal-theme';
 import type { ImageAttachment, PromptTranslateRequest, PromptTranslateResult, FileMentionEntry, SpellIssue, WorkspaceSkill } from '../../shared/prompt';
