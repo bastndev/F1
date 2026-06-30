@@ -29,7 +29,7 @@ import {
 	type AgentLaunchExtensionMode,
 	type AgentLaunchSource
 } from '../shared/agent-launch-guard';
-import { SmartService } from '../../my-plus/my-smart/my-smart';
+import { SmartService } from '../../my-plus/plus';
 
 export class MyCliViewProvider implements vscode.WebviewViewProvider, vscode.Disposable {
 	public static readonly viewType = 'f1.myCli';
