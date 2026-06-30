@@ -1,16 +1,14 @@
-/* Smart + Skills — custom launch overlay (loading animation only). Injected as a
-   <style> by smart-skeleton.ts. Skeleton rows modeled on my-skills install-skill
-   (staggered wave + breathe). The "ready" confirmation comes from the CLI's own
-   reply in the chat, not from here. */
+/* Smart + Skills — Smart Mode Skeleton v5 */
 
 .smart-overlay {
 	position: fixed;
 	inset: 0;
 	z-index: 40;
 	display: flex;
-	background: var(--vscode-editor-background, #1e1e1e);
+	background: var(--vscode-editor-background, #0d0d10);
 	opacity: 1;
-	transition: opacity 460ms ease;
+	transition: opacity .4s ease;
+	overflow: hidden;
 }
 
 .smart-overlay.is-leaving {
@@ -18,127 +16,269 @@
 	pointer-events: none;
 }
 
+.smart-overlay::before {
+	content: "";
+	position: absolute;
+	inset: 0;
+	background-image:
+		linear-gradient(rgba(99,102,241,.04) 1px, transparent 1px),
+		linear-gradient(90deg, rgba(99,102,241,.04) 1px, transparent 1px);
+	background-size: 32px 32px;
+	pointer-events: none;
+}
+
+.smart-overlay::after {
+	content: "";
+	position: absolute;
+	top: -80px;
+	left: 50%;
+	transform: translateX(-50%);
+	width: 420px;
+	height: 220px;
+	background: radial-gradient(ellipse, rgba(99,102,241,.10) 0%, transparent 70%);
+	pointer-events: none;
+}
+
+.smart-scan {
+	position: absolute;
+	top: 0;
+	left: 0;
+	right: 0;
+	height: 1px;
+	background: linear-gradient(90deg, transparent, rgba(129,140,248,.5), transparent);
+	animation: smart-scan 3s ease-in-out infinite;
+	z-index: 1;
+	pointer-events: none;
+}
+
 .smart-overlay-inner {
+	position: relative;
 	flex: 1;
 	display: flex;
 	flex-direction: column;
-	min-height: 0;
-	padding: 18px 16px 16px;
+	height: 100%;
+	padding: 20px 18px 16px;
 	box-sizing: border-box;
+	z-index: 2;
 }
 
+/* ── HEAD ── */
 .smart-overlay-head {
 	display: flex;
 	align-items: center;
 	gap: 10px;
-	padding: 2px 4px 14px;
+	margin-bottom: 18px;
+	flex-shrink: 0;
 }
 
 .smart-overlay-spark {
+	position: relative;
+	width: 9px;
+	height: 9px;
 	flex: 0 0 auto;
-	width: 11px;
-	height: 11px;
+}
+
+.smart-overlay-spark-dot {
+	width: 9px;
+	height: 9px;
 	border-radius: 50%;
-	background: #3b82f6;
-	animation: smart-spark-pulse 1.6s ease-in-out infinite;
+	background: #818cf8;
+	position: absolute;
+	inset: 0;
+	animation: smart-pulse 2.4s ease-in-out infinite;
+}
+
+.smart-overlay-spark-ring {
+	position: absolute;
+	inset: -4px;
+	border-radius: 50%;
+	border: 1px solid rgba(129,140,248,.35);
+	animation: smart-ring 2.4s ease-in-out infinite;
 }
 
 .smart-overlay-title {
-	font-family: var(--font-family, var(--vscode-font-family));
-	font-size: 12.5px;
-	letter-spacing: 0.2px;
-	color: color-mix(in srgb, var(--vscode-foreground, #cccccc) 80%, transparent);
+	font-family: var(--vscode-editor-font-family, monospace);
+	font-size: 11px;
+	letter-spacing: .6px;
+	text-transform: uppercase;
+	color: var(--vscode-descriptionForeground, rgba(129,140,248,.85));
 }
 
+.smart-overlay-phase {
+	margin-left: auto;
+	font-family: var(--vscode-editor-font-family, monospace);
+	font-size: 10px;
+	letter-spacing: .4px;
+	text-transform: uppercase;
+	color: var(--vscode-descriptionForeground, rgba(129,140,248,.4));
+	opacity: .6;
+}
+
+/* ── SKELETON ROWS ── */
 .smart-skeleton {
 	flex: 1;
 	display: flex;
 	flex-direction: column;
-	gap: 2px;
+	justify-content: space-evenly;
 	min-height: 0;
-	overflow: hidden;
 }
 
 .smart-skel-row {
-	--d: calc(var(--i) * 95ms);
 	display: flex;
 	align-items: center;
 	gap: 10px;
-	min-height: 42px;
-	padding: 7px 6px;
-	box-sizing: border-box;
-	opacity: 0.5;
-	animation: smart-row-wave 2.35s ease-in-out var(--d) infinite;
+	padding: 9px 10px;
+	border-radius: 8px;
+	border: 1px solid rgba(99,102,241,.1);
+	background: rgba(99,102,241,.04);
+	animation: smart-row-in .5s ease both;
 }
 
+.smart-skel-row:nth-child(1) { animation-delay: .05s; }
+.smart-skel-row:nth-child(2) { animation-delay: .12s; }
+.smart-skel-row:nth-child(3) { animation-delay: .19s; }
+.smart-skel-row:nth-child(4) { animation-delay: .26s; }
+.smart-skel-row:nth-child(5) { animation-delay: .33s; }
+.smart-skel-row:nth-child(6) { animation-delay: .40s; }
+.smart-skel-row:nth-child(7) { animation-delay: .47s; }
+
 .smart-skel-accent {
-	flex: 0 0 24px;
-	width: 24px;
-	height: 24px;
+	flex: 0 0 26px;
+	width: 26px;
+	height: 26px;
 	border-radius: 6px;
-	background: color-mix(in srgb, #3b82f6 14%, transparent);
-	border: 1px solid color-mix(in srgb, #3b82f6 24%, transparent);
+	background: rgba(99,102,241,.12);
+	border: 1px solid rgba(99,102,241,.18);
+	position: relative;
+	overflow: hidden;
 }
+
+.smart-skel-accent::after {
+	content: "";
+	position: absolute;
+	inset: 0;
+	transform: translateX(-100%);
+	background: linear-gradient(90deg, transparent, rgba(129,140,248,.22), transparent);
+	animation: smart-shimmer 1.8s linear infinite;
+}
+
+.smart-skel-row:nth-child(2n) .smart-skel-accent::after { animation-delay: -.6s; }
+.smart-skel-row:nth-child(3n) .smart-skel-accent::after { animation-delay: -1.2s; }
 
 .smart-skel-lines {
 	flex: 1;
-	min-width: 0;
 	display: flex;
 	flex-direction: column;
 	gap: 6px;
 }
 
 .smart-skel-bar {
-	display: block;
-	height: 10px;
-	border-radius: 3px;
-	background: color-mix(in srgb, var(--vscode-foreground, #ffffff) 8%, transparent);
-	animation: smart-bar-breathe 2.35s ease-in-out var(--d) infinite;
-}
-
-.smart-skel-bar.w-long {
-	width: min(70%, 320px);
-}
-
-.smart-skel-bar.w-mid {
-	width: min(50%, 220px);
 	height: 8px;
-	opacity: 0.78;
+	border-radius: 999px;
+	background: rgba(129,140,248,.08);
+	position: relative;
+	overflow: hidden;
 }
 
-.smart-skel-row:nth-child(3n + 1) .smart-skel-bar.w-long {
-	width: min(60%, 260px);
+.smart-skel-bar::after {
+	content: "";
+	position: absolute;
+	inset: 0;
+	transform: translateX(-100%);
+	background: linear-gradient(90deg, transparent, rgba(129,140,248,.2), transparent);
+	animation: smart-shimmer 1.8s linear infinite;
 }
 
-.smart-skel-row:nth-child(4n + 2) .smart-skel-bar.w-long {
-	width: min(78%, 360px);
+.smart-skel-bar:nth-child(2)::after { animation-delay: -.4s; }
+
+.smart-skel-bar.w-long  { width: 70%; }
+.smart-skel-bar.w-mid   { width: 46%; height: 6px; opacity: .65; }
+
+.smart-skel-row:nth-child(2n) .w-long { width: 58%; }
+.smart-skel-row:nth-child(3n) .w-long { width: 80%; }
+.smart-skel-row:nth-child(4n) .w-mid  { width: 55%; }
+
+/* ── BARRA DE PROGRESO (pegada al fondo) ── */
+.smart-status {
+	flex-shrink: 0;
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	padding-top: 12px;
+	border-top: 1px solid rgba(99,102,241,.1);
+	margin-top: 12px;
 }
 
-@keyframes smart-spark-pulse {
-	0%, 100% {
-		box-shadow: 0 0 0 0 color-mix(in srgb, #3b82f6 55%, transparent);
-	}
-	50% {
-		box-shadow: 0 0 0 7px color-mix(in srgb, #3b82f6 0%, transparent);
-	}
+.smart-status-label {
+	font-family: var(--vscode-editor-font-family, monospace);
+	font-size: 10px;
+	letter-spacing: .5px;
+	text-transform: uppercase;
+	color: var(--vscode-descriptionForeground, rgba(129,140,248,.6));
+	white-space: nowrap;
+	flex-shrink: 0;
 }
 
-@keyframes smart-row-wave {
-	0% { opacity: 0.32; }
-	18% { opacity: 0.9; }
-	42% { opacity: 0.54; }
-	100% { opacity: 0.32; }
+.smart-status-track {
+	flex: 1;
+	height: 1px;
+	background: rgba(99,102,241,.15);
+	border-radius: 999px;
+	overflow: hidden;
 }
 
-@keyframes smart-bar-breathe {
-	0%, 100% { background: color-mix(in srgb, var(--vscode-foreground, #ffffff) 7%, transparent); }
-	18% { background: color-mix(in srgb, var(--vscode-foreground, #ffffff) 15%, transparent); }
+.smart-status-fill {
+	height: 100%;
+	width: 0%;
+	background: var(--vscode-focusBorder, rgba(129,140,248,.7));
+	border-radius: 999px;
+	transition: width .25s linear;
+}
+
+.smart-status-pct {
+	font-family: var(--vscode-editor-font-family, monospace);
+	font-size: 10px;
+	letter-spacing: .5px;
+	color: var(--vscode-descriptionForeground, rgba(129,140,248,.8));
+	min-width: 32px;
+	text-align: right;
+	flex-shrink: 0;
+}
+
+/* ── KEYFRAMES ── */
+@keyframes smart-pulse {
+	0%,100% { transform: scale(1); opacity: .9; }
+	50%      { transform: scale(1.25); opacity: 1; }
+}
+
+@keyframes smart-ring {
+	0%   { transform: scale(1); opacity: .5; }
+	50%  { transform: scale(1.8); opacity: 0; }
+	100% { transform: scale(1); opacity: 0; }
+}
+
+@keyframes smart-shimmer {
+	100% { transform: translateX(100%); }
+}
+
+@keyframes smart-row-in {
+	from { opacity: 0; transform: translateY(4px); }
+	to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes smart-scan {
+	0%   { top: 0%;   opacity: 0; }
+	5%   { opacity: 1; }
+	95%  { opacity: 1; }
+	100% { top: 100%; opacity: 0; }
 }
 
 @media (prefers-reduced-motion: reduce) {
-	.smart-overlay-spark,
-	.smart-skel-row,
-	.smart-skel-bar {
+	.smart-overlay-spark-dot,
+	.smart-overlay-spark-ring,
+	.smart-scan,
+	.smart-skel-accent::after,
+	.smart-skel-bar::after {
 		animation: none;
 	}
 }
