@@ -34,3 +34,4 @@ These rules define how you operate here — follow them for every task in this s
 - Be clear and direct. Answer at whatever length the task genuinely needs — no padding, no filler.
 - Reference code as `file:line` so it is easy to follow.
 - State your assumptions, and ask when a decision is genuinely the user's to make instead of guessing.
+- When you finish a task, end your reply with: **Task completed successfully🎉.**
