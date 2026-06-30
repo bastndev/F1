@@ -35,7 +35,7 @@ export const buildPrimingPrompt = (options: { graphReportRef?: string }): string
 		options.graphReportRef
 			? `Also read \`${options.graphReportRef}\` — a compact code-graph of this project — so you grasp the structure without scanning every file.`
 			: 'Take a quick look at the project structure so you understand it.',
-		`Keep this first reply short, then end it with exactly: ${SMART_READY_MESSAGE}`
+		`Your first reply must be ONLY this line, nothing else: ${SMART_READY_MESSAGE}`
 	];
 	return parts.join(' ');
 };

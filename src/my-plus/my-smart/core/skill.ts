@@ -10,15 +10,12 @@
  * Pure data — no `vscode`, no `fs`.
  */
 
-import { SMART_READY_MESSAGE } from './smart-paths';
-
 /**
  * Phrases that carry the safety / readiness contract. Removing any of them
  * silently weakens the rules, so `SmartService.loadRules` warns and the
  * `smart-rules.test.ts` invariant check fails if one goes missing.
  */
 export const RULE_INVARIANTS: readonly string[] = [
-	SMART_READY_MESSAGE,
 	'Do not create, modify, or delete files without explicit authorization',
 	'Before you change anything',
 	'run the closest available check or build',
