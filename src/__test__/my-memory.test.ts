@@ -34,7 +34,7 @@ const memory = new MemoryService();
 const enabled: boolean = memory.isEnabled();
 memory.setEnabled(true);
 const root: string | undefined = undefined;
-const wrote: boolean = memory.writeRules(root, 'content');
+memory.writeRules(root, 'content');
 const cleaned: string[] = memory.cleanup(root);
 
 void dir;
@@ -48,5 +48,4 @@ void claudeFile;
 void claudeImport;
 void claudeSlug;
 void enabled;
-void wrote;
 void cleaned;

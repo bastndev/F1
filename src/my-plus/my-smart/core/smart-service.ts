@@ -18,7 +18,7 @@ import { extractSkillBody, findMissingRuleInvariants } from './skill';
 const GRAPHIFY_OUT_DIR = 'graphify-out';
 const GRAPH_REPORT_REL = 'graphify-out/GRAPH_REPORT.md';
 const GRAPH_BUILD_TIMEOUT_MS = 30000;
-const RULES_ASSET_REL = path.join('src', 'my-plus', 'my-smart', 'assets', 'skills', 'default', 'SKILL.md');
+const RULES_ASSET_SEGMENTS = ['src', 'my-plus', 'my-smart', 'assets', 'skills', 'default', 'SKILL.md'];
 
 export class SmartService {
 	private readonly memory = new MemoryService();
@@ -40,7 +40,7 @@ export class SmartService {
 			return undefined;
 		}
 		try {
-			const body = extractSkillBody(fs.readFileSync(path.join(extensionFsPath, RULES_ASSET_REL), 'utf8'));
+			const body = extractSkillBody(fs.readFileSync(path.join(extensionFsPath, ...RULES_ASSET_SEGMENTS), 'utf8'));
 			const missing = findMissingRuleInvariants(body);
 			if (missing.length) {
 				console.error('[smart] rules asset is missing required phrases:', missing);

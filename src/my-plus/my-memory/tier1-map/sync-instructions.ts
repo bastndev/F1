@@ -19,7 +19,10 @@ import {
 	CLAUDE_FILE,
 	CLAUDE_IMPORT_LINE,
 	CLAUDE_SLUG,
-	HUB_FILE
+	HUB_FILE,
+	MEMORY_DIR,
+	MEMORY_MAP_FILE,
+	RULES_FILE
 } from '../core/memory-paths';
 import { atomicWriteFile, backupPristineFile, writeFileIfChanged } from '../core/atomic-write';
 import { buildManagedBlock } from '../../shared/instruction-builder';
@@ -54,12 +57,37 @@ const upsertBlockAtTop = (content: string, block: string): string => {
 	return tail ? `${head}\n\n${block}\n\n${tail}\n` : `${head}\n\n${block}\n`;
 };
 
+/** Check whether the files referenced by the managed block actually exist. */
+const managedBlockTargetsExist = (root: string): boolean => {
+	const dir = path.join(root, MEMORY_DIR);
+	try {
+		return (
+			fs.existsSync(path.join(dir, RULES_FILE)) ||
+			fs.existsSync(path.join(dir, MEMORY_MAP_FILE))
+		);
+	} catch {
+		return false;
+	}
+};
+
 /** Ensure AGENTS.md (the hub) carries the managed block at the top. */
 const syncHub = (root: string): boolean => {
 	try {
 		const filePath = path.join(root, HUB_FILE);
 		const existing = fs.existsSync(filePath) ? fs.readFileSync(filePath, 'utf8') : '';
 		backupPristineFile(filePath, existing, BLOCK_START);
+
+		if (!managedBlockTargetsExist(root)) {
+			const start = existing.indexOf(BLOCK_START);
+			const end = existing.indexOf(BLOCK_END);
+			if (start !== -1 && end !== -1 && end > start) {
+				const cleaned = (existing.slice(0, start) + existing.slice(end + BLOCK_END.length))
+					.replace(/\n{3,}/g, '\n\n').trim();
+				return writeFileIfChanged(filePath, cleaned ? `${cleaned}\n` : '');
+			}
+			return false;
+		}
+
 		return writeFileIfChanged(filePath, upsertBlockAtTop(existing, buildManagedBlock()));
 	} catch (error) {
 		console.error(`[my-memory] sync ${HUB_FILE} failed:`, error);

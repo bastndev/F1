@@ -56,15 +56,14 @@ export class MemoryService {
 	}
 
 	/** Write the built-in rules file into `.f1/` (atomic, idempotent; ensures the dir). */
-	public writeRules(root: string | undefined, content: string): boolean {
+	public writeRules(root: string | undefined, content: string): void {
 		if (!root || !content) {
-			return false;
+			return;
 		}
 		try {
-			return writeFileIfChanged(path.join(root, MEMORY_DIR, RULES_FILE), content);
+			writeFileIfChanged(path.join(root, MEMORY_DIR, RULES_FILE), content);
 		} catch (error) {
 			console.error('[my-memory] writeRules failed:', error);
-			return false;
 		}
 	}
 

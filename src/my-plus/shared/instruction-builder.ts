@@ -12,10 +12,8 @@
 import { BLOCK_END, BLOCK_START, MEMORY_DIR, MEMORY_MAP_FILE, RULES_FILE } from '../my-memory/core/memory-paths';
 import { SMART_READY_MESSAGE } from '../my-smart/core/smart-paths';
 
-/** Workspace-relative reference to the generated working-rules file. */
-export const RULES_REF = `./${MEMORY_DIR}/${RULES_FILE}`;
-/** Workspace-relative reference to the generated project map. */
-export const MAP_REF = `./${MEMORY_DIR}/${MEMORY_MAP_FILE}`;
+const RULES_REF = `./${MEMORY_DIR}/${RULES_FILE}`;
+const MAP_REF = `./${MEMORY_DIR}/${MEMORY_MAP_FILE}`;
 
 /** The managed block written at the top of AGENTS.md (between the F1 markers). */
 export const buildManagedBlock = (): string => {

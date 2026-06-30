@@ -98,7 +98,7 @@ export const validateAndClean = <T extends Record<string, unknown>>(value: T): T
 		return clean as T;
 	}
 	for (const [key, entry] of Object.entries(value)) {
-		if (entry === undefined || typeof entry === 'function' || typeof entry === 'symbol') {
+		if (entry === undefined || typeof entry === 'function') {
 			continue;
 		}
 		if (typeof entry === 'number' && !Number.isFinite(entry)) {
