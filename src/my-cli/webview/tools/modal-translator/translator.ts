@@ -13,6 +13,10 @@ import { getPromptLanguage } from '../../../shared/prompt';
 
 const stylesId = 'cli-translator-panel-styles';
 const maxVoiceChunkChars = 900;
+// A voice chunk shorter than this is too small to read on its own. When it falls
+// at the very end of an answer it's folded into the previous chunk instead of
+// being spoken (and highlighted) as a lonely fragment.
+const minVoiceChunkChars = 200;
 // Target size for a streamed translation block. Mirrors the voice chunk size
 // and the host's long-text threshold: blocks this big translate in one fast
 // pass yet are small enough that a long answer arrives in several pieces.
@@ -183,49 +187,117 @@ function hasTranslatableText(text: string): boolean {
 	return /\p{L}/u.test(text);
 }
 
-function buildVoiceChunks(textEl: HTMLElement): TranslatorVoiceChunk[] {
-	const renderedBlocks = Array.from(textEl.children)
-		.filter((element): element is HTMLElement => element instanceof HTMLElement);
-	const sourceBlocks = renderedBlocks.length ? renderedBlocks : [textEl];
-	const chunks: TranslatorVoiceChunk[] = [];
-	let currentText = '';
-	let currentElements: HTMLElement[] = [];
+// ── Voice chunking ───────────────────────────────────────────────────
+// A voice chunk is one reading unit: the blue band highlights it while the host
+// reads it aloud. Rather than greedily packing ~900 chars across many sections
+// (which made the first read swallow the whole dashboard + several paragraphs),
+// chunks follow the answer's STRUCTURE: a run of "openers" (headings, emoji /
+// score labels) attaches to the first "body" block that follows it — heading +
+// a bit of context — and a second body starts a new chunk. So the first read is
+// "title and a little context", and the highlight marks exactly that.
 
-	const flush = () => {
-		if (currentText.trim()) {
-			chunks.push({ text: currentText.trim(), elements: currentElements });
-		}
-		currentText = '';
-		currentElements = [];
-	};
+// Openers are short structural lines that introduce what comes next; they ride
+// along with the following body instead of ending a chunk. Everything else
+// (paragraphs, lists, tables, code, quotes) is a body that closes the unit.
+const voiceOpenerSelector = '.md-h, .md-emoji-item, .md-score-item, .md-hr';
+const isVoiceOpener = (element: HTMLElement): boolean => element.matches(voiceOpenerSelector);
 
-	for (const element of sourceBlocks) {
-		const text = normalizeSpeechText(element.textContent || '');
-		if (!text) {
-			continue;
-		}
+// Groups rendered blocks into structural units. `add` returns a unit when the
+// block it's given starts a new one (so the caller can stream it); `flush`
+// yields the final, still-open unit.
+function createVoiceUnitAccumulator() {
+	let current: TranslatorVoiceChunk | null = null;
+	let currentHasBody = false;
 
-		if (text.length > maxVoiceChunkChars) {
-			flush();
-			for (const piece of splitSpeechText(text)) {
-				chunks.push({ text: piece, elements: [element] });
+	return {
+		add(element: HTMLElement): TranslatorVoiceChunk | null {
+			const text = normalizeSpeechText(element.textContent || '');
+			if (!text) {
+				return null; // rules and empty nodes carry no speech
 			}
-			continue;
-		}
+			const isBody = !isVoiceOpener(element);
 
-		const next = currentText ? `${currentText}\n\n${text}` : text;
-		if (next.length > maxVoiceChunkChars) {
-			flush();
-			currentText = text;
-			currentElements = [element];
-		} else {
-			currentText = next;
-			currentElements.push(element);
+			// The current unit already holds a body, so this block — opener or
+			// body — belongs to the next one.
+			if (current && currentHasBody) {
+				const completed = current;
+				current = { text, elements: [element] };
+				currentHasBody = isBody;
+				return completed;
+			}
+
+			if (current) {
+				current.text = `${current.text}\n\n${text}`;
+				current.elements.push(element);
+				currentHasBody = currentHasBody || isBody;
+			} else {
+				current = { text, elements: [element] };
+				currentHasBody = isBody;
+			}
+			return null;
+		},
+		flush(): TranslatorVoiceChunk | null {
+			const completed = current;
+			current = null;
+			currentHasBody = false;
+			return completed;
+		},
+	};
+}
+
+// A unit larger than a single chunk (a very long paragraph) is split into
+// speakable pieces that all map back to the same element(s) — keeping every
+// chunk under the host's split threshold so its progress index stays aligned
+// with this list for highlighting.
+function unitToVoiceChunks(unit: TranslatorVoiceChunk): TranslatorVoiceChunk[] {
+	if (unit.text.length <= maxVoiceChunkChars) {
+		return [unit];
+	}
+	return splitSpeechText(unit.text).map((piece) => ({ text: piece, elements: unit.elements }));
+}
+
+function mergeVoiceUnits(first: TranslatorVoiceChunk, second: TranslatorVoiceChunk): TranslatorVoiceChunk {
+	return {
+		text: `${first.text}\n\n${second.text}`,
+		elements: [...first.elements, ...second.elements],
+	};
+}
+
+// Fold a too-small trailing unit into its predecessor so a little leftover text
+// is read together with the block before it instead of on its own.
+function mergeTrailingVoiceUnit(units: TranslatorVoiceChunk[]): TranslatorVoiceChunk[] {
+	if (units.length < 2) {
+		return units;
+	}
+	const last = units[units.length - 1];
+	if (last.text.length >= minVoiceChunkChars) {
+		return units;
+	}
+	const previous = units[units.length - 2];
+	return [...units.slice(0, -2), mergeVoiceUnits(previous, last)];
+}
+
+function buildVoiceChunks(textEl: HTMLElement): TranslatorVoiceChunk[] {
+	const renderedBlocks = Array.from(textEl.children).filter(
+		(element): element is HTMLElement =>
+			element instanceof HTMLElement && !element.classList.contains('translator-streaming'),
+	);
+	const sourceBlocks = renderedBlocks.length ? renderedBlocks : [textEl];
+
+	const accumulator = createVoiceUnitAccumulator();
+	const units: TranslatorVoiceChunk[] = [];
+	for (const element of sourceBlocks) {
+		const completed = accumulator.add(element);
+		if (completed) {
+			units.push(completed);
 		}
 	}
+	const tail = accumulator.flush();
+	if (tail) {
+		units.push(tail);
+	}
 
-	flush();
-	return chunks;
+	return mergeTrailingVoiceUnit(units).flatMap(unitToVoiceChunks);
 }
 
 function clearVoiceHighlights(chunks: TranslatorVoiceChunk[]): void {
@@ -471,6 +543,68 @@ function initializeTranslator(host: HTMLElement, context: ToolContext) {
 		let codeCount = 0;
 		let streamStarted = false;
 
+		// Voice pipeline (auto mode): read each finished unit aloud while the rest
+		// of the answer is still translating, instead of waiting for the whole
+		// thing. A completed unit is held back one step so a small final unit can
+		// merge into it (mergeTrailingVoiceUnit) before either is spoken.
+		const createVoiceStreamPipeline = () => {
+			const accumulator = createVoiceUnitAccumulator();
+			let buffered: TranslatorVoiceChunk | null = null;
+			let started = false;
+
+			const send = (unit: TranslatorVoiceChunk, final: boolean) => {
+				const chunks = unitToVoiceChunks(unit);
+				// Highlight list must mirror the host's chunk order, so push as we send.
+				activeVoiceChunks.push(...chunks);
+				const reset = !started;
+				started = true;
+				context.appendSpeech?.(chunks.map((chunk) => chunk.text), { final, reset, lang: targetLang });
+			};
+
+			return {
+				feed(elements: HTMLElement[]) {
+					for (const element of elements) {
+						const completed = accumulator.add(element);
+						if (!completed) {
+							continue;
+						}
+						if (buffered) {
+							send(buffered, false);
+						}
+						buffered = completed;
+					}
+				},
+				finish() {
+					const last = accumulator.flush();
+					let tail: TranslatorVoiceChunk[];
+					if (buffered && last) {
+						tail = mergeTrailingVoiceUnit([buffered, last]);
+					} else if (buffered) {
+						tail = [buffered];
+					} else if (last) {
+						tail = [last];
+					} else {
+						tail = [];
+					}
+					buffered = null;
+					if (!tail.length) {
+						// Nothing left to send; close the live session if we opened one.
+						if (started) {
+							context.appendSpeech?.([], { final: true, lang: targetLang });
+						}
+						return;
+					}
+					tail.forEach((unit, index) => send(unit, index === tail.length - 1));
+				},
+			};
+		};
+
+		// Stream the reading only in auto mode (and only if the host supports it).
+		// reset:true on the first append supersedes any prior playback, so a quick
+		// re-translate can't splice a new answer onto the old one.
+		const streamVoice = autoTranslate && typeof context.appendSpeech === 'function';
+		const voicePipeline = streamVoice ? createVoiceStreamPipeline() : undefined;
+
 		// The body height is animated to fit the content as blocks land, so the
 		// modal grows smoothly with the translation instead of sitting skeleton-
 		// sized until the very end. maxBodyHeight caps the grow at the panel's
@@ -532,16 +666,21 @@ function initializeTranslator(host: HTMLElement, context: ToolContext) {
 			const indicator = textEl.querySelector('.translator-streaming');
 			const template = document.createElement('template');
 			template.innerHTML = renderMarkdownLite(markdown);
+			const insertedElements: HTMLElement[] = [];
 			for (const node of Array.from(template.content.childNodes)) {
 				if (node instanceof HTMLElement) {
 					node.classList.add('is-block-in');
 					node.addEventListener('animationend', () => {
 						node.classList.remove('is-block-in');
 					}, { once: true });
+					insertedElements.push(node);
 				}
 				textEl.insertBefore(node, indicator);
 			}
 			scheduleGrow();
+			// Feed the rendered blocks to the voice stream so reading can begin
+			// before the rest of the answer finishes translating.
+			voicePipeline?.feed(insertedElements);
 		};
 
 		try {
@@ -646,7 +785,13 @@ function initializeTranslator(host: HTMLElement, context: ToolContext) {
 			resultStatus = provider ? `translated · ${provider.toLowerCase()}` : 'translated';
 			setStatus(resultStatus);
 			enableResultActions();
-			triggerAutoRead();
+			if (voicePipeline) {
+				// Streaming read already started during translation — flush the tail
+				// (with the small-final-unit merge) and close the session.
+				voicePipeline.finish();
+			} else {
+				triggerAutoRead();
+			}
 			// Remember this exact selection so revisiting it skips the round-trip.
 			setCachedTranslation(targetLang, extracted, { rendered: renderedMarkdown, copyText, status: resultStatus });
 		} catch (err) {
@@ -668,6 +813,8 @@ function initializeTranslator(host: HTMLElement, context: ToolContext) {
 			resultStatus = 'translation failed';
 			setStatus(resultStatus);
 			enableResultActions();
+			// Read whatever did stream in before the failure, then close the session.
+			voicePipeline?.finish();
 			// Failed attempts may be transient (rate limit, network) — allow retry.
 			if (translateBtn) {
 				translateBtn.disabled = false;

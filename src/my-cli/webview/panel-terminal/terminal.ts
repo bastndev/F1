@@ -463,6 +463,13 @@ const speakText = (text: string, options?: { chunks?: string[]; lang?: string })
 	vscode.postMessage({ type: 'voice.speak', text, chunks: options?.chunks, lang: options?.lang });
 };
 
+// Streaming companion to speakText: queue more chunks onto the running voice
+// session (the Translator feeds blocks as they finish translating). `final`
+// marks the last batch so the host can wind the session down.
+const appendSpeech = (chunks: string[], options?: { final?: boolean; lang?: string; reset?: boolean }) => {
+	vscode.postMessage({ type: 'voice.append', chunks, lang: options?.lang, final: options?.final, reset: options?.reset });
+};
+
 // Ask the host whether the voice for a language is already downloaded, so the
 // Listen button can show a "download" affordance before the first click.
 const voiceReadyRpc = createRpcChannel<[string], boolean>({
@@ -619,6 +626,7 @@ const toolsController = layoutRight
 			openCreateSkill: () => vscode.postMessage({ type: 'mySkills.openCreate' }),
 			requestSpellcheck: (text: string, lang: string, strict: boolean) => spellcheckRpc.request(text, lang, strict),
 			speakText,
+			appendSpeech,
 			checkVoiceReady: (lang: string) => voiceReadyRpc.request(lang),
 			pauseSpeech,
 			resumeSpeech,
