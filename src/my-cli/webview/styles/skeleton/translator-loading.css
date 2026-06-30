@@ -154,11 +154,50 @@
 	}
 }
 
+/* ── Streaming reveal — each block settles in as it lands ─────────────
+   Used when the translation streams block by block (see emitBlock). A quick
+   rise + de-blur so new content arrives softly instead of popping; the class
+   is removed on animationend, leaving the block at its natural resting state
+   (so it never interferes with the voice-reading highlight later). */
+.translator-text .is-block-in {
+	animation: translator-block-in 440ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes translator-block-in {
+	0%   { opacity: 0; transform: translateY(7px); filter: blur(1.5px); }
+	55%  { opacity: 1; filter: blur(0); }
+	100% { opacity: 1; transform: none; filter: none; }
+}
+
+/* "More on the way" tail shown below the streamed blocks while translating. */
+.translator-streaming {
+	display: flex;
+	flex-direction: column;
+	gap: 7px;
+	margin-top: 14px;
+	animation: translator-stream-fade 260ms ease both;
+}
+
+.translator-streaming .t-skel-line {
+	width: 46%;
+}
+
+.translator-streaming .t-skel-typing {
+	padding-top: 0;
+}
+
+@keyframes translator-stream-fade {
+	from { opacity: 0; }
+	to   { opacity: 0.9; }
+}
+
 /* ── Reduced motion ──────────────────────────────────────────────── */
 @media (prefers-reduced-motion: reduce) {
 	.t-skel-line,
 	.t-skel-dot,
-	.translator-text.is-revealing {
+	.translator-text.is-revealing,
+	.translator-text .is-block-in,
+	.translator-streaming {
 		animation: none !important;
 	}
 

@@ -13,6 +13,10 @@ import { getPromptLanguage } from '../../../shared/prompt';
 
 const stylesId = 'cli-translator-panel-styles';
 const maxVoiceChunkChars = 900;
+// Target size for a streamed translation block. Mirrors the voice chunk size
+// and the host's long-text threshold: blocks this big translate in one fast
+// pass yet are small enough that a long answer arrives in several pieces.
+const maxStreamBlockChars = 900;
 
 type TranslatorVoiceChunk = {
 	text: string;
@@ -440,6 +444,55 @@ function initializeTranslator(host: HTMLElement, context: ToolContext) {
 		textEl.replaceChildren(buildSkeleton(lockedHeight));
 		setStatus('translating…');
 
+		// Accumulated result (for the Copy button + the exact-selection cache)
+		// and the progressive-stream state. Each translated block is revealed
+		// the moment it lands — like the voice reader working through chunks —
+		// so a long answer fills in continuously instead of arriving in one
+		// slow lump behind the skeleton.
+		const renderedParts: string[] = [];
+		const copyParts: string[] = [];
+		let provider: string | undefined;
+		let codeCount = 0;
+		let streamStarted = false;
+
+		// First block: drop the skeleton, switch the field to rendered mode, and
+		// pin a small "more on the way" indicator at the bottom that subsequent
+		// blocks insert in front of.
+		const beginStream = () => {
+			streamStarted = true;
+			textEl.replaceChildren();
+			textEl.classList.remove('placeholder');
+			textEl.classList.add('is-rendered');
+			textEl.append(buildStreamIndicator());
+		};
+
+		const emitBlock = (markdown: string, copy: string) => {
+			renderedParts.push(markdown);
+			copyParts.push(copy);
+			if (!isMounted) {
+				return;
+			}
+			if (!streamStarted) {
+				beginStream();
+			}
+			// Render just this block and animate each top-level node in, inserting
+			// before the trailing indicator so it stays at the bottom. The finished
+			// DOM matches rendering the whole markdown at once, so the cache-hit and
+			// voice-chunking paths stay identical.
+			const indicator = textEl.querySelector('.translator-streaming');
+			const template = document.createElement('template');
+			template.innerHTML = renderMarkdownLite(markdown);
+			for (const node of Array.from(template.content.childNodes)) {
+				if (node instanceof HTMLElement) {
+					node.classList.add('is-block-in');
+					node.addEventListener('animationend', () => {
+						node.classList.remove('is-block-in');
+					}, { once: true });
+				}
+				textEl.insertBefore(node, indicator);
+			}
+		};
+
 		try {
 			// Split the selection into translatable prose and verbatim frames
 			// (tree diagrams). Box tables arrive as pipe markdown inside prose;
@@ -449,36 +502,32 @@ function initializeTranslator(host: HTMLElement, context: ToolContext) {
 				segments.push({ kind: 'prose', content: extracted });
 			}
 
-			const renderedParts: string[] = [];
-			const copyParts: string[] = [];
-			let provider: string | undefined;
-			let codeCount = 0;
-
 			for (const segment of segments) {
+				if (!isMounted) {
+					return;
+				}
+
 				if (segment.kind === 'diagram') {
-					renderedParts.push(`\`\`\`tree\n${segment.content}\n\`\`\``);
-					copyParts.push(segment.content);
+					emitBlock(`\`\`\`tree\n${segment.content}\n\`\`\``, segment.content);
 					continue;
 				}
 
 				if (segment.kind === 'code') {
 					codeCount += 1;
-					renderedParts.push(`[[code-here:${codeCount}]]`);
-					copyParts.push(`[code here #${codeCount}]`);
+					emitBlock(`[[code-here:${codeCount}]]`, `[code here #${codeCount}]`);
 					continue;
 				}
 
 				// Prose segment: translate in as few requests as possible while
 				// protecting markdown markers. Consecutive plain lines (and the
-				// blanks between them) are sent to the provider as ONE block — the
-				// host chunks long text by paragraph internally, so a multi-line
-				// block is both far fewer round-trips than line-by-line *and* a
-				// better translation (the engine sees whole sentences, not the
-				// terminal's hard-wrapped fragments). Only the few structured lines
-				// (headings, emoji labels, scores) are translated on their own so
-				// their leading markers can be kept and rebuilt by the renderer.
+				// blanks between them) are gathered, then split into voice-sized
+				// blocks so the host translates each in one shot (chunking it
+				// further by paragraph) and we stream it in as it returns — far
+				// fewer, larger round-trips than line-by-line, and a better
+				// translation (whole sentences, not hard-wrapped fragments). Only
+				// the few structured lines (headings, emoji labels, scores) are
+				// translated on their own so their markers can be rebuilt.
 				const lines = segment.content.split('\n');
-				const outParts: string[] = [];
 				let plainRun: string[] = [];
 
 				const flushPlainRun = async () => {
@@ -487,18 +536,24 @@ function initializeTranslator(host: HTMLElement, context: ToolContext) {
 					}
 					const runText = plainRun.join('\n');
 					plainRun = [];
-					if (!runText.trim()) {
-						// Blank-only run (the gaps around a heading) — keep verbatim so
-						// paragraph breaks survive into the renderer.
-						outParts.push(runText);
-						return;
+					for (const block of splitForStreaming(runText)) {
+						if (!isMounted) {
+							return;
+						}
+						const result = await translateSelection(block);
+						provider ??= result.provider;
+						const value = result.text || block;
+						emitBlock(value, value);
+						if (value.trim()) {
+							cacheParagraphPairs(targetLang, block, value);
+						}
 					}
-					const result = await translateSelection(runText);
-					provider ??= result.provider;
-					outParts.push(result.text || runText);
 				};
 
 				for (const line of lines) {
+					if (!isMounted) {
+						return;
+					}
 					const parsed = line.trim() ? parseMarkdownLine(line) : null;
 					if (!parsed) {
 						// Plain or blank line — batch it into the current block.
@@ -517,16 +572,9 @@ function initializeTranslator(host: HTMLElement, context: ToolContext) {
 						provider ??= result.provider;
 						translatedContent = result.text || parsed.content;
 					}
-					outParts.push(`${parsed.marker}${translatedContent}`);
+					emitBlock(`${parsed.marker}${translatedContent}`, `${parsed.marker}${translatedContent}`);
 				}
 				await flushPlainRun();
-
-				const value = outParts.join('\n');
-				renderedParts.push(value);
-				copyParts.push(value);
-				if (value.trim()) {
-					cacheParagraphPairs(targetLang, segment.content, value);
-				}
 			}
 
 			if (!isMounted) {
@@ -535,7 +583,13 @@ function initializeTranslator(host: HTMLElement, context: ToolContext) {
 
 			const renderedMarkdown = renderedParts.join('\n\n');
 			copyText = copyParts.join('\n\n');
-			revealText(textEl, renderedMarkdown);
+			if (streamStarted) {
+				// Streaming already drew the result; just retire the indicator.
+				textEl.querySelector('.translator-streaming')?.remove();
+			} else {
+				// Nothing emitted (empty translation) — show the plain result.
+				revealText(textEl, renderedMarkdown);
+			}
 			resultStatus = provider ? `translated · ${provider.toLowerCase()}` : 'translated';
 			setStatus(resultStatus);
 			enableResultActions();
@@ -547,11 +601,19 @@ function initializeTranslator(host: HTMLElement, context: ToolContext) {
 				return;
 			}
 			console.error('[Translator] EN->ES failed:', err);
-			copyText = extracted;
-			revealText(textEl, extracted);
+			textEl.querySelector('.translator-streaming')?.remove();
+			if (streamStarted && renderedParts.length) {
+				// Keep whatever already streamed in — the user can still read and
+				// copy the translated portion; only the status flags the failure.
+				copyText = copyParts.join('\n\n');
+			} else {
+				// Failed before anything showed — fall back to the source text so
+				// copying/listening still makes sense.
+				copyText = extracted;
+				revealText(textEl, extracted);
+			}
 			resultStatus = 'translation failed';
 			setStatus(resultStatus);
-			// The original text is on screen — copying/listening still makes sense.
 			enableResultActions();
 			// Failed attempts may be transient (rate limit, network) — allow retry.
 			if (translateBtn) {
@@ -894,6 +956,74 @@ function cacheParagraphPairs(target: string, source: string, translated: string)
 	for (let i = 0; i < sourceParagraphs.length; i += 1) {
 		setCachedParagraph(target, sourceParagraphs[i], translatedParagraphs[i]);
 	}
+}
+
+// Break a run of prose into voice-sized blocks on paragraph boundaries so a
+// long translation streams in piece by piece instead of arriving in one slow
+// lump. Paragraphs are grouped up to maxStreamBlockChars; a single paragraph
+// longer than that is left whole (the host chunks it further internally).
+function splitForStreaming(text: string): string[] {
+	const trimmed = text.trim();
+	if (!trimmed) {
+		return [];
+	}
+	if (trimmed.length <= maxStreamBlockChars) {
+		return [trimmed];
+	}
+
+	const paragraphs = trimmed.split(/\n[ \t]*\n+/).map((part) => part.trim()).filter(Boolean);
+	const blocks: string[] = [];
+	let current = '';
+
+	for (const paragraph of paragraphs) {
+		if (!current) {
+			current = paragraph;
+			continue;
+		}
+		if (current.length + paragraph.length + 2 > maxStreamBlockChars) {
+			blocks.push(current);
+			current = paragraph;
+		} else {
+			current = `${current}\n\n${paragraph}`;
+		}
+	}
+	if (current) {
+		blocks.push(current);
+	}
+	return blocks;
+}
+
+// Compact "still translating" affordance pinned below the streamed blocks —
+// a shimmer line plus the skeleton's typing dots, so the loading state reads
+// as one language whether it's the full skeleton or the streaming tail.
+function buildStreamIndicator(): HTMLElement {
+	const wrap = document.createElement('div');
+	wrap.className = 'translator-streaming';
+	wrap.setAttribute('aria-hidden', 'true');
+
+	const line = document.createElement('div');
+	line.className = 't-skel-line med';
+	wrap.append(line);
+
+	const typing = document.createElement('div');
+	typing.className = 't-skel-typing';
+
+	const sym = document.createElement('span');
+	sym.className = 't-skel-sym';
+	sym.textContent = '›';
+	typing.append(sym);
+
+	const dots = document.createElement('span');
+	dots.className = 't-skel-dots';
+	for (let i = 0; i < 3; i += 1) {
+		const dot = document.createElement('span');
+		dot.className = 't-skel-dot';
+		dots.append(dot);
+	}
+	typing.append(dots);
+	wrap.append(typing);
+
+	return wrap;
 }
 
 function buildSkeleton(availableHeight: number): HTMLElement {
