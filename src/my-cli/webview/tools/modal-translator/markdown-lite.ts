@@ -174,6 +174,59 @@ export function renderMarkdownLite(markdown: string): string {
 			continue;
 		}
 
+		// Score line: emoji + label + N/10 (e.g. "🏗️ Architecture 8/10")
+		const scoreLine = trimmed.match(/^(\p{Emoji_Presentation}+\s*)(\S+)\s+(\d{1,2}\/10)\s*$/u);
+		if (scoreLine) {
+			flushAll();
+			html.push(
+				`<div class="md-score-item">` +
+				`<span class="md-score-emoji">${scoreLine[1]}</span>` +
+				`<span class="md-score-label">${renderInline(scoreLine[2])}</span>` +
+				`<span class="md-score-value">${scoreLine[3]}</span>` +
+				`</div>`
+			);
+			continue;
+		}
+
+		// Emoji-prefixed item: "🔍 Project Understanding" / "📊 [end] Health Overview"
+		const emojiItem = trimmed.match(/^(\p{Emoji_Presentation}+\s*)(.*)/u);
+		if (emojiItem) {
+			flushAll();
+			// Check if the content has a bracket label inside
+			const innerContent = emojiItem[2];
+			const bracketInner = innerContent.match(/^\[([^\]]+)\]\s*(.*)$/);
+			if (bracketInner) {
+				html.push(
+					`<div class="md-emoji-item">` +
+					`<span class="md-emoji">${emojiItem[1]}</span>` +
+					`<span class="md-bracket">[${bracketInner[1]}]</span> ` +
+					`${renderInline(bracketInner[2])}` +
+					`</div>`
+				);
+			} else {
+				html.push(
+					`<div class="md-emoji-item">` +
+					`<span class="md-emoji">${emojiItem[1]}</span> ` +
+					`${renderInline(innerContent)}` +
+					`</div>`
+				);
+			}
+			continue;
+		}
+
+		// Bracket label standalone: "[end] Health Overview"
+		const bracketLabel = trimmed.match(/^\[([^\]]+)\]\s+(.*)$/);
+		if (bracketLabel) {
+			flushAll();
+			html.push(
+				`<div class="md-emoji-item">` +
+				`<span class="md-bracket">[${bracketLabel[1]}]</span> ` +
+				`${renderInline(bracketLabel[2])}` +
+				`</div>`
+			);
+			continue;
+		}
+
 		const bullet = trimmed.match(/^[-*•]\s+(.*)$/);
 		if (bullet) {
 			flushParagraph();

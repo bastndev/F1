@@ -5,7 +5,7 @@ import type { ToolContext } from '../tools';
 import type { VoiceProgress, VoiceState } from '../../../shared/voice/voice-types';
 import { translateEnTo } from './browser-terminal-translator';
 import { renderMarkdownLite } from './markdown-lite';
-import { segmentTerminalSelection } from './terminal-text';
+import { segmentTerminalSelection, isMarkdownStructuredLine } from './terminal-text';
 import { getCachedTranslation, setCachedTranslation, getCachedParagraph, setCachedParagraph } from './translator-cache';
 import { matchesShortcut } from '../../../../shared/keymaps/cli';
 import { getStoredPromptLang } from '../modal-prompt/language-select';
@@ -107,6 +107,70 @@ function splitSpeechText(text: string): string[] {
 
 	flush();
 	return chunks;
+}
+
+// ── Markdown protection through translation ───────────────────────
+// Translation APIs destroy markdown formatting (headings, emoji labels,
+// score tables, etc.). This layer detects structured lines and translates
+// only their content, preserving markers for renderMarkdownLite.
+
+type MarkdownLine = {
+	marker: string;     // everything before the translatable content
+	content: string;    // the text the API should translate
+};
+
+// Matches a line with a heading prefix: ## Title / ### Subtitle
+const headingPattern = /^(#{1,6})\s+(.*)$/;
+
+// Matches a line starting with an emoji followed by content
+const emojiPrefixPattern = /^(\p{Emoji_Presentation}+\s*)(.*)/u;
+
+// Matches a bracket label: [end] / [fin] / [start]
+const bracketLabelPattern = /^(\[[\w\s]+\]\s*)(.*)$/;
+
+// Matches a blockquote: > text
+const blockquotePattern = /^(>\s*)(.*)$/;
+
+// Matches a score line: emoji + label + N/10 pattern
+const scoreLinePattern = /^(\p{Emoji_Presentation}+\s*\S+\s+)(\d{1,2}\/10)\s*$/u;
+
+function parseMarkdownLine(line: string): MarkdownLine | null {
+	const trimmed = line.trim();
+	if (!trimmed || !isMarkdownStructuredLine(trimmed)) {
+		return null;
+	}
+
+	// Score lines: "🏗️ Architecture 8/10" → protect marker + score
+	const scoreMatch = trimmed.match(scoreLinePattern);
+	if (scoreMatch) {
+		return { marker: scoreMatch[1], content: scoreMatch[2] };
+	}
+
+	// Heading: "## Title" → protect "## " prefix
+	const headingMatch = trimmed.match(headingPattern);
+	if (headingMatch) {
+		return { marker: `${headingMatch[1]} `, content: headingMatch[2] };
+	}
+
+	// Bracket label: "[end] Health Overview" → protect "[end] "
+	const bracketMatch = trimmed.match(bracketLabelPattern);
+	if (bracketMatch) {
+		return { marker: bracketMatch[1], content: bracketMatch[2] };
+	}
+
+	// Emoji prefix: "🔍 Project Understanding" → protect emoji
+	const emojiMatch = trimmed.match(emojiPrefixPattern);
+	if (emojiMatch) {
+		return { marker: emojiMatch[1], content: emojiMatch[2] };
+	}
+
+	// Blockquote: "> text" → protect "> "
+	const quoteMatch = trimmed.match(blockquotePattern);
+	if (quoteMatch) {
+		return { marker: quoteMatch[1], content: quoteMatch[2] };
+	}
+
+	return null;
 }
 
 function buildVoiceChunks(textEl: HTMLElement): TranslatorVoiceChunk[] {
@@ -392,22 +456,45 @@ function initializeTranslator(host: HTMLElement, context: ToolContext) {
 				}
 
 				if (segment.kind === 'code') {
-					// Code never goes to translation. It collapses into a numbered
-					// "code here" placeholder — kept in English so a future voice
-					// feature can read it without translation tricks.
 					codeCount += 1;
 					renderedParts.push(`[[code-here:${codeCount}]]`);
 					copyParts.push(`[code here #${codeCount}]`);
 					continue;
 				}
 
-				const result = await translateSelection(segment.content);
-				const value = result.text || segment.content;
-				provider ??= result.provider;
+				// Prose segment: translate line-by-line, protecting markdown
+				// markers so headings, emoji labels, and score tables survive.
+				const lines = segment.content.split('\n');
+				const translatedLines: string[] = [];
+
+				for (const line of lines) {
+					const trimmed = line.trim();
+					if (!trimmed) {
+						translatedLines.push('');
+						continue;
+					}
+
+					const parsed = parseMarkdownLine(trimmed);
+					if (parsed) {
+						// Structured line: translate only the content, keep the marker
+						const result = await translateSelection(parsed.content);
+						const translatedContent = result.text || parsed.content;
+						provider ??= result.provider;
+						translatedLines.push(`${parsed.marker}${translatedContent}`);
+					} else {
+						// Plain text line: translate normally
+						const result = await translateSelection(trimmed);
+						const translatedLine = result.text || trimmed;
+						provider ??= result.provider;
+						translatedLines.push(translatedLine);
+					}
+				}
+
+				const value = translatedLines.join('\n');
 				renderedParts.push(value);
 				copyParts.push(value);
-				if (result.text.trim()) {
-					cacheParagraphPairs(targetLang, segment.content, result.text);
+				if (value.trim()) {
+					cacheParagraphPairs(targetLang, segment.content, value);
 				}
 			}
 
