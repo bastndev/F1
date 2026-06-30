@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 import * as crypto from 'crypto';
 import * as fs from 'fs';
-import { allowedAgents, getCliAgent, getAgentSlug } from '../shared/agents';
+import { allowedAgents, getCliAgent } from '../shared/agents';
 import { ensureCliInstalled } from './terminal-cli/installation';
 import { CliSessionManager } from './terminal-cli/session-manager';
 import { getAgentWebviewHtml } from './webview-html';
@@ -29,7 +29,7 @@ import {
 	type AgentLaunchExtensionMode,
 	type AgentLaunchSource
 } from '../shared/agent-launch-guard';
-import { SmartService, SMART_READY_MESSAGE, SMART_CLEANUP_DELAY_MS } from '../../my-smart/my-smart';
+import { SmartService } from '../../my-smart/my-smart';
 
 export class MyCliViewProvider implements vscode.WebviewViewProvider, vscode.Disposable {
 	public static readonly viewType = 'f1.myCli';
@@ -333,24 +333,48 @@ export class MyCliViewProvider implements vscode.WebviewViewProvider, vscode.Dis
 	}
 
 	/**
-	 * Smart-mode launch: write rules + project context, start the CLI showing the
-	 * "ready" line, then auto-clean the generated .f1/ once it has been read.
+	 * Smart-mode launch. Builds the project graph + writes the rules, starts the
+	 * CLI, and once it's booted + idle TYPES one prompt into it so the agent reads
+	 * the graph + rules and confirms readiness in its own chat. The generated files
+	 * are removed after that first reply settles.
 	 */
 	private async _launchInitialAgent(agentLabel: string, smart: boolean) {
-		let readyNotice: string | undefined;
-		if (smart) {
-			const root = this._workspaceRoot();
-			const prepared = this.smartService.prepareLaunch(root, getAgentSlug(agentLabel), this._readSmartRules());
-			if (prepared.ok) {
-				readyNotice = SMART_READY_MESSAGE;
+		if (!smart) {
+			void this.sessionManager.createSession(agentLabel);
+			return;
+		}
+
+		const root = this._workspaceRoot();
+		// Build the graph BEFORE writing the rules, so graphify doesn't index our own
+		// rules file into the project graph.
+		const graphReady = this.smartService.buildGraph(root);
+
+		const sessionId = await this.sessionManager.createSession(agentLabel, { smart: true });
+		if (!sessionId) {
+			return;
+		}
+
+		// Wait until the graph is built AND the CLI is booted + idle.
+		const [hasGraph] = await Promise.all([graphReady, this.sessionManager.waitForFirstIdle(sessionId)]);
+
+		// Write the rules, then type one prompt so the agent reads the rules + graph.
+		this.smartService.writeRules(root, this._readSmartRules());
+		this.sessionManager.sendText(sessionId, this.smartService.composePrompt(hasGraph));
+
+		// Keep the loading overlay up through the whole internal prep: when the agent's
+		// first reply settles, clean up the generated files and only THEN reveal the chat.
+		// A hard cap guarantees the overlay never gets stuck if the agent never replies.
+		let revealed = false;
+		const reveal = () => {
+			if (revealed) {
+				return;
 			}
-		}
-
-		const sessionId = await this.sessionManager.createSession(agentLabel, { readyNotice });
-
-		if (smart && sessionId) {
-			setTimeout(() => this.smartService.cleanup(this._workspaceRoot()), SMART_CLEANUP_DELAY_MS);
-		}
+			revealed = true;
+			this.smartService.cleanup(root);
+			void this._activeWebview?.postMessage({ type: 'smart.dismiss' });
+		};
+		this.sessionManager.onceResponseSettled(sessionId, reveal);
+		setTimeout(reveal, 90000);
 	}
 
 	private _workspaceRoot(): string | undefined {

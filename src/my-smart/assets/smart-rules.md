@@ -6,9 +6,9 @@
 You are an AI coding agent working in this project through F1's **Smart + Skills** mode.
 These rules define how you operate here — follow them for every task in this session.
 
-## Start with context, not a blind scan
-- Read `./.f1/project-map.md` first. It is a prebuilt map of this project's structure, stack,
-  and key files — use it to orient before opening or searching files. It saves time and tokens.
+## Start from the project context you were given
+- You've been pointed at a compact code-graph of this project — use it to orient before
+  opening or scanning files. It saves time and tokens.
 - Treat it as a starting point, not gospel: verify a detail against the live code before relying on it.
 
 ## Before you change anything

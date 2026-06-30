@@ -35,6 +35,8 @@ export type CliSessionSnapshot = {
 	 * rebuilt on a panel switch — the webview's own memory does not.
 	 */
 	awaitingFirstOutput: boolean;
+	/** True for the initial Smart-mode launch — the webview shows the Smart overlay. */
+	smart?: boolean;
 };
 
 export type CliAgentOption = {
@@ -86,6 +88,7 @@ export type HostToWebviewMessage =
 	| { type: 'cli.visible' }
 	| { type: 'cli.hidden' }
 	| { type: 'cli.focusTerminal' }
+	| { type: 'smart.dismiss' }
 	| { type: 'prompt.translated'; id: string; text: string; provider?: string; fromCache?: boolean }
 	| { type: 'prompt.translationError'; id: string; message: string }
 	| { type: 'prompt.prepared'; id: string; text: string }

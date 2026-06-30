@@ -10,6 +10,7 @@ import { USAGE_BUSY_ERROR, isUsageAgentBusy, isUsageViewInline } from '../tools/
 import { detectModelName } from '../../shared/model-detect';
 import { createRpcChannel } from './host-rpc';
 import { createBootSkeletons } from './boot-skeleton';
+import { createSmartSkeleton, type SmartSkeletonController } from '../../../my-smart/webview/smart-skeleton';
 import { createCopyToTranslateWatcher } from './copy-to-translate';
 import { getTerminalFontFamily, getTerminalTheme } from './terminal-theme';
 import type { ImageAttachment, PromptTranslateRequest, PromptTranslateResult, FileMentionEntry, SpellIssue, WorkspaceSkill } from '../../shared/prompt';
@@ -746,6 +747,11 @@ const bootSkeletons = createBootSkeletons({
 	getAgentSlug
 });
 
+// Smart + Skills launch overlay. Shown once for the initial Smart session while
+// it boots; revealed on its first output, which also tells the host to clean up.
+let smartOverlay: SmartSkeletonController | undefined;
+let smartDone = false;
+
 const createTerminalView = (session: CliSession) => {
 	const existingView = terminals.get(session.id);
 	if (existingView) {
@@ -881,7 +887,13 @@ const createTerminalView = (session: CliSession) => {
 	// only while the CLI genuinely hasn't rendered yet, so it plays on launch but
 	// never replays on return. Gate on running so an instant exit/error doesn't flash it.
 	if (session.awaitingFirstOutput && session.status === 'running') {
-		bootSkeletons.create(session.id);
+		if (session.smart && !smartDone) {
+			if (!smartOverlay) {
+				smartOverlay = createSmartSkeleton(document.body);
+			}
+		} else {
+			bootSkeletons.create(session.id);
+		}
 	}
 
 	return view;
@@ -1105,6 +1117,13 @@ window.addEventListener('message', (event: MessageEvent<ServerMessage>) => {
 
 	if (message.type === 'workspace.skillsChanged') {
 		toolsController?.refreshPromptIfOpen();
+		return;
+	}
+
+	if (message.type === 'smart.dismiss') {
+		smartDone = true;
+		smartOverlay?.dismiss();
+		smartOverlay = undefined;
 		return;
 	}
 

@@ -26,6 +26,11 @@ type CliSession = Omit<CliSessionSnapshot, 'buffer'> & {
 	awaitingResponse?: boolean;
 	/** Quiet-period timer that decides the response is done. */
 	responseSettleTimer?: ReturnType<typeof setTimeout>;
+	/** One-shot: fires when the response after a host-sent prompt settles (Smart cleanup). */
+	onResponseDone?: () => void;
+	/** "CLI booted and is idle, ready for input" detection (Smart auto-prompt). */
+	idleTimer?: ReturnType<typeof setTimeout>;
+	idleResolve?: () => void;
 };
 
 type MyCliMessageResult = 'closed-last-session' | undefined;
@@ -36,6 +41,10 @@ const maxBufferLength = 240000;
 // response "finished". TUI CLIs stream spinner frames while thinking, so this
 // only elapses once the agent has actually stopped writing.
 const responseSettleMs = 1500;
+
+// After the CLI's first output, how long it must stay quiet before we treat it as
+// "booted and waiting for input" — the moment the Smart auto-prompt is typed in.
+const bootIdleMs = 1200;
 
 const getWorkspaceCwd = () => {
 	return vscode.workspace.workspaceFolders?.[0]?.uri.fsPath || os.homedir();
@@ -114,7 +123,7 @@ export class CliSessionManager implements vscode.Disposable {
 		this.finishSoundSuppressed = suppressed;
 	}
 
-	public async createSession(agentLabel: string, options: { readyNotice?: string } = {}): Promise<string | undefined> {
+	public async createSession(agentLabel: string, options: { smart?: boolean } = {}): Promise<string | undefined> {
 		const agent = getCliAgent(agentLabel);
 		if (!agent) {
 			this.postError(`Unknown CLI: ${agentLabel}`);
@@ -125,14 +134,14 @@ export class CliSessionManager implements vscode.Disposable {
 			return undefined;
 		}
 
-		return this.createSessionFromCommand(agent.label, agent.command, agent.args, options.readyNotice);
+		return this.createSessionFromCommand(agent.label, agent.command, agent.args, options.smart);
 	}
 
 	public createCustomSession(customCli: CustomCliLaunch) {
 		this.createSessionFromCommand(customCli.label, customCli.command, customCli.args);
 	}
 
-	private createSessionFromCommand(label: string, command: string, args: string[], readyNotice?: string): string {
+	private createSessionFromCommand(label: string, command: string, args: string[], smart?: boolean): string {
 		const id = `cli-${this.nextSessionId++}`;
 		const cwd = getWorkspaceCwd();
 		const session: CliSession = {
@@ -145,6 +154,7 @@ export class CliSessionManager implements vscode.Disposable {
 			buffer: '',
 			hasUnread: false,
 			awaitingFirstOutput: true,
+			smart: smart === true,
 			cols: 80,
 			rows: 24
 		};
@@ -152,9 +162,6 @@ export class CliSessionManager implements vscode.Disposable {
 		this.sessions.set(id, session);
 		this.activeSessionId = id;
 		appendToBuffer(session, `\x1b[90mCLI Hub: starting ${session.commandLine}\x1b[0m\r\n`);
-		if (readyNotice) {
-			appendToBuffer(session, `\x1b[32m${readyNotice}\x1b[0m\r\n`);
-		}
 		this.postState();
 
 		try {
@@ -242,6 +249,8 @@ export class CliSessionManager implements vscode.Disposable {
 			const exitCode = message.exitCode ?? 0;
 			session.status = 'exited';
 			session.exitCode = exitCode;
+			session.idleResolve?.();
+			session.idleResolve = undefined;
 			this.appendSessionOutput(session, `\r\n\x1b[90mCLI Hub: ${session.label} exited with code ${exitCode}\x1b[0m\r\n`);
 			this.postState();
 			return;
@@ -261,6 +270,7 @@ export class CliSessionManager implements vscode.Disposable {
 		// trips this. cli.output dismisses the live skeleton; the flag keeps it from
 		// reappearing after the webview is rebuilt on a panel switch.
 		session.awaitingFirstOutput = false;
+		this.armIdle(session);
 
 		if (this.activeSessionId !== session.id) {
 			session.hasUnread = true;
@@ -294,7 +304,74 @@ export class CliSessionManager implements vscode.Disposable {
 			) {
 				playFinishSound(this.voiceFinishLang);
 			}
+
+			const onDone = session.onResponseDone;
+			session.onResponseDone = undefined;
+			onDone?.();
 		}, responseSettleMs);
+	}
+
+	private armIdle(session: CliSession) {
+		if (!session.idleResolve) {
+			return;
+		}
+		if (session.idleTimer) {
+			clearTimeout(session.idleTimer);
+		}
+		session.idleTimer = setTimeout(() => {
+			session.idleTimer = undefined;
+			const resolve = session.idleResolve;
+			session.idleResolve = undefined;
+			resolve?.();
+		}, bootIdleMs);
+	}
+
+	/**
+	 * Resolve once the CLI has produced output and then gone quiet — i.e. it has
+	 * booted and is waiting for input. Times the Smart auto-prompt. A hard fallback
+	 * means it can never hang the launch.
+	 */
+	public waitForFirstIdle(sessionId: string): Promise<void> {
+		return new Promise((resolve) => {
+			const session = this.sessions.get(sessionId);
+			if (!session || session.status !== 'running') {
+				resolve();
+				return;
+			}
+			let settled = false;
+			const done = () => {
+				if (!settled) {
+					settled = true;
+					resolve();
+				}
+			};
+			session.idleResolve = done;
+			if (!session.awaitingFirstOutput) {
+				this.armIdle(session);
+			}
+			setTimeout(done, 20000);
+		});
+	}
+
+	/** Type text into the CLI (as if submitted) and arm the response detector. */
+	public sendText(sessionId: string, text: string) {
+		const session = this.sessions.get(sessionId);
+		if (!session || session.status !== 'running') {
+			return;
+		}
+		session.awaitingResponse = true;
+		this.sendPtyHostCommand(session, { type: 'input', data: text });
+		this.sendPtyHostCommand(session, { type: 'input', data: '\r' });
+	}
+
+	/** Run `callback` once, when the response after the next host-sent prompt settles. */
+	public onceResponseSettled(sessionId: string, callback: () => void) {
+		const session = this.sessions.get(sessionId);
+		if (!session) {
+			callback();
+			return;
+		}
+		session.onResponseDone = callback;
 	}
 
 	private markSessionError(session: CliSession, message: string) {
@@ -303,6 +380,8 @@ export class CliSessionManager implements vscode.Disposable {
 		}
 
 		session.status = 'error';
+		session.idleResolve?.();
+		session.idleResolve = undefined;
 		this.appendSessionOutput(session, `\r\n\x1b[31m${message}\x1b[0m\r\n`);
 		this.postState();
 	}
@@ -456,6 +535,13 @@ export class CliSessionManager implements vscode.Disposable {
 			session.responseSettleTimer = undefined;
 		}
 		session.awaitingResponse = false;
+		if (session.idleTimer) {
+			clearTimeout(session.idleTimer);
+			session.idleTimer = undefined;
+		}
+		session.idleResolve?.();
+		session.idleResolve = undefined;
+		session.onResponseDone = undefined;
 
 		try {
 			this.sendPtyHostCommand(session, { type: 'kill' });
@@ -484,6 +570,7 @@ export class CliSessionManager implements vscode.Disposable {
 			...(includeBuffer ? { buffer: session.buffer } : {}),
 			hasUnread: session.hasUnread,
 			awaitingFirstOutput: session.awaitingFirstOutput,
+			smart: session.smart,
 			exitCode: session.exitCode
 		};
 	}
