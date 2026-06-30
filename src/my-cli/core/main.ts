@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 import * as crypto from 'crypto';
 import * as fs from 'fs';
-import { allowedAgents, getCliAgent } from '../shared/agents';
+import { allowedAgents, getCliAgent, getAgentSlug } from '../shared/agents';
 import { ensureCliInstalled } from './terminal-cli/installation';
 import { CliSessionManager } from './terminal-cli/session-manager';
 import { getAgentWebviewHtml } from './webview-html';
@@ -37,7 +37,13 @@ export class MyCliViewProvider implements vscode.WebviewViewProvider, vscode.Dis
 	constructor(
 		private readonly _extensionUri: vscode.Uri,
 		private readonly _extensionContext?: vscode.ExtensionContext
-	) {}
+	) {
+		this.sessionManager.onBeforeSessionCreate((agentLabel) => {
+			const root = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath;
+			const slug = getAgentSlug(agentLabel);
+			this.smartService.prepareContext(root, slug);
+		});
+	}
 
 	public async resolveWebviewView(
 		webviewView: vscode.WebviewView,
