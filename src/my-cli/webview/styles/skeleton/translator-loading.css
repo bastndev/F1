@@ -191,6 +191,15 @@
 	to   { opacity: 0.9; }
 }
 
+/* While streaming, the body height is driven to fit each block (see
+   performTranslation). Animate it so the modal grows smoothly with the
+   content; overflow is pinned hidden during the grow so no scrollbar flickers
+   in and out, reverting to the base auto-scroll once the grow settles. */
+.translator-body.is-streaming-grow {
+	overflow-y: hidden;
+	transition: height 0.34s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
 /* ── Reduced motion ──────────────────────────────────────────────── */
 @media (prefers-reduced-motion: reduce) {
 	.t-skel-line,
@@ -199,6 +208,10 @@
 	.translator-text .is-block-in,
 	.translator-streaming {
 		animation: none !important;
+	}
+
+	.translator-body.is-streaming-grow {
+		transition: none;
 	}
 
 	.t-skel-line {

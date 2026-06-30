@@ -348,6 +348,9 @@ function initializeTranslator(host: HTMLElement, context: ToolContext) {
 	let copyText = '';
 	let resultStatus = statusEl?.textContent || 'ready';
 	let activeVoiceChunks: TranslatorVoiceChunk[] = [];
+	// Pending "settle" after a streamed translation finishes growing — cleared
+	// if a new translation starts before it fires (see performTranslation).
+	let growSettleTimer: ReturnType<typeof setTimeout> | undefined;
 
 	// Auto-read: when "auto" is on, start reading as soon as a translation is
 	// shown (no Listen press). Wired once the voice control is set up below; the
@@ -374,6 +377,16 @@ function initializeTranslator(host: HTMLElement, context: ToolContext) {
 	const performTranslation = async () => {
 		// A new translation re-arms auto-read (the previous result was its own).
 		autoReadConsumed = false;
+		// Cancel a pending grow-settle from a previous run and reset the body to a
+		// clean slate (the height lock below takes over).
+		if (growSettleTimer) {
+			clearTimeout(growSettleTimer);
+			growSettleTimer = undefined;
+		}
+		if (bodyEl) {
+			bodyEl.classList.remove('is-streaming-grow');
+			bodyEl.style.height = '';
+		}
 		const extracted = extractTextToTranslate(context);
 		if (!extracted) {
 			if (textEl) {
@@ -428,8 +441,11 @@ function initializeTranslator(host: HTMLElement, context: ToolContext) {
 		}
 
 		// Freeze the body at its current height so swapping the text for the
-		// skeleton doesn't collapse the modal and snap it back on completion.
-		const lockedHeight = bodyEl?.offsetHeight ?? 0;
+		// skeleton doesn't collapse the modal. When auto-translate fires before the
+		// panel is even attached the measurement is ~0, so fall back to a
+		// comfortable skeleton height; the streaming grow takes over from there.
+		const measuredHeight = bodyEl?.offsetHeight ?? 0;
+		const lockedHeight = measuredHeight >= 80 ? measuredHeight : 220;
 		if (bodyEl) {
 			bodyEl.style.height = `${lockedHeight}px`;
 		}
@@ -455,15 +471,49 @@ function initializeTranslator(host: HTMLElement, context: ToolContext) {
 		let codeCount = 0;
 		let streamStarted = false;
 
-		// First block: drop the skeleton, switch the field to rendered mode, and
-		// pin a small "more on the way" indicator at the bottom that subsequent
-		// blocks insert in front of.
+		// The body height is animated to fit the content as blocks land, so the
+		// modal grows smoothly with the translation instead of sitting skeleton-
+		// sized until the very end. maxBodyHeight caps the grow at the panel's
+		// spare room; past it the body scrolls (restored when the grow settles).
+		let maxBodyHeight = Number.POSITIVE_INFINITY;
+		let growScheduled = false;
+
+		const applyBodyHeight = () => {
+			if (bodyEl) {
+				bodyEl.style.height = `${Math.min(bodyEl.scrollHeight, maxBodyHeight)}px`;
+			}
+		};
+
+		// Coalesce the per-block height writes into one per frame — several short
+		// blocks (scores, labels) can land in the same tick.
+		const scheduleGrow = () => {
+			if (growScheduled) {
+				return;
+			}
+			growScheduled = true;
+			requestAnimationFrame(() => {
+				growScheduled = false;
+				if (isMounted) {
+					applyBodyHeight();
+				}
+			});
+		};
+
+		// First block: drop the skeleton, switch the field to rendered mode, pin a
+		// small "more on the way" indicator that subsequent blocks insert in front
+		// of, and arm the smooth grow (measuring the panel's spare room first).
 		const beginStream = () => {
 			streamStarted = true;
 			textEl.replaceChildren();
 			textEl.classList.remove('placeholder');
 			textEl.classList.add('is-rendered');
 			textEl.append(buildStreamIndicator());
+			if (bodyEl && modalEl) {
+				const available = modalEl.parentElement?.clientHeight ?? 0;
+				const chrome = modalEl.offsetHeight - bodyEl.offsetHeight;
+				maxBodyHeight = available > 0 ? Math.max(0, available - chrome) : Number.POSITIVE_INFINITY;
+				bodyEl.classList.add('is-streaming-grow');
+			}
 		};
 
 		const emitBlock = (markdown: string, copy: string) => {
@@ -491,6 +541,7 @@ function initializeTranslator(host: HTMLElement, context: ToolContext) {
 				}
 				textEl.insertBefore(node, indicator);
 			}
+			scheduleGrow();
 		};
 
 		try {
@@ -584,8 +635,10 @@ function initializeTranslator(host: HTMLElement, context: ToolContext) {
 			const renderedMarkdown = renderedParts.join('\n\n');
 			copyText = copyParts.join('\n\n');
 			if (streamStarted) {
-				// Streaming already drew the result; just retire the indicator.
+				// Streaming already drew the result; retire the indicator and grow
+				// one last time to the final content height.
 				textEl.querySelector('.translator-streaming')?.remove();
+				applyBodyHeight();
 			} else {
 				// Nothing emitted (empty translation) — show the plain result.
 				revealText(textEl, renderedMarkdown);
@@ -622,7 +675,20 @@ function initializeTranslator(host: HTMLElement, context: ToolContext) {
 		} finally {
 			modalEl.classList.remove('is-translating');
 			if (bodyEl) {
-				bodyEl.style.height = '';
+				if (streamStarted) {
+					// Let the final grow finish animating, then drop the explicit
+					// height (now equal to the content, so no jump) and re-enable
+					// scrolling for results taller than the panel.
+					const body = bodyEl;
+					growSettleTimer = setTimeout(() => {
+						growSettleTimer = undefined;
+						body.style.height = '';
+						body.classList.remove('is-streaming-grow');
+					}, 380);
+				} else {
+					bodyEl.style.height = '';
+					bodyEl.classList.remove('is-streaming-grow');
+				}
 			}
 		}
 	};
