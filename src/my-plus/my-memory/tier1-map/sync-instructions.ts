@@ -149,7 +149,8 @@ export const syncAllInstructionFiles = (root: string): string[] => {
 	return updated;
 };
 
-/** Strip the managed block from AGENTS.md and the @AGENTS.md import from CLAUDE.md. */
+/** Strip the managed block from AGENTS.md. Leaves CLAUDE.md untouched — the
+ *  `@AGENTS.md` pointer is harmless and can't be distinguished from user content. */
 export const removeAllInstructionBlocks = (root: string): string[] => {
 	const removed: string[] = [];
 
@@ -173,26 +174,6 @@ export const removeAllInstructionBlocks = (root: string): string[] => {
 		}
 	} catch (error) {
 		console.error(`[my-memory] remove block from ${HUB_FILE} failed:`, error);
-	}
-
-	try {
-		const claudePath = path.join(root, CLAUDE_FILE);
-		if (fs.existsSync(claudePath)) {
-			const content = fs.readFileSync(claudePath, 'utf8');
-			const lines = content.split('\n');
-			const filtered = lines.filter(line => line.trim() !== CLAUDE_IMPORT_LINE);
-			if (filtered.length !== lines.length) {
-				const cleaned = filtered.join('\n').replace(/^\n+/, '').replace(/\n{3,}/g, '\n\n').trim();
-				if (cleaned) {
-					atomicWriteFile(claudePath, cleaned + '\n');
-				} else {
-					fs.unlinkSync(claudePath);
-				}
-				removed.push(CLAUDE_FILE);
-			}
-		}
-	} catch (error) {
-		console.error(`[my-memory] remove import from ${CLAUDE_FILE} failed:`, error);
 	}
 
 	return removed;
