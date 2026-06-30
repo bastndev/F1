@@ -173,6 +173,12 @@ function parseMarkdownLine(line: string): MarkdownLine | null {
 	return null;
 }
 
+// True when a string has letters worth translating. Bare scores/counts like
+// "8/10" or "[0]" translate to themselves, so we skip the network round-trip.
+function hasTranslatableText(text: string): boolean {
+	return /\p{L}/u.test(text);
+}
+
 function buildVoiceChunks(textEl: HTMLElement): TranslatorVoiceChunk[] {
 	const renderedBlocks = Array.from(textEl.children)
 		.filter((element): element is HTMLElement => element instanceof HTMLElement);
@@ -462,35 +468,60 @@ function initializeTranslator(host: HTMLElement, context: ToolContext) {
 					continue;
 				}
 
-				// Prose segment: translate line-by-line, protecting markdown
-				// markers so headings, emoji labels, and score tables survive.
+				// Prose segment: translate in as few requests as possible while
+				// protecting markdown markers. Consecutive plain lines (and the
+				// blanks between them) are sent to the provider as ONE block — the
+				// host chunks long text by paragraph internally, so a multi-line
+				// block is both far fewer round-trips than line-by-line *and* a
+				// better translation (the engine sees whole sentences, not the
+				// terminal's hard-wrapped fragments). Only the few structured lines
+				// (headings, emoji labels, scores) are translated on their own so
+				// their leading markers can be kept and rebuilt by the renderer.
 				const lines = segment.content.split('\n');
-				const translatedLines: string[] = [];
+				const outParts: string[] = [];
+				let plainRun: string[] = [];
+
+				const flushPlainRun = async () => {
+					if (!plainRun.length) {
+						return;
+					}
+					const runText = plainRun.join('\n');
+					plainRun = [];
+					if (!runText.trim()) {
+						// Blank-only run (the gaps around a heading) — keep verbatim so
+						// paragraph breaks survive into the renderer.
+						outParts.push(runText);
+						return;
+					}
+					const result = await translateSelection(runText);
+					provider ??= result.provider;
+					outParts.push(result.text || runText);
+				};
 
 				for (const line of lines) {
-					const trimmed = line.trim();
-					if (!trimmed) {
-						translatedLines.push('');
+					const parsed = line.trim() ? parseMarkdownLine(line) : null;
+					if (!parsed) {
+						// Plain or blank line — batch it into the current block.
+						plainRun.push(line);
 						continue;
 					}
 
-					const parsed = parseMarkdownLine(trimmed);
-					if (parsed) {
-						// Structured line: translate only the content, keep the marker
+					// Structured line: flush the pending prose first, then translate
+					// just its content (keeping the marker). Content with no letters —
+					// a bare "8/10" score, "[0]" — would translate to itself, so skip
+					// the round-trip entirely.
+					await flushPlainRun();
+					let translatedContent = parsed.content;
+					if (hasTranslatableText(parsed.content)) {
 						const result = await translateSelection(parsed.content);
-						const translatedContent = result.text || parsed.content;
 						provider ??= result.provider;
-						translatedLines.push(`${parsed.marker}${translatedContent}`);
-					} else {
-						// Plain text line: translate normally
-						const result = await translateSelection(trimmed);
-						const translatedLine = result.text || trimmed;
-						provider ??= result.provider;
-						translatedLines.push(translatedLine);
+						translatedContent = result.text || parsed.content;
 					}
+					outParts.push(`${parsed.marker}${translatedContent}`);
 				}
+				await flushPlainRun();
 
-				const value = translatedLines.join('\n');
+				const value = outParts.join('\n');
 				renderedParts.push(value);
 				copyParts.push(value);
 				if (value.trim()) {
