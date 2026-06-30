@@ -480,11 +480,11 @@
    The chunk being read aloud is drawn as one cohesive band BEHIND the text using
    a pseudo-element. Because that layer is absolutely positioned, toggling it can
    never change the box — so the text never jumps vertically as the highlight
-   moves — and there is no left rail. Each block gets .is-voice-active; the first
-   .is-voice-start and the last .is-voice-end round the band's ends. The layer
-   bleeds 7px into the inter-paragraph gaps so consecutive blocks join, and 10px
-   into the side padding. z-index:0 gives the block its own stacking context so
-   the ::before sits behind its text but above the modal background.
+   moves. Each block gets .is-voice-active; the first .is-voice-start and the last
+   .is-voice-end round the band's ends. The layer bleeds 7px into inter-paragraph
+   gaps so consecutive blocks join, and 10px into the side padding. z-index:0
+   gives the block its own stacking context so the ::before sits behind its text
+   but above the modal background.
 
    The 7px vertical bleed is paired with the block spacing above: sibling blocks
    sit at most 14px (= 2 × 7) apart, so the two bleed layers always meet and the
@@ -493,6 +493,7 @@
 .translator-text .is-voice-active {
 	position: relative;
 	z-index: 0;
+	transition: color 200ms ease;
 }
 
 .translator-text .is-voice-active::before {
@@ -500,41 +501,49 @@
 	position: absolute;
 	z-index: -1;
 	inset: -7px -10px;
-	background-color: rgba(93, 202, 165, 0.08);
-	background-image: linear-gradient(to bottom, rgba(93, 202, 165, 0.6), rgba(93, 202, 165, 0.6));
-	background-size: 2px 100%;
+	background-color: rgba(99, 179, 237, 0.15);
+	background-image: linear-gradient(to bottom, rgba(99, 179, 237, 0.85), rgba(99, 179, 237, 0.85));
+	background-size: 3px 100%;
 	background-position: left;
 	background-repeat: no-repeat;
-	transition: background-color 160ms ease, background-image 160ms ease;
+	box-shadow: 0 0 12px -2px rgba(99, 179, 237, 0.12);
+	transition: background-color 220ms ease, background-image 220ms ease, box-shadow 220ms ease;
 }
 
 .translator-text .is-voice-start::before {
 	top: 0;
 	border-top-left-radius: 0;
 	border-top-right-radius: 0;
-	background-image: linear-gradient(to bottom, transparent 0px, rgba(93, 202, 165, 0.6) min(45px, 100%));
+	background-image: linear-gradient(to bottom, transparent 0px, rgba(99, 179, 237, 0.85) min(45px, 100%));
 }
 
 .translator-text .is-voice-end::before {
 	bottom: 0;
 	border-bottom-left-radius: 0;
 	border-bottom-right-radius: 0;
-	background-image: linear-gradient(to top, transparent 0px, rgba(93, 202, 165, 0.6) min(45px, 100%));
+	background-image: linear-gradient(to top, transparent 0px, rgba(99, 179, 237, 0.85) min(45px, 100%));
 }
 
 .translator-text .is-voice-start.is-voice-end::before {
-	background-image: linear-gradient(to bottom, transparent 0px, rgba(93, 202, 165, 0.6) min(45px, 45%), rgba(93, 202, 165, 0.6) max(calc(100% - 45px), 55%), transparent 100%);
+	background-image: linear-gradient(to bottom, transparent 0px, rgba(99, 179, 237, 0.85) min(45px, 45%), rgba(99, 179, 237, 0.85) max(calc(100% - 45px), 55%), transparent 100%);
+}
+
+/* Text brightens slightly when its chunk is being read for emphasis */
+.translator-text .is-voice-active:not(.is-voice-active *) {
+	color: #dcecf9;
 }
 
 /* Fallback: the whole translation is one unstructured block (no child elements),
    so the container itself carries the highlight — a plain tint, no layout change. */
 .translator-text.is-voice-active {
 	border-radius: 0;
-	background-color: rgba(93, 202, 165, 0.08);
-	background-image: linear-gradient(to bottom, transparent 0px, rgba(93, 202, 165, 0.6) min(45px, 45%), rgba(93, 202, 165, 0.6) max(calc(100% - 45px), 55%), transparent 100%);
-	background-size: 2px 100%;
+	background-color: rgba(99, 179, 237, 0.15);
+	background-image: linear-gradient(to bottom, transparent 0px, rgba(99, 179, 237, 0.85) min(45px, 45%), rgba(99, 179, 237, 0.85) max(calc(100% - 45px), 55%), transparent 100%);
+	background-size: 3px 100%;
 	background-position: left;
 	background-repeat: no-repeat;
+	box-shadow: 0 0 12px -2px rgba(99, 179, 237, 0.12);
+	transition: background-color 220ms ease, box-shadow 220ms ease;
 }
 
 .translator-text strong {
