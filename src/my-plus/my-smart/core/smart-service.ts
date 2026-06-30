@@ -29,6 +29,11 @@ export class SmartService {
 		}
 	}
 
+	/** Prepare project context (.f1/ map + instruction files) before a session starts. */
+	public prepareContext(root: string | undefined, agentSlug: string | undefined): void {
+		this.memory.onLaunch(root, agentSlug);
+	}
+
 	/**
 	 * Run `graphify update .` (re-extract the code graph — no LLM, free) to produce
 	 * graphify-out/GRAPH_REPORT.md, the compact map the CLI reads. Resolves true if

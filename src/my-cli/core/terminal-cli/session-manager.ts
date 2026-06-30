@@ -81,11 +81,14 @@ const getPtyHostPath = () => {
 	return path.join(__dirname, 'my-cli', 'core', 'pty-host.js');
 };
 
+export type SessionBeforeCreateHook = (agentLabel: string) => void;
+
 export class CliSessionManager implements vscode.Disposable {
 	private readonly sessions = new Map<string, CliSession>();
 	private webview?: vscode.Webview;
 	private activeSessionId?: string;
 	private nextSessionId = 1;
+	private _beforeSessionCreate?: SessionBeforeCreateHook;
 
 	// Voice Finish config, pushed from the webview (cli.voiceFinish). Off by
 	// default; the language picks which WAV cue plays when a response settles.
@@ -107,6 +110,10 @@ export class CliSessionManager implements vscode.Disposable {
 	public attach(webview: vscode.Webview) {
 		this.webview = webview;
 		this.sessionsKnownToWebview.clear();
+	}
+
+	public onBeforeSessionCreate(hook: SessionBeforeCreateHook) {
+		this._beforeSessionCreate = hook;
 	}
 
 	public detach() {
@@ -134,6 +141,7 @@ export class CliSessionManager implements vscode.Disposable {
 			return undefined;
 		}
 
+		this._beforeSessionCreate?.(agentLabel);
 		return this.createSessionFromCommand(agent.label, agent.command, agent.args, options.smart);
 	}
 

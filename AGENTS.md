@@ -1,99 +1,88 @@
-# CLAUDE.md
+# AGENTS.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+## Project
+
+- %description%.
+- Built with: esbuild.
+- Language: TypeScript.
+
+## Package manager
+
+- Use `bun` for this workspace. The lockfile is `bun.lock`.
+- Run package scripts with `bun <script>`.
 
 ## Commands
 
 ```bash
-# Build (type-check + lint + bundle)
-bun run compile
-
-# Development watch mode (esbuild + tsc in parallel)
-bun run watch
-
-# Type-check only
-bun run check-types
-
-# Lint only
-bun run lint
+bun check-types      # check types without emitting
+bun lint             # run linter
+bun compile          # compile/bundle (dev)
+bun watch            # watch and rebuild on changes
 ```
 
-There is no test suite. To debug the extension, press **F5** in VS Code (uses `.vscode/launch.json` → `extensionHost` config, which runs `compile` as a pre-launch task).
+`compile` already runs typecheck and lint before bundling; use it as the normal pre-finish gate.
+
+No formatter, test runner is configured.
 
 ## Architecture
 
-F1 is a VS Code extension providing a **CLI Hub** panel that lets users launch and manage multiple AI coding CLI tools (Claude Code, Codex CLI, OpenCode, Copilot, Cursor, Kiro, Kilo Code, Grok, Antigravity) in embedded xterm.js terminals.
+- VS Code extension targeting `^1.75.0`.
+- Extension host main: `./dist/extension.js`; build before launching because runtime output lives under `dist/`.
+- Source activation entrypoint: `src/extension.ts`.
+- `src/my-skills/core/main.ts` owns the `WebviewViewProvider`, host-side message handling, template loading, and workspace file writes.
+- `src/my-skills/view/index.ts` is the shell bridge between webview events and `vscode.postMessage`.
+Key paths:
+- `src/my-skills/screens/create-skill/ui/index.ts` — CREATE screen client bundle entrypoint.
+- `src/my-skills/screens/install-skill/core` — INSTALL marketplace and installation core.
+- `src/my-skills/screens/local-skill/core` — LOCAL installed-skill discovery and state.
 
-### Repository layout
+## Build entrypoints
 
-`src/` hosts three products plus a shared layer — keep them separate:
+The esbuild config creates separate bundles; keep host and browser targets separate.
 
-- `src/my-cli/` — the CLI Hub feature (this extension).
-- `src/my-skills/` — the My Skills extension (skill marketplace, creation, local management).
-- `src/my-memory/` — the My Memory feature (project context graph, graphify integration).
-- `src/shared/` — keymaps and assets shared by both UI products; no `vscode`, no DOM.
+| Source | Output | Format | Platform |
+|---|---|---|---|
+| `src/extension.ts` | `dist/extension.js` | `cjs` | `node` |
+| `src/my-cli/webview/panel-terminal/terminal.ts` | `dist/my-cli/webview/terminal.js` | `iife` | `browser` |
+| `src/my-cli/webview/launcher/index.ts` | `dist/my-cli/webview/launcher/index.js` | `iife` | `browser` |
+| `src/my-skills/view/index.ts` | `dist/webview.js` | `iife` | `browser` |
+| `src/my-skills/screens/create-skill/ui/index.ts` | `dist/create-skill.js` | `iife` | `browser` |
+| `src/shared/tutorial/t-skill/support.ts` | `dist/create-skill-support.js` | `iife` | `browser` |
+| `src/shared/tutorial/t-cli/support.ts` | `dist/cli-tutorial.js` | `iife` | `browser` |
+| `src/my-cli/core/terminal-cli/pty-host.ts` | `dist/my-cli/core/pty-host.js` | `cjs` | `node` |
 
-Each product exposes one **front door** that is the only file importable from outside its folder: `src/my-cli/my-cli.ts` (host-side exports only — never re-export webview code there), `src/my-skills/my-skills.ts`, and `src/my-memory/my-memory.ts`. `src/extension.ts` imports exclusively through these.
+## Runtime assets and packaging
 
-Inside `src/my-cli/` the code is split by **where it runs**:
+- `dist/` is ignored, so build before launching, testing, or packaging.
+- `vscode` is provided by the extension host; keep it external in extension bundles.
+- HTML templates, CSS, and SVG assets under `src/my-skills/` are loaded at runtime by the extension host, not bundled into the webview JS.
+- `.vscodeignore` excludes TypeScript sources but keeps `src/my-skills/**/*.html`, `**/*.css`, and `**/*.svg`; update packaging rules if new runtime asset types are added.
 
-- `src/my-cli/core/` — extension-host (Node.js) code: the webview provider (`main.ts`), HTML builders (`launcher-html.ts`, `webview-html.ts`, `webview-assets.ts`), session manager + pty host, workspace queries, translation/spellcheck/voice/attachment services.
-- `src/my-cli/webview/` — browser code: the launcher (`launcher/`), the terminal panel (`panel-terminal/`, `panel-tab/`), the tools modals (`tools/`), styles and SVG assets.
-- `src/my-cli/shared/` — code imported from both sides: the message protocol (`protocol.ts`), the CLI agent registry (`agents.ts`), prompt/token logic (`prompt/`), launch-guard, model detection, voice/translation types, UI strings (`ui-strings.ts`).
+## Testing and launch
 
-`core/` code must never be imported from `webview/**` and vice versa; `shared/**` must not import `vscode` or touch the DOM at module scope (types and pure logic only). `src/shared/` (keymaps) is importable from both `my-cli/webview/` and `my-skills/` webview code.
+- VS Code's default build task is `watch`; launch configs may start that task automatically.
+- Launch configs: `Run Extension`.
+- Tests are present, but no `test` package script was detected; inspect the test config before running broad suites.
 
-### Eight build targets (esbuild.js)
+## Related instruction files
 
-| Entry point | Output | Platform |
-|---|---|---|
-| `src/extension.ts` | `dist/extension.js` | Node.js / CJS |
-| `src/my-cli/webview/launcher/index.ts` | `dist/my-cli/webview/launcher/index.js` | Browser / IIFE |
-| `src/my-cli/webview/panel-terminal/terminal.ts` | `dist/my-cli/webview/terminal.js` | Browser / IIFE |
-| `src/my-cli/core/terminal-cli/pty-host.ts` | `dist/my-cli/core/pty-host.js` | Node.js / CJS |
-| `src/my-skills/view/index.ts` | `dist/webview.js` | Browser / IIFE |
-| `src/my-skills/screens/create-skill/ui/index.ts` | `dist/create-skill.js` | Browser / IIFE |
-| `src/shared/tutorial/t-skill/support.ts` | `dist/create-skill-support.js` | Browser / IIFE |
-| `src/shared/tutorial/t-cli/support.ts` | `dist/cli-tutorial.js` | Browser / IIFE |
+- Also check `CLAUDE.md` when the task touches matching tooling or design behavior.
 
-`node-pty` and `vscode` are always external. Non-TS assets (HTML, CSS, SVG) are copied from `src/my-cli/webview/` into `dist/my-cli/webview/` by the build script — they are not bundled. CSS/HTML files imported inside the terminal bundle (modal UI files) use esbuild's `text` loader so they bundle as strings.
+## Key Conventions
 
-### Two-phase webview
+- Error messages with prefix `[MySkills]`.
+- Nonce of 64 chars for webview security.
+- Minimum 1200ms loading on create operations (UX).
+- Use `vscode.Uri.joinPath()` for paths.
 
-**Phase 1 – Launcher** (`src/my-cli/webview/launcher/index.ts` + `index.html`, host side `src/my-cli/core/launcher-html.ts`):
-The initial webview renders a fuzzy-search launcher to pick which CLI to open. State is persisted via `vscode.getState()`/`setState()`. On selection, a `{ type: 'openAgent', agent }` message is posted to the extension host.
+## Caveats
 
-**Phase 2 – Terminal** (`src/my-cli/webview/panel-terminal/terminal.ts`, host side `src/my-cli/core/webview-html.ts`):
-Once an agent is chosen, `MyCliViewProvider` replaces `webviewView.webview.html` entirely with the terminal layout. From this point, `terminal.ts` drives xterm.js instances and exchanges typed messages with the host. Its supporting modules live alongside it: `host-rpc.ts` (request/response channels), `boot-skeleton.ts`, `copy-to-translate.ts`, `terminal-theme.ts`.
+- No formatter detected — no Prettier config or format script.
 
-### PTY host subprocess
+## Boundaries
 
-`CliSessionManager` (`src/my-cli/core/terminal-cli/session-manager.ts`) runs in the extension host. For each CLI session it spawns `dist/my-cli/core/pty-host.js` as a Node.js child process with IPC stdio. The pty-host process owns the `node-pty` instance and relays `output`, `exit`, and `error` messages back over IPC. This keeps the native `node-pty` module out of the renderer process and out of the main extension bundle. The pty-host must be spawned with system `node` (Electron-as-Node segfaults with node-pty).
-
-### Message protocol
-
-All message contracts live in **`src/my-cli/shared/protocol.ts`** — both sides of each boundary import from it:
-
-- **Extension host ↔ webview**: `webview.postMessage()` / `window.addEventListener('message')`. `WebviewToHostMessage` / `HostToWebviewMessage`; types are prefixed `cli.*`, `prompt.*`, `workspace.*`, `voice.*`, `clipboard.*`.
-- **Extension host ↔ pty-host**: Node.js IPC. `PtyHostCommand` (`start`, `input`, `resize`, `kill`) / `PtyHostEvent` (`ready`, `output`, `exit`, `error`).
-
-`cli.state` snapshots include a session's terminal buffer only the first time that session is announced to the current webview; afterwards the webview maintains its own copy from incremental `cli.output` messages.
-
-### Tools panel
-
-The terminal panel has a right-side tools area (`src/my-cli/webview/tools/`) with four modals:
-
-- **Prompt** (`modal-prompt/`) – rich textarea with @-file mention picker, image paste support, collapsed pastes, skills chips, live spell-marking, and ES→EN translation before sending to the CLI. `prompt.ts` orchestrates; the concerns live in sibling modules (`attachments-ui.ts`, `highlight.ts`, `skills-chips.ts`, `footer-model.ts`, `lowercase-input.ts`, `textarea-history.ts`, `session-state.ts`).
-- **Translator** (`modal-translator/`) – standalone translation modal; uses selection from the active terminal (webview-side providers in `browser-terminal-translator.ts`).
-- **Keymaps** (`modal-keymaps/`) – keyboard shortcut reference.
-- **Use** (`modal-use/`) – per-CLI usage/status view; agent-specific readers live under `agents/`.
-
-Prompt translation is handled in the extension host (`src/my-cli/core/translation/host-prompt-translator.ts`) using MyMemory and Google Translate (no API key required) with an in-memory cache and per-provider rate-limit cooldown.
-
-Image attachments are saved to `context.globalStorageUri/my-cli-images/` by `src/my-cli/core/attachments/host-preparer.ts` before the final text is sent to the CLI.
-
-### Adding a new CLI agent
-
-1. Add one entry to the registry in `src/my-cli/shared/agents.ts` (label, command, args, slug, aliases, icon file).
-2. Add the SVG icon to `src/my-cli/webview/assets/icons-cli/`.
-3. Optionally add an installer entry in `src/my-cli/core/terminal-cli/cli-installers.ts`.
+- Prefer existing local patterns and helper APIs before adding new abstractions.
+- Keep generated, packaged, and runtime asset boundaries intact; do not move files across host/webview ownership without updating build and packaging config.
+- Webview DOM code is vanilla TypeScript; do not introduce a framework unless the project explicitly adopts one.
+- After changing host/webview message contracts, verify both the webview bridge and the extension host handler.
+- `ARCHITECTURE.md`, `CONTRIBUTING.md`, `CODE_OF_CONDUCT.md` must not exist when packaging the extension.

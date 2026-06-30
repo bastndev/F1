@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 import * as crypto from 'crypto';
 import * as fs from 'fs';
-import { allowedAgents, getCliAgent } from '../shared/agents';
+import { allowedAgents, getCliAgent, getAgentSlug } from '../shared/agents';
 import { ensureCliInstalled } from './terminal-cli/installation';
 import { CliSessionManager } from './terminal-cli/session-manager';
 import { getAgentWebviewHtml } from './webview-html';
@@ -10,17 +10,7 @@ import { getWebviewAssetUri, getNonce } from './webview-assets';
 import { handleWorkspaceListFiles, handleWorkspaceListSkills } from './workspace';
 import { translatePromptToEnglish } from './translation/host-prompt-translator';
 import { resolveCustomCliLaunch, validateCustomCliCommandInput } from './terminal-cli/custom-cli';
-import {
-	ensureVoice,
-	isVoiceReady,
-	streamSpeech,
-	synthesizeSpeech,
-	playPcmBuffer,
-	stopVoicePlayback,
-	isVoiceSpeaking,
-} from './voice/host-voice-tts';
-import { normalizeVoiceChunks, type ActiveVoiceSession } from './voice/voice-chunks';
-import type { VoiceProgress, VoiceState } from '../shared/voice/voice-types';
+import { VoiceController } from './voice/voice-controller';
 import { checkText as spellCheckText, warmSpellchecker } from './spellcheck/host-spellcheck';
 import { preparePromptForCLI } from './attachments/host-preparer';
 import type { CustomCliLaunch, InboundWebviewMessage } from '../shared/protocol';
@@ -40,15 +30,20 @@ export class MyCliViewProvider implements vscode.WebviewViewProvider, vscode.Dis
 	private pendingInitialSmart = false;
 	private pendingInitialCustomCli?: CustomCliLaunch;
 	private activePromptTranslation?: AbortController;
-	private activeVoiceSession?: ActiveVoiceSession;
-	private voiceRequestSeq = 0;
 	private _activeWebview?: vscode.Webview;
 	private _tutorialPanel?: vscode.WebviewPanel;
+	private voiceController?: VoiceController;
 
 	constructor(
 		private readonly _extensionUri: vscode.Uri,
 		private readonly _extensionContext?: vscode.ExtensionContext
-	) {}
+	) {
+		this.sessionManager.onBeforeSessionCreate((agentLabel) => {
+			const root = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath;
+			const slug = getAgentSlug(agentLabel);
+			this.smartService.prepareContext(root, slug);
+		});
+	}
 
 	public async resolveWebviewView(
 		webviewView: vscode.WebviewView,
@@ -65,6 +60,10 @@ export class MyCliViewProvider implements vscode.WebviewViewProvider, vscode.Dis
 		};
 
 		webviewView.webview.html = await this._getHtmlForWebview(webviewView.webview);
+		this.voiceController = new VoiceController(
+			(msg) => webviewView.webview.postMessage(msg),
+			() => this._extensionContext,
+		);
 		// VS Code hides a webview view by layout (display:none on the iframe) while
 		// keeping the window "visible", so the Page Visibility API inside the webview
 		// never fires on a panel switch. retainContextWhenHidden then leaves xterm's
@@ -159,32 +158,32 @@ export class MyCliViewProvider implements vscode.WebviewViewProvider, vscode.Dis
 			}
 
 			if (message.type === 'voice.speak') {
-				await this._handleVoiceSpeak(webviewView.webview, message);
+				await this.voiceController?.handleSpeak(message);
 				return;
 			}
 
 			if (message.type === 'voice.pause') {
-				await this._handleVoicePause(webviewView.webview);
+				await this.voiceController?.handlePause();
 				return;
 			}
 
 			if (message.type === 'voice.resume') {
-				await this._handleVoiceResume(webviewView.webview);
+				await this.voiceController?.handleResume();
 				return;
 			}
 
 			if (message.type === 'voice.stop') {
-				await this._handleVoiceStop(webviewView.webview);
+				await this.voiceController?.handleStop();
 				return;
 			}
 
 			if (message.type === 'voice.query') {
-				await this._postCurrentVoiceState(webviewView.webview);
+				await this.voiceController?.handleQueryState();
 				return;
 			}
 
 			if (message.type === 'voice.checkReady') {
-				await this._handleVoiceCheckReady(webviewView.webview, message);
+				await this.voiceController?.handleCheckReady(message);
 				return;
 			}
 
@@ -328,7 +327,7 @@ export class MyCliViewProvider implements vscode.WebviewViewProvider, vscode.Dis
 	public dispose() {
 		this._tutorialPanel?.dispose();
 		this.activePromptTranslation?.abort();
-		stopVoicePlayback();
+		this.voiceController?.dispose();
 		this.sessionManager.dispose();
 	}
 
@@ -447,232 +446,6 @@ export class MyCliViewProvider implements vscode.WebviewViewProvider, vscode.Dis
 		);
 
 		return choice === guard.confirmLabel;
-	}
-
-	private async _postVoiceState(
-		webview: vscode.Webview,
-		state: VoiceState,
-		detail?: string,
-		progress?: VoiceProgress
-	) {
-		await webview.postMessage({ type: 'voice.state', state, message: detail, progress });
-	}
-
-	private _voiceProgress(session: ActiveVoiceSession): VoiceProgress {
-		return {
-			chunkIndex: Math.min(session.index, Math.max(0, session.chunks.length - 1)),
-			chunkCount: session.chunks.length
-		};
-	}
-
-	private _voiceChunkLabel(session: ActiveVoiceSession): string | undefined {
-		const progress = this._voiceProgress(session);
-		return progress.chunkCount > 1 ? `voice ${progress.chunkIndex + 1}/${progress.chunkCount}` : undefined;
-	}
-
-	private _isVoiceRunActive(session: ActiveVoiceSession, seq: number): boolean {
-		return this.activeVoiceSession === session && seq === this.voiceRequestSeq;
-	}
-
-	private async _postCurrentVoiceState(webview: vscode.Webview) {
-		const session = this.activeVoiceSession;
-		if (session) {
-			await this._postVoiceState(webview, session.state, this._voiceChunkLabel(session), this._voiceProgress(session));
-			return;
-		}
-
-		await this._postVoiceState(webview, isVoiceSpeaking() ? 'speaking' : 'idle');
-	}
-
-	private async _handleVoiceSpeak(webview: vscode.Webview, message: InboundWebviewMessage) {
-		const chunks = normalizeVoiceChunks(message);
-		if (!chunks.length) {
-			return;
-		}
-
-		if (!this._extensionContext) {
-			await this._postVoiceState(webview, 'error', 'Voice unavailable: no extension context.');
-			return;
-		}
-
-		// A newer speak request supersedes this one; only the latest may
-		// report state, otherwise its 'idle' would overwrite 'speaking'.
-		const seq = ++this.voiceRequestSeq;
-		stopVoicePlayback(false);
-		const session: ActiveVoiceSession = {
-			chunks,
-			index: 0,
-			state: 'preparing',
-			lang: typeof message.lang === 'string' ? message.lang : 'es',
-		};
-		this.activeVoiceSession = session;
-
-		await this._runVoiceSession(webview, session, seq);
-	}
-
-	private async _handleVoicePause(webview: vscode.Webview) {
-		const session = this.activeVoiceSession;
-		if (!session || (session.state !== 'preparing' && session.state !== 'speaking')) {
-			return;
-		}
-
-		this.voiceRequestSeq += 1;
-		session.state = 'paused';
-		stopVoicePlayback();
-		await this._postVoiceState(webview, 'paused', this._voiceChunkLabel(session), this._voiceProgress(session));
-	}
-
-	private async _handleVoiceResume(webview: vscode.Webview) {
-		const session = this.activeVoiceSession;
-		if (!session || session.state !== 'paused') {
-			return;
-		}
-
-		const seq = ++this.voiceRequestSeq;
-		await this._runVoiceSession(webview, session, seq);
-	}
-
-	private async _handleVoiceStop(webview: vscode.Webview) {
-		this.voiceRequestSeq += 1;
-		this.activeVoiceSession = undefined;
-		stopVoicePlayback();
-		await this._postVoiceState(webview, 'idle');
-	}
-
-	private async _handleVoiceCheckReady(webview: vscode.Webview, message: InboundWebviewMessage) {
-		if (typeof message.id !== 'string') {
-			return;
-		}
-		const lang = typeof message.lang === 'string' ? message.lang : 'es';
-		let ready = false;
-		try {
-			ready = this._extensionContext ? await isVoiceReady(this._extensionContext, lang) : false;
-		} catch {
-			// Treat a probe failure as "ready" so the UI doesn't nag with a
-			// download prompt; pressing Listen still downloads if truly missing.
-			ready = true;
-		}
-		await webview.postMessage({ type: 'voice.ready', id: message.id, ready });
-	}
-
-	private async _runVoiceSession(webview: vscode.Webview, session: ActiveVoiceSession, seq: number) {
-		const post = async (state: VoiceState) => {
-			if (this._isVoiceRunActive(session, seq)) {
-				await this._postVoiceState(webview, state, this._voiceChunkLabel(session), this._voiceProgress(session));
-			}
-		};
-
-		try {
-			if (!this._extensionContext) {
-				this.activeVoiceSession = undefined;
-				await this._postVoiceState(webview, 'error', 'Voice unavailable: no extension context.');
-				return;
-			}
-
-			session.state = 'preparing';
-			await post('preparing');
-			// Reuses ATM's piper engine/voice when installed; downloads into
-			// F1's globalStorage (with a progress notification) otherwise.
-			session.resources ??= await ensureVoice(this._extensionContext, session.lang);
-			const resources = session.resources;
-			const chunks = session.chunks;
-
-			// Prefetch helper: synthesize a block to a buffer ahead of time. The no-op
-			// .catch keeps a bail (pause/stop kills the in-flight synth) from surfacing
-			// as an unhandled rejection; the real await still throws on a genuine failure.
-			const startSynth = (text: string) => {
-				let ready = false;
-				const promise = synthesizeSpeech(resources, text).then((audio) => {
-					ready = true;
-					return audio;
-				});
-				void promise.catch(() => undefined);
-				return { promise, isReady: () => ready };
-			};
-
-			// Best of both worlds:
-			//  • The first block of this run STREAMS — audio starts on the first synthesized
-			//    bytes, so there's no upfront wait (a single-block read is just this).
-			//  • While it plays, the next block is synthesized to a buffer; every later block
-			//    plays from its prefetched buffer → seamless, gap-free transitions.
-			let pending: { promise: Promise<Buffer>; isReady: () => boolean } | undefined;
-
-			for (let index = session.index; index < chunks.length; index += 1) {
-				if (!this._isVoiceRunActive(session, seq)) {
-					return;
-				}
-
-				session.index = index;
-				const nextIndex = index + 1;
-
-				if (!pending) {
-					// First block of the run (fresh start or resume): fast streaming start,
-					// and begin the next block's prefetch as soon as audio is flowing.
-					session.state = 'preparing';
-					await post('preparing');
-					await streamSpeech(resources, chunks[index], () => {
-						if (!this._isVoiceRunActive(session, seq)) {
-							return;
-						}
-						session.state = 'speaking';
-						void post('speaking');
-						if (nextIndex < chunks.length && !pending) {
-							pending = startSynth(chunks[nextIndex]);
-						}
-					});
-					continue;
-				}
-
-				// Prefetched block: play it (already, or nearly, synthesized) with no gap,
-				// then start synthesizing the one after to overlap this playback.
-				const current = pending;
-				if (!current.isReady()) {
-					session.state = 'preparing';
-					await post('preparing');
-				}
-
-				let audio: Buffer;
-				try {
-					audio = await current.promise;
-				} catch (error) {
-					if (!this._isVoiceRunActive(session, seq)) {
-						return;
-					}
-					throw error;
-				}
-				if (!this._isVoiceRunActive(session, seq)) {
-					return;
-				}
-
-				pending = nextIndex < chunks.length ? startSynth(chunks[nextIndex]) : undefined;
-
-				session.state = 'speaking';
-				await playPcmBuffer(resources, audio, () => {
-					if (this._isVoiceRunActive(session, seq)) {
-						session.state = 'speaking';
-						void post('speaking');
-					}
-				});
-			}
-
-			if (!this._isVoiceRunActive(session, seq)) {
-				return;
-			}
-
-			this.activeVoiceSession = undefined;
-			session.state = 'idle';
-			await this._postVoiceState(webview, 'idle');
-		} catch (error) {
-			if (!this._isVoiceRunActive(session, seq)) {
-				return;
-			}
-
-			this.activeVoiceSession = undefined;
-			session.state = 'error';
-			const detail = error instanceof Error ? error.message : 'Voice playback failed.';
-			console.error('[f1-voice] Playback error:', error);
-			await this._postVoiceState(webview, 'error', detail);
-		}
 	}
 
 	private async _handlePromptTranslate(webview: vscode.Webview, message: InboundWebviewMessage) {
