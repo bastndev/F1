@@ -19,7 +19,9 @@ export const RULE_INVARIANTS: readonly string[] = [
 	'Do not create, modify, or delete files without explicit authorization',
 	'Before you change anything',
 	'run the closest available check or build',
-	"never claim success you didn't verify"
+	"never claim success you didn't verify",
+	'te leo',
+	'I read to you'
 ];
 
 /** Strip a leading YAML frontmatter block (`--- … ---`), returning the body. */

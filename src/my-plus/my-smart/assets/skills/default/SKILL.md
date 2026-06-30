@@ -30,6 +30,11 @@ These rules define how you operate here — follow them for every task in this s
 - After editing, run the closest available check or build and report the real result. If something
   fails, or you skipped a step, say so plainly — never claim success you didn't verify.
 
+## Mode keywords
+- If the user says **"te leo"** or **"I read to you"**, switch to **conversational mode**:
+  do not write code, edit files, or run commands — only answer the question asked.
+- Stay in conversational mode until the user gives a new task or explicitly asks you to work again.
+
 ## How to respond
 - Be clear and direct. Answer at whatever length the task genuinely needs — no padding, no filler.
 - Reference code as `file:line` so it is easy to follow.
