@@ -131,26 +131,28 @@ export const createSmartSkeleton = (host: HTMLElement): SmartSkeletonController 
 	}, 3500);
 
 	// Animate status bar
+	const status = overlay.querySelector('.smart-status') as HTMLElement | null;
+	const statusLabel = overlay.querySelector('.smart-status-label') as HTMLElement | null;
 	const fill = overlay.querySelector('.smart-status-fill') as HTMLElement | null;
 	const pct = overlay.querySelector('.smart-status-pct') as HTMLElement | null;
+	// Ease toward a ceiling instead of crawling into a hard wall: each tick advances
+	// a fraction of the remaining distance, so the bar decelerates smoothly and never
+	// truly stalls (the small constant keeps it alive on very large projects).
+	const CEILING = 92;
 	let progress = 0;
 	const statusInterval = setInterval(() => {
 		if (dismissed) {
 			clearInterval(statusInterval);
 			return;
 		}
-		// Slow crawl: reaches ~85% by the time it would typically dismiss
-		progress += Math.random() * 3 + 0.5;
-		if (progress > 85) {
-			progress = 85;
-		}
+		progress = Math.min(CEILING, progress + (CEILING - progress) * 0.08 + 0.15);
 		if (fill) {
 			fill.style.width = `${progress}%`;
 		}
 		if (pct) {
 			pct.textContent = `${Math.round(progress)}%`;
 		}
-	}, 800);
+	}, 400);
 
 	return {
 		dismiss: () => {
@@ -161,19 +163,41 @@ export const createSmartSkeleton = (host: HTMLElement): SmartSkeletonController 
 			clearInterval(phaseInterval);
 			clearInterval(statusInterval);
 
-			// Snap to 100% before fading
+			// Completion sweep: ease the fill to 100% (see .is-complete in the CSS)
+			// instead of snapping, so a fast small-project dismiss reads as a finish
+			// rather than a one-frame teleport. Fade only after the sweep settles.
+			const SWEEP_MS = 480;
+			if (status) {
+				status.classList.add('is-complete');
+			}
+			if (statusLabel) {
+				statusLabel.textContent = 'Ready';
+			}
 			if (fill) {
 				fill.style.width = '100%';
 			}
 			if (pct) {
-				pct.textContent = '100%';
+				const pctEl = pct;
+				const from = progress;
+				const start = performance.now();
+				const tick = (now: number) => {
+					const t = Math.min(1, (now - start) / SWEEP_MS);
+					const eased = 1 - Math.pow(1 - t, 3);
+					pctEl.textContent = `${Math.round(from + (100 - from) * eased)}%`;
+					if (t < 1) {
+						requestAnimationFrame(tick);
+					}
+				};
+				requestAnimationFrame(tick);
 			}
 
-			overlay.classList.add('is-leaving');
-			const remove = () => overlay.remove();
-			overlay.addEventListener('transitionend', remove, { once: true });
-			// Fallback in case transitionend doesn't fire.
-			setTimeout(remove, 700);
+			window.setTimeout(() => {
+				overlay.classList.add('is-leaving');
+				const remove = () => overlay.remove();
+				overlay.addEventListener('transitionend', remove, { once: true });
+				// Fallback in case transitionend doesn't fire.
+				window.setTimeout(remove, 700);
+			}, SWEEP_MS);
 		}
 	};
 };
