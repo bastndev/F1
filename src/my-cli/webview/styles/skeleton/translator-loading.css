@@ -39,44 +39,47 @@
 	100% { top: 108%; }
 }
 
-/* ── Line field — fills the locked body height ──────────────────── */
+/* ── Line field — clusters lines at the top like real text, leaving the
+   typing indicator at the bottom. With a compact loading box this reads as
+   a small snippet rather than a huge empty page. */
 .t-skel-lines {
 	flex: 1 1 auto;
 	display: flex;
 	flex-direction: column;
-	justify-content: space-between;
-	gap: 10px;
+	justify-content: flex-start;
+	gap: 11px;
 	min-height: 0;
 	overflow: hidden;
 }
 
 .t-skel-line {
-	height: 10px;
-	border-radius: 4px;
+	height: 8px;
+	border-radius: 999px;
 	flex: 0 0 auto;
 	background: linear-gradient(
 		90deg,
 		transparent 0%,
-		color-mix(in srgb, var(--vscode-foreground) 5%, transparent) 18%,
-		color-mix(in srgb, var(--skeleton-accent) 18%, transparent) 48%,
-		color-mix(in srgb, var(--vscode-foreground) 6%, transparent) 78%,
+		color-mix(in srgb, var(--vscode-foreground) 9%, transparent) 18%,
+		color-mix(in srgb, var(--skeleton-accent) 26%, transparent) 48%,
+		color-mix(in srgb, var(--vscode-foreground) 10%, transparent) 78%,
 		transparent 100%
 	);
 	background-size: 280% 100%;
 	background-position: 140% 50%;
-	opacity: 0.6;
+	opacity: 0.65;
 	will-change: background-position;
 	animation: t-skel-shimmer 4.2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }
 
-/* Width variants — natural prose rhythm */
-.t-skel-line.full  { width: 100%; opacity: 0.5;  }
-.t-skel-line.long  { width: 84%;  opacity: 0.58; }
-.t-skel-line.med   { width: 61%;  opacity: 0.62; }
-.t-skel-line.short { width: 37%;  opacity: 0.5;  }
+/* Width variants — natural prose rhythm. Most lines stay near full width;
+   only an occasional medium or short line hints at a paragraph ending. */
+.t-skel-line.full  { width: 100%; opacity: 0.58; }
+.t-skel-line.long  { width: 88%;  opacity: 0.62; }
+.t-skel-line.med   { width: 68%;  opacity: 0.66; }
+.t-skel-line.short { width: 44%;  opacity: 0.58; }
 
 /* Paragraph break — extra air before the line */
-.t-skel-line.t-skel-gap { margin-top: 12px; }
+.t-skel-line.t-skel-gap { margin-top: 14px; }
 
 /* Staggered timing so the sweep feels organic, not mechanical */
 .t-skel-line:nth-child(2n)   { animation-duration: 5.4s; animation-delay: -0.7s; }

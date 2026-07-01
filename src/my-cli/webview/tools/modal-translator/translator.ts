@@ -559,12 +559,14 @@ function initializeTranslator(host: HTMLElement, context: ToolContext) {
 			return;
 		}
 
-		// Freeze the body at its current height so swapping the text for the
-		// skeleton doesn't collapse the modal. When auto-translate fires before the
-		// panel is even attached the measurement is ~0, so fall back to a
-		// comfortable skeleton height; the streaming grow takes over from there.
+		// Use a compact loading box. We deliberately do not freeze the body at its
+		// previous (possibly tall) height; instead we cap it so the skeleton stays
+		// small and the modal only expands once real content arrives. When auto-
+		// translate fires before the panel is attached the measurement is ~0, so
+		// fall back to a comfortable minimum; the streaming grow takes over from
+		// there.
 		const measuredHeight = bodyEl?.offsetHeight ?? 0;
-		const lockedHeight = measuredHeight >= 80 ? measuredHeight : 220;
+		const lockedHeight = Math.max(100, Math.min(150, measuredHeight || 220));
 		if (bodyEl) {
 			bodyEl.style.height = `${lockedHeight}px`;
 		}
@@ -693,6 +695,7 @@ function initializeTranslator(host: HTMLElement, context: ToolContext) {
 				const available = modalEl.parentElement?.clientHeight ?? 0;
 				const chrome = modalEl.offsetHeight - bodyEl.offsetHeight;
 				maxBodyHeight = available > 0 ? Math.max(0, available - chrome) : Number.POSITIVE_INFINITY;
+				bodyEl.style.maxHeight = `${maxBodyHeight}px`;
 				bodyEl.classList.add('is-streaming-grow');
 			}
 		};
@@ -1368,9 +1371,9 @@ function buildSkeleton(availableHeight: number): HTMLElement {
 	wrap.className = 'translator-skeleton';
 	wrap.setAttribute('aria-hidden', 'true');
 
-	// The body is height-locked while loading; size the skeleton to fill it
-	// edge to edge (minus the body's 16px vertical padding). Overflow clips.
-	const contentHeight = Math.max(66, availableHeight - 32);
+	// The skeleton lives inside a deliberately compact loading box; it should
+	// hint at text arriving, not fill the whole panel like a giant placeholder.
+	const contentHeight = Math.max(60, Math.min(150, availableHeight - 32));
 	wrap.style.height = `${contentHeight}px`;
 
 	const scan = document.createElement('div');
@@ -1381,15 +1384,15 @@ function buildSkeleton(availableHeight: number): HTMLElement {
 	lines.className = 't-skel-lines';
 	wrap.append(lines);
 
-	// A handful of shimmer lines is enough for a loading state that's usually
-	// short-lived; capping the count keeps the DOM light even on tall panels.
-	const pattern = ['full', 'long', 'med', 'full', 'short', 'long'];
-	const lineCount = Math.min(12, Math.max(3, Math.floor((contentHeight - 30) / 22)));
+	// Just a few thin shimmer lines so the loading state feels minimal. Widths
+	// stay close to full-width for a natural prose silhouette.
+	const pattern = ['full', 'full', 'long', 'full', 'med', 'full', 'long'];
+	const lineCount = Math.min(6, Math.max(3, Math.floor((contentHeight - 34) / 18)));
 
 	for (let i = 0; i < lineCount; i += 1) {
 		const line = document.createElement('div');
 		line.className = `t-skel-line ${pattern[i % pattern.length]}`;
-		if (i > 0 && i % 4 === 0) {
+		if (i > 0 && i % 3 === 0) {
 			line.classList.add('t-skel-gap');
 		}
 		lines.append(line);

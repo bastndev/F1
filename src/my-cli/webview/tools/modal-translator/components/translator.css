@@ -194,7 +194,11 @@
 
 /* ── Body ────────────────────────────────────────────────────────── */
 .translator-body {
-	flex: 1 1 auto;
+	/* Keep the body sized to its content so the modal stays compact for short
+	   answers and loading states, rather than stretching to fill the host. It
+	   can still grow up to the available space (max-height is set while
+	   streaming) and scroll once it hits that cap. */
+	flex: 0 1 auto;
 	min-height: 0;
 	overflow-y: auto;
 	overscroll-behavior: contain;
