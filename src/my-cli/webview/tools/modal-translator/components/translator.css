@@ -304,17 +304,11 @@
 }
 
 /* Bare filesystem paths in CLI output (src/a/b.ts, ~/x) — painted a modern green
-   so they read as a distinct token, not prose. box-decoration-break keeps the
-   tint clean when a long path wraps across lines. */
+   so they read as a distinct token, not prose. Text only, no background. */
 .translator-text .md-path {
 	font-family: 'JetBrains Mono', ui-monospace, monospace;
 	font-size: 12px;
 	color: #7fe0bd;
-	background: rgba(93, 202, 165, 0.12);
-	padding: 1px 4px;
-	border-radius: 3px;
-	box-decoration-break: clone;
-	-webkit-box-decoration-break: clone;
 	overflow-wrap: anywhere;
 }
 
