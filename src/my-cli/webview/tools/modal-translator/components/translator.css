@@ -194,13 +194,25 @@
 
 /* ── Body ────────────────────────────────────────────────────────── */
 .translator-body {
-	flex: 1 1 auto;
+	/* Keep the body sized to its content so the modal stays compact for short
+	   answers and loading states, rather than stretching to fill the host. It
+	   can still grow up to the available space (max-height is set while
+	   streaming) and scroll once it hits that cap. */
+	flex: 0 1 auto;
 	min-height: 0;
 	overflow-y: auto;
 	overscroll-behavior: contain;
 	padding: 16px 18px;
 	scrollbar-width: thin;
 	scrollbar-color: rgba(175, 169, 236, 0.2) transparent;
+}
+
+/* Tighter vertical padding while the skeleton is showing so a small
+   selection gets a minimal loading box — the 16px top/bottom would otherwise
+   dominate a tiny skeleton. Restored when translation ends. */
+.translator-modal.is-translating .translator-body {
+	padding-top: 10px;
+	padding-bottom: 10px;
 }
 
 .translator-text {
