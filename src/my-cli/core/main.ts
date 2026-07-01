@@ -162,6 +162,11 @@ export class MyCliViewProvider implements vscode.WebviewViewProvider, vscode.Dis
 				return;
 			}
 
+			if (message.type === 'voice.append') {
+				await this.voiceController?.handleAppend(message);
+				return;
+			}
+
 			if (message.type === 'voice.pause') {
 				await this.voiceController?.handlePause();
 				return;

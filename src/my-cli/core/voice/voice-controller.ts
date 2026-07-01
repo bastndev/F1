@@ -17,6 +17,8 @@ export type VoicePostMessage = (message: Record<string, unknown>) => Thenable<bo
 export class VoiceController {
 	private activeSession?: ActiveVoiceSession;
 	private requestSeq = 0;
+	/** Set while a streaming session's loop is parked waiting for more chunks. */
+	private moreChunks?: () => void;
 
 	constructor(
 		private readonly postMessage: VoicePostMessage,
@@ -24,7 +26,24 @@ export class VoiceController {
 	) {}
 
 	public dispose() {
+		this.requestSeq += 1;
+		this.activeSession = undefined;
 		stopVoicePlayback();
+		this.wakeMoreChunks();
+	}
+
+	/** A parked streaming loop awaits this; resolved by append/pause/stop. */
+	private waitForMoreChunks(): Promise<void> {
+		return new Promise<void>((resolve) => {
+			this.moreChunks = resolve;
+		});
+	}
+
+	/** Release a parked streaming loop (no-op if nothing is parked). */
+	private wakeMoreChunks(): void {
+		const resolve = this.moreChunks;
+		this.moreChunks = undefined;
+		resolve?.();
 	}
 
 	public async handleSpeak(message: InboundWebviewMessage) {
@@ -41,6 +60,7 @@ export class VoiceController {
 
 		const seq = ++this.requestSeq;
 		stopVoicePlayback(false);
+		this.wakeMoreChunks();
 		const session: ActiveVoiceSession = {
 			chunks,
 			index: 0,
@@ -52,6 +72,58 @@ export class VoiceController {
 		await this.runSession(session, seq);
 	}
 
+	/**
+	 * Streaming append: queue more chunks onto the live session (starting one if
+	 * none is active) so the Translator can feed blocks as they finish translating
+	 * instead of waiting for the whole answer. `final: true` signals the last batch.
+	 */
+	public async handleAppend(message: InboundWebviewMessage) {
+		const incoming = normalizeVoiceChunks(message);
+		const final = message.final === true;
+		const reset = message.reset === true;
+		const session = this.activeSession;
+
+		// Extend the live stream — unless the producer asks to reset (a new answer
+		// supersedes whatever is still playing from the previous one).
+		if (!reset && session && session.streaming) {
+			if (incoming.length) {
+				session.chunks.push(...incoming);
+			}
+			if (final) {
+				session.complete = true;
+			}
+			// Wake the loop if it's parked at the end of the previous batch.
+			this.wakeMoreChunks();
+			return;
+		}
+
+		// A bare "final" with nothing to say has no session to start — ignore it.
+		if (!incoming.length) {
+			return;
+		}
+
+		const ctx = this.getExtensionContext();
+		if (!ctx) {
+			await this.postState('error', 'Voice unavailable: no extension context.');
+			return;
+		}
+
+		const seq = ++this.requestSeq;
+		stopVoicePlayback(false);
+		this.wakeMoreChunks();
+		const newSession: ActiveVoiceSession = {
+			chunks: incoming,
+			index: 0,
+			state: 'preparing',
+			lang: typeof message.lang === 'string' ? message.lang : 'es',
+			streaming: true,
+			complete: final,
+		};
+		this.activeSession = newSession;
+
+		await this.runSession(newSession, seq);
+	}
+
 	public async handlePause() {
 		const session = this.activeSession;
 		if (!session || (session.state !== 'preparing' && session.state !== 'speaking')) {
@@ -61,6 +133,7 @@ export class VoiceController {
 		this.requestSeq += 1;
 		session.state = 'paused';
 		stopVoicePlayback();
+		this.wakeMoreChunks();
 		await this.postState('paused', this.chunkLabel(session), this.progress(session));
 	}
 
@@ -78,6 +151,7 @@ export class VoiceController {
 		this.requestSeq += 1;
 		this.activeSession = undefined;
 		stopVoicePlayback();
+		this.wakeMoreChunks();
 		await this.postState('idle');
 	}
 
@@ -158,10 +232,22 @@ export class VoiceController {
 			};
 
 			let pending: { promise: Promise<Buffer>; isReady: () => boolean } | undefined;
+			let index = session.index;
 
-			for (let index = session.index; index < chunks.length; index += 1) {
+			for (;;) {
 				if (!this.isRunActive(session, seq)) {
 					return;
+				}
+
+				// No chunk at this position yet. A streaming session parks here
+				// until more arrive (or it's told it's complete); a normal session
+				// has simply reached the end.
+				if (index >= chunks.length) {
+					if (!session.streaming || session.complete) {
+						break;
+					}
+					await this.waitForMoreChunks();
+					continue;
 				}
 
 				session.index = index;
@@ -180,6 +266,7 @@ export class VoiceController {
 							pending = startSynth(chunks[nextIndex]);
 						}
 					});
+					index = nextIndex;
 					continue;
 				}
 
@@ -211,6 +298,7 @@ export class VoiceController {
 						void post('speaking');
 					}
 				});
+				index = nextIndex;
 			}
 
 			if (!this.isRunActive(session, seq)) {

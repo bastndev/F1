@@ -13,12 +13,45 @@
  *                the modal renders them as a monospace block.
  *   - code     → fenced or detected source code. Never translated; the modal
  *                shows a numbered "code here" placeholder instead.
+ *   - markdown → lines with structural markers (headings, emoji items, score
+ *                tables) that are sent to translation with their markers
+ *                protected so the renderer can rebuild the structure.
  */
 
 export type TerminalSegment = {
-	kind: 'prose' | 'diagram' | 'code';
+	kind: 'prose' | 'diagram' | 'code' | 'markdown';
 	content: string;
 };
+
+/**
+ * Lines that carry visual structure the translator must preserve. Each entry
+ * is a regex that matches a line whose *leading markers* (emoji, `##`, `>`,
+ * etc.) must survive translation so the renderer can rebuild the structure.
+ */
+const markdownLinePatterns: RegExp[] = [
+	// Heading: ## Title / ### Subtitle
+	/^#{1,6}\s+/,
+	// Emoji-prefixed label: 🔍 Project Understanding, 🏗️ Architecture 8/10
+	/^\p{Emoji_Presentation}\s*/u,
+	/^\p{Emoji_Modifier_Base}\p{Emoji_Modifier}?\s*/u,
+	// Bracket label: [end] / [fin] / [start]
+	/^\[[\w\s]+\]\s+/,
+	// Blockquote: > text
+	/^>\s+/,
+	// Score table line: emoji + label + score pattern (e.g. 🏗️ Architecture 8/10)
+	/\p{Emoji_Presentation}.*\b\d{1,2}\/10\b/u,
+];
+
+/**
+ * Detect whether a line carries structural markdown markers that should be
+ * protected through translation.
+ */
+export function isMarkdownStructuredLine(trimmed: string): boolean {
+	if (!trimmed) {
+		return false;
+	}
+	return markdownLinePatterns.some((pattern) => pattern.test(trimmed));
+}
 
 type LineKind =
 	| 'blank'
@@ -29,6 +62,7 @@ type LineKind =
 	| 'tree'
 	| 'pipes'
 	| 'code'
+	| 'markdown'
 	| 'prose';
 
 // Lines made purely of frame characters and whitespace.
@@ -65,6 +99,12 @@ function classifyLine(trimmed: string): LineKind {
 	// otherwise a tree/diagram continuation line.
 	if (/^[│┃]/.test(trimmed)) {
 		return (trimmed.match(/[│┃]/g) || []).length >= 2 ? 'table-content' : 'tree';
+	}
+
+	// Structured markdown: headings, emoji-prefixed labels, bracket labels.
+	// These carry formatting markers that must survive translation.
+	if (isMarkdownStructuredLine(trimmed)) {
+		return 'markdown';
 	}
 
 	return 'prose';
@@ -284,6 +324,17 @@ export function segmentTerminalSelection(raw: string): TerminalSegment[] {
 				}
 				blockKind = 'code';
 				block.push(line);
+				break;
+			}
+
+			case 'markdown': {
+				// Structured lines (headings, emoji items, scores) flow into
+				// the prose stream but flush any open block first. The
+				// translator protects their markers before the API call.
+				if (blockKind) {
+					flushBlock();
+				}
+				prose.push(line);
 				break;
 			}
 

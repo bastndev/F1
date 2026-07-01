@@ -13,6 +13,15 @@ export type ActiveVoiceSession = {
 	/** Language of the spoken text — selects the Piper voice. */
 	lang: string;
 	resources?: VoiceResources;
+	/**
+	 * Streaming session: chunks arrive over time via `voice.append` while the
+	 * source (the Translator) is still producing them. The playback loop parks
+	 * at the end of the available chunks instead of finishing, and resumes when
+	 * more arrive — so reading can start before the whole answer is ready.
+	 */
+	streaming?: boolean;
+	/** True once the producer has signalled there are no more chunks coming. */
+	complete?: boolean;
 };
 
 function normalizeVoiceText(text: string): string {

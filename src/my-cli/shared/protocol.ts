@@ -68,6 +68,7 @@ export type WebviewToHostMessage =
 	| { type: 'workspace.listSkills'; id: string }
 	| { type: 'mySkills.openCreate' }
 	| { type: 'voice.speak'; text: string; lang?: string; chunks?: string[] }
+	| { type: 'voice.append'; chunks: string[]; lang?: string; final?: boolean; reset?: boolean }
 	| { type: 'voice.checkReady'; id: string; lang: string }
 	| { type: 'voice.pause' }
 	| { type: 'voice.resume' }
@@ -115,6 +116,8 @@ export type InboundWebviewMessage = {
 	id?: string;
 	text?: string;
 	chunks?: unknown;
+	final?: boolean;
+	reset?: boolean;
 	from?: string;
 	to?: string;
 	attachments?: ImageAttachment[];
