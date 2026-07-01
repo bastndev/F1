@@ -559,6 +559,12 @@ const toolsController = layoutRight
 				}
 				return detectModelName(getAgentSlug(session.label), session.buffer);
 			},
+			getActiveSessionBuffer: () => {
+				if (!activeSessionId) {
+					return undefined;
+				}
+				return sessions.get(activeSessionId)?.buffer;
+			},
 			getUsageSnapshot: () => {
 				if (!activeSessionId) {
 					return undefined;

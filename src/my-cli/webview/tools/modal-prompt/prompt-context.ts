@@ -12,6 +12,7 @@ export type PromptContext = {
 	close: () => void;
 	getActiveSessionId?: () => string | undefined;
 	getActiveModelName?: () => string | undefined;
+	getActiveSessionBuffer?: () => string | undefined;
 	sendToActiveSession?: (text: string, options?: { paste?: boolean; submit?: boolean }) => void;
 	translatePrompt?: (request: PromptTranslateRequest) => Promise<PromptTranslateResult>;
 	preparePromptWithAttachments?: (text: string, attachments: ImageAttachment[]) => Promise<string>;
