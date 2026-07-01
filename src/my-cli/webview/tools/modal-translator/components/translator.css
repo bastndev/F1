@@ -201,6 +201,10 @@
 	flex: 0 1 auto;
 	min-height: 0;
 	overflow-y: auto;
+	/* Reserve the scrollbar gutter at all times so the thin scrollbar appearing
+	   (when a streamed result finally overflows, or when is-streaming-grow flips
+	   overflow back to auto) never reflows the text left and clips its right edge. */
+	scrollbar-gutter: stable;
 	overscroll-behavior: contain;
 	padding: 16px 18px;
 	scrollbar-width: thin;

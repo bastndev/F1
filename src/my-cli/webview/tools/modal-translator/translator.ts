@@ -768,7 +768,9 @@ function initializeTranslator(host: HTMLElement, context: ToolContext) {
 		// blocks in a short buffer and flush them as a cohesive chunk. The skeleton
 		// stays visible while buffering, then a batch of blocks crossfades in with a
 		// staggered reveal — a much cleaner, premium feel than content dribbling in.
-		const maxStagedBlocks = 4;
+		// Keep the batch small so blocks arrive a couple at a time and each gets room
+		// to settle, rather than four popping in at once (which read as "hard").
+		const maxStagedBlocks = 2;
 		const stageRevealDelayMs = 420;
 		const stagedBlocks: { markdown: string; copy: string }[] = [];
 		let stageFlushTimer: ReturnType<typeof setTimeout> | undefined;
@@ -807,7 +809,7 @@ function initializeTranslator(host: HTMLElement, context: ToolContext) {
 				for (const node of Array.from(template.content.childNodes)) {
 					if (node instanceof HTMLElement) {
 						node.classList.add('is-block-in');
-						node.style.animationDelay = `${staggerIndex * 45}ms`;
+						node.style.animationDelay = `${staggerIndex * 110}ms`;
 						node.addEventListener('animationend', () => {
 							node.classList.remove('is-block-in');
 							node.style.animationDelay = '';
