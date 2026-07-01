@@ -10,46 +10,35 @@ import { getWebviewAssetUri, getNonce } from './webview-assets';
 import { handleWorkspaceListFiles, handleWorkspaceListSkills } from './workspace';
 import { translatePromptToEnglish } from './translation/host-prompt-translator';
 import { resolveCustomCliLaunch, validateCustomCliCommandInput } from './terminal-cli/custom-cli';
-import {
-	ensureVoice,
-	isVoiceReady,
-	streamSpeech,
-	synthesizeSpeech,
-	playPcmBuffer,
-	stopVoicePlayback,
-	isVoiceSpeaking,
-} from './voice/host-voice-tts';
-import { normalizeVoiceChunks, type ActiveVoiceSession } from './voice/voice-chunks';
-import type { VoiceProgress, VoiceState } from '../shared/voice/voice-types';
+import { VoiceController } from './voice/voice-controller';
 import { checkText as spellCheckText, warmSpellchecker } from './spellcheck/host-spellcheck';
 import { preparePromptForCLI } from './attachments/host-preparer';
-import { MemoryService } from '../../my-memory/my-memory';
 import type { CustomCliLaunch, InboundWebviewMessage } from '../shared/protocol';
 import {
 	getAgentLaunchGuardMessage,
 	type AgentLaunchExtensionMode,
 	type AgentLaunchSource
 } from '../shared/agent-launch-guard';
+import { SmartService, SMART_READY_MESSAGE } from '../../my-plus/plus';
 
 export class MyCliViewProvider implements vscode.WebviewViewProvider, vscode.Disposable {
 	public static readonly viewType = 'f1.myCli';
 	private readonly sessionManager = new CliSessionManager();
-	private readonly memoryService = new MemoryService();
+	private readonly smartService = new SmartService();
 	private readonly launcherStateSessionId = crypto.randomBytes(16).toString('hex');
 	private pendingInitialAgent?: string;
+	private pendingInitialSmart = false;
 	private pendingInitialCustomCli?: CustomCliLaunch;
 	private activePromptTranslation?: AbortController;
-	private activeVoiceSession?: ActiveVoiceSession;
-	private voiceRequestSeq = 0;
 	private _activeWebview?: vscode.Webview;
-	private _memoryWatcher?: vscode.FileSystemWatcher;
-	private _memoryWatchTimer?: ReturnType<typeof setTimeout>;
 	private _tutorialPanel?: vscode.WebviewPanel;
+	private voiceController?: VoiceController;
 
 	constructor(
 		private readonly _extensionUri: vscode.Uri,
 		private readonly _extensionContext?: vscode.ExtensionContext
-	) {}
+	) {
+	}
 
 	public async resolveWebviewView(
 		webviewView: vscode.WebviewView,
@@ -66,6 +55,10 @@ export class MyCliViewProvider implements vscode.WebviewViewProvider, vscode.Dis
 		};
 
 		webviewView.webview.html = await this._getHtmlForWebview(webviewView.webview);
+		this.voiceController = new VoiceController(
+			(msg) => webviewView.webview.postMessage(msg),
+			() => this._extensionContext,
+		);
 		// VS Code hides a webview view by layout (display:none on the iframe) while
 		// keeping the window "visible", so the Page Visibility API inside the webview
 		// never fires on a panel switch. retainContextWhenHidden then leaves xterm's
@@ -90,7 +83,6 @@ export class MyCliViewProvider implements vscode.WebviewViewProvider, vscode.Dis
 		webviewView.onDidDispose(() => {
 			windowStateSub.dispose();
 			this.sessionManager.detach();
-			this._disposeMemoryWatcher();
 			this._activeWebview = undefined;
 		});
 		webviewView.webview.onDidReceiveMessage(async (message: InboundWebviewMessage) => {
@@ -109,6 +101,7 @@ export class MyCliViewProvider implements vscode.WebviewViewProvider, vscode.Dis
 				}
 
 				this.pendingInitialAgent = message.agent;
+				this.pendingInitialSmart = message.smart === true;
 				webviewView.webview.html = this._getAgentHtmlForWebview(webviewView.webview, message.agent);
 				return;
 			}
@@ -138,17 +131,15 @@ export class MyCliViewProvider implements vscode.WebviewViewProvider, vscode.Dis
 				this.sessionManager.attach(webviewView.webview);
 				warmSpellchecker();
 
-				const memoryEnabled = this._readMemoryEnabled();
-				this.memoryService.setEnabled(memoryEnabled);
-				void webviewView.webview.postMessage({ type: 'memory.initialState', enabled: memoryEnabled });
-
 				if (this.pendingInitialCustomCli) {
 					this.sessionManager.createCustomSession(this.pendingInitialCustomCli);
 					this.pendingInitialCustomCli = undefined;
 				} else if (this.pendingInitialAgent) {
-					this._memoryOnLaunch(this.pendingInitialAgent);
-					void this.sessionManager.createSession(this.pendingInitialAgent);
+					const agentLabel = this.pendingInitialAgent;
+					const smart = this.pendingInitialSmart;
 					this.pendingInitialAgent = undefined;
+					this.pendingInitialSmart = false;
+					void this._launchInitialAgent(agentLabel, smart);
 				} else {
 					this.sessionManager.postState();
 				}
@@ -162,32 +153,37 @@ export class MyCliViewProvider implements vscode.WebviewViewProvider, vscode.Dis
 			}
 
 			if (message.type === 'voice.speak') {
-				await this._handleVoiceSpeak(webviewView.webview, message);
+				await this.voiceController?.handleSpeak(message);
+				return;
+			}
+
+			if (message.type === 'voice.append') {
+				await this.voiceController?.handleAppend(message);
 				return;
 			}
 
 			if (message.type === 'voice.pause') {
-				await this._handleVoicePause(webviewView.webview);
+				await this.voiceController?.handlePause();
 				return;
 			}
 
 			if (message.type === 'voice.resume') {
-				await this._handleVoiceResume(webviewView.webview);
+				await this.voiceController?.handleResume();
 				return;
 			}
 
 			if (message.type === 'voice.stop') {
-				await this._handleVoiceStop(webviewView.webview);
+				await this.voiceController?.handleStop();
 				return;
 			}
 
 			if (message.type === 'voice.query') {
-				await this._postCurrentVoiceState(webviewView.webview);
+				await this.voiceController?.handleQueryState();
 				return;
 			}
 
 			if (message.type === 'voice.checkReady') {
-				await this._handleVoiceCheckReady(webviewView.webview, message);
+				await this.voiceController?.handleCheckReady(message);
 				return;
 			}
 
@@ -227,21 +223,24 @@ export class MyCliViewProvider implements vscode.WebviewViewProvider, vscode.Dis
 				return;
 			}
 
-			if (message.type === 'memory.getSnapshot' && typeof message.id === 'string') {
-				await this._handleMemoryGetSnapshot(webviewView.webview, message);
-				return;
-			}
-
-			if (message.type === 'memory.rebuild' && typeof message.id === 'string') {
-				await this._handleMemoryRebuild(webviewView.webview, message);
-				return;
-			}
-
 			if (message.type === 'cli.create' && message.agent && allowedAgents.has(message.agent)) {
 				if (!(await this._confirmAgentLaunch(message.agent, 'panel'))) {
 					return;
 				}
-				this._memoryOnLaunch(message.agent);
+
+				if (message.smart === true) {
+					const root = this._workspaceRoot();
+					this.smartService.prepareContext(root, getAgentSlug(message.agent));
+					const graphController = new AbortController();
+					const graphReady = this.smartService.buildGraph(root, graphController.signal);
+					const sessionId = await this.sessionManager.createSession(message.agent, { smart: true });
+					if (!sessionId) {
+						graphController.abort();
+						return;
+					}
+					void this._runSmartSession(sessionId, root, graphReady);
+					return;
+				}
 			}
 
 			if (message.type?.startsWith('cli.')) {
@@ -342,9 +341,83 @@ export class MyCliViewProvider implements vscode.WebviewViewProvider, vscode.Dis
 	public dispose() {
 		this._tutorialPanel?.dispose();
 		this.activePromptTranslation?.abort();
-		stopVoicePlayback();
-		this._disposeMemoryWatcher();
+		this.voiceController?.dispose();
 		this.sessionManager.dispose();
+	}
+
+	/**
+	 * Smart-mode launch. Builds the project graph + writes the rules, starts the
+	 * CLI, and once it's booted + idle TYPES one prompt into it so the agent reads
+	 * the graph + rules and confirms readiness in its own chat. The generated files
+	 * are removed after that first reply settles.
+	 */
+	private async _launchInitialAgent(agentLabel: string, smart: boolean) {
+		if (!smart) {
+			void this.sessionManager.createSession(agentLabel);
+			return;
+		}
+
+		const root = this._workspaceRoot();
+		this.smartService.prepareContext(root, getAgentSlug(agentLabel));
+		// Build the graph BEFORE writing the rules, so graphify doesn't index our own
+		// rules file into the project graph. Abort it if session creation fails so we
+		// don't leave a spawned graphify running unattended.
+		const graphController = new AbortController();
+		const graphReady = this.smartService.buildGraph(root, graphController.signal);
+
+		const sessionId = await this.sessionManager.createSession(agentLabel, { smart: true });
+		if (!sessionId) {
+			graphController.abort();
+			return;
+		}
+
+		await this._runSmartSession(sessionId, root, graphReady);
+	}
+
+	/**
+	 * Smart orchestration shared by the launcher initial-launch path and the
+	 * in-panel "create another CLI in smart mode" path. Waits for the graph +
+	 * the CLI to be ready, writes the rules, types the priming prompt, and
+	 * schedules cleanup after the agent's first reply settles.
+	 */
+	private async _runSmartSession(sessionId: string, root: string | undefined, graphReady: Promise<boolean>): Promise<void> {
+		// Wait until the graph is built AND the CLI is booted + idle.
+		const [hasGraph] = await Promise.all([graphReady, this.sessionManager.waitForFirstIdle(sessionId)]);
+
+		// Write the rules, then type one prompt so the agent reads the rules + graph.
+		this.smartService.writeRules(root, this.smartService.loadRules(this._extensionUri.fsPath));
+		this.sessionManager.sendText(sessionId, this.smartService.composePrompt(hasGraph));
+
+		// Keep the loading overlay up through the whole internal prep: when the
+		// agent's first reply settles, verify it surfaced the ready message the
+		// priming prompt demands, then clean up + reveal. A hard cap guarantees
+		// the overlay never gets stuck if the agent never replies (or never says
+		// the ready line) — it reveals unconditionally as the fallback.
+		let revealed = false;
+		const reveal = () => {
+			if (revealed) {
+				return;
+			}
+			revealed = true;
+			this.smartService.cleanup(root);
+			void this._activeWebview?.postMessage({ type: 'smart.dismiss' });
+		};
+		const onSettled = () => {
+			if (revealed) {
+				return;
+			}
+			if (!this.sessionManager.bufferContains(sessionId, SMART_READY_MESSAGE)) {
+				console.warn('[smart] agent first reply did not contain the ready message; waiting for the hard cap');
+				return;
+			}
+			reveal();
+		};
+		this.sessionManager.onceResponseSettled(sessionId, onSettled);
+		setTimeout(reveal, 90000);
+	}
+
+	private _workspaceRoot(): string | undefined {
+		return vscode.workspace.workspaceFolders?.[0]?.uri.fsPath;
 	}
 
 	private _getAgentLaunchExtensionMode(): AgentLaunchExtensionMode {
@@ -403,232 +476,6 @@ export class MyCliViewProvider implements vscode.WebviewViewProvider, vscode.Dis
 		);
 
 		return choice === guard.confirmLabel;
-	}
-
-	private async _postVoiceState(
-		webview: vscode.Webview,
-		state: VoiceState,
-		detail?: string,
-		progress?: VoiceProgress
-	) {
-		await webview.postMessage({ type: 'voice.state', state, message: detail, progress });
-	}
-
-	private _voiceProgress(session: ActiveVoiceSession): VoiceProgress {
-		return {
-			chunkIndex: Math.min(session.index, Math.max(0, session.chunks.length - 1)),
-			chunkCount: session.chunks.length
-		};
-	}
-
-	private _voiceChunkLabel(session: ActiveVoiceSession): string | undefined {
-		const progress = this._voiceProgress(session);
-		return progress.chunkCount > 1 ? `voice ${progress.chunkIndex + 1}/${progress.chunkCount}` : undefined;
-	}
-
-	private _isVoiceRunActive(session: ActiveVoiceSession, seq: number): boolean {
-		return this.activeVoiceSession === session && seq === this.voiceRequestSeq;
-	}
-
-	private async _postCurrentVoiceState(webview: vscode.Webview) {
-		const session = this.activeVoiceSession;
-		if (session) {
-			await this._postVoiceState(webview, session.state, this._voiceChunkLabel(session), this._voiceProgress(session));
-			return;
-		}
-
-		await this._postVoiceState(webview, isVoiceSpeaking() ? 'speaking' : 'idle');
-	}
-
-	private async _handleVoiceSpeak(webview: vscode.Webview, message: InboundWebviewMessage) {
-		const chunks = normalizeVoiceChunks(message);
-		if (!chunks.length) {
-			return;
-		}
-
-		if (!this._extensionContext) {
-			await this._postVoiceState(webview, 'error', 'Voice unavailable: no extension context.');
-			return;
-		}
-
-		// A newer speak request supersedes this one; only the latest may
-		// report state, otherwise its 'idle' would overwrite 'speaking'.
-		const seq = ++this.voiceRequestSeq;
-		stopVoicePlayback(false);
-		const session: ActiveVoiceSession = {
-			chunks,
-			index: 0,
-			state: 'preparing',
-			lang: typeof message.lang === 'string' ? message.lang : 'es',
-		};
-		this.activeVoiceSession = session;
-
-		await this._runVoiceSession(webview, session, seq);
-	}
-
-	private async _handleVoicePause(webview: vscode.Webview) {
-		const session = this.activeVoiceSession;
-		if (!session || (session.state !== 'preparing' && session.state !== 'speaking')) {
-			return;
-		}
-
-		this.voiceRequestSeq += 1;
-		session.state = 'paused';
-		stopVoicePlayback();
-		await this._postVoiceState(webview, 'paused', this._voiceChunkLabel(session), this._voiceProgress(session));
-	}
-
-	private async _handleVoiceResume(webview: vscode.Webview) {
-		const session = this.activeVoiceSession;
-		if (!session || session.state !== 'paused') {
-			return;
-		}
-
-		const seq = ++this.voiceRequestSeq;
-		await this._runVoiceSession(webview, session, seq);
-	}
-
-	private async _handleVoiceStop(webview: vscode.Webview) {
-		this.voiceRequestSeq += 1;
-		this.activeVoiceSession = undefined;
-		stopVoicePlayback();
-		await this._postVoiceState(webview, 'idle');
-	}
-
-	private async _handleVoiceCheckReady(webview: vscode.Webview, message: InboundWebviewMessage) {
-		if (typeof message.id !== 'string') {
-			return;
-		}
-		const lang = typeof message.lang === 'string' ? message.lang : 'es';
-		let ready = false;
-		try {
-			ready = this._extensionContext ? await isVoiceReady(this._extensionContext, lang) : false;
-		} catch {
-			// Treat a probe failure as "ready" so the UI doesn't nag with a
-			// download prompt; pressing Listen still downloads if truly missing.
-			ready = true;
-		}
-		await webview.postMessage({ type: 'voice.ready', id: message.id, ready });
-	}
-
-	private async _runVoiceSession(webview: vscode.Webview, session: ActiveVoiceSession, seq: number) {
-		const post = async (state: VoiceState) => {
-			if (this._isVoiceRunActive(session, seq)) {
-				await this._postVoiceState(webview, state, this._voiceChunkLabel(session), this._voiceProgress(session));
-			}
-		};
-
-		try {
-			if (!this._extensionContext) {
-				this.activeVoiceSession = undefined;
-				await this._postVoiceState(webview, 'error', 'Voice unavailable: no extension context.');
-				return;
-			}
-
-			session.state = 'preparing';
-			await post('preparing');
-			// Reuses ATM's piper engine/voice when installed; downloads into
-			// F1's globalStorage (with a progress notification) otherwise.
-			session.resources ??= await ensureVoice(this._extensionContext, session.lang);
-			const resources = session.resources;
-			const chunks = session.chunks;
-
-			// Prefetch helper: synthesize a block to a buffer ahead of time. The no-op
-			// .catch keeps a bail (pause/stop kills the in-flight synth) from surfacing
-			// as an unhandled rejection; the real await still throws on a genuine failure.
-			const startSynth = (text: string) => {
-				let ready = false;
-				const promise = synthesizeSpeech(resources, text).then((audio) => {
-					ready = true;
-					return audio;
-				});
-				void promise.catch(() => undefined);
-				return { promise, isReady: () => ready };
-			};
-
-			// Best of both worlds:
-			//  • The first block of this run STREAMS — audio starts on the first synthesized
-			//    bytes, so there's no upfront wait (a single-block read is just this).
-			//  • While it plays, the next block is synthesized to a buffer; every later block
-			//    plays from its prefetched buffer → seamless, gap-free transitions.
-			let pending: { promise: Promise<Buffer>; isReady: () => boolean } | undefined;
-
-			for (let index = session.index; index < chunks.length; index += 1) {
-				if (!this._isVoiceRunActive(session, seq)) {
-					return;
-				}
-
-				session.index = index;
-				const nextIndex = index + 1;
-
-				if (!pending) {
-					// First block of the run (fresh start or resume): fast streaming start,
-					// and begin the next block's prefetch as soon as audio is flowing.
-					session.state = 'preparing';
-					await post('preparing');
-					await streamSpeech(resources, chunks[index], () => {
-						if (!this._isVoiceRunActive(session, seq)) {
-							return;
-						}
-						session.state = 'speaking';
-						void post('speaking');
-						if (nextIndex < chunks.length && !pending) {
-							pending = startSynth(chunks[nextIndex]);
-						}
-					});
-					continue;
-				}
-
-				// Prefetched block: play it (already, or nearly, synthesized) with no gap,
-				// then start synthesizing the one after to overlap this playback.
-				const current = pending;
-				if (!current.isReady()) {
-					session.state = 'preparing';
-					await post('preparing');
-				}
-
-				let audio: Buffer;
-				try {
-					audio = await current.promise;
-				} catch (error) {
-					if (!this._isVoiceRunActive(session, seq)) {
-						return;
-					}
-					throw error;
-				}
-				if (!this._isVoiceRunActive(session, seq)) {
-					return;
-				}
-
-				pending = nextIndex < chunks.length ? startSynth(chunks[nextIndex]) : undefined;
-
-				session.state = 'speaking';
-				await playPcmBuffer(resources, audio, () => {
-					if (this._isVoiceRunActive(session, seq)) {
-						session.state = 'speaking';
-						void post('speaking');
-					}
-				});
-			}
-
-			if (!this._isVoiceRunActive(session, seq)) {
-				return;
-			}
-
-			this.activeVoiceSession = undefined;
-			session.state = 'idle';
-			await this._postVoiceState(webview, 'idle');
-		} catch (error) {
-			if (!this._isVoiceRunActive(session, seq)) {
-				return;
-			}
-
-			this.activeVoiceSession = undefined;
-			session.state = 'error';
-			const detail = error instanceof Error ? error.message : 'Voice playback failed.';
-			console.error('[f1-voice] Playback error:', error);
-			await this._postVoiceState(webview, 'error', detail);
-		}
 	}
 
 	private async _handlePromptTranslate(webview: vscode.Webview, message: InboundWebviewMessage) {
@@ -727,177 +574,6 @@ export class MyCliViewProvider implements vscode.WebviewViewProvider, vscode.Dis
 				issues: [],
 			});
 		}
-	}
-
-	private _getMemoryWorkspaceRoot(): string | undefined {
-		return vscode.workspace.workspaceFolders?.[0]?.uri.fsPath;
-	}
-
-	private _readMemoryEnabled(): boolean {
-		return this._extensionContext?.workspaceState.get<boolean>('myMemory.enabled') ?? false;
-	}
-
-	private _writeMemoryEnabled(enabled: boolean): void {
-		void this._extensionContext?.workspaceState.update('myMemory.enabled', enabled);
-	}
-
-	/** Watch the workspace so the button turns yellow when files change. */
-	private _ensureMemoryWatcher(): void {
-		if (this._memoryWatcher) {
-			return;
-		}
-		const folder = vscode.workspace.workspaceFolders?.[0];
-		if (!folder) {
-			return;
-		}
-		const watcher = vscode.workspace.createFileSystemWatcher(new vscode.RelativePattern(folder, '**/*'));
-		const onEvent = (uri: vscode.Uri) => this._onMemoryFsEvent(uri);
-		watcher.onDidCreate(onEvent);
-		watcher.onDidChange(onEvent);
-		watcher.onDidDelete(onEvent);
-		this._memoryWatcher = watcher;
-	}
-
-	private _disposeMemoryWatcher(): void {
-		if (this._memoryWatchTimer) {
-			clearTimeout(this._memoryWatchTimer);
-			this._memoryWatchTimer = undefined;
-		}
-		this._memoryWatcher?.dispose();
-		this._memoryWatcher = undefined;
-	}
-
-	/** Debounced: a relevant file changed → push a fresh snapshot to the button. */
-	private _onMemoryFsEvent(uri: vscode.Uri): void {
-		const p = uri.fsPath.replace(/\\/g, '/');
-		// Note: we do NOT skip .f1/ here — deleting it must flip the button to red.
-		if (/\/(node_modules|\.git|dist|out|build|coverage|\.next|\.cache|graphify-out)\//.test(p)) {
-			return;
-		}
-		if (this._memoryWatchTimer) {
-			clearTimeout(this._memoryWatchTimer);
-		}
-		this._memoryWatchTimer = setTimeout(() => {
-			const root = this._getMemoryWorkspaceRoot();
-			const webview = this._activeWebview;
-			if (!root || !webview) {
-				return;
-			}
-			void webview.postMessage({ type: 'memory.snapshot', id: 'watch', snapshot: this.memoryService.getSnapshot(root) });
-		}, 600);
-	}
-
-	/** When My Memory is on, point the launching CLI's instructions file at .f1/. */
-	private _memoryOnLaunch(agentLabel: string): void {
-		if (!this.memoryService.isEnabled()) {
-			return;
-		}
-		this.memoryService.onLaunch(this._getMemoryWorkspaceRoot(), getAgentSlug(agentLabel));
-	}
-
-	private async _handleMemoryGetSnapshot(webview: vscode.Webview, message: InboundWebviewMessage) {
-		const id = message.id as string;
-		const root = this._getMemoryWorkspaceRoot();
-		this._activeWebview = webview;
-
-		if (typeof message.enabled === 'boolean') {
-			this.memoryService.setEnabled(message.enabled);
-			this._writeMemoryEnabled(message.enabled);
-			if (message.enabled) {
-				this._ensureMemoryWatcher();
-				const userInitiated = !message.restore;
-				if (userInitiated && !this.memoryService.getSnapshot(root).hasGraphJson) {
-					await this._ensureMemoryBuilt(webview, id);
-					return;
-				}
-			} else {
-				this._disposeMemoryWatcher();
-				this.memoryService.cleanup(root);
-			}
-		} else if (this.memoryService.isEnabled()) {
-			this._ensureMemoryWatcher();
-		}
-
-		const snapshot = this.memoryService.getSnapshot(root);
-		await webview.postMessage({ type: 'memory.snapshot', id, snapshot });
-	}
-
-	private async _handleMemoryRebuild(webview: vscode.Webview, message: InboundWebviewMessage) {
-		await this._ensureMemoryBuilt(webview, message.id as string);
-	}
-
-	/**
-	 * Shared build path for the toggle and the brain button. Ensures the graphify
-	 * toolchain is present (offering a one-time native install if not), then
-	 * builds the graph + syncs instruction files inside a progress notification.
-	 * If the toolchain is missing and the user cancels — or the install fails —
-	 * the feature is turned back OFF and the webview drops the button.
-	 */
-	private async _ensureMemoryBuilt(webview: vscode.Webview, id: string) {
-		const root = this._getMemoryWorkspaceRoot();
-		if (!root) {
-			await webview.postMessage({ type: 'memory.buildError', id, error: 'Open a folder to build project memory.' });
-			vscode.window.showWarningMessage(vscode.l10n.t('My Memory: open a folder before building project context.'));
-			await this._memoryDisable(webview);
-			return;
-		}
-
-		if (!this.memoryService.hasToolchain()) {
-			const choice = await vscode.window.showInformationMessage(
-				vscode.l10n.t('Install (Python + Graphify) to enable project graph generation. One-time setup 📥.'),
-				'Install',
-				'Cancel'
-			);
-			if (choice !== 'Install') {
-				await this._memoryDisable(webview);
-				return;
-			}
-
-			try {
-				await webview.postMessage({ type: 'memory.buildStart', id });
-				await vscode.window.withProgress(
-					{ location: vscode.ProgressLocation.Notification, title: 'My Memory: installing graphify…', cancellable: false },
-					async (progress) => this.memoryService.installToolchain((msg) => {
-						progress.report({ message: msg });
-						void webview.postMessage({ type: 'memory.buildProgress', id, message: msg });
-					})
-				);
-			} catch (installError) {
-				const err = installError instanceof Error ? installError.message : String(installError);
-				await webview.postMessage({ type: 'memory.buildError', id, error: err });
-				vscode.window.showErrorMessage(vscode.l10n.t('My Memory: graphify install failed. {0}', err));
-				await this._memoryDisable(webview);
-				return;
-			}
-		}
-
-		await webview.postMessage({ type: 'memory.buildStart', id });
-		const result = await vscode.window.withProgress(
-			{ location: vscode.ProgressLocation.Notification, title: 'My Memory: building project context…', cancellable: false },
-			async (progress) => this.memoryService.rebuild(root, {
-				onProgress: (msg) => {
-					progress.report({ message: msg });
-					void webview.postMessage({ type: 'memory.buildProgress', id, message: msg });
-				}
-			})
-		);
-
-		if (result.success) {
-			await webview.postMessage({ type: 'memory.buildComplete', id, result });
-			vscode.window.showInformationMessage(vscode.l10n.t('Memory updated · Instruction files synced. ✔'));
-		} else {
-			await webview.postMessage({ type: 'memory.buildError', id, error: result.error || result.message });
-			vscode.window.showErrorMessage(vscode.l10n.t('My Memory failed: {0}', result.error || result.message));
-		}
-	}
-
-	/** Turn the feature OFF and tell the webview to drop the brain button. */
-	private async _memoryDisable(webview: vscode.Webview) {
-		this.memoryService.setEnabled(false);
-		this._writeMemoryEnabled(false);
-		this._disposeMemoryWatcher();
-		this.memoryService.cleanup(this._getMemoryWorkspaceRoot());
-		await webview.postMessage({ type: 'memory.disabled' });
 	}
 
 	private async _postPromptTranslationError(webview: vscode.Webview, id: string, message: string) {

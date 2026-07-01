@@ -9,7 +9,6 @@
 import type { AgentLaunchGuardMessage } from './agent-launch-guard';
 import type { ImageAttachment, FileMentionEntry, SpellIssue, WorkspaceSkill } from './prompt';
 import type { VoiceProgress, VoiceState } from './voice/voice-types';
-import type { MemorySnapshot, MemoryBuildResult } from '../../my-memory/memory-types';
 
 export type CliSessionStatus = 'running' | 'exited' | 'error';
 
@@ -36,6 +35,8 @@ export type CliSessionSnapshot = {
 	 * rebuilt on a panel switch — the webview's own memory does not.
 	 */
 	awaitingFirstOutput: boolean;
+	/** True for the initial Smart-mode launch — the webview shows the Smart overlay. */
+	smart?: boolean;
 };
 
 export type CliAgentOption = {
@@ -50,9 +51,9 @@ export type CustomCliLaunch = {
 
 /** Webview → extension host. */
 export type WebviewToHostMessage =
-	| { type: 'openAgent'; agent: string }
+	| { type: 'openAgent'; agent: string; smart?: boolean }
 	| { type: 'cli.ready' }
-	| { type: 'cli.create'; agent: string; launchGuard?: AgentLaunchGuardMessage }
+	| { type: 'cli.create'; agent: string; launchGuard?: AgentLaunchGuardMessage; smart?: boolean }
 	| { type: 'customCli.open'; source: 'launcher' | 'panel' }
 	| { type: 'cli.openTutorial' }
 	| { type: 'cli.input'; sessionId: string; data: string }
@@ -67,14 +68,13 @@ export type WebviewToHostMessage =
 	| { type: 'workspace.listSkills'; id: string }
 	| { type: 'mySkills.openCreate' }
 	| { type: 'voice.speak'; text: string; lang?: string; chunks?: string[] }
+	| { type: 'voice.append'; chunks: string[]; lang?: string; final?: boolean; reset?: boolean }
 	| { type: 'voice.checkReady'; id: string; lang: string }
 	| { type: 'voice.pause' }
 	| { type: 'voice.resume' }
 	| { type: 'voice.stop' }
 	| { type: 'voice.query' }
-	| { type: 'clipboard.read'; id: string }
-	| { type: 'memory.getSnapshot'; id: string; enabled?: boolean; restore?: boolean }
-	| { type: 'memory.rebuild'; id: string };
+	| { type: 'clipboard.read'; id: string };
 
 /** Extension host → webview. */
 export type HostToWebviewMessage =
@@ -89,6 +89,7 @@ export type HostToWebviewMessage =
 	| { type: 'cli.visible' }
 	| { type: 'cli.hidden' }
 	| { type: 'cli.focusTerminal' }
+	| { type: 'smart.dismiss' }
 	| { type: 'prompt.translated'; id: string; text: string; provider?: string; fromCache?: boolean }
 	| { type: 'prompt.translationError'; id: string; message: string }
 	| { type: 'prompt.prepared'; id: string; text: string }
@@ -99,14 +100,7 @@ export type HostToWebviewMessage =
 	| { type: 'workspace.skillsChanged' }
 	| { type: 'voice.state'; state: VoiceState; message?: string; progress?: VoiceProgress }
 	| { type: 'voice.ready'; id: string; ready: boolean }
-	| { type: 'clipboard.text'; id: string; text: string }
-	| { type: 'memory.initialState'; enabled: boolean }
-	| { type: 'memory.snapshot'; id: string; snapshot: MemorySnapshot }
-	| { type: 'memory.buildStart'; id: string }
-	| { type: 'memory.buildProgress'; id: string; message: string }
-	| { type: 'memory.buildComplete'; id: string; result: MemoryBuildResult }
-	| { type: 'memory.buildError'; id: string; error: string }
-	| { type: 'memory.disabled'; reason?: string };
+	| { type: 'clipboard.text'; id: string; text: string };
 
 /**
  * Loosely-typed inbound view of WebviewToHostMessage. Webview messages cross
@@ -116,11 +110,14 @@ export type HostToWebviewMessage =
 export type InboundWebviewMessage = {
 	type?: string;
 	agent?: string;
+	smart?: boolean;
 	launchGuard?: AgentLaunchGuardMessage;
 	source?: string;
 	id?: string;
 	text?: string;
 	chunks?: unknown;
+	final?: boolean;
+	reset?: boolean;
 	from?: string;
 	to?: string;
 	attachments?: ImageAttachment[];

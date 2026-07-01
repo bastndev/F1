@@ -9,8 +9,8 @@ import { createToolsController, type CliUsageSnapshot } from '../tools/tools';
 import { USAGE_BUSY_ERROR, isUsageAgentBusy, isUsageViewInline } from '../tools/modal-use/agents';
 import { detectModelName } from '../../shared/model-detect';
 import { createRpcChannel } from './host-rpc';
-import { initMemoryHandler, handleMemoryMessage } from '../memory-handler';
 import { createBootSkeletons } from './boot-skeleton';
+import { createSmartSkeleton, type SmartSkeletonController } from '../../../my-plus/my-smart/webview/smart-skeleton';
 import { createCopyToTranslateWatcher } from './copy-to-translate';
 import { getTerminalFontFamily, getTerminalTheme } from './terminal-theme';
 import type { ImageAttachment, PromptTranslateRequest, PromptTranslateResult, FileMentionEntry, SpellIssue, WorkspaceSkill } from '../../shared/prompt';
@@ -463,6 +463,13 @@ const speakText = (text: string, options?: { chunks?: string[]; lang?: string })
 	vscode.postMessage({ type: 'voice.speak', text, chunks: options?.chunks, lang: options?.lang });
 };
 
+// Streaming companion to speakText: queue more chunks onto the running voice
+// session (the Translator feeds blocks as they finish translating). `final`
+// marks the last batch so the host can wind the session down.
+const appendSpeech = (chunks: string[], options?: { final?: boolean; lang?: string; reset?: boolean }) => {
+	vscode.postMessage({ type: 'voice.append', chunks, lang: options?.lang, final: options?.final, reset: options?.reset });
+};
+
 // Ask the host whether the voice for a language is already downloaded, so the
 // Listen button can show a "download" affordance before the first click.
 const voiceReadyRpc = createRpcChannel<[string], boolean>({
@@ -619,6 +626,7 @@ const toolsController = layoutRight
 			openCreateSkill: () => vscode.postMessage({ type: 'mySkills.openCreate' }),
 			requestSpellcheck: (text: string, lang: string, strict: boolean) => spellcheckRpc.request(text, lang, strict),
 			speakText,
+			appendSpeech,
 			checkVoiceReady: (lang: string) => voiceReadyRpc.request(lang),
 			pauseSpeech,
 			resumeSpeech,
@@ -664,10 +672,10 @@ const copyToTranslate = createCopyToTranslateWatcher({
 
 const tabController = createTabController({
 	getAgentIcon,
-	onCreate: (agent) => vscode.postMessage(createCliCreateMessage(agent, {
+	onCreate: (agent, smart) => vscode.postMessage(createCliCreateMessage(agent, {
 		source: 'panel',
 		extensionMode: 'unknown'
-	})),
+	}, smart)),
 	onCreateCustomCli: () => vscode.postMessage({ type: 'customCli.open', source: 'panel' }),
 	onCycleSession: (offset) => {
 		switchSessionByOffset(offset);
@@ -746,6 +754,11 @@ const bootSkeletons = createBootSkeletons({
 	getSessionLabel: (sessionId) => sessions.get(sessionId)?.label || '',
 	getAgentSlug
 });
+
+// Smart + Skills launch overlay. Shown once for the initial Smart session while
+// it boots; revealed on its first output, which also tells the host to clean up.
+let smartOverlay: SmartSkeletonController | undefined;
+let smartDone = false;
 
 const createTerminalView = (session: CliSession) => {
 	const existingView = terminals.get(session.id);
@@ -882,7 +895,16 @@ const createTerminalView = (session: CliSession) => {
 	// only while the CLI genuinely hasn't rendered yet, so it plays on launch but
 	// never replays on return. Gate on running so an instant exit/error doesn't flash it.
 	if (session.awaitingFirstOutput && session.status === 'running') {
-		bootSkeletons.create(session.id);
+		if (session.smart) {
+			// Reset the one-shot latch for each new Smart session so a panel-created
+			// Smart CLI also gets the skeleton (the launcher only fires once, but the
+			// in-panel "+" path can start further Smart sessions afterwards).
+			smartDone = false;
+			smartOverlay?.dismiss();
+			smartOverlay = createSmartSkeleton(document.body);
+		} else {
+			bootSkeletons.create(session.id);
+		}
 	}
 
 	return view;
@@ -1109,13 +1131,10 @@ window.addEventListener('message', (event: MessageEvent<ServerMessage>) => {
 		return;
 	}
 
-	if (message.type === 'memory.initialState') {
-		tabController.setMemoryState(message.enabled);
-		return;
-	}
-
-	if (message.type?.startsWith('memory.')) {
-		handleMemoryMessage(message);
+	if (message.type === 'smart.dismiss') {
+		smartDone = true;
+		smartOverlay?.dismiss();
+		smartOverlay = undefined;
 		return;
 	}
 
@@ -1196,8 +1215,6 @@ document.addEventListener('visibilitychange', () => {
 		repaintActiveTerminal();
 	}
 });
-
-initMemoryHandler((message) => vscode.postMessage(message));
 
 // Seed the host with the persisted Voice Finish state on load — the host's copy
 // resets each time this (non-retained) webview is rebuilt on a panel switch.

@@ -93,83 +93,24 @@
 	cursor: not-allowed;
 }
 
-/* Working — keep the button lit (not dimmed) while the refresh icon spins. */
-.agent-new-button.is-loading:disabled {
-	opacity: 1;
-	cursor: progress;
-}
-
-/* Broken — .f1/ missing or unreadable. The only state that changes the colour. */
-.agent-new-button.is-error {
-	background: #ef4444;
-	color: white;
-}
-
-/*
- * Synced and stale both keep the theme's button colour — no green, no yellow.
- * They differ only by ICON (brain = up to date, refresh = changes to sync) plus
- * a small badge on stale. Up to date is intentionally not clickable.
- */
-.agent-new-button.is-fresh:disabled {
-	opacity: 1;
-	cursor: default;
-}
-
-/* The brain button stacks two icons + a badge; only one icon shows at a time. */
-#cli-memory-action-button {
-	position: relative;
-}
-
-.agent-memory-refresh-icon {
-	display: none;
-}
-
-.agent-new-button.is-stale .agent-memory-brain-icon,
-.agent-new-button.is-loading .agent-memory-brain-icon {
-	display: none;
-}
-
-.agent-new-button.is-stale .agent-memory-refresh-icon {
-	display: block;
-}
-
-/* While working, the same refresh icon spins to signal the build is running. */
-.agent-new-button.is-loading .agent-memory-refresh-icon {
-	display: block;
-	animation: agent-memory-spin 0.8s linear infinite;
-}
-
-/* Small "changes pending" dot — neutral (theme button fg) so it contrasts with
- * the button without reintroducing a warning colour. */
-.agent-memory-badge {
-	display: none;
-	position: absolute;
-	top: -2px;
-	right: -2px;
-	width: 8px;
-	height: 8px;
-	border-radius: 50%;
-	box-sizing: border-box;
-	background: #f5a742;
-	border: 1.5px solid var(--vscode-sideBar-background, var(--vscode-editor-background));
-}
-
-.agent-new-button.is-stale .agent-memory-badge {
-	display: block;
-}
-
-@keyframes agent-memory-spin {
-	to {
-		transform: rotate(360deg);
-	}
-}
-
 .agent-new-button-label {
 	min-width: 1ch;
 	font-size: 13px;
 	font-weight: 600;
 	line-height: 1;
 	text-align: center;
+}
+
+.agent-new-button-label svg {
+	width: 16px;
+	height: 16px;
+	display: block;
+}
+
+.agent-new-button.is-smart-create {
+	background: #3b82f6;
+	border-color: color-mix(in srgb, #3b82f6 60%, transparent);
+	box-shadow: 0 0 8px color-mix(in srgb, #3b82f6 45%, transparent);
 }
 
 .agent-tools-button:focus-visible,
@@ -329,6 +270,31 @@
 .agent-picker-option-custom-icon {
 	font-size: 14px;
 	font-weight: 600;
+}
+
+/* Smart-mode hint dot — shown only on the hovered option while Alt is held,
+   signalling that clicking will launch the CLI in Smart + Skills mode.
+   Never shown on the Custom CLI option. */
+.agent-picker-option-smart-dot {
+	display: none;
+}
+
+.agent-picker-option {
+	position: relative;
+}
+
+.agent-picker-menu.is-alt-smart-mode .agent-picker-option:not(.agent-picker-option--custom):hover .agent-picker-option-smart-dot,
+.agent-picker-menu.is-alt-smart-mode .agent-picker-option:not(.agent-picker-option--custom):focus-visible .agent-picker-option-smart-dot {
+	display: block;
+	position: absolute;
+	right: 8px;
+	top: 50%;
+	transform: translateY(-50%);
+	width: 7px;
+	height: 7px;
+	border-radius: 999px;
+	background: #3b82f6;
+	box-shadow: 0 0 6px color-mix(in srgb, #3b82f6 70%, transparent);
 }
 
 .vscode-dark .agent-picker-option.has-dark-icon .agent-picker-option-icon {

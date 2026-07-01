@@ -16,13 +16,12 @@ export type CliSessionSummary = {
 
 import type { CliAgentOption } from '../../shared/protocol';
 import { consumeShortcut, matchesShortcut } from '../../../shared/keymaps/cli';
-import { notifyMemoryToggle, onMemoryForceDisable } from '../memory-handler';
 
 export type CliToolId = 'translate' | 'keymaps' | 'prompt' | 'use' | 'commands';
 
 type TabControllerOptions = {
 	getAgentIcon: (label: string) => CliAgentIcon | undefined;
-	onCreate: (agent: string) => void;
+	onCreate: (agent: string, smart?: boolean) => void;
 	onCreateCustomCli: () => void;
 	onCycleSession: (offset: 1 | -1) => void;
 	onSwitch: (sessionId: string) => void;
@@ -105,15 +104,15 @@ const writeVoiceFinishPreference = (enabled: boolean) => {
 };
 
 
+const smartCreateIconSvg = '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M15.5 13a3.5 3.5 0 0 0 -3.5 3.5v1a3.5 3.5 0 0 0 7 0v-1.8" /><path d="M8.5 13a3.5 3.5 0 0 1 3.5 3.5v1a3.5 3.5 0 0 1 -7 0v-1.8" /><path d="M17.5 16a3.5 3.5 0 0 0 0 -7h-.5" /><path d="M19 9.3v-2.8a3.5 3.5 0 0 0 -7 0" /><path d="M6.5 16a3.5 3.5 0 0 1 0 -7h.5" /><path d="M5 9.3v-2.8a3.5 3.5 0 0 1 7 0v10" /></svg>';
+
 export const createTabController = (options: TabControllerOptions) => {
 	const createButton = getRequiredElement<HTMLButtonElement>('cli-create-button');
 	const createButtonLabel = getRequiredElement<HTMLSpanElement>('cli-create-button-label');
 	const toolsButton = getRequiredElement<HTMLButtonElement>('cli-tools-button');
 	const toolsPopover = getRequiredElement<HTMLDivElement>('cli-tools-popover');
 	const promptFilterToggle = getRequiredElement<HTMLInputElement>('cli-prompt-filter-toggle');
-	const memoryToggle = getRequiredElement<HTMLInputElement>('cli-memory-toggle');
 	const voiceFinishToggle = getRequiredElement<HTMLInputElement>('cli-voice-finish-toggle');
-	const memoryActionButton = getRequiredElement<HTMLButtonElement>('cli-memory-action-button');
 	const agentButton = getRequiredElement<HTMLButtonElement>('cli-agent-button');
 	const agentLabel = getRequiredElement<HTMLSpanElement>('cli-agent-label');
 	const agentMenu = getRequiredElement<HTMLDivElement>('cli-agent-menu');
@@ -130,22 +129,6 @@ export const createTabController = (options: TabControllerOptions) => {
 	let isAltPressed = false;
 	let isPromptFilterEnabled = readPromptFilterPreference();
 	let promptFilterToastTimer: number | undefined;
-	let isMemoryEnabled = false;
-
-	const setMemoryEnabled = (enabled: boolean, notify = true) => {
-		isMemoryEnabled = enabled;
-		memoryToggle.checked = enabled;
-
-		memoryActionButton.style.display = enabled ? 'inline-flex' : 'none';
-
-		if (notify) {
-			notifyMemoryToggle(enabled);
-		}
-	};
-
-	// If the host backs out (graphify install cancelled or failed) it tells us
-	// to turn the feature back off and drop the button.
-	onMemoryForceDisable(() => setMemoryEnabled(false, false));
 
 	const setAgentMenuOpen = (isOpen: boolean) => {
 		isAgentMenuOpen = isOpen;
@@ -227,13 +210,13 @@ export const createTabController = (options: TabControllerOptions) => {
 		}
 	};
 
-	const selectAgent = (label: string) => {
+	const selectAgent = (label: string, smart?: boolean) => {
 		dismissToolModal();
 		currentAgentLabel = label;
 		syncAgentPicker();
 		setAgentMenuOpen(false);
 		agentButton.focus();
-		options.onCreate(label);
+		options.onCreate(label, smart);
 	};
 
 	const focusAgentOption = (offset: 1 | -1) => {
@@ -287,7 +270,7 @@ export const createTabController = (options: TabControllerOptions) => {
 	const createCurrentAgentSession = () => {
 		if (currentAgentLabel) {
 			dismissToolModal();
-			options.onCreate(currentAgentLabel);
+			options.onCreate(currentAgentLabel, isAltPressed ? true : undefined);
 		}
 	};
 
@@ -306,13 +289,20 @@ export const createTabController = (options: TabControllerOptions) => {
 	};
 
 	const updateCreateButtonVisuals = () => {
-		// Show "-" as soon as Alt is pressed (anywhere), no hover required
+		// Show the brain icon as soon as Alt is pressed (anywhere) — signalling
+		// that clicking now creates the CLI in Smart + Skills mode.
 		if (isAltPressed) {
-			createButtonLabel.textContent = '-';
+			createButtonLabel.innerHTML = smartCreateIconSvg;
+			createButton.title = 'New CLI (Smart + Skills)';
+			createButton.setAttribute('aria-label', 'New CLI (Smart + Skills)');
 		} else {
 			createButtonLabel.textContent = currentSessionCount >= 3 && currentSessionCount <= 9 ? String(currentSessionCount) : '+';
+			createButton.title = 'New CLI';
+			createButton.setAttribute('aria-label', 'New CLI');
 		}
+		createButton.classList.toggle('is-smart-create', isAltPressed);
 		sessionList.classList.toggle('is-alt-close-mode', isAltPressed);
+		agentMenu.classList.toggle('is-alt-smart-mode', isAltPressed);
 	};
 
 	const updateCreateButtonLabel = (sessionCount: number) => {
@@ -408,12 +398,8 @@ export const createTabController = (options: TabControllerOptions) => {
 		return true;
 	};
 
-	createButton.addEventListener('click', (event) => {
-		if (event.altKey) {
-			closeActiveSession();
-		} else {
-			createCurrentAgentSession();
-		}
+	createButton.addEventListener('click', () => {
+		createCurrentAgentSession();
 	});
 
 	createButton.addEventListener('mouseenter', (event) => {
@@ -467,7 +453,7 @@ export const createTabController = (options: TabControllerOptions) => {
 			return;
 		}
 		if (optionButton?.dataset.agentLabel) {
-			selectAgent(optionButton.dataset.agentLabel);
+			selectAgent(optionButton.dataset.agentLabel, (event.altKey || isAltPressed) ? true : undefined);
 		}
 	});
 
@@ -489,7 +475,7 @@ export const createTabController = (options: TabControllerOptions) => {
 			}
 			if (optionButton?.dataset.agentLabel) {
 				event.preventDefault();
-				selectAgent(optionButton.dataset.agentLabel);
+				selectAgent(optionButton.dataset.agentLabel, event.altKey ? true : undefined);
 			}
 		}
 	});
@@ -503,11 +489,6 @@ export const createTabController = (options: TabControllerOptions) => {
 
 	promptFilterToggle.addEventListener('change', () => {
 		setPromptFilterEnabled(promptFilterToggle.checked);
-	});
-
-	memoryToggle.addEventListener('change', () => {
-		setMemoryEnabled(memoryToggle.checked);
-		setToolsPopoverOpen(false);
 	});
 
 	voiceFinishToggle.addEventListener('change', () => {
@@ -529,7 +510,6 @@ export const createTabController = (options: TabControllerOptions) => {
 	});
 
 	setPromptFilterEnabled(isPromptFilterEnabled, false);
-	setMemoryEnabled(false, false);
 	// Restore the persisted Voice Finish state into the checkbox; the host is
 	// (re)synced separately from terminal.ts so it also has the current language.
 	voiceFinishToggle.checked = readVoiceFinishPreference();
@@ -620,11 +600,16 @@ export const createTabController = (options: TabControllerOptions) => {
 				option.append(fallbackIcon);
 			}
 
-			const text = document.createElement('span');
-			text.className = 'agent-picker-option-label';
-			text.textContent = agent.label;
-			option.append(text);
-			agentMenu.append(option);
+		const text = document.createElement('span');
+		text.className = 'agent-picker-option-label';
+		text.textContent = agent.label;
+		option.append(text);
+
+		const smartDot = document.createElement('span');
+		smartDot.className = 'agent-picker-option-smart-dot';
+		option.append(smartDot);
+
+		agentMenu.append(option);
 		}
 
 		const customOption = document.createElement('button');
@@ -781,17 +766,9 @@ export const createTabController = (options: TabControllerOptions) => {
 		sessionList.replaceChildren(fragment);
 	};
 
-	const setMemoryState = (enabled: boolean) => {
-		setMemoryEnabled(enabled, false);
-		if (enabled) {
-			notifyMemoryToggle(true, true);
-		}
-	};
-
 	return {
 		handleKeyboardShortcut,
 		render,
-		setAgents,
-		setMemoryState
+		setAgents
 	};
 };

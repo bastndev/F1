@@ -21,19 +21,11 @@ import {
 	CLAUDE_SLUG,
 	HUB_FILE,
 	MEMORY_DIR,
-	MEMORY_MAP_FILE
+	MEMORY_MAP_FILE,
+	RULES_FILE
 } from '../core/memory-paths';
-
-const buildBlock = (): string => {
-	return [
-		BLOCK_START,
-		'## Project context (F1 My Memory)',
-		'',
-		`This project ships a prebuilt context map at \`./${MEMORY_DIR}/${MEMORY_MAP_FILE}\`.`,
-		'Read it first to understand the project before scanning files — it saves tokens.',
-		BLOCK_END
-	].join('\n');
-};
+import { atomicWriteFile, backupPristineFile, removeBackupIfExists, writeFileIfChanged } from '../core/atomic-write';
+import { buildManagedBlock } from '../../shared/instruction-builder';
 
 /**
  * Return `content` with the managed block at the top: just under the first H1
@@ -65,13 +57,38 @@ const upsertBlockAtTop = (content: string, block: string): string => {
 	return tail ? `${head}\n\n${block}\n\n${tail}\n` : `${head}\n\n${block}\n`;
 };
 
+/** Check whether the files referenced by the managed block actually exist. */
+const managedBlockTargetsExist = (root: string): boolean => {
+	const dir = path.join(root, MEMORY_DIR);
+	try {
+		return (
+			fs.existsSync(path.join(dir, RULES_FILE)) ||
+			fs.existsSync(path.join(dir, MEMORY_MAP_FILE))
+		);
+	} catch {
+		return false;
+	}
+};
+
 /** Ensure AGENTS.md (the hub) carries the managed block at the top. */
 const syncHub = (root: string): boolean => {
 	try {
 		const filePath = path.join(root, HUB_FILE);
 		const existing = fs.existsSync(filePath) ? fs.readFileSync(filePath, 'utf8') : '';
-		fs.writeFileSync(filePath, upsertBlockAtTop(existing, buildBlock()), 'utf8');
-		return true;
+		backupPristineFile(filePath, existing, BLOCK_START);
+
+		if (!managedBlockTargetsExist(root)) {
+			const start = existing.indexOf(BLOCK_START);
+			const end = existing.indexOf(BLOCK_END);
+			if (start !== -1 && end !== -1 && end > start) {
+				const cleaned = (existing.slice(0, start) + existing.slice(end + BLOCK_END.length))
+					.replace(/\n{3,}/g, '\n\n').trim();
+				return writeFileIfChanged(filePath, cleaned ? `${cleaned}\n` : '');
+			}
+			return false;
+		}
+
+		return writeFileIfChanged(filePath, upsertBlockAtTop(existing, buildManagedBlock()));
 	} catch (error) {
 		console.error(`[my-memory] sync ${HUB_FILE} failed:`, error);
 		return false;
@@ -93,11 +110,11 @@ const syncClaudePointer = (root: string): boolean => {
 			return true;
 		}
 
+		backupPristineFile(filePath, existing, CLAUDE_IMPORT_LINE);
 		const next = existing.trim().length
 			? `${CLAUDE_IMPORT_LINE}\n\n${existing.trimStart()}`
 			: `${CLAUDE_IMPORT_LINE}\n`;
-		fs.writeFileSync(filePath, next, 'utf8');
-		return true;
+		return writeFileIfChanged(filePath, next);
 	} catch (error) {
 		console.error(`[my-memory] sync ${CLAUDE_FILE} failed:`, error);
 		return false;
@@ -132,7 +149,9 @@ export const syncAllInstructionFiles = (root: string): string[] => {
 	return updated;
 };
 
-/** Strip the managed block from AGENTS.md and the @AGENTS.md import from CLAUDE.md. */
+/** Strip the managed block from AGENTS.md and remove the now-redundant `.bak`
+ *  backups (AGENTS.md.bak + CLAUDE.md.bak). Leaves CLAUDE.md untouched — the
+ *  `@AGENTS.md` pointer is harmless and can't be distinguished from user content. */
 export const removeAllInstructionBlocks = (root: string): string[] => {
 	const removed: string[] = [];
 
@@ -147,36 +166,24 @@ export const removeAllInstructionBlocks = (root: string): string[] => {
 					.replace(/\n{3,}/g, '\n\n')
 					.trim();
 				if (cleaned) {
-					fs.writeFileSync(hubPath, cleaned + '\n', 'utf8');
+					atomicWriteFile(hubPath, cleaned + '\n');
 				} else {
 					fs.unlinkSync(hubPath);
 				}
 				removed.push(HUB_FILE);
+				// The user's content has been restored — the pristine backup
+				// captured by backupPristineFile is now redundant.
+				removeBackupIfExists(hubPath);
 			}
 		}
 	} catch (error) {
 		console.error(`[my-memory] remove block from ${HUB_FILE} failed:`, error);
 	}
 
-	try {
-		const claudePath = path.join(root, CLAUDE_FILE);
-		if (fs.existsSync(claudePath)) {
-			const content = fs.readFileSync(claudePath, 'utf8');
-			const lines = content.split('\n');
-			const filtered = lines.filter(line => line.trim() !== CLAUDE_IMPORT_LINE);
-			if (filtered.length !== lines.length) {
-				const cleaned = filtered.join('\n').replace(/^\n+/, '').replace(/\n{3,}/g, '\n\n').trim();
-				if (cleaned) {
-					fs.writeFileSync(claudePath, cleaned + '\n', 'utf8');
-				} else {
-					fs.unlinkSync(claudePath);
-				}
-				removed.push(CLAUDE_FILE);
-			}
-		}
-	} catch (error) {
-		console.error(`[my-memory] remove import from ${CLAUDE_FILE} failed:`, error);
-	}
+	// CLAUDE.md keeps its `@AGENTS.md` pointer (harmless), but the backup taken
+	// before we prepended it is now redundant too — clean it up so the workspace
+	// isn't left with orphaned `.bak` files.
+	removeBackupIfExists(path.join(root, CLAUDE_FILE));
 
 	return removed;
 };

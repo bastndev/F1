@@ -194,10 +194,21 @@
 
 /* ── Body ────────────────────────────────────────────────────────── */
 .translator-body {
-	flex: 1 1 auto;
+	/* Keep the body sized to its content so the modal stays compact for short
+	   answers and loading states, rather than stretching to fill the host. It
+	   can still grow up to the available space (max-height is set while
+	   streaming) and scroll once it hits that cap. */
+	flex: 0 1 auto;
 	min-height: 0;
 	overflow-y: auto;
+	/* Reserve the scrollbar gutter at all times so the thin scrollbar appearing
+	   (when a streamed result finally overflows, or when is-streaming-grow flips
+	   overflow back to auto) never reflows the text left and clips its right edge. */
+	scrollbar-gutter: stable;
 	overscroll-behavior: contain;
+	/* Constant through loading AND the result: the skeleton and the translated
+	   text share the same top padding, so nothing shifts down when the result
+	   lands (the skeleton's own height keeps the loading box compact instead). */
 	padding: 16px 18px;
 	scrollbar-width: thin;
 	scrollbar-color: rgba(175, 169, 236, 0.2) transparent;
@@ -231,11 +242,11 @@
 }
 
 .translator-text p {
-	margin: 0 0 10px;
+	margin: 0 0 14px;
 }
 
 .translator-text .md-h {
-	margin: 18px 0 8px;
+	margin: 14px 0 8px;
 	font-weight: 600;
 	line-height: 1.35;
 	color: var(--vscode-foreground);
@@ -268,12 +279,13 @@
 
 .translator-text ul,
 .translator-text ol {
-	margin: 0 0 12px;
-	padding-left: 22px;
+	margin: 0 0 14px;
+	padding-left: 24px;
 }
 
 .translator-text li {
-	margin: 4px 0;
+	margin: 6px 0;
+	padding-left: 3px;
 }
 
 .translator-text li::marker {
@@ -291,8 +303,17 @@
 	overflow-wrap: anywhere;
 }
 
+/* Bare filesystem paths in CLI output (src/a/b.ts, ~/x) — painted a modern green
+   so they read as a distinct token, not prose. Text only, no background. */
+.translator-text .md-path {
+	font-family: 'JetBrains Mono', ui-monospace, monospace;
+	font-size: 12px;
+	color: #7fe0bd;
+	overflow-wrap: anywhere;
+}
+
 .translator-text .md-pre {
-	margin: 0 0 12px;
+	margin: 0 0 14px;
 	padding: 10px 12px;
 	background: var(--vscode-input-background);
 	border: 0.5px solid var(--vscode-editorGroup-border);
@@ -348,7 +369,7 @@
 	display: flex;
 	align-items: center;
 	gap: 8px;
-	margin: 4px 0 12px;
+	margin: 6px 0 14px;
 	padding: 9px 12px;
 	border: 1px dashed color-mix(in srgb, var(--agent-accent, #AFA9EC) 35%, transparent);
 	border-radius: 8px;
@@ -384,8 +405,8 @@
 }
 
 .translator-text .md-quote {
-	margin: 0 0 10px;
-	padding: 2px 0 2px 10px;
+	margin: 4px 0 14px;
+	padding: 2px 0 2px 12px;
 	border-left: 2px solid color-mix(in srgb, var(--agent-accent, #AFA9EC) 50%, transparent);
 	color: var(--vscode-descriptionForeground);
 }
@@ -403,60 +424,154 @@
 	border-bottom: 0.5px solid color-mix(in srgb, var(--agent-accent, #AFA9EC) 45%, transparent);
 }
 
+/* ── Emoji-prefixed items (🔍, 📊, 🏗️, etc.) ───────────────────────
+   In CLI answers these read as section labels ("🔍 Project Understanding",
+   "⚠️ Findings"). Generous space ABOVE separates each section; a small gap
+   BELOW binds the label to the body that follows. The 14px top stays within
+   the voice-highlight bleed budget (see .is-voice-active::before) so the green
+   band/left line never tears between a label and its neighbours. */
+.translator-text .md-emoji-item {
+	display: flex;
+	align-items: baseline;
+	gap: 8px;
+	margin: 14px 0 5px;
+	font-size: 13px;
+	font-weight: 500;
+	line-height: 1.6;
+	color: var(--vscode-foreground);
+}
+
+.translator-text .md-emoji {
+	flex-shrink: 0;
+	font-size: 15px;
+	font-weight: 400;
+	line-height: 1.4;
+}
+
+.translator-text .md-bracket {
+	font-family: 'JetBrains Mono', ui-monospace, monospace;
+	font-size: 11.5px;
+	color: var(--agent-accent, #AFA9EC);
+	font-weight: 500;
+	background: color-mix(in srgb, var(--agent-accent, #AFA9EC) 10%, transparent);
+	padding: 0 4px;
+	border-radius: 3px;
+}
+
+/* ── Score items (🏗️ Architecture 8/10) ──────────────────────────────
+   Scored dimensions render as a tidy two-column list: emoji + label on the
+   left, a value pill flush right. Kept tighter than section labels so the run
+   reads as one grouped block, with the surrounding 14px margins giving the
+   group air before and after. */
+.translator-text .md-score-item {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	margin: 5px 0;
+	font-size: 13px;
+	line-height: 1.6;
+}
+
+.translator-text .md-score-emoji {
+	flex-shrink: 0;
+	font-size: 15px;
+	line-height: 1.4;
+}
+
+.translator-text .md-score-label {
+	flex: 1;
+	min-width: 0;
+	color: var(--vscode-foreground);
+}
+
+.translator-text .md-score-value {
+	font-family: 'JetBrains Mono', ui-monospace, monospace;
+	font-size: 12px;
+	font-weight: 600;
+	color: #5DCAA5;
+	background: rgba(93, 202, 165, 0.08);
+	padding: 1px 6px;
+	border-radius: 4px;
+	min-width: 38px;
+	text-align: center;
+}
+
 /* ── Voice reading highlight ─────────────────────────────────────────
    The chunk being read aloud is drawn as one cohesive band BEHIND the text using
    a pseudo-element. Because that layer is absolutely positioned, toggling it can
    never change the box — so the text never jumps vertically as the highlight
-   moves — and there is no left rail. Each block gets .is-voice-active; the first
-   .is-voice-start and the last .is-voice-end round the band's ends. The layer
-   bleeds 5px into the inter-paragraph gaps so consecutive blocks join, and 10px
-   into the side padding. z-index:0 gives the block its own stacking context so
-   the ::before sits behind its text but above the modal background. */
+   moves. Each block gets .is-voice-active; the first .is-voice-start and the last
+   .is-voice-end round the band's ends. The layer bleeds 7px into inter-paragraph
+   gaps so consecutive blocks join, and 10px into the side padding. z-index:0
+   gives the block its own stacking context so the ::before sits behind its text
+   but above the modal background.
+
+   The 7px vertical bleed is paired with the block spacing above: sibling blocks
+   sit at most 14px (= 2 × 7) apart, so the two bleed layers always meet and the
+   green band — and the line down its left edge — stays unbroken. Widen any gap
+   past 14px and the band tears; raise this bleed to match if you ever do. */
 .translator-text .is-voice-active {
 	position: relative;
 	z-index: 0;
+	transition: color 200ms ease;
 }
 
 .translator-text .is-voice-active::before {
 	content: '';
 	position: absolute;
 	z-index: -1;
-	inset: -5px -10px;
-	background-color: rgba(93, 202, 165, 0.08);
-	background-image: linear-gradient(to bottom, rgba(93, 202, 165, 0.6), rgba(93, 202, 165, 0.6));
-	background-size: 2px 100%;
+	inset: -7px -10px;
+	background-color: rgba(99, 179, 237, 0.15);
+	background-image: linear-gradient(to bottom, rgba(99, 179, 237, 0.85), rgba(99, 179, 237, 0.85));
+	background-size: 3px 100%;
 	background-position: left;
 	background-repeat: no-repeat;
-	transition: background-color 160ms ease, background-image 160ms ease;
+	box-shadow: 0 0 12px -2px rgba(99, 179, 237, 0.12);
+	transition: background-color 220ms ease, background-image 220ms ease, box-shadow 220ms ease;
 }
 
 .translator-text .is-voice-start::before {
 	top: 0;
 	border-top-left-radius: 0;
 	border-top-right-radius: 0;
-	background-image: linear-gradient(to bottom, transparent 0px, rgba(93, 202, 165, 0.6) min(45px, 100%));
+	background-image: linear-gradient(to bottom, transparent 0px, rgba(99, 179, 237, 0.85) min(45px, 100%));
 }
 
 .translator-text .is-voice-end::before {
 	bottom: 0;
 	border-bottom-left-radius: 0;
 	border-bottom-right-radius: 0;
-	background-image: linear-gradient(to top, transparent 0px, rgba(93, 202, 165, 0.6) min(45px, 100%));
+	background-image: linear-gradient(to top, transparent 0px, rgba(99, 179, 237, 0.85) min(45px, 100%));
 }
 
 .translator-text .is-voice-start.is-voice-end::before {
-	background-image: linear-gradient(to bottom, transparent 0px, rgba(93, 202, 165, 0.6) min(45px, 45%), rgba(93, 202, 165, 0.6) max(calc(100% - 45px), 55%), transparent 100%);
+	background-image: linear-gradient(to bottom, transparent 0px, rgba(99, 179, 237, 0.85) min(45px, 45%), rgba(99, 179, 237, 0.85) max(calc(100% - 45px), 55%), transparent 100%);
+}
+
+/* A list item reads on its own, so its band must also cover the "N." marker,
+   which sits outside the <li> in the list's gutter (ul/ol padding-left: 24px).
+   Extend the band left by that gutter so the number is inside it and the accent
+   line lines up with block-level bands (their -10px side bleed): -(24 + 10). */
+.translator-text li.is-voice-active::before {
+	left: -34px;
+}
+
+/* Text brightens slightly when its chunk is being read for emphasis */
+.translator-text .is-voice-active:not(.is-voice-active *) {
+	color: #dcecf9;
 }
 
 /* Fallback: the whole translation is one unstructured block (no child elements),
    so the container itself carries the highlight — a plain tint, no layout change. */
 .translator-text.is-voice-active {
 	border-radius: 0;
-	background-color: rgba(93, 202, 165, 0.08);
-	background-image: linear-gradient(to bottom, transparent 0px, rgba(93, 202, 165, 0.6) min(45px, 45%), rgba(93, 202, 165, 0.6) max(calc(100% - 45px), 55%), transparent 100%);
-	background-size: 2px 100%;
+	background-color: rgba(99, 179, 237, 0.15);
+	background-image: linear-gradient(to bottom, transparent 0px, rgba(99, 179, 237, 0.85) min(45px, 45%), rgba(99, 179, 237, 0.85) max(calc(100% - 45px), 55%), transparent 100%);
+	background-size: 3px 100%;
 	background-position: left;
 	background-repeat: no-repeat;
+	box-shadow: 0 0 12px -2px rgba(99, 179, 237, 0.12);
+	transition: background-color 220ms ease, box-shadow 220ms ease;
 }
 
 .translator-text strong {

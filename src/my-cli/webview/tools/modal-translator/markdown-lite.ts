@@ -16,6 +16,26 @@ const escapeHtml = (text: string): string =>
 		.replace(/>/g, '&gt;')
 		.replace(/"/g, '&quot;');
 
+// A run that looks like a filesystem path: optional ~ / . / .. root, then one or
+// more "segment/" and a final segment. The lookbehind stops it starting mid-token
+// or after ':' or '/', so it never bites into an http(s):// URL (those become
+// links) or an email. Candidates are still validated by isStylablePath.
+const pathCandidatePattern = /(?<![\w@:/~.+-])((?:~|\.\.?)?\/?(?:[\w.@+-]+\/)+[\w.@+-]+)/g;
+
+// Only paint a candidate that is confidently a path — a real file extension, a
+// leading root (~/, ./, ../, /), or 2+ segments carrying a path-ish char (., -,
+// _). This rejects prose slashes like "and/or", "he/she/they", "12/10".
+function isStylablePath(raw: string): boolean {
+	const slashes = (raw.match(/\//g) || []).length;
+	if (slashes < 1) {
+		return false;
+	}
+	const hasExtension = /\.[A-Za-z][\w]{0,7}$/.test(raw);
+	const isRooted = /^(?:~\/|\.\.?\/|\/)/.test(raw);
+	const isDeepAndRich = slashes >= 2 && /[._-]/.test(raw);
+	return hasExtension || isRooted || isDeepAndRich;
+}
+
 function renderInline(text: string): string {
 	let out = escapeHtml(text);
 
@@ -25,6 +45,14 @@ function renderInline(text: string): string {
 		codeSpans.push(code);
 		return `\u0000${codeSpans.length - 1}\u0000`;
 	});
+
+	// Bare filesystem paths (src/a/b.ts, ~/x) arrive unstyled — paint the confident
+	// ones green so they stand out from prose. Runs before bold/italic/link on
+	// escaped text; the emitted span carries no markdown/HTML metachars, so later
+	// passes leave it intact. Paths inside `code` are already extracted above, so
+	// they stay code and are not double-styled.
+	out = out.replace(pathCandidatePattern, (match, raw: string) =>
+		isStylablePath(raw) ? `<span class="md-path">${raw}</span>` : match);
 
 	out = out.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
 	out = out.replace(/__([^_]+)__/g, '<strong>$1</strong>');
@@ -171,6 +199,59 @@ export function renderMarkdownLite(markdown: string): string {
 		if (quote) {
 			flushAll();
 			html.push(`<blockquote class="md-quote">${renderInline(quote[1])}</blockquote>`);
+			continue;
+		}
+
+		// Score line: emoji + label + N/10 (e.g. "🏗️ Architecture 8/10")
+		const scoreLine = trimmed.match(/^(\p{Emoji_Presentation}+\s*)(\S+)\s+(\d{1,2}\/10)\s*$/u);
+		if (scoreLine) {
+			flushAll();
+			html.push(
+				`<div class="md-score-item">` +
+				`<span class="md-score-emoji">${scoreLine[1]}</span>` +
+				`<span class="md-score-label">${renderInline(scoreLine[2])}</span>` +
+				`<span class="md-score-value">${scoreLine[3]}</span>` +
+				`</div>`
+			);
+			continue;
+		}
+
+		// Emoji-prefixed item: "🔍 Project Understanding" / "📊 [end] Health Overview"
+		const emojiItem = trimmed.match(/^(\p{Emoji_Presentation}+\s*)(.*)/u);
+		if (emojiItem) {
+			flushAll();
+			// Check if the content has a bracket label inside
+			const innerContent = emojiItem[2];
+			const bracketInner = innerContent.match(/^\[([^\]]+)\]\s*(.*)$/);
+			if (bracketInner) {
+				html.push(
+					`<div class="md-emoji-item">` +
+					`<span class="md-emoji">${emojiItem[1]}</span>` +
+					`<span class="md-bracket">[${bracketInner[1]}]</span> ` +
+					`${renderInline(bracketInner[2])}` +
+					`</div>`
+				);
+			} else {
+				html.push(
+					`<div class="md-emoji-item">` +
+					`<span class="md-emoji">${emojiItem[1]}</span> ` +
+					`${renderInline(innerContent)}` +
+					`</div>`
+				);
+			}
+			continue;
+		}
+
+		// Bracket label standalone: "[end] Health Overview"
+		const bracketLabel = trimmed.match(/^\[([^\]]+)\]\s+(.*)$/);
+		if (bracketLabel) {
+			flushAll();
+			html.push(
+				`<div class="md-emoji-item">` +
+				`<span class="md-bracket">[${bracketLabel[1]}]</span> ` +
+				`${renderInline(bracketLabel[2])}` +
+				`</div>`
+			);
 			continue;
 		}
 

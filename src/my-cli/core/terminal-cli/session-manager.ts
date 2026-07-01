@@ -26,6 +26,11 @@ type CliSession = Omit<CliSessionSnapshot, 'buffer'> & {
 	awaitingResponse?: boolean;
 	/** Quiet-period timer that decides the response is done. */
 	responseSettleTimer?: ReturnType<typeof setTimeout>;
+	/** One-shot: fires when the response after a host-sent prompt settles (Smart cleanup). */
+	onResponseDone?: () => void;
+	/** "CLI booted and is idle, ready for input" detection (Smart auto-prompt). */
+	idleTimer?: ReturnType<typeof setTimeout>;
+	idleResolve?: () => void;
 };
 
 type MyCliMessageResult = 'closed-last-session' | undefined;
@@ -36,6 +41,25 @@ const maxBufferLength = 240000;
 // response "finished". TUI CLIs stream spinner frames while thinking, so this
 // only elapses once the agent has actually stopped writing.
 const responseSettleMs = 1500;
+
+// After the CLI's first output, how long it must stay quiet before we treat it as
+// "booted and waiting for input" — the moment the Smart auto-prompt is typed in.
+const bootIdleMs = 1200;
+
+// Gap between typing the auto-prompt and sending the Enter that submits it. TUI
+// CLIs (opencode, kilocode, copilot…) read a fast "text\r" burst as a single
+// paste and fold the trailing Return into the input as a literal newline instead
+// of submitting. Sending Enter as its own delayed keystroke makes it a real
+// "submit" key. It's hidden behind the Smart overlay, so it costs no UX latency.
+const submitEnterDelayMs = 250;
+
+// opencode and its fork kilocode drop a whole-prompt burst on their bubbletea
+// input — the box stays empty (placeholder still showing). For those agents we
+// type the prompt one code point at a time (after a short lead-in) so each lands
+// as a genuine keystroke their input always accepts. Hidden behind the overlay.
+const incrementalTypeSlugs = new Set(['opencode', 'kilocode']);
+const incrementalLeadInMs = 400;
+const perCharTypeMs = 8;
 
 const getWorkspaceCwd = () => {
 	return vscode.workspace.workspaceFolders?.[0]?.uri.fsPath || os.homedir();
@@ -72,11 +96,14 @@ const getPtyHostPath = () => {
 	return path.join(__dirname, 'my-cli', 'core', 'pty-host.js');
 };
 
+export type SessionBeforeCreateHook = (agentLabel: string) => void;
+
 export class CliSessionManager implements vscode.Disposable {
 	private readonly sessions = new Map<string, CliSession>();
 	private webview?: vscode.Webview;
 	private activeSessionId?: string;
 	private nextSessionId = 1;
+	private _beforeSessionCreate?: SessionBeforeCreateHook;
 
 	// Voice Finish config, pushed from the webview (cli.voiceFinish). Off by
 	// default; the language picks which WAV cue plays when a response settles.
@@ -100,6 +127,10 @@ export class CliSessionManager implements vscode.Disposable {
 		this.sessionsKnownToWebview.clear();
 	}
 
+	public onBeforeSessionCreate(hook: SessionBeforeCreateHook) {
+		this._beforeSessionCreate = hook;
+	}
+
 	public detach() {
 		this.webview = undefined;
 		this.sessionsKnownToWebview.clear();
@@ -114,25 +145,26 @@ export class CliSessionManager implements vscode.Disposable {
 		this.finishSoundSuppressed = suppressed;
 	}
 
-	public async createSession(agentLabel: string) {
+	public async createSession(agentLabel: string, options: { smart?: boolean } = {}): Promise<string | undefined> {
 		const agent = getCliAgent(agentLabel);
 		if (!agent) {
 			this.postError(`Unknown CLI: ${agentLabel}`);
-			return;
+			return undefined;
 		}
 
 		if (!(await ensureCliInstalled(agent))) {
-			return;
+			return undefined;
 		}
 
-		this.createSessionFromCommand(agent.label, agent.command, agent.args);
+		this._beforeSessionCreate?.(agentLabel);
+		return this.createSessionFromCommand(agent.label, agent.command, agent.args, options.smart);
 	}
 
 	public createCustomSession(customCli: CustomCliLaunch) {
 		this.createSessionFromCommand(customCli.label, customCli.command, customCli.args);
 	}
 
-	private createSessionFromCommand(label: string, command: string, args: string[]) {
+	private createSessionFromCommand(label: string, command: string, args: string[], smart?: boolean): string {
 		const id = `cli-${this.nextSessionId++}`;
 		const cwd = getWorkspaceCwd();
 		const session: CliSession = {
@@ -145,6 +177,7 @@ export class CliSessionManager implements vscode.Disposable {
 			buffer: '',
 			hasUnread: false,
 			awaitingFirstOutput: true,
+			smart: smart === true,
 			cols: 80,
 			rows: 24
 		};
@@ -164,6 +197,8 @@ export class CliSessionManager implements vscode.Disposable {
 			this.postMessage({ type: 'cli.output', sessionId: session.id, data: output });
 			this.postState();
 		}
+
+		return id;
 	}
 
 	public hasRunningSessionForAgent(agentLabel: string) {
@@ -237,6 +272,8 @@ export class CliSessionManager implements vscode.Disposable {
 			const exitCode = message.exitCode ?? 0;
 			session.status = 'exited';
 			session.exitCode = exitCode;
+			session.idleResolve?.();
+			session.idleResolve = undefined;
 			this.appendSessionOutput(session, `\r\n\x1b[90mCLI Hub: ${session.label} exited with code ${exitCode}\x1b[0m\r\n`);
 			this.postState();
 			return;
@@ -256,6 +293,7 @@ export class CliSessionManager implements vscode.Disposable {
 		// trips this. cli.output dismisses the live skeleton; the flag keeps it from
 		// reappearing after the webview is rebuilt on a panel switch.
 		session.awaitingFirstOutput = false;
+		this.armIdle(session);
 
 		if (this.activeSessionId !== session.id) {
 			session.hasUnread = true;
@@ -289,7 +327,119 @@ export class CliSessionManager implements vscode.Disposable {
 			) {
 				playFinishSound(this.voiceFinishLang);
 			}
+
+			const onDone = session.onResponseDone;
+			session.onResponseDone = undefined;
+			onDone?.();
 		}, responseSettleMs);
+	}
+
+	private armIdle(session: CliSession) {
+		if (!session.idleResolve) {
+			return;
+		}
+		if (session.idleTimer) {
+			clearTimeout(session.idleTimer);
+		}
+		session.idleTimer = setTimeout(() => {
+			session.idleTimer = undefined;
+			const resolve = session.idleResolve;
+			session.idleResolve = undefined;
+			resolve?.();
+		}, bootIdleMs);
+	}
+
+	/**
+	 * Resolve once the CLI has produced output and then gone quiet — i.e. it has
+	 * booted and is waiting for input. Times the Smart auto-prompt. A hard fallback
+	 * means it can never hang the launch.
+	 */
+	public waitForFirstIdle(sessionId: string): Promise<void> {
+		return new Promise((resolve) => {
+			const session = this.sessions.get(sessionId);
+			if (!session || session.status !== 'running') {
+				resolve();
+				return;
+			}
+			let settled = false;
+			const done = () => {
+				if (!settled) {
+					settled = true;
+					resolve();
+				}
+			};
+			session.idleResolve = done;
+			if (!session.awaitingFirstOutput) {
+				this.armIdle(session);
+			}
+			setTimeout(done, 20000);
+		});
+	}
+
+	/** Type text into the CLI (as if submitted) and arm the response detector. */
+	public sendText(sessionId: string, text: string) {
+		const session = this.sessions.get(sessionId);
+		if (!session || session.status !== 'running') {
+			return;
+		}
+		session.awaitingResponse = true;
+
+		// Bubbletea CLIs (opencode/kilocode) ignore a whole-prompt burst, so type
+		// it out as real keystrokes. Everyone else takes the single write fine.
+		const slug = getCliAgent(session.label)?.slug;
+		if (slug && incrementalTypeSlugs.has(slug)) {
+			this.typePromptIncrementally(sessionId, Array.from(text), 0);
+			return;
+		}
+
+		this.sendPtyHostCommand(session, { type: 'input', data: text });
+		this.submitPromptAfterDelay(sessionId);
+	}
+
+	// Send the prompt one code point at a time (Array.from keeps "—"/"✅" intact),
+	// then submit. Each keystroke is its own pty write, so it's never mistaken for
+	// a paste and the input box actually fills.
+	private typePromptIncrementally(sessionId: string, chars: string[], index: number) {
+		if (index >= chars.length) {
+			this.submitPromptAfterDelay(sessionId);
+			return;
+		}
+		setTimeout(() => {
+			const session = this.sessions.get(sessionId);
+			if (!session || session.status !== 'running' || session.closing) {
+				return;
+			}
+			this.sendPtyHostCommand(session, { type: 'input', data: chars[index] });
+			this.typePromptIncrementally(sessionId, chars, index + 1);
+		}, index === 0 ? incrementalLeadInMs : perCharTypeMs);
+	}
+
+	// Send the Enter that submits a host-typed prompt, on a separate delayed write
+	// so TUI CLIs read it as a real submit key instead of folding it into the text.
+	private submitPromptAfterDelay(sessionId: string) {
+		setTimeout(() => {
+			const session = this.sessions.get(sessionId);
+			if (!session || session.status !== 'running' || session.closing) {
+				return;
+			}
+			this.sendPtyHostCommand(session, { type: 'input', data: '\r' });
+		}, submitEnterDelayMs);
+	}
+
+	/** Run `callback` once, when the response after the next host-sent prompt settles. */
+	public onceResponseSettled(sessionId: string, callback: () => void) {
+		const session = this.sessions.get(sessionId);
+		if (!session) {
+			callback();
+			return;
+		}
+		session.onResponseDone = callback;
+	}
+
+	/** True if the session's output buffer contains `needle` (e.g. the Smart ready message). */
+	public bufferContains(sessionId: string, needle: string): boolean {
+		const session = this.sessions.get(sessionId);
+		return !!session && session.buffer.includes(needle);
 	}
 
 	private markSessionError(session: CliSession, message: string) {
@@ -298,6 +448,8 @@ export class CliSessionManager implements vscode.Disposable {
 		}
 
 		session.status = 'error';
+		session.idleResolve?.();
+		session.idleResolve = undefined;
 		this.appendSessionOutput(session, `\r\n\x1b[31m${message}\x1b[0m\r\n`);
 		this.postState();
 	}
@@ -451,6 +603,13 @@ export class CliSessionManager implements vscode.Disposable {
 			session.responseSettleTimer = undefined;
 		}
 		session.awaitingResponse = false;
+		if (session.idleTimer) {
+			clearTimeout(session.idleTimer);
+			session.idleTimer = undefined;
+		}
+		session.idleResolve?.();
+		session.idleResolve = undefined;
+		session.onResponseDone = undefined;
 
 		try {
 			this.sendPtyHostCommand(session, { type: 'kill' });
@@ -479,6 +638,7 @@ export class CliSessionManager implements vscode.Disposable {
 			...(includeBuffer ? { buffer: session.buffer } : {}),
 			hasUnread: session.hasUnread,
 			awaitingFirstOutput: session.awaitingFirstOutput,
+			smart: session.smart,
 			exitCode: session.exitCode
 		};
 	}

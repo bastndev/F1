@@ -39,44 +39,48 @@
 	100% { top: 108%; }
 }
 
-/* ── Line field — fills the locked body height ──────────────────── */
+/* ── Line field — clusters lines at the top like real text, with the
+   typing indicator sitting right below the last line. The section sizes
+   to its own content (flex: 0 0 auto) so it never stretches to fill the
+   box and leave a gap between the lines and the typing dots. */
 .t-skel-lines {
-	flex: 1 1 auto;
+	flex: 0 0 auto;
 	display: flex;
 	flex-direction: column;
-	justify-content: space-between;
-	gap: 10px;
+	justify-content: flex-start;
+	gap: 9px;
 	min-height: 0;
 	overflow: hidden;
 }
 
 .t-skel-line {
-	height: 10px;
-	border-radius: 4px;
+	height: 8px;
+	border-radius: 999px;
 	flex: 0 0 auto;
 	background: linear-gradient(
 		90deg,
 		transparent 0%,
-		color-mix(in srgb, var(--vscode-foreground) 5%, transparent) 18%,
-		color-mix(in srgb, var(--skeleton-accent) 18%, transparent) 48%,
-		color-mix(in srgb, var(--vscode-foreground) 6%, transparent) 78%,
+		color-mix(in srgb, var(--vscode-foreground) 9%, transparent) 18%,
+		color-mix(in srgb, var(--skeleton-accent) 26%, transparent) 48%,
+		color-mix(in srgb, var(--vscode-foreground) 10%, transparent) 78%,
 		transparent 100%
 	);
 	background-size: 280% 100%;
 	background-position: 140% 50%;
-	opacity: 0.6;
+	opacity: 0.65;
 	will-change: background-position;
 	animation: t-skel-shimmer 4.2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }
 
-/* Width variants — natural prose rhythm */
-.t-skel-line.full  { width: 100%; opacity: 0.5;  }
-.t-skel-line.long  { width: 84%;  opacity: 0.58; }
-.t-skel-line.med   { width: 61%;  opacity: 0.62; }
-.t-skel-line.short { width: 37%;  opacity: 0.5;  }
+/* Width variants — natural prose rhythm. Most lines stay near full width;
+   only an occasional medium or short line hints at a paragraph ending. */
+.t-skel-line.full  { width: 100%; opacity: 0.58; }
+.t-skel-line.long  { width: 88%;  opacity: 0.62; }
+.t-skel-line.med   { width: 68%;  opacity: 0.66; }
+.t-skel-line.short { width: 44%;  opacity: 0.58; }
 
 /* Paragraph break — extra air before the line */
-.t-skel-line.t-skel-gap { margin-top: 12px; }
+.t-skel-line.t-skel-gap { margin-top: 11px; }
 
 /* Staggered timing so the sweep feels organic, not mechanical */
 .t-skel-line:nth-child(2n)   { animation-duration: 5.4s; animation-delay: -0.7s; }
@@ -154,12 +158,79 @@
 	}
 }
 
+/* ── Streaming reveal — each block settles in as it lands ─────────────
+   Used when the translation streams block by block (see emitBlock). A quick
+   rise + de-blur so new content arrives softly instead of popping; the class
+   is removed on animationend, leaving the block at its natural resting state
+   (so it never interferes with the voice-reading highlight later). */
+.translator-text .is-block-in {
+	animation: translator-block-in 600ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes translator-block-in {
+	0%   { opacity: 0; transform: translateY(8px); filter: blur(3px); }
+	50%  { opacity: 1; }
+	100% { opacity: 1; transform: none; filter: none; }
+}
+
+/* "More on the way" tail shown below the streamed blocks while translating. */
+.translator-streaming {
+	display: flex;
+	flex-direction: column;
+	gap: 7px;
+	margin-top: 14px;
+	animation: translator-stream-fade 260ms ease both;
+}
+
+.translator-streaming .t-skel-line {
+	width: 46%;
+}
+
+.translator-streaming .t-skel-typing {
+	padding-top: 0;
+}
+
+@keyframes translator-stream-fade {
+	from { opacity: 0; }
+	to   { opacity: 0.9; }
+}
+
+/* ── Inline loading — minimal indicator for short selections ──────────
+   Just the typing dots (› ···) with no skeleton box, no shimmer lines,
+   no scan beam. Sits where the result will appear, barely taller than
+   the text itself — no empty space, no height lock, no jump when the
+   translation arrives. */
+.translator-inline-loading {
+	display: flex;
+	align-items: center;
+	animation: translator-stream-fade 260ms ease both;
+}
+
+.translator-inline-loading .t-skel-typing {
+	padding-top: 0;
+}
+
+/* While streaming, the body height is driven to fit each block (see
+   performTranslation). Animate it so the modal grows smoothly with the
+   content; overflow is pinned hidden during the grow so no scrollbar flickers
+   in and out, reverting to the base auto-scroll once the grow settles. */
+.translator-body.is-streaming-grow {
+	overflow-y: hidden;
+	transition: height 0.34s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
 /* ── Reduced motion ──────────────────────────────────────────────── */
 @media (prefers-reduced-motion: reduce) {
 	.t-skel-line,
 	.t-skel-dot,
-	.translator-text.is-revealing {
+	.translator-text.is-revealing,
+	.translator-text .is-block-in,
+	.translator-streaming {
 		animation: none !important;
+	}
+
+	.translator-body.is-streaming-grow {
+		transition: none;
 	}
 
 	.t-skel-line {
