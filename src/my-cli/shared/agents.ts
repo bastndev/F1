@@ -19,19 +19,19 @@ export type CliAgent = {
 	lightIcon?: boolean;
 	/** Slash command that opens the CLI's native model picker, if it has one. */
 	modelCommand?: string;
-	/** Slash command that opens/resumes recent chats (Kiro uses /chat). */
+	/** Slash command that opens recent chats/sessions (Kiro uses /chat, OpenCode/Kilo use /sessions). */
 	resumeCommand?: string;
 };
 
 export const cliAgents: CliAgent[] = [
-	{ label: 'OpenCode', command: 'opencode', args: [], slug: 'opencode', aliases: ['opencode', 'open code', 'op'], iconFile: 'opencode.svg', lightIcon: true, modelCommand: '/models' },
+	{ label: 'OpenCode', command: 'opencode', args: [], slug: 'opencode', aliases: ['opencode', 'open code', 'op'], iconFile: 'opencode.svg', lightIcon: true, modelCommand: '/models', resumeCommand: '/sessions' },
 	{ label: 'Claude Code', command: 'claude', args: [], slug: 'claude', aliases: ['claude', 'claude code'], iconFile: 'claudecode.svg', modelCommand: '/model', resumeCommand: '/resume' },
 	{ label: 'Codex CLI', command: 'codex', args: [], slug: 'codex', aliases: ['codex', 'codex cli', 'code', 'co', 'c'], iconFile: 'codex.svg', modelCommand: '/model', resumeCommand: '/resume' },
 	{ label: 'Antigravity CLI', command: 'agy', args: [], slug: 'antigravity', aliases: ['antigravity', 'antigravity cli', 'agy', 'an', 'ant'], iconFile: 'Antigravity_cli.svg', modelCommand: '/model', resumeCommand: '/resume' },
 	{ label: 'Kiro CLI', command: 'kiro-cli', args: [], slug: 'kiro', aliases: ['kiro', 'kiro cli'], iconFile: 'kiro.svg', modelCommand: '/model', resumeCommand: '/chat' },
 	{ label: 'Cursor', command: 'cursor', args: ['agent'], slug: 'cursor', aliases: ['cursor'], iconFile: 'cursor.svg', darkIcon: true, modelCommand: '/model', resumeCommand: '/resume' },
 	{ label: 'Grok', command: 'grok', args: [], slug: 'grok', aliases: ['grok'], iconFile: 'grok.svg', darkIcon: true, modelCommand: '/model', resumeCommand: '/resume' },
-	{ label: 'Kilo Code', command: 'kilo', args: [], slug: 'kilocode', aliases: ['kilo', 'kilo code', 'code', 'k'], iconFile: 'kilocode.svg', darkIcon: true, modelCommand: '/models' },
+	{ label: 'Kilo Code', command: 'kilo', args: [], slug: 'kilocode', aliases: ['kilo', 'kilo code', 'code', 'k'], iconFile: 'kilocode.svg', darkIcon: true, modelCommand: '/models', resumeCommand: '/sessions' },
 	{ label: 'Copilot CLI', command: 'copilot', args: [], slug: 'copilot', aliases: ['github copilot', 'copilot', 'copilot cli'], iconFile: 'github-copilot.svg', darkIcon: true, modelCommand: '/model', resumeCommand: '/resume' }
 ];
 
