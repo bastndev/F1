@@ -544,6 +544,14 @@
 	background-image: linear-gradient(to bottom, transparent 0px, rgba(99, 179, 237, 0.85) min(45px, 45%), rgba(99, 179, 237, 0.85) max(calc(100% - 45px), 55%), transparent 100%);
 }
 
+/* A list item reads on its own, so its band must also cover the "N." marker,
+   which sits outside the <li> in the list's gutter (ul/ol padding-left: 24px).
+   Extend the band left by that gutter so the number is inside it and the accent
+   line lines up with block-level bands (their -10px side bleed): -(24 + 10). */
+.translator-text li.is-voice-active::before {
+	left: -34px;
+}
+
 /* Text brightens slightly when its chunk is being read for emphasis */
 .translator-text .is-voice-active:not(.is-voice-active *) {
 	color: #dcecf9;

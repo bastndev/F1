@@ -22,9 +22,10 @@ const minVoiceChunkChars = 200;
 // and the host's long-text threshold: blocks this big translate in one fast
 // pass yet are small enough that a long answer arrives in several pieces.
 const maxStreamBlockChars = 900;
-// List items are batched into groups so the reading band highlights a compact
-// run (~4 items) instead of one giant band over a 20-item list. The char cap
-// prevents very long items from making a 4-item batch too tall.
+// List items are batched into ~4-item / ~400-char groups for translation and
+// rendering, so a long list arrives as a few compact <ol>/<ul> blocks (one
+// network round-trip each) rather than one item at a time. The voice reading
+// band is finer-grained — one item at a time — built in the voice chunking.
 const maxListBatchItems = 4;
 const maxListBatchChars = 400;
 
@@ -290,6 +291,15 @@ function makeChunkFromElements(elements: HTMLElement[]): TranslatorVoiceChunk {
 	};
 }
 
+// The <li> children of a rendered list, or the list itself as a fallback if it
+// somehow has none — so list voice units can be built one item at a time.
+function listItemsOf(list: HTMLElement): HTMLElement[] {
+	const items = Array.from(list.children).filter(
+		(child): child is HTMLElement => child instanceof HTMLElement && child.tagName === 'LI',
+	);
+	return items.length ? items : [list];
+}
+
 function buildVoiceChunks(textEl: HTMLElement): TranslatorVoiceChunk[] {
 	const renderedBlocks = Array.from(textEl.children).filter(
 		(element): element is HTMLElement =>
@@ -300,9 +310,9 @@ function buildVoiceChunks(textEl: HTMLElement): TranslatorVoiceChunk[] {
 	}
 
 	// Walk blocks: non-list blocks go through the structural accumulator
-	// (opener+body grouping), while <ul>/<ol> are split into batched <li>
-	// groups so the reading band covers ~4 items at a time instead of one
-	// giant band over a 20-item list.
+	// (opener+body grouping), while each <li> of a <ul>/<ol> becomes its own
+	// unit — so the reading band follows one list item at a time instead of
+	// covering a whole batch of items.
 	const units: TranslatorVoiceChunk[] = [];
 	let nonListBlocks: HTMLElement[] = [];
 
@@ -327,24 +337,8 @@ function buildVoiceChunks(textEl: HTMLElement): TranslatorVoiceChunk[] {
 	for (const block of renderedBlocks) {
 		if (block.tagName === 'UL' || block.tagName === 'OL') {
 			flushNonList();
-			const items = Array.from(block.children).filter(
-				(child): child is HTMLElement => child instanceof HTMLElement && child.tagName === 'LI',
-			);
-			const listItems = items.length ? items : [block];
-
-			let batch: HTMLElement[] = [];
-			let batchLen = 0;
-			for (const item of listItems) {
-				if (batch.length >= maxListBatchItems || batchLen >= maxListBatchChars) {
-					units.push(makeChunkFromElements(batch));
-					batch = [];
-					batchLen = 0;
-				}
-				batch.push(item);
-				batchLen += (item.textContent?.length ?? 0) + 2;
-			}
-			if (batch.length) {
-				units.push(makeChunkFromElements(batch));
+			for (const item of listItemsOf(block)) {
+				units.push(makeChunkFromElements([item]));
 			}
 		} else {
 			nonListBlocks.push(block);
@@ -677,14 +671,21 @@ function initializeTranslator(host: HTMLElement, context: ToolContext) {
 			return {
 				feed(elements: HTMLElement[]) {
 					for (const element of elements) {
-						const completed = accumulator.add(element);
-						if (!completed) {
-							continue;
+						// Expand a rendered list into its items so each is read (and
+						// highlighted) on its own, matching the per-item reading band.
+						const voiceElements = element.tagName === 'UL' || element.tagName === 'OL'
+							? listItemsOf(element)
+							: [element];
+						for (const voiceElement of voiceElements) {
+							const completed = accumulator.add(voiceElement);
+							if (!completed) {
+								continue;
+							}
+							if (buffered) {
+								send(buffered, false);
+							}
+							buffered = completed;
 						}
-						if (buffered) {
-							send(buffered, false);
-						}
-						buffered = completed;
 					}
 				},
 				finish() {
