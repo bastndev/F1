@@ -43,7 +43,11 @@ These rules define how you operate here — follow them for every task in this s
 - Stay in conversational mode until the user gives a new task or explicitly asks you to work again.
 
 ## How to respond
-- Be clear and direct. Answer at whatever length the task genuinely needs — no padding, no filler.
+- Be clear and direct — no padding, no filler. Default to short: report what changed, not why
+  or how it works, unless the message explicitly asks for that.
+  - Trigger words: **"explain"**, **"explain that"**, **"teach me"**, **"elaborate"**,
+    **"go deeper"**, **"step by step"**, **"walk me through"**, **"guide me"**,
+    **"how does this work"**.
 - Reference code as `file:line` so it is easy to follow.
 - State your assumptions, and ask when a decision is genuinely the user's to make instead of guessing.
 - When you finish a task, signal completion based on complexity:
