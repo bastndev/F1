@@ -26,6 +26,14 @@ src/**
 !src/my-skills/**/*.png
 !src/my-skills/**/*.webp
 
+# Smart + Skills mode reads its rules asset (assets/skills/default/SKILL.md) from
+# src/my-plus/ at runtime via extensionUri (see my-smart/core/smart-service.ts:
+# loadRules → RULES_ASSET_SEGMENTS). Without these negations the packaged build
+# can't write the workspace .f1/ folder — only graphify-out/ shows up.
+!src/my-plus/
+!src/my-plus/**/
+!src/my-plus/**/*.md
+
 # Repo/GitHub-only assets (~13 MB, screenshot.gif etc) — not loaded by the extension
 public/**
 
