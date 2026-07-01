@@ -13,6 +13,7 @@ import { getPromptLanguage } from '../../../shared/prompt';
 
 const stylesId = 'cli-translator-panel-styles';
 const maxVoiceChunkChars = 900;
+let voiceScrollDebounceTimer: ReturnType<typeof setTimeout> | undefined;
 // A voice chunk shorter than this is too small to read on its own. When it falls
 // at the very end of an answer it's folded into the previous chunk instead of
 // being spoken (and highlighted) as a lonely fragment.
@@ -328,7 +329,18 @@ function setActiveVoiceChunk(chunks: TranslatorVoiceChunk[], index: number): voi
 			element.classList.add('is-voice-end');
 		}
 	});
-	chunk.elements[0]?.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+	const target = chunk.elements[0];
+	if (target) {
+		// Debounce scrolling so rapid chunk advances don't fight the user's
+		// own scrolling through the translation.
+		if (voiceScrollDebounceTimer) {
+			clearTimeout(voiceScrollDebounceTimer);
+		}
+		voiceScrollDebounceTimer = setTimeout(() => {
+			voiceScrollDebounceTimer = undefined;
+			target.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+		}, 80);
+	}
 }
 
 export const mountTranslatorPanel = (host: HTMLElement, context: ToolContext) => {
@@ -423,6 +435,12 @@ function initializeTranslator(host: HTMLElement, context: ToolContext) {
 	// Pending "settle" after a streamed translation finishes growing — cleared
 	// if a new translation starts before it fires (see performTranslation).
 	let growSettleTimer: ReturnType<typeof setTimeout> | undefined;
+	// Generation counter so a newer translation can supersede an older one
+	// still in flight (e.g. user clicks Translate twice or toggles auto).
+	let translationGeneration = 0;
+	// Memoize voice chunks against the rendered HTML so Listen doesn't rebuild
+	// the same chunk list every time.
+	let voiceChunksSource = '';
 
 	// Auto-read: when "auto" is on, start reading as soon as a translation is
 	// shown (no Listen press). Wired once the voice control is set up below; the
@@ -447,8 +465,22 @@ function initializeTranslator(host: HTMLElement, context: ToolContext) {
 	};
 
 	const performTranslation = async () => {
+		// A new translation replaces whatever was being read aloud; stop the old
+		// playback so a new answer doesn't talk over the previous one.
+		context.stopSpeech?.();
+		// Cancel any pending voice scroll from a previous read.
+		if (voiceScrollDebounceTimer) {
+			clearTimeout(voiceScrollDebounceTimer);
+			voiceScrollDebounceTimer = undefined;
+		}
 		// A new translation re-arms auto-read (the previous result was its own).
 		autoReadConsumed = false;
+		// Invalidate any cached voice chunks — the rendered text is about to change.
+		voiceChunksSource = '';
+		// Bump the generation so any previous in-flight translation knows it was
+		// superseded and stops touching state/DOM.
+		const generation = ++translationGeneration;
+		const isCurrentTranslation = () => generation === translationGeneration && isMounted;
 		// Cancel a pending grow-settle from a previous run and reset the body to a
 		// clean slate (the height lock below takes over).
 		if (growSettleTimer) {
@@ -479,11 +511,19 @@ function initializeTranslator(host: HTMLElement, context: ToolContext) {
 			return;
 		}
 
+		// A newer translation may have started while we were reading context state.
+		if (!isCurrentTranslation()) {
+			return;
+		}
+
 		// Already translated this exact selection? Restore it instantly — no
 		// skeleton, no host round-trip, no re-translation. (Cache is RAM-only and
 		// dies with the panel; see translator-cache.ts.)
 		const cached = getCachedTranslation(targetLang, extracted);
 		if (cached) {
+			if (!isCurrentTranslation()) {
+				return;
+			}
 			copyText = cached.copyText;
 			textEl.classList.remove('placeholder');
 			revealText(textEl, cached.rendered);
@@ -500,6 +540,9 @@ function initializeTranslator(host: HTMLElement, context: ToolContext) {
 		// lines, so it can never show a wrong result; a miss just falls through.
 		const reused = reconstructFromParagraphs(targetLang, extracted);
 		if (reused) {
+			if (!isCurrentTranslation()) {
+				return;
+			}
 			copyText = reused;
 			textEl.classList.remove('placeholder');
 			revealText(textEl, reused);
@@ -509,6 +552,10 @@ function initializeTranslator(host: HTMLElement, context: ToolContext) {
 			triggerAutoRead();
 			// Remember the exact selection too, so repeating it is a direct hit.
 			setCachedTranslation(targetLang, extracted, { rendered: reused, copyText, status: resultStatus });
+			return;
+		}
+
+		if (!isCurrentTranslation()) {
 			return;
 		}
 
@@ -653,11 +700,14 @@ function initializeTranslator(host: HTMLElement, context: ToolContext) {
 		const emitBlock = (markdown: string, copy: string) => {
 			renderedParts.push(markdown);
 			copyParts.push(copy);
-			if (!isMounted) {
+			if (!isCurrentTranslation()) {
 				return;
 			}
 			if (!streamStarted) {
 				beginStream();
+			}
+			if (!isCurrentTranslation()) {
+				return;
 			}
 			// Render just this block and animate each top-level node in, inserting
 			// before the trailing indicator so it stays at the bottom. The finished
@@ -667,6 +717,7 @@ function initializeTranslator(host: HTMLElement, context: ToolContext) {
 			const template = document.createElement('template');
 			template.innerHTML = renderMarkdownLite(markdown);
 			const insertedElements: HTMLElement[] = [];
+			const fragment = document.createDocumentFragment();
 			for (const node of Array.from(template.content.childNodes)) {
 				if (node instanceof HTMLElement) {
 					node.classList.add('is-block-in');
@@ -675,8 +726,9 @@ function initializeTranslator(host: HTMLElement, context: ToolContext) {
 					}, { once: true });
 					insertedElements.push(node);
 				}
-				textEl.insertBefore(node, indicator);
+				fragment.appendChild(node);
 			}
+			textEl.insertBefore(fragment, indicator);
 			scheduleGrow();
 			// Feed the rendered blocks to the voice stream so reading can begin
 			// before the rest of the answer finishes translating.
@@ -693,7 +745,7 @@ function initializeTranslator(host: HTMLElement, context: ToolContext) {
 			}
 
 			for (const segment of segments) {
-				if (!isMounted) {
+				if (!isCurrentTranslation()) {
 					return;
 				}
 
@@ -727,7 +779,7 @@ function initializeTranslator(host: HTMLElement, context: ToolContext) {
 					const runText = plainRun.join('\n');
 					plainRun = [];
 					for (const block of splitForStreaming(runText)) {
-						if (!isMounted) {
+						if (!isCurrentTranslation()) {
 							return;
 						}
 						const result = await translateSelection(block);
@@ -741,7 +793,7 @@ function initializeTranslator(host: HTMLElement, context: ToolContext) {
 				};
 
 				for (const line of lines) {
-					if (!isMounted) {
+					if (!isCurrentTranslation()) {
 						return;
 					}
 					const parsed = line.trim() ? parseMarkdownLine(line) : null;
@@ -756,6 +808,9 @@ function initializeTranslator(host: HTMLElement, context: ToolContext) {
 					// a bare "8/10" score, "[0]" — would translate to itself, so skip
 					// the round-trip entirely.
 					await flushPlainRun();
+					if (!isCurrentTranslation()) {
+						return;
+					}
 					let translatedContent = parsed.content;
 					if (hasTranslatableText(parsed.content)) {
 						const result = await translateSelection(parsed.content);
@@ -767,7 +822,7 @@ function initializeTranslator(host: HTMLElement, context: ToolContext) {
 				await flushPlainRun();
 			}
 
-			if (!isMounted) {
+			if (!isCurrentTranslation()) {
 				return;
 			}
 
@@ -795,7 +850,7 @@ function initializeTranslator(host: HTMLElement, context: ToolContext) {
 			// Remember this exact selection so revisiting it skips the round-trip.
 			setCachedTranslation(targetLang, extracted, { rendered: renderedMarkdown, copyText, status: resultStatus });
 		} catch (err) {
-			if (!isMounted) {
+			if (!isCurrentTranslation()) {
 				return;
 			}
 			console.error('[Translator] EN->ES failed:', err);
@@ -820,6 +875,10 @@ function initializeTranslator(host: HTMLElement, context: ToolContext) {
 				translateBtn.disabled = false;
 			}
 		} finally {
+			// If a newer translation is already running, leave its UI state alone.
+			if (generation !== translationGeneration) {
+				return;
+			}
 			modalEl.classList.remove('is-translating');
 			if (bodyEl) {
 				if (streamStarted) {
@@ -1038,6 +1097,19 @@ function initializeTranslator(host: HTMLElement, context: ToolContext) {
 		// pause if speaking, otherwise start reading the current translation. The
 		// preparing / no-result guards let the keyboard path respect the same
 		// constraints the disabled button already enforces for clicks.
+		const rebuildVoiceChunksIfNeeded = () => {
+			if (!textEl) {
+				return;
+			}
+			const source = textEl.innerHTML;
+			if (activeVoiceChunks.length > 0 && voiceChunksSource === source) {
+				return;
+			}
+			voiceChunksSource = source;
+			clearVoiceHighlights(activeVoiceChunks);
+			activeVoiceChunks = buildVoiceChunks(textEl);
+		};
+
 		const toggleSpeak = () => {
 			if (isPreparingVoice) {
 				return;
@@ -1053,8 +1125,7 @@ function initializeTranslator(host: HTMLElement, context: ToolContext) {
 			if (!hasResult || !textEl || !context.speakText) {
 				return;
 			}
-			clearVoiceHighlights(activeVoiceChunks);
-			activeVoiceChunks = buildVoiceChunks(textEl);
+			rebuildVoiceChunksIfNeeded();
 			const chunks = activeVoiceChunks.map((chunk) => chunk.text);
 			const value = chunks.join('\n\n');
 			if (value) {
@@ -1114,6 +1185,10 @@ function initializeTranslator(host: HTMLElement, context: ToolContext) {
 			document.removeEventListener('keydown', handleSpaceShortcut);
 			disposeVoiceState?.();
 			clearVoiceHighlights(activeVoiceChunks);
+			if (voiceScrollDebounceTimer) {
+				clearTimeout(voiceScrollDebounceTimer);
+				voiceScrollDebounceTimer = undefined;
+			}
 		};
 	}
 
@@ -1257,11 +1332,10 @@ function buildSkeleton(availableHeight: number): HTMLElement {
 	lines.className = 't-skel-lines';
 	wrap.append(lines);
 
-	// One line per ~22px of field (13px font × 1.7 line-height), reserving
-	// room for the typing row. Width pattern mimics prose; every 4th line
-	// starts a new "paragraph".
-	const pattern = ['full', 'long', 'full', 'med', 'long', 'short', 'full', 'long', 'med', 'full', 'short'];
-	const lineCount = Math.min(60, Math.max(3, Math.floor((contentHeight - 30) / 22)));
+	// A handful of shimmer lines is enough for a loading state that's usually
+	// short-lived; capping the count keeps the DOM light even on tall panels.
+	const pattern = ['full', 'long', 'med', 'full', 'short', 'long'];
+	const lineCount = Math.min(12, Math.max(3, Math.floor((contentHeight - 30) / 22)));
 
 	for (let i = 0; i < lineCount; i += 1) {
 		const line = document.createElement('div');
