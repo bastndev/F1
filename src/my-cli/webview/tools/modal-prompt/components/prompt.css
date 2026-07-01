@@ -1117,6 +1117,13 @@
   border-color: color-mix(in srgb, var(--agent-accent, #534AB7) 45%, transparent);
 }
 
+/* Container for model + resume shortcut chips */
+.prompt-footer-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
 /* Session live dot */
 .prompt-session-dot {
   width: 6px;

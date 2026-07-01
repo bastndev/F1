@@ -1,8 +1,8 @@
 /**
- * Footer "model" area: shows the active CLI name plus the best-effort
- * detected model. Agents that declare a modelCommand get a shortcut button
- * that clears the terminal input line, closes the modal, and opens the
- * CLI's native model picker.
+ * Footer "model" area: shows the active CLI name plus a row of action chips.
+ * Agents that declare modelCommand/resumeCommand get shortcut buttons that
+ * clear the terminal input line, close the modal, and open the CLI's native
+ * picker. The rest keep a read-only detected-model chip.
  */
 import type { PromptContext } from './prompt-context';
 import { getCliAgent } from '../../../shared/agents';
@@ -24,15 +24,26 @@ export function updateFooterModel(host: HTMLElement, context: PromptContext, has
 
 	const agent = getCliAgent(label);
 	const modelCommand = agent?.modelCommand;
+	const resumeCommand = agent?.resumeCommand;
 
 	footerInfo.innerHTML = `<span class="prompt-session-dot" id="sessionDot"></span><i class="ti ti-cpu" aria-hidden="true"></i> ${simpleName}`;
 
 	const modelName = context.getActiveModelName?.();
 
-	// Agents with a modelCommand get a shortcut to the native picker; the rest
-	// keep the read-only detected-model chip.
-	if (modelCommand && hasActiveSession && context.sendToActiveSession) {
-		footerInfo.append(buildModelShortcut(context, modelCommand, modelName));
+	// Agents with shortcut commands get action chips; the rest keeps the
+	// read-only detected-model chip.
+	if (hasActiveSession && context.sendToActiveSession && (modelCommand || resumeCommand)) {
+		const actions = document.createElement('span');
+		actions.className = 'prompt-footer-actions';
+
+		if (modelCommand) {
+			actions.append(buildShortcutButton(context, modelCommand, modelName ?? modelCommand));
+		}
+		if (resumeCommand) {
+			actions.append(buildShortcutButton(context, resumeCommand, resumeCommand));
+		}
+
+		footerInfo.append(actions);
 		return;
 	}
 
@@ -46,13 +57,13 @@ export function updateFooterModel(host: HTMLElement, context: PromptContext, has
 	}
 }
 
-function buildModelShortcut(context: PromptContext, modelCommand: string, detectedModel?: string): HTMLElement {
+function buildShortcutButton(context: PromptContext, command: string, labelText: string): HTMLElement {
 	const button = document.createElement('button');
 	button.className = 'prompt-footer-model prompt-footer-model-btn';
-	button.title = `Open model picker (${modelCommand})`;
+	button.title = `Run ${command}`;
 
 	const label = document.createElement('span');
-	label.textContent = detectedModel ?? 'model';
+	label.textContent = labelText;
 
 	button.append(label);
 
@@ -61,8 +72,8 @@ function buildModelShortcut(context: PromptContext, modelCommand: string, detect
 		// command is injected.
 		context.close();
 		// \x15 is Ctrl+U: wipe the current terminal input line so a partially
-		// typed prompt like "asd" is not concatenated into "asd${modelCommand}".
-		context.sendToActiveSession?.(`\x15${modelCommand}`, { submit: true });
+		// typed prompt is not concatenated with the command.
+		context.sendToActiveSession?.(`\x15${command}`, { submit: true });
 	});
 
 	return button;
