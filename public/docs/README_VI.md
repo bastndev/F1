@@ -3,9 +3,9 @@
 [![Lynx F1](https://raw.githubusercontent.com/bastndev/F1/refs/heads/main/public/banner.webp)](https://www.gohit.xyz/extension/f1)
 
 <p>
-  <img src="https://vsmarketplacebadges.dev/version-short/bastndev.f1.jpg?style=for-the-badge&colorA=000000&colorB=FFFFFF&label=VERSION" alt="Version">&nbsp;
-  <img src="https://vsmarketplacebadges.dev/downloads-short/bastndev.f1.jpg?style=for-the-badge&colorA=000000&colorB=FFFFFF&label=Downloads" alt="Downloads">&nbsp;
-  <img src="https://vsmarketplacebadges.dev/rating-short/bastndev.f1.jpg?style=for-the-badge&colorA=000000&colorB=FFFFFF&label=RATING" alt="Rating">&nbsp;
+  <img src="https://vsmarketplacebadges.dev/version-short/bastndev.f1.jpg?style=for-the-badge&colorA=010409&colorB=FFFFFF&label=VERSION" alt="Version">&nbsp;
+  <img src="https://vsmarketplacebadges.dev/downloads-short/bastndev.f1.jpg?style=for-the-badge&colorA=010409&colorB=FFFFFF&label=Downloads" alt="Downloads">&nbsp;
+  <img src="https://vsmarketplacebadges.dev/rating-short/bastndev.f1.jpg?style=for-the-badge&colorA=010409&colorB=FFFFFF&label=RATING" alt="Rating">&nbsp;
   <a href="https://github.com/bastndev/F1"><img src="https://raw.githubusercontent.com/bastndev/F1/refs/heads/main/public/github/icons/star.png" width="26.6px" alt="Github Star ⭐️"></a>
 </p>
 
@@ -62,6 +62,8 @@ F1 biến VS Code thành trung tâm cho các tác nhân lập trình AI. Mở **
 | Đóng phiên hiện tại                       | `Alt + -`           | `Alt + -`              | `Alt + -`              | ㅤㅤ✅ |
 | Phiên CLI mới                             | `Alt + +`           | `Alt + +`              | `Alt + +`              | ㅤㅤ✅ |
 | -                                         | -                   | -                      | -                      |        |
+| Mở tác nhân 1–9 (alt hoặc bật/tắt đang hoạt động) | `1`–`9` | `1`–`9`          | `1`–`9`                | ㅤㅤ✅ |
+| -                                         | -                   | -                      | -                      |        |
 | `[`Skill`]` - Chuyển đến tab Tạo          | `Alt + 1`           | `Alt + 1`              | `Alt + 1`              | ㅤㅤ✅ |
 | `[`Skill`]` - Chuyển đến tab Cài đặt      | `Alt + 2`           | `Alt + 2`              | `Alt + 2`              | ㅤㅤ✅ |
 | `[`Skill`]` - Chuyển đến tab Cục bộ       | `Alt + 3`           | `Alt + 3`              | `Alt + 3`              | ㅤㅤ✅ |
@@ -89,6 +91,7 @@ F1 biến VS Code thành trung tâm cho các tác nhân lập trình AI. Mở **
   - **Translator** — dịch nội tuyến bất kỳ lựa chọn nào trong terminal.
   - **Use** — xem mức sử dụng / trạng thái theo từng CLI.
   - **Keymaps** — tham chiếu phím tắt.
+  - **Commands** — bảng lệnh của tác nhân đang hoạt động, có thể tìm kiếm và phân loại theo CLI.
 - **Voice** — đọc to các câu trả lời, cộng với âm thanh "ding" tùy chọn khi tác nhân hoàn thành trong lúc bạn đang chú ý chỗ khác.
 
 ### 🧩 My Skills
@@ -97,10 +100,11 @@ F1 biến VS Code thành trung tâm cho các tác nhân lập trình AI. Mở **
 - Tạo skills bằng các trình tạo có hướng dẫn cho `AGENTS.md`, `CLAUDE.md`, và `DESIGN.md`, cộng với các mẫu nhanh theo danh mục.
 - Quản lý các skills cục bộ và đã lưu theo từng workspace.
 
-### 🧠 My Memory
+### 🧠 Smart + Skills
 
-- Tạo bản đồ ngữ cảnh dự án `.f1/` đã cam kết để bất kỳ CLI nào cũng khởi chạy với ngữ cảnh được chia sẻ và giá rẻ.
-- Chuyển đổi theo dự án; các tệp hướng dẫn (`AGENTS.md` / `CLAUDE.md`) vẫn được trỏ tới ngữ cảnh.
+- Bật nút **Smart + Skills** trong trình khởi chạy, rồi chọn tác nhân như bình thường.
+- Khi khởi chạy, F1 xây dựng biểu đồ mã giá rẻ của dự án cộng với bộ quy tắc làm việc tích hợp sẵn, sau đó yêu cầu tác nhân đọc chúng — để tác nhân bắt đầu đã được định hướng và trả lời **“I am ready for work ✅”** trong chat, không cần dán ngữ cảnh thủ công.
+- Được hỗ trợ bởi **My Memory**: một động cơ TypeScript thuần túy nhanh chóng viết bản đồ dự án cấu trúc `.f1/` và giữ tệp hướng dẫn của từng CLI (`AGENTS.md` / `CLAUDE.md`) được trỏ đến nó. Các tệp tạm được dọn dẹp tự động sau khi tác nhân được chuẩn bị xong.
 
 <br>
 

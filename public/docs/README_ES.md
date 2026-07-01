@@ -3,9 +3,9 @@
 [![Lynx F1](https://raw.githubusercontent.com/bastndev/F1/refs/heads/main/public/banner.webp)](https://www.gohit.xyz/extension/f1)
 
 <p>
-  <img src="https://vsmarketplacebadges.dev/version-short/bastndev.f1.jpg?style=for-the-badge&colorA=000000&colorB=FFFFFF&label=VERSION" alt="Version">&nbsp;
-  <img src="https://vsmarketplacebadges.dev/downloads-short/bastndev.f1.jpg?style=for-the-badge&colorA=000000&colorB=FFFFFF&label=Downloads" alt="Downloads">&nbsp;
-  <img src="https://vsmarketplacebadges.dev/rating-short/bastndev.f1.jpg?style=for-the-badge&colorA=000000&colorB=FFFFFF&label=RATING" alt="Rating">&nbsp;
+  <img src="https://vsmarketplacebadges.dev/version-short/bastndev.f1.jpg?style=for-the-badge&colorA=010409&colorB=FFFFFF&label=VERSION" alt="Version">&nbsp;
+  <img src="https://vsmarketplacebadges.dev/downloads-short/bastndev.f1.jpg?style=for-the-badge&colorA=010409&colorB=FFFFFF&label=Downloads" alt="Downloads">&nbsp;
+  <img src="https://vsmarketplacebadges.dev/rating-short/bastndev.f1.jpg?style=for-the-badge&colorA=010409&colorB=FFFFFF&label=RATING" alt="Rating">&nbsp;
   <a href="https://github.com/bastndev/F1"><img src="https://raw.githubusercontent.com/bastndev/F1/refs/heads/main/public/github/icons/star.png" width="26.6px" alt="Github Star ⭐️"></a>
 </p>
 
@@ -62,6 +62,8 @@ F1 convierte VS Code en un centro para agentes de programación de IA. Abra **Cl
 | Cerrar sesión actual                 | `Alt + -`           | `Alt + -`              | `Alt + -`              | ㅤㅤ✅    |
 | Nueva sesión CLI                     | `Alt + +`           | `Alt + +`              | `Alt + +`              | ㅤㅤ✅    |
 | -                                    | -                   | -                      | -                      |           |
+| Abrir agente 1–9 (alt o alternar activo) | `1`–`9`         | `1`–`9`                | `1`–`9`                | ㅤㅤ✅    |
+| -                                    | -                   | -                      | -                      |           |
 | `[`Skill`]` - Ir a pestaña Crear     | `Alt + 1`           | `Alt + 1`              | `Alt + 1`              | ㅤㅤ✅    |
 | `[`Skill`]` - Ir a pestaña Instalar  | `Alt + 2`           | `Alt + 2`              | `Alt + 2`              | ㅤㅤ✅    |
 | `[`Skill`]` - Ir a pestaña Local     | `Alt + 3`           | `Alt + 3`              | `Alt + 3`              | ㅤㅤ✅    |
@@ -89,6 +91,7 @@ F1 convierte VS Code en un centro para agentes de programación de IA. Abra **Cl
   - **Translator** — traduzca cualquier selección del terminal en línea.
   - **Use** — vista de uso / estado por CLI.
   - **Keymaps** — referencia de atajos de teclado.
+  - **Commands** — paleta de comandos del agente activo, buscable y por CLI.
 - **Voice** — lea las respuestas en voz alta, más un "ding" opcional cuando un agente termine mientras su atención está en otra parte.
 
 ### 🧩 My Skills
@@ -97,10 +100,11 @@ F1 convierte VS Code en un centro para agentes de programación de IA. Abra **Cl
 - Cree skills con generadores guiados para `AGENTS.md`, `CLAUDE.md` y `DESIGN.md`, más plantillas rápidas por categoría.
 - Gestione skills locales y guardadas por espacio de trabajo.
 
-### 🧠 My Memory
+### 🧠 Smart + Skills
 
-- Genere un mapa de contexto del proyecto `.f1/` comprometido para que cualquier CLI inicie con un contexto compartido y barato.
-- Activador por proyecto; los archivos de instrucciones (`AGENTS.md` / `CLAUDE.md`) se mantienen apuntados al contexto.
+- Active el interruptor **Smart + Skills** en el lanzador y luego elija un agente como de costumbre.
+- Al iniciar, F1 construye un gráfico de código barato de su proyecto más un conjunto de reglas de trabajo integradas, y luego hace que el agente las lea — para que comience ya orientado y responda **"I am ready for work ✅"** en el chat, sin necesidad de pegar contexto manualmente.
+- Potenciado por **My Memory**: un motor rápido y puro en TypeScript que escribe un mapa de proyecto estructural `.f1/` y mantiene el archivo de instrucciones de cada CLI (`AGENTS.md` / `CLAUDE.md`) apuntado a él. Los archivos temporales se limpian automáticamente una vez que el agente está preparado.
 
 <br>
 

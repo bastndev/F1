@@ -3,9 +3,9 @@
 [![Lynx F1](https://raw.githubusercontent.com/bastndev/F1/refs/heads/main/public/banner.webp)](https://www.gohit.xyz/extension/f1)
 
 <p>
-  <img src="https://vsmarketplacebadges.dev/version-short/bastndev.f1.jpg?style=for-the-badge&colorA=000000&colorB=FFFFFF&label=VERSION" alt="Version">&nbsp;
-  <img src="https://vsmarketplacebadges.dev/downloads-short/bastndev.f1.jpg?style=for-the-badge&colorA=000000&colorB=FFFFFF&label=Downloads" alt="Downloads">&nbsp;
-  <img src="https://vsmarketplacebadges.dev/rating-short/bastndev.f1.jpg?style=for-the-badge&colorA=000000&colorB=FFFFFF&label=RATING" alt="Rating">&nbsp;
+  <img src="https://vsmarketplacebadges.dev/version-short/bastndev.f1.jpg?style=for-the-badge&colorA=010409&colorB=FFFFFF&label=VERSION" alt="Version">&nbsp;
+  <img src="https://vsmarketplacebadges.dev/downloads-short/bastndev.f1.jpg?style=for-the-badge&colorA=010409&colorB=FFFFFF&label=Downloads" alt="Downloads">&nbsp;
+  <img src="https://vsmarketplacebadges.dev/rating-short/bastndev.f1.jpg?style=for-the-badge&colorA=010409&colorB=FFFFFF&label=RATING" alt="Rating">&nbsp;
   <a href="https://github.com/bastndev/F1"><img src="https://raw.githubusercontent.com/bastndev/F1/refs/heads/main/public/github/icons/star.png" width="26.6px" alt="Github Star ⭐️"></a>
 </p>
 
@@ -62,6 +62,8 @@ F1 transforme VS Code en un hub pour les agents de codage IA. Ouvrez **Claude Co
 | Fermer la session actuelle                  | `Alt + -`           | `Alt + -`              | `Alt + -`              | ㅤㅤ✅   |
 | Nouvelle session CLI                        | `Alt + +`           | `Alt + +`              | `Alt + +`              | ㅤㅤ✅   |
 | -                                           | -                   | -                      | -                      |          |
+| Ouvrir agent 1–9 (alt ou basculer actif)    | `1`–`9`             | `1`–`9`                | `1`–`9`                | ㅤㅤ✅   |
+| -                                           | -                   | -                      | -                      |          |
 | `[`Skill`]` - Aller à l'onglet Créer        | `Alt + 1`           | `Alt + 1`              | `Alt + 1`              | ㅤㅤ✅   |
 | `[`Skill`]` - Aller à l'onglet Installer    | `Alt + 2`           | `Alt + 2`              | `Alt + 2`              | ㅤㅤ✅   |
 | `[`Skill`]` - Aller à l'onglet Local        | `Alt + 3`           | `Alt + 3`              | `Alt + 3`              | ㅤㅤ✅   |
@@ -84,11 +86,12 @@ F1 transforme VS Code en un hub pour les agents de codage IA. Ouvrez **Claude Co
 
 - Exécutez plusieurs CLI de codage IA côte à côte dans des terminaux [xterm.js](https://xtermjs.org/) intégrés.
 - Lanceur de recherche floue pour choisir un agent ; appuyez sur **F1** pour accéder directement au panneau.
-- Outils intégrés à chaque session :
-  - **Prompt** — éditeur enrichi avec mentions de fichiers `@`, collage d'images, pastilles de skills, correction orthographique en direct et traduction source→Anglais avant l'envoi.
-  - **Translator** — traduisez n'importe quelle sélection du terminal en ligne.
-  - **Use** — vue de l'utilisation / statut par CLI.
+- Outils intégrés à chaque session :
+  - **Prompt** — éditeur enrichi avec mentions de fichiers `@`, collage d’images, pastilles de skills, correction orthographique en direct et traduction source→Anglais avant l’envoi.
+  - **Translator** — traduisez n’importe quelle sélection du terminal en ligne.
+  - **Use** — vue de l’utilisation / statut par CLI.
   - **Keymaps** — référence des raccourcis clavier.
+  - **Commands** — palette de commandes de l’agent actif, consultable et par CLI.
 - **Voice** — lisez les réponses à haute voix, plus un "ding" optionnel quand un agent a terminé alors que votre attention est ailleurs.
 
 ### 🧩 My Skills
@@ -97,10 +100,11 @@ F1 transforme VS Code en un hub pour les agents de codage IA. Ouvrez **Claude Co
 - Créez des skills avec des générateurs guidés pour `AGENTS.md`, `CLAUDE.md`, et `DESIGN.md`, plus des modèles rapides par catégorie.
 - Gérez les skills locales et sauvegardées par espace de travail.
 
-### 🧠 My Memory
+### 🧠 Smart + Skills
 
-- Générez une carte de contexte `.f1/` sauvegardée pour que n'importe quel CLI démarre avec un contexte partagé et léger.
-- Bascule par projet ; les fichiers d'instructions (`AGENTS.md` / `CLAUDE.md`) restent pointés sur le contexte.
+- Activez le bouton **Smart + Skills** dans le lanceur, puis choisissez un agent comme d’habitude.
+- Au lancement, F1 construit un graphe de code léger de votre projet ainsi qu’un ensemble de règles de travail intégrées, puis fait lire cela par l’agent — afin qu’il commence déjà orienté et réponde **« I am ready for work ✅ »** dans le chat, sans collage manuel de contexte.
+- Alimenté par **My Memory** : un moteur TypeScript pur et rapide qui écrit une carte de projet structurelle `.f1/` et maintient le fichier d’instructions de chaque CLI (`AGENTS.md` / `CLAUDE.md`) pointé dessus. Les fichiers temporaires sont nettoyés automatiquement une fois l’agent prêt.
 
 <br>
 
