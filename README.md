@@ -66,6 +66,7 @@ F1 turns VS Code into a hub for AI coding agents. Open **Claude Code, Codex, Cop
 | Toggle agents palette              | `Tab`               | `Tab`                  | `Tab`                  | ㅤㅤ✅    |
 | Close agents palette               | `Escape`            | `Escape`               | `Escape`               | ㅤㅤ✅    |
 | Open CLI selector                  | `CapsLock`          | `CapsLock`             | `CapsLock`             | ㅤㅤ✅    |
+| Open agent 1–9 (alt or toggle active)          | `1`–`9`             | `1`–`9`                | `1`–`9`                | ㅤㅤ✅    |
 | -                                  | -                   | -                      | -                      |           |
 | Close current session              | `Alt + -`           | `Alt + -`              | `Alt + -`              | ㅤㅤ✅    |
 | New CLI session                    | `Alt + +`           | `Alt + +`              | `Alt + +`              | ㅤㅤ✅    |
@@ -97,7 +98,7 @@ F1 turns VS Code into a hub for AI coding agents. Open **Claude Code, Codex, Cop
 </details>
 
 <details>
-<summary>▶️ &nbsp;<b>Tutorial 2</b> — My Skills &amp; My Memory</summary>
+<summary>▶️ &nbsp;<b>Tutorial 2</b> — My Skills &amp; Smart + Skills</summary>
 
 <br>
 
@@ -118,6 +119,7 @@ F1 turns VS Code into a hub for AI coding agents. Open **Claude Code, Codex, Cop
   - **Translator** — translate any terminal selection inline.
   - **Use** — per‑CLI usage / status view.
   - **Keymaps** — keyboard‑shortcut reference.
+  - **Commands** — searchable, per-CLI palette of the active agent's slash-commands.
 - **Voice** — read replies aloud, plus an optional "ding" when an agent finishes while your attention is elsewhere.
 
 ### 🧩 My Skills
@@ -126,10 +128,11 @@ F1 turns VS Code into a hub for AI coding agents. Open **Claude Code, Codex, Cop
 - Create skills with guided generators for `AGENTS.md`, `CLAUDE.md`, and `DESIGN.md`, plus fast templates by category.
 - Manage local and saved skills per workspace.
 
-### 🧠 My Memory
+### 🧠 Smart + Skills
 
-- Generate a committed `.f1/` project‑context map so any CLI starts with cheap, shared context.
-- Per‑project toggle; instruction files (`AGENTS.md` / `CLAUDE.md`) stay pointed at the context.
+- Flip the **Smart + Skills** toggle in the launcher, then pick an agent as usual.
+- On launch, F1 builds a cheap code-graph of your project plus a set of built-in working rules, then has the agent read them — so it starts already oriented and replies **"I am ready for work ✅"** in the chat, with no manual context-pasting.
+- Powered by **My Memory**: a fast, pure-TS engine that writes a structural `.f1/` project map and keeps each CLI's instruction file (`AGENTS.md` / `CLAUDE.md`) pointed at it. Scratch files are cleaned up automatically once the agent is primed.
 
 <br>
 
