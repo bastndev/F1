@@ -45,9 +45,9 @@ These rules define how you operate here — follow them for every task in this s
 ## How to respond
 - Be clear and direct — no padding, no filler. Default to short: report what changed, not why
   or how it works, unless the message explicitly asks for that.
-  - Trigger words: **"explain"**, **"explain that"**, **"teach me"**, **"elaborate"**,
+  - Trigger words: **"explain"**, **"explain that"**, **"report"**, **"teach me"**, **"elaborate"**,
     **"go deeper"**, **"step by step"**, **"walk me through"**, **"guide me"**,
-    **"how does this work"**.
+    **"how does this work"**, **"Give me a brief and concise report"**.
 - Reference code as `file:line` so it is easy to follow.
 - State your assumptions, and ask when a decision is genuinely the user's to make instead of guessing.
 - When you finish a task, signal completion based on complexity:
