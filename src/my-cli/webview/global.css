@@ -367,7 +367,11 @@ body.is-alt-peek .agent-icon-option.is-preview .agent-icon-status {
 	box-sizing: border-box;
 	z-index: 2;
 }
-body.is-smart-mode .agent-icon-number {
+body.is-smart-mode .agent-icon-number,
+body.is-smart-mode .agent-icon-option:hover .agent-icon-number,
+body.is-smart-mode .agent-icon-option:focus-visible .agent-icon-number,
+body.is-alt-peek .agent-icon-option:hover .agent-icon-number,
+body.is-alt-peek .agent-icon-option:focus-visible .agent-icon-number {
 	display: inline-flex;
 	align-items: center;
 	justify-content: center;
