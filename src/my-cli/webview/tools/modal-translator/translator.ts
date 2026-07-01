@@ -22,6 +22,12 @@ const minVoiceChunkChars = 200;
 // and the host's long-text threshold: blocks this big translate in one fast
 // pass yet are small enough that a long answer arrives in several pieces.
 const maxStreamBlockChars = 900;
+// List items are batched into ~4-item / ~400-char groups for translation and
+// rendering, so a long list arrives as a few compact <ol>/<ul> blocks (one
+// network round-trip each) rather than one item at a time. The voice reading
+// band is finer-grained — one item at a time — built in the voice chunking.
+const maxListBatchItems = 4;
+const maxListBatchChars = 400;
 
 type TranslatorVoiceChunk = {
 	text: string;
@@ -278,25 +284,67 @@ function mergeTrailingVoiceUnit(units: TranslatorVoiceChunk[]): TranslatorVoiceC
 	return [...units.slice(0, -2), mergeVoiceUnits(previous, last)];
 }
 
+function makeChunkFromElements(elements: HTMLElement[]): TranslatorVoiceChunk {
+	return {
+		text: elements.map((el) => normalizeSpeechText(el.textContent || '')).join('\n\n'),
+		elements,
+	};
+}
+
+// The <li> children of a rendered list, or the list itself as a fallback if it
+// somehow has none — so list voice units can be built one item at a time.
+function listItemsOf(list: HTMLElement): HTMLElement[] {
+	const items = Array.from(list.children).filter(
+		(child): child is HTMLElement => child instanceof HTMLElement && child.tagName === 'LI',
+	);
+	return items.length ? items : [list];
+}
+
 function buildVoiceChunks(textEl: HTMLElement): TranslatorVoiceChunk[] {
 	const renderedBlocks = Array.from(textEl.children).filter(
 		(element): element is HTMLElement =>
 			element instanceof HTMLElement && !element.classList.contains('translator-streaming'),
 	);
-	const sourceBlocks = renderedBlocks.length ? renderedBlocks : [textEl];
+	if (!renderedBlocks.length) {
+		return mergeTrailingVoiceUnit([makeChunkFromElements([textEl])]).flatMap(unitToVoiceChunks);
+	}
 
-	const accumulator = createVoiceUnitAccumulator();
+	// Walk blocks: non-list blocks go through the structural accumulator
+	// (opener+body grouping), while each <li> of a <ul>/<ol> becomes its own
+	// unit — so the reading band follows one list item at a time instead of
+	// covering a whole batch of items.
 	const units: TranslatorVoiceChunk[] = [];
-	for (const element of sourceBlocks) {
-		const completed = accumulator.add(element);
-		if (completed) {
-			units.push(completed);
+	let nonListBlocks: HTMLElement[] = [];
+
+	const flushNonList = () => {
+		if (!nonListBlocks.length) {
+			return;
+		}
+		const accumulator = createVoiceUnitAccumulator();
+		for (const element of nonListBlocks) {
+			const completed = accumulator.add(element);
+			if (completed) {
+				units.push(completed);
+			}
+		}
+		const tail = accumulator.flush();
+		if (tail) {
+			units.push(tail);
+		}
+		nonListBlocks = [];
+	};
+
+	for (const block of renderedBlocks) {
+		if (block.tagName === 'UL' || block.tagName === 'OL') {
+			flushNonList();
+			for (const item of listItemsOf(block)) {
+				units.push(makeChunkFromElements([item]));
+			}
+		} else {
+			nonListBlocks.push(block);
 		}
 	}
-	const tail = accumulator.flush();
-	if (tail) {
-		units.push(tail);
-	}
+	flushNonList();
 
 	return mergeTrailingVoiceUnit(units).flatMap(unitToVoiceChunks);
 }
@@ -623,14 +671,21 @@ function initializeTranslator(host: HTMLElement, context: ToolContext) {
 			return {
 				feed(elements: HTMLElement[]) {
 					for (const element of elements) {
-						const completed = accumulator.add(element);
-						if (!completed) {
-							continue;
+						// Expand a rendered list into its items so each is read (and
+						// highlighted) on its own, matching the per-item reading band.
+						const voiceElements = element.tagName === 'UL' || element.tagName === 'OL'
+							? listItemsOf(element)
+							: [element];
+						for (const voiceElement of voiceElements) {
+							const completed = accumulator.add(voiceElement);
+							if (!completed) {
+								continue;
+							}
+							if (buffered) {
+								send(buffered, false);
+							}
+							buffered = completed;
 						}
-						if (buffered) {
-							send(buffered, false);
-						}
-						buffered = completed;
 					}
 				},
 				finish() {
@@ -714,7 +769,9 @@ function initializeTranslator(host: HTMLElement, context: ToolContext) {
 		// blocks in a short buffer and flush them as a cohesive chunk. The skeleton
 		// stays visible while buffering, then a batch of blocks crossfades in with a
 		// staggered reveal — a much cleaner, premium feel than content dribbling in.
-		const maxStagedBlocks = 4;
+		// Keep the batch small so blocks arrive a couple at a time and each gets room
+		// to settle, rather than four popping in at once (which read as "hard").
+		const maxStagedBlocks = 2;
 		const stageRevealDelayMs = 420;
 		const stagedBlocks: { markdown: string; copy: string }[] = [];
 		let stageFlushTimer: ReturnType<typeof setTimeout> | undefined;
@@ -753,7 +810,7 @@ function initializeTranslator(host: HTMLElement, context: ToolContext) {
 				for (const node of Array.from(template.content.childNodes)) {
 					if (node instanceof HTMLElement) {
 						node.classList.add('is-block-in');
-						node.style.animationDelay = `${staggerIndex * 45}ms`;
+						node.style.animationDelay = `${staggerIndex * 110}ms`;
 						node.addEventListener('animationend', () => {
 							node.classList.remove('is-block-in');
 							node.style.animationDelay = '';
@@ -1317,38 +1374,127 @@ function cacheParagraphPairs(target: string, source: string, translated: string)
 	}
 }
 
+const orderedItemPattern = /^\d{1,3}[.)]\s+.*/;
+const bulletItemPattern = /^[-*•]\s+.*/;
+
+const isListItemLine = (line: string): boolean => {
+	const trimmed = line.trim();
+	return orderedItemPattern.test(trimmed) || bulletItemPattern.test(trimmed);
+};
+
+// Group hard-wrapped lines into whole logical list items: a new item begins at a
+// marker line ("1." / "-"), and unmarked continuation lines (terminal wraps) stay
+// with the item above them. Batching then works on items, never physical lines,
+// so a single item is never split across batches — a mid-item split would strand
+// the tail as an un-numbered <p> (markdown-lite only continues a list already
+// open in the block), which is the orphaned-paragraph bug this prevents.
+function groupListItems(lines: string[]): string[] {
+	const items: string[] = [];
+	let current: string[] = [];
+	for (const line of lines) {
+		if (isListItemLine(line) && current.length) {
+			items.push(current.join('\n'));
+			current = [];
+		}
+		current.push(line);
+	}
+	if (current.length) {
+		items.push(current.join('\n'));
+	}
+	return items;
+}
+
+function splitListRun(lines: string[]): string[] {
+	const batches: string[] = [];
+	let batch: string[] = [];
+	let batchLen = 0;
+	for (const item of groupListItems(lines)) {
+		// Flush before adding only when the batch already holds something, so an
+		// item longer than the char cap still forms its own batch rather than
+		// being dropped onto an empty one and split.
+		if (batch.length && (batch.length >= maxListBatchItems || batchLen >= maxListBatchChars)) {
+			batches.push(batch.join('\n'));
+			batch = [];
+			batchLen = 0;
+		}
+		batch.push(item);
+		batchLen += item.length + 1;
+	}
+	if (batch.length) {
+		batches.push(batch.join('\n'));
+	}
+	return batches;
+}
+
 // Break a run of prose into voice-sized blocks on paragraph boundaries so a
 // long translation streams in piece by piece instead of arriving in one slow
-// lump. Paragraphs are grouped up to maxStreamBlockChars; a single paragraph
-// longer than that is left whole (the host chunks it further internally).
+// lump. List runs (numbered or bulleted) are detected and batched into groups
+// of ~4 items / ~400 chars so each batch renders as its own <ol>/<ul> and the
+// reading band highlights a compact run instead of the entire list at once.
 function splitForStreaming(text: string): string[] {
 	const trimmed = text.trim();
 	if (!trimmed) {
 		return [];
 	}
-	if (trimmed.length <= maxStreamBlockChars) {
-		return [trimmed];
-	}
 
-	const paragraphs = trimmed.split(/\n[ \t]*\n+/).map((part) => part.trim()).filter(Boolean);
+	const lines = trimmed.split('\n');
 	const blocks: string[] = [];
-	let current = '';
+	let proseLines: string[] = [];
+	let listLines: string[] = [];
+	let prevWasListItem = false;
 
-	for (const paragraph of paragraphs) {
-		if (!current) {
-			current = paragraph;
-			continue;
+	const flushProse = () => {
+		if (!proseLines.length) {
+			return;
 		}
-		if (current.length + paragraph.length + 2 > maxStreamBlockChars) {
+		const proseText = proseLines.join('\n');
+		proseLines = [];
+		const paragraphs = proseText.split(/\n[ \t]*\n+/).map((part) => part.trim()).filter(Boolean);
+		let current = '';
+		for (const paragraph of paragraphs) {
+			if (!current) {
+				current = paragraph;
+			} else if (current.length + paragraph.length + 2 > maxStreamBlockChars) {
+				blocks.push(current);
+				current = paragraph;
+			} else {
+				current = `${current}\n\n${paragraph}`;
+			}
+		}
+		if (current) {
 			blocks.push(current);
-			current = paragraph;
+		}
+	};
+
+	const flushListRun = () => {
+		if (!listLines.length) {
+			return;
+		}
+		blocks.push(...splitListRun(listLines));
+		listLines = [];
+	};
+
+	for (const line of lines) {
+		if (!line.trim()) {
+			flushProse();
+			flushListRun();
+			prevWasListItem = false;
+		} else if (isListItemLine(line)) {
+			flushProse();
+			listLines.push(line);
+			prevWasListItem = true;
+		} else if (prevWasListItem) {
+			// Lazy continuation of the last list item — stays with the list run.
+			listLines.push(line);
 		} else {
-			current = `${current}\n\n${paragraph}`;
+			flushListRun();
+			proseLines.push(line);
+			prevWasListItem = false;
 		}
 	}
-	if (current) {
-		blocks.push(current);
-	}
+	flushProse();
+	flushListRun();
+
 	return blocks;
 }
 
@@ -1423,9 +1569,10 @@ function buildSkeleton(availableHeight: number, lineHint?: number): HTMLElement 
 	// The skeleton sizes to the locked loading box so the scan beam covers it,
 	// but the shimmer lines + typing dots pack tightly at the top (see CSS:
 	// .t-skel-lines is flex: 0 0 auto) — so a small selection gets a minimal
-	// cluster with no gap, not a tall stretched placeholder. The body padding
-	// is tightened during translation (10px top/bottom), so subtract 20.
-	const contentHeight = Math.max(26, Math.min(200, availableHeight - 20));
+	// cluster with no gap, not a tall stretched placeholder. The body keeps its
+	// resting 16px top/bottom padding through loading (so the result never
+	// shifts when it lands), so subtract 32.
+	const contentHeight = Math.max(26, Math.min(200, availableHeight - 32));
 	wrap.style.height = `${contentHeight}px`;
 
 	const scan = document.createElement('div');

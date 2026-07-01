@@ -201,18 +201,17 @@
 	flex: 0 1 auto;
 	min-height: 0;
 	overflow-y: auto;
+	/* Reserve the scrollbar gutter at all times so the thin scrollbar appearing
+	   (when a streamed result finally overflows, or when is-streaming-grow flips
+	   overflow back to auto) never reflows the text left and clips its right edge. */
+	scrollbar-gutter: stable;
 	overscroll-behavior: contain;
+	/* Constant through loading AND the result: the skeleton and the translated
+	   text share the same top padding, so nothing shifts down when the result
+	   lands (the skeleton's own height keeps the loading box compact instead). */
 	padding: 16px 18px;
 	scrollbar-width: thin;
 	scrollbar-color: rgba(175, 169, 236, 0.2) transparent;
-}
-
-/* Tighter vertical padding while the skeleton is showing so a small
-   selection gets a minimal loading box — the 16px top/bottom would otherwise
-   dominate a tiny skeleton. Restored when translation ends. */
-.translator-modal.is-translating .translator-body {
-	padding-top: 10px;
-	padding-bottom: 10px;
 }
 
 .translator-text {
@@ -538,6 +537,14 @@
 
 .translator-text .is-voice-start.is-voice-end::before {
 	background-image: linear-gradient(to bottom, transparent 0px, rgba(99, 179, 237, 0.85) min(45px, 45%), rgba(99, 179, 237, 0.85) max(calc(100% - 45px), 55%), transparent 100%);
+}
+
+/* A list item reads on its own, so its band must also cover the "N." marker,
+   which sits outside the <li> in the list's gutter (ul/ol padding-left: 24px).
+   Extend the band left by that gutter so the number is inside it and the accent
+   line lines up with block-level bands (their -10px side bleed): -(24 + 10). */
+.translator-text li.is-voice-active::before {
+	left: -34px;
 }
 
 /* Text brightens slightly when its chunk is being read for emphasis */
