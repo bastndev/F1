@@ -195,6 +195,21 @@
 	to   { opacity: 0.9; }
 }
 
+/* ── Inline loading — minimal indicator for short selections ──────────
+   Just the typing dots (› ···) with no skeleton box, no shimmer lines,
+   no scan beam. Sits where the result will appear, barely taller than
+   the text itself — no empty space, no height lock, no jump when the
+   translation arrives. */
+.translator-inline-loading {
+	display: flex;
+	align-items: center;
+	animation: translator-stream-fade 260ms ease both;
+}
+
+.translator-inline-loading .t-skel-typing {
+	padding-top: 0;
+}
+
 /* While streaming, the body height is driven to fit each block (see
    performTranslation). Animate it so the modal grows smoothly with the
    content; overflow is pinned hidden during the grow so no scrollbar flickers

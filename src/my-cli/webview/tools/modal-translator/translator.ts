@@ -559,18 +559,14 @@ function initializeTranslator(host: HTMLElement, context: ToolContext) {
 			return;
 		}
 
-		// Size the loading box to the source text's actual rendered height so a
-		// small selection gets a small skeleton (no sticking out, no empty space
-		// below) and a tall selection gets a tall one. The floor keeps the compact
-		// skeleton legible for very short selections; the cap stops a very tall
-		// selection from locking the whole panel. When auto-translate fires before
-		// the panel is attached the measurement is ~0, so the fallback acts as the
-		// floor; the streaming grow takes over from there.
-		const measuredHeight = bodyEl?.offsetHeight ?? 0;
-		const lockedHeight = Math.max(64, Math.min(220, measuredHeight || 92));
-		if (bodyEl) {
-			bodyEl.style.height = `${lockedHeight}px`;
-		}
+		// Adaptive loading: a short selection (1–2 non-empty lines) gets a
+		// minimal inline indicator — just the typing dots sitting where the
+		// result will appear, barely taller than the text itself (no skeleton
+		// box, no shimmer lines, no height lock). A longer selection gets the
+		// full skeleton sized to its rendered height so the modal only grows
+		// once real content streams in.
+		const sourceLineCount = extracted.split('\n').filter((line) => line.trim()).length;
+		const isShortSelection = sourceLineCount <= 2;
 
 		if (translateBtn) {
 			translateBtn.disabled = true;
@@ -579,9 +575,21 @@ function initializeTranslator(host: HTMLElement, context: ToolContext) {
 		activeVoiceChunks = [];
 		modalEl.classList.add('is-translating');
 		textEl.classList.remove('placeholder', 'is-rendered');
-		const sourceLineCount = extracted.split('\n').filter((line) => line.trim()).length;
-		textEl.replaceChildren(buildSkeleton(lockedHeight, sourceLineCount));
-		setStatus('translating…');
+
+		if (isShortSelection) {
+			// No height lock — the body stays at its natural content height so
+			// the loading state is as tall as the typing dots alone.
+			textEl.replaceChildren(buildInlineLoading());
+			setStatus('translating…');
+		} else {
+			const measuredHeight = bodyEl?.offsetHeight ?? 0;
+			const lockedHeight = Math.max(80, Math.min(220, measuredHeight || 120));
+			if (bodyEl) {
+				bodyEl.style.height = `${lockedHeight}px`;
+			}
+			textEl.replaceChildren(buildSkeleton(lockedHeight, sourceLineCount));
+			setStatus('translating…');
+		}
 
 		// Accumulated result (for the Copy button + the exact-selection cache)
 		// and the progressive-stream state. Translated blocks are staged in a
@@ -945,11 +953,10 @@ function initializeTranslator(host: HTMLElement, context: ToolContext) {
 						body.style.height = '';
 						body.classList.remove('is-streaming-grow');
 					}, 380);
-				} else {
-					// Nothing streamed (e.g. an empty/tiny translation fell through
-					// to revealText). Ease the height to the result instead of
-					// snapping from the locked loading height — so small text never
-					// "jumps" to its final size.
+				} else if (bodyEl.style.height) {
+					// A height was locked (long selection, no streaming). Ease it
+					// to the result instead of snapping — so the modal settles
+					// smoothly to the final content height.
 					const body = bodyEl;
 					body.classList.add('is-streaming-grow');
 					body.style.height = `${body.scrollHeight}px`;
@@ -1378,6 +1385,36 @@ function buildStreamIndicator(): HTMLElement {
 	return wrap;
 }
 
+// Minimal inline loading indicator for short selections — just the typing
+// dots (› ···) with no skeleton box, no shimmer lines, no scan beam. Sits
+// where the result will appear, barely taller than the text itself, so a
+// one-line selection gets a loading state with no empty space and no jump.
+function buildInlineLoading(): HTMLElement {
+	const wrap = document.createElement('div');
+	wrap.className = 'translator-inline-loading';
+	wrap.setAttribute('aria-hidden', 'true');
+
+	const typing = document.createElement('div');
+	typing.className = 't-skel-typing';
+
+	const sym = document.createElement('span');
+	sym.className = 't-skel-sym';
+	sym.textContent = '›';
+	typing.append(sym);
+
+	const dots = document.createElement('span');
+	dots.className = 't-skel-dots';
+	for (let i = 0; i < 3; i += 1) {
+		const dot = document.createElement('span');
+		dot.className = 't-skel-dot';
+		dots.append(dot);
+	}
+	typing.append(dots);
+	wrap.append(typing);
+
+	return wrap;
+}
+
 function buildSkeleton(availableHeight: number, lineHint?: number): HTMLElement {
 	const wrap = document.createElement('div');
 	wrap.className = 'translator-skeleton';
@@ -1385,9 +1422,10 @@ function buildSkeleton(availableHeight: number, lineHint?: number): HTMLElement 
 
 	// The skeleton sizes to the locked loading box so the scan beam covers it,
 	// but the shimmer lines + typing dots pack tightly at the top (see CSS:
-	// .t-skel-lines is flex: 0 0 auto) — so a small selection gets a compact
-	// cluster with no gap, not a tall stretched placeholder.
-	const contentHeight = Math.max(44, Math.min(200, availableHeight - 32));
+	// .t-skel-lines is flex: 0 0 auto) — so a small selection gets a minimal
+	// cluster with no gap, not a tall stretched placeholder. The body padding
+	// is tightened during translation (10px top/bottom), so subtract 20.
+	const contentHeight = Math.max(26, Math.min(200, availableHeight - 20));
 	wrap.style.height = `${contentHeight}px`;
 
 	const scan = document.createElement('div');
@@ -1399,11 +1437,12 @@ function buildSkeleton(availableHeight: number, lineHint?: number): HTMLElement 
 	wrap.append(lines);
 
 	// Scale the shimmer line count to the source text so a one-line selection
-	// gets a compact skeleton (no giant placeholder) and a long selection gets
-	// a fuller one. The hint is clamped, then capped by what the box can hold.
+	// gets a minimal skeleton (a single line + the typing dots) and a long
+	// selection gets a fuller one. The hint is clamped, then capped by what the
+	// box can hold.
 	const pattern = ['full', 'full', 'long', 'full', 'med', 'full', 'long'];
-	const hinted = lineHint && lineHint > 0 ? Math.min(8, lineHint) : 3;
-	const lineCount = Math.min(hinted, Math.max(2, Math.floor((contentHeight - 28) / 16)));
+	const hinted = lineHint && lineHint > 0 ? Math.min(8, lineHint) : 2;
+	const lineCount = Math.min(hinted, Math.max(1, Math.floor((contentHeight - 22) / 16)));
 
 	for (let i = 0; i < lineCount; i += 1) {
 		const line = document.createElement('div');
