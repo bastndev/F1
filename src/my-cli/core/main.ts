@@ -19,7 +19,7 @@ import {
 	type AgentLaunchExtensionMode,
 	type AgentLaunchSource
 } from '../shared/agent-launch-guard';
-import { SmartService } from '../../my-plus/plus';
+import { SmartService, SMART_READY_MESSAGE } from '../../my-plus/plus';
 
 export class MyCliViewProvider implements vscode.WebviewViewProvider, vscode.Disposable {
 	public static readonly viewType = 'f1.myCli';
@@ -350,11 +350,14 @@ export class MyCliViewProvider implements vscode.WebviewViewProvider, vscode.Dis
 
 		const root = this._workspaceRoot();
 		// Build the graph BEFORE writing the rules, so graphify doesn't index our own
-		// rules file into the project graph.
-		const graphReady = this.smartService.buildGraph(root);
+		// rules file into the project graph. Abort it if session creation fails so we
+		// don't leave a spawned graphify running unattended.
+		const graphController = new AbortController();
+		const graphReady = this.smartService.buildGraph(root, graphController.signal);
 
 		const sessionId = await this.sessionManager.createSession(agentLabel, { smart: true });
 		if (!sessionId) {
+			graphController.abort();
 			return;
 		}
 
@@ -365,9 +368,11 @@ export class MyCliViewProvider implements vscode.WebviewViewProvider, vscode.Dis
 		this.smartService.writeRules(root, this.smartService.loadRules(this._extensionUri.fsPath));
 		this.sessionManager.sendText(sessionId, this.smartService.composePrompt(hasGraph));
 
-		// Keep the loading overlay up through the whole internal prep: when the agent's
-		// first reply settles, clean up the generated files and only THEN reveal the chat.
-		// A hard cap guarantees the overlay never gets stuck if the agent never replies.
+		// Keep the loading overlay up through the whole internal prep: when the
+		// agent's first reply settles, verify it surfaced the ready message the
+		// priming prompt demands, then clean up + reveal. A hard cap guarantees
+		// the overlay never gets stuck if the agent never replies (or never says
+		// the ready line) — it reveals unconditionally as the fallback.
 		let revealed = false;
 		const reveal = () => {
 			if (revealed) {
@@ -377,7 +382,17 @@ export class MyCliViewProvider implements vscode.WebviewViewProvider, vscode.Dis
 			this.smartService.cleanup(root);
 			void this._activeWebview?.postMessage({ type: 'smart.dismiss' });
 		};
-		this.sessionManager.onceResponseSettled(sessionId, reveal);
+		const onSettled = () => {
+			if (revealed) {
+				return;
+			}
+			if (!this.sessionManager.bufferContains(sessionId, SMART_READY_MESSAGE)) {
+				console.warn('[smart] agent first reply did not contain the ready message; waiting for the hard cap');
+				return;
+			}
+			reveal();
+		};
+		this.sessionManager.onceResponseSettled(sessionId, onSettled);
 		setTimeout(reveal, 90000);
 	}
 

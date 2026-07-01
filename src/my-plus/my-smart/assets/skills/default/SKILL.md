@@ -30,13 +30,24 @@ These rules define how you operate here — follow them for every task in this s
 - After editing, run the closest available check or build and report the real result. If something
   fails, or you skipped a step, say so plainly — never claim success you didn't verify.
 
+## How to write code
+- Comment only when it adds the why, a runtime dependency, or a warning about what breaks if
+  it's removed — never what the code already makes obvious. Skip anything that just restates
+  the next line.
+- Let names and structure carry the meaning before reaching for a comment. A comment is a
+  fallback, not a substitute for a clearer name or a smaller function.
+
 ## Mode keywords
 - If the user says **"te leo"** or **"I read to you"**, switch to **conversational mode**:
   do not write code, edit files, or run commands — only answer the question asked.
 - Stay in conversational mode until the user gives a new task or explicitly asks you to work again.
 
 ## How to respond
-- Be clear and direct. Answer at whatever length the task genuinely needs — no padding, no filler.
+- Be clear and direct — no padding, no filler. Default to short: report what changed, not why
+  or how it works, unless the message explicitly asks for that.
+  - Trigger words: **"explain"**, **"explain that"**, **"report"**, **"teach me"**, **"elaborate"**,
+    **"go deeper"**, **"step by step"**, **"walk me through"**, **"guide me"**,
+    **"how does this work"**, **"Give me a brief and concise report"**.
 - Reference code as `file:line` so it is easy to follow.
 - State your assumptions, and ask when a decision is genuinely the user's to make instead of guessing.
 - When you finish a task, signal completion based on complexity:

@@ -23,6 +23,13 @@ const RULES_ASSET_SEGMENTS = ['src', 'my-plus', 'my-smart', 'assets', 'skills', 
 export class SmartService {
 	private readonly memory = new MemoryService();
 
+	constructor() {
+		// Smart mode always builds the project map + syncs the AGENTS.md hub.
+		// Without this, MemoryService.onLaunch() early-returns on `!enabled`
+		// and the structural map + managed block never get written.
+		this.memory.setEnabled(true);
+	}
+
 	/** Write the built-in rules into .f1/smart-rules.md (best-effort). */
 	public writeRules(root: string | undefined, rulesContent: string | undefined): void {
 		if (rulesContent) {
@@ -61,8 +68,10 @@ export class SmartService {
 	 * Run `graphify update .` (re-extract the code graph — no LLM, free) to produce
 	 * graphify-out/GRAPH_REPORT.md, the compact map the CLI reads. Resolves true if
 	 * the report was produced. Best-effort: missing graphify / failure → false.
+	 * Pass an AbortSignal to cancel the spawned graphify early (the 'error'
+	 * event from an abort is treated as a silent cancel, not a failure).
 	 */
-	public buildGraph(root: string | undefined): Promise<boolean> {
+	public buildGraph(root: string | undefined, signal?: AbortSignal): Promise<boolean> {
 		return new Promise((resolve) => {
 			if (!root) {
 				resolve(false);
@@ -71,24 +80,44 @@ export class SmartService {
 
 			let child: ReturnType<typeof spawn>;
 			try {
-				child = spawn('graphify', ['update', '.'], { cwd: root, stdio: 'ignore' });
-			} catch {
+				child = spawn('graphify', ['update', '.'], {
+					cwd: root,
+					stdio: ['ignore', 'ignore', 'pipe'],
+					signal,
+				});
+			} catch (error) {
+				console.error('[smart] graphify spawn failed:', error);
 				resolve(false);
 				return;
 			}
+
+			let stderr = '';
+			child.stderr?.on('data', (chunk: Buffer) => { stderr += chunk.toString(); });
 
 			const timer = setTimeout(() => {
 				try { child.kill(); } catch { /* already gone */ }
 				resolve(false);
 			}, GRAPH_BUILD_TIMEOUT_MS);
 
-			child.on('error', () => {
+			child.on('error', (err: NodeJS.ErrnoException & { name?: string }) => {
 				clearTimeout(timer);
+				if (err.name === 'AbortError') {
+					resolve(false); // intentional cancel — silent
+					return;
+				}
+				console.error('[smart] graphify failed:', err.message);
 				resolve(false);
 			});
 			child.on('exit', (code) => {
 				clearTimeout(timer);
-				resolve(code === 0 && fs.existsSync(path.join(root, GRAPH_REPORT_REL)));
+				const ok = code === 0 && fs.existsSync(path.join(root, GRAPH_REPORT_REL));
+				if (!ok && !signal?.aborted) {
+					const detail = code === 0
+						? 'ran but produced no GRAPH_REPORT.md'
+						: `exited with code ${code}`;
+					console.error(`[smart] graphify ${detail}${stderr.trim() ? `\n${stderr.trim()}` : ''}`);
+				}
+				resolve(ok);
 			});
 		});
 	}

@@ -34,6 +34,10 @@ const assertRuleInvariants = (): void => {
 const invariants: readonly string[] = RULE_INVARIANTS;
 const stripped: string = extractSkillBody('---\nname: x\n---\n# body\n');
 
-void assertRuleInvariants;
+// Actually run the invariant check — fails if any load-bearing phrase was
+// dropped from SKILL.md. (Runs when a test runner is wired up; type-verified
+// by `tsc --noEmit` today.)
+assertRuleInvariants();
+
 void invariants;
 void stripped;
