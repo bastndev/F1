@@ -207,6 +207,10 @@
 	scrollbar-gutter: stable;
 	overscroll-behavior: contain;
 	padding: 16px 18px;
+	/* Ease the padding change so that when the skeleton's tighter padding
+	   (is-translating) relaxes back to the resting value as the result lands, the
+	   text eases down instead of jumping ~6px. */
+	transition: padding 0.34s cubic-bezier(0.22, 1, 0.36, 1);
 	scrollbar-width: thin;
 	scrollbar-color: rgba(175, 169, 236, 0.2) transparent;
 }
