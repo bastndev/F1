@@ -104,6 +104,8 @@ const writeVoiceFinishPreference = (enabled: boolean) => {
 };
 
 
+const smartCreateIconSvg = '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M15.5 13a3.5 3.5 0 0 0 -3.5 3.5v1a3.5 3.5 0 0 0 7 0v-1.8" /><path d="M8.5 13a3.5 3.5 0 0 1 3.5 3.5v1a3.5 3.5 0 0 1 -7 0v-1.8" /><path d="M17.5 16a3.5 3.5 0 0 0 0 -7h-.5" /><path d="M19 9.3v-2.8a3.5 3.5 0 0 0 -7 0" /><path d="M6.5 16a3.5 3.5 0 0 1 0 -7h.5" /><path d="M5 9.3v-2.8a3.5 3.5 0 0 1 7 0v10" /></svg>';
+
 export const createTabController = (options: TabControllerOptions) => {
 	const createButton = getRequiredElement<HTMLButtonElement>('cli-create-button');
 	const createButtonLabel = getRequiredElement<HTMLSpanElement>('cli-create-button-label');
@@ -268,7 +270,7 @@ export const createTabController = (options: TabControllerOptions) => {
 	const createCurrentAgentSession = () => {
 		if (currentAgentLabel) {
 			dismissToolModal();
-			options.onCreate(currentAgentLabel);
+			options.onCreate(currentAgentLabel, isAltPressed ? true : undefined);
 		}
 	};
 
@@ -287,12 +289,18 @@ export const createTabController = (options: TabControllerOptions) => {
 	};
 
 	const updateCreateButtonVisuals = () => {
-		// Show "-" as soon as Alt is pressed (anywhere), no hover required
+		// Show the brain icon as soon as Alt is pressed (anywhere) — signalling
+		// that clicking now creates the CLI in Smart + Skills mode.
 		if (isAltPressed) {
-			createButtonLabel.textContent = '-';
+			createButtonLabel.innerHTML = smartCreateIconSvg;
+			createButton.title = 'New CLI (Smart + Skills)';
+			createButton.setAttribute('aria-label', 'New CLI (Smart + Skills)');
 		} else {
 			createButtonLabel.textContent = currentSessionCount >= 3 && currentSessionCount <= 9 ? String(currentSessionCount) : '+';
+			createButton.title = 'New CLI';
+			createButton.setAttribute('aria-label', 'New CLI');
 		}
+		createButton.classList.toggle('is-smart-create', isAltPressed);
 		sessionList.classList.toggle('is-alt-close-mode', isAltPressed);
 		agentMenu.classList.toggle('is-alt-smart-mode', isAltPressed);
 	};
@@ -390,12 +398,8 @@ export const createTabController = (options: TabControllerOptions) => {
 		return true;
 	};
 
-	createButton.addEventListener('click', (event) => {
-		if (event.altKey) {
-			closeActiveSession();
-		} else {
-			createCurrentAgentSession();
-		}
+	createButton.addEventListener('click', () => {
+		createCurrentAgentSession();
 	});
 
 	createButton.addEventListener('mouseenter', (event) => {
