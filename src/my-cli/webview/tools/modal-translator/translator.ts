@@ -559,14 +559,15 @@ function initializeTranslator(host: HTMLElement, context: ToolContext) {
 			return;
 		}
 
-		// Use a compact loading box. We deliberately do not freeze the body at its
-		// previous (possibly tall) height; instead we cap it so the skeleton stays
-		// small and the modal only expands once real content arrives. When auto-
-		// translate fires before the panel is attached the measurement is ~0, so
-		// fall back to a comfortable minimum; the streaming grow takes over from
-		// there.
+		// Size the loading box to the source text's actual rendered height so a
+		// small selection gets a small skeleton (no sticking out, no empty space
+		// below) and a tall selection gets a tall one. The floor keeps the compact
+		// skeleton legible for very short selections; the cap stops a very tall
+		// selection from locking the whole panel. When auto-translate fires before
+		// the panel is attached the measurement is ~0, so the fallback acts as the
+		// floor; the streaming grow takes over from there.
 		const measuredHeight = bodyEl?.offsetHeight ?? 0;
-		const lockedHeight = Math.max(100, Math.min(150, measuredHeight || 220));
+		const lockedHeight = Math.max(64, Math.min(220, measuredHeight || 92));
 		if (bodyEl) {
 			bodyEl.style.height = `${lockedHeight}px`;
 		}
@@ -578,7 +579,8 @@ function initializeTranslator(host: HTMLElement, context: ToolContext) {
 		activeVoiceChunks = [];
 		modalEl.classList.add('is-translating');
 		textEl.classList.remove('placeholder', 'is-rendered');
-		textEl.replaceChildren(buildSkeleton(lockedHeight));
+		const sourceLineCount = extracted.split('\n').filter((line) => line.trim()).length;
+		textEl.replaceChildren(buildSkeleton(lockedHeight, sourceLineCount));
 		setStatus('translating…');
 
 		// Accumulated result (for the Copy button + the exact-selection cache)
@@ -944,8 +946,18 @@ function initializeTranslator(host: HTMLElement, context: ToolContext) {
 						body.classList.remove('is-streaming-grow');
 					}, 380);
 				} else {
-					bodyEl.style.height = '';
-					bodyEl.classList.remove('is-streaming-grow');
+					// Nothing streamed (e.g. an empty/tiny translation fell through
+					// to revealText). Ease the height to the result instead of
+					// snapping from the locked loading height — so small text never
+					// "jumps" to its final size.
+					const body = bodyEl;
+					body.classList.add('is-streaming-grow');
+					body.style.height = `${body.scrollHeight}px`;
+					growSettleTimer = setTimeout(() => {
+						growSettleTimer = undefined;
+						body.style.height = '';
+						body.classList.remove('is-streaming-grow');
+					}, 380);
 				}
 			}
 		}
@@ -1366,14 +1378,16 @@ function buildStreamIndicator(): HTMLElement {
 	return wrap;
 }
 
-function buildSkeleton(availableHeight: number): HTMLElement {
+function buildSkeleton(availableHeight: number, lineHint?: number): HTMLElement {
 	const wrap = document.createElement('div');
 	wrap.className = 'translator-skeleton';
 	wrap.setAttribute('aria-hidden', 'true');
 
-	// The skeleton lives inside a deliberately compact loading box; it should
-	// hint at text arriving, not fill the whole panel like a giant placeholder.
-	const contentHeight = Math.max(60, Math.min(150, availableHeight - 32));
+	// The skeleton sizes to the locked loading box so the scan beam covers it,
+	// but the shimmer lines + typing dots pack tightly at the top (see CSS:
+	// .t-skel-lines is flex: 0 0 auto) — so a small selection gets a compact
+	// cluster with no gap, not a tall stretched placeholder.
+	const contentHeight = Math.max(44, Math.min(200, availableHeight - 32));
 	wrap.style.height = `${contentHeight}px`;
 
 	const scan = document.createElement('div');
@@ -1384,10 +1398,12 @@ function buildSkeleton(availableHeight: number): HTMLElement {
 	lines.className = 't-skel-lines';
 	wrap.append(lines);
 
-	// Just a few thin shimmer lines so the loading state feels minimal. Widths
-	// stay close to full-width for a natural prose silhouette.
+	// Scale the shimmer line count to the source text so a one-line selection
+	// gets a compact skeleton (no giant placeholder) and a long selection gets
+	// a fuller one. The hint is clamped, then capped by what the box can hold.
 	const pattern = ['full', 'full', 'long', 'full', 'med', 'full', 'long'];
-	const lineCount = Math.min(6, Math.max(3, Math.floor((contentHeight - 34) / 18)));
+	const hinted = lineHint && lineHint > 0 ? Math.min(8, lineHint) : 3;
+	const lineCount = Math.min(hinted, Math.max(2, Math.floor((contentHeight - 28) / 16)));
 
 	for (let i = 0; i < lineCount; i += 1) {
 		const line = document.createElement('div');

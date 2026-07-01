@@ -39,15 +39,16 @@
 	100% { top: 108%; }
 }
 
-/* ── Line field — clusters lines at the top like real text, leaving the
-   typing indicator at the bottom. With a compact loading box this reads as
-   a small snippet rather than a huge empty page. */
+/* ── Line field — clusters lines at the top like real text, with the
+   typing indicator sitting right below the last line. The section sizes
+   to its own content (flex: 0 0 auto) so it never stretches to fill the
+   box and leave a gap between the lines and the typing dots. */
 .t-skel-lines {
-	flex: 1 1 auto;
+	flex: 0 0 auto;
 	display: flex;
 	flex-direction: column;
 	justify-content: flex-start;
-	gap: 11px;
+	gap: 9px;
 	min-height: 0;
 	overflow: hidden;
 }
@@ -79,7 +80,7 @@
 .t-skel-line.short { width: 44%;  opacity: 0.58; }
 
 /* Paragraph break — extra air before the line */
-.t-skel-line.t-skel-gap { margin-top: 14px; }
+.t-skel-line.t-skel-gap { margin-top: 11px; }
 
 /* Staggered timing so the sweep feels organic, not mechanical */
 .t-skel-line:nth-child(2n)   { animation-duration: 5.4s; animation-delay: -0.7s; }
