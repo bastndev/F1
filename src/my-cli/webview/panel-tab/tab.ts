@@ -21,7 +21,7 @@ export type CliToolId = 'translate' | 'keymaps' | 'prompt' | 'use' | 'commands';
 
 type TabControllerOptions = {
 	getAgentIcon: (label: string) => CliAgentIcon | undefined;
-	onCreate: (agent: string) => void;
+	onCreate: (agent: string, smart?: boolean) => void;
 	onCreateCustomCli: () => void;
 	onCycleSession: (offset: 1 | -1) => void;
 	onSwitch: (sessionId: string) => void;
@@ -208,13 +208,13 @@ export const createTabController = (options: TabControllerOptions) => {
 		}
 	};
 
-	const selectAgent = (label: string) => {
+	const selectAgent = (label: string, smart?: boolean) => {
 		dismissToolModal();
 		currentAgentLabel = label;
 		syncAgentPicker();
 		setAgentMenuOpen(false);
 		agentButton.focus();
-		options.onCreate(label);
+		options.onCreate(label, smart);
 	};
 
 	const focusAgentOption = (offset: 1 | -1) => {
@@ -294,6 +294,7 @@ export const createTabController = (options: TabControllerOptions) => {
 			createButtonLabel.textContent = currentSessionCount >= 3 && currentSessionCount <= 9 ? String(currentSessionCount) : '+';
 		}
 		sessionList.classList.toggle('is-alt-close-mode', isAltPressed);
+		agentMenu.classList.toggle('is-alt-smart-mode', isAltPressed);
 	};
 
 	const updateCreateButtonLabel = (sessionCount: number) => {
@@ -448,7 +449,7 @@ export const createTabController = (options: TabControllerOptions) => {
 			return;
 		}
 		if (optionButton?.dataset.agentLabel) {
-			selectAgent(optionButton.dataset.agentLabel);
+			selectAgent(optionButton.dataset.agentLabel, (event.altKey || isAltPressed) ? true : undefined);
 		}
 	});
 
@@ -470,7 +471,7 @@ export const createTabController = (options: TabControllerOptions) => {
 			}
 			if (optionButton?.dataset.agentLabel) {
 				event.preventDefault();
-				selectAgent(optionButton.dataset.agentLabel);
+				selectAgent(optionButton.dataset.agentLabel, event.altKey ? true : undefined);
 			}
 		}
 	});
@@ -595,11 +596,16 @@ export const createTabController = (options: TabControllerOptions) => {
 				option.append(fallbackIcon);
 			}
 
-			const text = document.createElement('span');
-			text.className = 'agent-picker-option-label';
-			text.textContent = agent.label;
-			option.append(text);
-			agentMenu.append(option);
+		const text = document.createElement('span');
+		text.className = 'agent-picker-option-label';
+		text.textContent = agent.label;
+		option.append(text);
+
+		const smartDot = document.createElement('span');
+		smartDot.className = 'agent-picker-option-smart-dot';
+		option.append(smartDot);
+
+		agentMenu.append(option);
 		}
 
 		const customOption = document.createElement('button');

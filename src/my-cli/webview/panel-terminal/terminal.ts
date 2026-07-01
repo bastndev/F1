@@ -672,10 +672,10 @@ const copyToTranslate = createCopyToTranslateWatcher({
 
 const tabController = createTabController({
 	getAgentIcon,
-	onCreate: (agent) => vscode.postMessage(createCliCreateMessage(agent, {
+	onCreate: (agent, smart) => vscode.postMessage(createCliCreateMessage(agent, {
 		source: 'panel',
 		extensionMode: 'unknown'
-	})),
+	}, smart)),
 	onCreateCustomCli: () => vscode.postMessage({ type: 'customCli.open', source: 'panel' }),
 	onCycleSession: (offset) => {
 		switchSessionByOffset(offset);

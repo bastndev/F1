@@ -62,11 +62,13 @@ export const getAgentLaunchGuardMessage = (
 
 export const createCliCreateMessage = (
 	agentLabel: string,
-	context: AgentLaunchGuardContext
+	context: AgentLaunchGuardContext,
+	smart?: boolean
 ) => {
 	return {
 		type: 'cli.create' as const,
 		agent: agentLabel,
-		launchGuard: getAgentLaunchGuardMessage(agentLabel, context)
+		launchGuard: getAgentLaunchGuardMessage(agentLabel, context),
+		smart
 	};
 };
