@@ -22,6 +22,11 @@ const minVoiceChunkChars = 200;
 // and the host's long-text threshold: blocks this big translate in one fast
 // pass yet are small enough that a long answer arrives in several pieces.
 const maxStreamBlockChars = 900;
+// List items are batched into groups so the reading band highlights a compact
+// run (~4 items) instead of one giant band over a 20-item list. The char cap
+// prevents very long items from making a 4-item batch too tall.
+const maxListBatchItems = 4;
+const maxListBatchChars = 400;
 
 type TranslatorVoiceChunk = {
 	text: string;
@@ -278,25 +283,74 @@ function mergeTrailingVoiceUnit(units: TranslatorVoiceChunk[]): TranslatorVoiceC
 	return [...units.slice(0, -2), mergeVoiceUnits(previous, last)];
 }
 
+function makeChunkFromElements(elements: HTMLElement[]): TranslatorVoiceChunk {
+	return {
+		text: elements.map((el) => normalizeSpeechText(el.textContent || '')).join('\n\n'),
+		elements,
+	};
+}
+
 function buildVoiceChunks(textEl: HTMLElement): TranslatorVoiceChunk[] {
 	const renderedBlocks = Array.from(textEl.children).filter(
 		(element): element is HTMLElement =>
 			element instanceof HTMLElement && !element.classList.contains('translator-streaming'),
 	);
-	const sourceBlocks = renderedBlocks.length ? renderedBlocks : [textEl];
+	if (!renderedBlocks.length) {
+		return mergeTrailingVoiceUnit([makeChunkFromElements([textEl])]).flatMap(unitToVoiceChunks);
+	}
 
-	const accumulator = createVoiceUnitAccumulator();
+	// Walk blocks: non-list blocks go through the structural accumulator
+	// (opener+body grouping), while <ul>/<ol> are split into batched <li>
+	// groups so the reading band covers ~4 items at a time instead of one
+	// giant band over a 20-item list.
 	const units: TranslatorVoiceChunk[] = [];
-	for (const element of sourceBlocks) {
-		const completed = accumulator.add(element);
-		if (completed) {
-			units.push(completed);
+	let nonListBlocks: HTMLElement[] = [];
+
+	const flushNonList = () => {
+		if (!nonListBlocks.length) {
+			return;
+		}
+		const accumulator = createVoiceUnitAccumulator();
+		for (const element of nonListBlocks) {
+			const completed = accumulator.add(element);
+			if (completed) {
+				units.push(completed);
+			}
+		}
+		const tail = accumulator.flush();
+		if (tail) {
+			units.push(tail);
+		}
+		nonListBlocks = [];
+	};
+
+	for (const block of renderedBlocks) {
+		if (block.tagName === 'UL' || block.tagName === 'OL') {
+			flushNonList();
+			const items = Array.from(block.children).filter(
+				(child): child is HTMLElement => child instanceof HTMLElement && child.tagName === 'LI',
+			);
+			const listItems = items.length ? items : [block];
+
+			let batch: HTMLElement[] = [];
+			let batchLen = 0;
+			for (const item of listItems) {
+				if (batch.length >= maxListBatchItems || batchLen >= maxListBatchChars) {
+					units.push(makeChunkFromElements(batch));
+					batch = [];
+					batchLen = 0;
+				}
+				batch.push(item);
+				batchLen += (item.textContent?.length ?? 0) + 2;
+			}
+			if (batch.length) {
+				units.push(makeChunkFromElements(batch));
+			}
+		} else {
+			nonListBlocks.push(block);
 		}
 	}
-	const tail = accumulator.flush();
-	if (tail) {
-		units.push(tail);
-	}
+	flushNonList();
 
 	return mergeTrailingVoiceUnit(units).flatMap(unitToVoiceChunks);
 }
@@ -1317,38 +1371,102 @@ function cacheParagraphPairs(target: string, source: string, translated: string)
 	}
 }
 
+const orderedItemPattern = /^\d{1,3}[.)]\s+.*/;
+const bulletItemPattern = /^[-*•]\s+.*/;
+
+const isListItemLine = (line: string): boolean => {
+	const trimmed = line.trim();
+	return orderedItemPattern.test(trimmed) || bulletItemPattern.test(trimmed);
+};
+
+function splitListRun(lines: string[]): string[] {
+	const batches: string[] = [];
+	let batch: string[] = [];
+	let batchLen = 0;
+	for (const line of lines) {
+		if (batch.length >= maxListBatchItems || batchLen >= maxListBatchChars) {
+			batches.push(batch.join('\n'));
+			batch = [];
+			batchLen = 0;
+		}
+		batch.push(line);
+		batchLen += line.length + 1;
+	}
+	if (batch.length) {
+		batches.push(batch.join('\n'));
+	}
+	return batches;
+}
+
 // Break a run of prose into voice-sized blocks on paragraph boundaries so a
 // long translation streams in piece by piece instead of arriving in one slow
-// lump. Paragraphs are grouped up to maxStreamBlockChars; a single paragraph
-// longer than that is left whole (the host chunks it further internally).
+// lump. List runs (numbered or bulleted) are detected and batched into groups
+// of ~4 items / ~400 chars so each batch renders as its own <ol>/<ul> and the
+// reading band highlights a compact run instead of the entire list at once.
 function splitForStreaming(text: string): string[] {
 	const trimmed = text.trim();
 	if (!trimmed) {
 		return [];
 	}
-	if (trimmed.length <= maxStreamBlockChars) {
-		return [trimmed];
-	}
 
-	const paragraphs = trimmed.split(/\n[ \t]*\n+/).map((part) => part.trim()).filter(Boolean);
+	const lines = trimmed.split('\n');
 	const blocks: string[] = [];
-	let current = '';
+	let proseLines: string[] = [];
+	let listLines: string[] = [];
+	let prevWasListItem = false;
 
-	for (const paragraph of paragraphs) {
-		if (!current) {
-			current = paragraph;
-			continue;
+	const flushProse = () => {
+		if (!proseLines.length) {
+			return;
 		}
-		if (current.length + paragraph.length + 2 > maxStreamBlockChars) {
+		const proseText = proseLines.join('\n');
+		proseLines = [];
+		const paragraphs = proseText.split(/\n[ \t]*\n+/).map((part) => part.trim()).filter(Boolean);
+		let current = '';
+		for (const paragraph of paragraphs) {
+			if (!current) {
+				current = paragraph;
+			} else if (current.length + paragraph.length + 2 > maxStreamBlockChars) {
+				blocks.push(current);
+				current = paragraph;
+			} else {
+				current = `${current}\n\n${paragraph}`;
+			}
+		}
+		if (current) {
 			blocks.push(current);
-			current = paragraph;
+		}
+	};
+
+	const flushListRun = () => {
+		if (!listLines.length) {
+			return;
+		}
+		blocks.push(...splitListRun(listLines));
+		listLines = [];
+	};
+
+	for (const line of lines) {
+		if (!line.trim()) {
+			flushProse();
+			flushListRun();
+			prevWasListItem = false;
+		} else if (isListItemLine(line)) {
+			flushProse();
+			listLines.push(line);
+			prevWasListItem = true;
+		} else if (prevWasListItem) {
+			// Lazy continuation of the last list item — stays with the list run.
+			listLines.push(line);
 		} else {
-			current = `${current}\n\n${paragraph}`;
+			flushListRun();
+			proseLines.push(line);
+			prevWasListItem = false;
 		}
 	}
-	if (current) {
-		blocks.push(current);
-	}
+	flushProse();
+	flushListRun();
+
 	return blocks;
 }
 
