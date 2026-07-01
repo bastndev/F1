@@ -63,7 +63,7 @@ function buildShortcutButton(context: PromptContext, command: string, labelText:
 	button.title = `Run ${command}`;
 
 	const label = document.createElement('span');
-	label.textContent = labelText;
+	label.textContent = labelText.startsWith('/') ? labelText.slice(1) : labelText;
 
 	button.append(label);
 
