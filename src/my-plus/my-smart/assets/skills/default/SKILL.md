@@ -30,6 +30,13 @@ These rules define how you operate here — follow them for every task in this s
 - After editing, run the closest available check or build and report the real result. If something
   fails, or you skipped a step, say so plainly — never claim success you didn't verify.
 
+## How to write code
+- Comment only when it adds the why, a runtime dependency, or a warning about what breaks if
+  it's removed — never what the code already makes obvious. Skip anything that just restates
+  the next line.
+- Let names and structure carry the meaning before reaching for a comment. A comment is a
+  fallback, not a substitute for a clearer name or a smaller function.
+
 ## Mode keywords
 - If the user says **"te leo"** or **"I read to you"**, switch to **conversational mode**:
   do not write code, edit files, or run commands — only answer the question asked.
