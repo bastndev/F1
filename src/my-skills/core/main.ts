@@ -1,9 +1,6 @@
 import * as vscode from 'vscode';
-import * as fs from 'fs';
-import { fetchAllTimeSkillsPage, fetchFlameSkills, fetchOfficialSkillsForOwner, fetchOfficialSkillSources, fetchTrending24hSkills, searchMarketplaceSkills } from '../screens/install-skill/core/marketplace';
-import { installMarketplaceSkill } from '../screens/install-skill/core/installer';
-import type { InstallMarketplaceSkill, InstallSkillInstallMessage, InstallSkillsSearchRequestMessage, OfficialSkillSource, SkillsLockFile } from '../screens/install-skill/core/types';
-import { FLAME_SKILL_REPO_URL, FLAME_SKILL_SOURCE } from '../screens/install-skill/ui/panels/trending-skill/flame/data/flame-skills';
+import { FLAME_SKILL_REPO_URL } from '../screens/install-skill/ui/panels/trending-skill/flame/data/flame-skills';
+import { InstallSkillsController } from './install-skills-controller';
 import { ROOT_SKILL_FILE_NAMES, ROOT_SKILL_FOLDER_WATCH_PATTERNS, deleteWorkspaceRootSkill, getWorkspaceRootSkills, setWorkspaceRootSkillEnabled } from '../screens/local-skill/core/local-skills';
 import { deleteSavedSkill, enableSavedSkill, getSavedSkills, isSavedSkillInWorkspace, saveSkill } from '../screens/local-skill/core/saved-skills';
 import type { LocalSkillDeleteMessage, LocalSkillDeleteSavedMessage, LocalSkillEnableSavedMessage, LocalSkillOpenMessage, LocalSkillSaveMessage, LocalSkillSetEnabledMessage } from '../screens/local-skill/core/types';
@@ -18,7 +15,7 @@ import { designTypographyOptions } from '../screens/create-skill/ui/chat-create/
 import { createSkillBoilerplate } from '../screens/create-skill/core/chat-create-core/skill-generator';
 import { translateQuery } from '../screens/create-skill/core/shared/project-translation';
 import { resetFastContext, updateFastDescription, updateFastName, updateFastTechnologies, waitForPendingBackgroundFetches } from '../screens/create-skill/core/chat-create-core/fast-context-manager';
-import { AsyncListSection } from './install-state';
+import { getNonce, getWorkspaceName, getSkillsWebviewHtml, getCreateSkillSupportHtml } from './skills-webview-html';
 import {
 	isWebviewMessage,
 	isLocalSkillsRequestMessage,
@@ -66,33 +63,16 @@ export class MySkillsViewProvider implements vscode.WebviewViewProvider {
 	private _localSkillWatchers: vscode.FileSystemWatcher[] = [];
 	private readonly _onDidSkillsChange = new vscode.EventEmitter<void>();
 	public readonly onDidSkillsChange = this._onDidSkillsChange.event;
-	private _installSkills: InstallMarketplaceSkill[] = [];
-	private _isLoadingInstallSkills = false;
-	private _installSkillsError: string | null = null;
-	private _installSkillsPage = -1;
-	private _installSkillsHasMore = true;
-	private _installSkillsTotal: number | null = null;
-	private _searchSkillsByQuery = new Map<string, InstallMarketplaceSkill[]>();
-	private readonly _trending24h = new AsyncListSection<InstallMarketplaceSkill[]>(
-		[],
-		skills => skills.length > 0,
-		skills => (skills.length === 0 ? 'No trending skills found. Try refreshing.' : null),
-	);
-	private readonly _flame = new AsyncListSection<InstallMarketplaceSkill[]>(
-		[],
-		skills => skills.length > 0,
-		skills => (skills.length === 0 ? 'No skills found in the flame repository.' : null),
-	);
-	private _createSearchSkills: InstallMarketplaceSkill[] = [];
-	private readonly _officialSources = new AsyncListSection<OfficialSkillSource[]>(
-		[],
-		sources => sources.length > 0,
-		sources => (sources.length === 0 ? 'No official sources found. Try refreshing.' : null),
-	);
-	private _officialSkillsByOwner = new Map<string, InstallMarketplaceSkill[]>();
-	private _loadingOfficialOwners = new Set<string>();
-	private _officialOwnerErrors = new Map<string, string | null>();
-	private _installedMarketplaceSkillIds = new Set<string>();
+	private readonly _install = new InstallSkillsController({
+		hasView: () => this._view !== undefined,
+		postMessage: message => this._view?.webview.postMessage(message),
+		onSkillInstalled: async () => {
+			await this._postLocalSkills();
+			this._onDidSkillsChange.fire();
+			clearSearchRecommendationCache();
+			await this._postCreateDesignReturnToLocal();
+		},
+	});
 
 	constructor(
 		private readonly _context: vscode.ExtensionContext,
@@ -184,35 +164,35 @@ export class MySkillsViewProvider implements vscode.WebviewViewProvider {
 				void this._deleteSavedSkill(message);
 			}
 			if (isInstallSkillsRequestMessage(message)) {
-				void this._postInstallSkills(message.refresh ?? true);
+				void this._install.postInstallSkills(message.refresh ?? true);
 			}
 			if (isInstallSkillsMoreRequestMessage(message)) {
-				void this._postMoreInstallSkills();
+				void this._install.postMoreInstallSkills();
 			}
 			if (isInstallSkillsSearchRequestMessage(message)) {
-				void this._postSearchSkills(message);
+				void this._install.postSearchSkills(message);
 			}
 			if (isTrending24hRequestMessage(message)) {
-				void this._postTrending24hSkills(true);
+				void this._install.postTrending24hSkills(true);
 			}
 			if (isFlameSkillsRequestMessage(message)) {
-				void this._postFlameSkills(true);
+				void this._install.postFlameSkills(true);
 			}
 			if (isFlameSkillOpenRepoMessage(message)) {
 				void vscode.env.openExternal(vscode.Uri.parse(FLAME_SKILL_REPO_URL));
 			}
 			if (isOfficialSourcesRequestMessage(message)) {
-				void this._postOfficialSources(true);
+				void this._install.postOfficialSources(true);
 			}
 			if (isOfficialSkillsRequestMessage(message)) {
-				void this._postOfficialSkills(message.owner, true);
+				void this._install.postOfficialSkills(message.owner, true);
 			}
 			if (isInstallSkillInstallMessage(message)) {
-				void this._installMarketplaceSkill(message);
+				void this._install.installSkill(message);
 			}
 		});
 
-		webviewView.webview.html = this._getHtmlForWebview(webviewView.webview, nonce);
+		webviewView.webview.html = getSkillsWebviewHtml(webviewView.webview, this._extensionUri, nonce);
 		this._watchWorkspaceLocalSkills();
 	}
 
@@ -455,7 +435,7 @@ export class MySkillsViewProvider implements vscode.WebviewViewProvider {
 				query: translatedQuery,
 				limit: message.limit ?? 5,
 			});
-			this._createSearchSkills = result.recommendations.map(recommendation => recommendation.skill);
+			this._install.setCreateSearchSkills(result.recommendations.map(recommendation => recommendation.skill));
 
 			await this._view.webview.postMessage({
 				type: 'createSkill.search.update',
@@ -480,318 +460,6 @@ export class MySkillsViewProvider implements vscode.WebviewViewProvider {
 				error: err instanceof Error ? err.message : String(err),
 			});
 		}
-	}
-
-	private async _postInstallSkills(refresh = false) {
-		if (!this._view) {
-			return;
-		}
-
-		if (this._isLoadingInstallSkills) {
-			await this._sendInstallSkillsUpdate();
-			return;
-		}
-
-		if (!refresh && this._installSkills.length > 0) {
-			await this._sendInstallSkillsUpdate();
-			return;
-		}
-
-		if (refresh) {
-			this._installSkills = [];
-			this._installSkillsPage = -1;
-			this._installSkillsHasMore = true;
-			this._installSkillsTotal = null;
-		}
-
-		await this._loadInstallSkillsPage(0);
-	}
-
-	private async _postMoreInstallSkills() {
-		if (!this._view || this._isLoadingInstallSkills || !this._installSkillsHasMore) {
-			await this._sendInstallSkillsUpdate();
-			return;
-		}
-
-		await this._loadInstallSkillsPage(this._installSkillsPage + 1);
-	}
-
-	private async _loadInstallSkillsPage(page: number) {
-		this._isLoadingInstallSkills = true;
-		this._installSkillsError = null;
-		await this._sendInstallSkillsUpdate();
-
-		try {
-			this._installedMarketplaceSkillIds = await getInstalledMarketplaceSkillIds();
-			const payload = await fetchAllTimeSkillsPage(page);
-			const nextSkills = filterInstallableSkills(payload.skills, this._installedMarketplaceSkillIds);
-			this._installSkills = page <= 0 ? nextSkills : mergeMarketplaceSkills(this._installSkills, nextSkills);
-			this._installSkillsPage = payload.page;
-			this._installSkillsHasMore = payload.hasMore && nextSkills.length > 0;
-			this._installSkillsTotal = payload.total;
-			if (this._installSkills.length === 0) {
-				this._installSkillsError = 'No skills found. Try refreshing.';
-			}
-		} catch (err) {
-			this._installSkillsError = err instanceof Error ? err.message : String(err);
-			this._installSkillsHasMore = false;
-		} finally {
-			this._isLoadingInstallSkills = false;
-			await this._sendInstallSkillsUpdate();
-		}
-	}
-
-	private async _sendInstallSkillsUpdate() {
-		await this._view?.webview.postMessage({
-			type: 'installSkills.update',
-			skills: this._installSkills,
-			isLoading: this._isLoadingInstallSkills,
-			error: this._installSkillsError,
-			hasMore: this._installSkillsHasMore,
-			total: this._installSkillsTotal,
-			page: this._installSkillsPage,
-		});
-	}
-
-	private async _postSearchSkills(message: InstallSkillsSearchRequestMessage) {
-		if (!this._view) {
-			return;
-		}
-
-		const query = message.query.trim();
-		if (query.length < 2) {
-			await this._view.webview.postMessage({
-				type: 'installSkills.search.update',
-				query,
-				requestId: message.requestId,
-				skills: [],
-				isLoading: false,
-				error: null,
-			});
-			return;
-		}
-
-		const cacheKey = query.toLowerCase();
-		const cached = this._searchSkillsByQuery.get(cacheKey);
-		if (cached) {
-			await this._view.webview.postMessage({
-				type: 'installSkills.search.update',
-				query,
-				requestId: message.requestId,
-				skills: cached,
-				isLoading: false,
-				error: null,
-			});
-			return;
-		}
-
-		await this._view.webview.postMessage({
-			type: 'installSkills.search.update',
-			query,
-			requestId: message.requestId,
-			skills: [],
-			isLoading: true,
-			error: null,
-		});
-
-		try {
-			this._installedMarketplaceSkillIds = await getInstalledMarketplaceSkillIds();
-			const skills = filterInstallableSkills(
-				await searchMarketplaceSkills(query, message.limit ?? 120),
-				this._installedMarketplaceSkillIds,
-			);
-			this._searchSkillsByQuery.set(cacheKey, skills);
-			await this._view.webview.postMessage({
-				type: 'installSkills.search.update',
-				query,
-				requestId: message.requestId,
-				skills,
-				isLoading: false,
-				error: null,
-			});
-		} catch (err) {
-			await this._view.webview.postMessage({
-				type: 'installSkills.search.update',
-				query,
-				requestId: message.requestId,
-				skills: [],
-				isLoading: false,
-				error: err instanceof Error ? err.message : String(err),
-			});
-		}
-	}
-
-	private async _postTrending24hSkills(refresh = false) {
-		if (!this._view) {
-			return;
-		}
-
-		await this._trending24h.load({
-			refresh,
-			fetch: async () => {
-				this._installedMarketplaceSkillIds = await getInstalledMarketplaceSkillIds();
-				return filterInstallableSkills(await fetchTrending24hSkills(), this._installedMarketplaceSkillIds);
-			},
-			send: () => this._sendTrending24hUpdate(),
-		});
-	}
-
-	private async _sendTrending24hUpdate() {
-		await this._view?.webview.postMessage({
-			type: 'trending24h.update',
-			skills: this._trending24h.data,
-			isLoading: this._trending24h.isLoading,
-			error: this._trending24h.error,
-		});
-	}
-
-	private async _postFlameSkills(refresh = false) {
-		if (!this._view) {
-			return;
-		}
-
-		await this._flame.load({
-			refresh,
-			fetch: async () => {
-				this._installedMarketplaceSkillIds = await getInstalledMarketplaceSkillIds();
-				return filterInstallableSkills(await fetchFlameSkills(FLAME_SKILL_SOURCE), this._installedMarketplaceSkillIds);
-			},
-			send: () => this._sendFlameSkillsUpdate(),
-		});
-	}
-
-	private async _sendFlameSkillsUpdate() {
-		await this._view?.webview.postMessage({
-			type: 'flameSkills.update',
-			skills: this._flame.data,
-			isLoading: this._flame.isLoading,
-			error: this._flame.error,
-		});
-	}
-
-	private async _postOfficialSources(refresh = false) {
-		if (!this._view) {
-			return;
-		}
-
-		await this._officialSources.load({
-			refresh,
-			fetch: () => fetchOfficialSkillSources(),
-			send: () => this._sendOfficialSourcesUpdate(),
-		});
-	}
-
-	private async _sendOfficialSourcesUpdate() {
-		await this._view?.webview.postMessage({
-			type: 'officialSources.update',
-			sources: this._officialSources.data,
-			isLoading: this._officialSources.isLoading,
-			error: this._officialSources.error,
-		});
-	}
-
-	private async _postOfficialSkills(owner: string, refresh = false) {
-		if (!this._view) {
-			return;
-		}
-
-		const normalizedOwner = owner.trim().toLowerCase();
-		if (!normalizedOwner) {
-			return;
-		}
-
-		if (this._loadingOfficialOwners.has(normalizedOwner)) {
-			await this._sendOfficialSkillsUpdate(normalizedOwner);
-			return;
-		}
-
-		if (!refresh && this._officialSkillsByOwner.has(normalizedOwner)) {
-			await this._sendOfficialSkillsUpdate(normalizedOwner);
-			return;
-		}
-
-		this._loadingOfficialOwners.add(normalizedOwner);
-		this._officialOwnerErrors.set(normalizedOwner, null);
-		await this._sendOfficialSkillsUpdate(normalizedOwner);
-
-		try {
-			this._installedMarketplaceSkillIds = await getInstalledMarketplaceSkillIds();
-			const skills = filterInstallableSkills(await fetchOfficialSkillsForOwner(normalizedOwner), this._installedMarketplaceSkillIds);
-			this._officialSkillsByOwner.set(normalizedOwner, skills);
-			if (skills.length === 0) {
-				this._officialOwnerErrors.set(normalizedOwner, 'No installable official skills found.');
-			}
-		} catch (err) {
-			this._officialOwnerErrors.set(normalizedOwner, err instanceof Error ? err.message : String(err));
-		} finally {
-			this._loadingOfficialOwners.delete(normalizedOwner);
-			await this._sendOfficialSkillsUpdate(normalizedOwner);
-		}
-	}
-
-	private async _sendOfficialSkillsUpdate(owner: string) {
-		await this._view?.webview.postMessage({
-			type: 'officialSkills.update',
-			owner,
-			skills: this._officialSkillsByOwner.get(owner) ?? [],
-			isLoading: this._loadingOfficialOwners.has(owner),
-			error: this._officialOwnerErrors.get(owner) ?? null,
-		});
-	}
-
-	private async _installMarketplaceSkill(message: InstallSkillInstallMessage) {
-		const skill = this._findMarketplaceSkill(message.id);
-		if (!skill) {
-			void vscode.window.showErrorMessage(vscode.l10n.t('My Skills could not find this skill in the marketplace list.'));
-			return;
-		}
-
-		await this._view?.webview.postMessage({
-			type: 'installSkill.status',
-			id: skill.id,
-			status: 'installing',
-		});
-
-		const didInstall = await installMarketplaceSkill(skill);
-		if (didInstall) {
-			this._installedMarketplaceSkillIds.add(skill.skillId);
-			this._installSkills = filterInstallableSkills(this._installSkills, this._installedMarketplaceSkillIds);
-			this._trending24h.data = filterInstallableSkills(this._trending24h.data, this._installedMarketplaceSkillIds);
-			this._flame.data = filterInstallableSkills(this._flame.data, this._installedMarketplaceSkillIds);
-			this._createSearchSkills = filterInstallableSkills(this._createSearchSkills, this._installedMarketplaceSkillIds);
-			this._officialSkillsByOwner.forEach((skills, owner) => {
-				this._officialSkillsByOwner.set(owner, filterInstallableSkills(skills, this._installedMarketplaceSkillIds));
-			});
-			this._searchSkillsByQuery.forEach((skills, query) => {
-				this._searchSkillsByQuery.set(query, filterInstallableSkills(skills, this._installedMarketplaceSkillIds));
-			});
-		}
-
-		await this._view?.webview.postMessage({
-			type: 'installSkill.status',
-			id: skill.id,
-			status: didInstall ? 'installed' : 'idle',
-		});
-
-		if (didInstall) {
-			await this._sendInstallSkillsUpdate();
-			await this._sendTrending24hUpdate();
-			await this._sendFlameSkillsUpdate();
-			await Promise.all(Array.from(this._officialSkillsByOwner.keys(), owner => this._sendOfficialSkillsUpdate(owner)));
-			await this._postLocalSkills();
-			this._onDidSkillsChange.fire();
-			clearSearchRecommendationCache();
-			await this._postCreateDesignReturnToLocal();
-		}
-	}
-
-	private _findMarketplaceSkill(id: string): InstallMarketplaceSkill | undefined {
-		return this._installSkills.find(candidate => candidate.id === id)
-			?? this._trending24h.data.find(candidate => candidate.id === id)
-			?? this._flame.data.find(candidate => candidate.id === id)
-			?? this._createSearchSkills.find(candidate => candidate.id === id)
-			?? Array.from(this._officialSkillsByOwner.values()).flat().find(candidate => candidate.id === id)
-			?? Array.from(this._searchSkillsByQuery.values()).flat().find(candidate => candidate.id === id);
 	}
 
 	private async _setLocalSkillEnabled(message: LocalSkillSetEnabledMessage) {
@@ -826,9 +494,9 @@ export class MySkillsViewProvider implements vscode.WebviewViewProvider {
 			await this._postLocalSkills();
 			this._onDidSkillsChange.fire();
 			if (isMarketplaceFolderSkillId(message.id)) {
-				await this._postInstallSkills(true);
-				await this._postTrending24hSkills(true);
-				await this._postFlameSkills(true);
+				await this._install.postInstallSkills(true);
+				await this._install.postTrending24hSkills(true);
+				await this._install.postFlameSkills(true);
 			}
 		}
 	}
@@ -963,122 +631,6 @@ export class MySkillsViewProvider implements vscode.WebviewViewProvider {
 		});
 	}
 
-	private _getHtmlForWebview(webview: vscode.Webview, nonce: string): string {
-		const shellPath = vscode.Uri.joinPath(this._extensionUri, 'src', 'my-skills', 'view', 'index.html').fsPath;
-
-		let html: string;
-		try {
-			html = fs.readFileSync(shellPath, 'utf8');
-		} catch (err) {
-			console.error(`[MySkills] Failed to read shell HTML: ${err}`);
-			return this._errorHtml('Failed to load shell template');
-		}
-
-		try {
-			const localPath = vscode.Uri.joinPath(this._extensionUri, 'src', 'my-skills', 'screens', 'local-skill', 'ui', 'local.html').fsPath;
-			const installPath = vscode.Uri.joinPath(this._extensionUri, 'src', 'my-skills', 'screens', 'install-skill', 'ui', 'install.html').fsPath;
-			const createPath = vscode.Uri.joinPath(this._extensionUri, 'src', 'my-skills', 'screens', 'create-skill', 'ui', 'shared', 'shell', 'shell.html').fsPath;
-			const createDockPath = vscode.Uri.joinPath(this._extensionUri, 'src', 'my-skills', 'screens', 'create-skill', 'ui', 'shared', 'dock', 'chat-dock.html').fsPath;
-			const createModePath = vscode.Uri.joinPath(this._extensionUri, 'src', 'my-skills', 'screens', 'create-skill', 'ui', 'chat-create', 'create.html').fsPath;
-			const designModePath = vscode.Uri.joinPath(this._extensionUri, 'src', 'my-skills', 'screens', 'create-skill', 'ui', 'chat-create', 'design-md', 'design-md.html').fsPath;
-			const searchModePath = vscode.Uri.joinPath(this._extensionUri, 'src', 'my-skills', 'screens', 'create-skill', 'ui', 'chat-search', 'search.html').fsPath;
-			const namePromptPath = vscode.Uri.joinPath(this._extensionUri, 'src', 'my-skills', 'screens', 'create-skill', 'ui', 'chat-create', 'modal', 'skill-modal.html').fsPath;
-
-			// ── Install sub-panels ────────────────────────────────────────
-			const alltimePath  = vscode.Uri.joinPath(this._extensionUri, 'src', 'my-skills', 'screens', 'install-skill', 'ui', 'panels', 'alltime-skill',  'alltime.html').fsPath;
-			const trendingPath = vscode.Uri.joinPath(this._extensionUri, 'src', 'my-skills', 'screens', 'install-skill', 'ui', 'panels', 'trending-skill', 'trending.html').fsPath;
-			const trending24hPath = vscode.Uri.joinPath(this._extensionUri, 'src', 'my-skills', 'screens', 'install-skill', 'ui', 'panels', 'trending-skill', '24h', '24h.html').fsPath;
-			const trendingFlamePath = vscode.Uri.joinPath(this._extensionUri, 'src', 'my-skills', 'screens', 'install-skill', 'ui', 'panels', 'trending-skill', 'flame', 'flame.html').fsPath;
-			const officialPath = vscode.Uri.joinPath(this._extensionUri, 'src', 'my-skills', 'screens', 'install-skill', 'ui', 'panels', 'official-skill', 'official.html').fsPath;
-			const searchPath   = vscode.Uri.joinPath(this._extensionUri, 'src', 'my-skills', 'screens', 'install-skill', 'ui', 'search-sh', 'search-sh.html').fsPath;
-
-			let localHtml      = fs.readFileSync(localPath, 'utf8');
-			let   installHtml  = fs.readFileSync(installPath, 'utf8');
-			let createHtml     = fs.readFileSync(createPath, 'utf8');
-			const createDockHtml = fs.readFileSync(createDockPath, 'utf8');
-			const createModeHtml = fs.readFileSync(createModePath, 'utf8');
-			const designModeHtml = fs.readFileSync(designModePath, 'utf8');
-			const searchModeHtml = fs.readFileSync(searchModePath, 'utf8');
-			const namePromptHtml = fs.readFileSync(namePromptPath, 'utf8');
-
-			const alltimeHtml  = fs.readFileSync(alltimePath,  'utf8');
-			let trendingHtml = fs.readFileSync(trendingPath, 'utf8');
-			const trending24hHtml = fs.readFileSync(trending24hPath, 'utf8');
-			const trendingFlameHtml = fs.readFileSync(trendingFlamePath, 'utf8');
-			let officialHtml = fs.readFileSync(officialPath, 'utf8');
-			const searchHtml   = fs.readFileSync(searchPath, 'utf8');
-
-			const officialListPath = vscode.Uri.joinPath(this._extensionUri, 'src', 'my-skills', 'screens', 'install-skill', 'ui', 'panels', 'official-skill', 'list-skill', 'list.html').fsPath;
-			const officialListHtml = fs.readFileSync(officialListPath, 'utf8');
-
-			const officialImagesUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, 'src', 'my-skills', 'assets', 'images', 'official'));
-			officialHtml = officialHtml.replace('{{OFFICIAL_IMAGES_URI}}', officialImagesUri.toString());
-			officialHtml = officialHtml.replace('<!-- OFFICIAL_LIST_PANEL -->', officialListHtml);
-			trendingHtml = trendingHtml.replace('<!-- TRENDING_24H_PANEL -->', trending24hHtml);
-			trendingHtml = trendingHtml.replace('<!-- TRENDING_FLAME_PANEL -->', trendingFlameHtml);
-
-			// Substitute sub-panel placeholders inside the install shell
-			installHtml = installHtml.replace('<!-- ALLTIME_PANEL -->',  alltimeHtml);
-			installHtml = installHtml.replace('<!-- TRENDING_PANEL -->', trendingHtml);
-			installHtml = installHtml.replace('<!-- OFFICIAL_PANEL -->', officialHtml);
-			installHtml = installHtml.replace('<!-- SEARCH_PANEL -->', searchHtml);
-			localHtml = localHtml.replaceAll('{{LOCAL_WORKSPACE_NAME}}', escapeHtml(getWorkspaceName()));
-
-			const scriptUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, 'dist', 'webview.js'));
-			const createScriptUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, 'dist', 'create-skill.js'));
-			const createLogoUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, 'src', 'my-skills', 'assets', 'svg', 'logo-animated.svg'));
-			const globalUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, 'src', 'my-skills', 'view', 'styles', 'global.css'));
-			const localStyleUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, 'src', 'my-skills', 'screens', 'local-skill', 'ui', 'local.css'));
-			const installStyleUri  = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, 'src', 'my-skills', 'screens', 'install-skill', 'ui', 'install.css'));
-			const trendingStyleUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, 'src', 'my-skills', 'screens', 'install-skill', 'ui', 'panels', 'trending-skill', 'trending.css'));
-			const officialStyleUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, 'src', 'my-skills', 'screens', 'install-skill', 'ui', 'panels', 'official-skill', 'official.css'));
-			const searchStyleUri   = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, 'src', 'my-skills', 'screens', 'install-skill', 'ui', 'search-sh', 'search-sh.css'));
-			const refineStyleUri   = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, 'src', 'my-skills', 'screens', 'install-skill', 'ui', 'refine', 'refine.css'));
-			const createStyleUri   = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, 'src', 'my-skills', 'screens', 'create-skill', 'ui', 'shared', 'shell', 'shell.css'));
-			const createDockStyleUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, 'src', 'my-skills', 'screens', 'create-skill', 'ui', 'shared', 'dock', 'chat-dock.css'));
-			const createTransitionsStyleUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, 'src', 'my-skills', 'screens', 'create-skill', 'ui', 'shared', 'transitions.css'));
-			const createModeStyleUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, 'src', 'my-skills', 'screens', 'create-skill', 'ui', 'chat-create', 'create.css'));
-			const designModeStyleUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, 'src', 'my-skills', 'screens', 'create-skill', 'ui', 'chat-create', 'design-md', 'design-md.css'));
-			const searchModeStyleUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, 'src', 'my-skills', 'screens', 'create-skill', 'ui', 'chat-search', 'search.css'));
-			const namePromptStyleUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, 'src', 'my-skills', 'screens', 'create-skill', 'ui', 'chat-create', 'modal', 'skill-modal.css'));
-			createHtml = createHtml.replace('<!-- CHAT_DOCK_PANEL -->', createDockHtml);
-			createHtml = createHtml.replace('<!-- CREATE_MODE_PANEL -->', createModeHtml);
-			createHtml = createHtml.replace('<!-- DESIGN_MODE_PANEL -->', designModeHtml);
-			createHtml = createHtml.replace('<!-- SEARCH_MODE_PANEL -->', searchModeHtml);
-			createHtml = createHtml.replace('<!-- NAME_PROMPT_PANEL -->', namePromptHtml);
-			const createPanelHtml = createHtml.replace('{{CREATE_LOGO_URI}}', createLogoUri.toString());
-
-			const csp = [
-				`<meta http-equiv="Content-Security-Policy" content="`,
-				`default-src 'none';`,
-				`base-uri 'none';`,
-				`form-action 'none';`,
-				`object-src 'none';`,
-				`style-src ${webview.cspSource};`,
-				`script-src 'nonce-${nonce}';`,
-				`img-src ${webview.cspSource};`,
-				`font-src ${webview.cspSource};`,
-				`">`,
-			].join(' ');
-
-			html = html.replace('<!-- CSP -->', csp);
-			html = html.replace('<!-- STYLES -->', `<link href="${globalUri}" rel="stylesheet"><link href="${localStyleUri}" rel="stylesheet"><link href="${installStyleUri}" rel="stylesheet"><link href="${trendingStyleUri}" rel="stylesheet"><link href="${officialStyleUri}" rel="stylesheet"><link href="${searchStyleUri}" rel="stylesheet"><link href="${refineStyleUri}" rel="stylesheet"><link href="${createStyleUri}" rel="stylesheet"><link href="${createDockStyleUri}" rel="stylesheet"><link href="${createTransitionsStyleUri}" rel="stylesheet"><link href="${createModeStyleUri}" rel="stylesheet"><link href="${designModeStyleUri}" rel="stylesheet"><link href="${searchModeStyleUri}" rel="stylesheet"><link href="${namePromptStyleUri}" rel="stylesheet">`);
-			html = html.replace('<!-- LOCAL_PANEL -->', localHtml);
-			html = html.replace('<!-- INSTALL_PANEL -->', installHtml); // already has sub-panels injected above
-			html = html.replace('<!-- CREATE_PANEL -->', createPanelHtml);
-			html = html.replace('<!-- SCRIPTS -->', `<script nonce="${nonce}" src="${scriptUri}"></script><script nonce="${nonce}" src="${createScriptUri}"></script>`);
-
-			return html;
-		} catch (err) {
-			console.error(`[MySkills] Failed to read screen template: ${err}`);
-			return this._errorHtml('Failed to load panel templates');
-		}
-	}
-
-	private _errorHtml(message: string): string {
-		return `<!DOCTYPE html><html><body style="display:flex;align-items:center;justify-content:center;height:100vh;margin:0;font-family:sans-serif;color:var(--vscode-foreground,#ccc);background:var(--vscode-editor-background,#1e1e1e);"><p>${message}</p></body></html>`;
-	}
-
 	private _openCreateSkillSupport() {
 		if (this._supportPanel) {
 			this._supportPanel.reveal(vscode.ViewColumn.One);
@@ -1098,63 +650,10 @@ export class MySkillsViewProvider implements vscode.WebviewViewProvider {
 
 		this._supportPanel = panel;
 		panel.iconPath = vscode.Uri.joinPath(this._extensionUri, 'src', 'my-skills', 'assets', 'svg', 'logo.svg');
-		panel.webview.html = this._getCreateSkillSupportHtml(panel.webview, getNonce());
+		panel.webview.html = getCreateSkillSupportHtml(panel.webview, this._extensionUri, getNonce());
 		panel.onDidDispose(() => {
 			this._supportPanel = undefined;
 		});
-	}
-
-	private _getCreateSkillSupportHtml(webview: vscode.Webview, nonce: string): string {
-		const supportPath = vscode.Uri.joinPath(this._extensionUri, 'src', 'shared', 'tutorial', 't-skill', 'support.html').fsPath;
-
-		let content: string;
-		try {
-			content = fs.readFileSync(supportPath, 'utf8');
-		} catch (err) {
-			console.error(`[MySkills] Failed to read create support template: ${err}`);
-			return this._errorHtml('Failed to load create support');
-		}
-
-		const supportStyleUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, 'src', 'shared', 'tutorial', 't-skill', 'support.css'));
-		const supportScriptUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, 'dist', 'create-skill-support.js'));
-		const supportLogoUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, 'src', 'my-skills', 'assets', 'svg', 'logo-animated.svg'));
-		const authorImageUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, 'src', 'shared', 'assets', 'images', 'author.webp'));
-		const p1ImageUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, 'src', 'shared', 'assets', 'images', 'tutorials', 'p1.webp'));
-		const p2ImageUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, 'src', 'shared', 'assets', 'images', 'tutorials', 'p2.webp'));
-		const p3ImageUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, 'src', 'shared', 'assets', 'images', 'tutorials', 'p3.webp'));
-		const supportHtml = content
-			.replace('{{CREATE_SUPPORT_LOGO_URI}}', supportLogoUri.toString())
-			.replace('{{AUTHOR_IMAGE_URI}}', authorImageUri.toString())
-			.replace('{{P1_IMAGE_URI}}', p1ImageUri.toString())
-			.replace('{{P2_IMAGE_URI}}', p2ImageUri.toString())
-			.replace('{{P3_IMAGE_URI}}', p3ImageUri.toString());
-		const csp = [
-			`default-src 'none';`,
-			`base-uri 'none';`,
-			`form-action 'none';`,
-			`object-src 'none';`,
-			`style-src ${webview.cspSource};`,
-			`script-src 'nonce-${nonce}';`,
-			`img-src ${webview.cspSource};`,
-			`font-src ${webview.cspSource};`,
-		].join(' ');
-
-		return [
-			'<!DOCTYPE html>',
-			'<html lang="en">',
-			'<head>',
-			'<meta charset="UTF-8">',
-			'<meta name="viewport" content="width=device-width, initial-scale=1.0">',
-			`<meta http-equiv="Content-Security-Policy" content="${csp}">`,
-			'<title>My Skills: Support</title>',
-			`<link href="${supportStyleUri}" rel="stylesheet">`,
-			'</head>',
-			'<body>',
-			supportHtml,
-			`<script nonce="${nonce}" src="${supportScriptUri}"></script>`,
-			'</body>',
-			'</html>',
-		].join('');
 	}
 
 	public dispose() {
@@ -1165,19 +664,6 @@ export class MySkillsViewProvider implements vscode.WebviewViewProvider {
 		this._localSkillWatchers = [];
 		this._onDidSkillsChange.dispose();
 	}
-}
-
-function getNonce(): string {
-	let text = '';
-	const possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-	for (let i = 0; i < 64; i++) {
-		text += possible.charAt(Math.floor(Math.random() * possible.length));
-	}
-	return text;
-}
-
-function getWorkspaceName(): string {
-	return vscode.workspace.name ?? vscode.workspace.workspaceFolders?.[0]?.name ?? 'Workspace';
 }
 
 function resolveDesignMdSelection(selection: CreateSkillDesignSelectionMessage): DesignMdSelection | undefined {
@@ -1223,37 +709,6 @@ function waitForMinimumDuration(startedAt: number, minimumMs: number): Promise<v
 	});
 }
 
-function escapeHtml(value: string): string {
-	return value
-		.replace(/&/g, '&amp;')
-		.replace(/</g, '&lt;')
-		.replace(/>/g, '&gt;')
-		.replace(/"/g, '&quot;');
-}
-
-async function getInstalledMarketplaceSkillIds(): Promise<Set<string>> {
-	const workspaceFolder = vscode.workspace.workspaceFolders?.[0];
-	if (!workspaceFolder) {
-		return new Set();
-	}
-
-	try {
-		const lockUri = vscode.Uri.joinPath(workspaceFolder.uri, 'skills-lock.json');
-		const content = Buffer.from(await vscode.workspace.fs.readFile(lockUri)).toString('utf8');
-		const parsed = JSON.parse(content) as SkillsLockFile;
-		return new Set(Object.keys(parsed.skills ?? {}));
-	} catch {
-		return new Set();
-	}
-}
-
-function filterInstallableSkills(
-	skills: InstallMarketplaceSkill[],
-	installedSkillIds: Set<string>,
-): InstallMarketplaceSkill[] {
-	return skills.filter(skill => !installedSkillIds.has(skill.id) && !installedSkillIds.has(skill.skillId) && !installedSkillIds.has(skill.name));
-}
-
 function toCreateSkillSearchPayload(result: SearchRecommendationResult) {
 	return {
 		query: result.query,
@@ -1279,25 +734,6 @@ function toCreateSkillSearchPayload(result: SearchRecommendationResult) {
 			score: recommendation.score,
 		})),
 	};
-}
-
-function mergeMarketplaceSkills(
-	currentSkills: InstallMarketplaceSkill[],
-	nextSkills: InstallMarketplaceSkill[],
-): InstallMarketplaceSkill[] {
-	const seen = new Set(currentSkills.map(skill => skill.id));
-	const merged = [...currentSkills];
-
-	for (const skill of nextSkills) {
-		if (seen.has(skill.id)) {
-			continue;
-		}
-
-		seen.add(skill.id);
-		merged.push(skill);
-	}
-
-	return merged;
 }
 
 function isMarketplaceFolderSkillId(skillId: string): boolean {
