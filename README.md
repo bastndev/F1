@@ -31,6 +31,14 @@
 
 F1 turns VS Code into a hub for AI coding agents. Open **Claude Code, Codex, Copilot, Cursor, Kiro, Kilo Code, OpenCode, Grok, Antigravity** — or any custom CLI — in embedded terminals, switch between them instantly, write better prompts, and keep your project's context cheap to load for every agent.
 
+<div align="center">
+
+<!-- 📊 GRAPHICS / BENCHMARK — drop the image at `public/benchmark.webp`, then uncomment the <img> below.
+     Left commented so a missing file doesn't show a broken image on the Marketplace/GitHub. -->
+<!-- <img src="https://raw.githubusercontent.com/bastndev/F1/refs/heads/main/public/benchmark.webp" alt="F1 — graphics & benchmark" width="900" /> -->
+
+</div>
+
 <br>
 
 ## ⌨️ Keyboard shortcuts - Focus `[`CLI Hub`]`
@@ -75,6 +83,27 @@ F1 turns VS Code into a hub for AI coding agents. Open **Claude Code, Codex, Cop
 3. Open **My Skills** from the activity bar (**`Ctrl+3`**) to install or create skills.
 
 > To use (**`Alt + E`**) & (**`Ctrl + 3`**) , you need to have **[Lynx Keymap Pro](https://open-vsx.org/extension/bastndev/Lynx-Keymap)** installed.
+
+<!-- 📺 VIDEO TUTORIALS — collapsed by default so they take up no space until opened.
+     Paste each tutorial (GIF, <video>, or a YouTube thumbnail linking to the clip) where the marker is. -->
+
+<details>
+<summary>▶️ &nbsp;<b>Tutorial 1</b> — CLI Hub: launch &amp; manage agents</summary>
+
+<br>
+
+<!-- //<video here> -->
+
+</details>
+
+<details>
+<summary>▶️ &nbsp;<b>Tutorial 2</b> — My Skills &amp; My Memory</summary>
+
+<br>
+
+<!-- //<video here> -->
+
+</details>
 
 <br>
 
