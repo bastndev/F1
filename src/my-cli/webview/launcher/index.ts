@@ -252,7 +252,7 @@ const openModel = (model: LauncherModel | undefined) => {
 	vscode.postMessage({
 		type: 'openAgent',
 		agent: model.label,
-		smart: document.body.classList.contains('is-smart-mode')
+		smart: document.body.classList.contains('is-smart-mode') || document.body.classList.contains('is-alt-peek')
 	});
 };
 
@@ -429,6 +429,15 @@ window.addEventListener('keydown', (event) => {
 		event.preventDefault();
 		footerToggle?.click();
 		return;
+	}
+
+	if (document.body.classList.contains('is-alt-peek') && event.altKey && !event.ctrlKey && !event.metaKey && !event.shiftKey) {
+		const num = Number.parseInt(event.key, 10);
+		if (Number.isInteger(num) && num >= 1 && num <= models.length) {
+			event.preventDefault();
+			openModel(models[num - 1]);
+			return;
+		}
 	}
 
 	if (document.body.classList.contains('is-smart-mode')) {

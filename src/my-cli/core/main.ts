@@ -38,11 +38,6 @@ export class MyCliViewProvider implements vscode.WebviewViewProvider, vscode.Dis
 		private readonly _extensionUri: vscode.Uri,
 		private readonly _extensionContext?: vscode.ExtensionContext
 	) {
-		this.sessionManager.onBeforeSessionCreate((agentLabel) => {
-			const root = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath;
-			const slug = getAgentSlug(agentLabel);
-			this.smartService.prepareContext(root, slug);
-		});
 	}
 
 	public async resolveWebviewView(
@@ -349,6 +344,7 @@ export class MyCliViewProvider implements vscode.WebviewViewProvider, vscode.Dis
 		}
 
 		const root = this._workspaceRoot();
+		this.smartService.prepareContext(root, getAgentSlug(agentLabel));
 		// Build the graph BEFORE writing the rules, so graphify doesn't index our own
 		// rules file into the project graph. Abort it if session creation fails so we
 		// don't leave a spawned graphify running unattended.
