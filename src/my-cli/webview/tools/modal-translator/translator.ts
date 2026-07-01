@@ -580,10 +580,10 @@ function initializeTranslator(host: HTMLElement, context: ToolContext) {
 		setStatus('translating…');
 
 		// Accumulated result (for the Copy button + the exact-selection cache)
-		// and the progressive-stream state. Each translated block is revealed
-		// the moment it lands — like the voice reader working through chunks —
-		// so a long answer fills in continuously instead of arriving in one
-		// slow lump behind the skeleton.
+		// and the progressive-stream state. Translated blocks are staged in a
+		// small buffer and flushed as a cohesive chunk, so the skeleton stays
+		// visible until there is enough content for a smooth, premium reveal
+		// rather than content dribbling in one block at a time.
 		const renderedParts: string[] = [];
 		const copyParts: string[] = [];
 		let provider: string | undefined;
@@ -697,42 +697,80 @@ function initializeTranslator(host: HTMLElement, context: ToolContext) {
 			}
 		};
 
-		const emitBlock = (markdown: string, copy: string) => {
-			renderedParts.push(markdown);
-			copyParts.push(copy);
+		// Instead of revealing every translated block the instant it lands, we stage
+		// blocks in a short buffer and flush them as a cohesive chunk. The skeleton
+		// stays visible while buffering, then a batch of blocks crossfades in with a
+		// staggered reveal — a much cleaner, premium feel than content dribbling in.
+		const maxStagedBlocks = 4;
+		const stageRevealDelayMs = 420;
+		const stagedBlocks: { markdown: string; copy: string }[] = [];
+		let stageFlushTimer: ReturnType<typeof setTimeout> | undefined;
+
+		const flushStagedBlocks = () => {
+			if (stageFlushTimer) {
+				clearTimeout(stageFlushTimer);
+				stageFlushTimer = undefined;
+			}
+			if (!stagedBlocks.length) {
+				return;
+			}
 			if (!isCurrentTranslation()) {
+				stagedBlocks.length = 0;
 				return;
 			}
 			if (!streamStarted) {
 				beginStream();
 			}
 			if (!isCurrentTranslation()) {
+				stagedBlocks.length = 0;
 				return;
 			}
-			// Render just this block and animate each top-level node in, inserting
-			// before the trailing indicator so it stays at the bottom. The finished
-			// DOM matches rendering the whole markdown at once, so the cache-hit and
-			// voice-chunking paths stay identical.
+
+			const blocksToEmit = stagedBlocks.splice(0);
 			const indicator = textEl.querySelector('.translator-streaming');
-			const template = document.createElement('template');
-			template.innerHTML = renderMarkdownLite(markdown);
-			const insertedElements: HTMLElement[] = [];
 			const fragment = document.createDocumentFragment();
-			for (const node of Array.from(template.content.childNodes)) {
-				if (node instanceof HTMLElement) {
-					node.classList.add('is-block-in');
-					node.addEventListener('animationend', () => {
-						node.classList.remove('is-block-in');
-					}, { once: true });
-					insertedElements.push(node);
+			const insertedElements: HTMLElement[] = [];
+			let staggerIndex = 0;
+
+			for (const { markdown, copy } of blocksToEmit) {
+				renderedParts.push(markdown);
+				copyParts.push(copy);
+				const template = document.createElement('template');
+				template.innerHTML = renderMarkdownLite(markdown);
+				for (const node of Array.from(template.content.childNodes)) {
+					if (node instanceof HTMLElement) {
+						node.classList.add('is-block-in');
+						node.style.animationDelay = `${staggerIndex * 45}ms`;
+						node.addEventListener('animationend', () => {
+							node.classList.remove('is-block-in');
+							node.style.animationDelay = '';
+						}, { once: true });
+						insertedElements.push(node);
+						staggerIndex += 1;
+					}
+					fragment.appendChild(node);
 				}
-				fragment.appendChild(node);
 			}
 			textEl.insertBefore(fragment, indicator);
 			scheduleGrow();
 			// Feed the rendered blocks to the voice stream so reading can begin
 			// before the rest of the answer finishes translating.
 			voicePipeline?.feed(insertedElements);
+		};
+
+		const stageBlock = (markdown: string, copy: string) => {
+			if (!isCurrentTranslation()) {
+				return;
+			}
+			stagedBlocks.push({ markdown, copy });
+			if (stagedBlocks.length >= maxStagedBlocks) {
+				flushStagedBlocks();
+			} else if (!stageFlushTimer) {
+				stageFlushTimer = setTimeout(() => {
+					stageFlushTimer = undefined;
+					flushStagedBlocks();
+				}, stageRevealDelayMs);
+			}
 		};
 
 		try {
@@ -750,13 +788,13 @@ function initializeTranslator(host: HTMLElement, context: ToolContext) {
 				}
 
 				if (segment.kind === 'diagram') {
-					emitBlock(`\`\`\`tree\n${segment.content}\n\`\`\``, segment.content);
+					stageBlock(`\`\`\`tree\n${segment.content}\n\`\`\``, segment.content);
 					continue;
 				}
 
 				if (segment.kind === 'code') {
 					codeCount += 1;
-					emitBlock(`[[code-here:${codeCount}]]`, `[code here #${codeCount}]`);
+					stageBlock(`[[code-here:${codeCount}]]`, `[code here #${codeCount}]`);
 					continue;
 				}
 
@@ -785,7 +823,7 @@ function initializeTranslator(host: HTMLElement, context: ToolContext) {
 						const result = await translateSelection(block);
 						provider ??= result.provider;
 						const value = result.text || block;
-						emitBlock(value, value);
+						stageBlock(value, value);
 						if (value.trim()) {
 							cacheParagraphPairs(targetLang, block, value);
 						}
@@ -817,7 +855,7 @@ function initializeTranslator(host: HTMLElement, context: ToolContext) {
 						provider ??= result.provider;
 						translatedContent = result.text || parsed.content;
 					}
-					emitBlock(`${parsed.marker}${translatedContent}`, `${parsed.marker}${translatedContent}`);
+					stageBlock(`${parsed.marker}${translatedContent}`, `${parsed.marker}${translatedContent}`);
 				}
 				await flushPlainRun();
 			}
@@ -825,6 +863,9 @@ function initializeTranslator(host: HTMLElement, context: ToolContext) {
 			if (!isCurrentTranslation()) {
 				return;
 			}
+
+			// Flush any final staged blocks before settling the UI.
+			flushStagedBlocks();
 
 			const renderedMarkdown = renderedParts.join('\n\n');
 			copyText = copyParts.join('\n\n');
@@ -854,6 +895,10 @@ function initializeTranslator(host: HTMLElement, context: ToolContext) {
 				return;
 			}
 			console.error('[Translator] EN->ES failed:', err);
+			// Surface any blocks that were translated but still buffered when the
+			// error happened, so the user isn't left with an empty or pure-skeleton
+			// view for no reason.
+			flushStagedBlocks();
 			textEl.querySelector('.translator-streaming')?.remove();
 			if (streamStarted && renderedParts.length) {
 				// Keep whatever already streamed in — the user can still read and
@@ -878,6 +923,10 @@ function initializeTranslator(host: HTMLElement, context: ToolContext) {
 			// If a newer translation is already running, leave its UI state alone.
 			if (generation !== translationGeneration) {
 				return;
+			}
+			if (stageFlushTimer) {
+				clearTimeout(stageFlushTimer);
+				stageFlushTimer = undefined;
 			}
 			modalEl.classList.remove('is-translating');
 			if (bodyEl) {
