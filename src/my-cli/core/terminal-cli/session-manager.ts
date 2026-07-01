@@ -436,6 +436,12 @@ export class CliSessionManager implements vscode.Disposable {
 		session.onResponseDone = callback;
 	}
 
+	/** True if the session's output buffer contains `needle` (e.g. the Smart ready message). */
+	public bufferContains(sessionId: string, needle: string): boolean {
+		const session = this.sessions.get(sessionId);
+		return !!session && session.buffer.includes(needle);
+	}
+
 	private markSessionError(session: CliSession, message: string) {
 		if (!this.sessions.has(session.id)) {
 			return;
