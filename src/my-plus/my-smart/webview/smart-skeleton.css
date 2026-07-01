@@ -249,19 +249,50 @@
 
 .smart-status-track {
 	flex: 1;
-	height: 1px;
-	background: rgba(0,120,212,.15);
+	height: 2px;
+	background: rgba(0,120,212,.12);
 	border-radius: 999px;
 	overflow: hidden;
 }
 
 .smart-status-fill {
+	position: relative;
 	height: 100%;
 	width: 0%;
-	background: var(--vscode-focusBorder, #0078d4);
 	border-radius: 999px;
+	background: linear-gradient(90deg,
+		rgba(0,120,212,.28) 0%,
+		rgba(90,170,240,.60) 50%,
+		rgba(0,120,212,.28) 100%);
+	background-size: 200% 100%;
+	animation: smart-fill-flow 2.8s linear infinite;
 	transition: width .4s linear;
-	box-shadow: 0 0 6px 1px rgba(0,120,212,.3);
+	box-shadow: 0 0 4px 0 rgba(0,120,212,.2);
+}
+
+/* Soft leading glow that rides the fill head. */
+.smart-status-fill::after {
+	content: "";
+	position: absolute;
+	top: 50%;
+	right: 0;
+	width: 4px;
+	height: 4px;
+	border-radius: 50%;
+	transform: translate(50%, -50%);
+	background: rgba(140,195,245,.75);
+	box-shadow: 0 0 6px 1px rgba(0,120,212,.4);
+}
+
+/* Completion sweep (JS toggles .is-complete on the status on dismiss). */
+.smart-status.is-complete .smart-status-fill {
+	transition: width .48s cubic-bezier(.22,1,.36,1);
+	animation-duration: 1.2s;
+	box-shadow: 0 0 7px 1px rgba(0,120,212,.4);
+}
+
+.smart-status.is-complete .smart-status-label {
+	color: var(--vscode-focusBorder, #0078d4);
 }
 
 .smart-status-pct {
@@ -289,6 +320,10 @@
 
 @keyframes smart-shimmer {
 	100% { transform: translateX(100%); }
+}
+
+@keyframes smart-fill-flow {
+	to { background-position: 200% 0; }
 }
 
 @keyframes smart-row-in {
@@ -346,6 +381,7 @@
 	.smart-skel-bar::after,
 	.smart-overlay-title,
 	.smart-skel-accent,
+	.smart-status-fill,
 	.smart-overlay::before,
 	.smart-overlay::after {
 		animation: none;
