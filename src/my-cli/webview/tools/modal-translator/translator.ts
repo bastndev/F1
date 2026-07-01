@@ -1379,18 +1379,43 @@ const isListItemLine = (line: string): boolean => {
 	return orderedItemPattern.test(trimmed) || bulletItemPattern.test(trimmed);
 };
 
+// Group hard-wrapped lines into whole logical list items: a new item begins at a
+// marker line ("1." / "-"), and unmarked continuation lines (terminal wraps) stay
+// with the item above them. Batching then works on items, never physical lines,
+// so a single item is never split across batches — a mid-item split would strand
+// the tail as an un-numbered <p> (markdown-lite only continues a list already
+// open in the block), which is the orphaned-paragraph bug this prevents.
+function groupListItems(lines: string[]): string[] {
+	const items: string[] = [];
+	let current: string[] = [];
+	for (const line of lines) {
+		if (isListItemLine(line) && current.length) {
+			items.push(current.join('\n'));
+			current = [];
+		}
+		current.push(line);
+	}
+	if (current.length) {
+		items.push(current.join('\n'));
+	}
+	return items;
+}
+
 function splitListRun(lines: string[]): string[] {
 	const batches: string[] = [];
 	let batch: string[] = [];
 	let batchLen = 0;
-	for (const line of lines) {
-		if (batch.length >= maxListBatchItems || batchLen >= maxListBatchChars) {
+	for (const item of groupListItems(lines)) {
+		// Flush before adding only when the batch already holds something, so an
+		// item longer than the char cap still forms its own batch rather than
+		// being dropped onto an empty one and split.
+		if (batch.length && (batch.length >= maxListBatchItems || batchLen >= maxListBatchChars)) {
 			batches.push(batch.join('\n'));
 			batch = [];
 			batchLen = 0;
 		}
-		batch.push(line);
-		batchLen += line.length + 1;
+		batch.push(item);
+		batchLen += item.length + 1;
 	}
 	if (batch.length) {
 		batches.push(batch.join('\n'));
