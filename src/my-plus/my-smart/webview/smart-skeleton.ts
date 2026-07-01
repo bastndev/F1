@@ -135,24 +135,60 @@ export const createSmartSkeleton = (host: HTMLElement): SmartSkeletonController 
 	const statusLabel = overlay.querySelector('.smart-status-label') as HTMLElement | null;
 	const fill = overlay.querySelector('.smart-status-fill') as HTMLElement | null;
 	const pct = overlay.querySelector('.smart-status-pct') as HTMLElement | null;
+
 	// Ease toward a ceiling instead of crawling into a hard wall: each tick advances
 	// a fraction of the remaining distance, so the bar decelerates smoothly and never
 	// truly stalls (the small constant keeps it alive on very large projects).
+	const START = 4;
 	const CEILING = 92;
-	let progress = 0;
-	const statusInterval = setInterval(() => {
-		if (dismissed) {
-			clearInterval(statusInterval);
-			return;
-		}
-		progress = Math.min(CEILING, progress + (CEILING - progress) * 0.08 + 0.15);
+	let progress = START;
+	const renderProgress = () => {
 		if (fill) {
 			fill.style.width = `${progress}%`;
 		}
 		if (pct) {
 			pct.textContent = `${Math.round(progress)}%`;
 		}
-	}, 400);
+	};
+	renderProgress();
+
+	// The bar is invisible (opacity 0) until its fade-in fires at ~3.5s. Start the
+	// crawl only when it actually appears, so the user watches it climb from ~START
+	// instead of popping in already half-full.
+	let statusInterval = 0;
+	let crawlStarted = false;
+	const startCrawl = () => {
+		if (crawlStarted || dismissed) {
+			return;
+		}
+		crawlStarted = true;
+		statusInterval = window.setInterval(() => {
+			if (dismissed) {
+				clearInterval(statusInterval);
+				return;
+			}
+			progress = Math.min(CEILING, progress + (CEILING - progress) * 0.08 + 0.15);
+			renderProgress();
+		}, 400);
+	};
+
+	const prefersReducedMotion =
+		typeof window.matchMedia === 'function' &&
+		window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+	if (prefersReducedMotion || !status) {
+		// No fade-in to wait for — the bar is shown immediately.
+		startCrawl();
+	} else {
+		const onAppear = (ev: AnimationEvent) => {
+			if (ev.animationName === 'smart-head-in') {
+				status.removeEventListener('animationstart', onAppear);
+				startCrawl();
+			}
+		};
+		status.addEventListener('animationstart', onAppear);
+		// Fallback in case the event never fires.
+		window.setTimeout(startCrawl, 3800);
+	}
 
 	return {
 		dismiss: () => {
