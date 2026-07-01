@@ -895,10 +895,13 @@ const createTerminalView = (session: CliSession) => {
 	// only while the CLI genuinely hasn't rendered yet, so it plays on launch but
 	// never replays on return. Gate on running so an instant exit/error doesn't flash it.
 	if (session.awaitingFirstOutput && session.status === 'running') {
-		if (session.smart && !smartDone) {
-			if (!smartOverlay) {
-				smartOverlay = createSmartSkeleton(document.body);
-			}
+		if (session.smart) {
+			// Reset the one-shot latch for each new Smart session so a panel-created
+			// Smart CLI also gets the skeleton (the launcher only fires once, but the
+			// in-panel "+" path can start further Smart sessions afterwards).
+			smartDone = false;
+			smartOverlay?.dismiss();
+			smartOverlay = createSmartSkeleton(document.body);
 		} else {
 			bootSkeletons.create(session.id);
 		}
