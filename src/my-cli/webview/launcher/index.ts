@@ -421,6 +421,10 @@ cliInput.addEventListener('input', () => {
 });
 
 window.addEventListener('keydown', (event) => {
+	if (event.key === 'Alt' && !event.ctrlKey && !event.metaKey && !event.shiftKey) {
+		document.body.classList.add('is-alt-peek');
+	}
+
 	if (event.key === 'Tab') {
 		event.preventDefault();
 		footerToggle?.click();
@@ -437,6 +441,16 @@ window.addEventListener('keydown', (event) => {
 			}
 		}
 	}
+});
+
+window.addEventListener('keyup', (event) => {
+	if (event.key === 'Alt') {
+		document.body.classList.remove('is-alt-peek');
+	}
+});
+
+window.addEventListener('blur', () => {
+	document.body.classList.remove('is-alt-peek');
 });
 
 cliInput.addEventListener('keydown', (event) => {

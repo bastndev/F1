@@ -335,12 +335,14 @@ body {
 		0 0 8px color-mix(in srgb, var(--accent-color) 70%, transparent);
 }
 
-/* Smart mode */
-body.is-smart-mode .agent-icon-status {
+/* Smart mode + Alt peek (dots only) */
+body.is-smart-mode .agent-icon-status,
+body.is-alt-peek .agent-icon-status {
 	background: #3b82f6;
 }
 
-body.is-smart-mode .agent-icon-option.is-preview .agent-icon-status {
+body.is-smart-mode .agent-icon-option.is-preview .agent-icon-status,
+body.is-alt-peek .agent-icon-option.is-preview .agent-icon-status {
 	background: #3b82f6;
 	box-shadow:
 		0 0 0 1px var(--bg-color),
