@@ -128,6 +128,12 @@ function looksLikeCode(line: string): boolean {
 	if (/[;{]\s*$/.test(trimmed)) {
 		score += 2;
 	}
+	// Braces — object/array literals and blocks. Effectively absent from English
+	// prose, so a safe strong signal; the >=2-consecutive-lines rule below still
+	// stops a lone braced sentence from ever becoming a code block on its own.
+	if (/[{}]/.test(trimmed)) {
+		score += 2;
+	}
 	if (/^(?:import|export|from|const|let|var|function|async|await|class|interface|enum|type|def|fn|pub|impl|struct|public|private|protected|static|void|elif|namespace|using|package|require)\b/.test(trimmed)) {
 		score += 2;
 	}
@@ -145,6 +151,15 @@ function looksLikeCode(line: string): boolean {
 		score += 1;
 	}
 	if (/^\s{2,}|\t/.test(line)) {
+		score += 1;
+	}
+	// Trailing line comment after code ("x // note"); the surrounding spaces keep
+	// it from matching the "://" in a URL.
+	if (/\s\/\/\s/.test(trimmed)) {
+		score += 1;
+	}
+	// Quoted value after a key ("href: '/'", "label: 'home'").
+	if (/[\w$]+\s*:\s*['"]/.test(trimmed)) {
 		score += 1;
 	}
 
