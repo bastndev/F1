@@ -21,6 +21,7 @@ export type ToolContext = {
 	getActiveSessionId?: () => string | undefined;
 	getActiveSessionCreatedAt?: () => number | undefined;
 	getActiveModelName?: () => string | undefined;
+	getActiveSessionBuffer?: () => string | undefined;
 	getUsageSnapshot?: () => CliUsageSnapshot | undefined;
 	requestUsage?: () => Promise<CliUsageSnapshot>;
 	dismissUsageView?: () => void;
@@ -71,6 +72,7 @@ export const createToolsController = ({
 	getActiveSessionId,
 	getActiveSessionCreatedAt,
 	getActiveModelName,
+	getActiveSessionBuffer,
 	getUsageSnapshot,
 	requestUsage,
 	dismissUsageView,
@@ -182,6 +184,7 @@ export const createToolsController = ({
 			getActiveSessionId,
 			getActiveSessionCreatedAt,
 			getActiveModelName,
+			getActiveSessionBuffer,
 			getUsageSnapshot,
 			requestUsage,
 			dismissUsageView,
