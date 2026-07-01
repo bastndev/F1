@@ -3,9 +3,9 @@
 [![Lynx F1](https://raw.githubusercontent.com/bastndev/F1/refs/heads/main/public/banner.webp)](https://www.gohit.xyz/extension/f1)
 
 <p>
-  <img src="https://vsmarketplacebadges.dev/version-short/bastndev.f1.jpg?style=for-the-badge&colorA=000000&colorB=FFFFFF&label=VERSION" alt="Version">&nbsp;
-  <img src="https://vsmarketplacebadges.dev/downloads-short/bastndev.f1.jpg?style=for-the-badge&colorA=000000&colorB=FFFFFF&label=Downloads" alt="Downloads">&nbsp;
-  <img src="https://vsmarketplacebadges.dev/rating-short/bastndev.f1.jpg?style=for-the-badge&colorA=000000&colorB=FFFFFF&label=RATING" alt="Rating">&nbsp;
+  <img src="https://vsmarketplacebadges.dev/version-short/bastndev.f1.jpg?style=for-the-badge&colorA=010409&colorB=FFFFFF&label=VERSION" alt="Version">&nbsp;
+  <img src="https://vsmarketplacebadges.dev/downloads-short/bastndev.f1.jpg?style=for-the-badge&colorA=010409&colorB=FFFFFF&label=Downloads" alt="Downloads">&nbsp;
+  <img src="https://vsmarketplacebadges.dev/rating-short/bastndev.f1.jpg?style=for-the-badge&colorA=010409&colorB=FFFFFF&label=RATING" alt="Rating">&nbsp;
   <a href="https://github.com/bastndev/F1"><img src="https://raw.githubusercontent.com/bastndev/F1/refs/heads/main/public/github/icons/star.png" width="26.6px" alt="Github Star ⭐️"></a>
 </p>
 
@@ -62,6 +62,8 @@ F1 превращает VS Code в центр для ИИ-агентов. Отк
 | Закрыть текущую сессию                      | `Alt + -`           | `Alt + -`              | `Alt + -`              | ㅤㅤ✅         |
 | Новая сессия CLI                            | `Alt + +`           | `Alt + +`              | `Alt + +`              | ㅤㅤ✅         |
 | -                                           | -                   | -                      | -                      |                |
+| Открыть агента 1–9 (альт или переключить активного) | `1`–`9`             | `1`–`9`                | `1`–`9`                | ㅤㅤ✅         |
+| -                                           | -                   | -                      | -                      |                |
 | `[`Skill`]` - Перейти на вкладку Создать    | `Alt + 1`           | `Alt + 1`              | `Alt + 1`              | ㅤㅤ✅         |
 | `[`Skill`]` - Перейти на вкладку Установить | `Alt + 2`           | `Alt + 2`              | `Alt + 2`              | ㅤㅤ✅         |
 | `[`Skill`]` - Перейти на вкладку Локально   | `Alt + 3`           | `Alt + 3`              | `Alt + 3`              | ㅤㅤ✅         |
@@ -89,18 +91,20 @@ F1 превращает VS Code в центр для ИИ-агентов. Отк
   - **Translator** — переводите любое выделение в терминале прямо на месте.
   - **Use** — просмотр использования / статуса каждого CLI.
   - **Keymaps** — справочник по горячим клавишам.
+  - **Commands** — палитра команд активного агента, доступная для поиска и разделённая по CLI.
 - **Voice** — чтение ответов вслух, плюс дополнительный звуковой сигнал "ding", когда агент заканчивает работу, пока вы заняты чем-то другим.
 
 ### 🧩 My Skills
 
 - Устанавливайте навыки из маркетплейса — источники **All‑time**, **Trending (24h)**, **🔥 Flame** и **Official**.
 - Создавайте навыки с помощью генераторов с подсказками для `AGENTS.md`, `CLAUDE.md` и `DESIGN.md`, а также быстрых шаблонов по категориям.
-- Управляйте локальными и сохраненными навыками в каждом рабочем пространстве.
+- Управляйте локальными и сохраненными навыками в каждом рабоческом пространстве.
 
-### 🧠 My Memory
+### 🧠 Smart + Skills
 
-- Генерируйте зафиксированную карту контекста проекта `.f1/`, чтобы любой CLI запускался с общим и легким контекстом.
-- Переключатель для каждого проекта; файлы инструкций (`AGENTS.md` / `CLAUDE.md`) остаются привязанными к контексту.
+- Включите переключатель **Smart + Skills** в лаунчере, затем выберите агента как обычно.
+- При запуске F1 строит дешёвый граф кода вашего проекта и набор встроенных правил работы, затем заставляет агента их прочитать — агент начинает уже ориентированным и отвечает **« I am ready for work ✅ »** в чате, без ручной вставки контекста.
+- Работает на базе **My Memory**: быстрого чистого TypeScript-движка, который записывает структурную карту проекта `.f1/` и удерживает файлы инструкций каждого CLI (`AGENTS.md` / `CLAUDE.md`) направленными на неё. Временные файлы автоматически удаляются после подготовки агента.
 
 <br>
 

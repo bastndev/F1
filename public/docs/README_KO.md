@@ -3,9 +3,9 @@
 [![Lynx F1](https://raw.githubusercontent.com/bastndev/F1/refs/heads/main/public/banner.webp)](https://www.gohit.xyz/extension/f1)
 
 <p>
-  <img src="https://vsmarketplacebadges.dev/version-short/bastndev.f1.jpg?style=for-the-badge&colorA=000000&colorB=FFFFFF&label=VERSION" alt="Version">&nbsp;
-  <img src="https://vsmarketplacebadges.dev/downloads-short/bastndev.f1.jpg?style=for-the-badge&colorA=000000&colorB=FFFFFF&label=Downloads" alt="Downloads">&nbsp;
-  <img src="https://vsmarketplacebadges.dev/rating-short/bastndev.f1.jpg?style=for-the-badge&colorA=000000&colorB=FFFFFF&label=RATING" alt="Rating">&nbsp;
+  <img src="https://vsmarketplacebadges.dev/version-short/bastndev.f1.jpg?style=for-the-badge&colorA=010409&colorB=FFFFFF&label=VERSION" alt="Version">&nbsp;
+  <img src="https://vsmarketplacebadges.dev/downloads-short/bastndev.f1.jpg?style=for-the-badge&colorA=010409&colorB=FFFFFF&label=Downloads" alt="Downloads">&nbsp;
+  <img src="https://vsmarketplacebadges.dev/rating-short/bastndev.f1.jpg?style=for-the-badge&colorA=010409&colorB=FFFFFF&label=RATING" alt="Rating">&nbsp;
   <a href="https://github.com/bastndev/F1"><img src="https://raw.githubusercontent.com/bastndev/F1/refs/heads/main/public/github/icons/star.png" width="26.6px" alt="Github Star ⭐️"></a>
 </p>
 
@@ -62,6 +62,8 @@ F1은 VS Code를 AI 코딩 에이전트의 허브로 바꿉니다. 내장된 터
 | 현재 세션 닫기                     | `Alt + -`           | `Alt + -`              | `Alt + -`              | ㅤㅤ✅ |
 | 새 CLI 세션                        | `Alt + +`           | `Alt + +`              | `Alt + +`              | ㅤㅤ✅ |
 | -                                  | -                   | -                      | -                      |        |
+| 에이전트 1쉀9 열기 (alt 또는 활성 토글) | `1`–`9`             | `1`–`9`                | `1`–`9`                | ㅤㅤ✅ |
+| -                                  | -                   | -                      | -                      |        |
 | `[`Skill`]` - 생성 탭으로 이동     | `Alt + 1`           | `Alt + 1`              | `Alt + 1`              | ㅤㅤ✅ |
 | `[`Skill`]` - 설치 탭으로 이동     | `Alt + 2`           | `Alt + 2`              | `Alt + 2`              | ㅤㅤ✅ |
 | `[`Skill`]` - 로컬 탭으로 이동     | `Alt + 3`           | `Alt + 3`              | `Alt + 3`              | ㅤㅤ✅ |
@@ -89,6 +91,7 @@ F1은 VS Code를 AI 코딩 에이전트의 허브로 바꿉니다. 내장된 터
   - **Translator** — 터미널 선택 항목을 인라인으로 번역하세요.
   - **Use** — CLI별 사용량 / 상태 보기.
   - **Keymaps** — 키보드 단축키 참조.
+  - **Commands** — 활성 에이전트의 슈래시 명령 팔레트 (검색 가능, CLI 별).
   - **Voice** — 답장을 소리 내어 읽어줍니다. 다른 곳에 주의를 기울이는 동안 에이전트가 완료되면 선택적으로 "딩" 소리가 납니다.
 
 ### 🧩 My Skills
@@ -97,10 +100,11 @@ F1은 VS Code를 AI 코딩 에이전트의 허브로 바꿉니다. 내장된 터
 - `AGENTS.md`, `CLAUDE.md`, `DESIGN.md`를 위한 안내된 생성기와 카테고리별 빠른 템플릿으로 스킬을 생성하세요.
 - 작업 공간별로 로컬 및 저장된 스킬을 관리하세요.
 
-### 🧠 My Memory
+### 🧠 Smart + Skills
 
-- 모든 CLI가 저렴한 공유 컨텍스트로 시작할 수 있도록 커밋된 `.f1/` 프로젝트 컨텍스트 맵을 생성하세요.
-- 프로젝트별 토글; 명령어 파일(`AGENTS.md` / `CLAUDE.md`)은 계속해서 컨텍스트를 가리킵니다.
+- 런처에서 **Smart + Skills** 토글을 활성화하고 평소대로 에이전트를 선택하세요.
+- 시작 시, F1이 프로젝트의 저렴한 코드 그래프와 내장 작업 규칙 세트를 구축한 다음 에이전트가 이를 읽도록 합니다 — 에이전트는 처음부터 이미 방향이 잡힌 상태로 시작하며, 컨텍스트를 수동으로 붙여 넣지 않고도 채팅에서 **“I am ready for work ✅”** 라고 답합니다.
+- **My Memory**로 구동됩니다: 구조적 `.f1/` 프로젝트 맵을 작성하고 각 CLI의 명령 파일(`AGENTS.md` / `CLAUDE.md`)을 그켠에 가리킨 채로 유지하는 빠르고 순수한 TypeScript 엔진. 에이전트가 준비되면 임시 파일은 자동으로 정리됩니다.
 
 <br>
 

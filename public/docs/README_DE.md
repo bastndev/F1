@@ -3,9 +3,9 @@
 [![Lynx F1](https://raw.githubusercontent.com/bastndev/F1/refs/heads/main/public/banner.webp)](https://www.gohit.xyz/extension/f1)
 
 <p>
-  <img src="https://vsmarketplacebadges.dev/version-short/bastndev.f1.jpg?style=for-the-badge&colorA=000000&colorB=FFFFFF&label=VERSION" alt="Version">&nbsp;
-  <img src="https://vsmarketplacebadges.dev/downloads-short/bastndev.f1.jpg?style=for-the-badge&colorA=000000&colorB=FFFFFF&label=Downloads" alt="Downloads">&nbsp;
-  <img src="https://vsmarketplacebadges.dev/rating-short/bastndev.f1.jpg?style=for-the-badge&colorA=000000&colorB=FFFFFF&label=RATING" alt="Rating">&nbsp;
+  <img src="https://vsmarketplacebadges.dev/version-short/bastndev.f1.jpg?style=for-the-badge&colorA=010409&colorB=FFFFFF&label=VERSION" alt="Version">&nbsp;
+  <img src="https://vsmarketplacebadges.dev/downloads-short/bastndev.f1.jpg?style=for-the-badge&colorA=010409&colorB=FFFFFF&label=Downloads" alt="Downloads">&nbsp;
+  <img src="https://vsmarketplacebadges.dev/rating-short/bastndev.f1.jpg?style=for-the-badge&colorA=010409&colorB=FFFFFF&label=RATING" alt="Rating">&nbsp;
   <a href="https://github.com/bastndev/F1"><img src="https://raw.githubusercontent.com/bastndev/F1/refs/heads/main/public/github/icons/star.png" width="26.6px" alt="Github Star ⭐️"></a>
 </p>
 
@@ -62,6 +62,8 @@ F1 macht VS Code zu einem Hub für KI-Programmieragenten. Öffnen Sie **Claude C
 | Aktuelle Sitzung schließen             | `Alt + -`           | `Alt + -`              | `Alt + -`              | ㅤㅤ✅      |
 | Neue CLI-Sitzung                       | `Alt + +`           | `Alt + +`              | `Alt + +`              | ㅤㅤ✅      |
 | -                                      | -                   | -                      | -                      |             |
+| Agent 1–9 öffnen (Alt oder aktiv schalten) | `1`–`9`         | `1`–`9`                | `1`–`9`                | ㅤㅤ✅      |
+| -                                      | -                   | -                      | -                      |             |
 | `[`Skill`]` - Zum Reiter Erstellen     | `Alt + 1`           | `Alt + 1`              | `Alt + 1`              | ㅤㅤ✅      |
 | `[`Skill`]` - Zum Reiter Installieren  | `Alt + 2`           | `Alt + 2`              | `Alt + 2`              | ㅤㅤ✅      |
 | `[`Skill`]` - Zum Reiter Lokal         | `Alt + 3`           | `Alt + 3`              | `Alt + 3`              | ㅤㅤ✅      |
@@ -89,6 +91,7 @@ F1 macht VS Code zu einem Hub für KI-Programmieragenten. Öffnen Sie **Claude C
   - **Translator** — Übersetzen Sie jede Terminal-Auswahl inline.
   - **Use** — Nutzungs- / Statusansicht pro CLI.
   - **Keymaps** — Tastaturkürzel-Referenz.
+  - **Commands** — Durchsuchbare Befehlspalette des aktiven Agenten, pro CLI.
 - **Voice** — Lesen Sie Antworten laut vor, plus optionales "Ding", wenn ein Agent fertig ist, während Ihre Aufmerksamkeit woanders liegt.
 
 ### 🧩 My Skills
@@ -97,10 +100,11 @@ F1 macht VS Code zu einem Hub für KI-Programmieragenten. Öffnen Sie **Claude C
 - Erstellen Sie Skills mit geführten Generatoren für `AGENTS.md`, `CLAUDE.md` und `DESIGN.md`, sowie schnelle Vorlagen nach Kategorie.
 - Verwalten Sie lokale und gespeicherte Skills pro Arbeitsbereich.
 
-### 🧠 My Memory
+### 🧠 Smart + Skills
 
-- Generieren Sie eine `.f1/` Projekt-Kontextkarte, damit jedes CLI mit günstigem, geteiltem Kontext startet.
-- Pro-Projekt-Umschalter; Anweisungsdateien (`AGENTS.md` / `CLAUDE.md`) bleiben auf den Kontext gerichtet.
+- Aktivieren Sie den Schalter **Smart + Skills** im Launcher und wählen Sie dann wie gewohnt einen Agenten aus.
+- Beim Start erstellt F1 einen günstigen Code-Graphen Ihres Projekts sowie einen Satz integrierter Arbeitsregeln und lässt den Agenten diese lesen — damit er bereits orientiert startet und mit **„I am ready for work ✅“** im Chat antwortet, ohne manuelles Einfügen von Kontext.
+- Angetrieben von **My Memory**: einer schnellen, reinen TypeScript-Engine, die eine strukturelle `.f1/` Projektkarte schreibt und die Anweisungsdatei jedes CLI (`AGENTS.md` / `CLAUDE.md`) darauf gerichtet hält. Temporäre Dateien werden automatisch bereinigt, sobald der Agent vorbereitet ist.
 
 <br>
 

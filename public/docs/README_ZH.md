@@ -3,9 +3,9 @@
 [![Lynx F1](https://raw.githubusercontent.com/bastndev/F1/refs/heads/main/public/banner.webp)](https://www.gohit.xyz/extension/f1)
 
 <p>
-  <img src="https://vsmarketplacebadges.dev/version-short/bastndev.f1.jpg?style=for-the-badge&colorA=000000&colorB=FFFFFF&label=VERSION" alt="Version">&nbsp;
-  <img src="https://vsmarketplacebadges.dev/downloads-short/bastndev.f1.jpg?style=for-the-badge&colorA=000000&colorB=FFFFFF&label=Downloads" alt="Downloads">&nbsp;
-  <img src="https://vsmarketplacebadges.dev/rating-short/bastndev.f1.jpg?style=for-the-badge&colorA=000000&colorB=FFFFFF&label=RATING" alt="Rating">&nbsp;
+  <img src="https://vsmarketplacebadges.dev/version-short/bastndev.f1.jpg?style=for-the-badge&colorA=010409&colorB=FFFFFF&label=VERSION" alt="Version">&nbsp;
+  <img src="https://vsmarketplacebadges.dev/downloads-short/bastndev.f1.jpg?style=for-the-badge&colorA=010409&colorB=FFFFFF&label=Downloads" alt="Downloads">&nbsp;
+  <img src="https://vsmarketplacebadges.dev/rating-short/bastndev.f1.jpg?style=for-the-badge&colorA=010409&colorB=FFFFFF&label=RATING" alt="Rating">&nbsp;
   <a href="https://github.com/bastndev/F1"><img src="https://raw.githubusercontent.com/bastndev/F1/refs/heads/main/public/github/icons/star.png" width="26.6px" alt="Github Star ⭐️"></a>
 </p>
 
@@ -62,6 +62,8 @@ F1 将 VS Code 变成了 AI 编程代理的枢纽。在嵌入式终端中打开 
 | 关闭当前会话                      | `Alt + -`           | `Alt + -`              | `Alt + -`              | ㅤㅤ✅ |
 | 新建 CLI 会话                     | `Alt + +`           | `Alt + +`              | `Alt + +`              | ㅤㅤ✅ |
 | -                                 | -                   | -                      | -                      |        |
+| 打开代理 1–9（Alt 或切换激活）          | `1`–`9`             | `1`–`9`                | `1`–`9`                | ㅤㅤ✅ |
+| -                                 | -                   | -                      | -                      |        |
 | `[`Skill`]` - 转到 Create 标签页  | `Alt + 1`           | `Alt + 1`              | `Alt + 1`              | ㅤㅤ✅ |
 | `[`Skill`]` - 转到 Install 标签页 | `Alt + 2`           | `Alt + 2`              | `Alt + 2`              | ㅤㅤ✅ |
 | `[`Skill`]` - 转到 Local 标签页   | `Alt + 3`           | `Alt + 3`              | `Alt + 3`              | ㅤㅤ✅ |
@@ -89,6 +91,7 @@ F1 将 VS Code 变成了 AI 编程代理的枢纽。在嵌入式终端中打开 
   - **Translator** — 内联翻译任何终端选区。
   - **Use** — 每个 CLI 的使用 / 状态视图。
   - **Keymaps** — 键盘快捷键参考。
+  - **Commands** — 可搜索的当前活跃代理命令面板，按 CLI 分类。
 - **Voice** — 朗读回复，外加当您的注意力在其他地方而代理完成时的可选“叮”声。
 
 ### 🧩 My Skills
@@ -97,10 +100,11 @@ F1 将 VS Code 变成了 AI 编程代理的枢纽。在嵌入式终端中打开 
 - 使用针对 `AGENTS.md`, `CLAUDE.md`，和 `DESIGN.md` 的向导生成器以及按类别分类的快速模板创建技能。
 - 按工作区管理本地和保存的技能。
 
-### 🧠 My Memory
+### 🧠 Smart + Skills
 
-- 生成一个已提交的 `.f1/` 项目上下文映射，以便任何 CLI 都以廉价、共享的上下文启动。
-- 每个项目切换；指令文件 (`AGENTS.md` / `CLAUDE.md`) 保持指向上下文。
+- 在启动器中打开 **Smart + Skills** 开关，然后像平常一样选择代理。
+- 启动时，F1 会构建项目的低成本代码图谱和一组内置工作规则，然后让代理读取它们——代理一开始就已预先定向，并在聊天中回复 **“I am ready for work ✅”**，无需手动粘贴上下文。
+- 由 **My Memory** 驱动：一个快速的纯 TypeScript 引擎，它会写入结构性 `.f1/` 项目地图，并保持每个 CLI 的指令文件（`AGENTS.md` / `CLAUDE.md`）指向它。一旦代理准备就绪，临时文件会被自动清理。
 
 <br>
 

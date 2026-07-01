@@ -3,9 +3,9 @@
 [![Lynx F1](https://raw.githubusercontent.com/bastndev/F1/refs/heads/main/public/banner.webp)](https://www.gohit.xyz/extension/f1)
 
 <p>
-  <img src="https://vsmarketplacebadges.dev/version-short/bastndev.f1.jpg?style=for-the-badge&colorA=000000&colorB=FFFFFF&label=VERSION" alt="Version">&nbsp;
-  <img src="https://vsmarketplacebadges.dev/downloads-short/bastndev.f1.jpg?style=for-the-badge&colorA=000000&colorB=FFFFFF&label=Downloads" alt="Downloads">&nbsp;
-  <img src="https://vsmarketplacebadges.dev/rating-short/bastndev.f1.jpg?style=for-the-badge&colorA=000000&colorB=FFFFFF&label=RATING" alt="Rating">&nbsp;
+  <img src="https://vsmarketplacebadges.dev/version-short/bastndev.f1.jpg?style=for-the-badge&colorA=010409&colorB=FFFFFF&label=VERSION" alt="Version">&nbsp;
+  <img src="https://vsmarketplacebadges.dev/downloads-short/bastndev.f1.jpg?style=for-the-badge&colorA=010409&colorB=FFFFFF&label=Downloads" alt="Downloads">&nbsp;
+  <img src="https://vsmarketplacebadges.dev/rating-short/bastndev.f1.jpg?style=for-the-badge&colorA=010409&colorB=FFFFFF&label=RATING" alt="Rating">&nbsp;
   <a href="https://github.com/bastndev/F1"><img src="https://raw.githubusercontent.com/bastndev/F1/refs/heads/main/public/github/icons/star.png" width="26.6px" alt="Github Star ⭐️"></a>
 </p>
 
@@ -62,6 +62,8 @@
 | إغلاق الجلسة الحالية                         | `Alt + -`           | `Alt + -`              | `Alt + -`              | ㅤㅤ✅ |
 | جلسة CLI جديدة                               | `Alt + +`           | `Alt + +`              | `Alt + +`              | ㅤㅤ✅ |
 | -                                            | -                   | -                      | -                      |        |
+| فتح وكيل 1–9 (alt أو تبديل النشط)            | `1`–`9`             | `1`–`9`                | `1`–`9`                | ㅤㅤ✅ |
+| -                                            | -                   | -                      | -                      |        |
 | `[`Skill`]` - الذهاب إلى علامة التبويب إنشاء | `Alt + 1`           | `Alt + 1`              | `Alt + 1`              | ㅤㅤ✅ |
 | `[`Skill`]` - الذهاب إلى علامة التبويب تثبيت | `Alt + 2`           | `Alt + 2`              | `Alt + 2`              | ㅤㅤ✅ |
 | `[`Skill`]` - الذهاب إلى علامة التبويب محلي  | `Alt + 3`           | `Alt + 3`              | `Alt + 3`              | ㅤㅤ✅ |
@@ -89,6 +91,7 @@
   - **المترجم (Translator)** — ترجم أي تحديد في الجهاز الطرفي مدمجاً.
   - **الاستخدام (Use)** — عرض الاستخدام / الحالة لكل CLI.
   - **خرائط المفاتيح (Keymaps)** — مرجع اختصارات لوحة المفاتيح.
+  - **الأوامر (Commands)** — لوحة أوامر الوكيل النشطة، قابلة للبحث ومقسمة حسب CLI.
 - **الصوت (Voice)** — قراءة الردود بصوت عالٍ، بالإضافة إلى رنين اختياري "ding" عند انتهاء وكيل بينما يكون انتباهك في مكان آخر.
 
 ### 🧩 مهاراتي (My Skills)
@@ -97,10 +100,11 @@
 - إنشاء المهارات باستخدام مولدات موجهة لـ `AGENTS.md` و `CLAUDE.md` و `DESIGN.md`، بالإضافة إلى قوالب سريعة حسب الفئة.
 - إدارة المهارات المحلية والمحفوظة لكل مساحة عمل.
 
-### 🧠 ذاكرتي (My Memory)
+### 🧠 Smart + Skills
 
-- إنشاء خريطة سياق مشروع `.f1/` ملتزمة بحيث يبدأ أي CLI بسياق مشترك ورخيص.
-- تبديل لكل مشروع؛ تظل ملفات التعليمات (`AGENTS.md` / `CLAUDE.md`) موجهة إلى السياق.
+- قم بتشغيل مفتاح **Smart + Skills** في المشغل، ثم اختر وكيلاً كما هو معتاد.
+- عند التشغيل، يقوم F1 ببناء رمز شجري رخيص لمشروعك بالإضافة إلى مجموعة من قواعد العمل المدمجة، ثم يجعل الوكيل يقرأها — ليبدأ موجهاً بالفعل ويرد بـ **"I am ready for work ✅"** في الدردشة، بدون لصق السياق يدوياً.
+- مدعوم بواسطة **My Memory**: محرك TypeScript سريع ونقي يكتب خريطة مشروع هيكلي `.f1/` ويحافظ على ملف تعليمات كل CLI (`AGENTS.md` / `CLAUDE.md`) موجهاً إليها. يتم تنظيف الملفات المؤقتة تلقائياً بمجرد تحضير الوكيل.
 
 <br>
 

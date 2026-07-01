@@ -3,9 +3,9 @@
 [![Lynx F1](https://raw.githubusercontent.com/bastndev/F1/refs/heads/main/public/banner.webp)](https://www.gohit.xyz/extension/f1)
 
 <p>
-  <img src="https://vsmarketplacebadges.dev/version-short/bastndev.f1.jpg?style=for-the-badge&colorA=000000&colorB=FFFFFF&label=VERSION" alt="Version">&nbsp;
-  <img src="https://vsmarketplacebadges.dev/downloads-short/bastndev.f1.jpg?style=for-the-badge&colorA=000000&colorB=FFFFFF&label=Downloads" alt="Downloads">&nbsp;
-  <img src="https://vsmarketplacebadges.dev/rating-short/bastndev.f1.jpg?style=for-the-badge&colorA=000000&colorB=FFFFFF&label=RATING" alt="Rating">&nbsp;
+  <img src="https://vsmarketplacebadges.dev/version-short/bastndev.f1.jpg?style=for-the-badge&colorA=010409&colorB=FFFFFF&label=VERSION" alt="Version">&nbsp;
+  <img src="https://vsmarketplacebadges.dev/downloads-short/bastndev.f1.jpg?style=for-the-badge&colorA=010409&colorB=FFFFFF&label=Downloads" alt="Downloads">&nbsp;
+  <img src="https://vsmarketplacebadges.dev/rating-short/bastndev.f1.jpg?style=for-the-badge&colorA=010409&colorB=FFFFFF&label=RATING" alt="Rating">&nbsp;
   <a href="https://github.com/bastndev/F1"><img src="https://raw.githubusercontent.com/bastndev/F1/refs/heads/main/public/github/icons/star.png" width="26.6px" alt="Github Star ⭐️"></a>
 </p>
 
@@ -62,6 +62,8 @@ O F1 transforma o VS Code em um hub para agentes de codificação de IA. Abra **
 | Fechar sessão atual                   | `Alt + -`           | `Alt + -`              | `Alt + -`              | ㅤㅤ✅    |
 | Nova sessão CLI                       | `Alt + +`           | `Alt + +`              | `Alt + +`              | ㅤㅤ✅    |
 | -                                     | -                   | -                      | -                      |           |
+| Abrir agente 1–9 (alt ou alternar ativo) | `1`–`9`           | `1`–`9`                | `1`–`9`                | ㅤㅤ✅    |
+| -                                     | -                   | -                      | -                      |           |
 | `[`Skill`]` - Ir para a aba Criar     | `Alt + 1`           | `Alt + 1`              | `Alt + 1`              | ㅤㅤ✅    |
 | `[`Skill`]` - Ir para a aba Instalar  | `Alt + 2`           | `Alt + 2`              | `Alt + 2`              | ㅤㅤ✅    |
 | `[`Skill`]` - Ir para a aba Local     | `Alt + 3`           | `Alt + 3`              | `Alt + 3`              | ㅤㅤ✅    |
@@ -89,6 +91,7 @@ O F1 transforma o VS Code em um hub para agentes de codificação de IA. Abra **
   - **Translator** — traduza qualquer seleção do terminal inline.
   - **Use** — visão de uso / status por CLI.
   - **Keymaps** — referência de atalhos de teclado.
+  - **Commands** — paleta de comandos do agente ativo, pesquisável e por CLI.
 - **Voice** — leia as respostas em voz alta, mais um "ding" opcional quando um agente termina enquanto sua atenção está em outro lugar.
 
 ### 🧩 My Skills
@@ -97,10 +100,11 @@ O F1 transforma o VS Code em um hub para agentes de codificação de IA. Abra **
 - Crie skills com geradores guiados para `AGENTS.md`, `CLAUDE.md`, e `DESIGN.md`, além de modelos rápidos por categoria.
 - Gerencie skills locais e salvas por espaço de trabalho.
 
-### 🧠 My Memory
+### 🧠 Smart + Skills
 
-- Gere um mapa de contexto de projeto `.f1/` comprometido para que qualquer CLI inicie com um contexto compartilhado e leve.
-- Alternância por projeto; arquivos de instrução (`AGENTS.md` / `CLAUDE.md`) permanecem apontados para o contexto.
+- Ative o interruptor **Smart + Skills** no lançador e escolha um agente normalmente.
+- Ao iniciar, o F1 constrói um grafo de código barato do seu projeto mais um conjunto de regras de trabalho integradas, e faz o agente lê-las — para que ele comece já orientado e responda **“I am ready for work ✅”** no chat, sem colar contexto manualmente.
+- Alimentado pelo **My Memory**: um motor TypeScript puro e rápido que escreve um mapa de projeto estrutural `.f1/` e mantém o arquivo de instruções de cada CLI (`AGENTS.md` / `CLAUDE.md`) apontado para ele. Os arquivos temporários são limpos automaticamente assim que o agente está preparado.
 
 <br>
 
