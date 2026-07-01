@@ -303,6 +303,15 @@
 	overflow-wrap: anywhere;
 }
 
+/* Bare filesystem paths in CLI output (src/a/b.ts, ~/x) — painted a modern green
+   so they read as a distinct token, not prose. Text only, no background. */
+.translator-text .md-path {
+	font-family: 'JetBrains Mono', ui-monospace, monospace;
+	font-size: 12px;
+	color: #7fe0bd;
+	overflow-wrap: anywhere;
+}
+
 .translator-text .md-pre {
 	margin: 0 0 14px;
 	padding: 10px 12px;
