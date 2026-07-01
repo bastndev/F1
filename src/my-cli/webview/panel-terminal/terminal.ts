@@ -5,8 +5,8 @@ import { getStoredPromptLang } from '../tools/modal-prompt/language-select';
 import { createCliCreateMessage } from '../../shared/agent-launch-guard';
 import { getAgentSlug as resolveAgentSlug } from '../../shared/agents';
 import { isLynxPanelNavChord } from '../../../shared/keymaps/lynx-keymap/index';
-import { createToolsController, type CliUsageSnapshot } from '../tools/tools';
-import { USAGE_BUSY_ERROR, isUsageAgentBusy, isUsageViewInline } from '../tools/modal-use/agents';
+import { createToolsController } from '../tools/tools';
+import { createUsageTracker } from './usage-tracker';
 import { detectModelName } from '../../shared/model-detect';
 import { createRpcChannel } from './host-rpc';
 import { createBootSkeletons } from './boot-skeleton';
@@ -65,30 +65,9 @@ const defaultSubmitDelayMs = 150;
 const slowPasteSubmitDelayMs = 750;
 const routeSubmitDelayMs = 450;
 const routeSubmitSecondEnterDelayMs = 350;
-const usageRequestSettleDelayMs = 900;
-const usageRequestTimeoutMs = 7000;
-const usageDismissSecondEscapeDelayMs = 80;
-const codexUsageSubmitDelayMs = 150;
-const usageCommandsByAgentSlug: Record<string, string> = {
-	antigravity: '/usage',
-	claude: '/usage',
-	codex: '/status',
-	kiro: '/usage'
-};
 let activeSessionId: string | undefined;
 let pendingTabSwitchSessionId: string | undefined;
 let isPromptFilterEnabled = false;
-const usageSnapshots = new Map<string, CliUsageSnapshot>();
-let pendingUsageRequest: {
-	sessionId: string;
-	agentLabel: string;
-	command: string;
-	captured: string;
-	resolve: (snapshot: CliUsageSnapshot) => void;
-	reject: (reason?: unknown) => void;
-	settleTimer?: number;
-	timeoutTimer?: number;
-} | undefined;
 
 const isAgentIcon = (value: unknown): value is CliAgentIcon => {
 	if (!value || typeof value !== 'object') {
@@ -215,179 +194,13 @@ const getSubmitDelayMs = (agentSlug: string, text: string) => {
 	return defaultSubmitDelayMs;
 };
 
-const getUsageCommandForAgent = (agentLabel: string) => {
-	const slug = resolveAgentSlug(agentLabel) ?? 'default';
-	return usageCommandsByAgentSlug[slug];
-};
-
-const getUsageInputData = (view: TerminalView | undefined, data: string) => (
-	view?.terminal.modes.sendFocusMode ? `\x1b[I${data}` : data
-);
-
-// The current visible terminal screen as plain text (no ANSI). Used to detect
-// whether a CLI is mid-task before injecting its usage command — the live
-// viewport reflects the present state, unlike the append-only session buffer.
-const readTerminalScreenText = (view: TerminalView | undefined): string => {
-	const terminal = view?.terminal;
-	const buffer = terminal?.buffer.active;
-	if (!terminal || !buffer) {
-		return '';
-	}
-
-	const lines: string[] = [];
-	const end = buffer.baseY + terminal.rows;
-	for (let row = buffer.baseY; row < end; row += 1) {
-		const line = buffer.getLine(row);
-		if (line) {
-			lines.push(line.translateToString(true));
-		}
-	}
-	return lines.join('\n');
-};
-
-const clearPendingUsageRequest = () => {
-	if (!pendingUsageRequest) {
-		return;
-	}
-
-	window.clearTimeout(pendingUsageRequest.settleTimer);
-	window.clearTimeout(pendingUsageRequest.timeoutTimer);
-	pendingUsageRequest = undefined;
-};
-
-const resolvePendingUsageRequest = () => {
-	const request = pendingUsageRequest;
-	if (!request) {
-		return;
-	}
-
-	const snapshot: CliUsageSnapshot = {
-		sessionId: request.sessionId,
-		agentLabel: request.agentLabel,
-		command: request.command,
-		raw: request.captured,
-		requestedAt: Date.now()
-	};
-
-	usageSnapshots.set(request.sessionId, snapshot);
-	clearPendingUsageRequest();
-	request.resolve(snapshot);
-};
-
-// Capture the usage command's output straight into the pending request as it
-// streams in, then (re)arm the settle timer so we resolve 900ms after the last
-// chunk. Capturing here — instead of slicing session.buffer by an absolute
-// offset on resolve — keeps usage detection correct in long sessions, where the
-// append-only buffer is trimmed from the front and a start offset recorded
-// before the command no longer lines up (it would slice off an empty tail).
-const notePendingUsageOutput = (sessionId: string, data: string) => {
-	if (!pendingUsageRequest || pendingUsageRequest.sessionId !== sessionId) {
-		return;
-	}
-
-	pendingUsageRequest.captured = trimSessionBuffer(pendingUsageRequest.captured + data);
-	window.clearTimeout(pendingUsageRequest.settleTimer);
-	pendingUsageRequest.settleTimer = window.setTimeout(resolvePendingUsageRequest, usageRequestSettleDelayMs);
-};
-
-const requestActiveUsage = () => new Promise<CliUsageSnapshot>((resolve, reject) => {
-	if (!activeSessionId) {
-		reject(new Error('No active CLI session.'));
-		return;
-	}
-
-	const session = sessions.get(activeSessionId);
-	if (!session || session.status !== 'running') {
-		reject(new Error('The active CLI session is not running.'));
-		return;
-	}
-
-	const command = getUsageCommandForAgent(session.label);
-	if (!command) {
-		reject(new Error(`Usage command is not configured for ${session.label}.`));
-		return;
-	}
-
-	const view = terminals.get(session.id);
-
-	// Idle-only CLIs (e.g. Kiro) corrupt their input if the usage command is
-	// injected mid-task. Bail before sending anything; the modal renders an
-	// in-progress card instead. Nothing is typed into the session.
-	if (isUsageAgentBusy(session.label, readTerminalScreenText(view))) {
-		reject(new Error(USAGE_BUSY_ERROR));
-		return;
-	}
-
-	if (pendingUsageRequest) {
-		pendingUsageRequest.reject(new Error('Usage refresh was superseded.'));
-		clearPendingUsageRequest();
-	}
-
-	const agentSlug = getAgentSlug(session.label);
-	pendingUsageRequest = {
-		sessionId: session.id,
-		agentLabel: session.label,
-		command,
-		captured: '',
-		resolve,
-		reject,
-		timeoutTimer: window.setTimeout(resolvePendingUsageRequest, usageRequestTimeoutMs)
-	};
-
-	if (agentSlug === 'codex') {
-		vscode.postMessage({
-			type: 'cli.input',
-			sessionId: session.id,
-			data: getUsageInputData(view, `\x15${command}`)
-		});
-		window.setTimeout(() => {
-			if (sessions.get(session.id)?.status === 'running') {
-				vscode.postMessage({
-					type: 'cli.input',
-					sessionId: session.id,
-					data: getUsageInputData(view, '\r')
-				});
-			}
-		}, codexUsageSubmitDelayMs);
-		return;
-	}
-
-	vscode.postMessage({
-		type: 'cli.input',
-		sessionId: session.id,
-		data: getUsageInputData(view, `\x15${command}\r`)
-	});
+const usageTracker = createUsageTracker({
+	post: message => vscode.postMessage(message),
+	getActiveSessionId: () => activeSessionId,
+	getSession: sessionId => sessions.get(sessionId),
+	getView: sessionId => terminals.get(sessionId),
+	trimSessionBuffer
 });
-
-const dismissActiveUsageView = () => {
-	if (!activeSessionId) {
-		return;
-	}
-
-	const sessionId = activeSessionId;
-	const session = sessions.get(sessionId);
-	if (session?.status !== 'running') {
-		return;
-	}
-
-	// Codex renders /status as inline transcript text — there's no overlay to
-	// close. Sending Esc would instead open Codex's backtrack/edit-previous
-	// pager whenever prior conversation exists, trapping the user. Skip dismiss.
-	if (isUsageViewInline(session.label)) {
-		return;
-	}
-
-	const view = terminals.get(sessionId);
-	const data = view?.terminal.modes.sendFocusMode ? '\x1b[I\x1b' : '\x1b';
-	const postEscape = () => {
-		if (sessions.get(sessionId)?.status === 'running') {
-			vscode.postMessage({ type: 'cli.input', sessionId, data });
-		}
-	};
-
-	postEscape();
-	window.setTimeout(postEscape, usageDismissSecondEscapeDelayMs);
-};
 
 // ── Host round-trips ─────────────────────────────────────────────────
 // One RPC channel per request/response message pair; see host-rpc.ts.
@@ -565,14 +378,9 @@ const toolsController = layoutRight
 				}
 				return sessions.get(activeSessionId)?.buffer;
 			},
-			getUsageSnapshot: () => {
-				if (!activeSessionId) {
-					return undefined;
-				}
-				return usageSnapshots.get(activeSessionId);
-			},
-			requestUsage: requestActiveUsage,
-			dismissUsageView: dismissActiveUsageView,
+			getUsageSnapshot: () => usageTracker.getSnapshot(activeSessionId),
+			requestUsage: usageTracker.request,
+			dismissUsageView: usageTracker.dismiss,
 			sendToActiveSession: (text: string, options?: { paste?: boolean; submit?: boolean }) => {
 				if (!activeSessionId) {
 					return;
@@ -1022,15 +830,7 @@ const syncState = (message: Extract<ServerMessage, { type: 'cli.state' }>) => {
 
 	removeClosedTerminals(openSessionIds);
 	sleepInactiveTerminals(visualSleepEnabled, openSessionIds);
-	for (const sessionId of [...usageSnapshots.keys()]) {
-		if (!openSessionIds.has(sessionId)) {
-			usageSnapshots.delete(sessionId);
-		}
-	}
-	if (pendingUsageRequest && !openSessionIds.has(pendingUsageRequest.sessionId)) {
-		pendingUsageRequest.reject(new Error('Usage refresh session was closed.'));
-		clearPendingUsageRequest();
-	}
+	usageTracker.pruneClosedSessions(openSessionIds);
 
 	// If a session entered error/exited state before producing output, don't leave skeleton hanging
 	for (const [sessionId, session] of sessions) {
@@ -1047,7 +847,7 @@ const handleOutput = (message: Extract<ServerMessage, { type: 'cli.output' }>) =
 	const session = sessions.get(message.sessionId);
 	if (session) {
 		appendToSessionBuffer(session, message.data);
-		notePendingUsageOutput(message.sessionId, message.data);
+		usageTracker.noteOutput(message.sessionId, message.data);
 	}
 
 	let restoredFromBuffer = false;
