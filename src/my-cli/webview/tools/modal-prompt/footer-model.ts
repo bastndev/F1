@@ -25,6 +25,9 @@ export function updateFooterModel(host: HTMLElement, context: PromptContext, has
 	const agent = getCliAgent(label);
 	const modelCommand = agent?.modelCommand;
 	const resumeCommand = agent?.resumeCommand;
+	// Cursor's TUI drops raw chunked input, so it needs bracketed-paste mode
+	// and no leading Ctrl+U for these shortcuts to register.
+	const usePasteMode = agent?.slug === 'cursor';
 
 	footerInfo.innerHTML = `<span class="prompt-session-dot" id="sessionDot"></span><i class="ti ti-cpu" aria-hidden="true"></i> ${simpleName}`;
 
@@ -37,10 +40,10 @@ export function updateFooterModel(host: HTMLElement, context: PromptContext, has
 		actions.className = 'prompt-footer-actions';
 
 		if (modelCommand) {
-			actions.append(buildShortcutButton(context, modelCommand, modelName ?? modelCommand));
+			actions.append(buildShortcutButton(context, modelCommand, modelName ?? modelCommand, usePasteMode));
 		}
 		if (resumeCommand) {
-			actions.append(buildShortcutButton(context, resumeCommand, resumeCommand));
+			actions.append(buildShortcutButton(context, resumeCommand, resumeCommand, usePasteMode));
 		}
 
 		footerInfo.append(actions);
@@ -57,7 +60,7 @@ export function updateFooterModel(host: HTMLElement, context: PromptContext, has
 	}
 }
 
-function buildShortcutButton(context: PromptContext, command: string, labelText: string): HTMLElement {
+function buildShortcutButton(context: PromptContext, command: string, labelText: string, usePasteMode: boolean): HTMLElement {
 	const button = document.createElement('button');
 	button.className = 'prompt-footer-model prompt-footer-model-btn';
 	button.title = `Run ${command}`;
@@ -71,9 +74,15 @@ function buildShortcutButton(context: PromptContext, command: string, labelText:
 		// Close the modal first so focus returns to the terminal before the
 		// command is injected.
 		context.close();
-		// \x15 is Ctrl+U: wipe the current terminal input line so a partially
-		// typed prompt is not concatenated with the command.
-		context.sendToActiveSession?.(`\x15${command}`, { submit: true });
+		if (usePasteMode) {
+			// Cursor's TUI drops raw input unless it arrives as a bracketed paste,
+			// and it does not need a Ctrl+U prefix to replace the current line.
+			context.sendToActiveSession?.(command, { paste: true, submit: true });
+		} else {
+			// \x15 is Ctrl+U: wipe the current terminal input line so a partially
+			// typed prompt is not concatenated with the command.
+			context.sendToActiveSession?.(`\x15${command}`, { submit: true });
+		}
 	});
 
 	return button;
