@@ -24,7 +24,7 @@ import {
 	MEMORY_MAP_FILE,
 	RULES_FILE
 } from '../core/memory-paths';
-import { atomicWriteFile, backupPristineFile, writeFileIfChanged } from '../core/atomic-write';
+import { atomicWriteFile, backupPristineFile, removeBackupIfExists, writeFileIfChanged } from '../core/atomic-write';
 import { buildManagedBlock } from '../../shared/instruction-builder';
 
 /**
@@ -149,7 +149,8 @@ export const syncAllInstructionFiles = (root: string): string[] => {
 	return updated;
 };
 
-/** Strip the managed block from AGENTS.md. Leaves CLAUDE.md untouched — the
+/** Strip the managed block from AGENTS.md and remove the now-redundant `.bak`
+ *  backups (AGENTS.md.bak + CLAUDE.md.bak). Leaves CLAUDE.md untouched — the
  *  `@AGENTS.md` pointer is harmless and can't be distinguished from user content. */
 export const removeAllInstructionBlocks = (root: string): string[] => {
 	const removed: string[] = [];
@@ -170,11 +171,19 @@ export const removeAllInstructionBlocks = (root: string): string[] => {
 					fs.unlinkSync(hubPath);
 				}
 				removed.push(HUB_FILE);
+				// The user's content has been restored — the pristine backup
+				// captured by backupPristineFile is now redundant.
+				removeBackupIfExists(hubPath);
 			}
 		}
 	} catch (error) {
 		console.error(`[my-memory] remove block from ${HUB_FILE} failed:`, error);
 	}
+
+	// CLAUDE.md keeps its `@AGENTS.md` pointer (harmless), but the backup taken
+	// before we prepended it is now redundant too — clean it up so the workspace
+	// isn't left with orphaned `.bak` files.
+	removeBackupIfExists(path.join(root, CLAUDE_FILE));
 
 	return removed;
 };

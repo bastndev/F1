@@ -65,3 +65,19 @@ export const backupPristineFile = (filePath: string, content: string, ownedMarke
 		console.error('[my-memory] backup failed:', error);
 	}
 };
+
+/**
+ * Remove the `.bak` created by `backupPristineFile` once the managed block has
+ * been stripped and the user's content restored — the backup is then redundant.
+ * Best-effort: never throws.
+ */
+export const removeBackupIfExists = (filePath: string): void => {
+	const backupPath = `${filePath}.bak`;
+	try {
+		if (fs.existsSync(backupPath)) {
+			fs.unlinkSync(backupPath);
+		}
+	} catch (error) {
+		console.error(`[my-memory] remove backup ${backupPath} failed:`, error);
+	}
+};
