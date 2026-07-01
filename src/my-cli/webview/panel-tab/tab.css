@@ -101,6 +101,18 @@
 	text-align: center;
 }
 
+.agent-new-button-label svg {
+	width: 16px;
+	height: 16px;
+	display: block;
+}
+
+.agent-new-button.is-smart-create {
+	background: #3b82f6;
+	border-color: color-mix(in srgb, #3b82f6 60%, transparent);
+	box-shadow: 0 0 8px color-mix(in srgb, #3b82f6 45%, transparent);
+}
+
 .agent-tools-button:focus-visible,
 .agent-new-button:focus-visible,
 .agent-picker-button:focus-visible,
@@ -258,6 +270,31 @@
 .agent-picker-option-custom-icon {
 	font-size: 14px;
 	font-weight: 600;
+}
+
+/* Smart-mode hint dot — shown only on the hovered option while Alt is held,
+   signalling that clicking will launch the CLI in Smart + Skills mode.
+   Never shown on the Custom CLI option. */
+.agent-picker-option-smart-dot {
+	display: none;
+}
+
+.agent-picker-option {
+	position: relative;
+}
+
+.agent-picker-menu.is-alt-smart-mode .agent-picker-option:not(.agent-picker-option--custom):hover .agent-picker-option-smart-dot,
+.agent-picker-menu.is-alt-smart-mode .agent-picker-option:not(.agent-picker-option--custom):focus-visible .agent-picker-option-smart-dot {
+	display: block;
+	position: absolute;
+	right: 8px;
+	top: 50%;
+	transform: translateY(-50%);
+	width: 7px;
+	height: 7px;
+	border-radius: 999px;
+	background: #3b82f6;
+	box-shadow: 0 0 6px color-mix(in srgb, #3b82f6 70%, transparent);
 }
 
 .vscode-dark .agent-picker-option.has-dark-icon .agent-picker-option-icon {

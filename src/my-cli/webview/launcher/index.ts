@@ -252,7 +252,7 @@ const openModel = (model: LauncherModel | undefined) => {
 	vscode.postMessage({
 		type: 'openAgent',
 		agent: model.label,
-		smart: document.body.classList.contains('is-smart-mode')
+		smart: document.body.classList.contains('is-smart-mode') || document.body.classList.contains('is-alt-peek')
 	});
 };
 
@@ -421,10 +421,23 @@ cliInput.addEventListener('input', () => {
 });
 
 window.addEventListener('keydown', (event) => {
+	if (event.key === 'Alt' && !event.ctrlKey && !event.metaKey && !event.shiftKey) {
+		document.body.classList.add('is-alt-peek');
+	}
+
 	if (event.key === 'Tab') {
 		event.preventDefault();
 		footerToggle?.click();
 		return;
+	}
+
+	if (document.body.classList.contains('is-alt-peek') && event.altKey && !event.ctrlKey && !event.metaKey && !event.shiftKey) {
+		const num = Number.parseInt(event.key, 10);
+		if (Number.isInteger(num) && num >= 1 && num <= models.length) {
+			event.preventDefault();
+			openModel(models[num - 1]);
+			return;
+		}
 	}
 
 	if (document.body.classList.contains('is-smart-mode')) {
@@ -437,6 +450,16 @@ window.addEventListener('keydown', (event) => {
 			}
 		}
 	}
+});
+
+window.addEventListener('keyup', (event) => {
+	if (event.key === 'Alt') {
+		document.body.classList.remove('is-alt-peek');
+	}
+});
+
+window.addEventListener('blur', () => {
+	document.body.classList.remove('is-alt-peek');
 });
 
 cliInput.addEventListener('keydown', (event) => {

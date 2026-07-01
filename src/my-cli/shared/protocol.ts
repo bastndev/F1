@@ -53,7 +53,7 @@ export type CustomCliLaunch = {
 export type WebviewToHostMessage =
 	| { type: 'openAgent'; agent: string; smart?: boolean }
 	| { type: 'cli.ready' }
-	| { type: 'cli.create'; agent: string; launchGuard?: AgentLaunchGuardMessage }
+	| { type: 'cli.create'; agent: string; launchGuard?: AgentLaunchGuardMessage; smart?: boolean }
 	| { type: 'customCli.open'; source: 'launcher' | 'panel' }
 	| { type: 'cli.openTutorial' }
 	| { type: 'cli.input'; sessionId: string; data: string }

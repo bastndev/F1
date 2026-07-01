@@ -24,7 +24,11 @@ Following VS Code best practices, F1 uses semantic versioning for all releases.
 <!-- --- -->
 
 ---
-## [1.2.0] - 2026-06-23
+## [1.2.0] - 2026-07-01
+- **fix**: Implement `Smart + skill
+
+---
+## [1.1.2] - 2026-06-23
 - **fix**: data, world
 - **new**: Skill and cerebrito
 

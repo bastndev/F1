@@ -2,7 +2,7 @@
   "name": "f1",
   "displayName": "%displayName%",
   "description": "%description%",
-  "version": "1.2.0",
+  "version": "2.0.0",
   "publisher": "bastndev",
   "license": "MIT",
   "engines": {

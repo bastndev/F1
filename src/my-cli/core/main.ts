@@ -38,11 +38,6 @@ export class MyCliViewProvider implements vscode.WebviewViewProvider, vscode.Dis
 		private readonly _extensionUri: vscode.Uri,
 		private readonly _extensionContext?: vscode.ExtensionContext
 	) {
-		this.sessionManager.onBeforeSessionCreate((agentLabel) => {
-			const root = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath;
-			const slug = getAgentSlug(agentLabel);
-			this.smartService.prepareContext(root, slug);
-		});
 	}
 
 	public async resolveWebviewView(
@@ -232,6 +227,20 @@ export class MyCliViewProvider implements vscode.WebviewViewProvider, vscode.Dis
 				if (!(await this._confirmAgentLaunch(message.agent, 'panel'))) {
 					return;
 				}
+
+				if (message.smart === true) {
+					const root = this._workspaceRoot();
+					this.smartService.prepareContext(root, getAgentSlug(message.agent));
+					const graphController = new AbortController();
+					const graphReady = this.smartService.buildGraph(root, graphController.signal);
+					const sessionId = await this.sessionManager.createSession(message.agent, { smart: true });
+					if (!sessionId) {
+						graphController.abort();
+						return;
+					}
+					void this._runSmartSession(sessionId, root, graphReady);
+					return;
+				}
 			}
 
 			if (message.type?.startsWith('cli.')) {
@@ -349,6 +358,7 @@ export class MyCliViewProvider implements vscode.WebviewViewProvider, vscode.Dis
 		}
 
 		const root = this._workspaceRoot();
+		this.smartService.prepareContext(root, getAgentSlug(agentLabel));
 		// Build the graph BEFORE writing the rules, so graphify doesn't index our own
 		// rules file into the project graph. Abort it if session creation fails so we
 		// don't leave a spawned graphify running unattended.
@@ -361,6 +371,16 @@ export class MyCliViewProvider implements vscode.WebviewViewProvider, vscode.Dis
 			return;
 		}
 
+		await this._runSmartSession(sessionId, root, graphReady);
+	}
+
+	/**
+	 * Smart orchestration shared by the launcher initial-launch path and the
+	 * in-panel "create another CLI in smart mode" path. Waits for the graph +
+	 * the CLI to be ready, writes the rules, types the priming prompt, and
+	 * schedules cleanup after the agent's first reply settles.
+	 */
+	private async _runSmartSession(sessionId: string, root: string | undefined, graphReady: Promise<boolean>): Promise<void> {
 		// Wait until the graph is built AND the CLI is booted + idle.
 		const [hasGraph] = await Promise.all([graphReady, this.sessionManager.waitForFirstIdle(sessionId)]);
 
