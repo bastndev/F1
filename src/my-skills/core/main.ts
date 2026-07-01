@@ -1,8 +1,6 @@
 import * as vscode from 'vscode';
-import { fetchAllTimeSkillsPage, fetchFlameSkills, fetchOfficialSkillsForOwner, fetchOfficialSkillSources, fetchTrending24hSkills, searchMarketplaceSkills } from '../screens/install-skill/core/marketplace';
-import { installMarketplaceSkill } from '../screens/install-skill/core/installer';
-import type { InstallMarketplaceSkill, InstallSkillInstallMessage, InstallSkillsSearchRequestMessage, OfficialSkillSource, SkillsLockFile } from '../screens/install-skill/core/types';
-import { FLAME_SKILL_REPO_URL, FLAME_SKILL_SOURCE } from '../screens/install-skill/ui/panels/trending-skill/flame/data/flame-skills';
+import { FLAME_SKILL_REPO_URL } from '../screens/install-skill/ui/panels/trending-skill/flame/data/flame-skills';
+import { InstallSkillsController } from './install-skills-controller';
 import { ROOT_SKILL_FILE_NAMES, ROOT_SKILL_FOLDER_WATCH_PATTERNS, deleteWorkspaceRootSkill, getWorkspaceRootSkills, setWorkspaceRootSkillEnabled } from '../screens/local-skill/core/local-skills';
 import { deleteSavedSkill, enableSavedSkill, getSavedSkills, isSavedSkillInWorkspace, saveSkill } from '../screens/local-skill/core/saved-skills';
 import type { LocalSkillDeleteMessage, LocalSkillDeleteSavedMessage, LocalSkillEnableSavedMessage, LocalSkillOpenMessage, LocalSkillSaveMessage, LocalSkillSetEnabledMessage } from '../screens/local-skill/core/types';
@@ -17,7 +15,6 @@ import { designTypographyOptions } from '../screens/create-skill/ui/chat-create/
 import { createSkillBoilerplate } from '../screens/create-skill/core/chat-create-core/skill-generator';
 import { translateQuery } from '../screens/create-skill/core/shared/project-translation';
 import { resetFastContext, updateFastDescription, updateFastName, updateFastTechnologies, waitForPendingBackgroundFetches } from '../screens/create-skill/core/chat-create-core/fast-context-manager';
-import { AsyncListSection } from './install-state';
 import { getNonce, getWorkspaceName, getSkillsWebviewHtml, getCreateSkillSupportHtml } from './skills-webview-html';
 import {
 	isWebviewMessage,
@@ -66,33 +63,16 @@ export class MySkillsViewProvider implements vscode.WebviewViewProvider {
 	private _localSkillWatchers: vscode.FileSystemWatcher[] = [];
 	private readonly _onDidSkillsChange = new vscode.EventEmitter<void>();
 	public readonly onDidSkillsChange = this._onDidSkillsChange.event;
-	private _installSkills: InstallMarketplaceSkill[] = [];
-	private _isLoadingInstallSkills = false;
-	private _installSkillsError: string | null = null;
-	private _installSkillsPage = -1;
-	private _installSkillsHasMore = true;
-	private _installSkillsTotal: number | null = null;
-	private _searchSkillsByQuery = new Map<string, InstallMarketplaceSkill[]>();
-	private readonly _trending24h = new AsyncListSection<InstallMarketplaceSkill[]>(
-		[],
-		skills => skills.length > 0,
-		skills => (skills.length === 0 ? 'No trending skills found. Try refreshing.' : null),
-	);
-	private readonly _flame = new AsyncListSection<InstallMarketplaceSkill[]>(
-		[],
-		skills => skills.length > 0,
-		skills => (skills.length === 0 ? 'No skills found in the flame repository.' : null),
-	);
-	private _createSearchSkills: InstallMarketplaceSkill[] = [];
-	private readonly _officialSources = new AsyncListSection<OfficialSkillSource[]>(
-		[],
-		sources => sources.length > 0,
-		sources => (sources.length === 0 ? 'No official sources found. Try refreshing.' : null),
-	);
-	private _officialSkillsByOwner = new Map<string, InstallMarketplaceSkill[]>();
-	private _loadingOfficialOwners = new Set<string>();
-	private _officialOwnerErrors = new Map<string, string | null>();
-	private _installedMarketplaceSkillIds = new Set<string>();
+	private readonly _install = new InstallSkillsController({
+		hasView: () => this._view !== undefined,
+		postMessage: message => this._view?.webview.postMessage(message),
+		onSkillInstalled: async () => {
+			await this._postLocalSkills();
+			this._onDidSkillsChange.fire();
+			clearSearchRecommendationCache();
+			await this._postCreateDesignReturnToLocal();
+		},
+	});
 
 	constructor(
 		private readonly _context: vscode.ExtensionContext,
@@ -184,31 +164,31 @@ export class MySkillsViewProvider implements vscode.WebviewViewProvider {
 				void this._deleteSavedSkill(message);
 			}
 			if (isInstallSkillsRequestMessage(message)) {
-				void this._postInstallSkills(message.refresh ?? true);
+				void this._install.postInstallSkills(message.refresh ?? true);
 			}
 			if (isInstallSkillsMoreRequestMessage(message)) {
-				void this._postMoreInstallSkills();
+				void this._install.postMoreInstallSkills();
 			}
 			if (isInstallSkillsSearchRequestMessage(message)) {
-				void this._postSearchSkills(message);
+				void this._install.postSearchSkills(message);
 			}
 			if (isTrending24hRequestMessage(message)) {
-				void this._postTrending24hSkills(true);
+				void this._install.postTrending24hSkills(true);
 			}
 			if (isFlameSkillsRequestMessage(message)) {
-				void this._postFlameSkills(true);
+				void this._install.postFlameSkills(true);
 			}
 			if (isFlameSkillOpenRepoMessage(message)) {
 				void vscode.env.openExternal(vscode.Uri.parse(FLAME_SKILL_REPO_URL));
 			}
 			if (isOfficialSourcesRequestMessage(message)) {
-				void this._postOfficialSources(true);
+				void this._install.postOfficialSources(true);
 			}
 			if (isOfficialSkillsRequestMessage(message)) {
-				void this._postOfficialSkills(message.owner, true);
+				void this._install.postOfficialSkills(message.owner, true);
 			}
 			if (isInstallSkillInstallMessage(message)) {
-				void this._installMarketplaceSkill(message);
+				void this._install.installSkill(message);
 			}
 		});
 
@@ -455,7 +435,7 @@ export class MySkillsViewProvider implements vscode.WebviewViewProvider {
 				query: translatedQuery,
 				limit: message.limit ?? 5,
 			});
-			this._createSearchSkills = result.recommendations.map(recommendation => recommendation.skill);
+			this._install.setCreateSearchSkills(result.recommendations.map(recommendation => recommendation.skill));
 
 			await this._view.webview.postMessage({
 				type: 'createSkill.search.update',
@@ -480,318 +460,6 @@ export class MySkillsViewProvider implements vscode.WebviewViewProvider {
 				error: err instanceof Error ? err.message : String(err),
 			});
 		}
-	}
-
-	private async _postInstallSkills(refresh = false) {
-		if (!this._view) {
-			return;
-		}
-
-		if (this._isLoadingInstallSkills) {
-			await this._sendInstallSkillsUpdate();
-			return;
-		}
-
-		if (!refresh && this._installSkills.length > 0) {
-			await this._sendInstallSkillsUpdate();
-			return;
-		}
-
-		if (refresh) {
-			this._installSkills = [];
-			this._installSkillsPage = -1;
-			this._installSkillsHasMore = true;
-			this._installSkillsTotal = null;
-		}
-
-		await this._loadInstallSkillsPage(0);
-	}
-
-	private async _postMoreInstallSkills() {
-		if (!this._view || this._isLoadingInstallSkills || !this._installSkillsHasMore) {
-			await this._sendInstallSkillsUpdate();
-			return;
-		}
-
-		await this._loadInstallSkillsPage(this._installSkillsPage + 1);
-	}
-
-	private async _loadInstallSkillsPage(page: number) {
-		this._isLoadingInstallSkills = true;
-		this._installSkillsError = null;
-		await this._sendInstallSkillsUpdate();
-
-		try {
-			this._installedMarketplaceSkillIds = await getInstalledMarketplaceSkillIds();
-			const payload = await fetchAllTimeSkillsPage(page);
-			const nextSkills = filterInstallableSkills(payload.skills, this._installedMarketplaceSkillIds);
-			this._installSkills = page <= 0 ? nextSkills : mergeMarketplaceSkills(this._installSkills, nextSkills);
-			this._installSkillsPage = payload.page;
-			this._installSkillsHasMore = payload.hasMore && nextSkills.length > 0;
-			this._installSkillsTotal = payload.total;
-			if (this._installSkills.length === 0) {
-				this._installSkillsError = 'No skills found. Try refreshing.';
-			}
-		} catch (err) {
-			this._installSkillsError = err instanceof Error ? err.message : String(err);
-			this._installSkillsHasMore = false;
-		} finally {
-			this._isLoadingInstallSkills = false;
-			await this._sendInstallSkillsUpdate();
-		}
-	}
-
-	private async _sendInstallSkillsUpdate() {
-		await this._view?.webview.postMessage({
-			type: 'installSkills.update',
-			skills: this._installSkills,
-			isLoading: this._isLoadingInstallSkills,
-			error: this._installSkillsError,
-			hasMore: this._installSkillsHasMore,
-			total: this._installSkillsTotal,
-			page: this._installSkillsPage,
-		});
-	}
-
-	private async _postSearchSkills(message: InstallSkillsSearchRequestMessage) {
-		if (!this._view) {
-			return;
-		}
-
-		const query = message.query.trim();
-		if (query.length < 2) {
-			await this._view.webview.postMessage({
-				type: 'installSkills.search.update',
-				query,
-				requestId: message.requestId,
-				skills: [],
-				isLoading: false,
-				error: null,
-			});
-			return;
-		}
-
-		const cacheKey = query.toLowerCase();
-		const cached = this._searchSkillsByQuery.get(cacheKey);
-		if (cached) {
-			await this._view.webview.postMessage({
-				type: 'installSkills.search.update',
-				query,
-				requestId: message.requestId,
-				skills: cached,
-				isLoading: false,
-				error: null,
-			});
-			return;
-		}
-
-		await this._view.webview.postMessage({
-			type: 'installSkills.search.update',
-			query,
-			requestId: message.requestId,
-			skills: [],
-			isLoading: true,
-			error: null,
-		});
-
-		try {
-			this._installedMarketplaceSkillIds = await getInstalledMarketplaceSkillIds();
-			const skills = filterInstallableSkills(
-				await searchMarketplaceSkills(query, message.limit ?? 120),
-				this._installedMarketplaceSkillIds,
-			);
-			this._searchSkillsByQuery.set(cacheKey, skills);
-			await this._view.webview.postMessage({
-				type: 'installSkills.search.update',
-				query,
-				requestId: message.requestId,
-				skills,
-				isLoading: false,
-				error: null,
-			});
-		} catch (err) {
-			await this._view.webview.postMessage({
-				type: 'installSkills.search.update',
-				query,
-				requestId: message.requestId,
-				skills: [],
-				isLoading: false,
-				error: err instanceof Error ? err.message : String(err),
-			});
-		}
-	}
-
-	private async _postTrending24hSkills(refresh = false) {
-		if (!this._view) {
-			return;
-		}
-
-		await this._trending24h.load({
-			refresh,
-			fetch: async () => {
-				this._installedMarketplaceSkillIds = await getInstalledMarketplaceSkillIds();
-				return filterInstallableSkills(await fetchTrending24hSkills(), this._installedMarketplaceSkillIds);
-			},
-			send: () => this._sendTrending24hUpdate(),
-		});
-	}
-
-	private async _sendTrending24hUpdate() {
-		await this._view?.webview.postMessage({
-			type: 'trending24h.update',
-			skills: this._trending24h.data,
-			isLoading: this._trending24h.isLoading,
-			error: this._trending24h.error,
-		});
-	}
-
-	private async _postFlameSkills(refresh = false) {
-		if (!this._view) {
-			return;
-		}
-
-		await this._flame.load({
-			refresh,
-			fetch: async () => {
-				this._installedMarketplaceSkillIds = await getInstalledMarketplaceSkillIds();
-				return filterInstallableSkills(await fetchFlameSkills(FLAME_SKILL_SOURCE), this._installedMarketplaceSkillIds);
-			},
-			send: () => this._sendFlameSkillsUpdate(),
-		});
-	}
-
-	private async _sendFlameSkillsUpdate() {
-		await this._view?.webview.postMessage({
-			type: 'flameSkills.update',
-			skills: this._flame.data,
-			isLoading: this._flame.isLoading,
-			error: this._flame.error,
-		});
-	}
-
-	private async _postOfficialSources(refresh = false) {
-		if (!this._view) {
-			return;
-		}
-
-		await this._officialSources.load({
-			refresh,
-			fetch: () => fetchOfficialSkillSources(),
-			send: () => this._sendOfficialSourcesUpdate(),
-		});
-	}
-
-	private async _sendOfficialSourcesUpdate() {
-		await this._view?.webview.postMessage({
-			type: 'officialSources.update',
-			sources: this._officialSources.data,
-			isLoading: this._officialSources.isLoading,
-			error: this._officialSources.error,
-		});
-	}
-
-	private async _postOfficialSkills(owner: string, refresh = false) {
-		if (!this._view) {
-			return;
-		}
-
-		const normalizedOwner = owner.trim().toLowerCase();
-		if (!normalizedOwner) {
-			return;
-		}
-
-		if (this._loadingOfficialOwners.has(normalizedOwner)) {
-			await this._sendOfficialSkillsUpdate(normalizedOwner);
-			return;
-		}
-
-		if (!refresh && this._officialSkillsByOwner.has(normalizedOwner)) {
-			await this._sendOfficialSkillsUpdate(normalizedOwner);
-			return;
-		}
-
-		this._loadingOfficialOwners.add(normalizedOwner);
-		this._officialOwnerErrors.set(normalizedOwner, null);
-		await this._sendOfficialSkillsUpdate(normalizedOwner);
-
-		try {
-			this._installedMarketplaceSkillIds = await getInstalledMarketplaceSkillIds();
-			const skills = filterInstallableSkills(await fetchOfficialSkillsForOwner(normalizedOwner), this._installedMarketplaceSkillIds);
-			this._officialSkillsByOwner.set(normalizedOwner, skills);
-			if (skills.length === 0) {
-				this._officialOwnerErrors.set(normalizedOwner, 'No installable official skills found.');
-			}
-		} catch (err) {
-			this._officialOwnerErrors.set(normalizedOwner, err instanceof Error ? err.message : String(err));
-		} finally {
-			this._loadingOfficialOwners.delete(normalizedOwner);
-			await this._sendOfficialSkillsUpdate(normalizedOwner);
-		}
-	}
-
-	private async _sendOfficialSkillsUpdate(owner: string) {
-		await this._view?.webview.postMessage({
-			type: 'officialSkills.update',
-			owner,
-			skills: this._officialSkillsByOwner.get(owner) ?? [],
-			isLoading: this._loadingOfficialOwners.has(owner),
-			error: this._officialOwnerErrors.get(owner) ?? null,
-		});
-	}
-
-	private async _installMarketplaceSkill(message: InstallSkillInstallMessage) {
-		const skill = this._findMarketplaceSkill(message.id);
-		if (!skill) {
-			void vscode.window.showErrorMessage(vscode.l10n.t('My Skills could not find this skill in the marketplace list.'));
-			return;
-		}
-
-		await this._view?.webview.postMessage({
-			type: 'installSkill.status',
-			id: skill.id,
-			status: 'installing',
-		});
-
-		const didInstall = await installMarketplaceSkill(skill);
-		if (didInstall) {
-			this._installedMarketplaceSkillIds.add(skill.skillId);
-			this._installSkills = filterInstallableSkills(this._installSkills, this._installedMarketplaceSkillIds);
-			this._trending24h.data = filterInstallableSkills(this._trending24h.data, this._installedMarketplaceSkillIds);
-			this._flame.data = filterInstallableSkills(this._flame.data, this._installedMarketplaceSkillIds);
-			this._createSearchSkills = filterInstallableSkills(this._createSearchSkills, this._installedMarketplaceSkillIds);
-			this._officialSkillsByOwner.forEach((skills, owner) => {
-				this._officialSkillsByOwner.set(owner, filterInstallableSkills(skills, this._installedMarketplaceSkillIds));
-			});
-			this._searchSkillsByQuery.forEach((skills, query) => {
-				this._searchSkillsByQuery.set(query, filterInstallableSkills(skills, this._installedMarketplaceSkillIds));
-			});
-		}
-
-		await this._view?.webview.postMessage({
-			type: 'installSkill.status',
-			id: skill.id,
-			status: didInstall ? 'installed' : 'idle',
-		});
-
-		if (didInstall) {
-			await this._sendInstallSkillsUpdate();
-			await this._sendTrending24hUpdate();
-			await this._sendFlameSkillsUpdate();
-			await Promise.all(Array.from(this._officialSkillsByOwner.keys(), owner => this._sendOfficialSkillsUpdate(owner)));
-			await this._postLocalSkills();
-			this._onDidSkillsChange.fire();
-			clearSearchRecommendationCache();
-			await this._postCreateDesignReturnToLocal();
-		}
-	}
-
-	private _findMarketplaceSkill(id: string): InstallMarketplaceSkill | undefined {
-		return this._installSkills.find(candidate => candidate.id === id)
-			?? this._trending24h.data.find(candidate => candidate.id === id)
-			?? this._flame.data.find(candidate => candidate.id === id)
-			?? this._createSearchSkills.find(candidate => candidate.id === id)
-			?? Array.from(this._officialSkillsByOwner.values()).flat().find(candidate => candidate.id === id)
-			?? Array.from(this._searchSkillsByQuery.values()).flat().find(candidate => candidate.id === id);
 	}
 
 	private async _setLocalSkillEnabled(message: LocalSkillSetEnabledMessage) {
@@ -826,9 +494,9 @@ export class MySkillsViewProvider implements vscode.WebviewViewProvider {
 			await this._postLocalSkills();
 			this._onDidSkillsChange.fire();
 			if (isMarketplaceFolderSkillId(message.id)) {
-				await this._postInstallSkills(true);
-				await this._postTrending24hSkills(true);
-				await this._postFlameSkills(true);
+				await this._install.postInstallSkills(true);
+				await this._install.postTrending24hSkills(true);
+				await this._install.postFlameSkills(true);
 			}
 		}
 	}
@@ -1041,29 +709,6 @@ function waitForMinimumDuration(startedAt: number, minimumMs: number): Promise<v
 	});
 }
 
-async function getInstalledMarketplaceSkillIds(): Promise<Set<string>> {
-	const workspaceFolder = vscode.workspace.workspaceFolders?.[0];
-	if (!workspaceFolder) {
-		return new Set();
-	}
-
-	try {
-		const lockUri = vscode.Uri.joinPath(workspaceFolder.uri, 'skills-lock.json');
-		const content = Buffer.from(await vscode.workspace.fs.readFile(lockUri)).toString('utf8');
-		const parsed = JSON.parse(content) as SkillsLockFile;
-		return new Set(Object.keys(parsed.skills ?? {}));
-	} catch {
-		return new Set();
-	}
-}
-
-function filterInstallableSkills(
-	skills: InstallMarketplaceSkill[],
-	installedSkillIds: Set<string>,
-): InstallMarketplaceSkill[] {
-	return skills.filter(skill => !installedSkillIds.has(skill.id) && !installedSkillIds.has(skill.skillId) && !installedSkillIds.has(skill.name));
-}
-
 function toCreateSkillSearchPayload(result: SearchRecommendationResult) {
 	return {
 		query: result.query,
@@ -1089,25 +734,6 @@ function toCreateSkillSearchPayload(result: SearchRecommendationResult) {
 			score: recommendation.score,
 		})),
 	};
-}
-
-function mergeMarketplaceSkills(
-	currentSkills: InstallMarketplaceSkill[],
-	nextSkills: InstallMarketplaceSkill[],
-): InstallMarketplaceSkill[] {
-	const seen = new Set(currentSkills.map(skill => skill.id));
-	const merged = [...currentSkills];
-
-	for (const skill of nextSkills) {
-		if (seen.has(skill.id)) {
-			continue;
-		}
-
-		seen.add(skill.id);
-		merged.push(skill);
-	}
-
-	return merged;
 }
 
 function isMarketplaceFolderSkillId(skillId: string): boolean {
