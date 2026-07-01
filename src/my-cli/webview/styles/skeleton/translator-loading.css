@@ -216,10 +216,7 @@
    in and out, reverting to the base auto-scroll once the grow settles. */
 .translator-body.is-streaming-grow {
 	overflow-y: hidden;
-	/* Keep padding in the transition too: is-translating is dropped (padding
-	   relaxes 10px → 16px) while this class is still on for ~380ms, so without it
-	   the padding would snap even though the height eases. */
-	transition: height 0.34s cubic-bezier(0.22, 1, 0.36, 1), padding 0.34s cubic-bezier(0.22, 1, 0.36, 1);
+	transition: height 0.34s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 /* ── Reduced motion ──────────────────────────────────────────────── */
@@ -232,7 +229,6 @@
 		animation: none !important;
 	}
 
-	.translator-body,
 	.translator-body.is-streaming-grow {
 		transition: none;
 	}

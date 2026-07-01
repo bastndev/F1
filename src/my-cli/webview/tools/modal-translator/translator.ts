@@ -1569,9 +1569,10 @@ function buildSkeleton(availableHeight: number, lineHint?: number): HTMLElement 
 	// The skeleton sizes to the locked loading box so the scan beam covers it,
 	// but the shimmer lines + typing dots pack tightly at the top (see CSS:
 	// .t-skel-lines is flex: 0 0 auto) — so a small selection gets a minimal
-	// cluster with no gap, not a tall stretched placeholder. The body padding
-	// is tightened during translation (10px top/bottom), so subtract 20.
-	const contentHeight = Math.max(26, Math.min(200, availableHeight - 20));
+	// cluster with no gap, not a tall stretched placeholder. The body keeps its
+	// resting 16px top/bottom padding through loading (so the result never
+	// shifts when it lands), so subtract 32.
+	const contentHeight = Math.max(26, Math.min(200, availableHeight - 32));
 	wrap.style.height = `${contentHeight}px`;
 
 	const scan = document.createElement('div');
