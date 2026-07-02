@@ -85,6 +85,15 @@ type PromptDraft = {
 };
 const promptDrafts = new Map<string, PromptDraft>();
 
+/** Drop drafts whose session is gone; the terminal calls this on every state sync. */
+export const prunePromptDrafts = (openSessionIds: Set<string>) => {
+	for (const sessionId of promptDrafts.keys()) {
+		if (!openSessionIds.has(sessionId)) {
+			promptDrafts.delete(sessionId);
+		}
+	}
+};
+
 export const mountPromptPanel = (host: HTMLElement, context: PromptContext = { close: () => {} }) => {
 	ensureStyles();
 
@@ -365,8 +374,15 @@ function initPromptComposer(host: HTMLElement, context: PromptContext, hasActive
 			restoreRunButton();
 		}
 
+		// Release the in-flight guard only when the close actually runs: during a
+		// route prompt's delayed-close window the guard is what blocks a duplicate
+		// Ctrl+Enter send.
+		const closeAfterSend = () => {
+			sendInFlight = false;
+			ctx.close();
+		};
 		const result = processPrompt(textToSend, {
-			close: shouldDelayClose ? () => window.setTimeout(ctx.close, routePromptCloseDelayMs) : ctx.close,
+			close: shouldDelayClose ? () => window.setTimeout(closeAfterSend, routePromptCloseDelayMs) : closeAfterSend,
 			sendToActiveSession: ctx.sendToActiveSession,
 			getActiveSessionId: ctx.getActiveSessionId,
 		});
@@ -494,6 +510,9 @@ function initPromptComposer(host: HTMLElement, context: PromptContext, hasActive
 
 	const onInputForHighlight = () => {
 		adjustHeight();
+		// Offsets are relative to the text at check time, so any edit invalidates
+		// them — drop the marks now; the debounced pass recomputes them.
+		spellIssues = [];
 		if (highlight && textareaWrap) {
 			// use raf to ensure update happens after value commit and to help layer paint
 			requestAnimationFrame(renderHighlight);

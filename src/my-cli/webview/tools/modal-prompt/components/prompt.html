@@ -14,10 +14,11 @@
   </div>
   <!-- TOOLBAR: Pro button (left) + language toggles (right). The Pro button is
        always present, so English — which hides both toggles — can't collapse /
-       jump the row height. -->
+       jump the row height. Invisible (not removed) until its feature ships:
+       visibility keeps the row height stable. -->
   <div class="prompt-toolbar">
     <div class="prompt-toolbar-pro">
-      <button class="prompt-pro-btn" id="proBtn" type="button" title="Pro features">
+      <button class="prompt-pro-btn" id="proBtn" type="button" title="Pro features" style="visibility: hidden">
         PRO <span class="prompt-beta">beta</span>
       </button>
     </div>
