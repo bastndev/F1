@@ -44,6 +44,7 @@ import { updatePromptImageHighlight } from './highlight';
 import { initSkillsChips, isClaudeSession } from './skills-chips';
 import { updateFooterModel } from './footer-model';
 import { initSessionState, showNoSessionMessage } from './session-state';
+import { initPromptMode, PLAN_INSTRUCTION, type PromptMode } from './prompt-mode';
 import { initPromptHistory, recordSentPrompt } from './prompt-history';
 import { initAttachmentPeek } from './attachment-peek';
 import { getShortcut, matchesShortcut } from '../../../../shared/keymaps/cli';
@@ -127,6 +128,20 @@ function initPromptComposer(host: HTMLElement, context: PromptContext, hasActive
 	if (!textarea) {
 		return;
 	}
+
+	// PRO/PLAN tabs — initialized even without a session so the persisted mode
+	// always shows. PLAN appends a planning instruction at send time (see the
+	// send path); it never injects anything into the terminal.
+	let promptMode: PromptMode = 'pro';
+	initPromptMode(host, (mode) => {
+		promptMode = mode;
+		// Re-query: the run button's innerHTML is swapped during sends, so a
+		// cached span reference would go stale.
+		const runLabel = host.querySelector<HTMLElement>('#runBtn span');
+		if (runLabel) {
+			runLabel.textContent = mode === 'plan' ? 'Plan' : 'Execute';
+		}
+	});
 
 	// When there is no active session we keep everything disabled
 	if (!hasActiveSession) {
@@ -365,6 +380,12 @@ function initPromptComposer(host: HTMLElement, context: PromptContext, hasActive
 		// The textarea can show compact @~/ aliases; restore the actual
 		// workspace-relative @path right before sending to the CLI.
 		textToSend = resolveFileMentionAliases(textToSend);
+
+		// PLAN mode rides along as text — appended last so it wraps the fully
+		// expanded prompt, and post-translation so it stays English.
+		if (promptMode === 'plan') {
+			textToSend = `${textToSend.trimEnd()}\n\n${PLAN_INSTRUCTION}`;
+		}
 		const shouldDelayClose = hasRouteMention(textToSend);
 		if (shouldDelayClose && runBtn) {
 			// Route prompts hold the modal open briefly so the @path paste can land

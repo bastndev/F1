@@ -296,18 +296,24 @@
   display: none;
 }
 
-/* Pro button — anchors the toolbar's left edge. Always present, so when English
-   hides both toggles (on the right) the row keeps its height (no collapse /
-   jump). Subtle pill from the same family as the translate/strict toggles.
-   Reserved for future "Pro" features. */
+/* PRO/PLAN mode tabs — anchor the toolbar's left edge. Always present, so when
+   English hides both toggles (on the right) the row keeps its height (no
+   collapse / jump). One tab active at a time; the accent treatment below marks
+   the active one, inactive tabs dim to a neutral outline. */
 .prompt-toolbar-pro {
-  display: flex;
-  align-items: flex-end;
+  /* Grid with equal 1fr columns: both tabs get the width of the widest one
+     (the beta chip on PLAN would otherwise make them uneven). */
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: 1fr;
+  align-items: end;
+  gap: 4px;
 }
 
 .prompt-pro-btn {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 6px;
   padding: 5px 12px;
   /* Tab shape: rounded top corners only, squared bottom — sits flush on the
@@ -330,6 +336,21 @@
 .prompt-pro-btn:hover {
   background: color-mix(in srgb, var(--agent-accent, #534AB7) 20%, transparent);
   border-color: color-mix(in srgb, var(--agent-accent, #534AB7) 40%, transparent);
+}
+
+/* Inactive tab: same shape, accent drained to a neutral outline. */
+.prompt-pro-btn:not(.is-active) {
+  background: transparent;
+  border-color: var(--vscode-editorGroup-border);
+  box-shadow: none;
+  color: var(--vscode-descriptionForeground);
+  opacity: 0.65;
+}
+
+.prompt-pro-btn:not(.is-active):hover {
+  opacity: 0.9;
+  border-color: color-mix(in srgb, var(--agent-accent, #534AB7) 40%, transparent);
+  color: var(--agent-accent, #AFA9EC);
 }
 
 /* The beta chip rides inside the Pro button; drop its standalone left margin and
@@ -1160,8 +1181,12 @@
 .prompt-run-btn {
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 7px;
-  padding: 8px 20px 8px 14px;
+  /* Sized by the widest label ("Execute"); shorter ones ("Plan") center inside
+     the same width so the mode switch never resizes the button. */
+  min-width: 116px;
+  padding: 8px 14px;
   background: rgba(83, 74, 183, 0.85);
   border: none;
   border-radius: 7px;
