@@ -1331,3 +1331,128 @@
 	background: rgba(244, 135, 113, 0.1);
 	border-radius: 4px;
 }
+
+/* ── Attachment peek: paste popover + image thumbnail ──────────────────────
+   Both are appended to document.body (position: fixed) and anchored above
+   their marker span in the highlight overlay — same layer the spell note
+   uses (z-index 1000). */
+.prompt-peek-popover {
+  position: fixed;
+  z-index: 1000;
+  width: min(440px, 82vw);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 10px;
+  background: var(--vscode-editor-background);
+  border: 0.5px solid var(--vscode-editorGroup-border);
+  border-radius: 8px;
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.5);
+}
+
+.prompt-peek-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-family: 'Syne', sans-serif;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--vscode-descriptionForeground);
+}
+
+.prompt-peek-hint {
+  font-weight: 400;
+  text-transform: none;
+  opacity: 0.7;
+}
+
+.prompt-peek-editor {
+  width: 100%;
+  min-height: 90px;
+  max-height: 220px;
+  resize: vertical;
+  padding: 8px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  line-height: 1.5;
+  color: var(--vscode-input-foreground);
+  background: var(--vscode-input-background);
+  border: 0.5px solid var(--vscode-editorGroup-border);
+  border-radius: 6px;
+  outline: none;
+  white-space: pre;
+  overflow: auto;
+}
+
+.prompt-peek-editor:focus {
+  border-color: var(--vscode-focusBorder);
+}
+
+.prompt-peek-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 6px;
+}
+
+.prompt-peek-btn {
+  padding: 4px 10px;
+  background: #1b1c23; /* dark mode */
+  border: 0.5px solid var(--vscode-editorGroup-border);
+  border-radius: 7px;
+  color: var(--vscode-button-secondaryForeground, var(--vscode-foreground));
+  font-family: 'Syne', sans-serif;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  cursor: pointer;
+  opacity: 0.9;
+  transition: all 0.15s ease;
+}
+
+.vscode-light .prompt-peek-btn {
+  background: #f0f0f3;
+}
+
+.prompt-peek-btn:hover {
+  opacity: 1;
+  border-color: var(--vscode-focusBorder);
+}
+
+.prompt-peek-btn.danger {
+  color: var(--vscode-errorForeground, #f48771);
+}
+
+.prompt-peek-thumb {
+  position: fixed;
+  z-index: 1000;
+  pointer-events: none;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  max-width: 240px;
+  padding: 6px;
+  background: var(--vscode-editor-background);
+  border: 0.5px solid var(--vscode-editorGroup-border);
+  border-radius: 8px;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.4);
+}
+
+.prompt-peek-thumb img {
+  display: block;
+  max-width: 220px;
+  max-height: 160px;
+  border-radius: 4px;
+  object-fit: contain;
+}
+
+.prompt-peek-thumb-name {
+  max-width: 220px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px;
+  color: var(--vscode-descriptionForeground);
+}

@@ -44,6 +44,8 @@ import { updatePromptImageHighlight } from './highlight';
 import { initSkillsChips, isClaudeSession } from './skills-chips';
 import { updateFooterModel } from './footer-model';
 import { initSessionState, showNoSessionMessage } from './session-state';
+import { initPromptHistory, recordSentPrompt } from './prompt-history';
+import { initAttachmentPeek } from './attachment-peek';
 import { getShortcut, matchesShortcut } from '../../../../shared/keymaps/cli';
 
 export type { PromptContext } from './prompt-context';
@@ -71,6 +73,10 @@ const promptCharDanger = 4500;
 const routePromptCloseDelayMs = 1200;
 
 const hasRouteMention = (text: string) => /(^|\s)@\S+/.test(text);
+
+// Same source modal-commands uses; keys the per-CLI prompt history.
+const getActiveAgentSlug = (): string =>
+	document.querySelector<HTMLElement>('.agent-shell')?.dataset.agent ?? '';
 
 // Draft state per CLI session, surviving modal close/Esc (a too-easy accident
 // while typing). Lives in module scope: the webview JS context persists while
@@ -266,7 +272,8 @@ function initPromptComposer(host: HTMLElement, context: PromptContext, hasActive
 		hostEl: HTMLElement,
 		ta: HTMLTextAreaElement,
 		ctx: PromptContext,
-		currentAttachments: ImageAttachment[]
+		currentAttachments: ImageAttachment[],
+		skipTranslate: boolean
 	) {
 		if (sendInFlight) {
 			return;
@@ -300,8 +307,9 @@ function initPromptComposer(host: HTMLElement, context: PromptContext, hasActive
 		// Auto-translate (<source> → EN) when the language translates and the
 		// toggle is active. English (translates:false) is sent verbatim.
 		// The textarea keeps the original text; the CLI receives the translation.
+		// skipTranslate is the one-off Ctrl+Shift+Enter override.
 		const sourceLang = currentLang ? getPromptLanguage(currentLang) : undefined;
-		if (sourceLang?.translates && translateState.enabled && ctx.translatePrompt) {
+		if (sourceLang?.translates && translateState.enabled && !skipTranslate && ctx.translatePrompt) {
 			didTranslate = true;
 			setTranslating(true);
 			if (runBtn) {
@@ -398,9 +406,14 @@ function initPromptComposer(host: HTMLElement, context: PromptContext, hasActive
 			restoreRunButton();
 		}
 
-		// Sent successfully — the draft has served its purpose.
-		if (result.status === 'sent' && draftKey) {
-			promptDrafts.delete(draftKey);
+		if (result.status === 'sent') {
+			// Original textarea text (markers get stripped inside) — never the
+			// translated/expanded payload.
+			recordSentPrompt(getActiveAgentSlug(), ta.value);
+			// The draft has served its purpose.
+			if (draftKey) {
+				promptDrafts.delete(draftKey);
+			}
 		}
 	}
 
@@ -442,8 +455,8 @@ function initPromptComposer(host: HTMLElement, context: PromptContext, hasActive
 		);
 	}
 
-	const performSendNow = async () => {
-		await doPerformSendWithImages(host, textarea, context, imageAttachments);
+	const performSendNow = async (options?: { skipTranslate?: boolean }) => {
+		await doPerformSendWithImages(host, textarea, context, imageAttachments, options?.skipTranslate === true);
 	};
 
 	initRunButton(host, textarea, context, performSendNow);
@@ -567,6 +580,13 @@ function initPromptComposer(host: HTMLElement, context: PromptContext, hasActive
 		onApplied: rerunSpellcheck,
 	});
 
+	// ArrowUp in an empty textarea recalls previously sent prompts (per CLI).
+	initPromptHistory(textarea, getActiveAgentSlug);
+
+	// Plain click a collapsed-paste marker → peek/edit popover; hover an
+	// [Image #N] marker → thumbnail preview.
+	initAttachmentPeek({ textarea, highlight, pasteAttachments, imageAttachments });
+
 	// ── Language gate ────────────────────────────────────────────────
 	// The picker is the single source of the source language. Typing stays
 	// locked until one is chosen; the choice persists across sessions.
@@ -668,6 +688,7 @@ function initRunButton(
 
 	if (runHint) {
 		runHint.textContent = getShortcut('sendPrompt')?.description ?? 'Ctrl + Enter';
+		runHint.title = 'Hold Shift to send without translating';
 	}
 
 	const updateState = () => {
@@ -696,14 +717,24 @@ function initRunButton(
 	});
 }
 
-function initSendShortcut(textarea: HTMLTextAreaElement, context: PromptContext, performSendImpl: () => Promise<void>) {
+function initSendShortcut(
+	textarea: HTMLTextAreaElement,
+	context: PromptContext,
+	performSendImpl: (options?: { skipTranslate?: boolean }) => Promise<void>
+) {
 	textarea.addEventListener('keydown', (e) => {
-		if (!matchesShortcut(e, 'sendPrompt')) {
+		if (matchesShortcut(e, 'sendPrompt')) {
+			e.preventDefault();
+			void performSendImpl();
 			return;
 		}
 
-		e.preventDefault();
-		void performSendImpl();
+		// Shift variant of the send chord: one-off send without translation
+		// (sendPrompt itself never matches with Shift held).
+		if (e.key === 'Enter' && e.shiftKey && (e.ctrlKey || e.metaKey)) {
+			e.preventDefault();
+			void performSendImpl({ skipTranslate: true });
+		}
 	});
 }
 
