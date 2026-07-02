@@ -47,9 +47,10 @@ export function initSkillsChips(
 		addChip.setAttribute('aria-label', 'Create a skill');
 
 		if (context.openCreateSkill) {
+			// The modal stays open: the draft keeps waiting while the skill is
+			// created, and the registered refresh adds the new chip on return.
 			addChip.addEventListener('click', () => {
 				context.openCreateSkill?.();
-				context.close();
 			});
 		} else {
 			addChip.disabled = true;
