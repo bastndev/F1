@@ -12,6 +12,8 @@
  * The choice persists in localStorage 'f1-prompt-mode' ('pro' | 'plan';
  * missing = pro), sibling of 'f1-translate-auto' / 'f1-prompt-lang'.
  */
+import { matchesShortcut } from '../../../../shared/keymaps/cli';
+
 export type PromptMode = 'pro' | 'plan';
 
 const STORAGE_KEY = 'f1-prompt-mode';
@@ -53,6 +55,18 @@ export function initPromptMode(host: HTMLElement, onChange: (mode: PromptMode) =
 
 	proBtn.addEventListener('click', () => apply('pro', true));
 	planBtn.addEventListener('click', () => apply('plan', true));
+
+	// Alt+1 / Alt+2 switch modes; listening on the host (not the textarea)
+	// keeps the chord working wherever focus sits inside the modal.
+	host.addEventListener('keydown', (e) => {
+		if (matchesShortcut(e, 'promptModePro')) {
+			e.preventDefault();
+			apply('pro', true);
+		} else if (matchesShortcut(e, 'promptModePlan')) {
+			e.preventDefault();
+			apply('plan', true);
+		}
+	});
 
 	// Reflect the persisted mode on every mount.
 	apply(getPromptMode(), false);
