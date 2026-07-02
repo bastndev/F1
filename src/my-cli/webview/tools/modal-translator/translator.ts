@@ -5,7 +5,7 @@ import type { ToolContext } from '../tools';
 import type { VoiceProgress, VoiceState } from '../../../shared/voice/voice-types';
 import { translateEnTo } from './browser-terminal-translator';
 import { renderMarkdownLite } from './markdown-lite';
-import { segmentTerminalSelection, isMarkdownStructuredLine } from './terminal-text';
+import { segmentTerminalSelection, isMarkdownStructuredLine, emojiRunSource } from './terminal-text';
 import { getCachedTranslation, setCachedTranslation, getCachedParagraph, setCachedParagraph } from './translator-cache';
 import { matchesShortcut } from '../../../../shared/keymaps/cli';
 import { getStoredPromptLang } from '../modal-prompt/language-select';
@@ -49,7 +49,7 @@ type MarkdownLine = {
 const headingPattern = /^(#{1,6})\s+(.*)$/;
 
 // Matches a line starting with an emoji followed by content
-const emojiPrefixPattern = /^(\p{Emoji_Presentation}+\s*)(.*)/u;
+const emojiPrefixPattern = new RegExp(`^(${emojiRunSource}\\s*)(.*)`, 'u');
 
 // Matches a bracket label: [end] / [fin] / [start]
 const bracketLabelPattern = /^(\[[\w\s]+\]\s*)(.*)$/;
@@ -57,8 +57,9 @@ const bracketLabelPattern = /^(\[[\w\s]+\]\s*)(.*)$/;
 // Matches a blockquote: > text
 const blockquotePattern = /^(>\s*)(.*)$/;
 
-// Matches a score line: emoji + label + N/10 pattern
-const scoreLinePattern = /^(\p{Emoji_Presentation}+\s*\S+\s+)(\d{1,2}\/10)\s*$/u;
+// Matches a score line: emoji + label + N/10 pattern. The label may be several
+// words ("🧹 Code Quality 8/10") — lazy up to the anchored trailing score.
+const scoreLinePattern = new RegExp(`^(${emojiRunSource}\\s*\\S.*?\\s+)(\\d{1,2}\\/10)\\s*$`, 'u');
 
 function parseMarkdownLine(line: string): MarkdownLine | null {
 	const trimmed = line.trim();
@@ -726,7 +727,7 @@ function initializeTranslator(host: HTMLElement, context: ToolContext) {
 						body.style.height = '';
 						body.style.maxHeight = '';
 						body.classList.remove('is-streaming-grow');
-					}, 380);
+					}, getGrowSettleMs(body));
 				} else if (bodyEl.style.height) {
 					// A height was locked (long selection, no streaming). Ease it
 					// to the result instead of snapping — so the modal settles
@@ -738,7 +739,7 @@ function initializeTranslator(host: HTMLElement, context: ToolContext) {
 						growSettleTimer = undefined;
 						body.style.height = '';
 						body.classList.remove('is-streaming-grow');
-					}, 380);
+					}, getGrowSettleMs(body));
 				}
 			}
 		}
@@ -1041,6 +1042,16 @@ function initializeTranslator(host: HTMLElement, context: ToolContext) {
 
 function extractTextToTranslate(context: ToolContext): string {
 	return context.getTerminalSelection?.() || '';
+}
+
+// How long to wait before dropping the body's explicit height after a grow.
+// Must outlast the .is-streaming-grow height transition — read it live from
+// the element so CSS can change the duration without silently breaking this
+// (a settle that fires mid-transition snaps the modal). +40ms of slack covers
+// frame scheduling; reduced motion (transition: none) settles almost at once.
+function getGrowSettleMs(body: HTMLElement): number {
+	const seconds = Number.parseFloat(getComputedStyle(body).transitionDuration) || 0;
+	return seconds * 1000 + 40;
 }
 
 // Split prose into trimmed, non-empty paragraphs on blank lines. Shared by the

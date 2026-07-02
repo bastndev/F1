@@ -24,6 +24,19 @@ export type TerminalSegment = {
 };
 
 /**
+ * One rendered emoji run, as a regex source (shared with translator.ts and
+ * markdown-lite.ts so all three agree on what counts as an emoji prefix).
+ * `\p{Emoji_Presentation}` alone misses the pictographs that render as emoji
+ * only through a VS16 (⚠️ ❤️ 🏗️ — base char has Emoji_Presentation=No), so a
+ * unit is: a default-emoji char (with optional redundant VS16), or a
+ * pictograph + required VS16, or a skin-tone modifier, or the ZWJ gluing
+ * sequences like 👨‍💻. The VS16 stays REQUIRED on the pictograph alternative:
+ * bare \p{Extended_Pictographic} would also match © ® ™ in plain prose.
+ */
+export const emojiRunSource =
+	'(?:\\p{Emoji_Presentation}\\uFE0F?|\\p{Extended_Pictographic}\\uFE0F|\\p{Emoji_Modifier}|\\u200D)+';
+
+/**
  * Lines that carry visual structure the translator must preserve. Each entry
  * is a regex that matches a line whose *leading markers* (emoji, `##`, `>`,
  * etc.) must survive translation so the renderer can rebuild the structure.
@@ -31,15 +44,15 @@ export type TerminalSegment = {
 const markdownLinePatterns: RegExp[] = [
 	// Heading: ## Title / ### Subtitle
 	/^#{1,6}\s+/,
-	// Emoji-prefixed label: 🔍 Project Understanding, 🏗️ Architecture 8/10
-	/^\p{Emoji_Presentation}\s*/u,
+	// Emoji-prefixed label: 🔍 Project Understanding, ⚠️ Findings
+	new RegExp(`^${emojiRunSource}\\s*`, 'u'),
 	/^\p{Emoji_Modifier_Base}\p{Emoji_Modifier}?\s*/u,
 	// Bracket label: [end] / [fin] / [start]
 	/^\[[\w\s]+\]\s+/,
 	// Blockquote: > text
 	/^>\s+/,
 	// Score table line: emoji + label + score pattern (e.g. 🏗️ Architecture 8/10)
-	/\p{Emoji_Presentation}.*\b\d{1,2}\/10\b/u,
+	new RegExp(`${emojiRunSource}.*\\b\\d{1,2}\\/10\\b`, 'u'),
 ];
 
 /**

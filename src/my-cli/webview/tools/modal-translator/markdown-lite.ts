@@ -9,6 +9,15 @@
  *     continuation), ``` fences, > quotes, ---, `code`, bold, italic, links.
  */
 
+import { emojiRunSource } from './terminal-text';
+
+// Score line: emoji + label + N/10 (e.g. "🏗️ Architecture 8/10"). The label
+// may be several words ("🧹 Code Quality 8/10") — lazy up to the anchored score.
+const scoreLinePattern = new RegExp(`^(${emojiRunSource}\\s*)(\\S.*?)\\s+(\\d{1,2}\\/10)\\s*$`, 'u');
+
+// Emoji-prefixed item: "🔍 Project Understanding" / "📊 [end] Health Overview"
+const emojiItemPattern = new RegExp(`^(${emojiRunSource}\\s*)(.*)`, 'u');
+
 const escapeHtml = (text: string): string =>
 	text
 		.replace(/&/g, '&amp;')
@@ -202,8 +211,7 @@ export function renderMarkdownLite(markdown: string): string {
 			continue;
 		}
 
-		// Score line: emoji + label + N/10 (e.g. "🏗️ Architecture 8/10")
-		const scoreLine = trimmed.match(/^(\p{Emoji_Presentation}+\s*)(\S+)\s+(\d{1,2}\/10)\s*$/u);
+		const scoreLine = trimmed.match(scoreLinePattern);
 		if (scoreLine) {
 			flushAll();
 			html.push(
@@ -216,8 +224,7 @@ export function renderMarkdownLite(markdown: string): string {
 			continue;
 		}
 
-		// Emoji-prefixed item: "🔍 Project Understanding" / "📊 [end] Health Overview"
-		const emojiItem = trimmed.match(/^(\p{Emoji_Presentation}+\s*)(.*)/u);
+		const emojiItem = trimmed.match(emojiItemPattern);
 		if (emojiItem) {
 			flushAll();
 			// Check if the content has a bracket label inside
