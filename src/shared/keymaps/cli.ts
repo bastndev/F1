@@ -79,7 +79,9 @@ export type ShortcutId =
   | 'openUse'
   | 'openCommands'
   | 'toggleVoicePlayback'
-  | 'sendPrompt';
+  | 'sendPrompt'
+  | 'promptModePro'
+  | 'promptModePlan';
 
 export interface ShortcutDefinition {
   id: ShortcutId;
@@ -182,6 +184,20 @@ export const shortcuts: ShortcutDefinition[] = [
     contexts: ['prompt'],
     description: 'Ctrl + Enter',
     match: promptSendKey(),
+  },
+  {
+    id: 'promptModePro',
+    label: 'Switch to PRO mode',
+    contexts: ['prompt'],
+    description: 'Alt + 1',
+    match: altKey('1'),
+  },
+  {
+    id: 'promptModePlan',
+    label: 'Switch to PLAN mode',
+    contexts: ['prompt'],
+    description: 'Alt + 2',
+    match: altKey('2'),
   },
   {
     id: 'toggleAgentPalette',

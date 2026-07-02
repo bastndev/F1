@@ -44,6 +44,7 @@ export const PERSONAL_MISTAKES: Record<string, string> = {
 	'preciona': 'presionar',
 	'amejorar': 'mejorar',
 	'obiamnte': 'obviamente',
+	'ban': 'van',
 
 
     // world 

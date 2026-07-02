@@ -296,18 +296,24 @@
   display: none;
 }
 
-/* Pro button — anchors the toolbar's left edge. Always present, so when English
-   hides both toggles (on the right) the row keeps its height (no collapse /
-   jump). Subtle pill from the same family as the translate/strict toggles.
-   Reserved for future "Pro" features. */
+/* PRO/PLAN mode tabs — anchor the toolbar's left edge. Always present, so when
+   English hides both toggles (on the right) the row keeps its height (no
+   collapse / jump). One tab active at a time; the accent treatment below marks
+   the active one, inactive tabs dim to a neutral outline. */
 .prompt-toolbar-pro {
-  display: flex;
-  align-items: flex-end;
+  /* Grid with equal 1fr columns: both tabs get the width of the widest one
+     (the beta chip on PLAN would otherwise make them uneven). */
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: 1fr;
+  align-items: end;
+  gap: 4px;
 }
 
 .prompt-pro-btn {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 6px;
   padding: 5px 12px;
   /* Tab shape: rounded top corners only, squared bottom — sits flush on the
@@ -330,6 +336,21 @@
 .prompt-pro-btn:hover {
   background: color-mix(in srgb, var(--agent-accent, #534AB7) 20%, transparent);
   border-color: color-mix(in srgb, var(--agent-accent, #534AB7) 40%, transparent);
+}
+
+/* Inactive tab: same shape, accent drained to a neutral outline. */
+.prompt-pro-btn:not(.is-active) {
+  background: transparent;
+  border-color: var(--vscode-editorGroup-border);
+  box-shadow: none;
+  color: var(--vscode-descriptionForeground);
+  opacity: 0.65;
+}
+
+.prompt-pro-btn:not(.is-active):hover {
+  opacity: 0.9;
+  border-color: color-mix(in srgb, var(--agent-accent, #534AB7) 40%, transparent);
+  color: var(--agent-accent, #AFA9EC);
 }
 
 /* The beta chip rides inside the Pro button; drop its standalone left margin and
@@ -654,6 +675,14 @@
   background: var(--vscode-input-background);
   border: 0.5px solid var(--vscode-editorGroup-border);
   border-radius: 8px;
+  transition: background 0.2s ease, border-color 0.2s ease;
+}
+
+/* PLAN mode wears the accent on the field where the prompt is written — the
+   run button keeps its "Execute" label and size, and the border stays the
+   normal gray, in both modes. */
+.prompt-modal.is-plan-mode .prompt-textarea-wrap {
+  background: color-mix(in srgb, var(--agent-accent, #534AB7) 6%, var(--vscode-input-background));
 }
 
 .prompt-textarea-highlight {
@@ -1160,8 +1189,12 @@
 .prompt-run-btn {
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 7px;
-  padding: 8px 20px 8px 14px;
+  /* Sized by the widest label ("Execute"); shorter ones ("Plan") center inside
+     the same width so the mode switch never resizes the button. */
+  min-width: 116px;
+  padding: 8px 14px;
   background: rgba(83, 74, 183, 0.85);
   border: none;
   border-radius: 7px;
@@ -1330,4 +1363,129 @@
 	padding: 4px 8px;
 	background: rgba(244, 135, 113, 0.1);
 	border-radius: 4px;
+}
+
+/* ── Attachment peek: paste popover + image thumbnail ──────────────────────
+   Both are appended to document.body (position: fixed) and anchored above
+   their marker span in the highlight overlay — same layer the spell note
+   uses (z-index 1000). */
+.prompt-peek-popover {
+  position: fixed;
+  z-index: 1000;
+  width: min(440px, 82vw);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 10px;
+  background: var(--vscode-editor-background);
+  border: 0.5px solid var(--vscode-editorGroup-border);
+  border-radius: 8px;
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.5);
+}
+
+.prompt-peek-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-family: 'Syne', sans-serif;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--vscode-descriptionForeground);
+}
+
+.prompt-peek-hint {
+  font-weight: 400;
+  text-transform: none;
+  opacity: 0.7;
+}
+
+.prompt-peek-editor {
+  width: 100%;
+  min-height: 90px;
+  max-height: 220px;
+  resize: vertical;
+  padding: 8px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  line-height: 1.5;
+  color: var(--vscode-input-foreground);
+  background: var(--vscode-input-background);
+  border: 0.5px solid var(--vscode-editorGroup-border);
+  border-radius: 6px;
+  outline: none;
+  white-space: pre;
+  overflow: auto;
+}
+
+.prompt-peek-editor:focus {
+  border-color: var(--vscode-focusBorder);
+}
+
+.prompt-peek-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 6px;
+}
+
+.prompt-peek-btn {
+  padding: 4px 10px;
+  background: #1b1c23; /* dark mode */
+  border: 0.5px solid var(--vscode-editorGroup-border);
+  border-radius: 7px;
+  color: var(--vscode-button-secondaryForeground, var(--vscode-foreground));
+  font-family: 'Syne', sans-serif;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  cursor: pointer;
+  opacity: 0.9;
+  transition: all 0.15s ease;
+}
+
+.vscode-light .prompt-peek-btn {
+  background: #f0f0f3;
+}
+
+.prompt-peek-btn:hover {
+  opacity: 1;
+  border-color: var(--vscode-focusBorder);
+}
+
+.prompt-peek-btn.danger {
+  color: var(--vscode-errorForeground, #f48771);
+}
+
+.prompt-peek-thumb {
+  position: fixed;
+  z-index: 1000;
+  pointer-events: none;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  max-width: 240px;
+  padding: 6px;
+  background: var(--vscode-editor-background);
+  border: 0.5px solid var(--vscode-editorGroup-border);
+  border-radius: 8px;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.4);
+}
+
+.prompt-peek-thumb img {
+  display: block;
+  max-width: 220px;
+  max-height: 160px;
+  border-radius: 4px;
+  object-fit: contain;
+}
+
+.prompt-peek-thumb-name {
+  max-width: 220px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px;
+  color: var(--vscode-descriptionForeground);
 }

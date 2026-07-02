@@ -2,6 +2,7 @@ import { FitAddon } from '@xterm/addon-fit';
 import { Terminal } from '@xterm/xterm';
 import { createTabController, readVoiceFinishPreference, type CliAgentIcon } from '../panel-tab/tab';
 import { getStoredPromptLang } from '../tools/modal-prompt/language-select';
+import { prunePromptDrafts } from '../tools/modal-prompt/prompt';
 import { createCliCreateMessage } from '../../shared/agent-launch-guard';
 import { getAgentSlug as resolveAgentSlug } from '../../shared/agents';
 import { isLynxPanelNavChord } from '../../../shared/keymaps/lynx-keymap/index';
@@ -831,6 +832,7 @@ const syncState = (message: Extract<ServerMessage, { type: 'cli.state' }>) => {
 	removeClosedTerminals(openSessionIds);
 	sleepInactiveTerminals(visualSleepEnabled, openSessionIds);
 	usageTracker.pruneClosedSessions(openSessionIds);
+	prunePromptDrafts(openSessionIds);
 
 	// If a session entered error/exited state before producing output, don't leave skeleton hanging
 	for (const [sessionId, session] of sessions) {
