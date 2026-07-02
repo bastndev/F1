@@ -249,6 +249,9 @@ function initializeTranslator(host: HTMLElement, context: ToolContext) {
 		if (bodyEl) {
 			bodyEl.classList.remove('is-streaming-grow');
 			bodyEl.style.height = '';
+			// Drop the grow cap from any previous stream — it was measured against
+			// the panel size at that moment and would wrongly clip this run.
+			bodyEl.style.maxHeight = '';
 		}
 		const extracted = extractTextToTranslate(context);
 		if (!extracted) {
@@ -696,10 +699,6 @@ function initializeTranslator(host: HTMLElement, context: ToolContext) {
 			enableResultActions();
 			// Read whatever did stream in before the failure, then close the session.
 			voicePipeline?.finish();
-			// Failed attempts may be transient (rate limit, network) — allow retry.
-			if (translateBtn) {
-				translateBtn.disabled = false;
-			}
 		} finally {
 			// If a newer translation is already running, leave its UI state alone.
 			if (generation !== translationGeneration) {
@@ -708,6 +707,12 @@ function initializeTranslator(host: HTMLElement, context: ToolContext) {
 			if (stageFlushTimer) {
 				clearTimeout(stageFlushTimer);
 				stageFlushTimer = undefined;
+			}
+			// Re-arm the manual button: the terminal selection can change while the
+			// panel stays open, and failed attempts may be transient (rate limit,
+			// network) — either way another run must stay possible.
+			if (translateBtn) {
+				translateBtn.disabled = false;
 			}
 			modalEl.classList.remove('is-translating');
 			if (bodyEl) {
@@ -719,6 +724,7 @@ function initializeTranslator(host: HTMLElement, context: ToolContext) {
 					growSettleTimer = setTimeout(() => {
 						growSettleTimer = undefined;
 						body.style.height = '';
+						body.style.maxHeight = '';
 						body.classList.remove('is-streaming-grow');
 					}, 380);
 				} else if (bodyEl.style.height) {
@@ -1206,17 +1212,14 @@ function splitForStreaming(text: string): string[] {
 	return blocks;
 }
 
-// Compact "still translating" affordance pinned below the streamed blocks —
-// a shimmer line plus the skeleton's typing dots, so the loading state reads
-// as one language whether it's the full skeleton or the streaming tail.
+// Compact "still translating" affordance below the streamed blocks — the
+// skeleton's typing dots (› ···). Rendered with zero layout height (absolute,
+// in the body's bottom padding; see .translator-streaming) so removing it at
+// the end of the stream never shrinks the modal.
 function buildStreamIndicator(): HTMLElement {
 	const wrap = document.createElement('div');
 	wrap.className = 'translator-streaming';
 	wrap.setAttribute('aria-hidden', 'true');
-
-	const line = document.createElement('div');
-	line.className = 't-skel-line med';
-	wrap.append(line);
 
 	const typing = document.createElement('div');
 	typing.className = 't-skel-typing';

@@ -199,6 +199,11 @@
 	   can still grow up to the available space (max-height is set while
 	   streaming) and scroll once it hits that cap. */
 	flex: 0 1 auto;
+	/* The streaming grow drives style.height from scrollHeight, which includes
+	   this padding — border-box makes those the same coordinate system. Without
+	   it the body renders 32px taller than the content through the whole stream
+	   and snaps down when the inline height is cleared at settle. */
+	box-sizing: border-box;
 	min-height: 0;
 	overflow-y: auto;
 	/* Reserve the scrollbar gutter at all times so the thin scrollbar appearing
@@ -215,6 +220,8 @@
 }
 
 .translator-text {
+	/* Containing block for the absolutely positioned streaming indicator. */
+	position: relative;
 	font-size: 13px;
 	line-height: 1.7;
 	white-space: pre-wrap;
