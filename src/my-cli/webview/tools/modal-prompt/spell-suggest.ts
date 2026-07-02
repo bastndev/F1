@@ -1,15 +1,16 @@
 /**
- * Alt-click spell fixing for the prompt textarea.
+ * Alt/Ctrl-click spell fixing for the prompt textarea.
  *
  * A misspelled word carries its top correction (computed host-side during the
  * spellcheck pass; for Spanish the personal-typo fix is placed first). So:
- *   • Alt + Left-click on a red word  → replace it in place with that correction
- *     (instant, no round-trip). If there is none → a small "No suggestions" note.
- *   • Alt + hover over a red word     → the cursor turns into a pointer so the
- *     word reads as actionable.
+ *   • Alt or Ctrl + Left-click on a red word  → replace it in place with that
+ *     correction (instant, no round-trip). If there is none → a small
+ *     "No suggestions" note.
+ *   • Alt or Ctrl + hover over a red word     → the cursor turns into a pointer
+ *     so the word reads as actionable.
  *
- * Hit-testing the click uses the textarea's native caret (an Alt-click still
- * positions the caret, so selectionStart tells us which issue was clicked).
+ * Hit-testing the click uses the textarea's native caret (a modified click
+ * still positions the caret, so selectionStart tells us which issue was hit).
  * Hover uses the overlay's `.prompt-misspelled` rects, which mirror the textarea
  * layout exactly, so the textarea can stay on top for normal editing.
  */
@@ -26,9 +27,9 @@ interface SpellSuggestOptions {
 }
 
 export function initSpellSuggest({ textarea, highlight, getSpellIssues, onApplied }: SpellSuggestOptions) {
-	// ── Alt + click → apply the top correction for the clicked word ──
+	// ── Alt or Ctrl + click → apply the top correction for the clicked word ──
 	textarea.addEventListener('click', (event) => {
-		if (!event.altKey) {
+		if (!event.altKey && !event.ctrlKey) {
 			return;
 		}
 
@@ -51,7 +52,7 @@ export function initSpellSuggest({ textarea, highlight, getSpellIssues, onApplie
 		applyFix(textarea, issue, fix, onApplied);
 	});
 
-	// ── Alt + hover → pointer cursor over a red word ──
+	// ── Alt or Ctrl + hover → pointer cursor over a red word ──
 	let pointerActive = false;
 	const setPointer = (on: boolean) => {
 		if (on === pointerActive) {
@@ -62,7 +63,7 @@ export function initSpellSuggest({ textarea, highlight, getSpellIssues, onApplie
 	};
 
 	textarea.addEventListener('mousemove', (event) => {
-		if (!event.altKey || !highlight) {
+		if (!(event.altKey || event.ctrlKey) || !highlight) {
 			setPointer(false);
 			return;
 		}
@@ -71,7 +72,7 @@ export function initSpellSuggest({ textarea, highlight, getSpellIssues, onApplie
 
 	textarea.addEventListener('mouseleave', () => setPointer(false));
 	window.addEventListener('keyup', (event) => {
-		if (event.key === 'Alt') {
+		if (event.key === 'Alt' || event.key === 'Control') {
 			setPointer(false);
 		}
 	});
