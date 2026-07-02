@@ -61,15 +61,15 @@ F1 turns VS Code into a hub for AI coding agents. Open **Claude Code, Codex, Cop
 | `[`🌐`]` Side Panel (R/L) - [1]       | `Alt + CapsLock`    | `Alt + CapsLock`       | `Alt + CapsLock`       | ㅤㅤ✅    |
 | Focus CLI Panel `[`🌐`]` - [2]        | `Alt + E`           | `Alt + E`              | `Alt + E`              | ㅤㅤ✅    |
 | -                                     | -                   | -                      | -                      |           |
-| Open Prompt tool                      | `Shift + F1`        | `Shift + F1`           | `Shift + F1`           | ㅤㅤ✅    |
+| Open/Disable Chat filter              | `Shift + F1`        | `Shift + F1`           | `Shift + F1`           | ㅤㅤ✅    |
 | Open Translate tool                   | `Shift + F2`        | `Shift + F2`           | `Shift + F2`           | ㅤㅤ✅    |
 | Open Status/use tool                  | `Shift + F3`        | `Shift + F3`           | `Shift + F3`           | ㅤㅤ✅    |
 | Open Keymaps tool                     | `Shift + F4`        | `Shift + F4`           | `Shift + F4`           | ㅤㅤ✅    |
 | -                                     | -                   | -                      | -                      |           |
-| Open Commands tool                    | `Alt + F1`          | `Alt + F1`             | `Alt + F1`             | ㅤㅤ✅    |
-| Execute prompt                        | `⌘ + Enter`         | `Ctrl + Enter`         | `Ctrl + Enter`         | ㅤㅤ✅    |
-| Toggle Prompt filter                  | `Ctrl + Space`      | `Ctrl + Space`         | `Ctrl + Space`         | ㅤㅤ✅    |
+| Toggle chat filter                    | `Ctrl + Space`      | `Ctrl + Space`         | `Ctrl + Space`         | ㅤㅤ✅    |
 | Previous session                      | `Shift + Tab`       | `Shift + Tab`          | `Shift + Tab`          | ㅤㅤ✅    |
+| Execute prompt                        | `⌘ + Enter`         | `Ctrl + Enter`         | `Ctrl + Enter`         | ㅤㅤ✅    |
+| Open Commands tool                    | `Alt + F1`          | `Alt + F1`             | `Alt + F1`             | ㅤㅤ✅    |
 | -                                     | -                   | -                      | -                      |           |
 | Next session                          | `Tab`               | `Tab`                  | `Tab`                  | ㅤㅤ✅    |
 | Play / pause Listen                   | `Space`             | `Space`                | `Space`                | ㅤㅤ✅    |

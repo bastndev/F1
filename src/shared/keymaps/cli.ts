@@ -117,8 +117,8 @@ export const shortcuts: ShortcutDefinition[] = [
     id: 'togglePromptFilter',
     label: 'Toggle Prompt filter',
     contexts: ['terminal'],
-    description: 'Ctrl + Space',
-    match: ctrlSpace(),
+    description: 'Shift + F1',
+    match: shiftFKey(1),
   },
   {
     id: 'nextSession',
@@ -138,8 +138,8 @@ export const shortcuts: ShortcutDefinition[] = [
     id: 'openPrompt',
     label: 'Open Prompt tool',
     contexts: ['terminal'],
-    description: 'Shift + F1',
-    match: shiftFKey(1),
+    description: 'Ctrl + Space',
+    match: ctrlSpace(),
   },
   {
     id: 'openTranslate',
