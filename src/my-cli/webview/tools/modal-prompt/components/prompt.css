@@ -675,6 +675,14 @@
   background: var(--vscode-input-background);
   border: 0.5px solid var(--vscode-editorGroup-border);
   border-radius: 8px;
+  transition: background 0.2s ease, border-color 0.2s ease;
+}
+
+/* PLAN mode wears the accent on the field where the prompt is written — the
+   run button keeps its "Execute" label and size in both modes. */
+.prompt-modal.is-plan-mode .prompt-textarea-wrap {
+  background: color-mix(in srgb, var(--agent-accent, #534AB7) 6%, var(--vscode-input-background));
+  border-color: color-mix(in srgb, var(--agent-accent, #534AB7) 45%, transparent);
 }
 
 .prompt-textarea-highlight {

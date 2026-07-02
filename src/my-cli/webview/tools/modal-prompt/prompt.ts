@@ -135,12 +135,9 @@ function initPromptComposer(host: HTMLElement, context: PromptContext, hasActive
 	let promptMode: PromptMode = 'pro';
 	initPromptMode(host, (mode) => {
 		promptMode = mode;
-		// Re-query: the run button's innerHTML is swapped during sends, so a
-		// cached span reference would go stale.
-		const runLabel = host.querySelector<HTMLElement>('#runBtn span');
-		if (runLabel) {
-			runLabel.textContent = mode === 'plan' ? 'Plan' : 'Execute';
-		}
+		// The run button keeps "Execute" in both modes; the input field wears
+		// the mode instead (accent-tinted while PLAN is active).
+		host.querySelector<HTMLElement>('.prompt-modal')?.classList.toggle('is-plan-mode', mode === 'plan');
 	});
 
 	// When there is no active session we keep everything disabled
