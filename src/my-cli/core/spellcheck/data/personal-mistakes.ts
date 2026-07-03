@@ -48,6 +48,7 @@ export const PERSONAL_MISTAKES: Record<string, string> = {
 	'kitar': 'quitar',
 	'mardown': 'markdown',
 	'mitivos': 'motivos',
+	'nda': 'nada',
 
 
     // world 
