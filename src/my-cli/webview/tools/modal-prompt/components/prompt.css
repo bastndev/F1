@@ -1322,15 +1322,18 @@
 .prompt-footer.is-compact .prompt-run-btn {
   padding: 8px 12px 8px 10px;
 }
-/* Resume / usage / chat shortcuts: always icon-only so the label can never
-   truncate into "res..." / "us..." in narrow responsive mode. */
+/* Resume / usage / chat shortcuts: text by default; switch to icon-only
+   when the label would truncate ("res..." / "us..."). */
 .prompt-footer-model-btn[data-action="shortcut"] .prompt-icon {
-  display: inline-block;
-}
-.prompt-footer-model-btn[data-action="shortcut"] .prompt-footer-btn-label {
   display: none;
 }
-.prompt-footer-model-btn[data-action="shortcut"] {
+.prompt-footer-model-btn[data-action="shortcut"].is-truncated .prompt-icon {
+  display: inline-block;
+}
+.prompt-footer-model-btn[data-action="shortcut"].is-truncated .prompt-footer-btn-label {
+  display: none;
+}
+.prompt-footer-model-btn[data-action="shortcut"].is-truncated {
   min-width: 0;
   padding: 5px 7px;
 }

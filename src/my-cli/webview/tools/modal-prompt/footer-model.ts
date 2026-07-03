@@ -53,6 +53,10 @@ export function updateFooterModel(host: HTMLElement, context: PromptContext, has
 			actions.append(buildUsageButton(context, usageCommand, usePasteMode));
 		}
 
+		for (const btn of Array.from(actions.querySelectorAll<HTMLElement>('.prompt-footer-model-btn[data-action="shortcut"]'))) {
+			bindShortcutTruncation(btn);
+		}
+
 		footerInfo.append(actions);
 		bindFooterOverflow(host);
 		return;
@@ -126,6 +130,41 @@ function buildUsageButton(context: PromptContext, command: string, usePasteMode:
 	});
 
 	return button;
+}
+
+/** Watch a single shortcut chip. If its label would show an ellipsis
+ *  (scrollWidth > clientWidth), swap to icon-only; swap back to text-only
+ *  when the label would fit again. */
+function bindShortcutTruncation(button: HTMLElement) {
+	const label = button.querySelector<HTMLElement>('.prompt-footer-btn-label');
+	if (!label) {
+		return;
+	}
+
+	const wouldLabelFit = (): boolean => {
+		const wasTruncated = button.classList.contains('is-truncated');
+		button.classList.remove('is-truncated');
+		const fits = label.scrollWidth <= label.clientWidth + 1;
+		if (wasTruncated) {
+			button.classList.add('is-truncated');
+		}
+		return fits;
+	};
+
+	const check = () => {
+		const isTruncated = button.classList.contains('is-truncated');
+		if (isTruncated) {
+			if (wouldLabelFit()) {
+				button.classList.remove('is-truncated');
+			}
+		} else if (label.scrollWidth > label.clientWidth + 1) {
+			button.classList.add('is-truncated');
+		}
+	};
+
+	const ro = new ResizeObserver(check);
+	ro.observe(button);
+	requestAnimationFrame(check);
 }
 
 /** Watch the footer for overflow; collapse shortcut chips to icon-only
