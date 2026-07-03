@@ -48,7 +48,6 @@ import { initPromptMode, PLAN_INSTRUCTION, type PromptMode } from './prompt-mode
 import { initPromptHistory, recordSentPrompt } from './prompt-history';
 import { initAttachmentPeek } from './attachment-peek';
 import { getShortcut, matchesShortcut } from '../../../../shared/keymaps/cli';
-import { iconSvg } from './components/icons';
 
 export type { PromptContext } from './prompt-context';
 
@@ -328,7 +327,7 @@ function initPromptComposer(host: HTMLElement, context: PromptContext, hasActive
 			if (runBtn) {
 				runBtn.classList.add('is-translating');
 				runBtn.disabled = true;
-				runBtn.innerHTML = `${iconSvg('sparkles', 14)}<span>Translating…</span>`;
+				runBtn.innerHTML = '<span>Translating…</span>';
 			}
 			try {
 				// Image markers, paste markers, skill tokens AND @mention routes
@@ -393,8 +392,8 @@ function initPromptComposer(host: HTMLElement, context: PromptContext, hasActive
 			runBtn.classList.add('is-translating');
 			runBtn.disabled = true;
 			runBtn.innerHTML = didTranslate
-				? `${iconSvg('sparkles', 14)}<span>Translating…</span>`
-				: `${iconSvg('loader2', 14, 'prompt-icon prompt-spin')}<span>Sending…</span>`;
+				? '<span>Translating…</span>'
+				: '<span>Sending…</span>';
 		} else if (didTranslate) {
 			// Translated but closing immediately (no @route) — restore the normal
 			// button now that the deferred restore above no longer runs.

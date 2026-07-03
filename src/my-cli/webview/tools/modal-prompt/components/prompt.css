@@ -421,7 +421,6 @@
   opacity: 1;
 }
 
-.prompt-translate-toggle i,
 .prompt-translate-toggle .prompt-icon {
   font-size: 12px;
 }
@@ -497,10 +496,6 @@
   opacity: 0.8;
 }
 
-.prompt-strict-toggle i,
-.prompt-strict-toggle .prompt-icon {
-  font-size: 12px;
-}
 
 .prompt-strict-dot {
   width: 5px;
@@ -1116,7 +1111,6 @@
   min-width: 0;
   overflow: hidden;
 }
-.prompt-footer-info i,
 .prompt-footer-info .prompt-icon {
   font-size: 12px;
 }
@@ -1189,7 +1183,6 @@
   gap: 4px;
 }
 
-.prompt-footer-usage-btn i,
 .prompt-footer-usage-btn .prompt-icon {
   font-size: 11px;
 }
@@ -1273,10 +1266,6 @@
   from { transform: scale(0.88); opacity: 0.6; }
   to   { transform: scale(1);    opacity: 1; }
 }
-.prompt-run-btn i,
-.prompt-run-btn .prompt-icon {
-  font-size: 14px;
-}
 .prompt-run-btn:hover:not(:disabled) {
   background: rgba(83, 74, 183, 1);
   transform: translateY(-1px);
@@ -1333,10 +1322,15 @@
 .prompt-footer.is-compact .prompt-run-btn {
   padding: 8px 12px 8px 10px;
 }
-.prompt-footer.is-compact .prompt-footer-model-btn[data-action="shortcut"] .prompt-footer-btn-label {
+/* Resume / usage / chat shortcuts: always icon-only so the label can never
+   truncate into "res..." / "us..." in narrow responsive mode. */
+.prompt-footer-model-btn[data-action="shortcut"] .prompt-icon {
+  display: inline-block;
+}
+.prompt-footer-model-btn[data-action="shortcut"] .prompt-footer-btn-label {
   display: none;
 }
-.prompt-footer.is-compact .prompt-footer-model-btn[data-action="shortcut"] {
+.prompt-footer-model-btn[data-action="shortcut"] {
   min-width: 0;
   padding: 5px 7px;
 }

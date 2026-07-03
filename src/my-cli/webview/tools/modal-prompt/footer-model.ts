@@ -7,7 +7,7 @@
 import type { PromptContext } from './prompt-context';
 import { getCliAgent } from '../../../shared/agents';
 import { getUsageCommandLabel } from '../modal-use/agents';
-import { iconSvg, iconEl, type PromptIcon } from './components/icons';
+import { iconEl, type PromptIcon } from './components/icons';
 
 export function updateFooterModel(host: HTMLElement, context: PromptContext, hasActiveSession: boolean) {
 	const labelEl = document.getElementById('cli-terminal-label');
@@ -31,7 +31,7 @@ export function updateFooterModel(host: HTMLElement, context: PromptContext, has
 	// and no leading Ctrl+U for these shortcuts to register.
 	const usePasteMode = agent?.slug === 'cursor';
 
-	footerInfo.innerHTML = `<span class="prompt-session-dot" id="sessionDot"></span>${iconSvg('cpu', 12)}<span class="prompt-cli-name">${simpleName}</span>`;
+	footerInfo.innerHTML = `<span class="prompt-session-dot" id="sessionDot"></span><span class="prompt-cli-name">${simpleName}</span>`;
 
 	const modelName = context.getActiveModelName?.();
 	const usageCommand = hasActiveSession ? getUsageCommandLabel(label) : 'not configured';
