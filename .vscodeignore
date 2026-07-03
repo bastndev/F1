@@ -5,8 +5,7 @@
 .vscodeignore
 .yarnrc
 
-# Exclude all src/ except runtime assets loaded via extensionUri at runtime.
-# Negations below are required — removing them causes panels to render blank.
+# Exclude src/ except runtime assets loaded via extensionUri — negations required or panels render blank.
 src/**
 !src/shared/
 !src/shared/**/
@@ -23,8 +22,7 @@ src/**
 !src/my-skills/**/*.png
 !src/my-skills/**/*.webp
 
-# Smart + Skills rules asset read via extensionUri at runtime (loadRules → RULES_ASSET_SEGMENTS).
-# Match only .md so bundled .ts sources stay out of the package.
+# Smart+Skills rules read via extensionUri (loadRules → RULES_ASSET_SEGMENTS); .md only keeps .ts out of package.
 !src/my-plus/**/*.md
 
 # Repo-only assets (~13 MB) — not loaded by the extension
@@ -48,8 +46,7 @@ esbuild.js
 # Native debug symbols — trims ~53 MB of node-pty .pdb files
 **/*.pdb
 
-# fixnow dictionaries (~11 MB total). Keep en/es/pt/ru; drop ar/de/fr/vi (unused).
-# Mirrors src/my-cli/shared/prompt/languages.ts.
+# fixnow dictionaries (~11 MB total). Keep en/es/pt/ru; drop ar/de/fr/vi (mirrors languages.ts).
 node_modules/fixnow/dictionaries/ar/**
 node_modules/fixnow/dictionaries/de/**
 node_modules/fixnow/dictionaries/fr/**
