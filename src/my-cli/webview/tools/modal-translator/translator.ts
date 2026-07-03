@@ -5,7 +5,7 @@ import type { ToolContext } from '../tools';
 import type { VoiceProgress, VoiceState } from '../../../shared/voice/voice-types';
 import { translateEnTo } from './browser-terminal-translator';
 import { renderMarkdownLite } from './markdown-lite';
-import { segmentTerminalSelection, isMarkdownStructuredLine, emojiRunSource } from './terminal-text';
+import { segmentTerminalSelection, isMarkdownStructuredLine, emojiRunSource, hasTranslatableContent } from './terminal-text';
 import { getCachedTranslation, setCachedTranslation, getCachedParagraph, setCachedParagraph } from './translator-cache';
 import { matchesShortcut } from '../../../../shared/keymaps/cli';
 import { getStoredPromptLang } from '../modal-prompt/language-select';
@@ -1048,7 +1048,10 @@ function initializeTranslator(host: HTMLElement, context: ToolContext) {
 }
 
 function extractTextToTranslate(context: ToolContext): string {
-	return context.getTerminalSelection?.() || '';
+	const text = context.getTerminalSelection?.() || '';
+	// A selection with no letters or digits (separator rules, blank space) has
+	// nothing to translate — treat it as no selection so the hint shows instead.
+	return hasTranslatableContent(text) ? text : '';
 }
 
 // How long to wait before dropping the body's explicit height after a grow.

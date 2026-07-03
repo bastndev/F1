@@ -59,6 +59,16 @@ const markdownLinePatterns: RegExp[] = [
 ];
 
 /**
+ * True when a selection holds something worth translating — at least one
+ * letter or digit. Separator rules (──────, ----), box-drawing frames and
+ * pure whitespace (one space or fifty) all fail, so the translator neither
+ * auto-opens for nor tries to translate a selection with no actual text.
+ */
+export function hasTranslatableContent(text: string): boolean {
+	return /[\p{L}\p{N}]/u.test(text);
+}
+
+/**
  * Detect whether a line carries structural markdown markers that should be
  * protected through translation.
  */

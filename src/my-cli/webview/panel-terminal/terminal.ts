@@ -2,6 +2,7 @@ import { FitAddon } from '@xterm/addon-fit';
 import { Terminal } from '@xterm/xterm';
 import { createTabController, readVoiceFinishPreference, type CliAgentIcon } from '../panel-tab/tab';
 import { getStoredPromptLang } from '../tools/modal-prompt/language-select';
+import { hasTranslatableContent } from '../tools/modal-translator/terminal-text';
 import { prunePromptDrafts } from '../tools/modal-prompt/prompt';
 import { createCliCreateMessage } from '../../shared/agent-launch-guard';
 import { getAgentSlug as resolveAgentSlug } from '../../shared/agents';
@@ -692,7 +693,11 @@ const createTerminalView = (session: CliSession) => {
 		const moved = Math.hypot(event.clientX - pointerStart.x, event.clientY - pointerStart.y);
 		window.setTimeout(() => {
 			if (terminal.hasSelection()) {
-				openTranslatorFromTerminal(session.id);
+				// A selection of separators/whitespace only (──────, blank rows)
+				// carries no text — don't pop the translator over it.
+				if (hasTranslatableContent(terminal.getSelection())) {
+					openTranslatorFromTerminal(session.id);
+				}
 				return;
 			}
 
