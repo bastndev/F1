@@ -43,15 +43,15 @@ F1 convierte VS Code en un centro para agentes de programación de IA. Abra **Cl
 | `[`🌐`]` Panel Lateral (D/I) - [1]   | `Alt + CapsLock`    | `Alt + CapsLock`       | `Alt + CapsLock`       | ㅤㅤ✅    |
 | Enfocar Panel CLI `[`🌐`]` - [2] | `Alt + E`           | `Alt + E`              | `Alt + E`              | ㅤㅤ✅    |
 | -                                    | -                   | -                      | -                      |           |
-| Abrir herramienta Prompt             | `Shift + F1`        | `Shift + F1`           | `Shift + F1`           | ㅤㅤ✅    |
+| Abrir/Deshabilitar filtro de Chat    | `Shift + F1`        | `Shift + F1`           | `Shift + F1`           | ㅤㅤ✅    |
 | Abrir herramienta Translate          | `Shift + F2`        | `Shift + F2`           | `Shift + F2`           | ㅤㅤ✅    |
 | Abrir herramienta Status/use         | `Shift + F3`        | `Shift + F3`           | `Shift + F3`           | ㅤㅤ✅    |
 | Abrir herramienta Keymaps            | `Shift + F4`        | `Shift + F4`           | `Shift + F4`           | ㅤㅤ✅    |
 | -                                    | -                   | -                      | -                      |           |
-| Abrir herramienta Commands           | `Alt + F1`          | `Alt + F1`             | `Alt + F1`             | ㅤㅤ✅    |
-| Ejecutar prompt                      | `⌘ + Enter`         | `Ctrl + Enter`         | `Ctrl + Enter`         | ㅤㅤ✅    |
-| Alternar filtro de Prompt            | `Ctrl + Space`      | `Ctrl + Space`         | `Ctrl + Space`         | ㅤㅤ✅    |
+| Alternar filtro de Chat              | `Ctrl + Space`      | `Ctrl + Space`         | `Ctrl + Space`         | ㅤㅤ✅    |
 | Sesión anterior                      | `Shift + Tab`       | `Shift + Tab`          | `Shift + Tab`          | ㅤㅤ✅    |
+| Ejecutar prompt                      | `⌘ + Enter`         | `Ctrl + Enter`         | `Ctrl + Enter`         | ㅤㅤ✅    |
+| Abrir herramienta Commands           | `Alt + F1`          | `Alt + F1`             | `Alt + F1`             | ㅤㅤ✅    |
 | -                                    | -                   | -                      | -                      |           |
 | Siguiente sesión                     | `Tab`               | `Tab`                  | `Tab`                  | ㅤㅤ✅    |
 | Reproducir / pausar Escuchar         | `Space`             | `Space`                | `Space`                | ㅤㅤ✅    |

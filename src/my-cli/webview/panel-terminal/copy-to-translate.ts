@@ -13,6 +13,8 @@
  * the prompt filter (light toggle) is on. The baseline re-arms on focus, so
  * text copied elsewhere in the IDE can never trigger the translator.
  */
+import { hasTranslatableContent } from '../tools/modal-translator/terminal-text';
+
 export type CopyToTranslateWatcher = {
 	/** Text copied via OSC 52 — arms the baseline and routes to the translator. */
 	notifyCopiedText: (text: string, sessionId: string) => void;
@@ -33,7 +35,9 @@ export const createCopyToTranslateWatcher = (options: {
 	let clipboardBaseline: string | undefined;
 
 	const handleCopiedText = (text: string, sessionId?: string) => {
-		if (!text.trim()) {
+		// Copies with no actual text (separator rules like ──────, blank runs)
+		// must neither open the translator nor become the selection fallback.
+		if (!hasTranslatableContent(text)) {
 			return;
 		}
 		lastCopiedText = text;

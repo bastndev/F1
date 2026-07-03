@@ -2,6 +2,7 @@ import { FitAddon } from '@xterm/addon-fit';
 import { Terminal } from '@xterm/xterm';
 import { createTabController, readVoiceFinishPreference, type CliAgentIcon } from '../panel-tab/tab';
 import { getStoredPromptLang } from '../tools/modal-prompt/language-select';
+import { hasTranslatableContent } from '../tools/modal-translator/terminal-text';
 import { prunePromptDrafts } from '../tools/modal-prompt/prompt';
 import { createCliCreateMessage } from '../../shared/agent-launch-guard';
 import { getAgentSlug as resolveAgentSlug } from '../../shared/agents';
@@ -468,6 +469,12 @@ const toolsController = layoutRight
 				// Fallback (very rare): at least put focus near the terminal area.
 				const activePane = document.querySelector<HTMLElement>('.cli-terminal-pane.is-active');
 				activePane?.focus();
+			},
+			refocusCli: () => {
+				// Ask the extension host to focus the CLI Hub view and then refocus
+				// the terminal. This is needed after Alt+number shortcuts because VS Code
+				// may have moved focus to an editor tab.
+				vscode.postMessage({ type: 'cli.focus' });
 			}
 		})
 	: undefined;
@@ -686,7 +693,11 @@ const createTerminalView = (session: CliSession) => {
 		const moved = Math.hypot(event.clientX - pointerStart.x, event.clientY - pointerStart.y);
 		window.setTimeout(() => {
 			if (terminal.hasSelection()) {
-				openTranslatorFromTerminal(session.id);
+				// A selection of separators/whitespace only (──────, blank rows)
+				// carries no text — don't pop the translator over it.
+				if (hasTranslatableContent(terminal.getSelection())) {
+					openTranslatorFromTerminal(session.id);
+				}
 				return;
 			}
 

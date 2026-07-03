@@ -18,10 +18,10 @@
        every send; nothing is ever injected into the terminal. -->
   <div class="prompt-toolbar">
     <div class="prompt-toolbar-pro">
-      <button class="prompt-pro-btn is-active" id="proBtn" type="button" aria-pressed="true" title="Pro mode: auto-translate + spell-fix (Alt + 1)">
+      <button class="prompt-pro-btn is-active" id="proBtn" type="button" aria-pressed="true" title="Pro mode: auto-translate + spell-fix (Alt + 4)">
         PRO
       </button>
-      <button class="prompt-pro-btn" id="planBtn" type="button" aria-pressed="false" title="Plan mode: ask for a step-by-step plan and wait for your approval before any code (Alt + 2)">
+      <button class="prompt-pro-btn" id="planBtn" type="button" aria-pressed="false" title="Plan mode: ask for a step-by-step plan and wait for your approval before any code (Alt + 5)">
         PLAN <span class="prompt-beta">beta</span>
       </button>
     </div>
@@ -33,7 +33,6 @@
         title="Strict accents: flag words missing tildes (click to toggle)"
       >
         <span class="prompt-strict-dot" aria-hidden="true"></span>
-        <i class="ti ti-spell-check prompt-strict-icon" aria-hidden="true"></i>
         <span class="prompt-strict-label">strict</span>
       </button>
       <button
@@ -43,8 +42,7 @@
         title="Auto-translate to English before sending (click to toggle)"
       >
         <span class="prompt-translate-dot" aria-hidden="true"></span>
-        <i class="ti ti-language prompt-translate-icon" aria-hidden="true"></i>
-        <i class="ti ti-loader-2 prompt-translate-spinner" aria-hidden="true"></i>
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="prompt-icon prompt-translate-spinner" aria-hidden="true"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
         <span class="prompt-translate-label">translate</span>
       </button>
     </div>
@@ -76,13 +74,12 @@
   <div class="prompt-footer">
     <div class="prompt-footer-info">
       <span class="prompt-session-dot" id="sessionDot"></span>
-      <i class="ti ti-cpu" aria-hidden="true"></i> CLI
+      <span>CLI</span>
     </div>
     <div class="prompt-run-wrap">
       <span class="prompt-run-hint">Ctrl + Enter</span>
       <button class="prompt-run-btn" id="runBtn" data-action="both" disabled>
-        <i class="ti ti-send" aria-hidden="true"></i>
-        <span>Execute</span>
+        Execute
       </button>
     </div>
   </div>

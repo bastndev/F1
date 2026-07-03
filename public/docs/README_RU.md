@@ -43,15 +43,15 @@ F1 превращает VS Code в центр для ИИ-агентов. Отк
 | `[`🌐`]` Боковая панель (П/Л) - [1]         | `Alt + CapsLock`    | `Alt + CapsLock`       | `Alt + CapsLock`       | ㅤㅤ✅         |
 | Фокус на панели CLI `[`🌐`]` - [2]      | `Alt + E`           | `Alt + E`              | `Alt + E`              | ㅤㅤ✅         |
 | -                                           | -                   | -                      | -                      |                |
-| Открыть инструмент Prompt                   | `Shift + F1`        | `Shift + F1`           | `Shift + F1`           | ㅤㅤ✅         |
+| Открыть/Отключить фильтр чата               | `Shift + F1`        | `Shift + F1`           | `Shift + F1`           | ㅤㅤ✅         |
 | Открыть инструмент Translate                | `Shift + F2`        | `Shift + F2`           | `Shift + F2`           | ㅤㅤ✅         |
 | Открыть инструмент Status/use               | `Shift + F3`        | `Shift + F3`           | `Shift + F3`           | ㅤㅤ✅         |
 | Открыть инструмент Keymaps                  | `Shift + F4`        | `Shift + F4`           | `Shift + F4`           | ㅤㅤ✅         |
 | -                                           | -                   | -                      | -                      |                |
-| Открыть инструмент Commands                 | `Alt + F1`          | `Alt + F1`             | `Alt + F1`             | ㅤㅤ✅         |
-| Выполнить prompt                            | `⌘ + Enter`         | `Ctrl + Enter`         | `Ctrl + Enter`         | ㅤㅤ✅         |
-| Переключить фильтр Prompt                   | `Ctrl + Space`      | `Ctrl + Space`         | `Ctrl + Space`         | ㅤㅤ✅         |
+| Переключить фильтр чата                     | `Ctrl + Space`      | `Ctrl + Space`         | `Ctrl + Space`         | ㅤㅤ✅         |
 | Предыдущая сессия                           | `Shift + Tab`       | `Shift + Tab`          | `Shift + Tab`          | ㅤㅤ✅         |
+| Выполнить prompt                            | `⌘ + Enter`         | `Ctrl + Enter`         | `Ctrl + Enter`         | ㅤㅤ✅         |
+| Открыть инструмент Commands                 | `Alt + F1`          | `Alt + F1`             | `Alt + F1`             | ㅤㅤ✅         |
 | -                                           | -                   | -                      | -                      |                |
 | Следующая сессия                            | `Tab`               | `Tab`                  | `Tab`                  | ㅤㅤ✅         |
 | Воспроизведение / пауза (Слушать)           | `Space`             | `Space`                | `Space`                | ㅤㅤ✅         |

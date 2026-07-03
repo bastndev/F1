@@ -75,6 +75,8 @@ body[data-agent="cursor"] {
 
 
 body {
+	/* Reveals the launcher: its HTML inlines visibility:hidden until this file loads (anti-FOUC) */
+	visibility: visible;
 	display: flex;
 	justify-content: center;
 	align-items: center; /* Centrado vertical y horizontal como en la imagen 2 */

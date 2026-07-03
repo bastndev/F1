@@ -56,6 +56,7 @@ export type WebviewToHostMessage =
 	| { type: 'cli.create'; agent: string; launchGuard?: AgentLaunchGuardMessage; smart?: boolean }
 	| { type: 'customCli.open'; source: 'launcher' | 'panel' }
 	| { type: 'cli.openTutorial' }
+	| { type: 'cli.focus' }
 	| { type: 'cli.input'; sessionId: string; data: string }
 	| { type: 'cli.switch'; sessionId: string }
 	| { type: 'cli.resize'; sessionId?: string; cols: number; rows: number }

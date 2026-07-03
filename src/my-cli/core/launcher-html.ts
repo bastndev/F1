@@ -30,7 +30,7 @@ export const getLauncherWebviewHtml = async (
 	const contentSecurityPolicy = [
 		"default-src 'none'",
 		`img-src ${webview.cspSource} data:`,
-		`style-src ${webview.cspSource}`,
+		`style-src ${webview.cspSource} 'nonce-${nonce}'`,
 		`script-src 'nonce-${nonce}'`
 	].join('; ');
 

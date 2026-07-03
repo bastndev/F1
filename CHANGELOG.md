@@ -24,7 +24,12 @@ Following VS Code best practices, F1 uses semantic versioning for all releases.
 <!-- --- -->
 
 ---
-## [1.2.0] - 2026-07-01
+## [2.0.1] - 2026-07-02
+- **Add**: Mode /plan & /usage
+
+
+---
+## [2.0.0] - 2026-07-01
 - **fix**: Implement `Smart + skill
 
 ---

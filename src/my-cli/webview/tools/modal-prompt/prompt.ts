@@ -140,6 +140,28 @@ function initPromptComposer(host: HTMLElement, context: PromptContext, hasActive
 		host.querySelector<HTMLElement>('.prompt-modal')?.classList.toggle('is-plan-mode', mode === 'plan');
 	});
 
+	// Alt+1 / Alt+2 / Alt+3 click the footer model / resume / usage chips.
+	host.addEventListener('keydown', (e) => {
+		const shortcutButtons = [
+			{ id: 'promptFooterModel' as const, selector: '[data-shortcut="model"]' },
+			{ id: 'promptFooterResume' as const, selector: '[data-shortcut="resume"]' },
+			{ id: 'promptFooterUsage' as const, selector: '[data-shortcut="usage"]' },
+		];
+		for (const { id, selector } of shortcutButtons) {
+			if (matchesShortcut(e, id)) {
+				const btn = host.querySelector<HTMLButtonElement>(`.prompt-footer ${selector}`);
+				if (btn) {
+					e.preventDefault();
+					btn.click();
+					// VS Code's Alt+number bindings switch editor tabs and steal focus;
+					// bring it back to the CLI after the chip action runs.
+					context.refocusCli?.();
+				}
+				break;
+			}
+		}
+	});
+
 	// When there is no active session we keep everything disabled
 	if (!hasActiveSession) {
 		textarea.disabled = true;
@@ -327,7 +349,7 @@ function initPromptComposer(host: HTMLElement, context: PromptContext, hasActive
 			if (runBtn) {
 				runBtn.classList.add('is-translating');
 				runBtn.disabled = true;
-				runBtn.innerHTML = '<i class="ti ti-sparkles" aria-hidden="true"></i><span>Translating…</span>';
+				runBtn.innerHTML = '<span>Translating…</span>';
 			}
 			try {
 				// Image markers, paste markers, skill tokens AND @mention routes
@@ -392,8 +414,8 @@ function initPromptComposer(host: HTMLElement, context: PromptContext, hasActive
 			runBtn.classList.add('is-translating');
 			runBtn.disabled = true;
 			runBtn.innerHTML = didTranslate
-				? '<i class="ti ti-sparkles" aria-hidden="true"></i><span>Translating…</span>'
-				: '<i class="ti ti-loader-2" aria-hidden="true"></i><span>Sending…</span>';
+				? '<span>Translating…</span>'
+				: '<span>Sending…</span>';
 		} else if (didTranslate) {
 			// Translated but closing immediately (no @route) — restore the normal
 			// button now that the deferred restore above no longer runs.

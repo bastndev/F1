@@ -43,15 +43,15 @@ F1 macht VS Code zu einem Hub für KI-Programmieragenten. Öffnen Sie **Claude C
 | `[`🌐`]` Seitenpanel (R/L) - [1]       | `Alt + CapsLock`    | `Alt + CapsLock`       | `Alt + CapsLock`       | ㅤㅤ✅      |
 | Fokus CLI Panel `[`🌐`]` - [2]     | `Alt + E`           | `Alt + E`              | `Alt + E`              | ㅤㅤ✅      |
 | -                                      | -                   | -                      | -                      |             |
-| Prompt-Tool öffnen                     | `Shift + F1`        | `Shift + F1`           | `Shift + F1`           | ㅤㅤ✅      |
+| Chat-Filter öffnen/deaktivieren        | `Shift + F1`        | `Shift + F1`           | `Shift + F1`           | ㅤㅤ✅      |
 | Translate-Tool öffnen                  | `Shift + F2`        | `Shift + F2`           | `Shift + F2`           | ㅤㅤ✅      |
 | Status/use-Tool öffnen                 | `Shift + F3`        | `Shift + F3`           | `Shift + F3`           | ㅤㅤ✅      |
 | Keymaps-Tool öffnen                    | `Shift + F4`        | `Shift + F4`           | `Shift + F4`           | ㅤㅤ✅      |
 | -                                      | -                   | -                      | -                      |             |
-| Commands-Tool öffnen                   | `Alt + F1`          | `Alt + F1`             | `Alt + F1`             | ㅤㅤ✅      |
-| Prompt ausführen                       | `⌘ + Enter`         | `Ctrl + Enter`         | `Ctrl + Enter`         | ㅤㅤ✅      |
-| Prompt-Filter umschalten               | `Ctrl + Space`      | `Ctrl + Space`         | `Ctrl + Space`         | ㅤㅤ✅      |
+| Chat-Filter umschalten                 | `Ctrl + Space`      | `Ctrl + Space`         | `Ctrl + Space`         | ㅤㅤ✅      |
 | Vorherige Sitzung                      | `Shift + Tab`       | `Shift + Tab`          | `Shift + Tab`          | ㅤㅤ✅      |
+| Prompt ausführen                       | `⌘ + Enter`         | `Ctrl + Enter`         | `Ctrl + Enter`         | ㅤㅤ✅      |
+| Commands-Tool öffnen                   | `Alt + F1`          | `Alt + F1`             | `Alt + F1`             | ㅤㅤ✅      |
 | -                                      | -                   | -                      | -                      |             |
 | Nächste Sitzung                        | `Tab`               | `Tab`                  | `Tab`                  | ㅤㅤ✅      |
 | Zuhören abspielen / pausieren          | `Space`             | `Space`                | `Space`                | ㅤㅤ✅      |

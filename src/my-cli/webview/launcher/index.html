@@ -5,6 +5,8 @@
 	<meta http-equiv="Content-Security-Policy" content="${contentSecurityPolicy}">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<title>CLI Hub</title>
+	<!-- Anti-FOUC: hide until global.css (which sets visibility: visible on body) arrives -->
+	<style nonce="${nonce}">body { visibility: hidden; }</style>
 	<link href="${styleUri}" rel="stylesheet">
 </head>
 <body>

@@ -43,15 +43,15 @@
 | `[`🌐`]` اللوحة الجانبية (يمين/يسار) - [1]   | `Alt + CapsLock`    | `Alt + CapsLock`       | `Alt + CapsLock`       | ㅤㅤ✅ |
 | التركيز على لوحة CLI `[`🌐`]` - [2]      | `Alt + E`           | `Alt + E`              | `Alt + E`              | ㅤㅤ✅ |
 | -                                            | -                   | -                      | -                      |        |
-| فتح أداة Prompt                              | `Shift + F1`        | `Shift + F1`           | `Shift + F1`           | ㅤㅤ✅ |
+| فتح/تعطيل فلتر الدردشة                       | `Shift + F1`        | `Shift + F1`           | `Shift + F1`           | ㅤㅤ✅ |
 | فتح أداة Translate                           | `Shift + F2`        | `Shift + F2`           | `Shift + F2`           | ㅤㅤ✅ |
 | فتح أداة Status/use                          | `Shift + F3`        | `Shift + F3`           | `Shift + F3`           | ㅤㅤ✅ |
 | فتح أداة Keymaps                             | `Shift + F4`        | `Shift + F4`           | `Shift + F4`           | ㅤㅤ✅ |
 | -                                            | -                   | -                      | -                      |        |
-| فتح أداة Commands                            | `Alt + F1`          | `Alt + F1`             | `Alt + F1`             | ㅤㅤ✅ |
-| تنفيذ prompt                                 | `⌘ + Enter`         | `Ctrl + Enter`         | `Ctrl + Enter`         | ㅤㅤ✅ |
-| تبديل فلتر Prompt                            | `Ctrl + Space`      | `Ctrl + Space`         | `Ctrl + Space`         | ㅤㅤ✅ |
+| تبديل فلتر الدردشة                           | `Ctrl + Space`      | `Ctrl + Space`         | `Ctrl + Space`         | ㅤㅤ✅ |
 | الجلسة السابقة                               | `Shift + Tab`       | `Shift + Tab`          | `Shift + Tab`          | ㅤㅤ✅ |
+| تنفيذ prompt                                 | `⌘ + Enter`         | `Ctrl + Enter`         | `Ctrl + Enter`         | ㅤㅤ✅ |
+| فتح أداة Commands                            | `Alt + F1`          | `Alt + F1`             | `Alt + F1`             | ㅤㅤ✅ |
 | -                                            | -                   | -                      | -                      |        |
 | الجلسة التالية                               | `Tab`               | `Tab`                  | `Tab`                  | ㅤㅤ✅ |
 | تشغيل / إيقاف الاستماع                       | `Space`             | `Space`                | `Space`                | ㅤㅤ✅ |

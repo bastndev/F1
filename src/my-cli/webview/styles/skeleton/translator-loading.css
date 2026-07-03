@@ -173,17 +173,21 @@
 	100% { opacity: 1; transform: none; filter: none; }
 }
 
-/* "More on the way" tail shown below the streamed blocks while translating. */
+/* "More on the way" tail shown below the streamed blocks while translating.
+   Absolutely positioned (zero layout height): it renders in the body's bottom
+   padding just under the last block, so mounting and removing it never changes
+   the measured content height — that's what keeps the modal from shrinking at
+   the end of a stream. .translator-text is its containing block. Keep it
+   shorter than the body's 16px bottom padding or it adds scrollable overflow
+   and the end-of-stream shrink comes back. */
 .translator-streaming {
+	position: absolute;
+	top: calc(100% + 2px);
+	left: 0;
 	display: flex;
-	flex-direction: column;
-	gap: 7px;
-	margin-top: 14px;
+	align-items: center;
+	pointer-events: none;
 	animation: translator-stream-fade 260ms ease both;
-}
-
-.translator-streaming .t-skel-line {
-	width: 46%;
 }
 
 .translator-streaming .t-skel-typing {

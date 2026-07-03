@@ -43,15 +43,15 @@ F1은 VS Code를 AI 코딩 에이전트의 허브로 바꿉니다. 내장된 터
 | `[`🌐`]` 사이드 패널 (우/좌) - [1] | `Alt + CapsLock`    | `Alt + CapsLock`       | `Alt + CapsLock`       | ㅤㅤ✅ |
 | CLI 패널 포커스 `[`🌐`]` - [2] | `Alt + E`           | `Alt + E`              | `Alt + E`              | ㅤㅤ✅ |
 | -                                  | -                   | -                      | -                      |        |
-| Prompt 도구 열기                   | `Shift + F1`        | `Shift + F1`           | `Shift + F1`           | ㅤㅤ✅ |
+| 채팅 필터 열기/비활성화            | `Shift + F1`        | `Shift + F1`           | `Shift + F1`           | ㅤㅤ✅ |
 | Translate 도구 열기                | `Shift + F2`        | `Shift + F2`           | `Shift + F2`           | ㅤㅤ✅ |
 | Status/use 도구 열기               | `Shift + F3`        | `Shift + F3`           | `Shift + F3`           | ㅤㅤ✅ |
 | Keymaps 도구 열기                  | `Shift + F4`        | `Shift + F4`           | `Shift + F4`           | ㅤㅤ✅ |
 | -                                  | -                   | -                      | -                      |        |
-| Commands 도구 열기                 | `Alt + F1`          | `Alt + F1`             | `Alt + F1`             | ㅤㅤ✅ |
-| 프롬프트 실행                      | `⌘ + Enter`         | `Ctrl + Enter`         | `Ctrl + Enter`         | ㅤㅤ✅ |
-| Prompt 필터 전환                   | `Ctrl + Space`      | `Ctrl + Space`         | `Ctrl + Space`         | ㅤㅤ✅ |
+| 채팅 필터 전환                     | `Ctrl + Space`      | `Ctrl + Space`         | `Ctrl + Space`         | ㅤㅤ✅ |
 | 이전 세션                          | `Shift + Tab`       | `Shift + Tab`          | `Shift + Tab`          | ㅤㅤ✅ |
+| 프롬프트 실행                      | `⌘ + Enter`         | `Ctrl + Enter`         | `Ctrl + Enter`         | ㅤㅤ✅ |
+| Commands 도구 열기                 | `Alt + F1`          | `Alt + F1`             | `Alt + F1`             | ㅤㅤ✅ |
 | -                                  | -                   | -                      | -                      |        |
 | 다음 세션                          | `Tab`               | `Tab`                  | `Tab`                  | ㅤㅤ✅ |
 | 재생 / 일시정지 (듣기)             | `Space`             | `Space`                | `Space`                | ㅤㅤ✅ |

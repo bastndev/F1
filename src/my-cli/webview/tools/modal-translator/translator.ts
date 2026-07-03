@@ -5,7 +5,7 @@ import type { ToolContext } from '../tools';
 import type { VoiceProgress, VoiceState } from '../../../shared/voice/voice-types';
 import { translateEnTo } from './browser-terminal-translator';
 import { renderMarkdownLite } from './markdown-lite';
-import { segmentTerminalSelection, isMarkdownStructuredLine } from './terminal-text';
+import { segmentTerminalSelection, isMarkdownStructuredLine, emojiRunSource, hasTranslatableContent } from './terminal-text';
 import { getCachedTranslation, setCachedTranslation, getCachedParagraph, setCachedParagraph } from './translator-cache';
 import { matchesShortcut } from '../../../../shared/keymaps/cli';
 import { getStoredPromptLang } from '../modal-prompt/language-select';
@@ -49,7 +49,7 @@ type MarkdownLine = {
 const headingPattern = /^(#{1,6})\s+(.*)$/;
 
 // Matches a line starting with an emoji followed by content
-const emojiPrefixPattern = /^(\p{Emoji_Presentation}+\s*)(.*)/u;
+const emojiPrefixPattern = new RegExp(`^(${emojiRunSource}\\s*)(.*)`, 'u');
 
 // Matches a bracket label: [end] / [fin] / [start]
 const bracketLabelPattern = /^(\[[\w\s]+\]\s*)(.*)$/;
@@ -57,8 +57,9 @@ const bracketLabelPattern = /^(\[[\w\s]+\]\s*)(.*)$/;
 // Matches a blockquote: > text
 const blockquotePattern = /^(>\s*)(.*)$/;
 
-// Matches a score line: emoji + label + N/10 pattern
-const scoreLinePattern = /^(\p{Emoji_Presentation}+\s*\S+\s+)(\d{1,2}\/10)\s*$/u;
+// Matches a score line: emoji + label + N/10 pattern. The label may be several
+// words ("🧹 Code Quality 8/10") — lazy up to the anchored trailing score.
+const scoreLinePattern = new RegExp(`^(${emojiRunSource}\\s*\\S.*?\\s+)(\\d{1,2}\\/10)\\s*$`, 'u');
 
 function parseMarkdownLine(line: string): MarkdownLine | null {
 	const trimmed = line.trim();
@@ -249,6 +250,9 @@ function initializeTranslator(host: HTMLElement, context: ToolContext) {
 		if (bodyEl) {
 			bodyEl.classList.remove('is-streaming-grow');
 			bodyEl.style.height = '';
+			// Drop the grow cap from any previous stream — it was measured against
+			// the panel size at that moment and would wrongly clip this run.
+			bodyEl.style.maxHeight = '';
 		}
 		const extracted = extractTextToTranslate(context);
 		if (!extracted) {
@@ -573,6 +577,13 @@ function initializeTranslator(host: HTMLElement, context: ToolContext) {
 					continue;
 				}
 
+				if (segment.kind === 'command') {
+					// Shell commands stay verbatim — shown as a command card, never
+					// sent to translation (which turns `bun lint` into word soup).
+					stageBlock(`\`\`\`cmd\n${segment.content}\n\`\`\``, segment.content);
+					continue;
+				}
+
 				if (segment.kind === 'code') {
 					codeCount += 1;
 					stageBlock(`[[code-here:${codeCount}]]`, `[code here #${codeCount}]`);
@@ -696,10 +707,6 @@ function initializeTranslator(host: HTMLElement, context: ToolContext) {
 			enableResultActions();
 			// Read whatever did stream in before the failure, then close the session.
 			voicePipeline?.finish();
-			// Failed attempts may be transient (rate limit, network) — allow retry.
-			if (translateBtn) {
-				translateBtn.disabled = false;
-			}
 		} finally {
 			// If a newer translation is already running, leave its UI state alone.
 			if (generation !== translationGeneration) {
@@ -708,6 +715,12 @@ function initializeTranslator(host: HTMLElement, context: ToolContext) {
 			if (stageFlushTimer) {
 				clearTimeout(stageFlushTimer);
 				stageFlushTimer = undefined;
+			}
+			// Re-arm the manual button: the terminal selection can change while the
+			// panel stays open, and failed attempts may be transient (rate limit,
+			// network) — either way another run must stay possible.
+			if (translateBtn) {
+				translateBtn.disabled = false;
 			}
 			modalEl.classList.remove('is-translating');
 			if (bodyEl) {
@@ -719,8 +732,9 @@ function initializeTranslator(host: HTMLElement, context: ToolContext) {
 					growSettleTimer = setTimeout(() => {
 						growSettleTimer = undefined;
 						body.style.height = '';
+						body.style.maxHeight = '';
 						body.classList.remove('is-streaming-grow');
-					}, 380);
+					}, getGrowSettleMs(body));
 				} else if (bodyEl.style.height) {
 					// A height was locked (long selection, no streaming). Ease it
 					// to the result instead of snapping — so the modal settles
@@ -732,7 +746,7 @@ function initializeTranslator(host: HTMLElement, context: ToolContext) {
 						growSettleTimer = undefined;
 						body.style.height = '';
 						body.classList.remove('is-streaming-grow');
-					}, 380);
+					}, getGrowSettleMs(body));
 				}
 			}
 		}
@@ -1034,7 +1048,20 @@ function initializeTranslator(host: HTMLElement, context: ToolContext) {
 }
 
 function extractTextToTranslate(context: ToolContext): string {
-	return context.getTerminalSelection?.() || '';
+	const text = context.getTerminalSelection?.() || '';
+	// A selection with no letters or digits (separator rules, blank space) has
+	// nothing to translate — treat it as no selection so the hint shows instead.
+	return hasTranslatableContent(text) ? text : '';
+}
+
+// How long to wait before dropping the body's explicit height after a grow.
+// Must outlast the .is-streaming-grow height transition — read it live from
+// the element so CSS can change the duration without silently breaking this
+// (a settle that fires mid-transition snaps the modal). +40ms of slack covers
+// frame scheduling; reduced motion (transition: none) settles almost at once.
+function getGrowSettleMs(body: HTMLElement): number {
+	const seconds = Number.parseFloat(getComputedStyle(body).transitionDuration) || 0;
+	return seconds * 1000 + 40;
 }
 
 // Split prose into trimmed, non-empty paragraphs on blank lines. Shared by the
@@ -1206,17 +1233,14 @@ function splitForStreaming(text: string): string[] {
 	return blocks;
 }
 
-// Compact "still translating" affordance pinned below the streamed blocks —
-// a shimmer line plus the skeleton's typing dots, so the loading state reads
-// as one language whether it's the full skeleton or the streaming tail.
+// Compact "still translating" affordance below the streamed blocks — the
+// skeleton's typing dots (› ···). Rendered with zero layout height (absolute,
+// in the body's bottom padding; see .translator-streaming) so removing it at
+// the end of the stream never shrinks the modal.
 function buildStreamIndicator(): HTMLElement {
 	const wrap = document.createElement('div');
 	wrap.className = 'translator-streaming';
 	wrap.setAttribute('aria-hidden', 'true');
-
-	const line = document.createElement('div');
-	line.className = 't-skel-line med';
-	wrap.append(line);
 
 	const typing = document.createElement('div');
 	typing.className = 't-skel-typing';

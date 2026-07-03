@@ -43,15 +43,15 @@ F1 biến VS Code thành trung tâm cho các tác nhân lập trình AI. Mở **
 | `[`🌐`]` Bảng điều khiển bên (P/T) - [1]  | `Alt + CapsLock`    | `Alt + CapsLock`       | `Alt + CapsLock`       | ㅤㅤ✅ |
 | Tập trung vào Bảng CLI `[`🌐`]` - [2] | `Alt + E`           | `Alt + E`              | `Alt + E`              | ㅤㅤ✅ |
 | -                                         | -                   | -                      | -                      |        |
-| Mở công cụ Prompt                         | `Shift + F1`        | `Shift + F1`           | `Shift + F1`           | ㅤㅤ✅ |
+| Mở/Tắt bộ lọc Chat                        | `Shift + F1`        | `Shift + F1`           | `Shift + F1`           | ㅤㅤ✅ |
 | Mở công cụ Translate                      | `Shift + F2`        | `Shift + F2`           | `Shift + F2`           | ㅤㅤ✅ |
 | Mở công cụ Status/use                     | `Shift + F3`        | `Shift + F3`           | `Shift + F3`           | ㅤㅤ✅ |
 | Mở công cụ Keymaps                        | `Shift + F4`        | `Shift + F4`           | `Shift + F4`           | ㅤㅤ✅ |
 | -                                         | -                   | -                      | -                      |        |
-| Mở công cụ Commands                       | `Alt + F1`          | `Alt + F1`             | `Alt + F1`             | ㅤㅤ✅ |
-| Thực thi prompt                           | `⌘ + Enter`         | `Ctrl + Enter`         | `Ctrl + Enter`         | ㅤㅤ✅ |
-| Chuyển đổi bộ lọc Prompt                  | `Ctrl + Space`      | `Ctrl + Space`         | `Ctrl + Space`         | ㅤㅤ✅ |
+| Chuyển đổi bộ lọc Chat                    | `Ctrl + Space`      | `Ctrl + Space`         | `Ctrl + Space`         | ㅤㅤ✅ |
 | Phiên trước                               | `Shift + Tab`       | `Shift + Tab`          | `Shift + Tab`          | ㅤㅤ✅ |
+| Thực thi prompt                           | `⌘ + Enter`         | `Ctrl + Enter`         | `Ctrl + Enter`         | ㅤㅤ✅ |
+| Mở công cụ Commands                       | `Alt + F1`          | `Alt + F1`             | `Alt + F1`             | ㅤㅤ✅ |
 | -                                         | -                   | -                      | -                      |        |
 | Phiên tiếp theo                           | `Tab`               | `Tab`                  | `Tab`                  | ㅤㅤ✅ |
 | Phát / tạm dừng Nghe                      | `Space`             | `Space`                | `Space`                | ㅤㅤ✅ |

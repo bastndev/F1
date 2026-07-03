@@ -43,15 +43,15 @@ O F1 transforma o VS Code em um hub para agentes de codificação de IA. Abra **
 | `[`🌐`]` Painel Lateral (D/E) - [1]   | `Alt + CapsLock`    | `Alt + CapsLock`       | `Alt + CapsLock`       | ㅤㅤ✅    |
 | Focar Painel CLI `[`🌐`]` - [2]   | `Alt + E`           | `Alt + E`              | `Alt + E`              | ㅤㅤ✅    |
 | -                                     | -                   | -                      | -                      |           |
-| Abrir ferramenta Prompt               | `Shift + F1`        | `Shift + F1`           | `Shift + F1`           | ㅤㅤ✅    |
+| Abrir/Desabilitar filtro de Chat      | `Shift + F1`        | `Shift + F1`           | `Shift + F1`           | ㅤㅤ✅    |
 | Abrir ferramenta Translate            | `Shift + F2`        | `Shift + F2`           | `Shift + F2`           | ㅤㅤ✅    |
 | Abrir ferramenta Status/use           | `Shift + F3`        | `Shift + F3`           | `Shift + F3`           | ㅤㅤ✅    |
 | Abrir ferramenta Keymaps              | `Shift + F4`        | `Shift + F4`           | `Shift + F4`           | ㅤㅤ✅    |
 | -                                     | -                   | -                      | -                      |           |
-| Abrir ferramenta Commands             | `Alt + F1`          | `Alt + F1`             | `Alt + F1`             | ㅤㅤ✅    |
-| Executar prompt                       | `⌘ + Enter`         | `Ctrl + Enter`         | `Ctrl + Enter`         | ㅤㅤ✅    |
-| Alternar filtro de Prompt             | `Ctrl + Space`      | `Ctrl + Space`         | `Ctrl + Space`         | ㅤㅤ✅    |
+| Alternar filtro de Chat               | `Ctrl + Space`      | `Ctrl + Space`         | `Ctrl + Space`         | ㅤㅤ✅    |
 | Sessão anterior                       | `Shift + Tab`       | `Shift + Tab`          | `Shift + Tab`          | ㅤㅤ✅    |
+| Executar prompt                       | `⌘ + Enter`         | `Ctrl + Enter`         | `Ctrl + Enter`         | ㅤㅤ✅    |
+| Abrir ferramenta Commands             | `Alt + F1`          | `Alt + F1`             | `Alt + F1`             | ㅤㅤ✅    |
 | -                                     | -                   | -                      | -                      |           |
 | Próxima sessão                        | `Tab`               | `Tab`                  | `Tab`                  | ㅤㅤ✅    |
 | Reproduzir / pausar Ouvir             | `Space`             | `Space`                | `Space`                | ㅤㅤ✅    |
