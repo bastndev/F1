@@ -43,15 +43,15 @@ F1 将 VS Code 变成了 AI 编程代理的枢纽。在嵌入式终端中打开 
 | `[`🌐`]` 侧边面板 (右/左) - [1]   | `Alt + CapsLock`    | `Alt + CapsLock`       | `Alt + CapsLock`       | ㅤㅤ✅ |
 | 聚焦 CLI 面板 `[`🌐`]` - [2]  | `Alt + E`           | `Alt + E`              | `Alt + E`              | ㅤㅤ✅ |
 | -                                 | -                   | -                      | -                      |        |
-| 打开 Prompt 工具                  | `Shift + F1`        | `Shift + F1`           | `Shift + F1`           | ㅤㅤ✅ |
+| 打开/禁用聊天过滤器               | `Shift + F1`        | `Shift + F1`           | `Shift + F1`           | ㅤㅤ✅ |
 | 打开 Translate 工具               | `Shift + F2`        | `Shift + F2`           | `Shift + F2`           | ㅤㅤ✅ |
 | 打开 Status/use 工具              | `Shift + F3`        | `Shift + F3`           | `Shift + F3`           | ㅤㅤ✅ |
 | 打开 Keymaps 工具                 | `Shift + F4`        | `Shift + F4`           | `Shift + F4`           | ㅤㅤ✅ |
 | -                                 | -                   | -                      | -                      |        |
-| 打开 Commands 工具                | `Alt + F1`          | `Alt + F1`             | `Alt + F1`             | ㅤㅤ✅ |
-| 执行 prompt                       | `⌘ + Enter`         | `Ctrl + Enter`         | `Ctrl + Enter`         | ㅤㅤ✅ |
-| 切换 Prompt 过滤器                | `Ctrl + Space`      | `Ctrl + Space`         | `Ctrl + Space`         | ㅤㅤ✅ |
+| 切换聊天过滤器                    | `Ctrl + Space`      | `Ctrl + Space`         | `Ctrl + Space`         | ㅤㅤ✅ |
 | 上一个会话                        | `Shift + Tab`       | `Shift + Tab`          | `Shift + Tab`          | ㅤㅤ✅ |
+| 执行 prompt                       | `⌘ + Enter`         | `Ctrl + Enter`         | `Ctrl + Enter`         | ㅤㅤ✅ |
+| 打开 Commands 工具                | `Alt + F1`          | `Alt + F1`             | `Alt + F1`             | ㅤㅤ✅ |
 | -                                 | -                   | -                      | -                      |        |
 | 下一个会话                        | `Tab`               | `Tab`                  | `Tab`                  | ㅤㅤ✅ |
 | 播放 / 暂停聆听                   | `Space`             | `Space`                | `Space`                | ㅤㅤ✅ |

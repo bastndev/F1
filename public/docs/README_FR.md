@@ -43,15 +43,15 @@ F1 transforme VS Code en un hub pour les agents de codage IA. Ouvrez **Claude Co
 | `[`🌐`]` Panneau latéral (D/G) - [1]        | `Alt + CapsLock`    | `Alt + CapsLock`       | `Alt + CapsLock`       | ㅤㅤ✅   |
 | Focus sur le panneau CLI `[`🌐`]` - [2] | `Alt + E`           | `Alt + E`              | `Alt + E`              | ㅤㅤ✅   |
 | -                                           | -                   | -                      | -                      |          |
-| Ouvrir l'outil Prompt                       | `Shift + F1`        | `Shift + F1`           | `Shift + F1`           | ㅤㅤ✅   |
+| Ouvrir/Désactiver le filtre Chat            | `Shift + F1`        | `Shift + F1`           | `Shift + F1`           | ㅤㅤ✅   |
 | Ouvrir l'outil Translate                    | `Shift + F2`        | `Shift + F2`           | `Shift + F2`           | ㅤㅤ✅   |
 | Ouvrir l'outil Status/use                   | `Shift + F3`        | `Shift + F3`           | `Shift + F3`           | ㅤㅤ✅   |
 | Ouvrir l'outil Keymaps                      | `Shift + F4`        | `Shift + F4`           | `Shift + F4`           | ㅤㅤ✅   |
 | -                                           | -                   | -                      | -                      |          |
-| Ouvrir l'outil Commands                     | `Alt + F1`          | `Alt + F1`             | `Alt + F1`             | ㅤㅤ✅   |
-| Exécuter le prompt                          | `⌘ + Enter`         | `Ctrl + Enter`         | `Ctrl + Enter`         | ㅤㅤ✅   |
-| Basculer le filtre Prompt                   | `Ctrl + Space`      | `Ctrl + Space`         | `Ctrl + Space`         | ㅤㅤ✅   |
+| Basculer le filtre Chat                     | `Ctrl + Space`      | `Ctrl + Space`         | `Ctrl + Space`         | ㅤㅤ✅   |
 | Session précédente                          | `Shift + Tab`       | `Shift + Tab`          | `Shift + Tab`          | ㅤㅤ✅   |
+| Exécuter le prompt                          | `⌘ + Enter`         | `Ctrl + Enter`         | `Ctrl + Enter`         | ㅤㅤ✅   |
+| Ouvrir l'outil Commands                     | `Alt + F1`          | `Alt + F1`             | `Alt + F1`             | ㅤㅤ✅   |
 | -                                           | -                   | -                      | -                      |          |
 | Session suivante                            | `Tab`               | `Tab`                  | `Tab`                  | ㅤㅤ✅   |
 | Lecture / pause Écouter                     | `Space`             | `Space`                | `Space`                | ㅤㅤ✅   |
