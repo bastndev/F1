@@ -7,6 +7,7 @@
 import type { PromptContext } from './prompt-context';
 import { getCliAgent } from '../../../shared/agents';
 import { getUsageCommandLabel } from '../modal-use/agents';
+import { iconSvg, iconEl, type PromptIcon } from './components/icons';
 
 export function updateFooterModel(host: HTMLElement, context: PromptContext, hasActiveSession: boolean) {
 	const labelEl = document.getElementById('cli-terminal-label');
@@ -30,7 +31,7 @@ export function updateFooterModel(host: HTMLElement, context: PromptContext, has
 	// and no leading Ctrl+U for these shortcuts to register.
 	const usePasteMode = agent?.slug === 'cursor';
 
-	footerInfo.innerHTML = `<span class="prompt-session-dot" id="sessionDot"></span><i class="ti ti-cpu" aria-hidden="true"></i> ${simpleName}`;
+	footerInfo.innerHTML = `<span class="prompt-session-dot" id="sessionDot"></span>${iconSvg('cpu', 12)}<span class="prompt-cli-name">${simpleName}</span>`;
 
 	const modelName = context.getActiveModelName?.();
 	const usageCommand = hasActiveSession ? getUsageCommandLabel(label) : 'not configured';
@@ -46,13 +47,14 @@ export function updateFooterModel(host: HTMLElement, context: PromptContext, has
 			actions.append(buildShortcutButton(context, modelCommand, modelName ?? modelCommand, usePasteMode));
 		}
 		if (resumeCommand) {
-			actions.append(buildShortcutButton(context, resumeCommand, resumeCommand, usePasteMode));
+			actions.append(buildShortcutButton(context, resumeCommand, resumeCommand, usePasteMode, { action: 'shortcut', icon: 'refresh' }));
 		}
 		if (hasUsage) {
 			actions.append(buildUsageButton(context, usageCommand, usePasteMode));
 		}
 
 		footerInfo.append(actions);
+		bindFooterOverflow(host);
 		return;
 	}
 
@@ -66,12 +68,20 @@ export function updateFooterModel(host: HTMLElement, context: PromptContext, has
 	}
 }
 
-function buildShortcutButton(context: PromptContext, command: string, labelText: string, usePasteMode: boolean): HTMLElement {
+function buildShortcutButton(context: PromptContext, command: string, labelText: string, usePasteMode: boolean, opts?: { action?: string; icon?: PromptIcon }): HTMLElement {
 	const button = document.createElement('button');
 	button.className = 'prompt-footer-model prompt-footer-model-btn';
 	button.title = `Run ${command}`;
+	if (opts?.action) {
+		button.dataset.action = opts.action;
+	}
+
+	if (opts?.icon) {
+		button.append(iconEl(opts.icon, 12));
+	}
 
 	const label = document.createElement('span');
+	label.className = 'prompt-footer-btn-label';
 	label.textContent = labelText.startsWith('/') ? labelText.slice(1) : labelText;
 
 	button.append(label);
@@ -98,15 +108,13 @@ function buildUsageButton(context: PromptContext, command: string, usePasteMode:
 	const button = document.createElement('button');
 	button.className = 'prompt-footer-model prompt-footer-model-btn prompt-footer-usage-btn';
 	button.title = `Run ${command}`;
-
-	const icon = document.createElement('i');
-	icon.className = 'ti ti-chart-bar';
-	icon.setAttribute('aria-hidden', 'true');
+	button.dataset.action = 'shortcut';
 
 	const label = document.createElement('span');
+	label.className = 'prompt-footer-btn-label';
 	label.textContent = command.startsWith('/') ? command.slice(1) : command;
 
-	button.append(icon, label);
+	button.append(iconEl('chartBar', 11), label);
 
 	button.addEventListener('click', () => {
 		context.close();
@@ -118,4 +126,22 @@ function buildUsageButton(context: PromptContext, command: string, usePasteMode:
 	});
 
 	return button;
+}
+
+/** Watch the footer for overflow; collapse shortcut chips to icon-only
+ *  when the Execute button gets squeezed. Expands back when space allows. */
+function bindFooterOverflow(host: HTMLElement) {
+	const footer = host.querySelector<HTMLElement>('.prompt-footer');
+	if (!footer) {
+		return;
+	}
+
+	const check = () => {
+		footer.classList.toggle('is-compact', footer.scrollWidth > footer.clientWidth + 1);
+	};
+
+	const ro = new ResizeObserver(check);
+	ro.observe(footer);
+	ro.observe(host);
+	requestAnimationFrame(check);
 }
