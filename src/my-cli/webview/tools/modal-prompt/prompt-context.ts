@@ -21,4 +21,5 @@ export type PromptContext = {
 	openCreateSkill?: () => void;
 	requestSpellcheck?: (text: string, lang: string, strict: boolean) => Promise<SpellIssue[]>;
 	registerSkillsRefresh?: (refresh: () => void) => void;
+	refocusCli?: () => void;
 };

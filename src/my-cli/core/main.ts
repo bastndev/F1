@@ -127,6 +127,11 @@ export class MyCliViewProvider implements vscode.WebviewViewProvider, vscode.Dis
 				return;
 			}
 
+			if (message.type === 'cli.focus') {
+				void this.smartFocus();
+				return;
+			}
+
 			if (message.type === 'cli.ready') {
 				this.sessionManager.attach(webviewView.webview);
 				warmSpellchecker();

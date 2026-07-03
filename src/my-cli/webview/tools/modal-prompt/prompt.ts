@@ -153,6 +153,9 @@ function initPromptComposer(host: HTMLElement, context: PromptContext, hasActive
 				if (btn) {
 					e.preventDefault();
 					btn.click();
+					// VS Code's Alt+number bindings switch editor tabs and steal focus;
+					// bring it back to the CLI after the chip action runs.
+					context.refocusCli?.();
 				}
 				break;
 			}

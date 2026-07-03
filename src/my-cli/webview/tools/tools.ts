@@ -43,6 +43,7 @@ export type ToolContext = {
 	queryVoiceState?: () => void;
 	onVoiceState?: (listener: (state: VoiceState, message?: string, progress?: VoiceProgress) => void) => () => void;
 	refocusTerminal?: () => void;
+	refocusCli?: () => void;
 };
 
 type ToolCleanup = () => void;
@@ -92,7 +93,8 @@ export const createToolsController = ({
 	stopSpeech,
 	queryVoiceState,
 	onVoiceState,
-	refocusTerminal
+	refocusTerminal,
+	refocusCli
 }: ToolsControllerOptions) => {
 	let activeModal: HTMLElement | null = null;
 	let currentTool: ToolId | null = null;
@@ -206,7 +208,8 @@ export const createToolsController = ({
 			stopSpeech,
 			queryVoiceState,
 			onVoiceState,
-			refocusTerminal
+			refocusTerminal,
+			refocusCli
 		});
 		activeCleanup = typeof cleanup === 'function' ? cleanup : null;
 

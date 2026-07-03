@@ -468,6 +468,12 @@ const toolsController = layoutRight
 				// Fallback (very rare): at least put focus near the terminal area.
 				const activePane = document.querySelector<HTMLElement>('.cli-terminal-pane.is-active');
 				activePane?.focus();
+			},
+			refocusCli: () => {
+				// Ask the extension host to focus the CLI Hub view and then refocus
+				// the terminal. This is needed after Alt+number shortcuts because VS Code
+				// may have moved focus to an editor tab.
+				vscode.postMessage({ type: 'cli.focus' });
 			}
 		})
 	: undefined;
