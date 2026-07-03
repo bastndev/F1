@@ -140,6 +140,25 @@ function initPromptComposer(host: HTMLElement, context: PromptContext, hasActive
 		host.querySelector<HTMLElement>('.prompt-modal')?.classList.toggle('is-plan-mode', mode === 'plan');
 	});
 
+	// Alt+1 / Alt+2 / Alt+3 click the footer model / resume / usage chips.
+	host.addEventListener('keydown', (e) => {
+		const shortcutButtons = [
+			{ id: 'promptFooterModel' as const, selector: '[data-shortcut="model"]' },
+			{ id: 'promptFooterResume' as const, selector: '[data-shortcut="resume"]' },
+			{ id: 'promptFooterUsage' as const, selector: '[data-shortcut="usage"]' },
+		];
+		for (const { id, selector } of shortcutButtons) {
+			if (matchesShortcut(e, id)) {
+				const btn = host.querySelector<HTMLButtonElement>(`.prompt-footer ${selector}`);
+				if (btn) {
+					e.preventDefault();
+					btn.click();
+				}
+				break;
+			}
+		}
+	});
+
 	// When there is no active session we keep everything disabled
 	if (!hasActiveSession) {
 		textarea.disabled = true;

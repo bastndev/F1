@@ -44,10 +44,10 @@ export function updateFooterModel(host: HTMLElement, context: PromptContext, has
 		actions.className = 'prompt-footer-actions';
 
 		if (modelCommand) {
-			actions.append(buildShortcutButton(context, modelCommand, modelName ?? modelCommand, usePasteMode));
+			actions.append(buildShortcutButton(context, modelCommand, modelName ?? modelCommand, usePasteMode, { shortcut: 'model' }));
 		}
 		if (resumeCommand) {
-			actions.append(buildShortcutButton(context, resumeCommand, resumeCommand, usePasteMode, { action: 'shortcut', icon: 'refresh' }));
+			actions.append(buildShortcutButton(context, resumeCommand, resumeCommand, usePasteMode, { action: 'shortcut', icon: 'refresh', shortcut: 'resume' }));
 		}
 		if (hasUsage) {
 			actions.append(buildUsageButton(context, usageCommand, usePasteMode));
@@ -72,12 +72,17 @@ export function updateFooterModel(host: HTMLElement, context: PromptContext, has
 	}
 }
 
-function buildShortcutButton(context: PromptContext, command: string, labelText: string, usePasteMode: boolean, opts?: { action?: string; icon?: PromptIcon }): HTMLElement {
+function buildShortcutButton(context: PromptContext, command: string, labelText: string, usePasteMode: boolean, opts?: { action?: string; icon?: PromptIcon; shortcut?: 'model' | 'resume' }): HTMLElement {
 	const button = document.createElement('button');
 	button.className = 'prompt-footer-model prompt-footer-model-btn';
 	button.title = `Run ${command}`;
 	if (opts?.action) {
 		button.dataset.action = opts.action;
+	}
+	if (opts?.shortcut) {
+		button.dataset.shortcut = opts.shortcut;
+		const key = opts.shortcut === 'model' ? '1' : '2';
+		button.title = `Run ${command} (Alt + ${key})`;
 	}
 
 	if (opts?.icon) {
@@ -111,8 +116,9 @@ function buildShortcutButton(context: PromptContext, command: string, labelText:
 function buildUsageButton(context: PromptContext, command: string, usePasteMode: boolean): HTMLElement {
 	const button = document.createElement('button');
 	button.className = 'prompt-footer-model prompt-footer-model-btn prompt-footer-usage-btn';
-	button.title = `Run ${command}`;
+	button.title = `Run ${command} (Alt + 3)`;
 	button.dataset.action = 'shortcut';
+	button.dataset.shortcut = 'usage';
 
 	const label = document.createElement('span');
 	label.className = 'prompt-footer-btn-label';

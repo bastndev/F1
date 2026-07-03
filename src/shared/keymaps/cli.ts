@@ -81,7 +81,10 @@ export type ShortcutId =
   | 'toggleVoicePlayback'
   | 'sendPrompt'
   | 'promptModePro'
-  | 'promptModePlan';
+  | 'promptModePlan'
+  | 'promptFooterModel'
+  | 'promptFooterResume'
+  | 'promptFooterUsage';
 
 export interface ShortcutDefinition {
   id: ShortcutId;
@@ -186,18 +189,39 @@ export const shortcuts: ShortcutDefinition[] = [
     match: promptSendKey(),
   },
   {
-    id: 'promptModePro',
-    label: 'Switch to PRO mode',
+    id: 'promptFooterModel',
+    label: 'Open model picker',
     contexts: ['prompt'],
     description: 'Alt + 1',
     match: altKey('1'),
   },
   {
-    id: 'promptModePlan',
-    label: 'Switch to PLAN mode',
+    id: 'promptFooterResume',
+    label: 'Resume session',
     contexts: ['prompt'],
     description: 'Alt + 2',
     match: altKey('2'),
+  },
+  {
+    id: 'promptFooterUsage',
+    label: 'Show usage / status',
+    contexts: ['prompt'],
+    description: 'Alt + 3',
+    match: altKey('3'),
+  },
+  {
+    id: 'promptModePro',
+    label: 'Switch to PRO mode',
+    contexts: ['prompt'],
+    description: 'Alt + 4',
+    match: altKey('4'),
+  },
+  {
+    id: 'promptModePlan',
+    label: 'Switch to PLAN mode',
+    contexts: ['prompt'],
+    description: 'Alt + 5',
+    match: altKey('5'),
   },
   {
     id: 'toggleAgentPalette',
