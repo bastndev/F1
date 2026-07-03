@@ -5,11 +5,8 @@
 .vscodeignore
 .yarnrc
 
-# Source — excluded, EXCEPT the runtime assets the webviews load straight from src/
-# at runtime (see my-skills.ts: joinPath(extensionUri, 'src', …, '*.html'/'*.css'/'*.webp')).
-# Covers My Skills under src/my-skills/ and the shared tutorials under
-# src/shared/tutorial/ (+ their images in src/shared/assets/). Do NOT remove these
-# negations or the panels render blank.
+# Exclude all src/ except runtime assets loaded via extensionUri at runtime.
+# Negations below are required — removing them causes panels to render blank.
 src/**
 !src/shared/
 !src/shared/**/
@@ -26,14 +23,11 @@ src/**
 !src/my-skills/**/*.png
 !src/my-skills/**/*.webp
 
-# Smart + Skills mode reads its rules asset (assets/skills/default/SKILL.md) from
-# src/my-plus/ at runtime via extensionUri (see my-smart/core/smart-service.ts:
-# loadRules → RULES_ASSET_SEGMENTS). Without this the packaged build can't write
-# the workspace .f1/ folder — only graphify-out/ shows up. Match just the .md
-# assets (not the whole dir) so the bundled .ts sources stay out of the package.
+# Smart + Skills rules asset read via extensionUri at runtime (loadRules → RULES_ASSET_SEGMENTS).
+# Match only .md so bundled .ts sources stay out of the package.
 !src/my-plus/**/*.md
 
-# Repo/GitHub-only assets (~13 MB, screenshot.gif etc) — not loaded by the extension
+# Repo-only assets (~13 MB) — not loaded by the extension
 public/**
 
 # Tests and generated development maps
@@ -51,19 +45,17 @@ esbuild.js
 **/eslint.config.mjs
 **/tsconfig.json
 
-# Native debug symbols — never loaded at runtime (trims ~53 MB of node-pty .pdb files)
+# Native debug symbols — trims ~53 MB of node-pty .pdb files
 **/*.pdb
 
-# fixnow bundles dictionaries for 8 languages (~11 MB). F1's Prompt picker
-# spellchecks en/es/pt/ru (zh is character-based — fixnow has no dict for it).
-# Keep those four, drop the unused four (loaded from node_modules at runtime;
-# fixnow is external). Mirror src/my-cli/shared/prompt/languages.ts.
+# fixnow dictionaries (~11 MB total). Keep en/es/pt/ru; drop ar/de/fr/vi (unused).
+# Mirrors src/my-cli/shared/prompt/languages.ts.
 node_modules/fixnow/dictionaries/ar/**
 node_modules/fixnow/dictionaries/de/**
 node_modules/fixnow/dictionaries/fr/**
 node_modules/fixnow/dictionaries/vi/**
 
-# Project notes and contributor-only documentation
+# Contributor-only documentation
 AGENTS.md
 ARCHITECTURE.md
 CLAUDE.md
