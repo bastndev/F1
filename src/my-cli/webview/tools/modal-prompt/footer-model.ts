@@ -6,6 +6,7 @@
  */
 import type { PromptContext } from './prompt-context';
 import { getCliAgent } from '../../../shared/agents';
+import { getUsageCommandLabel } from '../modal-use/agents';
 
 export function updateFooterModel(host: HTMLElement, context: PromptContext, hasActiveSession: boolean) {
 	const labelEl = document.getElementById('cli-terminal-label');
@@ -32,10 +33,12 @@ export function updateFooterModel(host: HTMLElement, context: PromptContext, has
 	footerInfo.innerHTML = `<span class="prompt-session-dot" id="sessionDot"></span><i class="ti ti-cpu" aria-hidden="true"></i> ${simpleName}`;
 
 	const modelName = context.getActiveModelName?.();
+	const usageCommand = hasActiveSession ? getUsageCommandLabel(label) : 'not configured';
+	const hasUsage = usageCommand !== 'not configured';
 
 	// Agents with shortcut commands get action chips; the rest keeps the
 	// read-only detected-model chip.
-	if (hasActiveSession && context.sendToActiveSession && (modelCommand || resumeCommand)) {
+	if (hasActiveSession && context.sendToActiveSession && (modelCommand || resumeCommand || hasUsage)) {
 		const actions = document.createElement('span');
 		actions.className = 'prompt-footer-actions';
 
@@ -44,6 +47,9 @@ export function updateFooterModel(host: HTMLElement, context: PromptContext, has
 		}
 		if (resumeCommand) {
 			actions.append(buildShortcutButton(context, resumeCommand, resumeCommand, usePasteMode));
+		}
+		if (hasUsage) {
+			actions.append(buildUsageButton(context, usageCommand, usePasteMode));
 		}
 
 		footerInfo.append(actions);
@@ -81,6 +87,32 @@ function buildShortcutButton(context: PromptContext, command: string, labelText:
 		} else {
 			// \x15 is Ctrl+U: wipe the current terminal input line so a partially
 			// typed prompt is not concatenated with the command.
+			context.sendToActiveSession?.(`\x15${command}`, { submit: true });
+		}
+	});
+
+	return button;
+}
+
+function buildUsageButton(context: PromptContext, command: string, usePasteMode: boolean): HTMLElement {
+	const button = document.createElement('button');
+	button.className = 'prompt-footer-model prompt-footer-model-btn prompt-footer-usage-btn';
+	button.title = `Run ${command}`;
+
+	const icon = document.createElement('i');
+	icon.className = 'ti ti-chart-bar';
+	icon.setAttribute('aria-hidden', 'true');
+
+	const label = document.createElement('span');
+	label.textContent = command.startsWith('/') ? command.slice(1) : command;
+
+	button.append(icon, label);
+
+	button.addEventListener('click', () => {
+		context.close();
+		if (usePasteMode) {
+			context.sendToActiveSession?.(command, { paste: true, submit: true });
+		} else {
 			context.sendToActiveSession?.(`\x15${command}`, { submit: true });
 		}
 	});

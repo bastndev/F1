@@ -1146,6 +1146,24 @@
   border-color: color-mix(in srgb, var(--agent-accent, #534AB7) 45%, transparent);
 }
 
+/* Usage button — same base as model shortcut, slight accent tint at rest */
+.prompt-footer-usage-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.prompt-footer-usage-btn i {
+  font-size: 11px;
+}
+
+.prompt-footer-usage-btn:hover {
+  opacity: 1;
+  color: var(--agent-accent, #AFA9EC);
+  border-color: color-mix(in srgb, var(--agent-accent, #534AB7) 45%, transparent);
+  background: color-mix(in srgb, var(--agent-accent, #534AB7) 10%, transparent);
+}
+
 /* Container for model + resume shortcut chips */
 .prompt-footer-actions {
   display: inline-flex;
