@@ -417,6 +417,18 @@
 	overflow-x: auto;
 }
 
+/* Shell command card ($ bun compile) — verbatim, never translated. Reuses the
+   md-pre card look; the prompt glyph wears the voice green as a "command" cue. */
+.translator-text .md-pre.md-cmd {
+	color: var(--vscode-foreground);
+}
+
+.translator-text .md-cmd-prompt {
+	color: #5DCAA5;
+	font-weight: 600;
+	user-select: none;
+}
+
 .translator-text .md-quote {
 	margin: 4px 0 14px;
 	padding: 2px 0 2px 12px;

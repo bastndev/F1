@@ -107,8 +107,15 @@ export function renderMarkdownLite(markdown: string): string {
 	};
 
 	const flushCode = () => {
-		const treeClass = codeLang === 'tree' ? ' md-tree' : '';
-		html.push(`<pre class="md-pre${treeClass}"><code>${escapeHtml(codeLines.join('\n'))}</code></pre>`);
+		const variantClass = codeLang === 'tree' ? ' md-tree' : codeLang === 'cmd' ? ' md-cmd' : '';
+		// Command cards get their `$ ` prompt wrapped so it can wear the voice
+		// green — a visual cue that the line is a command, not output.
+		const body = codeLang === 'cmd'
+			? codeLines
+				.map((line) => escapeHtml(line).replace(/^\$(?=\s)/, () => '<span class="md-cmd-prompt">$</span>'))
+				.join('\n')
+			: escapeHtml(codeLines.join('\n'));
+		html.push(`<pre class="md-pre${variantClass}"><code>${body}</code></pre>`);
 		inCode = false;
 		codeLang = '';
 		codeLines = [];

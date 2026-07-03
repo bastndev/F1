@@ -577,6 +577,13 @@ function initializeTranslator(host: HTMLElement, context: ToolContext) {
 					continue;
 				}
 
+				if (segment.kind === 'command') {
+					// Shell commands stay verbatim — shown as a command card, never
+					// sent to translation (which turns `bun lint` into word soup).
+					stageBlock(`\`\`\`cmd\n${segment.content}\n\`\`\``, segment.content);
+					continue;
+				}
+
 				if (segment.kind === 'code') {
 					codeCount += 1;
 					stageBlock(`[[code-here:${codeCount}]]`, `[code here #${codeCount}]`);

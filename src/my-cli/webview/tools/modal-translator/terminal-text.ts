@@ -13,13 +13,16 @@
  *                the modal renders them as a monospace block.
  *   - code     → fenced or detected source code. Never translated; the modal
  *                shows a numbered "code here" placeholder instead.
+ *   - command  → `$ `-prefixed shell commands (OpenCode prints them like
+ *                this). Kept verbatim — translating `bun lint` into prose
+ *                shreds it — and rendered as a monospace command card.
  *   - markdown → lines with structural markers (headings, emoji items, score
  *                tables) that are sent to translation with their markers
  *                protected so the renderer can rebuild the structure.
  */
 
 export type TerminalSegment = {
-	kind: 'prose' | 'diagram' | 'code' | 'markdown';
+	kind: 'prose' | 'diagram' | 'code' | 'command' | 'markdown';
 	content: string;
 };
 
@@ -75,6 +78,7 @@ type LineKind =
 	| 'tree'
 	| 'pipes'
 	| 'code'
+	| 'command'
 	| 'markdown'
 	| 'prose';
 
@@ -91,6 +95,18 @@ function classifyLine(trimmed: string): LineKind {
 	// Braille spinner leftovers (⠋⠙⠹…)
 	if (/^[\s⠀-⣿]+$/.test(trimmed)) {
 		return 'noise';
+	}
+
+	// git diff-stat bars (+++++++-----). Requiring a '+' keeps plain --- rule
+	// lines (rendered as <hr>) out of this.
+	if (/^[+\s-]+$/.test(trimmed) && trimmed.includes('+')) {
+		return 'noise';
+	}
+
+	// Shell prompt line: "$ bun compile". The first token must carry a letter
+	// so prose amounts ("$ 100 discount") stay prose.
+	if (/^\$\s+\S*[a-zA-Z]/.test(trimmed)) {
+		return 'command';
 	}
 
 	if (structuralOnly.test(trimmed)) {
@@ -154,6 +170,12 @@ function looksLikeCode(line: string): boolean {
 		score += 2;
 	}
 	if (/^\s*(?:\/\/|\/\*|\*\/|\*\s|<!--)/.test(trimmed)) {
+		score += 2;
+	}
+	// A line that is just an HTML/JSX tag (<style>, </article>, <slot />,
+	// <article class:list={...}>) — tag soup is code even when it carries
+	// none of the operator signals above.
+	if (/^<\/?[a-zA-Z][\w.-]*(?:\s[^<>]*)?\/?>$/.test(trimmed)) {
 		score += 2;
 	}
 	// Weak signals
@@ -235,12 +257,28 @@ function markCodeLines(lines: string[], kinds: LineKind[]): void {
 	}
 }
 
+// CLIs wrap their "what changed" section in literal <details>/<summary> HTML.
+// The wrapper tags carry no content (drop them); the summary text does \u2014 keep
+// it as a bold label so it is translated and rendered like prose.
+function unwrapDetailsLine(line: string): string {
+	const trimmed = line.trim();
+	if (/^<\/?details[^>]*>$/i.test(trimmed)) {
+		return '';
+	}
+	const summary = trimmed.match(/^<summary[^>]*>(.*?)<\/summary>$/i);
+	if (summary) {
+		const label = summary[1].trim();
+		return label ? `**${label}**` : '';
+	}
+	return line;
+}
+
 export function segmentTerminalSelection(raw: string): TerminalSegment[] {
 	const lines = raw
 		.replace(/\u00a0/g, ' ')
 		.replace(/\r\n?/g, '\n')
 		.split('\n')
-		.map((line) => line.replace(/\s+$/, ''));
+		.map((line) => unwrapDetailsLine(line.replace(/\s+$/, '')));
 
 	const kinds = lines.map((line) => classifyLine(line.trim()));
 	markCodeLines(lines, kinds);
@@ -248,7 +286,7 @@ export function segmentTerminalSelection(raw: string): TerminalSegment[] {
 	const segments: TerminalSegment[] = [];
 	let prose: string[] = [];
 	let block: string[] = [];
-	let blockKind: 'tree' | 'table' | 'code' | null = null;
+	let blockKind: 'tree' | 'table' | 'code' | 'command' | null = null;
 
 	const flushProse = () => {
 		const cleaned = cleanProse(prose);
@@ -262,10 +300,10 @@ export function segmentTerminalSelection(raw: string): TerminalSegment[] {
 		if (!blockKind) {
 			return;
 		}
-		if (blockKind === 'tree' || blockKind === 'code') {
+		if (blockKind === 'tree' || blockKind === 'code' || blockKind === 'command') {
 			flushProse();
 			segments.push({
-				kind: blockKind === 'tree' ? 'diagram' : 'code',
+				kind: blockKind === 'tree' ? 'diagram' : blockKind,
 				content: block.join('\n'),
 			});
 		} else {
@@ -302,10 +340,10 @@ export function segmentTerminalSelection(raw: string): TerminalSegment[] {
 					const upcoming = nextRelevant(i);
 					const continues = blockKind === 'table'
 						? upcoming === 'table-border' || upcoming === 'table-content'
-						: blockKind === 'code'
-							? upcoming === 'code'
+						: blockKind === 'code' || blockKind === 'command'
+							? upcoming === blockKind
 							: upcoming === 'tree' || upcoming === 'pipes';
-					if (continues && blockKind === 'code') {
+					if (continues && (blockKind === 'code' || blockKind === 'command')) {
 						block.push(line);
 					}
 					if (!continues) {
@@ -351,6 +389,15 @@ export function segmentTerminalSelection(raw: string): TerminalSegment[] {
 					flushBlock();
 				}
 				blockKind = 'code';
+				block.push(line);
+				break;
+			}
+
+			case 'command': {
+				if (blockKind && blockKind !== 'command') {
+					flushBlock();
+				}
+				blockKind = 'command';
 				block.push(line);
 				break;
 			}
