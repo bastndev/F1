@@ -115,12 +115,20 @@ export const mountPromptPanel = (host: HTMLElement, context: PromptContext = { c
 
 	const hasActiveSession = !!context.getActiveSessionId?.();
 
-	updateFooterModel(host, context, hasActiveSession);
+	// Element-level listeners die with the DOM on unmount, but this mount also
+	// registers document/window listeners, observers and timers — those outlive
+	// the DOM and pile up across modal opens unless released. The abort signal
+	// is that release; the tools controller invokes the returned cleanup on close.
+	const lifecycle = new AbortController();
+
+	updateFooterModel(host, context, hasActiveSession, lifecycle.signal);
 	initSessionState(host, hasActiveSession);
-	initPromptComposer(host, context, hasActiveSession);
+	initPromptComposer(host, context, hasActiveSession, lifecycle.signal);
+
+	return () => lifecycle.abort();
 };
 
-function initPromptComposer(host: HTMLElement, context: PromptContext, hasActiveSession: boolean) {
+function initPromptComposer(host: HTMLElement, context: PromptContext, hasActiveSession: boolean, signal: AbortSignal) {
 	const textarea = host.querySelector<HTMLTextAreaElement>('#promptInput');
 	const textareaWrap = host.querySelector<HTMLElement>('.prompt-textarea-wrap');
 	const highlight = host.querySelector<HTMLElement>('.prompt-textarea-highlight');
@@ -186,7 +194,8 @@ function initPromptComposer(host: HTMLElement, context: PromptContext, hasActive
 			mountFileMentionPicker(
 				textarea,
 				textareaWrapEl,
-				() => context.requestWorkspaceFiles!()
+				() => context.requestWorkspaceFiles!(),
+				signal
 			);
 		}
 	}
@@ -602,6 +611,7 @@ function initPromptComposer(host: HTMLElement, context: PromptContext, hasActive
 		window.clearTimeout(spellcheckTimer);
 		spellcheckTimer = window.setTimeout(runSpellcheck, 400);
 	};
+	signal.addEventListener('abort', () => window.clearTimeout(spellcheckTimer));
 
 	const onInputForHighlight = () => {
 		adjustHeight();
@@ -647,7 +657,7 @@ function initPromptComposer(host: HTMLElement, context: PromptContext, hasActive
 			renderHighlight();
 		}
 	};
-	document.addEventListener('selectionchange', onSelectionChange);
+	document.addEventListener('selectionchange', onSelectionChange, { signal });
 
 	// Initial adjustment + first highlight render
 	requestAnimationFrame(() => {
@@ -661,6 +671,7 @@ function initPromptComposer(host: HTMLElement, context: PromptContext, hasActive
 		highlight,
 		getSpellIssues: () => spellIssues,
 		onApplied: rerunSpellcheck,
+		signal,
 	});
 
 	// ArrowUp in an empty textarea recalls previously sent prompts (per CLI).
@@ -668,7 +679,7 @@ function initPromptComposer(host: HTMLElement, context: PromptContext, hasActive
 
 	// Plain click a collapsed-paste marker → peek/edit popover; hover an
 	// [Image #N] marker → thumbnail preview.
-	initAttachmentPeek({ textarea, highlight, pasteAttachments, imageAttachments });
+	initAttachmentPeek({ textarea, highlight, pasteAttachments, imageAttachments, signal });
 
 	// ── Language gate ────────────────────────────────────────────────
 	// The picker is the single source of the source language. Typing stays

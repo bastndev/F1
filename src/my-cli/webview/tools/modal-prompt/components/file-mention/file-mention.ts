@@ -48,7 +48,8 @@ const registerMentionAlias = (entry: FileMentionEntry) => {
 export function mountFileMentionPicker(
 	textarea: HTMLTextAreaElement,
 	container: HTMLElement,
-	requestFiles: FileMentionRequest
+	requestFiles: FileMentionRequest,
+	signal?: AbortSignal
 ) {
 	ensureStyles();
 
@@ -306,6 +307,10 @@ export function mountFileMentionPicker(
 			closeDropdown();
 		}
 	};
+
+	// Close the dropdown (its document click listener with it) if the prompt
+	// panel unmounts while it is open — the portal outlives the textarea.
+	signal?.addEventListener('abort', () => closeDropdown());
 
 	const openDropdown = async (query: string) => {
 		const isFirstCreation = !dropdown;

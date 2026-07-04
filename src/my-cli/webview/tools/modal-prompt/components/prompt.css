@@ -927,6 +927,14 @@
   75%       { transform: translateX(3px); }
 }
 
+/* Footer chip clicked while the CLI is mid-task: injection refused — shake
+   and flash red so the denial is visible instead of silently doing nothing. */
+.prompt-footer-model-btn.is-denied {
+  animation: char-shake 0.35s ease;
+  color: #e05252;
+  border-color: color-mix(in srgb, #e05252 45%, transparent);
+}
+
 /* Skills row */
 .prompt-skills {
   display: flex;

@@ -14,6 +14,8 @@ export type PromptContext = {
 	getActiveModelName?: () => string | undefined;
 	getActiveSessionBuffer?: () => string | undefined;
 	sendToActiveSession?: (text: string, options?: { paste?: boolean; submit?: boolean }) => void;
+	/** Whether the active CLI is mid-task and would corrupt its input if a command were injected now. */
+	isCliBusy?: () => boolean;
 	translatePrompt?: (request: PromptTranslateRequest) => Promise<PromptTranslateResult>;
 	preparePromptWithAttachments?: (text: string, attachments: ImageAttachment[]) => Promise<string>;
 	requestWorkspaceFiles?: () => Promise<FileMentionEntry[]>;

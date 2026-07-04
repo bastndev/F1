@@ -29,6 +29,27 @@ export interface UsageTracker {
 
 const getAgentSlug = (label: string): string => resolveAgentSlug(label) ?? 'default';
 
+// The current visible terminal screen as plain text (no ANSI). Used to detect
+// whether a CLI is mid-task before injecting a command — the live viewport
+// reflects the present state, unlike the append-only session buffer.
+export const readTerminalScreenText = (view: { terminal: Terminal } | undefined): string => {
+	const terminal = view?.terminal;
+	const buffer = terminal?.buffer.active;
+	if (!terminal || !buffer) {
+		return '';
+	}
+
+	const lines: string[] = [];
+	const end = buffer.baseY + terminal.rows;
+	for (let row = buffer.baseY; row < end; row += 1) {
+		const line = buffer.getLine(row);
+		if (line) {
+			lines.push(line.translateToString(true));
+		}
+	}
+	return lines.join('\n');
+};
+
 export function createUsageTracker(deps: UsageTrackerDeps): UsageTracker {
 	const usageRequestSettleDelayMs = 900;
 	const usageRequestTimeoutMs = 7000;
@@ -61,27 +82,6 @@ export function createUsageTracker(deps: UsageTrackerDeps): UsageTracker {
 	const getUsageInputData = (view: { terminal: Terminal } | undefined, data: string) => (
 		view?.terminal.modes.sendFocusMode ? `\x1b[I${data}` : data
 	);
-
-	// The current visible terminal screen as plain text (no ANSI). Used to detect
-	// whether a CLI is mid-task before injecting its usage command — the live
-	// viewport reflects the present state, unlike the append-only session buffer.
-	const readTerminalScreenText = (view: { terminal: Terminal } | undefined): string => {
-		const terminal = view?.terminal;
-		const buffer = terminal?.buffer.active;
-		if (!terminal || !buffer) {
-			return '';
-		}
-
-		const lines: string[] = [];
-		const end = buffer.baseY + terminal.rows;
-		for (let row = buffer.baseY; row < end; row += 1) {
-			const line = buffer.getLine(row);
-			if (line) {
-				lines.push(line.translateToString(true));
-			}
-		}
-		return lines.join('\n');
-	};
 
 	const clearPendingUsageRequest = () => {
 		if (!pendingUsageRequest) {

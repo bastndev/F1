@@ -26,6 +26,8 @@ export type ToolContext = {
 	requestUsage?: () => Promise<CliUsageSnapshot>;
 	dismissUsageView?: () => void;
 	sendToActiveSession?: (text: string, options?: { paste?: boolean; submit?: boolean }) => void;
+	/** Whether the active CLI is mid-task and would corrupt its input if a command were injected now. */
+	isCliBusy?: () => boolean;
 	translatePrompt?: (request: PromptTranslateRequest) => Promise<PromptTranslateResult>;
 	getTerminalSelection?: () => string;
 	preparePromptWithAttachments?: (text: string, attachments: ImageAttachment[]) => Promise<string>;
@@ -78,6 +80,7 @@ export const createToolsController = ({
 	requestUsage,
 	dismissUsageView,
 	sendToActiveSession,
+	isCliBusy,
 	translatePrompt,
 	getTerminalSelection,
 	preparePromptWithAttachments,
@@ -192,6 +195,7 @@ export const createToolsController = ({
 			requestUsage,
 			dismissUsageView,
 			sendToActiveSession,
+			isCliBusy,
 			translatePrompt,
 			getTerminalSelection,
 			preparePromptWithAttachments,

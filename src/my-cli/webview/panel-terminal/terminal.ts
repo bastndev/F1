@@ -8,7 +8,8 @@ import { createCliCreateMessage } from '../../shared/agent-launch-guard';
 import { getAgentSlug as resolveAgentSlug, getCliAgent } from '../../shared/agents';
 import { isLynxPanelNavChord } from '../../../shared/keymaps/lynx-keymap/index';
 import { matchesShortcut } from '../../../shared/keymaps/cli';
-import { getUsageCommandLabel } from '../tools/modal-use/agents';
+import { getUsageCommandLabel, isUsageAgentBusy, isUsageViewInline } from '../tools/modal-use/agents';
+import { readTerminalScreenText } from './usage-tracker';
 import { createToolsController } from '../tools/tools';
 import { createUsageTracker } from './usage-tracker';
 import { detectModelName } from '../../shared/model-detect';
@@ -365,6 +366,9 @@ const sendToActiveSession = (text: string, options?: { paste?: boolean; submit?:
 	if (session?.status !== 'running') {
 		return;
 	}
+	if (options?.submit) {
+		trackPickerCommand(sessionId, session.label, text);
+	}
 	const view = terminals.get(sessionId);
 	let data = text;
 	// Frame pasted text in bracketed-paste markers when the CLI has
@@ -439,6 +443,7 @@ const toolsController = layoutRight
 			requestUsage: usageTracker.request,
 			dismissUsageView: usageTracker.dismiss,
 			sendToActiveSession,
+			isCliBusy: () => isActiveCliBusy(),
 			translatePrompt,
 			preparePromptWithAttachments,
 			requestWorkspaceFiles: () => workspaceFilesRpc.request(),
@@ -529,13 +534,18 @@ const tabController = createTabController({
 // just inside the prompt modal — same injection the modal footer chips use.
 // Skipped while any tool modal is open: the prompt modal binds its own
 // copies to click the visible chips, and the other modals own their keys.
+// The same chord pressed again closes the picker it opened (Esc), and a
+// different chord swaps pickers. We can't *see* the TUI picker, so this is
+// tracked state: set on injection, cleared by Esc/Enter in the terminal,
+// any other submitted send, and session close.
 
-const footerShortcutCommand = (kind: 'model' | 'resume' | 'usage'): string | undefined => {
-	const session = activeSessionId ? sessions.get(activeSessionId) : undefined;
-	if (session?.status !== 'running') {
-		return undefined;
-	}
-	const agent = getCliAgent(session.label);
+type FooterShortcutKind = 'model' | 'resume' | 'usage';
+
+const openFooterPickers = new Map<string, FooterShortcutKind>();
+const pickerSwapDelayMs = 200;
+
+const resolveFooterCommand = (label: string, kind: FooterShortcutKind): string | undefined => {
+	const agent = getCliAgent(label);
 	if (kind === 'model') {
 		return agent?.modelCommand;
 	}
@@ -543,8 +553,67 @@ const footerShortcutCommand = (kind: 'model' | 'resume' | 'usage'): string | und
 		return agent?.resumeCommand;
 	}
 	// Usage differs per CLI (/usage vs /status) and some CLIs have none.
-	const usageCommand = getUsageCommandLabel(session.label);
+	const usageCommand = getUsageCommandLabel(label);
 	return usageCommand === 'not configured' ? undefined : usageCommand;
+};
+
+// Runs on every submitted send (chords, modal chips, even a hand-typed
+// "/model" from the prompt modal): a send matching a picker command marks
+// that picker open; anything else clears the entry — after a real prompt
+// lands, no picker can still be up.
+const trackPickerCommand = (sessionId: string, label: string, text: string) => {
+	const stripped = text.startsWith('\x15') ? text.slice(1) : text;
+	let kind: FooterShortcutKind | undefined;
+	if (stripped === resolveFooterCommand(label, 'model')) {
+		kind = 'model';
+	} else if (stripped === resolveFooterCommand(label, 'resume')) {
+		kind = 'resume';
+	} else if (stripped === resolveFooterCommand(label, 'usage')) {
+		// Inline usage views (Codex /status prints into the transcript) have no
+		// overlay to close, so they are never tracked as open.
+		kind = isUsageViewInline(label) ? undefined : 'usage';
+	}
+	if (kind) {
+		openFooterPickers.set(sessionId, kind);
+	} else {
+		openFooterPickers.delete(sessionId);
+	}
+};
+
+const postEscapeToSession = (sessionId: string) => {
+	const view = terminals.get(sessionId);
+	const data = view?.terminal.modes.sendFocusMode ? '\x1b[I\x1b' : '\x1b';
+	vscode.postMessage({ type: 'cli.input', sessionId, data });
+};
+
+const injectFooterCommand = (kind: FooterShortcutKind) => {
+	const session = activeSessionId ? sessions.get(activeSessionId) : undefined;
+	if (session?.status !== 'running') {
+		return;
+	}
+	const command = resolveFooterCommand(session.label, kind);
+	if (!command) {
+		return;
+	}
+	if (getAgentSlug(session.label) === 'cursor') {
+		// Cursor's TUI drops raw chunked input: bracketed paste, no Ctrl+U.
+		sendToActiveSession(command, { paste: true, submit: true });
+	} else {
+		// \x15 is Ctrl+U: wipe the current input line so partially typed text
+		// is not concatenated with the command.
+		sendToActiveSession(`\x15${command}`, { submit: true });
+	}
+};
+
+// Whether the active CLI is mid-task and would corrupt its input if a command
+// were injected right now (idle-only CLIs: Kiro/Antigravity/Codex). Same
+// guard modal-use applies before injecting /usage.
+const isActiveCliBusy = (): boolean => {
+	const session = activeSessionId ? sessions.get(activeSessionId) : undefined;
+	if (!session) {
+		return false;
+	}
+	return isUsageAgentBusy(session.label, readTerminalScreenText(terminals.get(session.id)));
 };
 
 const handleFooterShortcutKey = (event: KeyboardEvent): boolean => {
@@ -561,25 +630,27 @@ const handleFooterShortcutKey = (event: KeyboardEvent): boolean => {
 	if (!kind) {
 		return false;
 	}
-	const command = footerShortcutCommand(kind);
-	if (!command) {
+	const session = activeSessionId ? sessions.get(activeSessionId) : undefined;
+	if (session?.status !== 'running' || !resolveFooterCommand(session.label, kind)) {
 		return false;
 	}
 	event.preventDefault();
 	event.stopPropagation();
-	const session = activeSessionId ? sessions.get(activeSessionId) : undefined;
-	if (session && getAgentSlug(session.label) === 'cursor') {
-		// Cursor's TUI drops raw chunked input: bracketed paste, no Ctrl+U.
-		sendToActiveSession(command, { paste: true, submit: true });
-	} else {
-		// \x15 is Ctrl+U: wipe the current input line so partially typed text
-		// is not concatenated with the command.
-		sendToActiveSession(`\x15${command}`, { submit: true });
+
+	const openKind = openFooterPickers.get(session.id);
+	if (openKind) {
+		// A picker we opened is still up: same chord closes it, a different
+		// chord closes it and opens the requested one once the Esc has landed.
+		postEscapeToSession(session.id);
+		openFooterPickers.delete(session.id);
+		if (openKind !== kind) {
+			window.setTimeout(() => injectFooterCommand(kind), pickerSwapDelayMs);
+		}
+	} else if (!isActiveCliBusy()) {
+		injectFooterCommand(kind);
 	}
 	// The CLI's picker needs terminal focus for arrow-key navigation.
-	if (activeSessionId) {
-		terminals.get(activeSessionId)?.terminal.focus();
-	}
+	terminals.get(session.id)?.terminal.focus();
 	return true;
 };
 
@@ -602,6 +673,12 @@ const isCtrlZ = (event: KeyboardEvent): boolean =>
 	&& event.key.toLowerCase() === 'z';
 
 const handleTerminalKey = (event: KeyboardEvent, sessionId: string) => {
+	// Esc dismisses a TUI picker, Enter selects from it — either way the
+	// picker a footer chord opened is gone now. Observe only, never consume.
+	if (event.type === 'keydown' && (event.key === 'Escape' || event.key === 'Enter')) {
+		openFooterPickers.delete(sessionId);
+	}
+
 	if (isOpenCodeSession(sessionId) && isCtrlZ(event)) {
 		event.preventDefault();
 		event.stopPropagation();
@@ -917,6 +994,11 @@ const syncState = (message: Extract<ServerMessage, { type: 'cli.state' }>) => {
 	sleepInactiveTerminals(visualSleepEnabled, openSessionIds);
 	usageTracker.pruneClosedSessions(openSessionIds);
 	prunePromptDrafts(openSessionIds);
+	for (const sessionId of [...openFooterPickers.keys()]) {
+		if (!openSessionIds.has(sessionId)) {
+			openFooterPickers.delete(sessionId);
+		}
+	}
 
 	// If a session entered error/exited state before producing output, don't leave skeleton hanging
 	for (const [sessionId, session] of sessions) {
