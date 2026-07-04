@@ -51,6 +51,14 @@ F1 biến VS Code thành trung tâm cho các tác nhân lập trình AI. Mở **
 | Chuyển đổi bộ lọc Chat                    | `Ctrl + Space`      | `Ctrl + Space`         | `Ctrl + Space`         | ㅤㅤ✅ |
 | Phiên trước                               | `Shift + Tab`       | `Shift + Tab`          | `Shift + Tab`          | ㅤㅤ✅ |
 | Thực thi prompt                           | `⌘ + Enter`         | `Ctrl + Enter`         | `Ctrl + Enter`         | ㅤㅤ✅ |
+| Thực thi không dịch                       | `⌘ + Shift + Enter` | `Ctrl + Shift + Enter` | `Ctrl + Shift + Enter` | ㅤㅤ✅ |
+| -                                         | -                   | -                      | -                      |        |
+| Bộ chọn mô hình (mở/đóng) - [3]           | `Alt + 1`           | `Alt + 1`              | `Alt + 1`              | ㅤㅤ✅ |
+| Tiếp tục phiên (mở/đóng) - [3]            | `Alt + 2`           | `Alt + 2`              | `Alt + 2`              | ㅤㅤ✅ |
+| Mức sử dụng / trạng thái - [3]            | `Alt + 3`           | `Alt + 3`              | `Alt + 3`              | ㅤㅤ✅ |
+| Chế độ PRO của Prompt                     | `Alt + 4`           | `Alt + 4`              | `Alt + 4`              | ㅤㅤ✅ |
+| Chế độ PLAN của Prompt                    | `Alt + 5`           | `Alt + 5`              | `Alt + 5`              | ㅤㅤ✅ |
+| -                                         | -                   | -                      | -                      |        |
 | Mở công cụ Commands                       | `Alt + F1`          | `Alt + F1`             | `Alt + F1`             | ㅤㅤ✅ |
 | -                                         | -                   | -                      | -                      |        |
 | Phiên tiếp theo                           | `Tab`               | `Tab`                  | `Tab`                  | ㅤㅤ✅ |
@@ -67,6 +75,8 @@ F1 biến VS Code thành trung tâm cho các tác nhân lập trình AI. Mở **
 | `[`Skill`]` - Chuyển đến tab Tạo          | `Alt + 1`           | `Alt + 1`              | `Alt + 1`              | ㅤㅤ✅ |
 | `[`Skill`]` - Chuyển đến tab Cài đặt      | `Alt + 2`           | `Alt + 2`              | `Alt + 2`              | ㅤㅤ✅ |
 | `[`Skill`]` - Chuyển đến tab Cục bộ       | `Alt + 3`           | `Alt + 3`              | `Alt + 3`              | ㅤㅤ✅ |
+
+> **[3]** `Alt + 1/2/3` chạy lệnh riêng của CLI đang hoạt động (`/model`, `/resume`, `/usage`…, được điều chỉnh theo tác nhân) — chúng hoạt động trực tiếp trong terminal **và** bên trong công cụ Prompt. Nhấn lại tổ hợp phím tương tự để đóng bộ chọn đã mở. Mức sử dụng/trạng thái không khả dụng trên mọi CLI.
 
 ---
 
@@ -87,8 +97,8 @@ F1 biến VS Code thành trung tâm cho các tác nhân lập trình AI. Mở **
 - Chạy song song nhiều CLI lập trình AI trong các terminal nhúng [xterm.js](https://xtermjs.org/).
 - Trình khởi chạy tìm kiếm mờ để chọn tác nhân; nhấn **F1** để chuyển thẳng đến bảng điều khiển.
 - Các công cụ tích hợp sẵn dọc theo mọi phiên:
-  - **Prompt** — trình chỉnh sửa phong phú với tính năng đề cập tệp `@`, dán hình ảnh, thẻ kỹ năng (skills chips), kiểm tra lỗi chính tả trực tiếp và dịch từ nguồn sang tiếng Anh trước khi gửi.
-  - **Translator** — dịch nội tuyến bất kỳ lựa chọn nào trong terminal.
+  - **Prompt** — trình chỉnh sửa phong phú với tính năng đề cập tệp `@`, dán hình ảnh, thẻ kỹ năng (skills chips), lịch sử prompt (`↑`), các chế độ **PRO / PLAN**, kiểm tra lỗi chính tả trực tiếp và dịch từ nguồn sang tiếng Anh trước khi gửi.
+  - **Translator** — dịch nội tuyến bất kỳ lựa chọn nào trong terminal, với chế độ tự động đọc to câu trả lời trong khi phần còn lại vẫn đang được dịch.
   - **Use** — xem mức sử dụng / trạng thái theo từng CLI.
   - **Keymaps** — tham chiếu phím tắt.
   - **Commands** — bảng lệnh của tác nhân đang hoạt động, có thể tìm kiếm và phân loại theo CLI.

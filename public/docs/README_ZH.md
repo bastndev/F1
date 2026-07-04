@@ -51,6 +51,14 @@ F1 将 VS Code 变成了 AI 编程代理的枢纽。在嵌入式终端中打开 
 | 切换聊天过滤器                    | `Ctrl + Space`      | `Ctrl + Space`         | `Ctrl + Space`         | ㅤㅤ✅ |
 | 上一个会话                        | `Shift + Tab`       | `Shift + Tab`          | `Shift + Tab`          | ㅤㅤ✅ |
 | 执行 prompt                       | `⌘ + Enter`         | `Ctrl + Enter`         | `Ctrl + Enter`         | ㅤㅤ✅ |
+| 不翻译直接执行                    | `⌘ + Shift + Enter` | `Ctrl + Shift + Enter` | `Ctrl + Shift + Enter` | ㅤㅤ✅ |
+| -                                 | -                   | -                      | -                      |        |
+| 模型选择器（打开/关闭）- [3]      | `Alt + 1`           | `Alt + 1`              | `Alt + 1`              | ㅤㅤ✅ |
+| 恢复会话（打开/关闭）- [3]        | `Alt + 2`           | `Alt + 2`              | `Alt + 2`              | ㅤㅤ✅ |
+| 使用量 / 状态 - [3]               | `Alt + 3`           | `Alt + 3`              | `Alt + 3`              | ㅤㅤ✅ |
+| Prompt PRO 模式                   | `Alt + 4`           | `Alt + 4`              | `Alt + 4`              | ㅤㅤ✅ |
+| Prompt PLAN 模式                  | `Alt + 5`           | `Alt + 5`              | `Alt + 5`              | ㅤㅤ✅ |
+| -                                 | -                   | -                      | -                      |        |
 | 打开 Commands 工具                | `Alt + F1`          | `Alt + F1`             | `Alt + F1`             | ㅤㅤ✅ |
 | -                                 | -                   | -                      | -                      |        |
 | 下一个会话                        | `Tab`               | `Tab`                  | `Tab`                  | ㅤㅤ✅ |
@@ -67,6 +75,8 @@ F1 将 VS Code 变成了 AI 编程代理的枢纽。在嵌入式终端中打开 
 | `[`Skill`]` - 转到 Create 标签页  | `Alt + 1`           | `Alt + 1`              | `Alt + 1`              | ㅤㅤ✅ |
 | `[`Skill`]` - 转到 Install 标签页 | `Alt + 2`           | `Alt + 2`              | `Alt + 2`              | ㅤㅤ✅ |
 | `[`Skill`]` - 转到 Local 标签页   | `Alt + 3`           | `Alt + 3`              | `Alt + 3`              | ㅤㅤ✅ |
+
+> **[3]** `Alt + 1/2/3` 执行活动 CLI 自身的命令（`/model`、`/resume`、`/usage`…，按代理适配）— 直接作用于终端 **和** Prompt 工具内部。再次按下同一组合键可关闭已打开的选取器。使用量/状态并非在所有 CLI 上都可用。
 
 ---
 
@@ -87,8 +97,8 @@ F1 将 VS Code 变成了 AI 编程代理的枢纽。在嵌入式终端中打开 
 - 在嵌入式 [xterm.js](https://xtermjs.org/) 终端中并排运行多个 AI 编程 CLI。
 - 模糊搜索启动器以选择代理；按 **F1** 直接跳转到面板。
 - 每个会话旁边的内置工具：
-  - **Prompt** — 富文本编辑器，带有 `@` 文件提及、图像粘贴、skill 标签、实时拼写标记以及在发送前的源语言→英语翻译。
-  - **Translator** — 内联翻译任何终端选区。
+  - **Prompt** — 富文本编辑器，带有 `@` 文件提及、图像粘贴、skill 标签、prompt 历史记录（`↑`）、**PRO / PLAN** 模式、实时拼写标记以及在发送前的源语言→英语翻译。
+  - **Translator** — 内联翻译任何终端选区，带有自动模式，在其余部分仍在翻译时会朗读答案。
   - **Use** — 每个 CLI 的使用 / 状态视图。
   - **Keymaps** — 键盘快捷键参考。
   - **Commands** — 可搜索的当前活跃代理命令面板，按 CLI 分类。

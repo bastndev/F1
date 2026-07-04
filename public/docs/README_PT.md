@@ -51,6 +51,14 @@ O F1 transforma o VS Code em um hub para agentes de codificação de IA. Abra **
 | Alternar filtro de Chat               | `Ctrl + Space`      | `Ctrl + Space`         | `Ctrl + Space`         | ㅤㅤ✅    |
 | Sessão anterior                       | `Shift + Tab`       | `Shift + Tab`          | `Shift + Tab`          | ㅤㅤ✅    |
 | Executar prompt                       | `⌘ + Enter`         | `Ctrl + Enter`         | `Ctrl + Enter`         | ㅤㅤ✅    |
+| Executar sem traduzir                 | `⌘ + Shift + Enter` | `Ctrl + Shift + Enter` | `Ctrl + Shift + Enter` | ㅤㅤ✅    |
+| -                                     | -                   | -                      | -                      |           |
+| Seletor de modelo (abrir/fechar) - [3] | `Alt + 1`          | `Alt + 1`              | `Alt + 1`              | ㅤㅤ✅    |
+| Retomar sessão (abrir/fechar) - [3]   | `Alt + 2`           | `Alt + 2`              | `Alt + 2`              | ㅤㅤ✅    |
+| Uso / status - [3]                    | `Alt + 3`           | `Alt + 3`              | `Alt + 3`              | ㅤㅤ✅    |
+| Modo PRO do Prompt                    | `Alt + 4`           | `Alt + 4`              | `Alt + 4`              | ㅤㅤ✅    |
+| Modo PLAN do Prompt                   | `Alt + 5`           | `Alt + 5`              | `Alt + 5`              | ㅤㅤ✅    |
+| -                                     | -                   | -                      | -                      |           |
 | Abrir ferramenta Commands             | `Alt + F1`          | `Alt + F1`             | `Alt + F1`             | ㅤㅤ✅    |
 | -                                     | -                   | -                      | -                      |           |
 | Próxima sessão                        | `Tab`               | `Tab`                  | `Tab`                  | ㅤㅤ✅    |
@@ -67,6 +75,8 @@ O F1 transforma o VS Code em um hub para agentes de codificação de IA. Abra **
 | `[`Skill`]` - Ir para a aba Criar     | `Alt + 1`           | `Alt + 1`              | `Alt + 1`              | ㅤㅤ✅    |
 | `[`Skill`]` - Ir para a aba Instalar  | `Alt + 2`           | `Alt + 2`              | `Alt + 2`              | ㅤㅤ✅    |
 | `[`Skill`]` - Ir para a aba Local     | `Alt + 3`           | `Alt + 3`              | `Alt + 3`              | ㅤㅤ✅    |
+
+> **[3]** `Alt + 1/2/3` executam o comando próprio do CLI ativo (`/model`, `/resume`, `/usage`…, adaptado por agente) — funcionam diretamente no terminal **e** dentro da ferramenta Prompt. Pressione a mesma combinação novamente para fechar o seletor aberto. Uso/status não está disponível em todos os CLIs.
 
 ---
 
@@ -87,8 +97,8 @@ O F1 transforma o VS Code em um hub para agentes de codificação de IA. Abra **
 - Execute várias CLIs de codificação de IA lado a lado em terminais [xterm.js](https://xtermjs.org/) incorporados.
 - Lançador de pesquisa difusa para escolher um agente; pressione **F1** para ir direto para o painel.
 - Ferramentas integradas ao lado de cada sessão:
-  - **Prompt** — editor rico com menções de arquivo `@`, colagem de imagens, chips de skills, verificação ortográfica ao vivo e tradução da origem para o inglês antes do envio.
-  - **Translator** — traduza qualquer seleção do terminal inline.
+  - **Prompt** — editor rico com menções de arquivo `@`, colagem de imagens, chips de skills, histórico de prompts (`↑`), modos **PRO / PLAN**, verificação ortográfica ao vivo e tradução da origem para o inglês antes do envio.
+  - **Translator** — traduza qualquer seleção do terminal inline, com um modo automático que lê a resposta em voz alta enquanto o resto ainda está sendo traduzido.
   - **Use** — visão de uso / status por CLI.
   - **Keymaps** — referência de atalhos de teclado.
   - **Commands** — paleta de comandos do agente ativo, pesquisável e por CLI.

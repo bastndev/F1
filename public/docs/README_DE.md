@@ -51,6 +51,14 @@ F1 macht VS Code zu einem Hub für KI-Programmieragenten. Öffnen Sie **Claude C
 | Chat-Filter umschalten                 | `Ctrl + Space`      | `Ctrl + Space`         | `Ctrl + Space`         | ㅤㅤ✅      |
 | Vorherige Sitzung                      | `Shift + Tab`       | `Shift + Tab`          | `Shift + Tab`          | ㅤㅤ✅      |
 | Prompt ausführen                       | `⌘ + Enter`         | `Ctrl + Enter`         | `Ctrl + Enter`         | ㅤㅤ✅      |
+| Ohne Übersetzung ausführen            | `⌘ + Shift + Enter` | `Ctrl + Shift + Enter` | `Ctrl + Shift + Enter` | ㅤㅤ✅      |
+| -                                      | -                   | -                      | -                      |             |
+| Modellauswahl (öffnen/schließen) - [3] | `Alt + 1`           | `Alt + 1`              | `Alt + 1`              | ㅤㅤ✅      |
+| Sitzung fortsetzen (öffnen/schließen) - [3] | `Alt + 2`      | `Alt + 2`              | `Alt + 2`              | ㅤㅤ✅      |
+| Nutzung / Status - [3]                 | `Alt + 3`           | `Alt + 3`              | `Alt + 3`              | ㅤㅤ✅      |
+| Prompt PRO Modus                       | `Alt + 4`           | `Alt + 4`              | `Alt + 4`              | ㅤㅤ✅      |
+| Prompt PLAN Modus                      | `Alt + 5`           | `Alt + 5`              | `Alt + 5`              | ㅤㅤ✅      |
+| -                                      | -                   | -                      | -                      |             |
 | Commands-Tool öffnen                   | `Alt + F1`          | `Alt + F1`             | `Alt + F1`             | ㅤㅤ✅      |
 | -                                      | -                   | -                      | -                      |             |
 | Nächste Sitzung                        | `Tab`               | `Tab`                  | `Tab`                  | ㅤㅤ✅      |
@@ -67,6 +75,8 @@ F1 macht VS Code zu einem Hub für KI-Programmieragenten. Öffnen Sie **Claude C
 | `[`Skill`]` - Zum Reiter Erstellen     | `Alt + 1`           | `Alt + 1`              | `Alt + 1`              | ㅤㅤ✅      |
 | `[`Skill`]` - Zum Reiter Installieren  | `Alt + 2`           | `Alt + 2`              | `Alt + 2`              | ㅤㅤ✅      |
 | `[`Skill`]` - Zum Reiter Lokal         | `Alt + 3`           | `Alt + 3`              | `Alt + 3`              | ㅤㅤ✅      |
+
+> **[3]** `Alt + 1/2/3` führen den eigenen Befehl des aktiven CLI aus (`/model`, `/resume`, `/usage`…, pro Agent angepasst) — sie funktionieren direkt im Terminal **und** innerhalb des Prompt-Tools. Drücken Sie dieselbe Tastenkombination erneut, um die geöffnete Auswahl zu schließen. Nutzung/Status ist nicht auf jedem CLI verfügbar.
 
 ---
 
@@ -87,8 +97,8 @@ F1 macht VS Code zu einem Hub für KI-Programmieragenten. Öffnen Sie **Claude C
 - Führen Sie mehrere KI-Programmier-CLIs nebeneinander in eingebetteten [xterm.js](https://xtermjs.org/) Terminals aus.
 - Fuzzy-Search-Launcher zur Auswahl eines Agenten; drücken Sie **F1**, um direkt zum Panel zu springen.
 - Integrierte Tools neben jeder Sitzung:
-  - **Prompt** — Rich-Text-Editor mit `@`-Datei-Erwähnungen, Bildeinfügung, Skill-Chips, Live-Rechtschreibprüfung und Quelle→Englisch-Übersetzung vor dem Senden.
-  - **Translator** — Übersetzen Sie jede Terminal-Auswahl inline.
+  - **Prompt** — Rich-Text-Editor mit `@`-Datei-Erwähnungen, Bildeinfügung, Skill-Chips, Prompt-Verlauf (`↑`), **PRO / PLAN** Modi, Live-Rechtschreibprüfung und Quelle→Englisch-Übersetzung vor dem Senden.
+  - **Translator** — Übersetzen Sie jede Terminal-Auswahl inline, mit einem Auto-Modus, der die Antwort vorliest, während der Rest noch übersetzt wird.
   - **Use** — Nutzungs- / Statusansicht pro CLI.
   - **Keymaps** — Tastaturkürzel-Referenz.
   - **Commands** — Durchsuchbare Befehlspalette des aktiven Agenten, pro CLI.

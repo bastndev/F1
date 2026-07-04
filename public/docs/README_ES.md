@@ -50,7 +50,15 @@ F1 convierte VS Code en un centro para agentes de programación de IA. Abra **Cl
 | -                                    | -                   | -                      | -                      |           |
 | Alternar filtro de Chat              | `Ctrl + Space`      | `Ctrl + Space`         | `Ctrl + Space`         | ㅤㅤ✅    |
 | Sesión anterior                      | `Shift + Tab`       | `Shift + Tab`          | `Shift + Tab`          | ㅤㅤ✅    |
-| Ejecutar prompt                      | `⌘ + Enter`         | `Ctrl + Enter`         | `Ctrl + Enter`         | ㅤㅤ✅    |
+| Ejecutar prompt                       | `⌘ + Enter`         | `Ctrl + Enter`         | `Ctrl + Enter`         | ㅤㅤ✅    |
+| Ejecutar sin traducir                | `⌘ + Shift + Enter` | `Ctrl + Shift + Enter` | `Ctrl + Shift + Enter` | ㅤㅤ✅    |
+| -                                     | -                   | -                      | -                      |           |
+| Selector de modelo (abrir/cerrar) - [3] | `Alt + 1`         | `Alt + 1`              | `Alt + 1`              | ㅤㅤ✅    |
+| Reanudar sesión (abrir/cerrar) - [3]  | `Alt + 2`           | `Alt + 2`              | `Alt + 2`              | ㅤㅤ✅    |
+| Uso / estado - [3]                    | `Alt + 3`           | `Alt + 3`              | `Alt + 3`              | ㅤㅤ✅    |
+| Modo PRO de Prompt                    | `Alt + 4`           | `Alt + 4`              | `Alt + 4`              | ㅤㅤ✅    |
+| Modo PLAN de Prompt                   | `Alt + 5`           | `Alt + 5`              | `Alt + 5`              | ㅤㅤ✅    |
+| -                                     | -                   | -                      | -                      |           |
 | Abrir herramienta Commands           | `Alt + F1`          | `Alt + F1`             | `Alt + F1`             | ㅤㅤ✅    |
 | -                                    | -                   | -                      | -                      |           |
 | Siguiente sesión                     | `Tab`               | `Tab`                  | `Tab`                  | ㅤㅤ✅    |
@@ -66,7 +74,9 @@ F1 convierte VS Code en un centro para agentes de programación de IA. Abra **Cl
 | -                                    | -                   | -                      | -                      |           |
 | `[`Skill`]` - Ir a pestaña Crear     | `Alt + 1`           | `Alt + 1`              | `Alt + 1`              | ㅤㅤ✅    |
 | `[`Skill`]` - Ir a pestaña Instalar  | `Alt + 2`           | `Alt + 2`              | `Alt + 2`              | ㅤㅤ✅    |
-| `[`Skill`]` - Ir a pestaña Local     | `Alt + 3`           | `Alt + 3`              | `Alt + 3`              | ㅤㅤ✅    |
+| `[`Skill`]` - Ir a pestaña Local         | `Alt + 3`           | `Alt + 3`              | `Alt + 3`              | ㅤㅤ✅    |
+
+> **[3]** `Alt + 1/2/3` ejecutan el comando propio del CLI activo (`/model`, `/resume`, `/usage`…, adaptado por agente) — funcionan directamente en el terminal **y** dentro de la herramienta Prompt. Presione la misma combinación nuevamente para cerrar el selector que abrió. Uso/estado no está disponible en todos los CLI.
 
 ---
 
@@ -87,8 +97,8 @@ F1 convierte VS Code en un centro para agentes de programación de IA. Abra **Cl
 - Ejecute múltiples CLIs de programación de IA lado a lado en terminales [xterm.js](https://xtermjs.org/) integrados.
 - Lanzador de búsqueda difusa para elegir un agente; presione **F1** para saltar directamente al panel.
 - Herramientas integradas junto a cada sesión:
-  - **Prompt** — editor enriquecido con menciones `@`-file, pegado de imágenes, chips de skills, revisión ortográfica en vivo y traducción origen→Inglés antes de enviar.
-  - **Translator** — traduzca cualquier selección del terminal en línea.
+  - **Prompt** — editor enriquecido con menciones `@`-file, pegado de imágenes, chips de skills, historial de prompts (`↑`), modos **PRO / PLAN**, revisión ortográfica en vivo y traducción origen→Inglés antes de enviar.
+  - **Translator** — traduzca cualquier selección del terminal en línea, con un modo automático que lee la respuesta en voz alta mientras el resto sigue traduciendo.
   - **Use** — vista de uso / estado por CLI.
   - **Keymaps** — referencia de atajos de teclado.
   - **Commands** — paleta de comandos del agente activo, buscable y por CLI.
