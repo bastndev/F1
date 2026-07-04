@@ -542,33 +542,23 @@
   100% { transform: translateX(150%); }
 }
 
-/* Spinner icon — hidden until .is-translating */
-.prompt-translate-spinner {
-  display: none;
-  animation: prompt-spin 0.75s linear infinite;
-}
-
-/* Translating state: swap icon ↔ spinner, lock the button */
+/* Translating state: the dot itself becomes a rotating ring, in place.
+   Negative margins absorb the size difference (9px ring in the dot's 5px
+   slot) so the pill never changes width or height — no layout jump. */
 .prompt-translate-toggle.is-translating {
   pointer-events: none;
   opacity: 1;
 }
 
-.prompt-translate-toggle.is-translating .prompt-translate-icon {
-  display: none;
-}
-
-.prompt-translate-toggle.is-translating .prompt-translate-spinner {
-  display: inline-block;
-}
-
 .prompt-translate-toggle.is-translating .prompt-translate-dot {
-  animation: translate-dot-blink 0.5s step-start infinite;
-}
-
-@keyframes translate-dot-blink {
-  0%, 100% { opacity: 1; }
-  50%       { opacity: 0; }
+  width: 9px;
+  height: 9px;
+  margin: -2px;
+  background: transparent;
+  border: 1.5px solid currentColor;
+  border-right-color: transparent;
+  opacity: 1;
+  animation: prompt-spin 0.75s linear infinite;
 }
 
 .prompt-action-btn {
