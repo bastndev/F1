@@ -512,11 +512,47 @@ function initPromptComposer(host: HTMLElement, context: PromptContext, hasActive
 	};
 
 	// Live spell-marking state. Misspelled-word ranges come from the host (cspell trie).
-	// Ranges are offset-based, so they go stale the moment the text changes — we clear
-	// them on input and recompute ~400ms after the user pauses typing.
+	// Ranges are offset-based, so edits shift them — instead of clearing on every
+	// keystroke (marks used to vanish and pop back after the debounce round-trip),
+	// we remap offsets across the edit and let the debounced recheck refresh them.
 	let spellIssues: SpellIssue[] = [];
+	// The text the current spellIssues offsets refer to.
+	let spellTextSnapshot = textarea.value;
 	let spellcheckTimer: number | undefined;
 	let spellcheckToken = 0;
+
+	// Shift existing marks across a contiguous edit (the only kind a textarea
+	// produces): marks before the edit stay, marks after it slide by the length
+	// delta, and marks touching the edited region are dropped — that word is
+	// being rewritten, and the recheck re-flags it if it's still wrong.
+	const remapSpellIssues = (oldText: string, newText: string) => {
+		if (spellIssues.length === 0 || oldText === newText) {
+			return;
+		}
+		let prefix = 0;
+		const maxCommon = Math.min(oldText.length, newText.length);
+		while (prefix < maxCommon && oldText[prefix] === newText[prefix]) {
+			prefix++;
+		}
+		let suffix = 0;
+		while (
+			suffix < maxCommon - prefix &&
+			oldText[oldText.length - 1 - suffix] === newText[newText.length - 1 - suffix]
+		) {
+			suffix++;
+		}
+		const oldEditEnd = oldText.length - suffix;
+		const delta = newText.length - oldText.length;
+		spellIssues = spellIssues.flatMap((issue) => {
+			if (issue.offset + issue.length < prefix) {
+				return [issue];
+			}
+			if (issue.offset > oldEditEnd) {
+				return [{ ...issue, offset: issue.offset + delta }];
+			}
+			return [];
+		});
+	};
 
 	const renderHighlight = () => {
 		if (highlight && textareaWrap) {
@@ -544,6 +580,7 @@ function initPromptComposer(host: HTMLElement, context: PromptContext, hasActive
 				return;
 			}
 			spellIssues = issues;
+			spellTextSnapshot = text;
 			renderHighlight();
 		});
 	};
@@ -552,6 +589,7 @@ function initPromptComposer(host: HTMLElement, context: PromptContext, hasActive
 	// immediately, then recompute under the new mode.
 	rerunSpellcheck = () => {
 		spellIssues = [];
+		spellTextSnapshot = textarea.value;
 		renderHighlight();
 		runSpellcheck();
 	};
@@ -563,9 +601,10 @@ function initPromptComposer(host: HTMLElement, context: PromptContext, hasActive
 
 	const onInputForHighlight = () => {
 		adjustHeight();
-		// Offsets are relative to the text at check time, so any edit invalidates
-		// them — drop the marks now; the debounced pass recomputes them.
-		spellIssues = [];
+		// Keep existing marks alive through the edit: shift their offsets to the
+		// new text so nothing flickers; the debounced pass trues them up.
+		remapSpellIssues(spellTextSnapshot, textarea.value);
+		spellTextSnapshot = textarea.value;
 		if (highlight && textareaWrap) {
 			// use raf to ensure update happens after value commit and to help layer paint
 			requestAnimationFrame(renderHighlight);

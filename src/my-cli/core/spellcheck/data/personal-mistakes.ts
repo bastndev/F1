@@ -69,6 +69,7 @@ export const PERSONAL_MISTAKES: Record<string, string> = {
 	'ajitas': 'cajitas',
 	'agrnadalo': 'agrandalo',
 	'est': 'este',
+	'tien': 'tiene',
 	
 
 
