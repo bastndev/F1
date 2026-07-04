@@ -77,6 +77,7 @@ export const PERSONAL_MISTAKES: Record<string, string> = {
 	'aimgen': 'imagen',
 	'empesare': 'empezare',
 	'arhivos': 'archivos',
+	'emjois': 'emojis',
 
 
 
