@@ -193,8 +193,11 @@ function initPromptComposer(host: HTMLElement, context: PromptContext, hasActive
 		const runBtn = host.querySelector<HTMLButtonElement>('#runBtn');
 		const savedRunBtnHtml = runBtn?.innerHTML;
 		if (runBtn) {
-			runBtn.classList.add('is-translating');
-			runBtn.innerHTML = '<span>Loading rules…</span>';
+			runBtn.classList.add('is-loading-rules');
+			// Hide the original "Execute" text but keep its width so the button
+			// does not collapse or stretch — the turquoise stripe animation is
+			// the only visible loading cue.
+			runBtn.innerHTML = '<span class="prompt-run-loading-text">Execute</span>';
 		}
 		runButtonRefresh?.();
 
@@ -206,7 +209,7 @@ function initPromptComposer(host: HTMLElement, context: PromptContext, hasActive
 		} finally {
 			injectInFlight = false;
 			if (runBtn && savedRunBtnHtml !== undefined) {
-				runBtn.classList.remove('is-translating');
+				runBtn.classList.remove('is-loading-rules');
 				runBtn.innerHTML = savedRunBtnHtml;
 			}
 			runButtonRefresh?.();

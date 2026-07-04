@@ -563,6 +563,57 @@
   100% { transform: translateX(150%); }
 }
 
+/* Rules loading state for Execute button — turquoise diagonal stripes moving
+   across the button, adapted from the usage-quota exhausted bar. Text stays
+   "Loading rules…". */
+.prompt-run-btn.is-loading-rules,
+.prompt-run-btn.is-loading-rules:disabled,
+.agent-shell[data-agent] .prompt-run-btn.is-loading-rules:disabled,
+.vscode-light .prompt-run-btn.is-loading-rules:disabled {
+  position: relative;
+  overflow: hidden;
+  background: #3a3a3f !important;
+  color: rgba(255, 255, 255, 0.55) !important;
+  cursor: progress;
+  opacity: 1;
+  transform: none;
+  box-shadow: none;
+  filter: none !important;
+}
+
+.vscode-light .prompt-run-btn.is-loading-rules,
+.vscode-light .prompt-run-btn.is-loading-rules:disabled {
+  background: #d1d1d6 !important;
+  color: rgba(0, 0, 0, 0.55) !important;
+}
+
+.prompt-run-btn.is-loading-rules span {
+  position: relative;
+  z-index: 1;
+  visibility: hidden;
+}
+
+.prompt-run-btn.is-loading-rules::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    45deg,
+    transparent,
+    transparent 10px,
+    color-mix(in srgb, #38BDF8 18%, transparent) 10px,
+    color-mix(in srgb, #38BDF8 18%, transparent) 20px
+  );
+  animation: rules-run-stripes 1.4s linear infinite;
+  pointer-events: none;
+  z-index: 0;
+}
+
+@keyframes rules-run-stripes {
+  from { background-position: 0 0; }
+  to { background-position: 28px 0; }
+}
+
 /* Translating state: the dot itself becomes a rotating ring, in place.
    Negative margins keep the ring inside the dot's 5px slot (bleeding into
    the left padding, away from the label) so the pill never changes size. */
