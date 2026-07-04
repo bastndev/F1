@@ -389,8 +389,8 @@
 .prompt-translate-toggle {
   display: flex;
   align-items: center;
-  gap: 5px;
-  padding: 4px 10px 4px 8px;
+  gap: 7px;
+  padding: 4px 12px 4px 10px;
   background: transparent;
   border: 1px solid var(--vscode-editorGroup-border);
   border-radius: 20px;
@@ -401,8 +401,7 @@
   letter-spacing: 0.04em;
   text-transform: lowercase;
   cursor: pointer;
-  transition: color 0.2s ease, border-color 0.2s ease, background 0.2s ease,
-    opacity 0.2s ease, gap 0.2s ease, padding 0.2s ease;
+  transition: color 0.2s ease, border-color 0.2s ease, background 0.2s ease, opacity 0.2s ease;
   margin-bottom: 6px;
   opacity: 0.5;
   flex-shrink: 0;
@@ -455,8 +454,8 @@
 .prompt-strict-toggle {
   display: flex;
   align-items: center;
-  gap: 5px;
-  padding: 4px 10px 4px 8px;
+  gap: 7px;
+  padding: 4px 12px 4px 10px;
   background: transparent;
   border: 1px solid var(--vscode-editorGroup-border);
   border-radius: 20px;
@@ -544,19 +543,17 @@
 }
 
 /* Translating state: the dot itself becomes a rotating ring, in place.
-   The pill eases a little wider (padding + gap) so the ring and the label
-   get room to breathe; vertical negative margins keep the height fixed. */
+   Negative margins keep the ring inside the dot's 5px slot (bleeding into
+   the left padding, away from the label) so the pill never changes size. */
 .prompt-translate-toggle.is-translating {
   pointer-events: none;
   opacity: 1;
-  gap: 8px;
-  padding: 4px 13px 4px 11px;
 }
 
 .prompt-translate-toggle.is-translating .prompt-translate-dot {
   width: 9px;
   height: 9px;
-  margin: -2px 0;
+  margin: -2px 0 -2px -4px;
   background: transparent;
   border: 1.5px solid currentColor;
   border-right-color: transparent;
