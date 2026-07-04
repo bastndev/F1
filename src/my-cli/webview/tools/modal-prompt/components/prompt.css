@@ -601,8 +601,8 @@
     45deg,
     transparent,
     transparent 10px,
-    color-mix(in srgb, #38BDF8 18%, transparent) 10px,
-    color-mix(in srgb, #38BDF8 18%, transparent) 20px
+    color-mix(in srgb, #38BDF8 48%, transparent) 10px,
+    color-mix(in srgb, #38BDF8 48%, transparent) 20px
   );
   animation: rules-run-stripes 1.4s linear infinite;
   pointer-events: none;
