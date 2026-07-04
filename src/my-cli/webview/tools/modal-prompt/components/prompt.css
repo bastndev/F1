@@ -445,12 +445,13 @@
   50%       { opacity: 0.4; transform: scale(0.75); }
 }
 
-/* === Rules toggle ===
-   Sits to the left of the translate pill. Unlike translate/strict it is
-   language- and CLI-agnostic (always shown). ON by default → turquoise + pulsing
-   dot; toggling OFF drops it to the muted gray.
-   aria-pressed="true"  → turquoise accent (ON, default)
-   aria-pressed="false" → muted / low-opacity (OFF) */
+/* === Rules button ===
+   Sits to the left of the translate pill. Language- and CLI-agnostic (always
+   shown). A ONE-SHOT action, not a preference toggle:
+   aria-pressed="true"            → available, turquoise + pulsing dot (default)
+   aria-pressed="true" .is-injecting → loading the rules into the CLI (disabled)
+   aria-pressed="false" :disabled → already loaded this session (muted gray)
+   .is-denied                     → click refused (busy / no session), red shake */
 
 .prompt-rules-toggle {
   display: flex;
@@ -473,7 +474,7 @@
   flex-shrink: 0;
 }
 
-.prompt-rules-toggle:hover {
+.prompt-rules-toggle:not(:disabled):hover {
   opacity: 1;
   color: #38BDF8;
   border-color: color-mix(in srgb, #38BDF8 40%, transparent);
@@ -487,14 +488,33 @@
   opacity: 1;
 }
 
-.prompt-rules-toggle[aria-pressed="true"]:hover {
+.prompt-rules-toggle[aria-pressed="true"]:not(:disabled):hover {
   border-color: color-mix(in srgb, #38BDF8 65%, transparent);
   background: color-mix(in srgb, #38BDF8 18%, transparent);
 }
 
-.prompt-rules-toggle:active {
+.prompt-rules-toggle:not(:disabled):active {
   transform: scale(0.96);
   opacity: 0.8;
+}
+
+/* Already loaded this session — muted gray, no pointer. */
+.prompt-rules-toggle[aria-pressed="false"]:disabled {
+  cursor: default;
+  opacity: 0.4;
+}
+
+/* Injection in flight — keep the turquoise but show it's working, not clickable. */
+.prompt-rules-toggle.is-injecting {
+  cursor: progress;
+}
+
+/* Click refused (CLI busy / no session): shake + flash red, same cue as the
+   footer chips. Reuses the char-shake keyframes defined further down. */
+.prompt-rules-toggle.is-denied {
+  animation: char-shake 0.35s ease;
+  color: #e05252;
+  border-color: color-mix(in srgb, #e05252 45%, transparent);
 }
 
 .prompt-rules-dot {

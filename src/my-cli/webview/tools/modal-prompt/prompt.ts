@@ -45,7 +45,8 @@ import { initSkillsChips, isClaudeSession } from './skills-chips';
 import { updateFooterModel } from './footer-model';
 import { initSessionState, showNoSessionMessage } from './session-state';
 import { initPromptMode, PLAN_INSTRUCTION, type PromptMode } from './prompt-mode';
-import { initRulesToggle } from './rules-toggle';
+import { initRulesToggle, type RulesToggleController } from './rules-toggle';
+import { buildRulesPrompt, RULES_CONFIRMATION } from './rules/rules-content';
 import { initPromptHistory, recordSentPrompt } from './prompt-history';
 import { initAttachmentPeek } from './attachment-peek';
 import { getShortcut, matchesShortcut } from '../../../../shared/keymaps/cli';
@@ -93,11 +94,22 @@ type PromptDraft = {
 };
 const promptDrafts = new Map<string, PromptDraft>();
 
-/** Drop drafts whose session is gone; the terminal calls this on every state sync. */
+// CLI sessions that already had the rules injected. Keyed by session id so the
+// one-shot survives modal close/reopen and resets for a brand-new CLI. Lives in
+// module scope alongside the drafts, and is pruned on the same lifecycle.
+const rulesInjectedSessions = new Set<string>();
+
+/** Drop drafts + rules-injected marks whose session is gone; the terminal calls
+ *  this on every state sync. */
 export const prunePromptDrafts = (openSessionIds: Set<string>) => {
 	for (const sessionId of promptDrafts.keys()) {
 		if (!openSessionIds.has(sessionId)) {
 			promptDrafts.delete(sessionId);
+		}
+	}
+	for (const sessionId of rulesInjectedSessions) {
+		if (!openSessionIds.has(sessionId)) {
+			rulesInjectedSessions.delete(sessionId);
 		}
 	}
 };
@@ -138,6 +150,12 @@ function initPromptComposer(host: HTMLElement, context: PromptContext, hasActive
 		return;
 	}
 
+	// Rules injection state — declared up front so the always-on rules button
+	// (wired before the no-session return) and the later run button can share it.
+	let injectInFlight = false;
+	let runButtonRefresh: (() => void) | undefined;
+	let rulesController: RulesToggleController | undefined;
+
 	// PRO/PLAN tabs — initialized even without a session so the persisted mode
 	// always shows. PLAN appends a planning instruction at send time (see the
 	// send path); it never injects anything into the terminal.
@@ -149,12 +167,68 @@ function initPromptComposer(host: HTMLElement, context: PromptContext, hasActive
 		host.querySelector<HTMLElement>('.prompt-modal')?.classList.toggle('is-plan-mode', mode === 'plan');
 	});
 
-	// "rules" toggle — language- and CLI-agnostic, so it is wired up before the
-	// no-session early return (always active). Send-time behaviour lands later;
-	// for now the callback is a placeholder for that hook.
-	initRulesToggle(host, (_enabled) => {
-		// TODO: apply the rules behaviour at send time.
-	});
+	// "rules" — a one-shot, language- and CLI-agnostic action, wired before the
+	// no-session return so the button is always live. Clicking it types the rules
+	// prompt into the CLI once (the host waits until the agent has read it); a
+	// click with no running CLI, a busy one, or after it already ran this session
+	// is refused with a shake. The per-session "loaded" mark survives modal
+	// close/reopen (rulesInjectedSessions) and blocks re-injection.
+	async function activateRules() {
+		if (injectInFlight) {
+			return;
+		}
+		const sessionId = context.getActiveSessionId?.();
+		// Need a running CLI to type into, and it must be idle — typing into a busy
+		// CLI would corrupt its input line.
+		if (!sessionId || context.isCliBusy?.() || !context.injectRules || rulesInjectedSessions.has(sessionId)) {
+			rulesController?.flashDenied();
+			return;
+		}
+
+		injectInFlight = true;
+		rulesController?.setInjecting();
+
+		// Block Execute with a visible "loading" state while the rules land — a
+		// prompt sent mid-injection would race the rules message into the CLI.
+		const runBtn = host.querySelector<HTMLButtonElement>('#runBtn');
+		const savedRunBtnHtml = runBtn?.innerHTML;
+		if (runBtn) {
+			runBtn.classList.add('is-translating');
+			runBtn.innerHTML = '<span>Loading rules…</span>';
+		}
+		runButtonRefresh?.();
+
+		let ok = false;
+		try {
+			ok = await context.injectRules(buildRulesPrompt(), RULES_CONFIRMATION);
+		} catch (err) {
+			console.error('[Prompt] Rules injection failed:', err);
+		} finally {
+			injectInFlight = false;
+			if (runBtn && savedRunBtnHtml !== undefined) {
+				runBtn.classList.remove('is-translating');
+				runBtn.innerHTML = savedRunBtnHtml;
+			}
+			runButtonRefresh?.();
+		}
+
+		if (ok) {
+			rulesInjectedSessions.add(sessionId);
+			rulesController?.setDone();
+		} else {
+			// Nothing landed (session gone) — leave it clickable to retry.
+			rulesController?.setAvailable();
+		}
+	}
+
+	rulesController = initRulesToggle(host, () => { void activateRules(); });
+	// Reflect whether this session already loaded the rules (survives reopen).
+	const activeSessionId = context.getActiveSessionId?.();
+	if (activeSessionId && rulesInjectedSessions.has(activeSessionId)) {
+		rulesController?.setDone();
+	} else {
+		rulesController?.setAvailable();
+	}
 
 	// Alt+1 / Alt+2 / Alt+3 click the footer model / resume / usage chips.
 	host.addEventListener('keydown', (e) => {
@@ -330,7 +404,9 @@ function initPromptComposer(host: HTMLElement, context: PromptContext, hasActive
 		currentAttachments: ImageAttachment[],
 		skipTranslate: boolean
 	) {
-		if (sendInFlight) {
+		// injectInFlight: a rules injection is landing in the CLI — a send now
+		// would race its message in ahead of the rules.
+		if (sendInFlight || injectInFlight) {
 			return;
 		}
 
@@ -510,7 +586,7 @@ function initPromptComposer(host: HTMLElement, context: PromptContext, hasActive
 		await doPerformSendWithImages(host, textarea, context, imageAttachments, options?.skipTranslate === true);
 	};
 
-	initRunButton(host, textarea, context, performSendNow);
+	runButtonRefresh = initRunButton(host, textarea, context, performSendNow, () => injectInFlight)?.refresh;
 	initSendShortcut(textarea, context, performSendNow);
 
 	if (hasActiveSession) {
@@ -745,12 +821,13 @@ function initRunButton(
 	host: HTMLElement,
 	textarea: HTMLTextAreaElement,
 	context: PromptContext,
-	performSendImpl: () => Promise<void>
-) {
+	performSendImpl: () => Promise<void>,
+	isBlocked?: () => boolean
+): { refresh: () => void } | undefined {
 	const runBtn = host.querySelector<HTMLButtonElement>('#runBtn');
 	const runHint = host.querySelector<HTMLElement>('.prompt-run-hint');
 	if (!runBtn) {
-		return;
+		return undefined;
 	}
 
 	if (runHint) {
@@ -765,7 +842,8 @@ function initRunButton(
 		const hasEnoughText = text.length >= 6 || text.includes(' ');
 		// Limit applies to the effective (typed) length — markers/@routes are free.
 		const overLimit = stripPromptTokens(textarea.value).length > promptCharLimit;
-		runBtn.disabled = !hasEnoughText || !hasSession || overLimit;
+		// isBlocked holds while a rules injection is in flight (Execute is frozen).
+		runBtn.disabled = !hasEnoughText || !hasSession || overLimit || (isBlocked?.() ?? false);
 	};
 
 	// Initial state
@@ -782,6 +860,8 @@ function initRunButton(
 	runBtn.addEventListener('click', async () => {
 		await performSendImpl();
 	});
+
+	return { refresh: updateState };
 }
 
 function initSendShortcut(

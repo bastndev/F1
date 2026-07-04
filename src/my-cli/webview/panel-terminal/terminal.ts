@@ -273,6 +273,16 @@ const spellcheckRpc = createRpcChannel<[string, string, boolean], SpellIssue[]>(
 	send: (id, text, lang, strict) => vscode.postMessage({ type: 'prompt.spellcheck', id, text, lang, strict })
 });
 
+// One-shot rules injection: the host types the rules prompt into the CLI and
+// answers when the agent has read it (or its own hard cap fires). The timeout
+// sits above that host cap so the modal always unblocks; a miss resolves false.
+const injectRulesRpc = createRpcChannel<[string, string, string], boolean>({
+	prefix: 'inject-rules',
+	timeoutMs: 70000,
+	onTimeout: { resolveWith: false },
+	send: (id, sessionId, text, marker) => vscode.postMessage({ type: 'prompt.injectRules', id, sessionId, text, marker })
+});
+
 // Voice playback runs in the extension host (Piper TTS, shared with the ATM
 // extension). The webview fires commands and mirrors broadcast state.
 let voiceStateListener: ((state: VoiceState, message?: string, progress?: VoiceProgress) => void) | undefined;
@@ -450,6 +460,8 @@ const toolsController = layoutRight
 			requestWorkspaceSkills: () => workspaceSkillsRpc.request(),
 			openCreateSkill: () => vscode.postMessage({ type: 'mySkills.openCreate' }),
 			requestSpellcheck: (text: string, lang: string, strict: boolean) => spellcheckRpc.request(text, lang, strict),
+			injectRules: (text: string, marker: string) =>
+				activeSessionId ? injectRulesRpc.request(activeSessionId, text, marker) : Promise.resolve(false),
 			speakText,
 			appendSpeech,
 			checkVoiceReady: (lang: string) => voiceReadyRpc.request(lang),
@@ -1087,6 +1099,11 @@ window.addEventListener('message', (event: MessageEvent<ServerMessage>) => {
 
 	if (message.type === 'prompt.spellResult') {
 		spellcheckRpc.resolve(message.id, message.issues);
+		return;
+	}
+
+	if (message.type === 'prompt.rulesInjected') {
+		injectRulesRpc.resolve(message.id, message.ok);
 		return;
 	}
 

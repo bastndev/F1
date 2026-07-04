@@ -1,52 +1,67 @@
 /**
- * "rules" toggle on the composer toolbar. Unlike the translate toggle, it is
- * language- AND CLI-agnostic: always shown, for every local CLI and every source
- * language (no language gate, initialized even without an active session).
+ * "rules" button on the composer toolbar — a ONE-SHOT action, not a preference
+ * toggle. Language- and CLI-agnostic (always shown, wired even without a session).
  *
- * Visual contract: ON by default → turquoise; toggling OFF turns it gray. The
- * choice persists in localStorage 'f1-prompt-rules' ('1' on (default) | '0' off),
- * sibling of 'f1-translate-auto' / 'f1-prompt-mode'.
+ * Lifecycle per CLI session:
+ *   • available  → turquoise, clickable ("load the rules into this session")
+ *   • injecting  → disabled, working look, while the host types the rules prompt
+ *                  and waits for the agent to read it
+ *   • done       → gray + permanently disabled for that session (rules loaded)
+ * A refused click (CLI busy / no session) shakes the button but leaves it
+ * available. The "already loaded" state is tracked per session by the composer
+ * (see prompt.ts), so it survives modal close/reopen and resets for a new CLI.
  *
- * The send-time behaviour is not wired yet — the onChange callback fires with the
- * new state on every toggle (and once on mount, reflecting the persisted value)
- * so the logic can hook in later without touching the UI.
+ * This module owns only the button's visual state; prompt.ts decides what a
+ * click does (deny vs inject) since that needs the session/busy context.
  */
-const STORAGE_KEY = 'f1-prompt-rules';
-
-/** The persisted rules state — ON unless explicitly turned off. */
-export const getRulesEnabled = (): boolean => {
-	try {
-		return localStorage.getItem(STORAGE_KEY) !== '0';
-	} catch {
-		return true;
-	}
+export type RulesToggleController = {
+	/** Turquoise + clickable — rules not yet loaded this session. */
+	setAvailable: () => void;
+	/** Disabled + working look — injection in flight. */
+	setInjecting: () => void;
+	/** Gray + permanently disabled — rules already loaded this session. */
+	setDone: () => void;
+	/** Transient shake — the click was refused (busy / no session). */
+	flashDenied: () => void;
 };
 
-export function initRulesToggle(host: HTMLElement, onChange?: (enabled: boolean) => void) {
-	const toggleBtn = host.querySelector<HTMLButtonElement>('#rulesToggle');
-	if (!toggleBtn) {
-		return;
+export function initRulesToggle(host: HTMLElement, onActivate: () => void): RulesToggleController | undefined {
+	const btn = host.querySelector<HTMLButtonElement>('#rulesToggle');
+	if (!btn) {
+		return undefined;
 	}
 
-	let enabled = getRulesEnabled();
-
-	const apply = (persist: boolean) => {
-		toggleBtn.setAttribute('aria-pressed', enabled ? 'true' : 'false');
-		if (persist) {
-			try {
-				localStorage.setItem(STORAGE_KEY, enabled ? '1' : '0');
-			} catch {
-				/* storage unavailable */
-			}
-		}
-		onChange?.(enabled);
+	const setAvailable = () => {
+		btn.disabled = false;
+		btn.classList.remove('is-injecting');
+		btn.setAttribute('aria-pressed', 'true');
+		btn.title = 'Load working rules into this session (click)';
 	};
 
-	toggleBtn.addEventListener('click', () => {
-		enabled = !enabled;
-		apply(true);
-	});
+	const setInjecting = () => {
+		btn.disabled = true;
+		btn.classList.add('is-injecting');
+		btn.setAttribute('aria-pressed', 'true');
+		btn.title = 'Loading rules…';
+	};
 
-	// Reflect the persisted state on every mount.
-	apply(false);
+	const setDone = () => {
+		btn.disabled = true;
+		btn.classList.remove('is-injecting');
+		btn.setAttribute('aria-pressed', 'false');
+		btn.title = 'Rules already loaded for this session';
+	};
+
+	const flashDenied = () => {
+		btn.classList.remove('is-denied');
+		// Force a reflow so a rapid second click restarts the shake.
+		void btn.offsetWidth;
+		btn.classList.add('is-denied');
+		btn.addEventListener('animationend', () => btn.classList.remove('is-denied'), { once: true });
+	};
+
+	// A disabled button never fires click, so this only runs while available.
+	btn.addEventListener('click', () => onActivate());
+
+	return { setAvailable, setInjecting, setDone, flashDenied };
 }

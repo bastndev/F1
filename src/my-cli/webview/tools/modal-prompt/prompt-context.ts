@@ -22,6 +22,9 @@ export type PromptContext = {
 	requestWorkspaceSkills?: () => Promise<WorkspaceSkill[]>;
 	openCreateSkill?: () => void;
 	requestSpellcheck?: (text: string, lang: string, strict: boolean) => Promise<SpellIssue[]>;
+	/** Type a one-shot rules prompt into the active CLI and resolve once the agent
+	 *  has read it (marker seen) or a host-side hard cap fires. false = no session. */
+	injectRules?: (text: string, marker: string) => Promise<boolean>;
 	registerSkillsRefresh?: (refresh: () => void) => void;
 	refocusCli?: () => void;
 };
