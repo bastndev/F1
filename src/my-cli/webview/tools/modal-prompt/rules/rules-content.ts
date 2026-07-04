@@ -11,7 +11,7 @@
 
 /** The exact line the agent is asked to reply with — the host watches for it to
  *  know the rules landed (see main._handleInjectRules). Keep it in sync there. */
-export const RULES_CONFIRMATION = 'Rules loaded ✅';
+export const RULES_CONFIRMATION = '>> Rules applied 🛠️';
 
 type RuleEntry = {
 	/** Stable id for future per-rule wiring; not shown to the agent. */
@@ -39,6 +39,6 @@ export const buildRulesPrompt = (): string => {
 	return (
 		'For the rest of this session, follow these rules in addition to your normal behaviour: '
 		+ numbered
-		+ ` Confirm by replying with ONLY this line, nothing else: ${RULES_CONFIRMATION}`
+		+ ` Your entire reply must be ONLY this exact line and nothing before or after it — no reasoning, no preamble, no explanation, no quotes, no extra symbols, no formatting: ${RULES_CONFIRMATION}`
 	);
 };
