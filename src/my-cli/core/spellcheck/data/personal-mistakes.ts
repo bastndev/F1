@@ -49,7 +49,17 @@ export const PERSONAL_MISTAKES: Record<string, string> = {
 	'mardown': 'markdown',
 	'mitivos': 'motivos',
 	'nda': 'nada',
-
+	'producion': 'produccion',
+	'suario': 'usuario',
+	'pudes': 'puedes',
+	'carpta': 'carpeta',
+	'elejio': 'eligio',
+	'percion': 'presiona',
+	'estube': 'estuve',
+	'mejoar': 'mejorar',
+	'necito': 'necesito',
+	'enitda': 'entienda',
+	'refactoirzacion': 'refactorizacion',
 
     // world 
 	'ideomas': 'idiomas',
