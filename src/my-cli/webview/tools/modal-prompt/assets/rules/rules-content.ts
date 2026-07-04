@@ -29,7 +29,7 @@ const RULES: readonly RuleEntry[] = [
 	{
 		id: 'concise',
 		instruction:
-			'Keep replies short and direct. When you finish a task, do not write a long walkthrough of every change — sign off by size: for a small change (1–2 files) end with "Task completed successfully 🎉."; for a medium change (3–5 files) add a short sorted checklist of what you did; for a large or architectural change add a brief collapsible <details> summary. Expand only when I explicitly ask (e.g. "explain", "why", "step by step").',
+			'Keep replies short and direct — never a long walkthrough of every change. Sign off by size: for a small change (1–2 files) reply with ONLY "Task completed successfully 🎉."; for anything larger (multiple files, multi-step, or architectural), reply with a short "Ready 🎉" (or similar) headline followed by a well-organized markdown table summarizing only the most important parts (e.g. columns like file, status, or file, lang, mode, status), using emojis for status (✅/❌) — no prose walkthrough, no per-file explanations. Expand only when I explicitly ask (e.g. "explain", "why", "step by step").',
 	},
 	{
 		id: 'ask-before-changes',
