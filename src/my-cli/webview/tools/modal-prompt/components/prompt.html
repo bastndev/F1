@@ -12,10 +12,11 @@
       <button class="prompt-close-btn" id="closePromptBtn" aria-label="Close" title="Close (Esc)">esc</button>
     </div>
   </div>
-  <!-- TOOLBAR: PRO/PLAN mode tabs (left) + language toggles (right). The tabs
-       are always present, so English — which hides both toggles — can't
-       collapse / jump the row height. PLAN appends a planning instruction to
-       every send; nothing is ever injected into the terminal. -->
+  <!-- TOOLBAR: PRO/PLAN mode tabs (left) + toggles (right). The tabs are always
+       present, so English — which hides the translate toggle — can't collapse /
+       jump the row height. The "rules" toggle is language- and CLI-agnostic
+       (always shown). PLAN appends a planning instruction to every send; nothing
+       is ever injected into the terminal. -->
   <div class="prompt-toolbar">
     <div class="prompt-toolbar-pro">
       <button class="prompt-pro-btn is-active" id="proBtn" type="button" aria-pressed="true" title="Pro mode: auto-translate + spell-fix (Alt + 4)">
@@ -26,6 +27,16 @@
       </button>
     </div>
     <div class="prompt-toolbar-toggles">
+      <button
+        class="prompt-rules-toggle"
+        id="rulesToggle"
+        type="button"
+        aria-pressed="true"
+        title="Rules (click to toggle)"
+      >
+        <span class="prompt-rules-dot" aria-hidden="true"></span>
+        <span class="prompt-rules-label">rules</span>
+      </button>
       <button
         class="prompt-translate-toggle"
         id="translateToggle"

@@ -45,6 +45,7 @@ import { initSkillsChips, isClaudeSession } from './skills-chips';
 import { updateFooterModel } from './footer-model';
 import { initSessionState, showNoSessionMessage } from './session-state';
 import { initPromptMode, PLAN_INSTRUCTION, type PromptMode } from './prompt-mode';
+import { initRulesToggle } from './rules-toggle';
 import { initPromptHistory, recordSentPrompt } from './prompt-history';
 import { initAttachmentPeek } from './attachment-peek';
 import { getShortcut, matchesShortcut } from '../../../../shared/keymaps/cli';
@@ -146,6 +147,13 @@ function initPromptComposer(host: HTMLElement, context: PromptContext, hasActive
 		// The run button keeps "Execute" in both modes; the input field wears
 		// the mode instead (accent-tinted while PLAN is active).
 		host.querySelector<HTMLElement>('.prompt-modal')?.classList.toggle('is-plan-mode', mode === 'plan');
+	});
+
+	// "rules" toggle — language- and CLI-agnostic, so it is wired up before the
+	// no-session early return (always active). Send-time behaviour lands later;
+	// for now the callback is a placeholder for that hook.
+	initRulesToggle(host, (_enabled) => {
+		// TODO: apply the rules behaviour at send time.
 	});
 
 	// Alt+1 / Alt+2 / Alt+3 click the footer model / resume / usage chips.
