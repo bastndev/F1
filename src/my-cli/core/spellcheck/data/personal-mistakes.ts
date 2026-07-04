@@ -70,6 +70,7 @@ export const PERSONAL_MISTAKES: Record<string, string> = {
 	'agrnadalo': 'agrandalo',
 	'est': 'este',
 	'tien': 'tiene',
+	'aigmen': 'imagen',
 	
 
 
