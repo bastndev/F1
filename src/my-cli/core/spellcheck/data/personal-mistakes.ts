@@ -62,6 +62,10 @@ export const PERSONAL_MISTAKES: Record<string, string> = {
 	'refactoirzacion': 'refactorizacion',
 	'analies': 'analices',
 	'brebes': 'breves',
+	'amejora': 'mejora',
+
+
+
 
     // world 
 	'ideomas': 'idiomas',
