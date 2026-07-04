@@ -572,7 +572,7 @@
 .vscode-light .prompt-run-btn.is-loading-rules:disabled {
   position: relative;
   overflow: hidden;
-  background: #3a3a3f !important;
+  background: #15171a !important;
   color: rgba(255, 255, 255, 0.55) !important;
   cursor: progress;
   opacity: 1;
@@ -601,8 +601,8 @@
     45deg,
     transparent,
     transparent 10px,
-    color-mix(in srgb, #38BDF8 48%, transparent) 10px,
-    color-mix(in srgb, #38BDF8 48%, transparent) 20px
+    color-mix(in srgb, #38BDF8 18%, transparent) 10px,
+    color-mix(in srgb, #38BDF8 18%, transparent) 20px
   );
   animation: rules-run-stripes 1.4s linear infinite;
   pointer-events: none;
