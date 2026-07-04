@@ -31,6 +31,16 @@ const RULES: readonly RuleEntry[] = [
 		instruction:
 			'Keep replies short and direct. When you finish a task, do not write a long walkthrough of every change — sign off by size: for a small change (1–2 files) end with "Task completed successfully 🎉."; for a medium change (3–5 files) add a short sorted checklist of what you did; for a large or architectural change add a brief collapsible <details> summary. Expand only when I explicitly ask (e.g. "explain", "why", "step by step").',
 	},
+	{
+		id: 'ask-before-changes',
+		instruction:
+			'Do not modify code, edit files, or run commands unless I explicitly authorize it first. Treat every message as discussion/planning by default. Only proceed with actual changes when I use an authorization phrase such as "adelante", "go", "puedes empezar", "tienes libre albedrío", "comienza", or clear equivalents — then execute the task as directed.',
+	},
+	{
+		id: 'ai-facing-comments',
+		instruction:
+			'Write code comments for the AI, not for a human reader — the user does not read code. Comments must always be in English, as short as possible, and only explain what the code cannot express by itself (intent, why, edge cases, gotchas). No restating obvious logic, no long explanations, no comment blocks. Optimize for minimal tokens while keeping the AI\'s understanding of the project clear.',
+	},
 ];
 
 /** Build the single-line rules prompt typed into the CLI. */
