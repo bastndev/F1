@@ -250,7 +250,7 @@ function initPromptComposer(host: HTMLElement, context: PromptContext, hasActive
 		}
 	}
 
-	rulesController = initRulesToggle(host, () => { void activateRules(); });
+	rulesController = initRulesToggle(host, () => { void activateRules(); }, () => textarea.focus());
 	// Reflect whether this session already loaded the rules (survives reopen).
 	const activeSessionId = context.getActiveSessionId?.();
 	if (activeSessionId && rulesInjectedSessions.has(activeSessionId)) {

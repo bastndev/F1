@@ -25,7 +25,7 @@ export type RulesToggleController = {
 	flashDenied: () => void;
 };
 
-export function initRulesToggle(host: HTMLElement, onActivate: () => void): RulesToggleController | undefined {
+export function initRulesToggle(host: HTMLElement, onActivate: () => void, refocusComposer?: () => void): RulesToggleController | undefined {
 	const btn = host.querySelector<HTMLButtonElement>('#rulesToggle');
 	if (!btn) {
 		return undefined;
@@ -76,6 +76,9 @@ export function initRulesToggle(host: HTMLElement, onActivate: () => void): Rule
 		}
 		btn.disabled = true;
 		onActivate();
+		// The button stole focus from the textarea; return it so the user can
+		// keep typing while the rules are injected in the background.
+		refocusComposer?.();
 	});
 
 	return { setAvailable, setInjecting, setDone, flashDenied };
