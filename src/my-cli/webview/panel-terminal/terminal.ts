@@ -5,8 +5,10 @@ import { getStoredPromptLang } from '../tools/modal-prompt/language-select';
 import { hasTranslatableContent } from '../tools/modal-translator/terminal-text';
 import { prunePromptDrafts } from '../tools/modal-prompt/prompt';
 import { createCliCreateMessage } from '../../shared/agent-launch-guard';
-import { getAgentSlug as resolveAgentSlug } from '../../shared/agents';
+import { getAgentSlug as resolveAgentSlug, getCliAgent } from '../../shared/agents';
 import { isLynxPanelNavChord } from '../../../shared/keymaps/lynx-keymap/index';
+import { matchesShortcut } from '../../../shared/keymaps/cli';
+import { getUsageCommandLabel } from '../tools/modal-use/agents';
 import { createToolsController } from '../tools/tools';
 import { createUsageTracker } from './usage-tracker';
 import { detectModelName } from '../../shared/model-detect';
@@ -354,6 +356,59 @@ const openTranslatorFromTerminal = (sessionId: string) => {
 	toolsController.open('translate');
 };
 
+const sendToActiveSession = (text: string, options?: { paste?: boolean; submit?: boolean }) => {
+	if (!activeSessionId) {
+		return;
+	}
+	const sessionId = activeSessionId;
+	const session = sessions.get(sessionId);
+	if (session?.status !== 'running') {
+		return;
+	}
+	const view = terminals.get(sessionId);
+	let data = text;
+	// Frame pasted text in bracketed-paste markers when the CLI has
+	// enabled that mode (xterm tracks DECSET 2004 per terminal). TUI
+	// CLIs rely on this to insert multi-char input cleanly; without it
+	// some (e.g. Copilot) garble or drop chunked input entirely.
+	if (options?.paste && view?.terminal.modes.bracketedPasteMode) {
+		data = `\x1b[200~${text}\x1b[201~`;
+	}
+	// CLIs that requested focus reporting (DECSET 1004) may ignore key
+	// input while the terminal reports itself unfocused — and it does
+	// while the user types in the prompt modal. Announce focus-in so the
+	// submit registers; the real focus events keep flowing as usual.
+	if (options?.submit && view?.terminal.modes.sendFocusMode) {
+		data = `\x1b[I${data}`;
+	}
+	vscode.postMessage({ type: 'cli.input', sessionId, data });
+	if (options?.submit) {
+		// Refresh the host's Voice Finish config so the cue matches the
+		// language the user is writing in right now for this response.
+		sendVoiceFinishConfig();
+		// Enter must arrive as its own write or TUI CLIs treat it as part
+		// of the paste. Copilot digests pastes noticeably slower than the
+		// rest. Route mentions are special in most CLI TUIs: the first
+		// Enter commits/accepts the @file/@folder context, the next one
+		// submits the completed prompt.
+		const agentSlug = getAgentSlug(session.label);
+		const delay = getSubmitDelayMs(agentSlug, text);
+		const enterData = view?.terminal.modes.sendFocusMode ? '\x1b[I\r' : '\r';
+		const needsRouteSubmitConfirm = hasRouteMention(text);
+		const postEnter = () => {
+			if (sessions.get(sessionId)?.status === 'running') {
+				vscode.postMessage({ type: 'cli.input', sessionId, data: enterData });
+			}
+		};
+		setTimeout(() => {
+			postEnter();
+			if (needsRouteSubmitConfirm) {
+				setTimeout(postEnter, routeSubmitSecondEnterDelayMs);
+			}
+		}, delay);
+	}
+};
+
 const toolsController = layoutRight
 	? createToolsController({
 			container: layoutRight,
@@ -383,58 +438,7 @@ const toolsController = layoutRight
 			getUsageSnapshot: () => usageTracker.getSnapshot(activeSessionId),
 			requestUsage: usageTracker.request,
 			dismissUsageView: usageTracker.dismiss,
-			sendToActiveSession: (text: string, options?: { paste?: boolean; submit?: boolean }) => {
-				if (!activeSessionId) {
-					return;
-				}
-				const sessionId = activeSessionId;
-				const session = sessions.get(sessionId);
-				if (session?.status !== 'running') {
-					return;
-				}
-				const view = terminals.get(sessionId);
-				let data = text;
-				// Frame pasted text in bracketed-paste markers when the CLI has
-				// enabled that mode (xterm tracks DECSET 2004 per terminal). TUI
-				// CLIs rely on this to insert multi-char input cleanly; without it
-				// some (e.g. Copilot) garble or drop chunked input entirely.
-				if (options?.paste && view?.terminal.modes.bracketedPasteMode) {
-					data = `\x1b[200~${text}\x1b[201~`;
-				}
-				// CLIs that requested focus reporting (DECSET 1004) may ignore key
-				// input while the terminal reports itself unfocused — and it does
-				// while the user types in the prompt modal. Announce focus-in so the
-				// submit registers; the real focus events keep flowing as usual.
-				if (options?.submit && view?.terminal.modes.sendFocusMode) {
-					data = `\x1b[I${data}`;
-				}
-				vscode.postMessage({ type: 'cli.input', sessionId, data });
-				if (options?.submit) {
-					// Refresh the host's Voice Finish config so the cue matches the
-					// language the user is writing in right now for this response.
-					sendVoiceFinishConfig();
-					// Enter must arrive as its own write or TUI CLIs treat it as part
-					// of the paste. Copilot digests pastes noticeably slower than the
-					// rest. Route mentions are special in most CLI TUIs: the first
-					// Enter commits/accepts the @file/@folder context, the next one
-					// submits the completed prompt.
-					const agentSlug = getAgentSlug(session.label);
-					const delay = getSubmitDelayMs(agentSlug, text);
-					const enterData = view?.terminal.modes.sendFocusMode ? '\x1b[I\r' : '\r';
-					const needsRouteSubmitConfirm = hasRouteMention(text);
-					const postEnter = () => {
-						if (sessions.get(sessionId)?.status === 'running') {
-							vscode.postMessage({ type: 'cli.input', sessionId, data: enterData });
-						}
-					};
-					setTimeout(() => {
-						postEnter();
-						if (needsRouteSubmitConfirm) {
-							setTimeout(postEnter, routeSubmitSecondEnterDelayMs);
-						}
-					}, delay);
-				}
-			},
+			sendToActiveSession,
 			translatePrompt,
 			preparePromptWithAttachments,
 			requestWorkspaceFiles: () => workspaceFilesRpc.request(),
@@ -520,6 +524,71 @@ const tabController = createTabController({
 	getOpenToolModal: () => toolsController?.getOpenTool() ?? null
 });
 
+// ── Footer chip shortcuts, terminal-wide ────────────────────────────
+// Alt+1/2/3 (model / resume / usage) work directly on the focused CLI, not
+// just inside the prompt modal — same injection the modal footer chips use.
+// Skipped while any tool modal is open: the prompt modal binds its own
+// copies to click the visible chips, and the other modals own their keys.
+
+const footerShortcutCommand = (kind: 'model' | 'resume' | 'usage'): string | undefined => {
+	const session = activeSessionId ? sessions.get(activeSessionId) : undefined;
+	if (session?.status !== 'running') {
+		return undefined;
+	}
+	const agent = getCliAgent(session.label);
+	if (kind === 'model') {
+		return agent?.modelCommand;
+	}
+	if (kind === 'resume') {
+		return agent?.resumeCommand;
+	}
+	// Usage differs per CLI (/usage vs /status) and some CLIs have none.
+	const usageCommand = getUsageCommandLabel(session.label);
+	return usageCommand === 'not configured' ? undefined : usageCommand;
+};
+
+const handleFooterShortcutKey = (event: KeyboardEvent): boolean => {
+	if (event.type !== 'keydown' || event.repeat) {
+		return false;
+	}
+	if (toolsController?.isOpen()) {
+		return false;
+	}
+	const kind = matchesShortcut(event, 'promptFooterModel') ? 'model'
+		: matchesShortcut(event, 'promptFooterResume') ? 'resume'
+		: matchesShortcut(event, 'promptFooterUsage') ? 'usage'
+		: undefined;
+	if (!kind) {
+		return false;
+	}
+	const command = footerShortcutCommand(kind);
+	if (!command) {
+		return false;
+	}
+	event.preventDefault();
+	event.stopPropagation();
+	const session = activeSessionId ? sessions.get(activeSessionId) : undefined;
+	if (session && getAgentSlug(session.label) === 'cursor') {
+		// Cursor's TUI drops raw chunked input: bracketed paste, no Ctrl+U.
+		sendToActiveSession(command, { paste: true, submit: true });
+	} else {
+		// \x15 is Ctrl+U: wipe the current input line so partially typed text
+		// is not concatenated with the command.
+		sendToActiveSession(`\x15${command}`, { submit: true });
+	}
+	// The CLI's picker needs terminal focus for arrow-key navigation.
+	if (activeSessionId) {
+		terminals.get(activeSessionId)?.terminal.focus();
+	}
+	return true;
+};
+
+// Catch the chords when focus sits elsewhere in the panel (tabs, buttons);
+// the xterm path below handles them while the terminal itself is focused.
+document.addEventListener('keydown', (event) => {
+	handleFooterShortcutKey(event);
+});
+
 const isOpenCodeSession = (sessionId: string): boolean => {
 	const session = sessions.get(sessionId);
 	return session ? getAgentSlug(session.label) === 'opencode' : false;
@@ -536,6 +605,10 @@ const handleTerminalKey = (event: KeyboardEvent, sessionId: string) => {
 	if (isOpenCodeSession(sessionId) && isCtrlZ(event)) {
 		event.preventDefault();
 		event.stopPropagation();
+		return false;
+	}
+
+	if (handleFooterShortcutKey(event)) {
 		return false;
 	}
 

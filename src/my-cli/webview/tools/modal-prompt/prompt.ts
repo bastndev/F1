@@ -152,6 +152,10 @@ function initPromptComposer(host: HTMLElement, context: PromptContext, hasActive
 				const btn = host.querySelector<HTMLButtonElement>(`.prompt-footer ${selector}`);
 				if (btn) {
 					e.preventDefault();
+					// The chip click closes the modal, so without this the event
+					// would bubble on to the terminal-wide Alt+1/2/3 handler (which
+					// only skips while a modal is open) and inject twice.
+					e.stopPropagation();
 					btn.click();
 					// VS Code's Alt+number bindings switch editor tabs and steal focus;
 					// bring it back to the CLI after the chip action runs.
