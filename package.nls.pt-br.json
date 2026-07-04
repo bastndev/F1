@@ -1,4 +1,4 @@
 {
   "displayName": "F1 [AI] composer",
-  "description": "Tudo-em-Um (F1 [AI] composer) — [CLI Hub, My skills, My Memory] Uma tecla para iniciar e alternar entre Claude Code, Codex, Copilot, Cursor, Kiro, Grok, Antigravity ou qualquer CLI de IA. Ferramentas Skills, Memory e Prompt integradas. 雨"
+  "description": "Hub de CLI de IA tudo-em-um: um atalho para lançar, alternar e gerenciar Claude Code, Codex, Copilot, Cursor, Kiro, Kilo Code, OpenCode, Grok, Antigravity ou qualquer agente de codificação personalizado — lado a lado na sua IDE. Escreva prompts melhores com menções @-arquivo, imagens, tradução automática e voz. Instale Skills de agente, acompanhe o uso e prepare cada CLI com a memória do seu projeto para que ele comece já conhecendo sua base de código."
 }
