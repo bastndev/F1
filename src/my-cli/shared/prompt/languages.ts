@@ -1,14 +1,13 @@
 /**
  * Source-language table for the prompt composer. The user picks ONE source
  * language; the translator target is always English. Picking a language drives
- * three things at once, all encoded here so the rules live in exactly one place:
+ * two things at once, all encoded here so the rules live in exactly one place:
  *
  *   • translation  — `<code> → en` (skipped entirely for English, source == target)
  *   • spell-check  — fixnow has dictionaries for en/es/pt/ru but NOT zh (Chinese
- *                    is character-based; a trie/word checker doesn't apply)
- *   • the strict-accents toggle — only Spanish has a meaningful "accept missing
- *                    tildes" mode to override; fixnow's accent leniency is
- *                    Spanish-only, so pt/en/ru are always accent-strict by nature.
+ *                    is character-based; a trie/word checker doesn't apply).
+ *                    Always lenient: accent omissions (missing tildes) are
+ *                    accepted, never flagged.
  *
  * Only these five are offered. Both the picker UI (webview) and the host
  * spell-check/translation read from this list, so it must stay DOM- and
@@ -27,16 +26,14 @@ export interface PromptLanguage {
 	translates: boolean;
 	/** False for Chinese — fixnow has no usable checker for it. */
 	spellcheck: boolean;
-	/** Whether to show the strict-accents toggle. Only Spanish (fixnow's accent leniency is es-only). */
-	strictToggle: boolean;
 }
 
 export const PROMPT_LANGUAGES: readonly PromptLanguage[] = [
-	{ code: 'es', label: 'Spanish',    flag: '🇪🇸', translates: true,  spellcheck: true,  strictToggle: true  },
-	{ code: 'zh', label: 'Chinese',    flag: '🇨🇳', translates: true,  spellcheck: false, strictToggle: false },
-	{ code: 'pt', label: 'Portuguese', flag: '🇧🇷', translates: true,  spellcheck: true,  strictToggle: false },
-	{ code: 'ru', label: 'Russian',    flag: '🇷🇺', translates: true,  spellcheck: true,  strictToggle: false },
-	{ code: 'en', label: 'English',    flag: '🌐', translates: false, spellcheck: true,  strictToggle: false },
+	{ code: 'es', label: 'Spanish',    flag: '🇪🇸', translates: true,  spellcheck: true  },
+	{ code: 'zh', label: 'Chinese',    flag: '🇨🇳', translates: true,  spellcheck: false },
+	{ code: 'pt', label: 'Portuguese', flag: '🇧🇷', translates: true,  spellcheck: true  },
+	{ code: 'ru', label: 'Russian',    flag: '🇷🇺', translates: true,  spellcheck: true  },
+	{ code: 'en', label: 'English',    flag: '🌐', translates: false, spellcheck: true  },
 ];
 
 /** Placeholder shown before any language is chosen. */

@@ -255,11 +255,11 @@ function initPromptComposer(host: HTMLElement, context: PromptContext, hasActive
 	const translateState = { enabled: localStorage.getItem('f1-translate-auto') !== '0' };
 	let setTranslating: (active: boolean) => void = () => {};
 
-	// Strict-accents toggle — OFF by default (missing tildes ignored). When ON,
-	// the host re-flags accent omissions. Persisted across IDE restarts.
-	// localStorage key: 'f1-spellcheck-strict' → '1' (on) | '0'/missing (off).
-	const strictState = { enabled: localStorage.getItem('f1-spellcheck-strict') === '1' };
-	// Assigned once runSpellcheck/renderHighlight exist; re-marks on toggle.
+	// Spell-checking always runs in lenient mode: accent omissions (missing
+	// tildes) are accepted, never flagged. There is no user-facing strict toggle —
+	// an English keyboard can't type accents and the CLI understands the text
+	// regardless. Assigned once runSpellcheck/renderHighlight exist; re-marks when
+	// the source language changes.
 	let rerunSpellcheck: () => void = () => {};
 
 	const registerPathImageAttachment = (path: string): string => {
@@ -496,16 +496,6 @@ function initPromptComposer(host: HTMLElement, context: PromptContext, hasActive
 			}
 		);
 		setTranslating = tools.setTranslating;
-
-		initStrictToggle(
-			host,
-			() => strictState.enabled,
-			(val) => {
-				strictState.enabled = val;
-				try { localStorage.setItem('f1-spellcheck-strict', val ? '1' : '0'); } catch { /* storage unavailable */ }
-				rerunSpellcheck();
-			}
-		);
 	}
 
 	const performSendNow = async (options?: { skipTranslate?: boolean }) => {
@@ -587,7 +577,8 @@ function initPromptComposer(host: HTMLElement, context: PromptContext, hasActive
 			return;
 		}
 
-		void context.requestSpellcheck(text, currentLang, strictState.enabled).then((issues) => {
+		// Always lenient: accent omissions are accepted, never flagged.
+		void context.requestSpellcheck(text, currentLang, false).then((issues) => {
 			// Drop stale responses and any result whose offsets no longer match the text.
 			if (token !== spellcheckToken || textarea.value !== text) {
 				return;
@@ -598,8 +589,8 @@ function initPromptComposer(host: HTMLElement, context: PromptContext, hasActive
 		});
 	};
 
-	// Toggling strict changes verdicts for already-typed text: clear stale marks
-	// immediately, then recompute under the new mode.
+	// Switching the source language changes verdicts for already-typed text:
+	// clear stale marks immediately, then recompute under the new dictionary.
 	rerunSpellcheck = () => {
 		spellIssues = [];
 		spellTextSnapshot = textarea.value;
@@ -685,7 +676,6 @@ function initPromptComposer(host: HTMLElement, context: PromptContext, hasActive
 	// The picker is the single source of the source language. Typing stays
 	// locked until one is chosen; the choice persists across sessions.
 	const translateToggleBtn = host.querySelector<HTMLButtonElement>('#translateToggle');
-	const strictToggleBtn = host.querySelector<HTMLButtonElement>('#strictToggle');
 
 	const applyLanguage = (lang: PromptLang) => {
 		currentLang = lang;
@@ -693,10 +683,6 @@ function initPromptComposer(host: HTMLElement, context: PromptContext, hasActive
 		// Translate toggle: only for languages that translate (hidden for English).
 		if (translateToggleBtn) {
 			translateToggleBtn.hidden = !info?.translates;
-		}
-		// Strict toggle: Spanish only (fixnow's accent leniency is es-only).
-		if (strictToggleBtn) {
-			strictToggleBtn.hidden = !info?.strictToggle;
 		}
 		// Unlock typing now that a language is chosen.
 		textarea.disabled = false;
@@ -711,12 +697,11 @@ function initPromptComposer(host: HTMLElement, context: PromptContext, hasActive
 	if (initialLang) {
 		applyLanguage(initialLang);
 	} else {
-		// No language yet — lock typing and hide the language-specific toggles
-		// until the user picks one from the header picker.
+		// No language yet — lock typing and hide the translate toggle until the
+		// user picks one from the header picker.
 		textarea.disabled = true;
 		textarea.placeholder = 'Select a language to start…';
 		if (translateToggleBtn) { translateToggleBtn.hidden = true; }
-		if (strictToggleBtn) { strictToggleBtn.hidden = true; }
 	}
 }
 
@@ -746,26 +731,6 @@ function initToolbarActions(
 			toggleBtn.classList.toggle('is-translating', active);
 		},
 	};
-}
-
-function initStrictToggle(
-	host: HTMLElement,
-	getEnabled: () => boolean,
-	setEnabled: (val: boolean) => void
-) {
-	const toggleBtn = host.querySelector<HTMLButtonElement>('#strictToggle');
-	if (!toggleBtn) {
-		return;
-	}
-
-	// Reflect the persisted preference on every mount.
-	toggleBtn.setAttribute('aria-pressed', getEnabled() ? 'true' : 'false');
-
-	toggleBtn.addEventListener('click', () => {
-		const next = !getEnabled();
-		setEnabled(next);
-		toggleBtn.setAttribute('aria-pressed', next ? 'true' : 'false');
-	});
 }
 
 function initRunButton(
