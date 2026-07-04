@@ -23,6 +23,7 @@ type MyCliWebviewOptions = {
 	selectedAgent: string;
 	workspacePath: string;
 	agentIcons: string;
+	soundUri: string;
 };
 
 type PanelFile = {
@@ -88,6 +89,7 @@ export const getAgentWebviewHtml = (
 		getWebviewAssetUriString(webview, extensionUri, 'styles', 'skeleton', 'start-cli.css')
 	];
 	const scriptUri = getWebviewAssetUriString(webview, extensionUri, 'terminal.js');
+	const soundUri = getWebviewAssetUriString(webview, extensionUri, 'tools', 'modal-prompt', 'assets', 'sound', 'latigo.wav');
 	const agentIcons = cliAgents.map((agent) => ({
 		label: agent.label,
 		icon: getWebviewAssetUriString(webview, extensionUri, 'assets', 'icons-cli', agent.iconFile),
@@ -109,7 +111,8 @@ export const getAgentWebviewHtml = (
 		scriptUri,
 		selectedAgent,
 		workspacePath: getWorkspaceDisplayPath(),
-		agentIcons: serializeJsonForHtmlScript(agentIcons)
+		agentIcons: serializeJsonForHtmlScript(agentIcons),
+		soundUri
 	});
 };
 
@@ -132,7 +135,7 @@ function getMyCliWebviewHtml(options: MyCliWebviewOptions) {
 <html lang="en">
 	<head>
 		<meta charset="UTF-8">
-		<meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src ${options.cspSource} data:; style-src ${options.cspSource} 'unsafe-inline'; script-src 'nonce-${options.nonce}'; connect-src ${options.cspSource} https://api.mymemory.translated.net https://lingva.thedaviddelta.com https://libretranslate.de;">
+		<meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src ${options.cspSource} data:; media-src ${options.cspSource}; style-src ${options.cspSource} 'unsafe-inline'; script-src 'nonce-${options.nonce}'; connect-src ${options.cspSource} https://api.mymemory.translated.net https://lingva.thedaviddelta.com https://libretranslate.de;">
 		<meta name="viewport" content="width=device-width, initial-scale=1.0">
 		<title>CLI Hub</title>
 		${styleLinks}
@@ -143,6 +146,9 @@ function getMyCliWebviewHtml(options: MyCliWebviewOptions) {
 		</div>
 		<script id="cli-agent-icons" type="application/json" nonce="${options.nonce}">
 			${options.agentIcons}
+		</script>
+		<script id="cli-sounds" type="application/json" nonce="${options.nonce}">
+			${serializeJsonForHtmlScript({ rules: options.soundUri })}
 		</script>
 		<script nonce="${options.nonce}" src="${escapeHtml(options.scriptUri)}"></script>
 	</body>

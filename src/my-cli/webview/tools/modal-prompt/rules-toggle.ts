@@ -61,10 +61,22 @@ export function initRulesToggle(host: HTMLElement, onActivate: () => void): Rule
 		void btn.offsetWidth;
 		btn.classList.add('is-denied');
 		btn.addEventListener('animationend', () => btn.classList.remove('is-denied'), { once: true });
+		// The click handler disabled the button to prevent double-press; re-enable
+		// it so a denied click (busy / no session) can be retried.
+		btn.disabled = false;
 	};
 
 	// A disabled button never fires click, so this only runs while available.
-	btn.addEventListener('click', () => onActivate());
+	// Disable immediately to prevent rapid double-clicks from queuing multiple
+	// rule injections; prompt.ts will re-enable via setAvailable if the click
+	// is denied (busy / no session).
+	btn.addEventListener('click', () => {
+		if (btn.disabled) {
+			return;
+		}
+		btn.disabled = true;
+		onActivate();
+	});
 
 	return { setAvailable, setInjecting, setDone, flashDenied };
 }

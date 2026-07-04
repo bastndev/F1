@@ -99,6 +99,19 @@ const promptDrafts = new Map<string, PromptDraft>();
 // module scope alongside the drafts, and is pruned on the same lifecycle.
 const rulesInjectedSessions = new Set<string>();
 
+/** Read the rules sound URI injected by the host into the webview HTML. */
+const getRulesSoundUri = (): string | undefined => {
+	const el = document.getElementById('cli-sounds');
+	if (!el) {
+		return undefined;
+	}
+	try {
+		return JSON.parse(el.textContent || '{}').rules as string | undefined;
+	} catch {
+		return undefined;
+	}
+};
+
 /** Drop drafts + rules-injected marks whose session is gone; the terminal calls
  *  this on every state sync. */
 export const prunePromptDrafts = (openSessionIds: Set<string>) => {
@@ -173,13 +186,14 @@ function initPromptComposer(host: HTMLElement, context: PromptContext, hasActive
 	// click with no running CLI, a busy one, or after it already ran this session
 	// is refused with a shake. The per-session "loaded" mark survives modal
 	// close/reopen (rulesInjectedSessions) and blocks re-injection.
+	let rulesSoundPlayedForSession = false;
 	async function activateRules() {
 		if (injectInFlight) {
 			return;
 		}
 		const sessionId = context.getActiveSessionId?.();
-		// Need a running CLI to type into, and it must be idle — typing into a busy
-		// CLI would corrupt its input line.
+		// Need a running CLI to type into, and it must be idle — typing into a
+		// busy CLI would corrupt its input line.
 		if (!sessionId || context.isCliBusy?.() || !context.injectRules || rulesInjectedSessions.has(sessionId)) {
 			rulesController?.flashDenied();
 			return;
@@ -187,6 +201,18 @@ function initPromptComposer(host: HTMLElement, context: PromptContext, hasActive
 
 		injectInFlight = true;
 		rulesController?.setInjecting();
+
+		// Play the whip-crack sound once per successful rules activation.
+		// Failures/retry reset via setAvailable below.
+		if (!rulesSoundPlayedForSession) {
+			rulesSoundPlayedForSession = true;
+			const soundUri = getRulesSoundUri();
+			if (soundUri) {
+				const audio = new Audio(soundUri);
+				audio.volume = 0.5;
+				audio.play().catch(() => { /* ignore autoplay / load errors */ });
+			}
+		}
 
 		// Block Execute with a visible "loading" state while the rules land — a
 		// prompt sent mid-injection would race the rules message into the CLI.
