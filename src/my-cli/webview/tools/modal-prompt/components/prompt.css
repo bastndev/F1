@@ -456,8 +456,9 @@
 .prompt-rules-toggle {
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 7px;
-  padding: 4px 12px 4px 10px;
+  padding: 4px 12px;
   background: transparent;
   border: 1px solid var(--vscode-editorGroup-border);
   border-radius: 20px;
@@ -504,9 +505,24 @@
   opacity: 0.4;
 }
 
-/* Injection in flight — keep the turquoise but show it's working, not clickable. */
+/* Injection in flight — slow pulse between turquoise and an opaque gray so
+   the whole pill breathes while the rules are landing. Text stays "rules". */
 .prompt-rules-toggle.is-injecting {
   cursor: progress;
+  animation: rules-loading-pulse 1.9s ease-in-out infinite;
+}
+
+@keyframes rules-loading-pulse {
+  0%, 100% {
+    color: #38BDF8;
+    border-color: color-mix(in srgb, #38BDF8 45%, transparent);
+    background: color-mix(in srgb, #38BDF8 10%, transparent);
+  }
+  50% {
+    color: var(--vscode-descriptionForeground);
+    border-color: var(--vscode-editorGroup-border);
+    background: color-mix(in srgb, var(--vscode-descriptionForeground) 18%, transparent);
+  }
 }
 
 /* Click refused (CLI busy / no session): shake + flash red, same cue as the
@@ -515,21 +531,6 @@
   animation: char-shake 0.35s ease;
   color: #e05252;
   border-color: color-mix(in srgb, #e05252 45%, transparent);
-}
-
-.prompt-rules-dot {
-  width: 5px;
-  height: 5px;
-  border-radius: 50%;
-  background: currentColor;
-  flex-shrink: 0;
-  opacity: 0.3;
-  transition: opacity 0.2s, transform 0.2s;
-}
-
-.prompt-rules-toggle[aria-pressed="true"] .prompt-rules-dot {
-  opacity: 1;
-  animation: translate-dot-pulse 2.2s ease-in-out infinite;
 }
 
 /* Translating state for run button (uses grey + glass flash animation) */

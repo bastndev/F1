@@ -36,20 +36,23 @@ export function initRulesToggle(host: HTMLElement, onActivate: () => void): Rule
 		btn.classList.remove('is-injecting');
 		btn.setAttribute('aria-pressed', 'true');
 		btn.title = 'Load working rules into this session (click)';
+		btn.innerHTML = '<span class="prompt-rules-label">rules</span>';
 	};
 
 	const setInjecting = () => {
 		btn.disabled = true;
 		btn.classList.add('is-injecting');
 		btn.setAttribute('aria-pressed', 'true');
-		btn.title = 'Loading rules…';
+		btn.title = 'loading rules';
+		btn.innerHTML = '<span class="prompt-rules-label">rules</span>';
 	};
 
 	const setDone = () => {
 		btn.disabled = true;
 		btn.classList.remove('is-injecting');
 		btn.setAttribute('aria-pressed', 'false');
-		btn.title = 'Rules already loaded for this session';
+		btn.title = 'rules loaded for this session';
+		btn.innerHTML = '<span class="prompt-rules-label">rules</span>';
 	};
 
 	const flashDenied = () => {
