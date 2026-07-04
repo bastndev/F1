@@ -64,6 +64,12 @@ export const PERSONAL_MISTAKES: Record<string, string> = {
 	'brebes': 'breves',
 	'amejora': 'mejora',
 	'jirando': 'girando',
+	'agrnda': 'agranda',
+	'granda': 'grande',
+	'ajitas': 'cajitas',
+	'agrnadalo': 'agrandalo',
+	'est': 'este',
+	
 
 
 
