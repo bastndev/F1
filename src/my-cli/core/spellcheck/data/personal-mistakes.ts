@@ -73,6 +73,7 @@ export const PERSONAL_MISTAKES: Record<string, string> = {
 	'aigmen': 'imagen',
 	'apar': 'para',
 	'necita': 'necesita',
+	'colicion': 'colision',
 	
 
 
