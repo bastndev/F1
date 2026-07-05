@@ -46,7 +46,7 @@ import { updateFooterModel } from './footer-model';
 import { initSessionState, showNoSessionMessage } from './session-state';
 import { initPromptMode, PLAN_INSTRUCTION, type PromptMode } from './prompt-mode';
 import { initRulesToggle, type RulesToggleController } from './rules-toggle';
-import { buildRulesPrompt, RULES_CONFIRMATION } from './assets/rules/rules-content';
+import { buildRulesPrompt, RULES_MARKER } from './assets/rules/rules-content';
 import { initPromptHistory, recordSentPrompt } from './prompt-history';
 import { initAttachmentPeek } from './attachment-peek';
 import { getShortcut, matchesShortcut } from '../../../../shared/keymaps/cli';
@@ -229,7 +229,7 @@ function initPromptComposer(host: HTMLElement, context: PromptContext, hasActive
 
 		let ok = false;
 		try {
-			ok = await context.injectRules(buildRulesPrompt(), RULES_CONFIRMATION);
+			ok = await context.injectRules(buildRulesPrompt(), RULES_MARKER);
 		} catch (err) {
 			console.error('[Prompt] Rules injection failed:', err);
 		} finally {
