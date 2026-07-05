@@ -891,7 +891,7 @@ const createTerminalView = (session: CliSession) => {
 			smartOverlay?.dismiss();
 			smartOverlay = createSmartSkeleton(document.body);
 		} else {
-			bootSkeletons.create(session.id);
+			bootSkeletons.create(session.id, { rulesMode: session.rules === true });
 		}
 	}
 
@@ -1108,6 +1108,7 @@ window.addEventListener('message', (event: MessageEvent<ServerMessage>) => {
 	}
 
 	if (message.type === 'cli.rulesLoaded' && typeof message.sessionId === 'string') {
+		bootSkeletons.notifyRulesLoaded(message.sessionId);
 		markRulesInjectedForSession(message.sessionId);
 		const soundUri = getRulesSoundUri();
 		if (soundUri) {

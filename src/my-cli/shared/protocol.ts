@@ -37,6 +37,8 @@ export type CliSessionSnapshot = {
 	awaitingFirstOutput: boolean;
 	/** True for the initial Smart-mode launch — the webview shows the Smart overlay. */
 	smart?: boolean;
+	/** True for launcher "rules mode" — the boot skeleton lingers until rules are injected. */
+	rules?: boolean;
 };
 
 export type CliAgentOption = {

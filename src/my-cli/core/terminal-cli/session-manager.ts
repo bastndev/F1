@@ -145,7 +145,7 @@ export class CliSessionManager implements vscode.Disposable {
 		this.finishSoundSuppressed = suppressed;
 	}
 
-	public async createSession(agentLabel: string, options: { smart?: boolean } = {}): Promise<string | undefined> {
+	public async createSession(agentLabel: string, options: { smart?: boolean; rules?: boolean } = {}): Promise<string | undefined> {
 		const agent = getCliAgent(agentLabel);
 		if (!agent) {
 			this.postError(`Unknown CLI: ${agentLabel}`);
@@ -157,14 +157,14 @@ export class CliSessionManager implements vscode.Disposable {
 		}
 
 		this._beforeSessionCreate?.(agentLabel);
-		return this.createSessionFromCommand(agent.label, agent.command, agent.args, options.smart);
+		return this.createSessionFromCommand(agent.label, agent.command, agent.args, options.smart, options.rules);
 	}
 
 	public createCustomSession(customCli: CustomCliLaunch) {
 		this.createSessionFromCommand(customCli.label, customCli.command, customCli.args);
 	}
 
-	private createSessionFromCommand(label: string, command: string, args: string[], smart?: boolean): string {
+	private createSessionFromCommand(label: string, command: string, args: string[], smart?: boolean, rules?: boolean): string {
 		const id = `cli-${this.nextSessionId++}`;
 		const cwd = getWorkspaceCwd();
 		const session: CliSession = {
@@ -178,6 +178,7 @@ export class CliSessionManager implements vscode.Disposable {
 			hasUnread: false,
 			awaitingFirstOutput: true,
 			smart: smart === true,
+			rules: rules === true,
 			cols: 80,
 			rows: 24
 		};
@@ -645,6 +646,7 @@ export class CliSessionManager implements vscode.Disposable {
 			hasUnread: session.hasUnread,
 			awaitingFirstOutput: session.awaitingFirstOutput,
 			smart: session.smart,
+			rules: session.rules,
 			exitCode: session.exitCode
 		};
 	}

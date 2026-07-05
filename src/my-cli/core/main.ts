@@ -386,7 +386,7 @@ export class MyCliViewProvider implements vscode.WebviewViewProvider, vscode.Dis
 			return;
 		}
 
-		const sessionId = await this.sessionManager.createSession(agentLabel);
+		const sessionId = await this.sessionManager.createSession(agentLabel, { rules });
 		if (rules && sessionId) {
 			void this._autoInjectRules(sessionId);
 		}
