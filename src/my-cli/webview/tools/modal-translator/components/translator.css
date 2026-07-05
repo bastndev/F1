@@ -728,6 +728,7 @@
 	color: var(--agent-accent, #AFA9EC);
 	background: color-mix(in srgb, var(--agent-accent, #AFA9EC) 16%, var(--vscode-input-background));
 	font-weight: 600;
+	padding-right: 15px;
 	animation: translate-btn-pulse 2s ease-in-out 3;
 }
 
