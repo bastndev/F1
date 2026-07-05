@@ -26,6 +26,10 @@ export class MyCliViewProvider implements vscode.WebviewViewProvider, vscode.Dis
 	public static readonly viewType = 'f1.myCli';
 	private readonly sessionManager = new CliSessionManager();
 	private readonly smartService = new SmartService();
+	// In-flight Smart launches, keyed by sessionId. The record is shared with the
+	// running _runSmartSession so a `smart.cancel` can flip `cancelled` and abort
+	// the graphify build mid-flight. Present only while the overlay is up.
+	private readonly _smartSessions = new Map<string, { graphController: AbortController; cancelled: boolean }>();
 	private readonly launcherStateSessionId = crypto.randomBytes(16).toString('hex');
 	private pendingInitialAgent?: string;
 	private pendingInitialSmart = false;
@@ -253,9 +257,15 @@ export class MyCliViewProvider implements vscode.WebviewViewProvider, vscode.Dis
 						graphController.abort();
 						return;
 					}
+					this._smartSessions.set(sessionId, { graphController, cancelled: false });
 					void this._runSmartSession(sessionId, root, graphReady);
 					return;
 				}
+			}
+
+			if (message.type === 'smart.cancel' && typeof message.sessionId === 'string') {
+				await this._cancelSmartSession(webviewView.webview, message.sessionId);
+				return;
 			}
 
 			if (message.type?.startsWith('cli.')) {
@@ -381,6 +391,7 @@ export class MyCliViewProvider implements vscode.WebviewViewProvider, vscode.Dis
 				graphController.abort();
 				return;
 			}
+			this._smartSessions.set(sessionId, { graphController, cancelled: false });
 
 			await this._runSmartSession(sessionId, root, graphReady);
 			return;
@@ -428,8 +439,16 @@ export class MyCliViewProvider implements vscode.WebviewViewProvider, vscode.Dis
 	 * schedules cleanup after the agent's first reply settles.
 	 */
 	private async _runSmartSession(sessionId: string, root: string | undefined, graphReady: Promise<boolean>): Promise<void> {
+		// Capture the shared record so cancellation reaches us even after the map
+		// entry is deleted (see _cancelSmartSession); the object stays alive here.
+		const record = this._smartSessions.get(sessionId);
+		const isCancelled = () => record?.cancelled === true;
+
 		// Wait until the graph is built AND the CLI is booted + idle.
 		const [hasGraph] = await Promise.all([graphReady, this.sessionManager.waitForFirstIdle(sessionId)]);
+		if (isCancelled()) {
+			return; // cancelled while booting — _cancelSmartSession owns the teardown
+		}
 
 		// Write the rules, then type one prompt so the agent reads the rules + graph.
 		this.smartService.writeRules(root, this.smartService.loadRules(this._extensionUri.fsPath));
@@ -442,15 +461,16 @@ export class MyCliViewProvider implements vscode.WebviewViewProvider, vscode.Dis
 		// the ready line) — it reveals unconditionally as the fallback.
 		let revealed = false;
 		const reveal = () => {
-			if (revealed) {
+			if (revealed || isCancelled()) {
 				return;
 			}
 			revealed = true;
+			this._smartSessions.delete(sessionId);
 			this.smartService.cleanup(root);
 			void this._activeWebview?.postMessage({ type: 'smart.dismiss' });
 		};
 		const onSettled = () => {
-			if (revealed) {
+			if (revealed || isCancelled()) {
 				return;
 			}
 			if (!this.sessionManager.bufferContains(sessionId, SMART_READY_MARKER)) {
@@ -461,6 +481,43 @@ export class MyCliViewProvider implements vscode.WebviewViewProvider, vscode.Dis
 		};
 		this.sessionManager.onceResponseSettled(sessionId, onSettled);
 		setTimeout(reveal, 90000);
+	}
+
+	/**
+	 * User hit Cancel on the Smart overlay: abort the whole launch. Flip the shared
+	 * flag (stops _runSmartSession from priming/revealing), abort the graphify build,
+	 * kill the CLI session, and revert every generated artifact (.f1/, graphify-out/,
+	 * the AGENTS.md/CLAUDE.md managed blocks). No-op unless a Smart launch is in
+	 * flight, so a stray message can't close a live CLI.
+	 */
+	private async _cancelSmartSession(webview: vscode.Webview, sessionId: string): Promise<void> {
+		const record = this._smartSessions.get(sessionId);
+		if (!record) {
+			return;
+		}
+		record.cancelled = true;
+		record.graphController.abort();
+		this._smartSessions.delete(sessionId);
+
+		const root = this._workspaceRoot();
+
+		// Kill the CLI (same path as a user close), rebuilding the launcher if it was
+		// the last session.
+		const result = this.sessionManager.handleMessage({ type: 'cli.close', sessionId });
+		if (result === 'closed-last-session') {
+			this.sessionManager.detach();
+			webview.html = await this._getHtmlForWebview(webview);
+		}
+
+		// Cleanup now, then once more after a beat to swallow any files a just-aborted
+		// graphify writes on its way down (cleanup is idempotent). Skip the second pass
+		// if another Smart launch has since started, so it can't clobber fresh files.
+		this.smartService.cleanup(root);
+		setTimeout(() => {
+			if (this._smartSessions.size === 0) {
+				this.smartService.cleanup(root);
+			}
+		}, 800);
 	}
 
 	private _workspaceRoot(): string | undefined {
