@@ -2,7 +2,7 @@
   "name": "f1",
   "displayName": "%displayName%",
   "description": "%description%",
-  "version": "2.0.1",
+  "version": "2.1.0",
   "publisher": "bastndev",
   "license": "MIT",
   "engines": {
@@ -16,6 +16,7 @@
   ],
   "keywords": [
     "ai",
+    "IDE",
     "ai assistant",
     "llm",
     "composer",
@@ -41,6 +42,7 @@
     "CLAUDE.md",
     "DESIGN.md",
     "f1",
+    "code",
     "quick switch",
     "keymaps",
     "CLI Hub",

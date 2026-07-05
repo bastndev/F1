@@ -436,6 +436,12 @@ export class CliSessionManager implements vscode.Disposable {
 		session.onResponseDone = callback;
 	}
 
+	/** True if the session exists and its pty is still running. */
+	public isRunning(sessionId: string): boolean {
+		const session = this.sessions.get(sessionId);
+		return !!session && session.status === 'running';
+	}
+
 	/** True if the session's output buffer contains `needle` (e.g. the Smart ready message). */
 	public bufferContains(sessionId: string, needle: string): boolean {
 		const session = this.sessions.get(sessionId);

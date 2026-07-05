@@ -26,6 +26,8 @@ export type ToolContext = {
 	requestUsage?: () => Promise<CliUsageSnapshot>;
 	dismissUsageView?: () => void;
 	sendToActiveSession?: (text: string, options?: { paste?: boolean; submit?: boolean }) => void;
+	/** Whether the active CLI is mid-task and would corrupt its input if a command were injected now. */
+	isCliBusy?: () => boolean;
 	translatePrompt?: (request: PromptTranslateRequest) => Promise<PromptTranslateResult>;
 	getTerminalSelection?: () => string;
 	preparePromptWithAttachments?: (text: string, attachments: ImageAttachment[]) => Promise<string>;
@@ -33,6 +35,8 @@ export type ToolContext = {
 	requestWorkspaceSkills?: () => Promise<WorkspaceSkill[]>;
 	openCreateSkill?: () => void;
 	requestSpellcheck?: (text: string, lang: string, strict: boolean) => Promise<SpellIssue[]>;
+	/** Type a one-shot rules prompt into the active CLI (see PromptContext.injectRules). */
+	injectRules?: (text: string, marker: string) => Promise<boolean>;
 	registerSkillsRefresh?: (refresh: () => void) => void;
 	speakText?: (text: string, options?: { chunks?: string[]; lang?: string }) => void;
 	appendSpeech?: (chunks: string[], options?: { final?: boolean; lang?: string; reset?: boolean }) => void;
@@ -78,6 +82,7 @@ export const createToolsController = ({
 	requestUsage,
 	dismissUsageView,
 	sendToActiveSession,
+	isCliBusy,
 	translatePrompt,
 	getTerminalSelection,
 	preparePromptWithAttachments,
@@ -85,6 +90,7 @@ export const createToolsController = ({
 	requestWorkspaceSkills,
 	openCreateSkill,
 	requestSpellcheck,
+	injectRules,
 	speakText,
 	appendSpeech,
 	checkVoiceReady,
@@ -192,6 +198,7 @@ export const createToolsController = ({
 			requestUsage,
 			dismissUsageView,
 			sendToActiveSession,
+			isCliBusy,
 			translatePrompt,
 			getTerminalSelection,
 			preparePromptWithAttachments,
@@ -199,6 +206,7 @@ export const createToolsController = ({
 			requestWorkspaceSkills,
 			openCreateSkill,
 			requestSpellcheck,
+			injectRules,
 			registerSkillsRefresh: (fn) => { skillsRefreshFn = fn; },
 			speakText,
 			appendSpeech,

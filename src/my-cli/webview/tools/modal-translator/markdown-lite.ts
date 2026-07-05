@@ -241,7 +241,7 @@ export function renderMarkdownLite(markdown: string): string {
 				html.push(
 					`<div class="md-emoji-item">` +
 					`<span class="md-emoji">${emojiItem[1]}</span>` +
-					`<span class="md-bracket">[${bracketInner[1]}]</span> ` +
+					`<span class="md-bracket">[${escapeHtml(bracketInner[1])}]</span> ` +
 					`${renderInline(bracketInner[2])}` +
 					`</div>`
 				);
@@ -262,7 +262,7 @@ export function renderMarkdownLite(markdown: string): string {
 			flushAll();
 			html.push(
 				`<div class="md-emoji-item">` +
-				`<span class="md-bracket">[${bracketLabel[1]}]</span> ` +
+				`<span class="md-bracket">[${escapeHtml(bracketLabel[1])}]</span> ` +
 				`${renderInline(bracketLabel[2])}` +
 				`</div>`
 			);

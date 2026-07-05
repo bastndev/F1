@@ -24,9 +24,11 @@ interface SpellSuggestOptions {
 	getSpellIssues: () => SpellIssue[];
 	/** Re-mark the text after a fix is applied. */
 	onApplied: () => void;
+	/** Releases the window-level listeners when the prompt panel unmounts. */
+	signal?: AbortSignal;
 }
 
-export function initSpellSuggest({ textarea, highlight, getSpellIssues, onApplied }: SpellSuggestOptions) {
+export function initSpellSuggest({ textarea, highlight, getSpellIssues, onApplied, signal }: SpellSuggestOptions) {
 	// ── Alt or Ctrl + click → apply the top correction for the clicked word ──
 	textarea.addEventListener('click', (event) => {
 		if (!event.altKey && !event.ctrlKey) {
@@ -75,8 +77,8 @@ export function initSpellSuggest({ textarea, highlight, getSpellIssues, onApplie
 		if (event.key === 'Alt' || event.key === 'Control') {
 			setPointer(false);
 		}
-	});
-	window.addEventListener('blur', () => setPointer(false));
+	}, { signal });
+	window.addEventListener('blur', () => setPointer(false), { signal });
 }
 
 function applyFix(

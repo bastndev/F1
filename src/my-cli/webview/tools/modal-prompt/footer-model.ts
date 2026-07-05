@@ -9,7 +9,21 @@ import { getCliAgent } from '../../../shared/agents';
 import { getUsageCommandLabel } from '../modal-use/agents';
 import { iconEl, type PromptIcon } from './components/icons';
 
-export function updateFooterModel(host: HTMLElement, context: PromptContext, hasActiveSession: boolean) {
+// Chips must not inject while an idle-only CLI is mid-task (it would corrupt
+// the CLI's input line). Flash the chip instead so the refusal is visible.
+function denyWhileBusy(context: PromptContext, button: HTMLButtonElement): boolean {
+	if (!context.isCliBusy?.()) {
+		return false;
+	}
+	button.classList.remove('is-denied');
+	// Force a reflow so a rapid second click restarts the shake animation.
+	void button.offsetWidth;
+	button.classList.add('is-denied');
+	button.addEventListener('animationend', () => button.classList.remove('is-denied'), { once: true });
+	return true;
+}
+
+export function updateFooterModel(host: HTMLElement, context: PromptContext, hasActiveSession: boolean, signal?: AbortSignal) {
 	const labelEl = document.getElementById('cli-terminal-label');
 	const label = labelEl?.textContent?.trim() || 'unknown';
 
@@ -54,11 +68,11 @@ export function updateFooterModel(host: HTMLElement, context: PromptContext, has
 		}
 
 		for (const btn of Array.from(actions.querySelectorAll<HTMLElement>('.prompt-footer-model-btn[data-action="shortcut"]'))) {
-			bindShortcutTruncation(btn);
+			bindShortcutTruncation(btn, signal);
 		}
 
 		footerInfo.append(actions);
-		bindFooterOverflow(host);
+		bindFooterOverflow(host, signal);
 		return;
 	}
 
@@ -96,6 +110,9 @@ function buildShortcutButton(context: PromptContext, command: string, labelText:
 	button.append(label);
 
 	button.addEventListener('click', () => {
+		if (denyWhileBusy(context, button)) {
+			return;
+		}
 		// Close the modal first so focus returns to the terminal before the
 		// command is injected.
 		context.close();
@@ -127,6 +144,9 @@ function buildUsageButton(context: PromptContext, command: string, usePasteMode:
 	button.append(iconEl('chartBar', 11), label);
 
 	button.addEventListener('click', () => {
+		if (denyWhileBusy(context, button)) {
+			return;
+		}
 		context.close();
 		if (usePasteMode) {
 			context.sendToActiveSession?.(command, { paste: true, submit: true });
@@ -141,7 +161,7 @@ function buildUsageButton(context: PromptContext, command: string, usePasteMode:
 /** Watch a single shortcut chip. If its label would show an ellipsis
  *  (scrollWidth > clientWidth), swap to icon-only; swap back to text-only
  *  when the label would fit again. */
-function bindShortcutTruncation(button: HTMLElement) {
+function bindShortcutTruncation(button: HTMLElement, signal?: AbortSignal) {
 	const label = button.querySelector<HTMLElement>('.prompt-footer-btn-label');
 	if (!label) {
 		return;
@@ -170,12 +190,14 @@ function bindShortcutTruncation(button: HTMLElement) {
 
 	const ro = new ResizeObserver(check);
 	ro.observe(button);
+	// Observers survive DOM removal and pin their targets — release on unmount.
+	signal?.addEventListener('abort', () => ro.disconnect());
 	requestAnimationFrame(check);
 }
 
 /** Watch the footer for overflow; collapse shortcut chips to icon-only
  *  when the Execute button gets squeezed. Expands back when space allows. */
-function bindFooterOverflow(host: HTMLElement) {
+function bindFooterOverflow(host: HTMLElement, signal?: AbortSignal) {
 	const footer = host.querySelector<HTMLElement>('.prompt-footer');
 	if (!footer) {
 		return;
@@ -188,5 +210,6 @@ function bindFooterOverflow(host: HTMLElement) {
 	const ro = new ResizeObserver(check);
 	ro.observe(footer);
 	ro.observe(host);
+	signal?.addEventListener('abort', () => ro.disconnect());
 	requestAnimationFrame(check);
 }

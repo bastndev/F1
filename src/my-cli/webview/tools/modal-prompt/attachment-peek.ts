@@ -18,11 +18,13 @@ interface AttachmentPeekOptions {
 	/** Live arrays owned by the composer — mutated in place on edit/remove. */
 	pasteAttachments: PasteAttachment[];
 	imageAttachments: ImageAttachment[];
+	/** Reaps the body-portaled thumb/popover when the prompt panel unmounts. */
+	signal?: AbortSignal;
 }
 
 const pasteMarkerSelector = '.prompt-paste-code, .prompt-paste-text';
 
-export function initAttachmentPeek({ textarea, highlight, pasteAttachments, imageAttachments }: AttachmentPeekOptions) {
+export function initAttachmentPeek({ textarea, highlight, pasteAttachments, imageAttachments, signal }: AttachmentPeekOptions) {
 	if (!highlight) {
 		return;
 	}
@@ -271,6 +273,13 @@ export function initAttachmentPeek({ textarea, highlight, pasteAttachments, imag
 		}
 		hideThumb();
 		openPastePopover(attachment, span.getClientRects()[0] ?? span.getBoundingClientRect());
+	});
+
+	// The thumb and popover portal to document.body, so unmounting the modal
+	// doesn't remove them — reap both (and their document-level listeners) here.
+	signal?.addEventListener('abort', () => {
+		hideThumb();
+		dismissPopover(false);
 	});
 }
 

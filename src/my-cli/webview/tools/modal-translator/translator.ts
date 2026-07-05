@@ -686,7 +686,7 @@ function initializeTranslator(host: HTMLElement, context: ToolContext) {
 			if (!isCurrentTranslation()) {
 				return;
 			}
-			console.error('[Translator] EN->ES failed:', err);
+			console.error('[Translator] Translation failed:', err);
 			// Surface any blocks that were translated but still buffered when the
 			// error happened, so the user isn't left with an empty or pure-skeleton
 			// view for no reason.
@@ -1035,6 +1035,7 @@ function initializeTranslator(host: HTMLElement, context: ToolContext) {
 
 		return () => {
 			isMounted = false;
+			clearTimeout(growSettleTimer);
 			document.removeEventListener('keydown', handleSpaceShortcut);
 			disposeVoiceState?.();
 			clearVoiceHighlights(activeVoiceChunks);
@@ -1044,6 +1045,7 @@ function initializeTranslator(host: HTMLElement, context: ToolContext) {
 
 	return () => {
 		isMounted = false;
+		clearTimeout(growSettleTimer);
 	};
 }
 

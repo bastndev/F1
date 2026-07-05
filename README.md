@@ -31,24 +31,6 @@
 
 F1 turns VS Code into a hub for AI coding agents. Open **Claude Code, Codex, Copilot, Cursor, Kiro, Kilo Code, OpenCode, Grok, Antigravity** — or any custom CLI — in embedded terminals, switch between them instantly, write better prompts, and keep your project's context cheap to load for every agent.
 
-<!-- 📺 VIDEO TUTORIALS — Future: collapsed by default so they take up no space until opened.
-     Paste each tutorial (GIF, <video>, or a YouTube thumbnail linking to the clip) where the marker is. -->
-
-<!-- <details>
-<summary>▶️ &nbsp;<b>Tutorial 1</b> — CLI Hub: launch &amp; manage agents</summary>
-
-<br>
-
-
-</details>
-
-<details>
-<summary>▶️ &nbsp;<b>Tutorial 2</b> — My Skills &amp; Smart + Skills</summary>
-
-<br>
-
-</details> -->
-
 <br>
 
 ## ⌨️ Keyboard shortcuts - Focus `[`CLI Hub`]`
@@ -61,29 +43,36 @@ F1 turns VS Code into a hub for AI coding agents. Open **Claude Code, Codex, Cop
 | `[`🌐`]` Side Panel (R/L) - [1]       | `Alt + CapsLock`    | `Alt + CapsLock`       | `Alt + CapsLock`       | ㅤㅤ✅    |
 | Focus CLI Panel `[`🌐`]` - [2]        | `Alt + E`           | `Alt + E`              | `Alt + E`              | ㅤㅤ✅    |
 | -                                     | -                   | -                      | -                      |           |
-| Open/Disable Chat filter              | `Shift + F1`        | `Shift + F1`           | `Shift + F1`           | ㅤㅤ✅    |
+| New CLI session                       | `Alt + +`           | `Alt + +`              | `Alt + +`              | ㅤㅤ✅    |
+| Close current session                 | `Alt + -`           | `Alt + -`              | `Alt + -`              | ㅤㅤ✅    |
+| Next session                          | `Tab`               | `Tab`                  | `Tab`                  | ㅤㅤ✅    |
+| Previous session                      | `Shift + Tab`       | `Shift + Tab`          | `Shift + Tab`          | ㅤㅤ✅    |
+| Open CLI selector                     | `CapsLock`          | `CapsLock`             | `CapsLock`             | ㅤㅤ✅    |
+| Open agent 1–9 (alt or toggle active) | `1`–`9`             | `1`–`9`                | `1`–`9`                | ㅤㅤ✅    |
+| Toggle agents palette                 | `Tab`               | `Tab`                  | `Tab`                  | ㅤㅤ✅    |
+| Close agents palette                  | `Escape`            | `Escape`               | `Escape`               | ㅤㅤ✅    |
+| -                                     | -                   | -                      | -                      |           |
+| Open Prompt tool                      | `Ctrl + Space`      | `Ctrl + Space`         | `Ctrl + Space`         | ㅤㅤ✅    |
+| Prompt filter on/off                  | `Shift + F1`        | `Shift + F1`           | `Shift + F1`           | ㅤㅤ✅    |
 | Open Translate tool                   | `Shift + F2`        | `Shift + F2`           | `Shift + F2`           | ㅤㅤ✅    |
 | Open Status/use tool                  | `Shift + F3`        | `Shift + F3`           | `Shift + F3`           | ㅤㅤ✅    |
 | Open Keymaps tool                     | `Shift + F4`        | `Shift + F4`           | `Shift + F4`           | ㅤㅤ✅    |
-| -                                     | -                   | -                      | -                      |           |
-| Toggle chat filter                    | `Ctrl + Space`      | `Ctrl + Space`         | `Ctrl + Space`         | ㅤㅤ✅    |
-| Previous session                      | `Shift + Tab`       | `Shift + Tab`          | `Shift + Tab`          | ㅤㅤ✅    |
-| Execute prompt                        | `⌘ + Enter`         | `Ctrl + Enter`         | `Ctrl + Enter`         | ㅤㅤ✅    |
 | Open Commands tool                    | `Alt + F1`          | `Alt + F1`             | `Alt + F1`             | ㅤㅤ✅    |
-| -                                     | -                   | -                      | -                      |           |
-| Next session                          | `Tab`               | `Tab`                  | `Tab`                  | ㅤㅤ✅    |
 | Play / pause Listen                   | `Space`             | `Space`                | `Space`                | ㅤㅤ✅    |
-| Toggle agents palette                 | `Tab`               | `Tab`                  | `Tab`                  | ㅤㅤ✅    |
-| Close agents palette                  | `Escape`            | `Escape`               | `Escape`               | ㅤㅤ✅    |
-| Open CLI selector                     | `CapsLock`          | `CapsLock`             | `CapsLock`             | ㅤㅤ✅    |
-| Open agent 1–9 (alt or toggle active) | `1`–`9`             | `1`–`9`                | `1`–`9`                | ㅤㅤ✅    |
 | -                                     | -                   | -                      | -                      |           |
-| Close current session                 | `Alt + -`           | `Alt + -`              | `Alt + -`              | ㅤㅤ✅    |
-| New CLI session                       | `Alt + +`           | `Alt + +`              | `Alt + +`              | ㅤㅤ✅    |
+| Execute prompt                        | `⌘ + Enter`         | `Ctrl + Enter`         | `Ctrl + Enter`         | ㅤㅤ✅    |
+| Execute without translating           | `⌘ + Shift + Enter` | `Ctrl + Shift + Enter` | `Ctrl + Shift + Enter` | ㅤㅤ✅    |
+| Model picker (open/close) - [3]       | `Alt + 1`           | `Alt + 1`              | `Alt + 1`              | ㅤㅤ✅    |
+| Resume session (open/close) - [3]     | `Alt + 2`           | `Alt + 2`              | `Alt + 2`              | ㅤㅤ✅    |
+| Usage / status - [3]                  | `Alt + 3`           | `Alt + 3`              | `Alt + 3`              | ㅤㅤ✅    |
+| Prompt PRO mode                       | `Alt + 4`           | `Alt + 4`              | `Alt + 4`              | ㅤㅤ✅    |
+| Prompt PLAN mode                      | `Alt + 5`           | `Alt + 5`              | `Alt + 5`              | ㅤㅤ✅    |
 | -                                     | -                   | -                      | -                      |           |
 | `[`Skill`]` - Go to Create tab        | `Alt + 1`           | `Alt + 1`              | `Alt + 1`              | ㅤㅤ✅    |
 | `[`Skill`]` - Go to Install tab       | `Alt + 2`           | `Alt + 2`              | `Alt + 2`              | ㅤㅤ✅    |
 | `[`Skill`]` - Go to Local tab         | `Alt + 3`           | `Alt + 3`              | `Alt + 3`              | ㅤㅤ✅    |
+
+> **[3]** `Alt + 1/2/3` run the active CLI's own command (`/model`, `/resume`, `/usage`…, adapted per agent) — they work directly in the terminal **and** inside the Prompt tool. Press the same chord again to close the picker it opened. Usage/status isn't available on every CLI.
 
 ---
 
@@ -104,8 +93,8 @@ F1 turns VS Code into a hub for AI coding agents. Open **Claude Code, Codex, Cop
 - Run multiple AI coding CLIs side by side in embedded [xterm.js](https://xtermjs.org/) terminals.
 - Fuzzy-search launcher to pick an agent; press **F1** to jump straight to the panel.
 - Built-in tools alongside every session:
-  - **Prompt** — rich editor with `@`-file mentions, image paste, skill chips, live spell‑marking, and source→English translation before sending.
-  - **Translator** — translate any terminal selection inline.
+  - **Prompt** — rich editor with `@`-file mentions, image paste, skill chips, live spell‑marking, prompt history (`↑`), **PRO / PLAN** modes, and source→English translation before sending.
+  - **Translator** — translate any terminal selection inline, with an auto mode that reads the answer aloud while the rest is still translating.
   - **Use** — per‑CLI usage / status view.
   - **Keymaps** — keyboard‑shortcut reference.
   - **Commands** — searchable, per-CLI palette of the active agent's slash-commands.

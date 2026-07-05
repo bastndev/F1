@@ -19,7 +19,7 @@ import {
 	type AgentLaunchExtensionMode,
 	type AgentLaunchSource
 } from '../shared/agent-launch-guard';
-import { SmartService, SMART_READY_MESSAGE } from '../../my-plus/plus';
+import { SmartService, SMART_READY_MARKER } from '../../my-plus/plus';
 
 export class MyCliViewProvider implements vscode.WebviewViewProvider, vscode.Disposable {
 	public static readonly viewType = 'f1.myCli';
@@ -210,6 +210,11 @@ export class MyCliViewProvider implements vscode.WebviewViewProvider, vscode.Dis
 
 			if (message.type === 'prompt.spellcheck') {
 				await this._handlePromptSpellcheck(webviewView.webview, message);
+				return;
+			}
+
+			if (message.type === 'prompt.injectRules') {
+				this._handleInjectRules(webviewView.webview, message);
 				return;
 			}
 
@@ -411,7 +416,7 @@ export class MyCliViewProvider implements vscode.WebviewViewProvider, vscode.Dis
 			if (revealed) {
 				return;
 			}
-			if (!this.sessionManager.bufferContains(sessionId, SMART_READY_MESSAGE)) {
+			if (!this.sessionManager.bufferContains(sessionId, SMART_READY_MARKER)) {
 				console.warn('[smart] agent first reply did not contain the ready message; waiting for the hard cap');
 				return;
 			}
@@ -579,6 +584,52 @@ export class MyCliViewProvider implements vscode.WebviewViewProvider, vscode.Dis
 				issues: [],
 			});
 		}
+	}
+
+	/**
+	 * One-shot "rules" injection from the prompt modal's rules button. Types the
+	 * webview-composed rules prompt into the target session and answers once the
+	 * agent's reply settles (confirmation marker seen) — reusing the same idle/
+	 * settle machinery as the Smart launch, minus the project graph and file
+	 * writes. A hard cap guarantees the modal always unblocks.
+	 */
+	private _handleInjectRules(webview: vscode.Webview, message: InboundWebviewMessage) {
+		if (typeof message.id !== 'string') {
+			return;
+		}
+		const id = message.id;
+		const sessionId = typeof message.sessionId === 'string' ? message.sessionId : '';
+		const text = typeof message.text === 'string' ? message.text : '';
+		const marker = typeof message.marker === 'string' ? message.marker : '';
+
+		let answered = false;
+		const answer = (ok: boolean) => {
+			if (answered) {
+				return;
+			}
+			answered = true;
+			void webview.postMessage({ type: 'prompt.rulesInjected', id, ok });
+		};
+
+		// Nothing to type into (no session / dead session) — tell the modal so it
+		// re-enables the button instead of hanging on the injecting state.
+		if (!sessionId || !text || !this.sessionManager.isRunning(sessionId)) {
+			answer(false);
+			return;
+		}
+
+		this.sessionManager.sendText(sessionId, text);
+		this.sessionManager.onceResponseSettled(sessionId, () => {
+			// Reply settled but the confirmation line isn't in the buffer yet — let
+			// the hard cap answer instead of reporting done prematurely.
+			if (marker && !this.sessionManager.bufferContains(sessionId, marker)) {
+				return;
+			}
+			answer(true);
+		});
+		// The rules were typed regardless — cap-answer as success so the button
+		// still locks for the session even if the agent never confirmed.
+		setTimeout(() => answer(true), 60000);
 	}
 
 	private async _postPromptTranslationError(webview: vscode.Webview, id: string, message: string) {

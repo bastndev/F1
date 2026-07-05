@@ -24,6 +24,13 @@ Following VS Code best practices, F1 uses semantic versioning for all releases.
 <!-- --- -->
 
 ---
+## [2.1.0] - 2026-07-03
+- **Better**: Chat  , Translator
+- **fix**: 🐞 spelling correction
+- **Refactor**:  @modal-prompt & @modal-translator
+- **TEST**: 🧪 
+
+---
 ## [2.0.1] - 2026-07-02
 - **Add**: Mode /plan & /usage
 

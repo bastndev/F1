@@ -45,6 +45,8 @@ import { initSkillsChips, isClaudeSession } from './skills-chips';
 import { updateFooterModel } from './footer-model';
 import { initSessionState, showNoSessionMessage } from './session-state';
 import { initPromptMode, PLAN_INSTRUCTION, type PromptMode } from './prompt-mode';
+import { initRulesToggle, type RulesToggleController } from './rules-toggle';
+import { buildRulesPrompt, RULES_MARKER } from './assets/rules/rules-content';
 import { initPromptHistory, recordSentPrompt } from './prompt-history';
 import { initAttachmentPeek } from './attachment-peek';
 import { getShortcut, matchesShortcut } from '../../../../shared/keymaps/cli';
@@ -92,11 +94,35 @@ type PromptDraft = {
 };
 const promptDrafts = new Map<string, PromptDraft>();
 
-/** Drop drafts whose session is gone; the terminal calls this on every state sync. */
+// CLI sessions that already had the rules injected. Keyed by session id so the
+// one-shot survives modal close/reopen and resets for a brand-new CLI. Lives in
+// module scope alongside the drafts, and is pruned on the same lifecycle.
+const rulesInjectedSessions = new Set<string>();
+
+/** Read the rules sound URI injected by the host into the webview HTML. */
+const getRulesSoundUri = (): string | undefined => {
+	const el = document.getElementById('cli-sounds');
+	if (!el) {
+		return undefined;
+	}
+	try {
+		return JSON.parse(el.textContent || '{}').rules as string | undefined;
+	} catch {
+		return undefined;
+	}
+};
+
+/** Drop drafts + rules-injected marks whose session is gone; the terminal calls
+ *  this on every state sync. */
 export const prunePromptDrafts = (openSessionIds: Set<string>) => {
 	for (const sessionId of promptDrafts.keys()) {
 		if (!openSessionIds.has(sessionId)) {
 			promptDrafts.delete(sessionId);
+		}
+	}
+	for (const sessionId of rulesInjectedSessions) {
+		if (!openSessionIds.has(sessionId)) {
+			rulesInjectedSessions.delete(sessionId);
 		}
 	}
 };
@@ -115,12 +141,20 @@ export const mountPromptPanel = (host: HTMLElement, context: PromptContext = { c
 
 	const hasActiveSession = !!context.getActiveSessionId?.();
 
-	updateFooterModel(host, context, hasActiveSession);
+	// Element-level listeners die with the DOM on unmount, but this mount also
+	// registers document/window listeners, observers and timers — those outlive
+	// the DOM and pile up across modal opens unless released. The abort signal
+	// is that release; the tools controller invokes the returned cleanup on close.
+	const lifecycle = new AbortController();
+
+	updateFooterModel(host, context, hasActiveSession, lifecycle.signal);
 	initSessionState(host, hasActiveSession);
-	initPromptComposer(host, context, hasActiveSession);
+	initPromptComposer(host, context, hasActiveSession, lifecycle.signal);
+
+	return () => lifecycle.abort();
 };
 
-function initPromptComposer(host: HTMLElement, context: PromptContext, hasActiveSession: boolean) {
+function initPromptComposer(host: HTMLElement, context: PromptContext, hasActiveSession: boolean, signal: AbortSignal) {
 	const textarea = host.querySelector<HTMLTextAreaElement>('#promptInput');
 	const textareaWrap = host.querySelector<HTMLElement>('.prompt-textarea-wrap');
 	const highlight = host.querySelector<HTMLElement>('.prompt-textarea-highlight');
@@ -128,6 +162,12 @@ function initPromptComposer(host: HTMLElement, context: PromptContext, hasActive
 	if (!textarea) {
 		return;
 	}
+
+	// Rules injection state — declared up front so the always-on rules button
+	// (wired before the no-session return) and the later run button can share it.
+	let injectInFlight = false;
+	let runButtonRefresh: (() => void) | undefined;
+	let rulesController: RulesToggleController | undefined;
 
 	// PRO/PLAN tabs — initialized even without a session so the persisted mode
 	// always shows. PLAN appends a planning instruction at send time (see the
@@ -139,6 +179,85 @@ function initPromptComposer(host: HTMLElement, context: PromptContext, hasActive
 		// the mode instead (accent-tinted while PLAN is active).
 		host.querySelector<HTMLElement>('.prompt-modal')?.classList.toggle('is-plan-mode', mode === 'plan');
 	});
+
+	// "rules" — a one-shot, language- and CLI-agnostic action, wired before the
+	// no-session return so the button is always live. Clicking it types the rules
+	// prompt into the CLI once (the host waits until the agent has read it); a
+	// click with no running CLI, a busy one, or after it already ran this session
+	// is refused with a shake. The per-session "loaded" mark survives modal
+	// close/reopen (rulesInjectedSessions) and blocks re-injection.
+	let rulesSoundPlayedForSession = false;
+	async function activateRules() {
+		if (injectInFlight) {
+			return;
+		}
+		const sessionId = context.getActiveSessionId?.();
+		// Need a running CLI to type into, and it must be idle — typing into a
+		// busy CLI would corrupt its input line.
+		if (!sessionId || context.isCliBusy?.() || !context.injectRules || rulesInjectedSessions.has(sessionId)) {
+			rulesController?.flashDenied();
+			return;
+		}
+
+		injectInFlight = true;
+		rulesController?.setInjecting();
+
+		// Play the whip-crack sound once per successful rules activation.
+		// Failures/retry reset via setAvailable below.
+		if (!rulesSoundPlayedForSession) {
+			rulesSoundPlayedForSession = true;
+			const soundUri = getRulesSoundUri();
+			if (soundUri) {
+				const audio = new Audio(soundUri);
+				audio.volume = 0.5;
+				audio.play().catch(() => { /* ignore autoplay / load errors */ });
+			}
+		}
+
+		// Block Execute with a visible "loading" state while the rules land — a
+		// prompt sent mid-injection would race the rules message into the CLI.
+		const runBtn = host.querySelector<HTMLButtonElement>('#runBtn');
+		const savedRunBtnHtml = runBtn?.innerHTML;
+		if (runBtn) {
+			runBtn.classList.add('is-loading-rules');
+			// Hide the original "Execute" text but keep its width so the button
+			// does not collapse or stretch — the turquoise stripe animation is
+			// the only visible loading cue.
+			runBtn.innerHTML = '<span class="prompt-run-loading-text">Execute</span>';
+		}
+		runButtonRefresh?.();
+
+		let ok = false;
+		try {
+			ok = await context.injectRules(buildRulesPrompt(), RULES_MARKER);
+		} catch (err) {
+			console.error('[Prompt] Rules injection failed:', err);
+		} finally {
+			injectInFlight = false;
+			if (runBtn && savedRunBtnHtml !== undefined) {
+				runBtn.classList.remove('is-loading-rules');
+				runBtn.innerHTML = savedRunBtnHtml;
+			}
+			runButtonRefresh?.();
+		}
+
+		if (ok) {
+			rulesInjectedSessions.add(sessionId);
+			rulesController?.setDone();
+		} else {
+			// Nothing landed (session gone) — leave it clickable to retry.
+			rulesController?.setAvailable();
+		}
+	}
+
+	rulesController = initRulesToggle(host, () => { void activateRules(); }, () => textarea.focus());
+	// Reflect whether this session already loaded the rules (survives reopen).
+	const activeSessionId = context.getActiveSessionId?.();
+	if (activeSessionId && rulesInjectedSessions.has(activeSessionId)) {
+		rulesController?.setDone();
+	} else {
+		rulesController?.setAvailable();
+	}
 
 	// Alt+1 / Alt+2 / Alt+3 click the footer model / resume / usage chips.
 	host.addEventListener('keydown', (e) => {
@@ -152,6 +271,10 @@ function initPromptComposer(host: HTMLElement, context: PromptContext, hasActive
 				const btn = host.querySelector<HTMLButtonElement>(`.prompt-footer ${selector}`);
 				if (btn) {
 					e.preventDefault();
+					// The chip click closes the modal, so without this the event
+					// would bubble on to the terminal-wide Alt+1/2/3 handler (which
+					// only skips while a modal is open) and inject twice.
+					e.stopPropagation();
 					btn.click();
 					// VS Code's Alt+number bindings switch editor tabs and steal focus;
 					// bring it back to the CLI after the chip action runs.
@@ -182,7 +305,8 @@ function initPromptComposer(host: HTMLElement, context: PromptContext, hasActive
 			mountFileMentionPicker(
 				textarea,
 				textareaWrapEl,
-				() => context.requestWorkspaceFiles!()
+				() => context.requestWorkspaceFiles!(),
+				signal
 			);
 		}
 	}
@@ -242,11 +366,11 @@ function initPromptComposer(host: HTMLElement, context: PromptContext, hasActive
 	const translateState = { enabled: localStorage.getItem('f1-translate-auto') !== '0' };
 	let setTranslating: (active: boolean) => void = () => {};
 
-	// Strict-accents toggle — OFF by default (missing tildes ignored). When ON,
-	// the host re-flags accent omissions. Persisted across IDE restarts.
-	// localStorage key: 'f1-spellcheck-strict' → '1' (on) | '0'/missing (off).
-	const strictState = { enabled: localStorage.getItem('f1-spellcheck-strict') === '1' };
-	// Assigned once runSpellcheck/renderHighlight exist; re-marks on toggle.
+	// Spell-checking always runs in lenient mode: accent omissions (missing
+	// tildes) are accepted, never flagged. There is no user-facing strict toggle —
+	// an English keyboard can't type accents and the CLI understands the text
+	// regardless. Assigned once runSpellcheck/renderHighlight exist; re-marks when
+	// the source language changes.
 	let rerunSpellcheck: () => void = () => {};
 
 	const registerPathImageAttachment = (path: string): string => {
@@ -309,7 +433,9 @@ function initPromptComposer(host: HTMLElement, context: PromptContext, hasActive
 		currentAttachments: ImageAttachment[],
 		skipTranslate: boolean
 	) {
-		if (sendInFlight) {
+		// injectInFlight: a rules injection is landing in the CLI — a send now
+		// would race its message in ahead of the rules.
+		if (sendInFlight || injectInFlight) {
 			return;
 		}
 
@@ -483,23 +609,13 @@ function initPromptComposer(host: HTMLElement, context: PromptContext, hasActive
 			}
 		);
 		setTranslating = tools.setTranslating;
-
-		initStrictToggle(
-			host,
-			() => strictState.enabled,
-			(val) => {
-				strictState.enabled = val;
-				try { localStorage.setItem('f1-spellcheck-strict', val ? '1' : '0'); } catch { /* storage unavailable */ }
-				rerunSpellcheck();
-			}
-		);
 	}
 
 	const performSendNow = async (options?: { skipTranslate?: boolean }) => {
 		await doPerformSendWithImages(host, textarea, context, imageAttachments, options?.skipTranslate === true);
 	};
 
-	initRunButton(host, textarea, context, performSendNow);
+	runButtonRefresh = initRunButton(host, textarea, context, performSendNow, () => injectInFlight)?.refresh;
 	initSendShortcut(textarea, context, performSendNow);
 
 	if (hasActiveSession) {
@@ -512,11 +628,47 @@ function initPromptComposer(host: HTMLElement, context: PromptContext, hasActive
 	};
 
 	// Live spell-marking state. Misspelled-word ranges come from the host (cspell trie).
-	// Ranges are offset-based, so they go stale the moment the text changes — we clear
-	// them on input and recompute ~400ms after the user pauses typing.
+	// Ranges are offset-based, so edits shift them — instead of clearing on every
+	// keystroke (marks used to vanish and pop back after the debounce round-trip),
+	// we remap offsets across the edit and let the debounced recheck refresh them.
 	let spellIssues: SpellIssue[] = [];
+	// The text the current spellIssues offsets refer to.
+	let spellTextSnapshot = textarea.value;
 	let spellcheckTimer: number | undefined;
 	let spellcheckToken = 0;
+
+	// Shift existing marks across a contiguous edit (the only kind a textarea
+	// produces): marks before the edit stay, marks after it slide by the length
+	// delta, and marks touching the edited region are dropped — that word is
+	// being rewritten, and the recheck re-flags it if it's still wrong.
+	const remapSpellIssues = (oldText: string, newText: string) => {
+		if (spellIssues.length === 0 || oldText === newText) {
+			return;
+		}
+		let prefix = 0;
+		const maxCommon = Math.min(oldText.length, newText.length);
+		while (prefix < maxCommon && oldText[prefix] === newText[prefix]) {
+			prefix++;
+		}
+		let suffix = 0;
+		while (
+			suffix < maxCommon - prefix &&
+			oldText[oldText.length - 1 - suffix] === newText[newText.length - 1 - suffix]
+		) {
+			suffix++;
+		}
+		const oldEditEnd = oldText.length - suffix;
+		const delta = newText.length - oldText.length;
+		spellIssues = spellIssues.flatMap((issue) => {
+			if (issue.offset + issue.length < prefix) {
+				return [issue];
+			}
+			if (issue.offset > oldEditEnd) {
+				return [{ ...issue, offset: issue.offset + delta }];
+			}
+			return [];
+		});
+	};
 
 	const renderHighlight = () => {
 		if (highlight && textareaWrap) {
@@ -538,20 +690,23 @@ function initPromptComposer(host: HTMLElement, context: PromptContext, hasActive
 			return;
 		}
 
-		void context.requestSpellcheck(text, currentLang, strictState.enabled).then((issues) => {
+		// Always lenient: accent omissions are accepted, never flagged.
+		void context.requestSpellcheck(text, currentLang, false).then((issues) => {
 			// Drop stale responses and any result whose offsets no longer match the text.
 			if (token !== spellcheckToken || textarea.value !== text) {
 				return;
 			}
 			spellIssues = issues;
+			spellTextSnapshot = text;
 			renderHighlight();
 		});
 	};
 
-	// Toggling strict changes verdicts for already-typed text: clear stale marks
-	// immediately, then recompute under the new mode.
+	// Switching the source language changes verdicts for already-typed text:
+	// clear stale marks immediately, then recompute under the new dictionary.
 	rerunSpellcheck = () => {
 		spellIssues = [];
+		spellTextSnapshot = textarea.value;
 		renderHighlight();
 		runSpellcheck();
 	};
@@ -560,12 +715,14 @@ function initPromptComposer(host: HTMLElement, context: PromptContext, hasActive
 		window.clearTimeout(spellcheckTimer);
 		spellcheckTimer = window.setTimeout(runSpellcheck, 400);
 	};
+	signal.addEventListener('abort', () => window.clearTimeout(spellcheckTimer));
 
 	const onInputForHighlight = () => {
 		adjustHeight();
-		// Offsets are relative to the text at check time, so any edit invalidates
-		// them — drop the marks now; the debounced pass recomputes them.
-		spellIssues = [];
+		// Keep existing marks alive through the edit: shift their offsets to the
+		// new text so nothing flickers; the debounced pass trues them up.
+		remapSpellIssues(spellTextSnapshot, textarea.value);
+		spellTextSnapshot = textarea.value;
 		if (highlight && textareaWrap) {
 			// use raf to ensure update happens after value commit and to help layer paint
 			requestAnimationFrame(renderHighlight);
@@ -604,7 +761,7 @@ function initPromptComposer(host: HTMLElement, context: PromptContext, hasActive
 			renderHighlight();
 		}
 	};
-	document.addEventListener('selectionchange', onSelectionChange);
+	document.addEventListener('selectionchange', onSelectionChange, { signal });
 
 	// Initial adjustment + first highlight render
 	requestAnimationFrame(() => {
@@ -618,6 +775,7 @@ function initPromptComposer(host: HTMLElement, context: PromptContext, hasActive
 		highlight,
 		getSpellIssues: () => spellIssues,
 		onApplied: rerunSpellcheck,
+		signal,
 	});
 
 	// ArrowUp in an empty textarea recalls previously sent prompts (per CLI).
@@ -625,13 +783,12 @@ function initPromptComposer(host: HTMLElement, context: PromptContext, hasActive
 
 	// Plain click a collapsed-paste marker → peek/edit popover; hover an
 	// [Image #N] marker → thumbnail preview.
-	initAttachmentPeek({ textarea, highlight, pasteAttachments, imageAttachments });
+	initAttachmentPeek({ textarea, highlight, pasteAttachments, imageAttachments, signal });
 
 	// ── Language gate ────────────────────────────────────────────────
 	// The picker is the single source of the source language. Typing stays
 	// locked until one is chosen; the choice persists across sessions.
 	const translateToggleBtn = host.querySelector<HTMLButtonElement>('#translateToggle');
-	const strictToggleBtn = host.querySelector<HTMLButtonElement>('#strictToggle');
 
 	const applyLanguage = (lang: PromptLang) => {
 		currentLang = lang;
@@ -639,10 +796,6 @@ function initPromptComposer(host: HTMLElement, context: PromptContext, hasActive
 		// Translate toggle: only for languages that translate (hidden for English).
 		if (translateToggleBtn) {
 			translateToggleBtn.hidden = !info?.translates;
-		}
-		// Strict toggle: Spanish only (fixnow's accent leniency is es-only).
-		if (strictToggleBtn) {
-			strictToggleBtn.hidden = !info?.strictToggle;
 		}
 		// Unlock typing now that a language is chosen.
 		textarea.disabled = false;
@@ -657,12 +810,11 @@ function initPromptComposer(host: HTMLElement, context: PromptContext, hasActive
 	if (initialLang) {
 		applyLanguage(initialLang);
 	} else {
-		// No language yet — lock typing and hide the language-specific toggles
-		// until the user picks one from the header picker.
+		// No language yet — lock typing and hide the translate toggle until the
+		// user picks one from the header picker.
 		textarea.disabled = true;
 		textarea.placeholder = 'Select a language to start…';
 		if (translateToggleBtn) { translateToggleBtn.hidden = true; }
-		if (strictToggleBtn) { strictToggleBtn.hidden = true; }
 	}
 }
 
@@ -694,36 +846,17 @@ function initToolbarActions(
 	};
 }
 
-function initStrictToggle(
-	host: HTMLElement,
-	getEnabled: () => boolean,
-	setEnabled: (val: boolean) => void
-) {
-	const toggleBtn = host.querySelector<HTMLButtonElement>('#strictToggle');
-	if (!toggleBtn) {
-		return;
-	}
-
-	// Reflect the persisted preference on every mount.
-	toggleBtn.setAttribute('aria-pressed', getEnabled() ? 'true' : 'false');
-
-	toggleBtn.addEventListener('click', () => {
-		const next = !getEnabled();
-		setEnabled(next);
-		toggleBtn.setAttribute('aria-pressed', next ? 'true' : 'false');
-	});
-}
-
 function initRunButton(
 	host: HTMLElement,
 	textarea: HTMLTextAreaElement,
 	context: PromptContext,
-	performSendImpl: () => Promise<void>
-) {
+	performSendImpl: () => Promise<void>,
+	isBlocked?: () => boolean
+): { refresh: () => void } | undefined {
 	const runBtn = host.querySelector<HTMLButtonElement>('#runBtn');
 	const runHint = host.querySelector<HTMLElement>('.prompt-run-hint');
 	if (!runBtn) {
-		return;
+		return undefined;
 	}
 
 	if (runHint) {
@@ -738,7 +871,8 @@ function initRunButton(
 		const hasEnoughText = text.length >= 6 || text.includes(' ');
 		// Limit applies to the effective (typed) length — markers/@routes are free.
 		const overLimit = stripPromptTokens(textarea.value).length > promptCharLimit;
-		runBtn.disabled = !hasEnoughText || !hasSession || overLimit;
+		// isBlocked holds while a rules injection is in flight (Execute is frozen).
+		runBtn.disabled = !hasEnoughText || !hasSession || overLimit || (isBlocked?.() ?? false);
 	};
 
 	// Initial state
@@ -755,6 +889,8 @@ function initRunButton(
 	runBtn.addEventListener('click', async () => {
 		await performSendImpl();
 	});
+
+	return { refresh: updateState };
 }
 
 function initSendShortcut(

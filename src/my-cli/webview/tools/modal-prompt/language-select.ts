@@ -1,9 +1,8 @@
 /**
  * Source-language picker that lives in the prompt header (replaces the old
  * static "🌐 → EN" chip). The translator target is always English; the user
- * picks the SOURCE. The choice drives translation, spell-check language and the
- * strict-toggle visibility (see shared/prompt/languages.ts) and is required
- * before the textarea unlocks.
+ * picks the SOURCE. The choice drives translation and spell-check language
+ * (see shared/prompt/languages.ts) and is required before the textarea unlocks.
  *
  * Indicator format (target-first, as requested):
  *   • no language yet → "🌐"
@@ -11,7 +10,7 @@
  *   • other           → "EN ← 🇪🇸"   (flag may fall back to letters on some fonts)
  *
  * The choice persists in localStorage 'f1-prompt-lang' (sibling of
- * 'f1-translate-auto' / 'f1-spellcheck-strict').
+ * 'f1-translate-auto').
  */
 import { PROMPT_LANGUAGES, PROMPT_LANG_GLOBE, getPromptLanguage, isPromptLang, type PromptLang } from '../../../shared/prompt';
 
