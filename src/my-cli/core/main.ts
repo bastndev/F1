@@ -19,7 +19,7 @@ import {
 	type AgentLaunchExtensionMode,
 	type AgentLaunchSource
 } from '../shared/agent-launch-guard';
-import { SmartService, SMART_READY_MESSAGE } from '../../my-plus/plus';
+import { SmartService, SMART_READY_MARKER } from '../../my-plus/plus';
 
 export class MyCliViewProvider implements vscode.WebviewViewProvider, vscode.Disposable {
 	public static readonly viewType = 'f1.myCli';
@@ -416,7 +416,7 @@ export class MyCliViewProvider implements vscode.WebviewViewProvider, vscode.Dis
 			if (revealed) {
 				return;
 			}
-			if (!this.sessionManager.bufferContains(sessionId, SMART_READY_MESSAGE)) {
+			if (!this.sessionManager.bufferContains(sessionId, SMART_READY_MARKER)) {
 				console.warn('[smart] agent first reply did not contain the ready message; waiting for the hard cap');
 				return;
 			}
