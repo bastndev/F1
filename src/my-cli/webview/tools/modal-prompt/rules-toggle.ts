@@ -6,8 +6,8 @@
  *   • available  → turquoise, clickable ("load the rules into this session")
  *   • injecting  → disabled, working look, while the host types the rules prompt
  *                  and waits for the agent to read it
- *   • done       → brief green "rules ✓" flash, then gray + permanently
- *                  disabled for that session (rules loaded)
+ *   • done       → brief green text flash (label stays "rules", no width
+ *                  change), then gray + permanently disabled for that session
  * A refused click (CLI busy / no session) shakes the button but leaves it
  * available. The "already loaded" state is tracked per session by the composer
  * (see prompt.ts), so it survives modal close/reopen and resets for a new CLI.
@@ -53,7 +53,7 @@ export function initRulesToggle(host: HTMLElement, onActivate: () => void, refoc
 		btn.classList.remove('is-injecting');
 		btn.setAttribute('aria-pressed', 'false');
 		btn.title = 'rules loaded for this session';
-		btn.innerHTML = '<span class="prompt-rules-label">rules ✓</span>';
+		btn.innerHTML = '<span class="prompt-rules-label">rules</span>';
 
 		// Transient green success flash so the click reads as "it worked",
 		// then settle into the permanent muted-gray done look.
