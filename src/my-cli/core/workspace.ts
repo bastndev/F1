@@ -113,10 +113,16 @@ export const handleWorkspaceListFiles = async (webview: vscode.Webview, message:
 	}
 
 	try {
-		// Find files excluding common ignored directories
-		const uris = await vscode.workspace.findFiles('**/*', '{**/node_modules/**,**/.git/**,**/dist/**,**/out/**}', 1000);
 		const workspaceFolder = vscode.workspace.workspaceFolders?.[0];
+		// gitignore is a tiny read and both the file filter and the dir walk need it.
 		const gitignoreRules = await getWorkspaceGitignoreRules(workspaceFolder);
+
+		// Run the file search and the directory walk concurrently — independent I/O that is
+		// the bulk of the picker's latency. The walk surfaces empty folders findFiles can't.
+		const [uris, walkedDirs] = await Promise.all([
+			vscode.workspace.findFiles('**/*', '{**/node_modules/**,**/.git/**,**/dist/**,**/out/**}', 1000),
+			workspaceFolder ? collectWorkspaceDirectories(workspaceFolder.uri, gitignoreRules) : Promise.resolve<string[]>([]),
+		]);
 
 		const files = uris.map(uri => {
 			const isDirectory = false; // findFiles only returns files
@@ -137,8 +143,9 @@ export const handleWorkspaceListFiles = async (webview: vscode.Webview, message:
 			};
 		}).filter(entry => isMentionVisiblePath(entry.path) && !isGitignoredPath(entry.path, entry.isDirectory, gitignoreRules));
 
-		// If we also want directories, we could get unique directory paths from the files list
-		const dirs = new Set<string>();
+		// Directories: empty ones from the walk above, plus every parent of a visible file
+		// (covers anything the walk's cap or a read error may have missed).
+		const dirs = new Set<string>(walkedDirs);
 		files.forEach(f => {
 			const dirPath = path.dirname(f.path);
 			if (dirPath !== '.') {
@@ -150,15 +157,6 @@ export const handleWorkspaceListFiles = async (webview: vscode.Webview, message:
 				}
 			}
 		});
-
-		// findFiles returns files only, so the derived dirs above miss empty folders. Walk
-		// the tree to add every directory (empty ones included) under the same excludes, so
-		// a folder with no files inside still shows in the picker.
-		if (workspaceFolder) {
-			for (const dir of await collectWorkspaceDirectories(workspaceFolder.uri, gitignoreRules)) {
-				dirs.add(dir);
-			}
-		}
 
 		const allEntries = [...files];
 		dirs.forEach(dir => {
