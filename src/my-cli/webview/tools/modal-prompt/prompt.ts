@@ -28,6 +28,7 @@ import { mountFileMentionPicker, resolveFileMentionAliases } from './components/
 import { initLanguageSelect } from './language-select';
 import { initSpellSuggest } from './spell-suggest';
 import type { PromptContext } from './prompt-context';
+import type { VoiceState } from '../../../shared/voice/voice-types';
 import { setupUndoHistory } from './textarea-history';
 import { enforceLowercaseInput } from './lowercase-input';
 import {
@@ -173,10 +174,62 @@ export const mountPromptPanel = (host: HTMLElement, context: PromptContext = { c
 
 	updateFooterModel(host, context, hasActiveSession, lifecycle.signal);
 	initSessionState(host, hasActiveSession);
+	// Wired independently of session state: a read-aloud can be live even with no
+	// active session, and must stay controllable here.
+	initVoiceControl(host, context, lifecycle.signal);
 	initPromptComposer(host, context, hasActiveSession, lifecycle.signal);
 
 	return () => lifecycle.abort();
 };
+
+// Voice pill: control a read-aloud already playing when the modal opens (e.g.
+// Ctrl+Space here from the translator mid-read). Shown only while active; the
+// prompt never starts a read, only pauses/resumes/stops the host's.
+function initVoiceControl(host: HTMLElement, context: PromptContext, signal: AbortSignal) {
+	const pill = host.querySelector<HTMLElement>('#promptVoicePill');
+	const toggleBtn = host.querySelector<HTMLButtonElement>('#promptVoiceToggle');
+	const stopBtn = host.querySelector<HTMLButtonElement>('#promptVoiceStop');
+	if (!pill || !toggleBtn || !stopBtn || !context.onVoiceState) {
+		return;
+	}
+
+	let state: VoiceState = 'idle';
+
+	const apply = (next: VoiceState) => {
+		state = next;
+		const active = next === 'speaking' || next === 'paused' || next === 'preparing';
+		pill.hidden = !active;
+		pill.setAttribute('aria-hidden', active ? 'false' : 'true');
+		pill.classList.toggle('is-speaking', next === 'speaking');
+		pill.classList.toggle('is-paused', next === 'paused');
+		pill.classList.toggle('is-preparing', next === 'preparing');
+		toggleBtn.disabled = next === 'preparing';
+		const label = next === 'preparing' ? 'Preparing voice…'
+			: next === 'paused' ? 'Resume voice'
+			: 'Pause voice';
+		toggleBtn.title = label;
+		toggleBtn.setAttribute('aria-label', label);
+	};
+
+	const dispose = context.onVoiceState((next) => apply(next));
+	// Resync against a read that may already be running in the translator we left.
+	context.queryVoiceState?.();
+
+	toggleBtn.addEventListener('click', () => {
+		if (state === 'speaking') {
+			context.pauseSpeech?.();
+		} else if (state === 'paused') {
+			context.resumeSpeech?.();
+		}
+	});
+	stopBtn.addEventListener('click', () => {
+		if (state === 'speaking' || state === 'paused') {
+			context.stopSpeech?.();
+		}
+	});
+
+	signal.addEventListener('abort', () => dispose());
+}
 
 function initPromptComposer(host: HTMLElement, context: PromptContext, hasActiveSession: boolean, signal: AbortSignal) {
 	const textarea = host.querySelector<HTMLTextAreaElement>('#promptInput');

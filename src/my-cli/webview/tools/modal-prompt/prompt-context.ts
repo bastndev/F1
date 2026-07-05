@@ -6,6 +6,7 @@ import type {
 	SpellIssue,
 	WorkspaceSkill
 } from '../../../shared/prompt';
+import type { VoiceProgress, VoiceState } from '../../../shared/voice/voice-types';
 
 /** Capabilities the terminal layer injects into the prompt modal. */
 export type PromptContext = {
@@ -26,5 +27,13 @@ export type PromptContext = {
 	 *  has read it (marker seen) or a host-side hard cap fires. false = no session. */
 	injectRules?: (text: string, marker: string) => Promise<boolean>;
 	registerSkillsRefresh?: (refresh: () => void) => void;
+	// Control a host-side read-aloud that may still be playing when this modal
+	// opens (switched here from the translator mid-read). No speakText: prompt
+	// only pauses/resumes/stops an existing read, never starts one.
+	pauseSpeech?: () => void;
+	resumeSpeech?: () => void;
+	stopSpeech?: () => void;
+	queryVoiceState?: () => void;
+	onVoiceState?: (listener: (state: VoiceState, message?: string, progress?: VoiceProgress) => void) => () => void;
 	refocusCli?: () => void;
 };
