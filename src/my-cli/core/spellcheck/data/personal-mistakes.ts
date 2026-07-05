@@ -14,6 +14,7 @@ export const PERSONAL_MISTAKES: Record<string, string> = {
 	'bise': 'hubiese',
 	'ubise': 'hubiese',
 	'pra': 'para',
+	'pgar': 'pegar',
 
 
 	// NOTES
