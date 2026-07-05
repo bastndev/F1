@@ -443,9 +443,8 @@ window.addEventListener('keydown', (event) => {
 		const num = Number.parseInt(event.key, 10);
 		if (Number.isInteger(num) && num >= 1 && num <= models.length) {
 			event.preventDefault();
-			// Alt+number keeps the existing smart-mode behavior (not the new
-			// Alt+Left click rules mode).
-			openModel(models[num - 1], false, true);
+			// Alt+number now mirrors Alt+Left click: rules mode, not smart mode.
+			openModel(models[num - 1], true, false);
 			return;
 		}
 	}
