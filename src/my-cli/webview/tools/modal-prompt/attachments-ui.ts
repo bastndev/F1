@@ -26,6 +26,45 @@ export const atomicMarkerPattern = new RegExp(
 	'g'
 );
 
+/**
+ * The leading [Skills] token only matches skillsTokenPattern when anchored at
+ * the very start of the text (its lookbehind requires start-of-string or
+ * whitespace) — that anchor is what stops "/skill" from false-matching inside
+ * arbitrary text. Gluing typed characters onto its front breaks that anchor
+ * and leaves it as dead, unstyled text. Returns the minimum caret position
+ * the textarea should ever allow: right after the token + its separating
+ * space, or 0 when there is no leading token.
+ */
+export function getLeadingSkillTokenGuardEnd(text: string): number {
+	const match = text.matchAll(skillsTokenPattern).next().value as RegExpMatchArray | undefined;
+	if (!match || match.index !== 0) {
+		return 0;
+	}
+	const end = match.index + match[0].length;
+	return text[end] === ' ' ? end + 1 : end;
+}
+
+/**
+ * Keeps the caret from ever resting in front of a leading [Skills] token —
+ * covers insertion paths that bypass the custom keydown handling (digits,
+ * symbols, space, IME composition, native paste fallback). Typed letters are
+ * clamped separately in enforceLowercaseInput, which intercepts them before
+ * a beforeinput event is even generated.
+ */
+export function guardLeadingSkillToken(textarea: HTMLTextAreaElement) {
+	textarea.addEventListener('beforeinput', () => {
+		const guardEnd = getLeadingSkillTokenGuardEnd(textarea.value);
+		if (guardEnd === 0) {
+			return;
+		}
+		const start = textarea.selectionStart ?? 0;
+		const end = textarea.selectionEnd ?? 0;
+		if (start < guardEnd || end < guardEnd) {
+			textarea.setSelectionRange(Math.max(start, guardEnd), Math.max(end, guardEnd));
+		}
+	});
+}
+
 export function replaceImagePathsWithMarkers(text: string, register: (path: string) => string): string {
 	if (!text) {
 		return text;

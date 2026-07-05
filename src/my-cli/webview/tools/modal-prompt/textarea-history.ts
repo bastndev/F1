@@ -6,6 +6,8 @@
  * restoring replays value + caret and re-dispatches 'input' so the highlight,
  * char count, draft and run-button state all stay in sync.
  */
+import { getLeadingSkillTokenGuardEnd } from './attachments-ui';
+
 export function setupUndoHistory(textarea: HTMLTextAreaElement) {
 	type Snapshot = { value: string; start: number; end: number };
 	type HistoryInputType = 'historyUndo' | 'historyRedo';
@@ -92,8 +94,12 @@ export function setupUndoHistory(textarea: HTMLTextAreaElement) {
 	const hasFullSelection = () => {
 		const start = textarea.selectionStart ?? 0;
 		const end = textarea.selectionEnd ?? 0;
+		// Native "select all" always starts at 0 even when a leading [Skills]
+		// token is present — treat that (or a manual selection starting right
+		// after the token) as "full", so the fast-path below still triggers.
+		const guardEnd = getLeadingSkillTokenGuardEnd(textarea.value);
 		return (
-			start === 0
+			start <= guardEnd
 			&& end === textarea.value.length
 			&& start !== end
 		);
@@ -101,8 +107,11 @@ export function setupUndoHistory(textarea: HTMLTextAreaElement) {
 
 	const deleteFullSelection = () => {
 		syncCurrentSelection();
-		textarea.value = '';
-		textarea.setSelectionRange(0, 0);
+		// A leading [Skills] token is a locked prefix, not deletable text —
+		// select-all + Backspace/Delete should only clear what comes after it.
+		const prefix = textarea.value.slice(0, getLeadingSkillTokenGuardEnd(textarea.value));
+		textarea.value = prefix;
+		textarea.setSelectionRange(prefix.length, prefix.length);
 		textarea.dispatchEvent(new Event('input', { bubbles: true }));
 	};
 

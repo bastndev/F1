@@ -28,7 +28,8 @@ export function initSkillsChips(
 	host: HTMLElement,
 	context: PromptContext,
 	textarea: HTMLTextAreaElement,
-	onSelectionChange: (selected: WorkspaceSkill[]) => void
+	onSelectionChange: (selected: WorkspaceSkill[]) => void,
+	initialSelected: WorkspaceSkill[] = []
 ): (() => void) | undefined {
 	const row = host.querySelector<HTMLElement>('.prompt-skills');
 	const chipsHost = host.querySelector<HTMLElement>('#skillChips');
@@ -173,13 +174,29 @@ export function initSkillsChips(
 			return;
 		}
 
+		// Restore a draft's selection (survives modal close/reopen) — but only
+		// for skills that still exist, and only when the draft text still
+		// carries the token; a bare token with nothing to back it is stale.
+		if (initialSelected.length && skillsTokenPresencePattern.test(textarea.value)) {
+			const validNames = new Set(skills.map((s) => s.name));
+			selected.push(...initialSelected.filter((s) => validNames.has(s.name)));
+		}
+
 		renderSkills(skills);
 
-		if (skillsTokenPresencePattern.test(textarea.value)) {
-			textarea.value = textarea.value
-				.replace(skillsTokenWithOptionalTrailingSpacePattern, '')
-				.trimStart();
-			textarea.dispatchEvent(new Event('input', { bubbles: true }));
+		if (selected.length === 0) {
+			if (skillsTokenPresencePattern.test(textarea.value)) {
+				textarea.value = textarea.value
+					.replace(skillsTokenWithOptionalTrailingSpacePattern, '')
+					.trimStart();
+				textarea.dispatchEvent(new Event('input', { bubbles: true }));
+			}
+		} else if (selected.length !== initialSelected.length) {
+			// Some previously selected skills vanished from disk while the
+			// modal was closed — repair the token to match what's left.
+			updateToken();
+		} else {
+			onSelectionChange([...selected]);
 		}
 	});
 

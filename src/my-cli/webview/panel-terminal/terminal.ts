@@ -18,6 +18,7 @@ import { createBootSkeletons } from './boot-skeleton';
 import { createSmartSkeleton, type SmartSkeletonController } from '../../../my-plus/my-smart/webview/smart-skeleton';
 import { createCopyToTranslateWatcher } from './copy-to-translate';
 import { getTerminalFontFamily, getTerminalTheme } from './terminal-theme';
+import { adaptRouteMentionsForKiro } from './kiro-send';
 import type { ImageAttachment, PromptTranslateRequest, PromptTranslateResult, FileMentionEntry, SpellIssue, WorkspaceSkill } from '../../shared/prompt';
 import type { VoiceProgress, VoiceState } from '../../shared/voice/voice-types';
 import type {
@@ -380,13 +381,25 @@ const sendToActiveSession = (text: string, options?: { paste?: boolean; submit?:
 		trackPickerCommand(sessionId, session.label, text);
 	}
 	const view = terminals.get(sessionId);
-	let data = text;
+	const agentSlug = getAgentSlug(session.label);
+	// kiro's @ is a modal file-picker: it drills @folder/ into a child file and swallows
+	// text pasted after the open picker. adaptRouteMentionsForKiro strips the @ from its
+	// folder routes so they land as literal paths (no picker). Non-kiro and kiro file
+	// routes come back unchanged.
+	const sendText = adaptRouteMentionsForKiro(text, agentSlug);
+	// Folder routes (@path/) arrive with the picker's trailing space trimmed off, so the
+	// CLI's own @ file-picker stays open on a highlighted child and the accept-Enter drills
+	// @src/ -> @src/style.css. Re-add one space to close that popup ON the folder. File
+	// routes end in a name and keep their popup so the exact match commits.
+	const endsWithFolderRoute = /(?:^|\s)@\S+\/$/.test(sendText);
+	const payload = endsWithFolderRoute ? `${sendText} ` : sendText;
+	let data = payload;
 	// Frame pasted text in bracketed-paste markers when the CLI has
 	// enabled that mode (xterm tracks DECSET 2004 per terminal). TUI
 	// CLIs rely on this to insert multi-char input cleanly; without it
 	// some (e.g. Copilot) garble or drop chunked input entirely.
 	if (options?.paste && view?.terminal.modes.bracketedPasteMode) {
-		data = `\x1b[200~${text}\x1b[201~`;
+		data = `\x1b[200~${payload}\x1b[201~`;
 	}
 	// CLIs that requested focus reporting (DECSET 1004) may ignore key
 	// input while the terminal reports itself unfocused — and it does
@@ -405,10 +418,13 @@ const sendToActiveSession = (text: string, options?: { paste?: boolean; submit?:
 		// rest. Route mentions are special in most CLI TUIs: the first
 		// Enter commits/accepts the @file/@folder context, the next one
 		// submits the completed prompt.
-		const agentSlug = getAgentSlug(session.label);
+		// Delay keys off the original text: a kiro folder route now sends a literal path but
+		// still wants the generous route-settle window before Enter.
 		const delay = getSubmitDelayMs(agentSlug, text);
 		const enterData = view?.terminal.modes.sendFocusMode ? '\x1b[I\r' : '\r';
-		const needsRouteSubmitConfirm = hasRouteMention(text);
+		// Folder routes closed their picker (trailing space, or literal path on kiro), so one
+		// Enter submits; only file/other routes need the second accept-then-submit Enter.
+		const needsRouteSubmitConfirm = hasRouteMention(sendText) && !endsWithFolderRoute;
 		const postEnter = () => {
 			if (sessions.get(sessionId)?.status === 'running') {
 				vscode.postMessage({ type: 'cli.input', sessionId, data: enterData });

@@ -62,14 +62,27 @@ export function mountFileMentionPicker(
 	// Cache full workspace list for the lifetime of this prompt panel mount.
 	// Avoids hammering the host with findFiles on every keystroke after "@".
 	let cachedEntries: FileMentionEntry[] | null = null;
+	let entriesInFlight: Promise<FileMentionEntry[]> | null = null;
 	let filterTimer: number | undefined;
 
-	void requestFiles('').then((files) => {
-		if (!cachedEntries) {
-			cachedEntries = files;
-			files.forEach(registerMentionAlias);
+	// One host round-trip at a time: reuse the in-flight fetch so typing "@" during the
+	// mount warm-up can't kick off a second findFiles.
+	const ensureEntries = (): Promise<FileMentionEntry[]> => {
+		if (cachedEntries) { return Promise.resolve(cachedEntries); }
+		if (!entriesInFlight) {
+			entriesInFlight = requestFiles('')
+				.then((files) => {
+					cachedEntries = files;
+					files.forEach(registerMentionAlias);
+					return files;
+				})
+				.finally(() => { entriesInFlight = null; });
 		}
-	});
+		return entriesInFlight;
+	};
+
+	// Warm the cache on mount so the first "@" opens instantly.
+	void ensureEntries();
 
 	// Portal target: we append the dropdown here (instead of the small textarea wrap)
 	// so it can float freely in the upper area of the whole modal without being
@@ -213,24 +226,27 @@ export function mountFileMentionPicker(
 		entries = visible.map((s) => s.entry);
 		activeIndex = 0;
 
-		list.replaceChildren();
-
 		if (visible.length === 0) {
 			const empty = document.createElement('div');
 			empty.className = 'fm-empty';
 			empty.textContent = 'No files found';
-			list.append(empty);
+			list.replaceChildren(empty);
 			return;
 		}
 
+		// Build every row off-DOM, then swap it in with a single mutation.
+		const frag = document.createDocumentFragment();
 		visible.forEach(({ entry, namePositions }, i) => {
 			const item = document.createElement('div');
 			item.className = 'fm-item' + (i === 0 ? ' active' : '');
 			item.dataset.index = String(i);
+			item.setAttribute('role', 'option');
+			item.setAttribute('aria-selected', i === 0 ? 'true' : 'false');
 
 			const iconEl = document.createElement('span');
 			iconEl.className = `fm-icon ${entry.isDirectory ? 'folder' : 'file'}`;
 			iconEl.textContent = entry.isDirectory ? '📁' : '📄';
+			iconEl.setAttribute('aria-hidden', 'true'); // decorative emoji
 
 			// Show the real parent path for disambiguation; the inserted token
 			// stays compact via displayPath.
@@ -248,8 +264,9 @@ export function mountFileMentionPicker(
 				selectEntry(entry);
 			});
 
-			list.appendChild(item);
+			frag.appendChild(item);
 		});
+		list.replaceChildren(frag);
 	};
 
 	const isVscodePath = (entryPath: string): boolean => {
@@ -259,8 +276,10 @@ export function mountFileMentionPicker(
 	const updateActive = () => {
 		if (!dropdown) { return; }
 		dropdown.querySelectorAll('.fm-item').forEach((el, i) => {
-			el.classList.toggle('active', i === activeIndex);
-			if (i === activeIndex) {
+			const isActive = i === activeIndex;
+			el.classList.toggle('active', isActive);
+			el.setAttribute('aria-selected', isActive ? 'true' : 'false');
+			if (isActive) {
 				(el as HTMLElement).scrollIntoView({ block: 'nearest' });
 			}
 		});
@@ -320,17 +339,13 @@ export function mountFileMentionPicker(
 			dropdown.className = 'fm-dropdown';
 
 			dropdown.innerHTML = `
-				<div class="fm-list"></div>
+				<div class="fm-list" role="listbox" aria-label="File and folder suggestions"></div>
 			`;
 		}
 
-		if (!cachedEntries) {
-			// First time for this prompt panel instance: fetch from host (expensive findFiles)
-			cachedEntries = await requestFiles(query);
-			cachedEntries.forEach(registerMentionAlias);
-		}
+		const available = cachedEntries ?? await ensureEntries();
 
-		renderItems(cachedEntries!, query);
+		renderItems(available, query);
 
 		if (isFirstCreation && dropdown) {
 			// Append *after* we have real content (and thus real height).
@@ -411,8 +426,8 @@ export function mountFileMentionPicker(
 		if (handleMentionCtrlBackspace(e)) { return; }
 
 		if (!dropdown) { return; }
-		if (e.key === 'ArrowDown') { e.preventDefault(); activeIndex = Math.min(activeIndex + 1, entries.length - 1); updateActive(); }
-		if (e.key === 'ArrowUp')   { e.preventDefault(); activeIndex = Math.max(activeIndex - 1, 0); updateActive(); }
+		if (e.key === 'ArrowDown') { e.preventDefault(); if (entries.length) { activeIndex = (activeIndex + 1) % entries.length; updateActive(); } }
+		if (e.key === 'ArrowUp')   { e.preventDefault(); if (entries.length) { activeIndex = (activeIndex + entries.length - 1) % entries.length; updateActive(); } }
 		if (matchesShortcut(e, 'sendPrompt')) { /* let send shortcut handle */ return; }
 		if (e.key === 'Enter')  { e.preventDefault(); if (entries[activeIndex]) { selectEntry(entries[activeIndex]); } }
 		if (e.key === 'Escape') {

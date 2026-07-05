@@ -6,7 +6,7 @@
  * untouched for its dedicated handlers.
  */
 import { shouldCollapsePaste } from '../../../shared/prompt';
-import { imagePathPattern } from './attachments-ui';
+import { getLeadingSkillTokenGuardEnd, imagePathPattern } from './attachments-ui';
 
 const isSentenceStartAfterPrefix = (value: string, start: number, end: number) => {
 	const before = value.slice(0, start);
@@ -25,8 +25,9 @@ export function enforceLowercaseInput(textarea: HTMLTextAreaElement) {
 				return; // keyboard shortcuts (Ctrl+C, Ctrl+V, etc.) — let browser handle
 			}
 			e.preventDefault();
-			const start = textarea.selectionStart ?? 0;
-			const end = textarea.selectionEnd ?? 0;
+			const guardEnd = getLeadingSkillTokenGuardEnd(textarea.value);
+			const start = Math.max(textarea.selectionStart ?? 0, guardEnd);
+			const end = Math.max(textarea.selectionEnd ?? 0, guardEnd);
 			let char: string;
 			if (e.shiftKey) {
 				char = e.key.toUpperCase();
@@ -64,8 +65,9 @@ export function enforceLowercaseInput(textarea: HTMLTextAreaElement) {
 		// Pasted text keeps its original casing — only typed characters are forced
 		// lowercase. So an UPPERCASE block dropped into the prompt stays as-is.
 		const text = pastedForCheck;
-		const start = textarea.selectionStart ?? 0;
-		const end = textarea.selectionEnd ?? 0;
+		const guardEnd = getLeadingSkillTokenGuardEnd(textarea.value);
+		const start = Math.max(textarea.selectionStart ?? 0, guardEnd);
+		const end = Math.max(textarea.selectionEnd ?? 0, guardEnd);
 		textarea.value = textarea.value.slice(0, start) + text + textarea.value.slice(end);
 		const newPos = start + text.length;
 		textarea.selectionStart = textarea.selectionEnd = newPos;

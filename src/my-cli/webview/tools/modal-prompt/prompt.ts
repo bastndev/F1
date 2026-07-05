@@ -33,8 +33,10 @@ import { enforceLowercaseInput } from './lowercase-input';
 import {
 	atomicMarkerPattern,
 	getImageTypeFromPath,
+	getLeadingSkillTokenGuardEnd,
 	getPathBaseName,
 	getReferencedImageAttachments,
+	guardLeadingSkillToken,
 	handleImageMarkerArrowKey,
 	handleImageMarkerDeleteKey,
 	setupImagePaste,
@@ -91,6 +93,7 @@ type PromptDraft = {
 	nextImageAttachmentId: number;
 	pasteAttachments: PasteAttachment[];
 	nextPasteAttachmentId: number;
+	selectedSkills: WorkspaceSkill[];
 };
 const promptDrafts = new Map<string, PromptDraft>();
 
@@ -361,6 +364,7 @@ function initPromptComposer(host: HTMLElement, context: PromptContext, hasActive
 			nextImageAttachmentId,
 			pasteAttachments,
 			nextPasteAttachmentId,
+			selectedSkills,
 		});
 	};
 	textarea.addEventListener('input', saveDraft);
@@ -440,6 +444,11 @@ function initPromptComposer(host: HTMLElement, context: PromptContext, hasActive
 		if (handleImageMarkerDeleteKey(textarea, e)) {return;}
 		if (handleImageMarkerArrowKey(textarea, e)) {return;}
 	});
+
+	// Blocks non-letter insertion (digits, symbols, space, IME, native paste)
+	// from landing in front of a leading [Skills] token. Typed letters are
+	// clamped separately in enforceLowercaseInput, above.
+	guardLeadingSkillToken(textarea);
 
 	// The real send that handles optional auto-translate + image resolution before processPrompt.
 	// Lives inside init so it closes over translateState / setTranslating / imageAttachments.
@@ -608,12 +617,18 @@ function initPromptComposer(host: HTMLElement, context: PromptContext, hasActive
 	// Ordered selection of skills — updated as the user toggles chips. The
 	// textarea holds only the aggregate [Skills #N] count token; the actual
 	// WorkspaceSkill objects live here and drive the send-time expansion.
-	let selectedSkills: WorkspaceSkill[] = [];
+	// Restored from the draft so a modal close/reopen keeps the chips marked.
+	let selectedSkills: WorkspaceSkill[] = savedDraft?.selectedSkills ?? [];
 
 	if (hasActiveSession) {
 		const refreshSkills = initSkillsChips(host, context, textarea, (selection) => {
 			selectedSkills = selection;
-		});
+			// updateToken() dispatches its own 'input' event (which calls
+			// saveDraft) BEFORE invoking this callback, so that save would
+			// otherwise persist the previous selection — save again now that
+			// selectedSkills is current.
+			saveDraft();
+		}, selectedSkills);
 		if (refreshSkills) {
 			context.registerSkillsRefresh?.(refreshSkills);
 		}
@@ -760,6 +775,16 @@ function initPromptComposer(host: HTMLElement, context: PromptContext, hasActive
 	const forceCaretOutOfMarkers = () => {
 		if (textarea.selectionStart !== textarea.selectionEnd) {return;}
 		const caret = textarea.selectionStart ?? 0;
+
+		// A leading [Skills] token has no valid position "before" it — unlike
+		// other markers, clicking right in front of it and typing would glue
+		// text onto its start-anchored pattern and silently break it.
+		const guardEnd = getLeadingSkillTokenGuardEnd(textarea.value);
+		if (caret < guardEnd) {
+			textarea.setSelectionRange(guardEnd, guardEnd);
+			return;
+		}
+
 		for (const match of textarea.value.matchAll(atomicMarkerPattern)) {
 			const start = match.index ?? 0;
 			const end = start + match[0].length;

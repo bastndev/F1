@@ -43,6 +43,9 @@ const visibleRootDotfiles = new Set([
 	'.vscodeignore',
 ]);
 
+// Ceiling on the directory walk so a huge tree can't stall the @-mention picker.
+const workspaceDirScanCap = 2000;
+
 export const handleWorkspaceListSkills = async (webview: vscode.Webview, message: InboundWebviewMessage) => {
 	if (typeof message.id !== 'string') {
 		return;
@@ -110,10 +113,16 @@ export const handleWorkspaceListFiles = async (webview: vscode.Webview, message:
 	}
 
 	try {
-		// Find files excluding common ignored directories
-		const uris = await vscode.workspace.findFiles('**/*', '{**/node_modules/**,**/.git/**,**/dist/**,**/out/**}', 1000);
 		const workspaceFolder = vscode.workspace.workspaceFolders?.[0];
+		// gitignore is a tiny read and both the file filter and the dir walk need it.
 		const gitignoreRules = await getWorkspaceGitignoreRules(workspaceFolder);
+
+		// Run the file search and the directory walk concurrently — independent I/O that is
+		// the bulk of the picker's latency. The walk surfaces empty folders findFiles can't.
+		const [uris, walkedDirs] = await Promise.all([
+			vscode.workspace.findFiles('**/*', '{**/node_modules/**,**/.git/**,**/dist/**,**/out/**}', 1000),
+			workspaceFolder ? collectWorkspaceDirectories(workspaceFolder.uri, gitignoreRules) : Promise.resolve<string[]>([]),
+		]);
 
 		const files = uris.map(uri => {
 			const isDirectory = false; // findFiles only returns files
@@ -134,8 +143,9 @@ export const handleWorkspaceListFiles = async (webview: vscode.Webview, message:
 			};
 		}).filter(entry => isMentionVisiblePath(entry.path) && !isGitignoredPath(entry.path, entry.isDirectory, gitignoreRules));
 
-		// If we also want directories, we could get unique directory paths from the files list
-		const dirs = new Set<string>();
+		// Directories: empty ones from the walk above, plus every parent of a visible file
+		// (covers anything the walk's cap or a read error may have missed).
+		const dirs = new Set<string>(walkedDirs);
 		files.forEach(f => {
 			const dirPath = path.dirname(f.path);
 			if (dirPath !== '.') {
@@ -190,6 +200,50 @@ function isMentionVisiblePath(relativePath: string): boolean {
 
 		return index === segments.length - 1 && visibleRootDotfiles.has(segment);
 	});
+}
+
+// Walk the workspace collecting directory relative paths — including empty ones, which
+// findFiles can't surface. Mirrors the file excludes (node_modules/.git/dist/out), skips
+// hidden dot-dirs and gitignored dirs, and stops at workspaceDirScanCap so a giant tree
+// can't stall the picker.
+async function collectWorkspaceDirectories(rootUri: vscode.Uri, gitignoreRules: GitignoreRule[]): Promise<string[]> {
+	const excludedDirNames = new Set(['node_modules', '.git', 'dist', 'out']);
+	const results: string[] = [];
+
+	const walk = async (dirUri: vscode.Uri, relBase: string): Promise<void> => {
+		if (results.length >= workspaceDirScanCap) {
+			return;
+		}
+		let entries: Array<[string, vscode.FileType]>;
+		try {
+			entries = await vscode.workspace.fs.readDirectory(dirUri);
+		} catch {
+			return; // unreadable dir — skip
+		}
+
+		for (const [name, type] of entries) {
+			if (type !== vscode.FileType.Directory) {
+				continue;
+			}
+			// Dot-dirs stay hidden (matches isMentionVisiblePath dropping non-leaf dotted
+			// segments); the named set mirrors the findFiles exclude glob.
+			if (name.startsWith('.') || excludedDirNames.has(name)) {
+				continue;
+			}
+			const rel = relBase ? `${relBase}/${name}` : name;
+			if (isGitignoredPath(rel, true, gitignoreRules)) {
+				continue;
+			}
+			results.push(rel);
+			await walk(vscode.Uri.joinPath(dirUri, name), rel);
+			if (results.length >= workspaceDirScanCap) {
+				return;
+			}
+		}
+	};
+
+	await walk(rootUri, '');
+	return results;
 }
 
 async function getWorkspaceGitignoreRules(workspaceFolder: vscode.WorkspaceFolder | undefined): Promise<GitignoreRule[]> {
