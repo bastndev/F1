@@ -533,10 +533,11 @@
   border-color: color-mix(in srgb, #e05252 45%, transparent);
 }
 
-/* Transient success flash right after rules finish loading — green "rules ✓"
-   with a soft breathing glow (opacity-only, cheap) — before settling into the
-   permanent muted-gray done look below. Selector is boosted to beat the
-   [aria-pressed="false"]:disabled specificity so the flash actually shows. */
+/* Transient success flash right after rules finish loading — text stays
+   "rules" (no width change), just turns green with a soft breathing glow
+   (opacity-only, cheap) — before settling into the permanent muted-gray done
+   look below. Selector is boosted to beat the [aria-pressed="false"]:disabled
+   specificity so the flash actually shows. */
 .prompt-rules-toggle[aria-pressed="false"]:disabled.is-just-done {
   color: #4ade80;
   border-color: color-mix(in srgb, #4ade80 45%, transparent);
