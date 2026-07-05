@@ -46,7 +46,7 @@ import { updatePromptImageHighlight } from './highlight';
 import { initSkillsChips, isClaudeSession } from './skills-chips';
 import { updateFooterModel } from './footer-model';
 import { initSessionState, showNoSessionMessage } from './session-state';
-import { initPromptMode, PLAN_INSTRUCTION, type PromptMode } from './prompt-mode';
+import { initPromptMode, buildPlanText, type PromptMode } from './prompt-mode';
 import { initRulesToggle, type RulesToggleController } from './rules-toggle';
 import { buildRulesPrompt, RULES_MARKER } from '../../../shared/rules/rules-content';
 import { initPromptHistory, recordSentPrompt } from './prompt-history';
@@ -102,6 +102,12 @@ const promptDrafts = new Map<string, PromptDraft>();
 // module scope alongside the drafts, and is pruned on the same lifecycle.
 const rulesInjectedSessions = new Set<string>();
 
+// CLI sessions that already received PLAN's full preamble. Same one-shot idea as
+// the rules set above: after the first plan send the model has the preamble in
+// context, so later plan sends carry only a short reminder. Same lifecycle —
+// survives modal reopen, pruned when the session closes.
+const planPreambleSentSessions = new Set<string>();
+
 /** The rules toggle controller for the currently open prompt modal, if any. */
 let activeRulesController: RulesToggleController | undefined;
 
@@ -136,6 +142,11 @@ export const prunePromptDrafts = (openSessionIds: Set<string>) => {
 	for (const sessionId of rulesInjectedSessions) {
 		if (!openSessionIds.has(sessionId)) {
 			rulesInjectedSessions.delete(sessionId);
+		}
+	}
+	for (const sessionId of planPreambleSentSessions) {
+		if (!openSessionIds.has(sessionId)) {
+			planPreambleSentSessions.delete(sessionId);
 		}
 	}
 };
@@ -553,9 +564,16 @@ function initPromptComposer(host: HTMLElement, context: PromptContext, hasActive
 		textToSend = resolveFileMentionAliases(textToSend);
 
 		// PLAN mode rides along as text — appended last so it wraps the fully
-		// expanded prompt, and post-translation so it stays English.
+		// expanded prompt, and post-translation so it stays English. Full preamble
+		// once per session (marked after a confirmed send below); route-only input
+		// gets analyze framing. See prompt-mode.buildPlanText.
+		let planSessionForMark: string | undefined;
 		if (promptMode === 'plan') {
-			textToSend = `${textToSend.trimEnd()}\n\n${PLAN_INSTRUCTION}`;
+			const sid = ctx.getActiveSessionId?.();
+			const firstInSession = !sid || !planPreambleSentSessions.has(sid);
+			const routeOnly = hasRouteMention(ta.value) && stripPromptTokens(ta.value).trim().length === 0;
+			textToSend = buildPlanText(textToSend, { routeOnly, firstInSession });
+			planSessionForMark = sid;
 		}
 		const shouldDelayClose = hasRouteMention(textToSend);
 		if (shouldDelayClose && runBtn) {
@@ -599,6 +617,11 @@ function initPromptComposer(host: HTMLElement, context: PromptContext, hasActive
 		}
 
 		if (result.status === 'sent') {
+			// Mark PLAN's full preamble as delivered only now — a failed send must
+			// not burn the one-shot.
+			if (planSessionForMark) {
+				planPreambleSentSessions.add(planSessionForMark);
+			}
 			// Original textarea text (markers get stripped inside) — never the
 			// translated/expanded payload.
 			recordSentPrompt(getActiveAgentSlug(), ta.value);
