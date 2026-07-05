@@ -1112,7 +1112,18 @@ window.addEventListener('message', (event: MessageEvent<ServerMessage>) => {
 	}
 
 	if (message.type === 'cli.rulesLoaded' && typeof message.sessionId === 'string') {
-		bootSkeletons.notifyRulesLoaded(message.sessionId);
+		const rulesSessionId = message.sessionId;
+		bootSkeletons.notifyRulesLoaded(rulesSessionId, () => {
+			// Open right as the skeleton starts fading (not after it's gone) — the
+			// modal sits above the skeleton (z-index 1000 vs 12) and renders during
+			// that ~580ms fade, so by the time the skeleton is actually gone the
+			// composer is already sitting there ready: one clean reveal instead of
+			// two separate beats. Only for the launcher's rules-mode launch (this
+			// message only fires from that path), and only if still on that session.
+			if (rulesSessionId === activeSessionId) {
+				toolsController?.open('prompt');
+			}
+		});
 		markRulesInjectedForSession(message.sessionId);
 		const soundUri = getRulesSoundUri();
 		if (soundUri) {

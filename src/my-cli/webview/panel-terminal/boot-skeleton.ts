@@ -25,8 +25,11 @@ export type BootSkeletonController = {
 	dismiss: (sessionId: string) => void;
 	/** First CLI output for a session — schedules the 1s lingering dismissal (normal mode only). */
 	notifyOutput: (sessionId: string) => void;
-	/** Rules finished injecting for a session — schedules the 1s lingering dismissal (rules mode only). */
-	notifyRulesLoaded: (sessionId: string) => void;
+	/** Rules finished injecting for a session — schedules the 1s lingering dismissal (rules mode only).
+	 *  onExitStart fires right as the skeleton begins fading out (not once it's fully gone), so a
+	 *  caller opening something underneath (e.g. the composer) has the whole ~580ms fade to render —
+	 *  by the time the skeleton is actually gone, that something is already sitting there ready. */
+	notifyRulesLoaded: (sessionId: string, onExitStart?: () => void) => void;
 	/** Drop skeletons (without exit animation) for sessions that no longer exist. */
 	removeClosed: (openSessionIds: Set<string>) => void;
 	/** Toggle the is-active class to match the active session. */
@@ -51,7 +54,7 @@ export const createBootSkeletons = (options: {
 		}
 	};
 
-	const dismiss = (sessionId: string) => {
+	const dismiss = (sessionId: string, onExitStart?: () => void) => {
 		const skeleton = skeletons.get(sessionId);
 		if (!skeleton) {
 			return;
@@ -61,6 +64,9 @@ export const createBootSkeletons = (options: {
 		sessionsWithFirstOutput.delete(sessionId);
 		rulesModeSessions.delete(sessionId);
 		clearPhaseTimer(sessionId);
+
+		// Fire before the fade starts, not after — see notifyRulesLoaded's doc.
+		onExitStart?.();
 
 		skeleton.classList.add('is-exiting');
 
@@ -217,7 +223,7 @@ export const createBootSkeletons = (options: {
 		}, rulesMode ? 65000 : 14000);
 	};
 
-	const notifyReady = (sessionId: string) => {
+	const notifyReady = (sessionId: string, onExitStart?: () => void) => {
 		if (!skeletons.has(sessionId) || sessionsWithFirstOutput.has(sessionId)) {
 			return;
 		}
@@ -227,7 +233,7 @@ export const createBootSkeletons = (options: {
 		// Wait 1 full second after the CLI actually speaks (or rules finish
 		// injecting) before we begin the exit animation.
 		setTimeout(() => {
-			dismiss(sessionId);
+			dismiss(sessionId, onExitStart);
 		}, 1000);
 	};
 
