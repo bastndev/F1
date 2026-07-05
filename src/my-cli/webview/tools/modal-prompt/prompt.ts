@@ -46,7 +46,7 @@ import { updatePromptImageHighlight } from './highlight';
 import { initSkillsChips, isClaudeSession } from './skills-chips';
 import { updateFooterModel } from './footer-model';
 import { initSessionState, showNoSessionMessage } from './session-state';
-import { initPromptMode, PLAN_INSTRUCTION, type PromptMode } from './prompt-mode';
+import { initPromptMode, buildPlanText, type PromptMode } from './prompt-mode';
 import { initRulesToggle, type RulesToggleController } from './rules-toggle';
 import { buildRulesPrompt, RULES_MARKER } from '../../../shared/rules/rules-content';
 import { initPromptHistory, recordSentPrompt } from './prompt-history';
@@ -102,6 +102,12 @@ const promptDrafts = new Map<string, PromptDraft>();
 // module scope alongside the drafts, and is pruned on the same lifecycle.
 const rulesInjectedSessions = new Set<string>();
 
+// CLI sessions that already received PLAN's full preamble. Same one-shot idea as
+// the rules set above: after the first plan send the model has the preamble in
+// context, so later plan sends carry only a short reminder. Same lifecycle —
+// survives modal reopen, pruned when the session closes.
+const planPreambleSentSessions = new Set<string>();
+
 /** The rules toggle controller for the currently open prompt modal, if any. */
 let activeRulesController: RulesToggleController | undefined;
 
@@ -136,6 +142,11 @@ export const prunePromptDrafts = (openSessionIds: Set<string>) => {
 	for (const sessionId of rulesInjectedSessions) {
 		if (!openSessionIds.has(sessionId)) {
 			rulesInjectedSessions.delete(sessionId);
+		}
+	}
+	for (const sessionId of planPreambleSentSessions) {
+		if (!openSessionIds.has(sessionId)) {
+			planPreambleSentSessions.delete(sessionId);
 		}
 	}
 };
@@ -186,11 +197,34 @@ function initPromptComposer(host: HTMLElement, context: PromptContext, hasActive
 	// always shows. PLAN appends a planning instruction at send time (see the
 	// send path); it never injects anything into the terminal.
 	let promptMode: PromptMode = 'pro';
+
+	// Rules is a full-session action; PLAN carries its own guard, so gray the
+	// button while planning (blocks an accidental heavy injection mid-plan) and
+	// restore it in PRO. Done/injecting states are left alone. Hoisted so the mode
+	// onChange can call it even though rulesController is undefined at the first
+	// (init) call — optional chaining no-ops then; the post-init call below applies
+	// it for real once the controller exists.
+	function syncRulesForMode(mode: PromptMode) {
+		if (injectInFlight) {
+			return; // an injection is landing — don't disturb its visual
+		}
+		const sid = context.getActiveSessionId?.();
+		if (sid && rulesInjectedSessions.has(sid)) {
+			return; // already loaded → stays muted-gray regardless of mode
+		}
+		if (mode === 'plan') {
+			rulesController?.setPlanLocked();
+		} else {
+			rulesController?.setAvailable();
+		}
+	}
+
 	initPromptMode(host, (mode) => {
 		promptMode = mode;
 		// The run button keeps "Execute" in both modes; the input field wears
 		// the mode instead (accent-tinted while PLAN is active).
 		host.querySelector<HTMLElement>('.prompt-modal')?.classList.toggle('is-plan-mode', mode === 'plan');
+		syncRulesForMode(mode);
 	});
 
 	// "rules" — a one-shot, language- and CLI-agnostic action, wired before the
@@ -258,8 +292,9 @@ function initPromptComposer(host: HTMLElement, context: PromptContext, hasActive
 			rulesInjectedSessions.add(sessionId);
 			rulesController?.setDone();
 		} else {
-			// Nothing landed (session gone) — leave it clickable to retry.
-			rulesController?.setAvailable();
+			// Nothing landed (session gone) — restore per current mode: clickable
+			// to retry in PRO, but stays grayed if we're now in PLAN.
+			syncRulesForMode(promptMode);
 		}
 	}
 
@@ -276,7 +311,8 @@ function initPromptComposer(host: HTMLElement, context: PromptContext, hasActive
 	if (activeSessionId && rulesInjectedSessions.has(activeSessionId)) {
 		rulesController?.setDone();
 	} else {
-		rulesController?.setAvailable();
+		// Not loaded yet → available in PRO, grayed while PLAN is active.
+		syncRulesForMode(promptMode);
 	}
 
 	// Alt+1 / Alt+2 / Alt+3 click the footer model / resume / usage chips.
@@ -553,9 +589,18 @@ function initPromptComposer(host: HTMLElement, context: PromptContext, hasActive
 		textToSend = resolveFileMentionAliases(textToSend);
 
 		// PLAN mode rides along as text — appended last so it wraps the fully
-		// expanded prompt, and post-translation so it stays English.
+		// expanded prompt, and post-translation so it stays English. A route-only
+		// message is a cheap "prime & ack" (💡); prose is the real plan request and
+		// carries the preamble once per session. See prompt-mode.buildPlanText.
+		let planSessionForMark: string | undefined;
 		if (promptMode === 'plan') {
-			textToSend = `${textToSend.trimEnd()}\n\n${PLAN_INSTRUCTION}`;
+			const sid = ctx.getActiveSessionId?.();
+			const routeOnly = hasRouteMention(ta.value) && stripPromptTokens(ta.value).trim().length === 0;
+			const firstInSession = !sid || !planPreambleSentSessions.has(sid);
+			textToSend = buildPlanText(textToSend, { routeOnly, firstInSession });
+			// A route-only prime carries no preamble, so it must not burn the
+			// one-shot — only a prose plan send marks the session.
+			planSessionForMark = routeOnly ? undefined : sid;
 		}
 		const shouldDelayClose = hasRouteMention(textToSend);
 		if (shouldDelayClose && runBtn) {
@@ -599,6 +644,11 @@ function initPromptComposer(host: HTMLElement, context: PromptContext, hasActive
 		}
 
 		if (result.status === 'sent') {
+			// Mark PLAN's full preamble as delivered only now — a failed send must
+			// not burn the one-shot.
+			if (planSessionForMark) {
+				planPreambleSentSessions.add(planSessionForMark);
+			}
 			// Original textarea text (markers get stripped inside) — never the
 			// translated/expanded payload.
 			recordSentPrompt(getActiveAgentSlug(), ta.value);

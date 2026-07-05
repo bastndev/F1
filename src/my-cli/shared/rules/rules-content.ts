@@ -55,6 +55,11 @@ const RULES: readonly RuleEntry[] = [
 			'Never modify code, edit files, or run commands without my explicit authorization first — treat every message as discussion/planning by default. Act only after I use an authorization phrase such as "adelante", "go", "puedes empezar", "comienza", "tienes libre albedrío", or a clear equivalent.',
 	},
 	{
+		id: 'question-first',
+		instruction:
+			'A question outranks any instruction in the same message: if I ask you something — your opinion, a recommendation, a yes/no, or whether an approach will work (usually ends with "?") — answer it and do NOT implement or change anything yet, even if I also told you to make a change. If the message mixed a question with an instruction, end your reply with exactly: ✋ I\'m ready to implement — I need your authorization. A "?" that is only part of what I ask you to build (inside quotes or code) does not count.',
+	},
+	{
 		id: 'ai-facing-comments',
 		instruction:
 			'Write code comments for the AI, not for a human reader — the user does not read code. Comments must be in English, as short as possible, and only say what the code cannot express itself (intent, why, edge cases, gotchas); never restate obvious logic. Optimize for minimal tokens while keeping the AI\'s understanding of the project clear.',

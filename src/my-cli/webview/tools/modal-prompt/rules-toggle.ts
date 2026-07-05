@@ -8,6 +8,8 @@
  *                  and waits for the agent to read it
  *   • done       → brief green text flash (label stays "rules", no width
  *                  change), then gray + permanently disabled for that session
+ *   • plan-lock  → gray + disabled while PLAN mode is active (PLAN owns the
+ *                  guard); reversible — returns to available back in PRO
  * A refused click (CLI busy / no session) shakes the button but leaves it
  * available. The "already loaded" state is tracked per session by the composer
  * (see prompt.ts), so it survives modal close/reopen and resets for a new CLI.
@@ -22,6 +24,8 @@ export type RulesToggleController = {
 	setInjecting: () => void;
 	/** Gray + permanently disabled — rules already loaded this session. */
 	setDone: () => void;
+	/** Gray + disabled while PLAN mode is active (reversible via setAvailable). */
+	setPlanLocked: () => void;
 	/** Transient shake — the click was refused (busy / no session). */
 	flashDenied: () => void;
 };
@@ -61,6 +65,17 @@ export function initRulesToggle(host: HTMLElement, onActivate: () => void, refoc
 		setTimeout(() => btn.classList.remove('is-just-done'), 2400);
 	};
 
+	// PLAN owns the guard, so gray the button while planning. Reuses the muted
+	// "done" look (aria-pressed=false + disabled) — no extra CSS. Reversible:
+	// setAvailable restores it in PRO. Caller skips this when done/injecting.
+	const setPlanLocked = () => {
+		btn.disabled = true;
+		btn.classList.remove('is-injecting', 'is-just-done');
+		btn.setAttribute('aria-pressed', 'false');
+		btn.title = 'Rules are handled by PLAN mode — switch to PRO to load them';
+		btn.innerHTML = '<span class="prompt-rules-label">rules</span>';
+	};
+
 	const flashDenied = () => {
 		btn.classList.remove('is-denied');
 		// Force a reflow so a rapid second click restarts the shake.
@@ -87,5 +102,5 @@ export function initRulesToggle(host: HTMLElement, onActivate: () => void, refoc
 		refocusComposer?.();
 	});
 
-	return { setAvailable, setInjecting, setDone, flashDenied };
+	return { setAvailable, setInjecting, setDone, setPlanLocked, flashDenied };
 }

@@ -5,6 +5,10 @@ export const PERSONAL_MISTAKES: Record<string, string> = {
 	'agregamo': 'agregamos',
 	'botn': 'boton',
 	'vulve': 'vuelve',
+	'scamos': 'sacamos',
+	'mod': 'modo',
+	'tokesn': 'tokens',
+	'tiens': 'tienes',
 
 
 	// NOTES
