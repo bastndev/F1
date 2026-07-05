@@ -206,6 +206,14 @@ function initializeTranslator(host: HTMLElement, context: ToolContext) {
 	};
 	goBtn?.addEventListener('click', activateGo);
 
+	// Plays the CSS entrance exactly when real content first lands (beginStream /
+	// revealText), instead of a blind timer that races the network — a cache hit
+	// would otherwise wait out a delay that already elapsed, and a slow stream
+	// would pop the button in over empty space.
+	const markGoReady = () => {
+		goBtn?.classList.add('is-ready');
+	};
+
 	// Ctrl+Alt+Enter mirrors the button so approval never needs the mouse. Scoped to
 	// the open panel; a no-op that passes the event through while the button is hidden.
 	const handleApproveShortcut = (event: KeyboardEvent) => {
@@ -336,6 +344,9 @@ function initializeTranslator(host: HTMLElement, context: ToolContext) {
 		// Re-evaluate the Go affordance against the current selection (also hides it
 		// when the selection is cleared/empty).
 		updateApprovalAffordance(extracted);
+		// New cycle — clear the ready flag so the entrance replays once this run's
+		// content actually lands, instead of staying visible from a prior selection.
+		goBtn?.classList.remove('is-ready');
 		if (!extracted) {
 			if (textEl) {
 				textEl.classList.remove('is-rendered');
@@ -371,6 +382,7 @@ function initializeTranslator(host: HTMLElement, context: ToolContext) {
 			copyText = cached.copyText;
 			textEl.classList.remove('placeholder');
 			revealText(textEl, cached.rendered);
+			markGoReady();
 			resultStatus = cached.status;
 			setStatus(resultStatus);
 			enableResultActions();
@@ -390,6 +402,7 @@ function initializeTranslator(host: HTMLElement, context: ToolContext) {
 			copyText = reused;
 			textEl.classList.remove('placeholder');
 			revealText(textEl, reused);
+			markGoReady();
 			resultStatus = 'translated';
 			setStatus(resultStatus);
 			enableResultActions();
@@ -551,6 +564,7 @@ function initializeTranslator(host: HTMLElement, context: ToolContext) {
 			textEl.replaceChildren();
 			textEl.classList.remove('placeholder');
 			textEl.classList.add('is-rendered');
+			markGoReady();
 			textEl.append(buildStreamIndicator());
 			if (bodyEl && modalEl) {
 				const available = modalEl.parentElement?.clientHeight ?? 0;
@@ -750,6 +764,7 @@ function initializeTranslator(host: HTMLElement, context: ToolContext) {
 			} else {
 				// Nothing emitted (empty translation) — show the plain result.
 				revealText(textEl, renderedMarkdown);
+				markGoReady();
 			}
 			resultStatus = provider ? `translated · ${provider.toLowerCase()}` : 'translated';
 			setStatus(resultStatus);
@@ -782,6 +797,7 @@ function initializeTranslator(host: HTMLElement, context: ToolContext) {
 				// copying/listening still makes sense.
 				copyText = extracted;
 				revealText(textEl, extracted);
+				markGoReady();
 			}
 			resultStatus = 'translation failed';
 			setStatus(resultStatus);
@@ -848,6 +864,9 @@ function initializeTranslator(host: HTMLElement, context: ToolContext) {
 			copyText = extracted;
 			textEl.textContent = extracted;
 			textEl.classList.add('placeholder');
+			// Source text is already on screen (auto-translate off, or before the
+			// async translation below overwrites it) — Go can enter now too.
+			markGoReady();
 		} else {
 			textEl.textContent = emptyStateMessage;
 			textEl.classList.add('placeholder');
