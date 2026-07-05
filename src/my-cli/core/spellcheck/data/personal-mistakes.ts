@@ -78,6 +78,7 @@ export const PERSONAL_MISTAKES: Record<string, string> = {
 	'empesare': 'empezare',
 	'arhivos': 'archivos',
 	'emjois': 'emojis',
+	'carge': 'cargue',
 
 
 
