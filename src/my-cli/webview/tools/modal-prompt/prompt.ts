@@ -564,16 +564,18 @@ function initPromptComposer(host: HTMLElement, context: PromptContext, hasActive
 		textToSend = resolveFileMentionAliases(textToSend);
 
 		// PLAN mode rides along as text — appended last so it wraps the fully
-		// expanded prompt, and post-translation so it stays English. Full preamble
-		// once per session (marked after a confirmed send below); route-only input
-		// gets analyze framing. See prompt-mode.buildPlanText.
+		// expanded prompt, and post-translation so it stays English. A route-only
+		// message is a cheap "prime & ack" (💡); prose is the real plan request and
+		// carries the preamble once per session. See prompt-mode.buildPlanText.
 		let planSessionForMark: string | undefined;
 		if (promptMode === 'plan') {
 			const sid = ctx.getActiveSessionId?.();
-			const firstInSession = !sid || !planPreambleSentSessions.has(sid);
 			const routeOnly = hasRouteMention(ta.value) && stripPromptTokens(ta.value).trim().length === 0;
+			const firstInSession = !sid || !planPreambleSentSessions.has(sid);
 			textToSend = buildPlanText(textToSend, { routeOnly, firstInSession });
-			planSessionForMark = sid;
+			// A route-only prime carries no preamble, so it must not burn the
+			// one-shot — only a prose plan send marks the session.
+			planSessionForMark = routeOnly ? undefined : sid;
 		}
 		const shouldDelayClose = hasRouteMention(textToSend);
 		if (shouldDelayClose && runBtn) {

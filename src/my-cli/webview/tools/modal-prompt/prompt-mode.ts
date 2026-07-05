@@ -37,28 +37,32 @@ const PLAN_PREAMBLE =
 // refresh the safety guard per turn.
 const PLAN_REMINDER = '(Still planning — plan only, no code yet, wait for my approval.)';
 
-// "Just pass a route": a plan message that is only an @mention (no prose) gets
-// wrapped in this analyze framing so the user skips retyping the boilerplate.
-// English + applied post-translation, like the preamble.
-const ANALYZE_PREFIX = 'Analyze and thoroughly understand ';
-const ANALYZE_SUFFIX =
-	' — I want to add a feature to it, so first I need you to fully understand how it currently works.';
+// "Just pass a route" (route-only) → a cheap PRIME step: the user loads code
+// into the model's context first (read & understand, NO plan, tiny ack), then
+// sends the real task to get the plan. Saves time and tokens. The ack line
+// mirrors the user's phrasing. English + post-translation, like the preamble.
+const PRIME_PREFIX = 'Read and fully understand ';
+const PRIME_SUFFIX =
+	' — open whatever files you need. Do not plan or write code yet; once you truly understand it, reply with only: 💡 now I get your project!';
 
 export type PlanTextOptions = {
-	/** Typed text is only a route (@mention), no prose → wrap it. */
+	/** Typed text is only a route (@mention), no prose → cheap prime + ack. */
 	routeOnly: boolean;
-	/** First plan send this session → full preamble; else the short reminder. */
+	/** First prose plan send this session → full preamble; else short reminder. */
 	firstInSession: boolean;
 };
 
 /** Build the PLAN text that rides along with a send. Pure — the caller owns the
- *  per-session "already sent the full preamble" state. */
+ *  per-session preamble one-shot (and skips marking it for route-only primes,
+ *  which carry no preamble). */
 export function buildPlanText(prompt: string, opts: PlanTextOptions): string {
-	const core = opts.routeOnly
-		? `${ANALYZE_PREFIX}${prompt.trim()}${ANALYZE_SUFFIX}`
-		: prompt.trimEnd();
+	// Route-only → prime the context and ask for the 💡 ack, nothing more.
+	if (opts.routeOnly) {
+		return `${PRIME_PREFIX}${prompt.trim()}${PRIME_SUFFIX}`;
+	}
+	// Prose → the real plan request: full preamble first, cheap reminder after.
 	const tail = opts.firstInSession ? PLAN_PREAMBLE : PLAN_REMINDER;
-	return `${core}\n\n${tail}`;
+	return `${prompt.trimEnd()}\n\n${tail}`;
 }
 
 export const getPromptMode = (): PromptMode => {
