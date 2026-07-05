@@ -52,7 +52,7 @@ export function initRulesToggle(host: HTMLElement, onActivate: () => void, refoc
 		btn.classList.remove('is-injecting');
 		btn.setAttribute('aria-pressed', 'false');
 		btn.title = 'rules loaded for this session';
-		btn.innerHTML = '<span class="prompt-rules-label">rules</span>';
+		btn.innerHTML = '<span class="prompt-rules-label">rules ✓</span>';
 	};
 
 	const flashDenied = () => {
