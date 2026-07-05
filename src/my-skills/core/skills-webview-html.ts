@@ -21,112 +21,12 @@ export function getWorkspaceName(): string {
 	return vscode.workspace.name ?? vscode.workspace.workspaceFolders?.[0]?.name ?? 'Workspace';
 }
 
-	function escapeHtml(value: string): string {
+function escapeHtml(value: string): string {
 	return value
 		.replace(/&/g, '&amp;')
 		.replace(/</g, '&lt;')
 		.replace(/>/g, '&gt;')
 		.replace(/"/g, '&quot;');
-}
-
-export function renderMarkdown(md: string, skillFolder: string): string {
-	const rawBase = `https://raw.githubusercontent.com/bastndev/skills/main/skills/${encodeURIComponent(skillFolder)}`;
-
-	function inline(text: string): string {
-		let result = escapeHtml(text);
-		result = result.replace(/!\[([^\]]*)\]\(([^)]+)\)/g, (_m: string, alt: string, url: string) => {
-			const href = url.startsWith('http') ? url : `${rawBase}/${url}`;
-			return `<img src="${escapeHtml(href)}" alt="${escapeHtml(alt)}" loading="lazy">`;
-		});
-		result = result.replace(/\[([^\]]+)\]\(([^)]+)\)/g, (_m: string, label: string, url: string) => {
-			const href = url.startsWith('http') ? url : `${rawBase}/${url}`;
-			return `<a href="${escapeHtml(href)}">${label}</a>`;
-		});
-		result = result.replace(/`([^`]+)`/g, '<code>$1</code>');
-		result = result.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
-		result = result.replace(/\*([^*]+)\*/g, '<em>$1</em>');
-		return result;
-	}
-
-	const lines = md.split('\n');
-	const out: string[] = [];
-	let inCode = false;
-	let codeBuf: string[] = [];
-
-	for (const raw of lines) {
-		if (raw.startsWith('```')) {
-			if (inCode) {
-				out.push(`<pre><code>${escapeHtml(codeBuf.join('\n'))}</code></pre>`);
-				codeBuf = [];
-			}
-			inCode = !inCode;
-			continue;
-		}
-
-		if (inCode) {
-			codeBuf.push(raw);
-			continue;
-		}
-
-		const trimmed = raw.trim();
-
-		if (!trimmed) {
-			out.push('');
-			continue;
-		}
-
-		if (/^#{1,4}\s/.test(trimmed)) {
-			const level = trimmed.match(/^#{1,4}/)![0].length;
-			const text = trimmed.slice(level + 1);
-			out.push(`<h${level}>${escapeHtml(text)}</h${level}>`);
-			continue;
-		}
-
-		if (trimmed.startsWith('- ') || trimmed.startsWith('* ')) {
-			out.push(`<li>${inline(trimmed.slice(2))}</li>`);
-			continue;
-		}
-
-		if (/^\d+\.\s/.test(trimmed)) {
-			out.push(`<li>${inline(trimmed.replace(/^\d+\.\s/, ''))}</li>`);
-			continue;
-		}
-
-		if (trimmed.startsWith('> ')) {
-			out.push(`<blockquote><p>${inline(trimmed.slice(2))}</p></blockquote>`);
-			continue;
-		}
-
-		if (trimmed === '---' || trimmed === '***' || trimmed === '___') {
-			out.push('<hr>');
-			continue;
-		}
-
-		out.push(inline(raw));
-	}
-
-	const html = out.join('\n');
-
-	return html
-		.replace(/\n{3,}/g, '\n\n')
-		.split('\n\n')
-		.map(block => {
-			const b = block.trim();
-			if (!b) {
-				return '';
-			}
-
-			if (/^<\/?(h[1-4]|pre|li|blockquote|hr|ul|ol|table)/.test(b)) {
-				return b;
-			}
-
-			if (/^<li/.test(b)) {
-				return `<ul>${b}</ul>`;
-			}
-
-			return `<p>${b}</p>`;
-		})
-		.join('\n');
 }
 
 function getErrorHtml(message: string): string {
@@ -243,41 +143,6 @@ export function getSkillsWebviewHtml(webview: vscode.Webview, extensionUri: vsco
 		console.error(`[MySkills] Failed to read screen template: ${err}`);
 		return getErrorHtml('Failed to load panel templates');
 	}
-}
-
-export function getSkillReadmeHtml(webview: vscode.Webview, extensionUri: vscode.Uri, nonce: string, skillName: string, skillSource: string, templateHtml: string, renderedContent: string): string {
-	const readmeStyleUri = webview.asWebviewUri(vscode.Uri.joinPath(extensionUri, 'src', 'my-skills', 'screens', 'install-skill', 'ui', 'panels', 'trending-skill', 'flame', 'view-readme', 'readme.css'));
-	const readmeScriptUri = webview.asWebviewUri(vscode.Uri.joinPath(extensionUri, 'dist', 'skill-readme.js'));
-	const csp = [
-		`default-src 'none';`,
-		`base-uri 'none';`,
-		`form-action 'none';`,
-		`object-src 'none';`,
-		`style-src ${webview.cspSource};`,
-		`script-src 'nonce-${nonce}';`,
-		`img-src ${webview.cspSource} https://raw.githubusercontent.com;`,
-		`font-src ${webview.cspSource};`,
-	].join(' ');
-
-	return [
-		'<!DOCTYPE html>',
-		'<html lang="en">',
-		'<head>',
-		'<meta charset="UTF-8">',
-		'<meta name="viewport" content="width=device-width, initial-scale=1.0">',
-		`<meta http-equiv="Content-Security-Policy" content="${csp}">`,
-		`<title>${escapeHtml(skillName)} — Skill README</title>`,
-		`<link href="${readmeStyleUri}" rel="stylesheet">`,
-		'</head>',
-		'<body>',
-		templateHtml
-			.replace('{{README_TITLE}}', escapeHtml(skillName))
-			.replace('{{README_SOURCE}}', escapeHtml(skillSource))
-			.replace('{{README_CONTENT}}', renderedContent),
-		`<script nonce="${nonce}" src="${readmeScriptUri}"></script>`,
-		'</body>',
-		'</html>',
-	].join('');
 }
 
 export function getCreateSkillSupportHtml(webview: vscode.Webview, extensionUri: vscode.Uri, nonce: string): string {

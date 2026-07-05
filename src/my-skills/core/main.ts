@@ -1,5 +1,6 @@
-import * as fs from 'fs';
 import * as https from 'https';
+import * as os from 'os';
+import * as path from 'path';
 import * as vscode from 'vscode';
 import { FLAME_SKILL_REPO_URL } from '../screens/install-skill/ui/panels/trending-skill/flame/data/flame-skills';
 import { InstallSkillsController } from './install-skills-controller';
@@ -18,7 +19,7 @@ import { designTypographyOptions } from '../screens/create-skill/ui/chat-create/
 import { createSkillBoilerplate } from '../screens/create-skill/core/chat-create-core/skill-generator';
 import { translateQuery } from '../screens/create-skill/core/shared/project-translation';
 import { resetFastContext, updateFastDescription, updateFastName, updateFastTechnologies, waitForPendingBackgroundFetches } from '../screens/create-skill/core/chat-create-core/fast-context-manager';
-import { getNonce, getWorkspaceName, getSkillsWebviewHtml, getCreateSkillSupportHtml, getSkillReadmeHtml, renderMarkdown } from './skills-webview-html';
+import { getNonce, getWorkspaceName, getSkillsWebviewHtml, getCreateSkillSupportHtml } from './skills-webview-html';
 import {
 	isWebviewMessage,
 	isLocalSkillsRequestMessage,
@@ -64,7 +65,6 @@ export class MySkillsViewProvider implements vscode.WebviewViewProvider {
 	public static readonly viewType = 'myskills-panel';
 	private _view?: vscode.WebviewView;
 	private _supportPanel?: vscode.WebviewPanel;
-	private _skillReadmePanel?: vscode.WebviewPanel;
 	private _localSkillWatchers: vscode.FileSystemWatcher[] = [];
 	private readonly _onDidSkillsChange = new vscode.EventEmitter<void>();
 	public readonly onDidSkillsChange = this._onDidSkillsChange.event;
@@ -640,7 +640,6 @@ export class MySkillsViewProvider implements vscode.WebviewViewProvider {
 	}
 
 	private async _openFlameSkillReadme(message: FlameSkillDetailMessage) {
-		// Only bastndev skills have guaranteed README.md files in the source repo.
 		if (message.source !== 'bastndev/skills') {
 			void vscode.env.openExternal(vscode.Uri.parse(FLAME_SKILL_REPO_URL));
 			return;
@@ -656,34 +655,14 @@ export class MySkillsViewProvider implements vscode.WebviewViewProvider {
 			return;
 		}
 
-		const renderedContent = renderMarkdown(rawContent, message.skillId);
-		const nonce = getNonce();
-		const readmeHtml = fs.readFileSync(
-			vscode.Uri.joinPath(this._extensionUri, 'src', 'my-skills', 'screens', 'install-skill', 'ui', 'panels', 'trending-skill', 'flame', 'view-readme', 'readme.html').fsPath,
-			'utf8',
-		);
-
-		if (this._skillReadmePanel) {
-			this._skillReadmePanel.dispose();
+		try {
+			const tempFile = vscode.Uri.file(path.join(os.tmpdir(), `bastndev-${message.skillId}-README.md`));
+			await vscode.workspace.fs.writeFile(tempFile, Buffer.from(rawContent, 'utf8'));
+			await vscode.commands.executeCommand('markdown.showPreview', tempFile);
+		} catch (err) {
+			console.error(`[MySkills] Failed to open README: ${err}`);
+			void vscode.env.openExternal(vscode.Uri.parse(FLAME_SKILL_REPO_URL));
 		}
-
-		const panel = vscode.window.createWebviewPanel(
-			'myskills.skillReadme',
-			`${message.name} — README`,
-			vscode.ViewColumn.One,
-			{
-				enableScripts: true,
-				localResourceRoots: [this._extensionUri],
-				retainContextWhenHidden: true,
-			},
-		);
-
-		this._skillReadmePanel = panel;
-		panel.iconPath = vscode.Uri.joinPath(this._extensionUri, 'src', 'my-skills', 'assets', 'svg', 'logo.svg');
-		panel.webview.html = getSkillReadmeHtml(panel.webview, this._extensionUri, nonce, message.name, message.source, readmeHtml, renderedContent);
-		panel.onDidDispose(() => {
-			this._skillReadmePanel = undefined;
-		});
 	}
 
 	private _openCreateSkillSupport() {
@@ -715,8 +694,7 @@ export class MySkillsViewProvider implements vscode.WebviewViewProvider {
 		this._view = undefined;
 		this._supportPanel?.dispose();
 		this._supportPanel = undefined;
-		this._skillReadmePanel?.dispose();
-		this._skillReadmePanel = undefined;
+
 		this._localSkillWatchers.forEach(watcher => watcher.dispose());
 		this._localSkillWatchers = [];
 		this._onDidSkillsChange.dispose();
