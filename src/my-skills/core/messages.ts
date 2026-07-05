@@ -6,6 +6,7 @@
  */
 import { isAgentsClaudeInstructionFileName, type AgentsClaudeInstructionFileName } from '../screens/create-skill/core/agents-claude-md';
 import type {
+	FlameSkillDetailMessage,
 	FlameSkillsRequestMessage,
 	InstallSkillInstallMessage,
 	InstallSkillsMoreRequestMessage,
@@ -251,6 +252,18 @@ export function isFlameSkillsRequestMessage(value: unknown): value is FlameSkill
 
 export function isFlameSkillOpenRepoMessage(value: unknown): value is { type: 'flameSkill.openRepo' } {
 	return isWebviewMessage(value) && value.type === 'flameSkill.openRepo';
+}
+
+export function isFlameSkillDetailMessage(value: unknown): value is FlameSkillDetailMessage {
+	if (!isWebviewMessage(value) || value.type !== 'flameSkill.viewDetail') {
+		return false;
+	}
+
+	const message = value as { id?: unknown; skillId?: unknown; name?: unknown; source?: unknown };
+	return typeof message.id === 'string'
+		&& typeof message.skillId === 'string'
+		&& typeof message.name === 'string'
+		&& typeof message.source === 'string';
 }
 
 export function isOfficialSourcesRequestMessage(value: unknown): value is OfficialSourcesRequestMessage {

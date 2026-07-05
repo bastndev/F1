@@ -60,6 +60,16 @@ declare function acquireVsCodeApi(): VsCodeApi;
 
 const vscodeApi = acquireVsCodeApi();
 
+// Reveal the shell only after window.load — guarantees all 14 external stylesheets applied, killing the FOUC. Paired with the inline opacity:0 guard in skills-webview-html.ts.
+function revealShell(): void {
+	document.documentElement.classList.add('msk-ready');
+}
+if (document.readyState === 'complete') {
+	revealShell();
+} else {
+	window.addEventListener('load', revealShell, { once: true });
+}
+
 document.body.classList.add('is-initializing');
 
 const tabs = Array.from(document.querySelectorAll<HTMLButtonElement>('.tab'));

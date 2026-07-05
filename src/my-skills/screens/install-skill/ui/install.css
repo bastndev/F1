@@ -678,6 +678,43 @@
 	}
 }
 
+.install-item--readme-loading {
+	position: relative;
+	background: var(--install-hover-bg);
+}
+
+.install-item--readme-loading::after {
+	content: '';
+	position: absolute;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	height: 2px;
+	background: linear-gradient(
+		90deg,
+		transparent 0%,
+		color-mix(in srgb, var(--install-accent) 70%, transparent) 40%,
+		var(--install-accent) 50%,
+		color-mix(in srgb, var(--install-accent) 70%, transparent) 60%,
+		transparent 100%
+	);
+	background-size: 60% 100%;
+	background-repeat: no-repeat;
+	background-position: -60% 0;
+	box-shadow: 0 0 6px 0 color-mix(in srgb, var(--install-accent) 70%, transparent);
+	animation: install-readme-sweep 1s ease-out forwards;
+}
+
+@keyframes install-readme-sweep {
+	from {
+		background-position: -60% 0;
+	}
+
+	to {
+		background-position: 160% 0;
+	}
+}
+
 @keyframes install-skeleton-row-wave {
 	0% {
 		opacity: 0.36;
@@ -719,6 +756,11 @@
 	.install-item:hover .install-downloads,
 	.install-item:hover .install-btn {
 		transition: none;
+	}
+
+	.install-item--readme-loading::after {
+		animation: none;
+		background-position: 50% 0;
 	}
 
 	.install-btn--busy {

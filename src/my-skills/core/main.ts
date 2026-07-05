@@ -1,8 +1,12 @@
+import * as https from 'https';
+import * as os from 'os';
+import * as path from 'path';
 import * as vscode from 'vscode';
 import { FLAME_SKILL_REPO_URL } from '../screens/install-skill/ui/panels/trending-skill/flame/data/flame-skills';
 import { InstallSkillsController } from './install-skills-controller';
 import { ROOT_SKILL_FILE_NAMES, ROOT_SKILL_FOLDER_WATCH_PATTERNS, deleteWorkspaceRootSkill, getWorkspaceRootSkills, setWorkspaceRootSkillEnabled } from '../screens/local-skill/core/local-skills';
 import { deleteSavedSkill, enableSavedSkill, getSavedSkills, isSavedSkillInWorkspace, saveSkill } from '../screens/local-skill/core/saved-skills';
+import type { FlameSkillDetailMessage } from '../screens/install-skill/core/types';
 import type { LocalSkillDeleteMessage, LocalSkillDeleteSavedMessage, LocalSkillEnableSavedMessage, LocalSkillOpenMessage, LocalSkillSaveMessage, LocalSkillSetEnabledMessage } from '../screens/local-skill/core/types';
 import { clearSearchRecommendationCache, getSearchRecommendationPreview, getSearchRecommendations, prewarmSearchRecommendations, type SearchRecommendationResult } from '../screens/create-skill/core/chat-search-core';
 import { createAgentsClaudeInstructionMarkdown, type AgentsClaudeInstructionFileName } from '../screens/create-skill/core/agents-claude-md';
@@ -39,6 +43,7 @@ import {
 	isTrending24hRequestMessage,
 	isFlameSkillsRequestMessage,
 	isFlameSkillOpenRepoMessage,
+	isFlameSkillDetailMessage,
 	isOfficialSourcesRequestMessage,
 	isOfficialSkillsRequestMessage,
 	isInstallSkillInstallMessage,
@@ -180,6 +185,9 @@ export class MySkillsViewProvider implements vscode.WebviewViewProvider {
 			}
 			if (isFlameSkillOpenRepoMessage(message)) {
 				void vscode.env.openExternal(vscode.Uri.parse(FLAME_SKILL_REPO_URL));
+			}
+			if (isFlameSkillDetailMessage(message)) {
+				void this._openFlameSkillReadme(message);
 			}
 			if (isOfficialSourcesRequestMessage(message)) {
 				void this._install.postOfficialSources(true);
@@ -631,6 +639,32 @@ export class MySkillsViewProvider implements vscode.WebviewViewProvider {
 		});
 	}
 
+	private async _openFlameSkillReadme(message: FlameSkillDetailMessage) {
+		if (message.source !== 'bastndev/skills') {
+			void vscode.env.openExternal(vscode.Uri.parse(FLAME_SKILL_REPO_URL));
+			return;
+		}
+
+		const readmeUrl = `https://raw.githubusercontent.com/bastndev/skills/main/skills/${encodeURIComponent(message.skillId)}/README.md`;
+
+		let rawContent: string;
+		try {
+			rawContent = await fetchUrl(readmeUrl);
+		} catch {
+			void vscode.env.openExternal(vscode.Uri.parse(FLAME_SKILL_REPO_URL));
+			return;
+		}
+
+		try {
+			const tempFile = vscode.Uri.file(path.join(os.tmpdir(), `bastndev-${message.skillId}-README.md`));
+			await vscode.workspace.fs.writeFile(tempFile, Buffer.from(rawContent, 'utf8'));
+			await vscode.commands.executeCommand('markdown.showPreview', tempFile);
+		} catch (err) {
+			console.error(`[MySkills] Failed to open README: ${err}`);
+			void vscode.env.openExternal(vscode.Uri.parse(FLAME_SKILL_REPO_URL));
+		}
+	}
+
 	private _openCreateSkillSupport() {
 		if (this._supportPanel) {
 			this._supportPanel.reveal(vscode.ViewColumn.One);
@@ -660,6 +694,7 @@ export class MySkillsViewProvider implements vscode.WebviewViewProvider {
 		this._view = undefined;
 		this._supportPanel?.dispose();
 		this._supportPanel = undefined;
+
 		this._localSkillWatchers.forEach(watcher => watcher.dispose());
 		this._localSkillWatchers = [];
 		this._onDidSkillsChange.dispose();
@@ -738,4 +773,32 @@ function toCreateSkillSearchPayload(result: SearchRecommendationResult) {
 
 function isMarketplaceFolderSkillId(skillId: string): boolean {
 	return skillId.startsWith('.agents/skills/') || skillId.startsWith('.claude/skills/');
+}
+
+function fetchUrl(url: string): Promise<string> {
+	return new Promise((resolve, reject) => {
+		const req = https.get(url, { timeout: 10000 }, response => {
+			if (response.statusCode && response.statusCode >= 300 && response.statusCode < 400 && response.headers.location) {
+				response.resume();
+				fetchUrl(response.headers.location).then(resolve).catch(reject);
+				return;
+			}
+
+			if (response.statusCode !== 200) {
+				response.resume();
+				reject(new Error(`HTTP ${response.statusCode}`));
+				return;
+			}
+
+			let data = '';
+			response.on('data', chunk => { data += chunk.toString(); });
+			response.on('end', () => resolve(data));
+			response.on('error', reject);
+		});
+		req.on('error', reject);
+		req.on('timeout', () => {
+			req.destroy();
+			reject(new Error('Request timed out'));
+		});
+	});
 }

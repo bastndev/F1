@@ -63,6 +63,14 @@ export interface FlameSkillsUpdateMessage {
 	error: string | null;
 }
 
+export interface FlameSkillDetailMessage {
+	type: 'flameSkill.viewDetail';
+	id: string;
+	skillId: string;
+	name: string;
+	source: string;
+}
+
 export interface OfficialSourcesUpdateMessage {
 	type: 'officialSources.update';
 	sources: OfficialSkillSource[];

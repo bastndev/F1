@@ -9,6 +9,13 @@ export const PERSONAL_MISTAKES: Record<string, string> = {
 	'mod': 'modo',
 	'tokesn': 'tokens',
 	'tiens': 'tienes',
+	'recomienas': 'recomiendas',
+	'spanol ': 'español',
+	'bise': 'hubiese',
+	'ubise': 'hubiese',
+	'pra': 'para',
+	'pgar': 'pegar',
+	'Analia': 'analiza',
 
 
 	// NOTES
