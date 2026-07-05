@@ -43,6 +43,9 @@ const visibleRootDotfiles = new Set([
 	'.vscodeignore',
 ]);
 
+// Ceiling on the directory walk so a huge tree can't stall the @-mention picker.
+const workspaceDirScanCap = 2000;
+
 export const handleWorkspaceListSkills = async (webview: vscode.Webview, message: InboundWebviewMessage) => {
 	if (typeof message.id !== 'string') {
 		return;
@@ -148,6 +151,15 @@ export const handleWorkspaceListFiles = async (webview: vscode.Webview, message:
 			}
 		});
 
+		// findFiles returns files only, so the derived dirs above miss empty folders. Walk
+		// the tree to add every directory (empty ones included) under the same excludes, so
+		// a folder with no files inside still shows in the picker.
+		if (workspaceFolder) {
+			for (const dir of await collectWorkspaceDirectories(workspaceFolder.uri, gitignoreRules)) {
+				dirs.add(dir);
+			}
+		}
+
 		const allEntries = [...files];
 		dirs.forEach(dir => {
 			if (isGitignoredPath(dir, true, gitignoreRules)) {
@@ -190,6 +202,50 @@ function isMentionVisiblePath(relativePath: string): boolean {
 
 		return index === segments.length - 1 && visibleRootDotfiles.has(segment);
 	});
+}
+
+// Walk the workspace collecting directory relative paths — including empty ones, which
+// findFiles can't surface. Mirrors the file excludes (node_modules/.git/dist/out), skips
+// hidden dot-dirs and gitignored dirs, and stops at workspaceDirScanCap so a giant tree
+// can't stall the picker.
+async function collectWorkspaceDirectories(rootUri: vscode.Uri, gitignoreRules: GitignoreRule[]): Promise<string[]> {
+	const excludedDirNames = new Set(['node_modules', '.git', 'dist', 'out']);
+	const results: string[] = [];
+
+	const walk = async (dirUri: vscode.Uri, relBase: string): Promise<void> => {
+		if (results.length >= workspaceDirScanCap) {
+			return;
+		}
+		let entries: Array<[string, vscode.FileType]>;
+		try {
+			entries = await vscode.workspace.fs.readDirectory(dirUri);
+		} catch {
+			return; // unreadable dir — skip
+		}
+
+		for (const [name, type] of entries) {
+			if (type !== vscode.FileType.Directory) {
+				continue;
+			}
+			// Dot-dirs stay hidden (matches isMentionVisiblePath dropping non-leaf dotted
+			// segments); the named set mirrors the findFiles exclude glob.
+			if (name.startsWith('.') || excludedDirNames.has(name)) {
+				continue;
+			}
+			const rel = relBase ? `${relBase}/${name}` : name;
+			if (isGitignoredPath(rel, true, gitignoreRules)) {
+				continue;
+			}
+			results.push(rel);
+			await walk(vscode.Uri.joinPath(dirUri, name), rel);
+			if (results.length >= workspaceDirScanCap) {
+				return;
+			}
+		}
+	};
+
+	await walk(rootUri, '');
+	return results;
 }
 
 async function getWorkspaceGitignoreRules(workspaceFolder: vscode.WorkspaceFolder | undefined): Promise<GitignoreRule[]> {
