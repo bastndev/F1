@@ -62,6 +62,9 @@ export function initTrendingFlamePanel(api: VsCodeApi): void {
 			const id = item.dataset.installId;
 			const skill = id ? flameSkills.find(s => s.id === id) : undefined;
 			if (skill) {
+				// README fetch + preview takes ~2-3s; show a fixed 1s loading cue on the row.
+				item.classList.add('install-item--readme-loading');
+				window.setTimeout(() => item.classList.remove('install-item--readme-loading'), 1000);
 				vscodeApi?.postMessage({ type: 'flameSkill.viewDetail', id: skill.id, skillId: skill.skillId, name: skill.name, source: skill.source });
 			}
 		}
