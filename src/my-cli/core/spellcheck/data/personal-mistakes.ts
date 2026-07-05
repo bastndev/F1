@@ -8,6 +8,7 @@ export const PERSONAL_MISTAKES: Record<string, string> = {
 	'scamos': 'sacamos',
 	'mod': 'modo',
 	'tokesn': 'tokens',
+	'tiens': 'tienes',
 
 
 	// NOTES
