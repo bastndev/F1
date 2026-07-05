@@ -56,9 +56,14 @@ export function initTrendingFlamePanel(api: VsCodeApi): void {
 			return;
 		}
 
-		// Clicking the skill row anywhere but the Install button opens the source repository.
-		if (target?.closest('.install-item')) {
-			vscodeApi?.postMessage({ type: 'flameSkill.openRepo' });
+		// Clicking the skill row anywhere but the Install button opens the skill's README.
+		const item = target?.closest<HTMLElement>('.install-item');
+		if (item) {
+			const id = item.dataset.installId;
+			const skill = id ? flameSkills.find(s => s.id === id) : undefined;
+			if (skill) {
+				vscodeApi?.postMessage({ type: 'flameSkill.viewDetail', id: skill.id, skillId: skill.skillId, name: skill.name, source: skill.source });
+			}
 		}
 	});
 

@@ -225,6 +225,22 @@ async function main() {
 			esbuildProblemMatcherPlugin,
 		],
 	});
+	const mySkillsSkillReadmeCtx = await esbuild.context({
+		entryPoints: [
+			'src/my-skills/screens/install-skill/ui/panels/trending-skill/flame/view-readme/readme.ts'
+		],
+		bundle: true,
+		format: 'iife',
+		minify: production,
+		sourcemap: !production,
+		sourcesContent: false,
+		platform: 'browser',
+		outfile: 'dist/skill-readme.js',
+		logLevel: 'silent',
+		plugins: [
+			esbuildProblemMatcherPlugin,
+		],
+	});
 	const cliTutorialCtx = await esbuild.context({
 		entryPoints: [
 			'src/shared/tutorial/t-cli/support.ts'
@@ -266,6 +282,7 @@ async function main() {
 		await mySkillsWebviewCtx.watch();
 		await mySkillsCreateSkillCtx.watch();
 		await mySkillsCreateSkillSupportCtx.watch();
+		await mySkillsSkillReadmeCtx.watch();
 		await cliTutorialCtx.watch();
 		await ptyHostCtx.watch();
 		watchWebviewAssets();
@@ -276,6 +293,7 @@ async function main() {
 		await mySkillsWebviewCtx.rebuild();
 		await mySkillsCreateSkillCtx.rebuild();
 		await mySkillsCreateSkillSupportCtx.rebuild();
+		await mySkillsSkillReadmeCtx.rebuild();
 		await cliTutorialCtx.rebuild();
 		await ptyHostCtx.rebuild();
 		await extensionCtx.dispose();
@@ -284,6 +302,7 @@ async function main() {
 		await mySkillsWebviewCtx.dispose();
 		await mySkillsCreateSkillCtx.dispose();
 		await mySkillsCreateSkillSupportCtx.dispose();
+		await mySkillsSkillReadmeCtx.dispose();
 		await cliTutorialCtx.dispose();
 		await ptyHostCtx.dispose();
 	}
