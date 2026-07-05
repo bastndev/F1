@@ -718,6 +718,79 @@
 	display: none;
 }
 
+/* ── Go / approve button ────────────────────────────────────────────
+   Shown only when the selected CLI output is a plan awaiting the user's green
+   light (needsApproval in translator.ts). Stronger accent fill than Translate so
+   it reads as the primary action; Ctrl+Alt+Enter triggers it too. Accent-tinted
+   rather than solid so text stays legible across every per-agent accent + theme. */
+.translator-go {
+	border-color: color-mix(in srgb, var(--agent-accent, #AFA9EC) 60%, var(--vscode-editorGroup-border));
+	color: var(--agent-accent, #AFA9EC);
+	background: color-mix(in srgb, var(--agent-accent, #AFA9EC) 16%, var(--vscode-input-background));
+	font-weight: 600;
+	padding-right: 15px;
+}
+
+/* Invisible until JS flags real content as rendered (.is-ready) — a fixed
+   delay here would race the network instead of matching what's on screen. */
+.translator-go:not([hidden]):not(.is-ready) {
+	opacity: 0;
+	pointer-events: none;
+}
+
+.translator-go.is-ready {
+	animation: go-enter 1s cubic-bezier(0.16, 1, 0.3, 1) both,
+	           go-pulse 2.8s ease-in-out 1.1s infinite;
+}
+
+@keyframes go-enter {
+	0% {
+		opacity: 0;
+		transform: translateX(24px) scale(0.85);
+		filter: blur(3px);
+	}
+	40% {
+		filter: blur(0);
+	}
+	70% {
+		transform: translateX(-3px) scale(1.02);
+	}
+	100% {
+		opacity: 1;
+		transform: translateX(0) scale(1);
+		filter: blur(0);
+	}
+}
+
+@keyframes go-pulse {
+	0%, 100% {
+		box-shadow: 0 0 0 0 color-mix(in srgb, var(--agent-accent, #AFA9EC) 0%, transparent);
+	}
+	50% {
+		box-shadow: 0 0 12px 2px color-mix(in srgb, var(--agent-accent, #AFA9EC) 20%, transparent);
+	}
+}
+
+.translator-go:hover {
+	border-color: color-mix(in srgb, var(--agent-accent, #AFA9EC) 85%, var(--vscode-editorGroup-border));
+	color: var(--agent-accent, #AFA9EC);
+	background: color-mix(in srgb, var(--agent-accent, #AFA9EC) 24%, var(--vscode-input-background));
+}
+
+.translator-go i {
+	font-size: 12px;
+	transition: transform 0.25s ease;
+}
+
+.translator-go:hover i {
+	transform: translateX(2px);
+}
+
+/* class+attr beats the .translator-action-btn { display: flex } base */
+.translator-go[hidden] {
+	display: none;
+}
+
 /* ── Auto-translate toggle ──────────────────────────────────────────
    Pill toggle mirroring the prompt modal's translate toggle. ON → translation
    runs on open and the manual Translate button is hidden; the toggle itself

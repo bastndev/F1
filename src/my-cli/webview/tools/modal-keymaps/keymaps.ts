@@ -45,6 +45,7 @@ const keymapSections: { title: string; items: { id: ShortcutId; icon: string }[]
 			{ id: 'openCommands', icon: 'C' },
 			{ id: 'togglePromptFilter', icon: '⚙︎' },
 			{ id: 'toggleVoicePlayback', icon: '⏯' },
+			{ id: 'approvePlan', icon: '▶' },
 		],
 	},
 	{
