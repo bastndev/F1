@@ -39,11 +39,13 @@ const PLAN_REMINDER = '(Still planning — plan only, no code yet, wait for my a
 
 // "Just pass a route" (route-only) → a cheap PRIME step: the user loads code
 // into the model's context first (read & understand, NO plan, tiny ack), then
-// sends the real task to get the plan. Saves time and tokens. The ack line
-// mirrors the user's phrasing. English + post-translation, like the preamble.
+// sends the real task to get the plan. Saves time and tokens. The ack is turn-
+// scoped ("this message only… never repeat"): without that, weak models re-emit
+// the fixed line on the NEXT message instead of engaging (the bare "reply with
+// only X" reads as a standing rule). English + post-translation, like the preamble.
 const PRIME_PREFIX = 'Read and fully understand ';
 const PRIME_SUFFIX =
-	' — open whatever files you need. Do not plan or write code yet; once you truly understand it, reply with only: 💡 now I get your project!';
+	' — open whatever files you need. Do not plan or write code yet; once you truly understand it, reply with only this line: 💡 now I get your project! — this reply is for THIS message only; respond normally to whatever I send next, and never repeat this line.';
 
 export type PlanTextOptions = {
 	/** Typed text is only a route (@mention), no prose → cheap prime + ack. */
