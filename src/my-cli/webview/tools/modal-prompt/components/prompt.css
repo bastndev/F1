@@ -450,7 +450,9 @@
    shown). A ONE-SHOT action, not a preference toggle:
    aria-pressed="true"            → available, turquoise + pulsing dot (default)
    aria-pressed="true" .is-injecting → loading the rules into the CLI (disabled)
-   aria-pressed="false" :disabled → already loaded this session (muted gray)
+   aria-pressed="false" :disabled → already loaded this session, OR grayed by
+                                    PLAN mode (both muted gray, reversible only
+                                    for the PLAN case)
    .is-denied                     → click refused (busy / no session), red shake */
 
 .prompt-rules-toggle {

@@ -197,11 +197,34 @@ function initPromptComposer(host: HTMLElement, context: PromptContext, hasActive
 	// always shows. PLAN appends a planning instruction at send time (see the
 	// send path); it never injects anything into the terminal.
 	let promptMode: PromptMode = 'pro';
+
+	// Rules is a full-session action; PLAN carries its own guard, so gray the
+	// button while planning (blocks an accidental heavy injection mid-plan) and
+	// restore it in PRO. Done/injecting states are left alone. Hoisted so the mode
+	// onChange can call it even though rulesController is undefined at the first
+	// (init) call — optional chaining no-ops then; the post-init call below applies
+	// it for real once the controller exists.
+	function syncRulesForMode(mode: PromptMode) {
+		if (injectInFlight) {
+			return; // an injection is landing — don't disturb its visual
+		}
+		const sid = context.getActiveSessionId?.();
+		if (sid && rulesInjectedSessions.has(sid)) {
+			return; // already loaded → stays muted-gray regardless of mode
+		}
+		if (mode === 'plan') {
+			rulesController?.setPlanLocked();
+		} else {
+			rulesController?.setAvailable();
+		}
+	}
+
 	initPromptMode(host, (mode) => {
 		promptMode = mode;
 		// The run button keeps "Execute" in both modes; the input field wears
 		// the mode instead (accent-tinted while PLAN is active).
 		host.querySelector<HTMLElement>('.prompt-modal')?.classList.toggle('is-plan-mode', mode === 'plan');
+		syncRulesForMode(mode);
 	});
 
 	// "rules" — a one-shot, language- and CLI-agnostic action, wired before the
@@ -269,8 +292,9 @@ function initPromptComposer(host: HTMLElement, context: PromptContext, hasActive
 			rulesInjectedSessions.add(sessionId);
 			rulesController?.setDone();
 		} else {
-			// Nothing landed (session gone) — leave it clickable to retry.
-			rulesController?.setAvailable();
+			// Nothing landed (session gone) — restore per current mode: clickable
+			// to retry in PRO, but stays grayed if we're now in PLAN.
+			syncRulesForMode(promptMode);
 		}
 	}
 
@@ -287,7 +311,8 @@ function initPromptComposer(host: HTMLElement, context: PromptContext, hasActive
 	if (activeSessionId && rulesInjectedSessions.has(activeSessionId)) {
 		rulesController?.setDone();
 	} else {
-		rulesController?.setAvailable();
+		// Not loaded yet → available in PRO, grayed while PLAN is active.
+		syncRulesForMode(promptMode);
 	}
 
 	// Alt+1 / Alt+2 / Alt+3 click the footer model / resume / usage chips.
