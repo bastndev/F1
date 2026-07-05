@@ -20,6 +20,7 @@ import {
 	type AgentLaunchSource
 } from '../shared/agent-launch-guard';
 import { SmartService, SMART_READY_MARKER } from '../../my-plus/plus';
+import { buildRulesPrompt, RULES_MARKER } from '../shared/rules/rules-content';
 
 export class MyCliViewProvider implements vscode.WebviewViewProvider, vscode.Disposable {
 	public static readonly viewType = 'f1.myCli';
@@ -28,6 +29,7 @@ export class MyCliViewProvider implements vscode.WebviewViewProvider, vscode.Dis
 	private readonly launcherStateSessionId = crypto.randomBytes(16).toString('hex');
 	private pendingInitialAgent?: string;
 	private pendingInitialSmart = false;
+	private pendingInitialRules = false;
 	private pendingInitialCustomCli?: CustomCliLaunch;
 	private activePromptTranslation?: AbortController;
 	private _activeWebview?: vscode.Webview;
@@ -102,6 +104,7 @@ export class MyCliViewProvider implements vscode.WebviewViewProvider, vscode.Dis
 
 				this.pendingInitialAgent = message.agent;
 				this.pendingInitialSmart = message.smart === true;
+				this.pendingInitialRules = message.rules === true;
 				webviewView.webview.html = this._getAgentHtmlForWebview(webviewView.webview, message.agent);
 				return;
 			}
@@ -142,9 +145,11 @@ export class MyCliViewProvider implements vscode.WebviewViewProvider, vscode.Dis
 				} else if (this.pendingInitialAgent) {
 					const agentLabel = this.pendingInitialAgent;
 					const smart = this.pendingInitialSmart;
+					const rules = this.pendingInitialRules;
 					this.pendingInitialAgent = undefined;
 					this.pendingInitialSmart = false;
-					void this._launchInitialAgent(agentLabel, smart);
+					this.pendingInitialRules = false;
+					void this._launchInitialAgent(agentLabel, smart, rules);
 				} else {
 					this.sessionManager.postState();
 				}
@@ -361,27 +366,59 @@ export class MyCliViewProvider implements vscode.WebviewViewProvider, vscode.Dis
 	 * the graph + rules and confirms readiness in its own chat. The generated files
 	 * are removed after that first reply settles.
 	 */
-	private async _launchInitialAgent(agentLabel: string, smart: boolean) {
-		if (!smart) {
-			void this.sessionManager.createSession(agentLabel);
+	private async _launchInitialAgent(agentLabel: string, smart: boolean, rules: boolean) {
+		if (smart) {
+			const root = this._workspaceRoot();
+			this.smartService.prepareContext(root, getAgentSlug(agentLabel));
+			// Build the graph BEFORE writing the rules, so graphify doesn't index our own
+			// rules file into the project graph. Abort it if session creation fails so we
+			// don't leave a spawned graphify running unattended.
+			const graphController = new AbortController();
+			const graphReady = this.smartService.buildGraph(root, graphController.signal);
+
+			const sessionId = await this.sessionManager.createSession(agentLabel, { smart: true });
+			if (!sessionId) {
+				graphController.abort();
+				return;
+			}
+
+			await this._runSmartSession(sessionId, root, graphReady);
 			return;
 		}
 
-		const root = this._workspaceRoot();
-		this.smartService.prepareContext(root, getAgentSlug(agentLabel));
-		// Build the graph BEFORE writing the rules, so graphify doesn't index our own
-		// rules file into the project graph. Abort it if session creation fails so we
-		// don't leave a spawned graphify running unattended.
-		const graphController = new AbortController();
-		const graphReady = this.smartService.buildGraph(root, graphController.signal);
-
-		const sessionId = await this.sessionManager.createSession(agentLabel, { smart: true });
-		if (!sessionId) {
-			graphController.abort();
-			return;
+		const sessionId = await this.sessionManager.createSession(agentLabel);
+		if (rules && sessionId) {
+			void this._autoInjectRules(sessionId);
 		}
+	}
 
-		await this._runSmartSession(sessionId, root, graphReady);
+	/**
+	 * Launcher "rules mode": after the CLI boots and idles, inject the working
+	 * rules and notify the webview so the prompt modal marks the button as done.
+	 * Mirrors the prompt modal's injectRules flow but is host-driven.
+	 */
+	private async _autoInjectRules(sessionId: string) {
+		await this.sessionManager.waitForFirstIdle(sessionId);
+
+		const text = buildRulesPrompt();
+		const marker = RULES_MARKER;
+		let answered = false;
+		const answer = () => {
+			if (answered) {
+				return;
+			}
+			answered = true;
+			void this._activeWebview?.postMessage({ type: 'cli.rulesLoaded', sessionId });
+		};
+
+		this.sessionManager.sendText(sessionId, text);
+		this.sessionManager.onceResponseSettled(sessionId, () => {
+			if (marker && !this.sessionManager.bufferContains(sessionId, marker)) {
+				return;
+			}
+			answer();
+		});
+		setTimeout(answer, 60000);
 	}
 
 	/**

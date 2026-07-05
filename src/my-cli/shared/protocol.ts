@@ -51,7 +51,7 @@ export type CustomCliLaunch = {
 
 /** Webview → extension host. */
 export type WebviewToHostMessage =
-	| { type: 'openAgent'; agent: string; smart?: boolean }
+	| { type: 'openAgent'; agent: string; smart?: boolean; rules?: boolean }
 	| { type: 'cli.ready' }
 	| { type: 'cli.create'; agent: string; launchGuard?: AgentLaunchGuardMessage; smart?: boolean }
 	| { type: 'customCli.open'; source: 'launcher' | 'panel' }
@@ -98,6 +98,7 @@ export type HostToWebviewMessage =
 	| { type: 'prompt.prepareError'; id: string; message: string }
 	| { type: 'prompt.spellResult'; id: string; issues: SpellIssue[] }
 	| { type: 'prompt.rulesInjected'; id: string; ok: boolean }
+	| { type: 'cli.rulesLoaded'; sessionId: string }
 	| { type: 'workspace.files'; id: string; files: FileMentionEntry[] }
 	| { type: 'workspace.skills'; id: string; skills: WorkspaceSkill[] }
 	| { type: 'workspace.skillsChanged' }
@@ -114,6 +115,7 @@ export type InboundWebviewMessage = {
 	type?: string;
 	agent?: string;
 	smart?: boolean;
+	rules?: boolean;
 	launchGuard?: AgentLaunchGuardMessage;
 	source?: string;
 	id?: string;

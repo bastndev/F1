@@ -3,7 +3,7 @@ import { Terminal } from '@xterm/xterm';
 import { createTabController, readVoiceFinishPreference, type CliAgentIcon } from '../panel-tab/tab';
 import { getStoredPromptLang } from '../tools/modal-prompt/language-select';
 import { hasTranslatableContent } from '../tools/modal-translator/terminal-text';
-import { prunePromptDrafts } from '../tools/modal-prompt/prompt';
+import { prunePromptDrafts, markRulesInjectedForSession, getRulesSoundUri } from '../tools/modal-prompt/prompt';
 import { createCliCreateMessage } from '../../shared/agent-launch-guard';
 import { getAgentSlug as resolveAgentSlug, getCliAgent } from '../../shared/agents';
 import { isLynxPanelNavChord } from '../../../shared/keymaps/lynx-keymap/index';
@@ -1104,6 +1104,17 @@ window.addEventListener('message', (event: MessageEvent<ServerMessage>) => {
 
 	if (message.type === 'prompt.rulesInjected') {
 		injectRulesRpc.resolve(message.id, message.ok);
+		return;
+	}
+
+	if (message.type === 'cli.rulesLoaded' && typeof message.sessionId === 'string') {
+		markRulesInjectedForSession(message.sessionId);
+		const soundUri = getRulesSoundUri();
+		if (soundUri) {
+			const audio = new Audio(soundUri);
+			audio.volume = 0.5;
+			audio.play().catch(() => { /* ignore autoplay / load errors */ });
+		}
 		return;
 	}
 
