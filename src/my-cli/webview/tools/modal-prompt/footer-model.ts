@@ -45,7 +45,14 @@ export function updateFooterModel(host: HTMLElement, context: PromptContext, has
 	// and no leading Ctrl+U for these shortcuts to register.
 	const usePasteMode = agent?.slug === 'cursor';
 
+	// The voice pill lives in this slot but is owned by initVoiceControl — keep the
+	// node (and its listeners) across the rebuild, re-attached first so the sibling
+	// rule can hide the dot+name while it is visible.
+	const voicePill = footerInfo.querySelector('.prompt-voice-pill');
 	footerInfo.innerHTML = `<span class="prompt-session-dot" id="sessionDot"></span><span class="prompt-cli-name">${simpleName}</span>`;
+	if (voicePill) {
+		footerInfo.prepend(voicePill);
+	}
 
 	const modelName = context.getActiveModelName?.();
 	const usageCommand = hasActiveSession ? getUsageCommandLabel(label) : 'not configured';

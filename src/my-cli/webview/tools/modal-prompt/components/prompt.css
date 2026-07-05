@@ -302,21 +302,28 @@
   display: none;
 }
 
-/* ── Voice pill — a "now playing" control that floats in the toolbar centre
-   while a read-aloud is live (Ctrl+Space here from the translator mid-read).
+/* ── Voice pill — a "now playing" control that sits in the footer's CLI-name
+   slot while a read-aloud is live (Ctrl+Space here from the translator mid-read).
    Voice is always green, never agent-tinted (matches the translator). Its own
    display:flex would defeat [hidden], so the attribute rule wins. ── */
 .prompt-voice-pill {
   display: flex;
   align-items: center;
-  align-self: center;
   gap: 3px;
-  padding: 3px 5px;
+  padding: 2px 4px;
   border-radius: 999px;
   background: color-mix(in srgb, #5DCAA5 13%, transparent);
   border: 0.5px solid color-mix(in srgb, #5DCAA5 30%, transparent);
 }
 .prompt-voice-pill[hidden] {
+  display: none;
+}
+
+/* While the pill is visible it takes the CLI-name slot: hide the dot + name
+   (siblings that follow it). Stopping the voice hides the pill and reveals them
+   again — the chips that follow are left untouched. */
+.prompt-voice-pill:not([hidden]) ~ .prompt-session-dot,
+.prompt-voice-pill:not([hidden]) ~ .prompt-cli-name {
   display: none;
 }
 
