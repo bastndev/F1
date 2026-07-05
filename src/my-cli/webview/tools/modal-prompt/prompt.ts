@@ -33,8 +33,10 @@ import { enforceLowercaseInput } from './lowercase-input';
 import {
 	atomicMarkerPattern,
 	getImageTypeFromPath,
+	getLeadingSkillTokenGuardEnd,
 	getPathBaseName,
 	getReferencedImageAttachments,
+	guardLeadingSkillToken,
 	handleImageMarkerArrowKey,
 	handleImageMarkerDeleteKey,
 	setupImagePaste,
@@ -443,6 +445,11 @@ function initPromptComposer(host: HTMLElement, context: PromptContext, hasActive
 		if (handleImageMarkerArrowKey(textarea, e)) {return;}
 	});
 
+	// Blocks non-letter insertion (digits, symbols, space, IME, native paste)
+	// from landing in front of a leading [Skills] token. Typed letters are
+	// clamped separately in enforceLowercaseInput, above.
+	guardLeadingSkillToken(textarea);
+
 	// The real send that handles optional auto-translate + image resolution before processPrompt.
 	// Lives inside init so it closes over translateState / setTranslating / imageAttachments.
 	async function doPerformSendWithImages(
@@ -768,6 +775,16 @@ function initPromptComposer(host: HTMLElement, context: PromptContext, hasActive
 	const forceCaretOutOfMarkers = () => {
 		if (textarea.selectionStart !== textarea.selectionEnd) {return;}
 		const caret = textarea.selectionStart ?? 0;
+
+		// A leading [Skills] token has no valid position "before" it — unlike
+		// other markers, clicking right in front of it and typing would glue
+		// text onto its start-anchored pattern and silently break it.
+		const guardEnd = getLeadingSkillTokenGuardEnd(textarea.value);
+		if (caret < guardEnd) {
+			textarea.setSelectionRange(guardEnd, guardEnd);
+			return;
+		}
+
 		for (const match of textarea.value.matchAll(atomicMarkerPattern)) {
 			const start = match.index ?? 0;
 			const end = start + match[0].length;
