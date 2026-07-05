@@ -91,6 +91,7 @@ type PromptDraft = {
 	nextImageAttachmentId: number;
 	pasteAttachments: PasteAttachment[];
 	nextPasteAttachmentId: number;
+	selectedSkills: WorkspaceSkill[];
 };
 const promptDrafts = new Map<string, PromptDraft>();
 
@@ -361,6 +362,7 @@ function initPromptComposer(host: HTMLElement, context: PromptContext, hasActive
 			nextImageAttachmentId,
 			pasteAttachments,
 			nextPasteAttachmentId,
+			selectedSkills,
 		});
 	};
 	textarea.addEventListener('input', saveDraft);
@@ -608,12 +610,18 @@ function initPromptComposer(host: HTMLElement, context: PromptContext, hasActive
 	// Ordered selection of skills — updated as the user toggles chips. The
 	// textarea holds only the aggregate [Skills #N] count token; the actual
 	// WorkspaceSkill objects live here and drive the send-time expansion.
-	let selectedSkills: WorkspaceSkill[] = [];
+	// Restored from the draft so a modal close/reopen keeps the chips marked.
+	let selectedSkills: WorkspaceSkill[] = savedDraft?.selectedSkills ?? [];
 
 	if (hasActiveSession) {
 		const refreshSkills = initSkillsChips(host, context, textarea, (selection) => {
 			selectedSkills = selection;
-		});
+			// updateToken() dispatches its own 'input' event (which calls
+			// saveDraft) BEFORE invoking this callback, so that save would
+			// otherwise persist the previous selection — save again now that
+			// selectedSkills is current.
+			saveDraft();
+		}, selectedSkills);
 		if (refreshSkills) {
 			context.registerSkillsRefresh?.(refreshSkills);
 		}
