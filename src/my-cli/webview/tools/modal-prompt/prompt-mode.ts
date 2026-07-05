@@ -15,14 +15,14 @@
  * so later sends carry only PLAN_REMINDER — the safety guard re-anchored
  * cheaply, not the whole preamble re-spent each turn.
  *
- * The choice persists in localStorage 'f1-prompt-mode' ('pro' | 'plan';
- * missing = pro), sibling of 'f1-translate-auto' / 'f1-prompt-lang'.
+ * The mode is intentionally NOT persisted: every mount opens in PRO and PLAN is
+ * a transient, per-open choice (sending closes the modal, so the next open is
+ * PRO again). A stale saved PLAN was a footgun — the modal could silently reopen
+ * in PLAN and turn "create X" into a plan-only reply.
  */
 import { matchesShortcut } from '../../../../shared/keymaps/cli';
 
 export type PromptMode = 'pro' | 'plan';
-
-const STORAGE_KEY = 'f1-prompt-mode';
 
 // Full planning preamble — FIRST plan send of a session only. Keeps the
 // approval guard (the safety line) and asks for a compact plan. Compact-format
@@ -67,14 +67,6 @@ export function buildPlanText(prompt: string, opts: PlanTextOptions): string {
 	return `${prompt.trimEnd()}\n\n${tail}`;
 }
 
-export const getPromptMode = (): PromptMode => {
-	try {
-		return localStorage.getItem(STORAGE_KEY) === 'plan' ? 'plan' : 'pro';
-	} catch {
-		return 'pro';
-	}
-};
-
 export function initPromptMode(host: HTMLElement, onChange: (mode: PromptMode) => void) {
 	const proBtn = host.querySelector<HTMLButtonElement>('#proBtn');
 	const planBtn = host.querySelector<HTMLButtonElement>('#planBtn');
@@ -82,36 +74,30 @@ export function initPromptMode(host: HTMLElement, onChange: (mode: PromptMode) =
 		return;
 	}
 
-	const apply = (mode: PromptMode, persist: boolean) => {
+	// PLAN is transient — never persisted (see module header). No persist arg.
+	const apply = (mode: PromptMode) => {
 		proBtn.classList.toggle('is-active', mode === 'pro');
 		planBtn.classList.toggle('is-active', mode === 'plan');
 		proBtn.setAttribute('aria-pressed', mode === 'pro' ? 'true' : 'false');
 		planBtn.setAttribute('aria-pressed', mode === 'plan' ? 'true' : 'false');
-		if (persist) {
-			try {
-				localStorage.setItem(STORAGE_KEY, mode);
-			} catch {
-				/* storage unavailable */
-			}
-		}
 		onChange(mode);
 	};
 
-	proBtn.addEventListener('click', () => apply('pro', true));
-	planBtn.addEventListener('click', () => apply('plan', true));
+	proBtn.addEventListener('click', () => apply('pro'));
+	planBtn.addEventListener('click', () => apply('plan'));
 
 	// Alt+1 / Alt+2 switch modes; listening on the host (not the textarea)
 	// keeps the chord working wherever focus sits inside the modal.
 	host.addEventListener('keydown', (e) => {
 		if (matchesShortcut(e, 'promptModePro')) {
 			e.preventDefault();
-			apply('pro', true);
+			apply('pro');
 		} else if (matchesShortcut(e, 'promptModePlan')) {
 			e.preventDefault();
-			apply('plan', true);
+			apply('plan');
 		}
 	});
 
-	// Reflect the persisted mode on every mount.
-	apply(getPromptMode(), false);
+	// Always open in PRO — the mode is not remembered across opens.
+	apply('pro');
 }
