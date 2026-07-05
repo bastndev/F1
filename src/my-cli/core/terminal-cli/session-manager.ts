@@ -61,6 +61,16 @@ const incrementalTypeSlugs = new Set(['opencode', 'kilocode']);
 const incrementalLeadInMs = 400;
 const perCharTypeMs = 8;
 
+// codex/copilot classify a large one-shot write as a paste and swallow the
+// trailing \r as paste content instead of a submit key (short prompts like the
+// Smart one submit fine — the trigger is size). Wrapping the text in the
+// standard bracketed-paste markers gives them a definite paste end, so the
+// separately-sent \r reads as a genuine Enter. Scoped to these two: other CLIs
+// already submit correctly and may not enable bracketed paste.
+const bracketedPasteSlugs = new Set(['codex', 'copilot']);
+const bracketedPasteOpen = '\x1b[200~';
+const bracketedPasteClose = '\x1b[201~';
+
 const getWorkspaceCwd = () => {
 	return vscode.workspace.workspaceFolders?.[0]?.uri.fsPath || os.homedir();
 };
@@ -393,7 +403,12 @@ export class CliSessionManager implements vscode.Disposable {
 			return;
 		}
 
-		this.sendPtyHostCommand(session, { type: 'input', data: text });
+		// codex/copilot need the text explicitly bracketed as paste so the later
+		// \r isn't eaten as paste content (see bracketedPasteSlugs).
+		const payload = slug && bracketedPasteSlugs.has(slug)
+			? bracketedPasteOpen + text + bracketedPasteClose
+			: text;
+		this.sendPtyHostCommand(session, { type: 'input', data: payload });
 		this.submitPromptAfterDelay(sessionId);
 	}
 
