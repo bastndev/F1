@@ -63,6 +63,7 @@ export type WebviewToHostMessage =
 	| { type: 'cli.switch'; sessionId: string }
 	| { type: 'cli.resize'; sessionId?: string; cols: number; rows: number }
 	| { type: 'cli.close'; sessionId: string }
+	| { type: 'smart.cancel'; sessionId: string }
 	| { type: 'cli.voiceFinish'; enabled: boolean; lang: string }
 	| { type: 'prompt.translate'; id: string; text: string; from: string; to: string }
 	| { type: 'prompt.prepare'; id: string; text: string; attachments: ImageAttachment[] }

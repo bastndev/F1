@@ -42,6 +42,22 @@ const buildOverlay = (): HTMLDivElement => {
 	const scan = document.createElement('div');
 	scan.className = 'smart-scan';
 
+	// Escape hatch: aborts the whole Smart launch (host kills the CLI + reverts the
+	// generated .f1/ + AGENTS.md). Visible from the start, not gated behind the
+	// staged head-in — the point is to bail early.
+	const cancel = document.createElement('button');
+	cancel.type = 'button';
+	cancel.className = 'smart-cancel';
+	cancel.title = 'Cancel';
+	cancel.setAttribute('aria-label', 'Cancel');
+	const cancelX = document.createElement('span');
+	cancelX.className = 'smart-cancel-x';
+	cancelX.textContent = '✕';
+	const cancelLabel = document.createElement('span');
+	cancelLabel.className = 'smart-cancel-label';
+	cancelLabel.textContent = 'Cancel';
+	cancel.append(cancelX, cancelLabel);
+
 	const inner = document.createElement('div');
 	inner.className = 'smart-overlay-inner';
 
@@ -100,7 +116,7 @@ const buildOverlay = (): HTMLDivElement => {
 	status.append(statusLabel, statusTrack, statusPct);
 
 	inner.append(skeleton, head, status);
-	overlay.append(vignette, scan, inner);
+	overlay.append(vignette, scan, inner, cancel);
 	return overlay;
 };
 
@@ -109,7 +125,10 @@ export type SmartSkeletonController = {
 	dismiss: () => void;
 };
 
-export const createSmartSkeleton = (host: HTMLElement): SmartSkeletonController => {
+export const createSmartSkeleton = (
+	host: HTMLElement,
+	options?: { onCancel?: () => void }
+): SmartSkeletonController => {
 	ensureStyles();
 	const overlay = buildOverlay();
 	host.append(overlay);
@@ -189,6 +208,23 @@ export const createSmartSkeleton = (host: HTMLElement): SmartSkeletonController 
 		// Fallback in case the event never fires.
 		window.setTimeout(startCrawl, 3800);
 	}
+
+	// Cancel: tell the host to abort, then fade straight out (no "Ready" sweep —
+	// that would misread as success). The host guards against a late reveal.
+	const cancelBtn = overlay.querySelector('.smart-cancel');
+	cancelBtn?.addEventListener('click', () => {
+		if (dismissed) {
+			return;
+		}
+		dismissed = true;
+		clearInterval(phaseInterval);
+		clearInterval(statusInterval);
+		options?.onCancel?.();
+		overlay.classList.add('is-leaving');
+		const remove = () => overlay.remove();
+		overlay.addEventListener('transitionend', remove, { once: true });
+		window.setTimeout(remove, 700);
+	});
 
 	return {
 		dismiss: () => {

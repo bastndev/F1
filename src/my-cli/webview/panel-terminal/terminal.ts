@@ -909,7 +909,9 @@ const createTerminalView = (session: CliSession) => {
 			// in-panel "+" path can start further Smart sessions afterwards).
 			smartDone = false;
 			smartOverlay?.dismiss();
-			smartOverlay = createSmartSkeleton(document.body);
+			smartOverlay = createSmartSkeleton(document.body, {
+				onCancel: () => vscode.postMessage({ type: 'smart.cancel', sessionId: session.id })
+			});
 		} else {
 			bootSkeletons.create(session.id, { rulesMode: session.rules === true });
 		}
