@@ -388,18 +388,26 @@ export class CliSessionManager implements vscode.Disposable {
 	}
 
 	/** Type text into the CLI (as if submitted) and arm the response detector. */
-	public sendText(sessionId: string, text: string) {
+	public sendText(sessionId: string, text: string, options: { focusReporting?: boolean } = {}) {
 		const session = this.sessions.get(sessionId);
 		if (!session || session.status !== 'running') {
 			return;
 		}
 		session.awaitingResponse = true;
 
+		// CLIs with DECSET 1004 focus reporting (copilot) drop key input while the
+		// terminal reports unfocused — which it does whenever the prompt modal is
+		// open (the button rules path). Prefix a focus-in so the input registers;
+		// mirrors the webview's own submit guard. Launcher/Smart pass nothing (no
+		// modal), keeping the plain path.
+		const focusIn = options.focusReporting ? '\x1b[I' : '';
+		const submitEnter = focusIn + '\r';
+
 		// Bubbletea CLIs (opencode/kilocode) ignore a whole-prompt burst, so type
 		// it out as real keystrokes. Everyone else takes the single write fine.
 		const slug = getCliAgent(session.label)?.slug;
 		if (slug && incrementalTypeSlugs.has(slug)) {
-			this.typePromptIncrementally(sessionId, Array.from(text), 0);
+			this.typePromptIncrementally(sessionId, Array.from(text), 0, submitEnter, focusIn);
 			return;
 		}
 
@@ -408,16 +416,17 @@ export class CliSessionManager implements vscode.Disposable {
 		const payload = slug && bracketedPasteSlugs.has(slug)
 			? bracketedPasteOpen + text + bracketedPasteClose
 			: text;
-		this.sendPtyHostCommand(session, { type: 'input', data: payload });
-		this.submitPromptAfterDelay(sessionId);
+		this.sendPtyHostCommand(session, { type: 'input', data: focusIn + payload });
+		this.submitPromptAfterDelay(sessionId, submitEnter);
 	}
 
 	// Send the prompt one code point at a time (Array.from keeps "—"/"✅" intact),
 	// then submit. Each keystroke is its own pty write, so it's never mistaken for
-	// a paste and the input box actually fills.
-	private typePromptIncrementally(sessionId: string, chars: string[], index: number) {
+	// a paste and the input box actually fills. leadFocusIn rides the first char so
+	// a focus-reporting CLI accepts the typing too (see sendText).
+	private typePromptIncrementally(sessionId: string, chars: string[], index: number, submitEnter = '\r', leadFocusIn = '') {
 		if (index >= chars.length) {
-			this.submitPromptAfterDelay(sessionId);
+			this.submitPromptAfterDelay(sessionId, submitEnter);
 			return;
 		}
 		setTimeout(() => {
@@ -425,20 +434,20 @@ export class CliSessionManager implements vscode.Disposable {
 			if (!session || session.status !== 'running' || session.closing) {
 				return;
 			}
-			this.sendPtyHostCommand(session, { type: 'input', data: chars[index] });
-			this.typePromptIncrementally(sessionId, chars, index + 1);
+			this.sendPtyHostCommand(session, { type: 'input', data: (index === 0 ? leadFocusIn : '') + chars[index] });
+			this.typePromptIncrementally(sessionId, chars, index + 1, submitEnter, leadFocusIn);
 		}, index === 0 ? incrementalLeadInMs : perCharTypeMs);
 	}
 
 	// Send the Enter that submits a host-typed prompt, on a separate delayed write
 	// so TUI CLIs read it as a real submit key instead of folding it into the text.
-	private submitPromptAfterDelay(sessionId: string) {
+	private submitPromptAfterDelay(sessionId: string, enterData = '\r') {
 		setTimeout(() => {
 			const session = this.sessions.get(sessionId);
 			if (!session || session.status !== 'running' || session.closing) {
 				return;
 			}
-			this.sendPtyHostCommand(session, { type: 'input', data: '\r' });
+			this.sendPtyHostCommand(session, { type: 'input', data: enterData });
 		}, submitEnterDelayMs);
 	}
 

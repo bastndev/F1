@@ -276,11 +276,11 @@ const spellcheckRpc = createRpcChannel<[string, string, boolean], SpellIssue[]>(
 // One-shot rules injection: the host types the rules prompt into the CLI and
 // answers when the agent has read it (or its own hard cap fires). The timeout
 // sits above that host cap so the modal always unblocks; a miss resolves false.
-const injectRulesRpc = createRpcChannel<[string, string, string], boolean>({
+const injectRulesRpc = createRpcChannel<[string, string, string, boolean], boolean>({
 	prefix: 'inject-rules',
 	timeoutMs: 70000,
 	onTimeout: { resolveWith: false },
-	send: (id, sessionId, text, marker) => vscode.postMessage({ type: 'prompt.injectRules', id, sessionId, text, marker })
+	send: (id, sessionId, text, marker, focusReporting) => vscode.postMessage({ type: 'prompt.injectRules', id, sessionId, text, marker, focusReporting })
 });
 
 // Voice playback runs in the extension host (Piper TTS, shared with the ATM
@@ -461,7 +461,11 @@ const toolsController = layoutRight
 			openCreateSkill: () => vscode.postMessage({ type: 'mySkills.openCreate' }),
 			requestSpellcheck: (text: string, lang: string, strict: boolean) => spellcheckRpc.request(text, lang, strict),
 			injectRules: (text: string, marker: string) =>
-				activeSessionId ? injectRulesRpc.request(activeSessionId, text, marker) : Promise.resolve(false),
+				activeSessionId
+					// Pass the live DECSET 1004 state so the host knows to prefix a
+					// focus-in on submit (the modal steals focus → copilot drops \r).
+					? injectRulesRpc.request(activeSessionId, text, marker, terminals.get(activeSessionId)?.terminal.modes.sendFocusMode ?? false)
+					: Promise.resolve(false),
 			speakText,
 			appendSpeech,
 			checkVoiceReady: (lang: string) => voiceReadyRpc.request(lang),

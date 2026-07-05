@@ -67,7 +67,7 @@ export type WebviewToHostMessage =
 	| { type: 'prompt.translate'; id: string; text: string; from: string; to: string }
 	| { type: 'prompt.prepare'; id: string; text: string; attachments: ImageAttachment[] }
 	| { type: 'prompt.spellcheck'; id: string; text: string; lang: string; strict: boolean }
-	| { type: 'prompt.injectRules'; id: string; sessionId: string; text: string; marker: string }
+	| { type: 'prompt.injectRules'; id: string; sessionId: string; text: string; marker: string; focusReporting?: boolean }
 	| { type: 'workspace.listFiles'; id: string }
 	| { type: 'workspace.listSkills'; id: string }
 	| { type: 'mySkills.openCreate' }
@@ -131,6 +131,7 @@ export type InboundWebviewMessage = {
 	lang?: string;
 	strict?: boolean;
 	marker?: string;
+	focusReporting?: boolean;
 	sessionId?: string;
 	data?: string;
 	cols?: number;

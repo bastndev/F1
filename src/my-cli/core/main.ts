@@ -655,7 +655,7 @@ export class MyCliViewProvider implements vscode.WebviewViewProvider, vscode.Dis
 			return;
 		}
 
-		this.sessionManager.sendText(sessionId, text);
+		this.sessionManager.sendText(sessionId, text, { focusReporting: message.focusReporting === true });
 		this.sessionManager.onceResponseSettled(sessionId, () => {
 			// Reply settled but the confirmation line isn't in the buffer yet — let
 			// the hard cap answer instead of reporting done prematurely.
