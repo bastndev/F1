@@ -384,7 +384,7 @@
   opacity: 1;
 }
 .prompt-voice-pill.is-preparing .prompt-voice-spectrum {
-  opacity: 0.45;
+  opacity: 0.85;
 }
 
 .prompt-voice-spectrum .bar {
@@ -407,6 +407,20 @@
 .prompt-voice-pill.is-speaking .bar:nth-child(5) { animation: pv-spectrum-high 340ms ease-in-out -180ms infinite alternate; }
 .prompt-voice-pill.is-speaking .bar:nth-child(6) { animation: pv-spectrum-low  410ms ease-in-out -280ms infinite alternate; }
 
+/* Preparing / buffering — happens on resume from pause (Piper re-synthesizes the
+   chunk) and in the gaps between chunks. Keep the meter MOVING but desaturated to
+   grey and a touch slower, so the wait reads as "loading" instead of a frozen bar
+   that looks broken. */
+.prompt-voice-pill.is-preparing .bar {
+  background: linear-gradient(180deg, #d3dbd8 0%, #8b948f 60%, #69716d 100%);
+}
+.prompt-voice-pill.is-preparing .bar:nth-child(1) { animation: pv-spectrum-low  660ms ease-in-out -120ms infinite alternate; }
+.prompt-voice-pill.is-preparing .bar:nth-child(2) { animation: pv-spectrum-mid  520ms ease-in-out -240ms infinite alternate; }
+.prompt-voice-pill.is-preparing .bar:nth-child(3) { animation: pv-spectrum-high 580ms ease-in-out  -60ms infinite alternate; }
+.prompt-voice-pill.is-preparing .bar:nth-child(4) { animation: pv-spectrum-mid  620ms ease-in-out -330ms infinite alternate; }
+.prompt-voice-pill.is-preparing .bar:nth-child(5) { animation: pv-spectrum-high 480ms ease-in-out -180ms infinite alternate; }
+.prompt-voice-pill.is-preparing .bar:nth-child(6) { animation: pv-spectrum-low  560ms ease-in-out -280ms infinite alternate; }
+
 @keyframes pv-spectrum-low {
   0%   { height: 3px;  opacity: 0.55; }
   60%  { height: 9px; }
@@ -424,7 +438,8 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .prompt-voice-pill.is-speaking .bar {
+  .prompt-voice-pill.is-speaking .bar,
+  .prompt-voice-pill.is-preparing .bar {
     animation: none !important;
   }
 }
