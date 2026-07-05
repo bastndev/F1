@@ -283,11 +283,95 @@ function unwrapDetailsLine(line: string): string {
 	return line;
 }
 
+// \u2500\u2500 Side-by-side column split \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
+// TUI menus draw a bordered panel to the RIGHT of a list; a linear selection
+// glues each row's left text to its box slice ("keep bare cli \u2502 cancel \u2192 \u2502").
+// Frame detectors below only fire on a border at column 0, so these mixed rows
+// leak into 'prose' and the translator shreds them. This pass locks onto a
+// shared vertical-border column and, when some row has text to its LEFT,
+// restacks the run as left-column-then-peeled-panel (column-major reads right).
+// Rows align by JS string index \u2192 only correct while left text is narrow; a
+// wide char (emoji/CJK) shifts it so the run won't match and the panel is left
+// untouched (safe, no worse than today). Visual-width alignment is the follow-up.
+
+// Box verticals/corners/junctions (light\u00b7heavy\u00b7double\u00b7rounded) that can form a
+// panel edge. Horizontals excluded so a stacked rule is never read as an edge.
+const verticalBorderChar = /[\u2502\u2503\u2551\u250c\u250f\u2554\u2510\u2513\u2557\u2514\u2517\u255a\u2518\u251b\u255d\u251c\u2523\u2560\u2524\u252b\u2563\u253c\u254b\u256c\u256d\u256e\u2570\u256f]/;
+// Whole Box Drawing block \u2014 only for peeling edges / spotting a pure-border row.
+const anyBoxDrawing = /[\u2500-\u257f]/;
+
+function firstBorderColumn(line: string): number {
+	for (let i = 0; i < line.length; i += 1) {
+		if (verticalBorderChar.test(line[i])) {
+			return i;
+		}
+	}
+	return -1;
+}
+
+function peelPanelInterior(segment: string): string {
+	const trimmed = segment.trim();
+	if (!trimmed) {
+		return '';
+	}
+	// Pure border row (any weight) carries no text.
+	if ([...trimmed].every((ch) => ch === ' ' || anyBoxDrawing.test(ch))) {
+		return '';
+	}
+	// Strip the outer vertical edges + padding; keep the interior text.
+	return trimmed
+		.replace(/^[\u2502\u2503\u2551]\s?/, '')
+		.replace(/\s?[\u2502\u2503\u2551]$/, '')
+		.replace(/\s+$/, '');
+}
+
+function splitSideBySideColumns(lines: string[]): string[] {
+	const columns = lines.map(firstBorderColumn);
+	const out: string[] = [];
+	let i = 0;
+
+	while (i < lines.length) {
+		const col = columns[i];
+		if (col < 0) {
+			out.push(lines[i]);
+			i += 1;
+			continue;
+		}
+
+		// Grow a run of rows whose first border sits at the same column.
+		let j = i + 1;
+		while (j < lines.length && columns[j] === col) {
+			j += 1;
+		}
+
+		// Split only when some row has text left of that edge \u2014 otherwise it's a
+		// standalone box the existing frame logic already handles.
+		const hasLeftText = lines.slice(i, j).some((line) => line.slice(0, col).trim() !== '');
+		if (j - i >= 3 && hasLeftText) {
+			for (let k = i; k < j; k += 1) {
+				out.push(lines[k].slice(0, col).replace(/\s+$/, ''));
+			}
+			out.push('');
+			for (let k = i; k < j; k += 1) {
+				out.push(peelPanelInterior(lines[k].slice(col)));
+			}
+		} else {
+			for (let k = i; k < j; k += 1) {
+				out.push(lines[k]);
+			}
+		}
+		i = j;
+	}
+
+	return out;
+}
+
 export function segmentTerminalSelection(raw: string): TerminalSegment[] {
-	const lines = raw
+	const normalized = raw
 		.replace(/\u00a0/g, ' ')
 		.replace(/\r\n?/g, '\n')
-		.split('\n')
+		.split('\n');
+	const lines = splitSideBySideColumns(normalized)
 		.map((line) => unwrapDetailsLine(line.replace(/\s+$/, '')));
 
 	const kinds = lines.map((line) => classifyLine(line.trim()));
