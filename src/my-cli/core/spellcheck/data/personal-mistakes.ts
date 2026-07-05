@@ -10,6 +10,7 @@ export const PERSONAL_MISTAKES: Record<string, string> = {
 	'tokesn': 'tokens',
 	'tiens': 'tienes',
 	'recomienas': 'recomiendas',
+	'spanol ': 'español',
 
 
 	// NOTES
