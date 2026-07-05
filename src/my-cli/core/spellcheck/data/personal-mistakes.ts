@@ -7,6 +7,7 @@ export const PERSONAL_MISTAKES: Record<string, string> = {
 	'vulve': 'vuelve',
 	'scamos': 'sacamos',
 	'mod': 'modo',
+	'tokesn': 'tokens',
 
 
 	// NOTES
