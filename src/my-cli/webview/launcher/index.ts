@@ -4,7 +4,7 @@ import { matchAgentShortcut } from '../../../shared/keymaps/cli';
 type VsCodeApi = {
 	getState: () => unknown;
 	setState: (state: LauncherState) => void;
-	postMessage: (message: { type: 'openAgent'; agent: string; smart?: boolean } | { type: 'customCli.open'; source: 'launcher' } | { type: 'cli.openTutorial' }) => void;
+	postMessage: (message: { type: 'openAgent'; agent: string; smart?: boolean; rules?: boolean } | { type: 'customCli.open'; source: 'launcher' } | { type: 'cli.openTutorial' }) => void;
 };
 
 type LauncherModel = {
@@ -243,16 +243,24 @@ const setCustomCliPreview = () => {
 	saveLauncherState();
 };
 
-const openModel = (model: LauncherModel | undefined) => {
+const openModel = (model: LauncherModel | undefined, forceRules = false, forceSmart = false) => {
 	if (!model) {
 		showInvalidInput();
 		return;
 	}
 
+	// Alt+Left click on a CLI option opens the new "rules mode": normal skeleton,
+	// then the host auto-injects the working rules once the CLI is idle.
+	// The footer toggle still controls smart mode. Rules takes precedence if both
+	// are somehow requested.
+	const rules = forceRules;
+	const smart = !rules && (forceSmart || document.body.classList.contains('is-smart-mode'));
+
 	vscode.postMessage({
 		type: 'openAgent',
 		agent: model.label,
-		smart: document.body.classList.contains('is-smart-mode') || document.body.classList.contains('is-alt-peek')
+		smart,
+		rules
 	});
 };
 
@@ -345,7 +353,7 @@ const renderIconPalette = () => {
 		badge.textContent = String(index + 1);
 
 		option.append(image, status, badge);
-		option.addEventListener('click', () => openModel(model));
+		option.addEventListener('click', (event) => openModel(model, event.altKey));
 		option.addEventListener('focus', () => {
 			const matches = [{ model, score: 100 }];
 			setSelectedModel(model, true, matches);
@@ -435,7 +443,8 @@ window.addEventListener('keydown', (event) => {
 		const num = Number.parseInt(event.key, 10);
 		if (Number.isInteger(num) && num >= 1 && num <= models.length) {
 			event.preventDefault();
-			openModel(models[num - 1]);
+			// Alt+number now mirrors Alt+Left click: rules mode, not smart mode.
+			openModel(models[num - 1], true, false);
 			return;
 		}
 	}

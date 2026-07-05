@@ -63,8 +63,8 @@ F1 turns VS Code into a hub for AI coding agents. Open **Claude Code, Codex, Cop
 | Execute prompt                        | `⌘ + Enter`         | `Ctrl + Enter`         | `Ctrl + Enter`         | ㅤㅤ✅    |
 | Execute without translating           | `⌘ + Shift + Enter` | `Ctrl + Shift + Enter` | `Ctrl + Shift + Enter` | ㅤㅤ✅    |
 | Model picker (open/close) - [3]       | `Alt + 1`           | `Alt + 1`              | `Alt + 1`              | ㅤㅤ✅    |
-| Resume session (open/close) - [3]     | `Alt + 2`           | `Alt + 2`              | `Alt + 2`              | ㅤㅤ✅    |
-| Usage / status - [3]                  | `Alt + 3`           | `Alt + 3`              | `Alt + 3`              | ㅤㅤ✅    |
+| Usage / status - [3]                  | `Alt + 2`           | `Alt + 2`              | `Alt + 2`              | ㅤㅤ✅    |
+| Resume session (open/close) - [3]     | `Alt + 3`           | `Alt + 3`              | `Alt + 3`              | ㅤㅤ✅    |
 | Prompt PRO mode                       | `Alt + 4`           | `Alt + 4`              | `Alt + 4`              | ㅤㅤ✅    |
 | Prompt PLAN mode                      | `Alt + 5`           | `Alt + 5`              | `Alt + 5`              | ㅤㅤ✅    |
 | -                                     | -                   | -                      | -                      |           |

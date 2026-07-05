@@ -3,7 +3,7 @@ import { Terminal } from '@xterm/xterm';
 import { createTabController, readVoiceFinishPreference, type CliAgentIcon } from '../panel-tab/tab';
 import { getStoredPromptLang } from '../tools/modal-prompt/language-select';
 import { hasTranslatableContent } from '../tools/modal-translator/terminal-text';
-import { prunePromptDrafts } from '../tools/modal-prompt/prompt';
+import { prunePromptDrafts, markRulesInjectedForSession, getRulesSoundUri } from '../tools/modal-prompt/prompt';
 import { createCliCreateMessage } from '../../shared/agent-launch-guard';
 import { getAgentSlug as resolveAgentSlug, getCliAgent } from '../../shared/agents';
 import { isLynxPanelNavChord } from '../../../shared/keymaps/lynx-keymap/index';
@@ -276,11 +276,11 @@ const spellcheckRpc = createRpcChannel<[string, string, boolean], SpellIssue[]>(
 // One-shot rules injection: the host types the rules prompt into the CLI and
 // answers when the agent has read it (or its own hard cap fires). The timeout
 // sits above that host cap so the modal always unblocks; a miss resolves false.
-const injectRulesRpc = createRpcChannel<[string, string, string], boolean>({
+const injectRulesRpc = createRpcChannel<[string, string, string, boolean], boolean>({
 	prefix: 'inject-rules',
 	timeoutMs: 70000,
 	onTimeout: { resolveWith: false },
-	send: (id, sessionId, text, marker) => vscode.postMessage({ type: 'prompt.injectRules', id, sessionId, text, marker })
+	send: (id, sessionId, text, marker, focusReporting) => vscode.postMessage({ type: 'prompt.injectRules', id, sessionId, text, marker, focusReporting })
 });
 
 // Voice playback runs in the extension host (Piper TTS, shared with the ATM
@@ -461,7 +461,11 @@ const toolsController = layoutRight
 			openCreateSkill: () => vscode.postMessage({ type: 'mySkills.openCreate' }),
 			requestSpellcheck: (text: string, lang: string, strict: boolean) => spellcheckRpc.request(text, lang, strict),
 			injectRules: (text: string, marker: string) =>
-				activeSessionId ? injectRulesRpc.request(activeSessionId, text, marker) : Promise.resolve(false),
+				activeSessionId
+					// Pass the live DECSET 1004 state so the host knows to prefix a
+					// focus-in on submit (the modal steals focus → copilot drops \r).
+					? injectRulesRpc.request(activeSessionId, text, marker, terminals.get(activeSessionId)?.terminal.modes.sendFocusMode ?? false)
+					: Promise.resolve(false),
 			speakText,
 			appendSpeech,
 			checkVoiceReady: (lang: string) => voiceReadyRpc.request(lang),
@@ -891,7 +895,7 @@ const createTerminalView = (session: CliSession) => {
 			smartOverlay?.dismiss();
 			smartOverlay = createSmartSkeleton(document.body);
 		} else {
-			bootSkeletons.create(session.id);
+			bootSkeletons.create(session.id, { rulesMode: session.rules === true });
 		}
 	}
 
@@ -1104,6 +1108,29 @@ window.addEventListener('message', (event: MessageEvent<ServerMessage>) => {
 
 	if (message.type === 'prompt.rulesInjected') {
 		injectRulesRpc.resolve(message.id, message.ok);
+		return;
+	}
+
+	if (message.type === 'cli.rulesLoaded' && typeof message.sessionId === 'string') {
+		const rulesSessionId = message.sessionId;
+		bootSkeletons.notifyRulesLoaded(rulesSessionId, () => {
+			// Open right as the skeleton starts fading (not after it's gone) — the
+			// modal sits above the skeleton (z-index 1000 vs 12) and renders during
+			// that ~580ms fade, so by the time the skeleton is actually gone the
+			// composer is already sitting there ready: one clean reveal instead of
+			// two separate beats. Only for the launcher's rules-mode launch (this
+			// message only fires from that path), and only if still on that session.
+			if (rulesSessionId === activeSessionId) {
+				toolsController?.open('prompt');
+			}
+		});
+		markRulesInjectedForSession(message.sessionId);
+		const soundUri = getRulesSoundUri();
+		if (soundUri) {
+			const audio = new Audio(soundUri);
+			audio.volume = 0.5;
+			audio.play().catch(() => { /* ignore autoplay / load errors */ });
+		}
 		return;
 	}
 

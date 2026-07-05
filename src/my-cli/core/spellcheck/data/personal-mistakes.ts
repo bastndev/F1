@@ -1,4 +1,12 @@
 export const PERSONAL_MISTAKES: Record<string, string> = {
+	// NEW
+	'nesitara': 'necesitara',
+	'hacelo': 'hacerlo',
+	'agregamo': 'agregamos',
+	'botn': 'boton',
+	'vulve': 'vuelve',
+
+
 	// NOTES
 	'empesar': 'empezar',
 	'empesaremos': 'empezaremos',

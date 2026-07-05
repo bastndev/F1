@@ -61,6 +61,16 @@ const incrementalTypeSlugs = new Set(['opencode', 'kilocode']);
 const incrementalLeadInMs = 400;
 const perCharTypeMs = 8;
 
+// codex/copilot classify a large one-shot write as a paste and swallow the
+// trailing \r as paste content instead of a submit key (short prompts like the
+// Smart one submit fine — the trigger is size). Wrapping the text in the
+// standard bracketed-paste markers gives them a definite paste end, so the
+// separately-sent \r reads as a genuine Enter. Scoped to these two: other CLIs
+// already submit correctly and may not enable bracketed paste.
+const bracketedPasteSlugs = new Set(['codex', 'copilot']);
+const bracketedPasteOpen = '\x1b[200~';
+const bracketedPasteClose = '\x1b[201~';
+
 const getWorkspaceCwd = () => {
 	return vscode.workspace.workspaceFolders?.[0]?.uri.fsPath || os.homedir();
 };
@@ -145,7 +155,7 @@ export class CliSessionManager implements vscode.Disposable {
 		this.finishSoundSuppressed = suppressed;
 	}
 
-	public async createSession(agentLabel: string, options: { smart?: boolean } = {}): Promise<string | undefined> {
+	public async createSession(agentLabel: string, options: { smart?: boolean; rules?: boolean } = {}): Promise<string | undefined> {
 		const agent = getCliAgent(agentLabel);
 		if (!agent) {
 			this.postError(`Unknown CLI: ${agentLabel}`);
@@ -157,14 +167,14 @@ export class CliSessionManager implements vscode.Disposable {
 		}
 
 		this._beforeSessionCreate?.(agentLabel);
-		return this.createSessionFromCommand(agent.label, agent.command, agent.args, options.smart);
+		return this.createSessionFromCommand(agent.label, agent.command, agent.args, options.smart, options.rules);
 	}
 
 	public createCustomSession(customCli: CustomCliLaunch) {
 		this.createSessionFromCommand(customCli.label, customCli.command, customCli.args);
 	}
 
-	private createSessionFromCommand(label: string, command: string, args: string[], smart?: boolean): string {
+	private createSessionFromCommand(label: string, command: string, args: string[], smart?: boolean, rules?: boolean): string {
 		const id = `cli-${this.nextSessionId++}`;
 		const cwd = getWorkspaceCwd();
 		const session: CliSession = {
@@ -178,6 +188,7 @@ export class CliSessionManager implements vscode.Disposable {
 			hasUnread: false,
 			awaitingFirstOutput: true,
 			smart: smart === true,
+			rules: rules === true,
 			cols: 80,
 			rows: 24
 		};
@@ -377,31 +388,45 @@ export class CliSessionManager implements vscode.Disposable {
 	}
 
 	/** Type text into the CLI (as if submitted) and arm the response detector. */
-	public sendText(sessionId: string, text: string) {
+	public sendText(sessionId: string, text: string, options: { focusReporting?: boolean } = {}) {
 		const session = this.sessions.get(sessionId);
 		if (!session || session.status !== 'running') {
 			return;
 		}
 		session.awaitingResponse = true;
 
+		// CLIs with DECSET 1004 focus reporting (copilot) drop key input while the
+		// terminal reports unfocused — which it does whenever the prompt modal is
+		// open (the button rules path). Prefix a focus-in so the input registers;
+		// mirrors the webview's own submit guard. Launcher/Smart pass nothing (no
+		// modal), keeping the plain path.
+		const focusIn = options.focusReporting ? '\x1b[I' : '';
+		const submitEnter = focusIn + '\r';
+
 		// Bubbletea CLIs (opencode/kilocode) ignore a whole-prompt burst, so type
 		// it out as real keystrokes. Everyone else takes the single write fine.
 		const slug = getCliAgent(session.label)?.slug;
 		if (slug && incrementalTypeSlugs.has(slug)) {
-			this.typePromptIncrementally(sessionId, Array.from(text), 0);
+			this.typePromptIncrementally(sessionId, Array.from(text), 0, submitEnter, focusIn);
 			return;
 		}
 
-		this.sendPtyHostCommand(session, { type: 'input', data: text });
-		this.submitPromptAfterDelay(sessionId);
+		// codex/copilot need the text explicitly bracketed as paste so the later
+		// \r isn't eaten as paste content (see bracketedPasteSlugs).
+		const payload = slug && bracketedPasteSlugs.has(slug)
+			? bracketedPasteOpen + text + bracketedPasteClose
+			: text;
+		this.sendPtyHostCommand(session, { type: 'input', data: focusIn + payload });
+		this.submitPromptAfterDelay(sessionId, submitEnter);
 	}
 
 	// Send the prompt one code point at a time (Array.from keeps "—"/"✅" intact),
 	// then submit. Each keystroke is its own pty write, so it's never mistaken for
-	// a paste and the input box actually fills.
-	private typePromptIncrementally(sessionId: string, chars: string[], index: number) {
+	// a paste and the input box actually fills. leadFocusIn rides the first char so
+	// a focus-reporting CLI accepts the typing too (see sendText).
+	private typePromptIncrementally(sessionId: string, chars: string[], index: number, submitEnter = '\r', leadFocusIn = '') {
 		if (index >= chars.length) {
-			this.submitPromptAfterDelay(sessionId);
+			this.submitPromptAfterDelay(sessionId, submitEnter);
 			return;
 		}
 		setTimeout(() => {
@@ -409,20 +434,20 @@ export class CliSessionManager implements vscode.Disposable {
 			if (!session || session.status !== 'running' || session.closing) {
 				return;
 			}
-			this.sendPtyHostCommand(session, { type: 'input', data: chars[index] });
-			this.typePromptIncrementally(sessionId, chars, index + 1);
+			this.sendPtyHostCommand(session, { type: 'input', data: (index === 0 ? leadFocusIn : '') + chars[index] });
+			this.typePromptIncrementally(sessionId, chars, index + 1, submitEnter, leadFocusIn);
 		}, index === 0 ? incrementalLeadInMs : perCharTypeMs);
 	}
 
 	// Send the Enter that submits a host-typed prompt, on a separate delayed write
 	// so TUI CLIs read it as a real submit key instead of folding it into the text.
-	private submitPromptAfterDelay(sessionId: string) {
+	private submitPromptAfterDelay(sessionId: string, enterData = '\r') {
 		setTimeout(() => {
 			const session = this.sessions.get(sessionId);
 			if (!session || session.status !== 'running' || session.closing) {
 				return;
 			}
-			this.sendPtyHostCommand(session, { type: 'input', data: '\r' });
+			this.sendPtyHostCommand(session, { type: 'input', data: enterData });
 		}, submitEnterDelayMs);
 	}
 
@@ -645,6 +670,7 @@ export class CliSessionManager implements vscode.Disposable {
 			hasUnread: session.hasUnread,
 			awaitingFirstOutput: session.awaitingFirstOutput,
 			smart: session.smart,
+			rules: session.rules,
 			exitCode: session.exitCode
 		};
 	}

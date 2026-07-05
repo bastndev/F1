@@ -46,7 +46,7 @@ import { updateFooterModel } from './footer-model';
 import { initSessionState, showNoSessionMessage } from './session-state';
 import { initPromptMode, PLAN_INSTRUCTION, type PromptMode } from './prompt-mode';
 import { initRulesToggle, type RulesToggleController } from './rules-toggle';
-import { buildRulesPrompt, RULES_MARKER } from './assets/rules/rules-content';
+import { buildRulesPrompt, RULES_MARKER } from '../../../shared/rules/rules-content';
 import { initPromptHistory, recordSentPrompt } from './prompt-history';
 import { initAttachmentPeek } from './attachment-peek';
 import { getShortcut, matchesShortcut } from '../../../../shared/keymaps/cli';
@@ -99,8 +99,18 @@ const promptDrafts = new Map<string, PromptDraft>();
 // module scope alongside the drafts, and is pruned on the same lifecycle.
 const rulesInjectedSessions = new Set<string>();
 
+/** The rules toggle controller for the currently open prompt modal, if any. */
+let activeRulesController: RulesToggleController | undefined;
+
+/** Host-driven rules injection (launcher Alt+Left click) tells the webview the
+ *  rules landed; mark the session and update the live button state. */
+export const markRulesInjectedForSession = (sessionId: string) => {
+	rulesInjectedSessions.add(sessionId);
+	activeRulesController?.setDone();
+};
+
 /** Read the rules sound URI injected by the host into the webview HTML. */
-const getRulesSoundUri = (): string | undefined => {
+export const getRulesSoundUri = (): string | undefined => {
 	const el = document.getElementById('cli-sounds');
 	if (!el) {
 		return undefined;
@@ -251,6 +261,13 @@ function initPromptComposer(host: HTMLElement, context: PromptContext, hasActive
 	}
 
 	rulesController = initRulesToggle(host, () => { void activateRules(); }, () => textarea.focus());
+	activeRulesController = rulesController;
+	signal.addEventListener('abort', () => {
+		if (activeRulesController === rulesController) {
+			activeRulesController = undefined;
+		}
+	});
+
 	// Reflect whether this session already loaded the rules (survives reopen).
 	const activeSessionId = context.getActiveSessionId?.();
 	if (activeSessionId && rulesInjectedSessions.has(activeSessionId)) {

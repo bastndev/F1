@@ -37,6 +37,8 @@ export type CliSessionSnapshot = {
 	awaitingFirstOutput: boolean;
 	/** True for the initial Smart-mode launch — the webview shows the Smart overlay. */
 	smart?: boolean;
+	/** True for launcher "rules mode" — the boot skeleton lingers until rules are injected. */
+	rules?: boolean;
 };
 
 export type CliAgentOption = {
@@ -51,7 +53,7 @@ export type CustomCliLaunch = {
 
 /** Webview → extension host. */
 export type WebviewToHostMessage =
-	| { type: 'openAgent'; agent: string; smart?: boolean }
+	| { type: 'openAgent'; agent: string; smart?: boolean; rules?: boolean }
 	| { type: 'cli.ready' }
 	| { type: 'cli.create'; agent: string; launchGuard?: AgentLaunchGuardMessage; smart?: boolean }
 	| { type: 'customCli.open'; source: 'launcher' | 'panel' }
@@ -65,7 +67,7 @@ export type WebviewToHostMessage =
 	| { type: 'prompt.translate'; id: string; text: string; from: string; to: string }
 	| { type: 'prompt.prepare'; id: string; text: string; attachments: ImageAttachment[] }
 	| { type: 'prompt.spellcheck'; id: string; text: string; lang: string; strict: boolean }
-	| { type: 'prompt.injectRules'; id: string; sessionId: string; text: string; marker: string }
+	| { type: 'prompt.injectRules'; id: string; sessionId: string; text: string; marker: string; focusReporting?: boolean }
 	| { type: 'workspace.listFiles'; id: string }
 	| { type: 'workspace.listSkills'; id: string }
 	| { type: 'mySkills.openCreate' }
@@ -98,6 +100,7 @@ export type HostToWebviewMessage =
 	| { type: 'prompt.prepareError'; id: string; message: string }
 	| { type: 'prompt.spellResult'; id: string; issues: SpellIssue[] }
 	| { type: 'prompt.rulesInjected'; id: string; ok: boolean }
+	| { type: 'cli.rulesLoaded'; sessionId: string }
 	| { type: 'workspace.files'; id: string; files: FileMentionEntry[] }
 	| { type: 'workspace.skills'; id: string; skills: WorkspaceSkill[] }
 	| { type: 'workspace.skillsChanged' }
@@ -114,6 +117,7 @@ export type InboundWebviewMessage = {
 	type?: string;
 	agent?: string;
 	smart?: boolean;
+	rules?: boolean;
 	launchGuard?: AgentLaunchGuardMessage;
 	source?: string;
 	id?: string;
@@ -127,6 +131,7 @@ export type InboundWebviewMessage = {
 	lang?: string;
 	strict?: boolean;
 	marker?: string;
+	focusReporting?: boolean;
 	sessionId?: string;
 	data?: string;
 	cols?: number;
