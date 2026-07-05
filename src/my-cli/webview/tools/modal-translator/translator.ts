@@ -114,14 +114,24 @@ function hasTranslatableText(text: string): boolean {
 // trips it. Conservative by design: a false positive fires "go" into a normal chat.
 const approvalWord = 'go';
 
+// Action verbs that read as "begin the substantive work"; one list so the vocab
+// grows in a single place. "go" is intentionally excluded here — it's allowed only
+// after "ready to __"; "i'll go" would false-match "i'll go through the code".
+const beginVerb = 'start|begin|proceed|implement|build|create|apply|wire|ship|generate';
+
 const approvalCuePattern = new RegExp(
 	[
 		'\\b(?:shall|should|can|may|do you want|would you like)\\s+(?:i|we|me|you)\\b',
 		'\\b(?:want|would like)\\s+me\\s+to\\b',
 		'\\b(?:let me know|say the word|just say (?:the word|go)|give me the (?:green light|go[- ]?ahead))\\b',
-		'\\b(?:ready|good|set|all set)\\s+to\\s+(?:start|begin|go|proceed|implement)\\b',
+		`\\b(?:ready|good|set|all set)\\s+to\\s+(?:${beginVerb}|go)\\b`,
 		'\\b(?:go ahead|green light|shall i proceed)\\b',
-		"\\bi(?:'ll| will| can)\\s+(?:start|begin|proceed|implement)\\b",
+		`\\bi(?:'ll| will| can)\\s+(?:${beginVerb})\\b`,
+		// Deferral: assistant recommends then hands the call back ("…my pick; your
+		// call"). No explicit ask, so the cues above miss it. Strong phrases only so
+		// a false positive never fires "go" into normal chat.
+		'\\b(?:your call|up to you|your move|you decide|your decision|you choose|your choice)\\b',
+		'\\bwhichever\\s+you\\s+(?:prefer|want|like|choose|pick)\\b',
 	].join('|'),
 	'iu',
 );
