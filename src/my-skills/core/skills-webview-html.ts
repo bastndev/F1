@@ -124,7 +124,7 @@ export function getSkillsWebviewHtml(webview: vscode.Webview, extensionUri: vsco
 			`base-uri 'none';`,
 			`form-action 'none';`,
 			`object-src 'none';`,
-			`style-src ${webview.cspSource};`,
+			`style-src 'nonce-${nonce}' ${webview.cspSource};`,
 			`script-src 'nonce-${nonce}';`,
 			`img-src ${webview.cspSource};`,
 			`font-src ${webview.cspSource};`,
@@ -132,7 +132,9 @@ export function getSkillsWebviewHtml(webview: vscode.Webview, extensionUri: vsco
 		].join(' ');
 
 		html = html.replace('<!-- CSP -->', csp);
-		html = html.replace('<!-- STYLES -->', `<link href="${globalUri}" rel="stylesheet"><link href="${localStyleUri}" rel="stylesheet"><link href="${installStyleUri}" rel="stylesheet"><link href="${trendingStyleUri}" rel="stylesheet"><link href="${officialStyleUri}" rel="stylesheet"><link href="${searchStyleUri}" rel="stylesheet"><link href="${refineStyleUri}" rel="stylesheet"><link href="${createStyleUri}" rel="stylesheet"><link href="${createDockStyleUri}" rel="stylesheet"><link href="${createTransitionsStyleUri}" rel="stylesheet"><link href="${createModeStyleUri}" rel="stylesheet"><link href="${designModeStyleUri}" rel="stylesheet"><link href="${searchModeStyleUri}" rel="stylesheet"><link href="${namePromptStyleUri}" rel="stylesheet">`);
+		// FOUC guard: render-blocking inline style hides the shell until window.load applies the 14 async <link> sheets; index.ts adds .msk-ready then. Keyframe is a failsafe reveal if that script never runs.
+		const preloadStyle = `<style nonce="${nonce}">html{opacity:0}html.msk-ready{opacity:1;transition:opacity .12s ease}@keyframes mskReveal{to{opacity:1}}html:not(.msk-ready){animation:mskReveal .01s linear 2.5s forwards}</style>`;
+		html = html.replace('<!-- STYLES -->', preloadStyle + `<link href="${globalUri}" rel="stylesheet"><link href="${localStyleUri}" rel="stylesheet"><link href="${installStyleUri}" rel="stylesheet"><link href="${trendingStyleUri}" rel="stylesheet"><link href="${officialStyleUri}" rel="stylesheet"><link href="${searchStyleUri}" rel="stylesheet"><link href="${refineStyleUri}" rel="stylesheet"><link href="${createStyleUri}" rel="stylesheet"><link href="${createDockStyleUri}" rel="stylesheet"><link href="${createTransitionsStyleUri}" rel="stylesheet"><link href="${createModeStyleUri}" rel="stylesheet"><link href="${designModeStyleUri}" rel="stylesheet"><link href="${searchModeStyleUri}" rel="stylesheet"><link href="${namePromptStyleUri}" rel="stylesheet">`);
 		html = html.replace('<!-- LOCAL_PANEL -->', localHtml);
 		html = html.replace('<!-- INSTALL_PANEL -->', installHtml); // already has sub-panels injected above
 		html = html.replace('<!-- CREATE_PANEL -->', createPanelHtml);
