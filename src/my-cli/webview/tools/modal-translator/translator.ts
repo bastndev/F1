@@ -106,6 +106,48 @@ function hasTranslatableText(text: string): boolean {
 	return /\p{L}/u.test(text);
 }
 
+// ── Plan-approval detection ───────────────────────────────────────
+// The trailing "shall I start?" an assistant appends when a plan is ready and it's
+// waiting for a green light. Detected on the ENGLISH source (CLI output is always
+// English — only the panel is translated) so it's target-language-independent, and
+// only over the last few non-empty lines so a mid-plan "proceed to step 2" never
+// trips it. Conservative by design: a false positive fires "go" into a normal chat.
+const approvalWord = 'go';
+
+const approvalCuePattern = new RegExp(
+	[
+		'\\b(?:shall|should|can|may|do you want|would you like)\\s+(?:i|we|me|you)\\b',
+		'\\b(?:want|would like)\\s+me\\s+to\\b',
+		'\\b(?:let me know|say the word|just say (?:the word|go)|give me the (?:green light|go[- ]?ahead))\\b',
+		'\\b(?:ready|good|set|all set)\\s+to\\s+(?:start|begin|go|proceed|implement)\\b',
+		'\\b(?:go ahead|green light|shall i proceed)\\b',
+		"\\bi(?:'ll| will| can)\\s+(?:start|begin|proceed|implement)\\b",
+	].join('|'),
+	'iu',
+);
+
+// Fallback: a trailing question that mentions beginning the work ("…start now?").
+const approvalQuestionPattern = /\?["')\]\s]*$/;
+const startVerbPattern = /\b(?:start|begin|proceed|implement)\b/i;
+
+function needsApproval(source: string): boolean {
+	const text = source.trim();
+	if (!text) {
+		return false;
+	}
+	// The ask always sits at the very bottom — scan only the last few non-empty lines.
+	const tail = text
+		.split('\n')
+		.map((line) => line.trim())
+		.filter(Boolean)
+		.slice(-3)
+		.join(' ');
+	if (!tail) {
+		return false;
+	}
+	return approvalCuePattern.test(tail) || (approvalQuestionPattern.test(tail) && startVerbPattern.test(tail));
+}
+
 export const mountTranslatorPanel = (host: HTMLElement, context: ToolContext) => {
 	ensureStyles();
 
@@ -142,6 +184,42 @@ function initializeTranslator(host: HTMLElement, context: ToolContext) {
 			statusEl.textContent = status;
 		}
 	};
+
+	// ── Go / approve affordance ───────────────────────────────────────
+	// When the selected CLI output is a plan waiting for a green light, reveal a
+	// one-press "Go" that types the approval into the CLI and closes the panel —
+	// replacing the manual close-then-type-"go". Visibility is driven off the
+	// English source, so it's set the moment the panel opens (no translation first).
+	const goBtn = host.querySelector<HTMLButtonElement>('#goBtn');
+	const updateApprovalAffordance = (source: string) => {
+		if (goBtn) {
+			goBtn.hidden = !needsApproval(source);
+		}
+	};
+	const activateGo = () => {
+		if (!goBtn || goBtn.hidden || !context.sendToActiveSession) {
+			return;
+		}
+		// Exactly what the user types by hand: send the approval word and submit.
+		context.sendToActiveSession(approvalWord, { submit: true });
+		context.close();
+	};
+	goBtn?.addEventListener('click', activateGo);
+
+	// Ctrl+Alt+Enter mirrors the button so approval never needs the mouse. Scoped to
+	// the open panel; a no-op that passes the event through while the button is hidden.
+	const handleApproveShortcut = (event: KeyboardEvent) => {
+		if (!matchesShortcut(event, 'approvePlan') || event.repeat) {
+			return;
+		}
+		if (!goBtn || goBtn.hidden) {
+			return;
+		}
+		event.preventDefault();
+		event.stopPropagation();
+		activateGo();
+	};
+	document.addEventListener('keydown', handleApproveShortcut);
 
 	// Target language mirrors the prompt modal's chosen source language (the user
 	// only picks once): if they write in Spanish, CLI output is translated to
@@ -255,6 +333,9 @@ function initializeTranslator(host: HTMLElement, context: ToolContext) {
 			bodyEl.style.maxHeight = '';
 		}
 		const extracted = extractTextToTranslate(context);
+		// Re-evaluate the Go affordance against the current selection (also hides it
+		// when the selection is cleared/empty).
+		updateApprovalAffordance(extracted);
 		if (!extracted) {
 			if (textEl) {
 				textEl.classList.remove('is-rendered');
@@ -772,6 +853,9 @@ function initializeTranslator(host: HTMLElement, context: ToolContext) {
 			textEl.classList.add('placeholder');
 		}
 	}
+	// Source already reads as an approval ask? Reveal Go immediately — detection is
+	// on the source, so it needs no translation first.
+	updateApprovalAffordance(extracted);
 	// Copy works on whatever the panel holds — the English source now, the Spanish
 	// result after translating — so enable it as soon as there is real text (not the
 	// "select text" hint). Listen stays gated to a finished result.
@@ -1037,6 +1121,7 @@ function initializeTranslator(host: HTMLElement, context: ToolContext) {
 			isMounted = false;
 			clearTimeout(growSettleTimer);
 			document.removeEventListener('keydown', handleSpaceShortcut);
+			document.removeEventListener('keydown', handleApproveShortcut);
 			disposeVoiceState?.();
 			clearVoiceHighlights(activeVoiceChunks);
 			cancelVoiceScroll();
@@ -1046,6 +1131,7 @@ function initializeTranslator(host: HTMLElement, context: ToolContext) {
 	return () => {
 		isMounted = false;
 		clearTimeout(growSettleTimer);
+		document.removeEventListener('keydown', handleApproveShortcut);
 	};
 }
 

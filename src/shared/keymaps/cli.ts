@@ -60,6 +60,13 @@ function promptSendKey(): (event: KeyboardEvent) => boolean {
     && (e.ctrlKey || e.metaKey || e.altKey);
 }
 
+// Strict Ctrl+Alt+Enter — narrower than promptSendKey (which also fires on plain
+// Ctrl+Enter) so approving a plan can't collide with the prompt's send chord.
+function approveKey(): (event: KeyboardEvent) => boolean {
+  return (e: KeyboardEvent) =>
+    e.key === 'Enter' && e.ctrlKey && e.altKey && !e.shiftKey && !e.metaKey;
+}
+
 // ─── Types ────────────────────────────────────────────────────────────────────
 
 export type ShortcutContext = 'launcher' | 'terminal' | 'prompt';
@@ -79,6 +86,7 @@ export type ShortcutId =
   | 'openUse'
   | 'openCommands'
   | 'toggleVoicePlayback'
+  | 'approvePlan'
   | 'sendPrompt'
   | 'promptModePro'
   | 'promptModePlan'
@@ -180,6 +188,13 @@ export const shortcuts: ShortcutDefinition[] = [
     contexts: ['terminal'],
     description: 'Space',
     match: spaceKey(),
+  },
+  {
+    id: 'approvePlan',
+    label: 'Approve plan / Go (Translator)',
+    contexts: ['terminal'],
+    description: 'Ctrl + Alt + Enter',
+    match: approveKey(),
   },
   {
     id: 'sendPrompt',

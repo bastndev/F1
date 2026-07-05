@@ -718,6 +718,34 @@
 	display: none;
 }
 
+/* ── Go / approve button ────────────────────────────────────────────
+   Shown only when the selected CLI output is a plan awaiting the user's green
+   light (needsApproval in translator.ts). Stronger accent fill than Translate so
+   it reads as the primary action; Ctrl+Alt+Enter triggers it too. Accent-tinted
+   rather than solid so text stays legible across every per-agent accent + theme. */
+.translator-go {
+	border-color: color-mix(in srgb, var(--agent-accent, #AFA9EC) 60%, var(--vscode-editorGroup-border));
+	color: var(--agent-accent, #AFA9EC);
+	background: color-mix(in srgb, var(--agent-accent, #AFA9EC) 16%, var(--vscode-input-background));
+	font-weight: 600;
+	animation: translate-btn-pulse 2s ease-in-out 3;
+}
+
+.translator-go:hover {
+	border-color: color-mix(in srgb, var(--agent-accent, #AFA9EC) 85%, var(--vscode-editorGroup-border));
+	color: var(--agent-accent, #AFA9EC);
+	background: color-mix(in srgb, var(--agent-accent, #AFA9EC) 24%, var(--vscode-input-background));
+}
+
+.translator-go i {
+	font-size: 12px;
+}
+
+/* class+attr beats the .translator-action-btn { display: flex } base */
+.translator-go[hidden] {
+	display: none;
+}
+
 /* ── Auto-translate toggle ──────────────────────────────────────────
    Pill toggle mirroring the prompt modal's translate toggle. ON → translation
    runs on open and the manual Translate button is hidden; the toggle itself
