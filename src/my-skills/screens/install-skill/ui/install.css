@@ -688,29 +688,6 @@
 	animation: install-busy-shine 1.8s linear infinite;
 }
 
-.install-spinner {
-	flex: 0 0 auto;
-	width: 12px;
-	height: 12px;
-	margin-right: 5px;
-	color: var(--install-accent);
-	animation: install-spinner-rotate 1s linear infinite;
-}
-
-.install-btn--cancel .install-spinner {
-	color: var(--vscode-errorForeground, #f85149);
-}
-
-@keyframes install-spinner-rotate {
-	from {
-		transform: rotate(0deg);
-	}
-
-	to {
-		transform: rotate(360deg);
-	}
-}
-
 .install-btn:focus-visible {
 	outline: 1px solid var(--install-accent);
 	outline-offset: 2px;
@@ -823,10 +800,6 @@
 
 	.install-btn--cancel.install-btn--busy {
 		color: var(--vscode-errorForeground, #f85149);
-	}
-
-	.install-spinner {
-		animation: none;
 	}
 
 	.install-skeleton-row,
