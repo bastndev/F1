@@ -350,7 +350,9 @@ const headerVoice = (() => {
 	let state: VoiceState = 'idle';
 	const apply = (next: VoiceState) => {
 		state = next;
-		const active = next === 'speaking' || next === 'paused' || next === 'preparing';
+		// Header pill intentionally hidden for now; keep state sync alive so a
+		// future flip just removes this override.
+		const active = false;
 		pill.hidden = !active;
 		pill.setAttribute('aria-hidden', active ? 'false' : 'true');
 		pill.classList.toggle('is-speaking', next === 'speaking');
