@@ -349,7 +349,7 @@ const headerVoice = (() => {
 
 	let state: VoiceState = 'idle';
 	const apply = (next?: VoiceState) => {
-		if (next) state = next;
+		if (next) {state = next;}
 		const openTool = toolsController?.getOpenTool();
 		// Show the pill when voice is active but voice modals (translator/prompt) are closed
 		const active = state !== 'idle' && openTool !== 'translate' && openTool !== 'prompt';
@@ -1387,8 +1387,10 @@ window.addEventListener('message', (event: MessageEvent<ServerMessage>) => {
 	}
 });
 
+let resizeTimer: ReturnType<typeof setTimeout>;
 const resizeObserver = new ResizeObserver(() => {
-	fitTerminal();
+	clearTimeout(resizeTimer);
+	resizeTimer = setTimeout(() => fitTerminal(), 50);
 });
 resizeObserver.observe(terminalStack);
 
