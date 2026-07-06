@@ -10,6 +10,7 @@ import { isLynxPanelNavChord } from '../../../shared/keymaps/lynx-keymap/index';
 import { matchesShortcut } from '../../../shared/keymaps/cli';
 import { getUsageCommandLabel, isUsageAgentBusy, isUsageViewInline } from '../tools/modal-use/agents';
 import { readTerminalScreenText } from './usage-tracker';
+import { isAwaitingUserInput } from './awaiting-input';
 import { createToolsController } from '../tools/tools';
 import { createUsageTracker } from './usage-tracker';
 import { detectModelName } from '../../shared/model-detect';
@@ -836,6 +837,7 @@ const createTerminalView = (session: CliSession) => {
 		replayingScrollback = true;
 		terminal.write(session.buffer, () => {
 			replayingScrollback = false;
+			checkAttention(session.id);
 		});
 	}
 	terminal.onData((data) => {
@@ -997,6 +999,45 @@ const updateAgentTheme = () => {
 	}
 };
 
+// Sessions whose live terminal screen currently shows a pending question
+// (numbered choice / y-n confirm). Tracked continuously off every output
+// chunk regardless of active/inactive — renderTabs() suppresses the badge
+// for whichever session is active, so a question asked while active is
+// already recorded by the time the user tabs away from it.
+const attentionSessionIds = new Set<string>();
+
+const renderTabs = () => {
+	const summaries = [...sessions.values()].map((session) => ({
+		...session,
+		needsInput: session.id !== activeSessionId && attentionSessionIds.has(session.id)
+	}));
+	tabController.render(summaries, activeSessionId);
+};
+
+const checkAttention = (sessionId: string) => {
+	const view = terminals.get(sessionId);
+	const session = sessions.get(sessionId);
+	if (!view || !session || session.status !== 'running') {
+		if (attentionSessionIds.delete(sessionId)) {
+			renderTabs();
+		}
+		return;
+	}
+
+	const isAwaiting = isAwaitingUserInput(readTerminalScreenText(view));
+	const wasAwaiting = attentionSessionIds.has(sessionId);
+	if (isAwaiting === wasAwaiting) {
+		return;
+	}
+
+	if (isAwaiting) {
+		attentionSessionIds.add(sessionId);
+	} else {
+		attentionSessionIds.delete(sessionId);
+	}
+	renderTabs();
+};
+
 const syncState = (message: Extract<ServerMessage, { type: 'cli.state' }>) => {
 	activeSessionId = message.activeSessionId;
 	tabController.setAgents(message.agents);
@@ -1027,6 +1068,11 @@ const syncState = (message: Extract<ServerMessage, { type: 'cli.state' }>) => {
 	removeClosedTerminals(openSessionIds);
 	sleepInactiveTerminals(visualSleepEnabled, openSessionIds);
 	usageTracker.pruneClosedSessions(openSessionIds);
+	for (const sessionId of [...attentionSessionIds]) {
+		if (!openSessionIds.has(sessionId)) {
+			attentionSessionIds.delete(sessionId);
+		}
+	}
 	prunePromptDrafts(openSessionIds);
 	for (const sessionId of [...openFooterPickers.keys()]) {
 		if (!openSessionIds.has(sessionId)) {
@@ -1041,7 +1087,7 @@ const syncState = (message: Extract<ServerMessage, { type: 'cli.state' }>) => {
 		}
 	}
 
-	tabController.render(message.sessions, activeSessionId);
+	renderTabs();
 	setActiveTerminal();
 };
 
@@ -1059,7 +1105,9 @@ const handleOutput = (message: Extract<ServerMessage, { type: 'cli.output' }>) =
 	}
 
 	if (!restoredFromBuffer) {
-		terminals.get(message.sessionId)?.terminal.write(message.data);
+		terminals.get(message.sessionId)?.terminal.write(message.data, () => {
+			checkAttention(message.sessionId);
+		});
 	}
 
 	// Skeleton dismissal contract: the skeleton must remain visible until the

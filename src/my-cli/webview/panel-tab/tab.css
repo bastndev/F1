@@ -650,6 +650,40 @@
 	filter: invert(1) brightness(0.42) contrast(1.45);
 }
 
+/* Needs-input badge — a livelier signal than has-unread: the CLI's screen is
+   showing a pending question (numbered choice / y-n confirm), not just new
+   output. Lives on the icon frame so it survives the icon-only responsive
+   layout too (where .agent-session-main is hidden entirely). */
+.agent-session-attention-badge {
+	display: none;
+	position: absolute;
+	top: -3px;
+	right: -3px;
+	width: 9px;
+	height: 9px;
+	border-radius: 999px;
+	background: var(--vscode-testing-iconQueued, #cca700);
+	border: 1.5px solid var(--vscode-sideBar-background, var(--vscode-editor-background));
+	box-shadow: 0 0 0 1px color-mix(in srgb, var(--vscode-testing-iconQueued, #cca700) 55%, transparent);
+	z-index: 2;
+	animation: attention-pulse 1.6s ease-in-out infinite;
+}
+
+.agent-session-item.needs-input .agent-session-attention-badge {
+	display: block;
+}
+
+/* Needs-input is the stronger signal — supersede the plain unread dot so a
+   blocked CLI shows only the pulsing badge, not two competing amber dots. */
+.agent-session-item.needs-input .agent-session-dot {
+	display: none;
+}
+
+@keyframes attention-pulse {
+	0%, 100% { transform: scale(1); opacity: 1; }
+	50% { transform: scale(1.25); opacity: 0.75; }
+}
+
 .agent-session-main {
 	min-width: 0;
 }

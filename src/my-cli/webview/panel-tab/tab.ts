@@ -11,6 +11,8 @@ export type CliSessionSummary = {
 	cwd: string;
 	status: 'running' | 'exited' | 'error';
 	hasUnread: boolean;
+	/** CLI's live screen is showing a pending question (choice list / y-n) — stronger signal than hasUnread. */
+	needsInput?: boolean;
 	exitCode?: number;
 };
 
@@ -676,6 +678,10 @@ export const createTabController = (options: TabControllerOptions) => {
 			item.className = 'agent-session-item';
 			item.classList.toggle('is-active', session.id === activeSessionId);
 			item.classList.toggle('has-unread', session.hasUnread);
+			item.classList.toggle('needs-input', !!session.needsInput);
+			if (session.needsInput) {
+				item.title = `${session.label} is waiting for your input`;
+			}
 			item.tabIndex = 0;
 			item.setAttribute('role', 'option');
 			item.setAttribute('aria-selected', session.id === activeSessionId ? 'true' : 'false');
@@ -698,6 +704,10 @@ export const createTabController = (options: TabControllerOptions) => {
 				image.draggable = false;
 				iconFrame.append(image);
 			}
+
+			const attentionBadge = document.createElement('span');
+			attentionBadge.className = 'agent-session-attention-badge';
+			iconFrame.append(attentionBadge);
 
 			const main = document.createElement('div');
 			main.className = 'agent-session-main';
