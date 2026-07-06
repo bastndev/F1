@@ -354,11 +354,11 @@ const headerVoice = (() => {
 		const active = state !== 'idle' && toolsController?.getOpenTool() !== 'translate';
 		pill.hidden = !active;
 		pill.setAttribute('aria-hidden', active ? 'false' : 'true');
-		pill.classList.toggle('is-speaking', next === 'speaking');
-		pill.classList.toggle('is-paused', next === 'paused');
-		pill.classList.toggle('is-preparing', next === 'preparing');
-		toggleBtn.disabled = next === 'preparing';
-		const label = next === 'preparing' ? 'Preparing voice…' : next === 'paused' ? 'Resume voice' : 'Pause voice';
+		pill.classList.toggle('is-speaking', state === 'speaking');
+		pill.classList.toggle('is-paused', state === 'paused');
+		pill.classList.toggle('is-preparing', state === 'preparing');
+		toggleBtn.disabled = state === 'preparing';
+		const label = state === 'preparing' ? 'Preparing voice…' : state === 'paused' ? 'Resume voice' : 'Pause voice';
 		toggleBtn.title = label;
 		toggleBtn.setAttribute('aria-label', label);
 	};
