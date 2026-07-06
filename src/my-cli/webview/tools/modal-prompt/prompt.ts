@@ -690,11 +690,20 @@ function initPromptComposer(host: HTMLElement, context: PromptContext, hasActive
 			sendInFlight = false;
 			ctx.close();
 		};
-		const result = processPrompt(textToSend, {
-			close: shouldDelayClose ? () => window.setTimeout(closeAfterSend, routePromptCloseDelayMs) : closeAfterSend,
-			sendToActiveSession: ctx.sendToActiveSession,
-			getActiveSessionId: ctx.getActiveSessionId,
-		});
+		let result: { status: string };
+		try {
+			result = processPrompt(textToSend, {
+				close: shouldDelayClose ? () => window.setTimeout(closeAfterSend, routePromptCloseDelayMs) : closeAfterSend,
+				sendToActiveSession: ctx.sendToActiveSession,
+				getActiveSessionId: ctx.getActiveSessionId,
+			});
+		} catch (err) {
+			console.error('[MySkills] processPrompt threw:', err);
+			sendInFlight = false;
+			ta.disabled = false;
+			restoreRunButton();
+			return;
+		}
 
 		if (result.status === 'no-session') {
 			sendInFlight = false;
