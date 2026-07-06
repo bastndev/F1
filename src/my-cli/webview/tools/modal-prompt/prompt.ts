@@ -560,6 +560,17 @@ function initPromptComposer(host: HTMLElement, context: PromptContext, hasActive
 		}
 
 		sendInFlight = true;
+		// Lock the composer for the whole in-flight window. Translation and the
+		// @route delayed-close both keep the modal open after Execute, and until
+		// now the textarea stayed editable there — the user could type into or
+		// delete from a prompt already on its way out. `disabled` (not readonly)
+		// because the custom key handlers mutate textarea.value directly and would
+		// slip past a readonly guard; it is also the component's existing "locked"
+		// idiom (no-session + language gate). The field's paint comes from the
+		// overlay, so disabling changes nothing visually beyond dropping the caret.
+		// Re-enabled only on the stay-open failure paths below; a successful send
+		// unmounts the modal.
+		ta.disabled = true;
 		const runBtn = hostEl.querySelector<HTMLButtonElement>('#runBtn');
 		const savedRunBtnHtml = runBtn?.innerHTML;
 		const restoreRunButton = () => {
@@ -679,21 +690,34 @@ function initPromptComposer(host: HTMLElement, context: PromptContext, hasActive
 			sendInFlight = false;
 			ctx.close();
 		};
-		const result = processPrompt(textToSend, {
-			close: shouldDelayClose ? () => window.setTimeout(closeAfterSend, routePromptCloseDelayMs) : closeAfterSend,
-			sendToActiveSession: ctx.sendToActiveSession,
-			getActiveSessionId: ctx.getActiveSessionId,
-		});
+		let result: { status: string };
+		try {
+			result = processPrompt(textToSend, {
+				close: shouldDelayClose ? () => window.setTimeout(closeAfterSend, routePromptCloseDelayMs) : closeAfterSend,
+				sendToActiveSession: ctx.sendToActiveSession,
+				getActiveSessionId: ctx.getActiveSessionId,
+			});
+		} catch (err) {
+			console.error('[MySkills] processPrompt threw:', err);
+			sendInFlight = false;
+			ta.disabled = false;
+			restoreRunButton();
+			return;
+		}
 
 		if (result.status === 'no-session') {
 			sendInFlight = false;
+			ta.disabled = false;
 			restoreRunButton();
 			showNoSessionMessage(hostEl);
+			ta.focus();
 		}
 
 		if (result.status === 'empty') {
 			sendInFlight = false;
+			ta.disabled = false;
 			restoreRunButton();
+			ta.focus();
 		}
 
 		if (result.status === 'sent') {
