@@ -1015,6 +1015,12 @@ const updateAgentTheme = () => {
 // already recorded by the time the user tabs away from it.
 const attentionSessionIds = new Set<string>();
 
+// Per-CLI prompt-composer open state: the sessions the user left the modal open
+// in. The overlay itself is single, but its open/closed state is snapshotted and
+// restored per CLI on switch (see syncState), so leaving the composer open in one
+// CLI and returning finds it open again — a CLI never opened stays closed.
+const promptOpenSessions = new Set<string>();
+
 const renderTabs = () => {
 	const summaries = [...sessions.values()].map((session) => ({
 		...session,
@@ -1127,6 +1133,11 @@ const syncState = (message: Extract<ServerMessage, { type: 'cli.state' }>) => {
 			openFooterPickers.delete(sessionId);
 		}
 	}
+	for (const sessionId of [...promptOpenSessions]) {
+		if (!openSessionIds.has(sessionId)) {
+			promptOpenSessions.delete(sessionId);
+		}
+	}
 
 	// If a session entered error/exited state before producing output, don't leave skeleton hanging
 	for (const [sessionId, session] of sessions) {
@@ -1138,17 +1149,25 @@ const syncState = (message: Extract<ServerMessage, { type: 'cli.state' }>) => {
 	renderTabs();
 	setActiveTerminal();
 
-	// A composer is bound to the CLI it opened for (its draft + pinned send
-	// target). If the active CLI just changed under an open composer, close it so
-	// the view matches the CLI underneath; reopening on the new CLI loads that
-	// CLI's own draft. Any in-flight send already pinned its target, so it lands
-	// correctly even though the composer is gone.
-	if (
-		previousActiveSessionId !== undefined
-		&& previousActiveSessionId !== activeSessionId
-		&& toolsController?.getOpenTool() === 'prompt'
-	) {
-		toolsController?.close();
+	// Per-CLI composer state. The prompt modal is a single overlay, but each CLI
+	// remembers whether the user left it open (its draft is already keyed by
+	// session). On a switch, snapshot the CLI we're leaving from the live overlay,
+	// then restore the one we're entering: re-mount it (with its own draft) if it
+	// was left open there, otherwise close it. Independent per CLI — a CLI never
+	// opened stays closed. In-flight sends are pinned, so they still land. Other
+	// tool modals are transient and not tracked here.
+	if (previousActiveSessionId !== undefined && previousActiveSessionId !== activeSessionId) {
+		const leftPromptOpen = toolsController?.getOpenTool() === 'prompt';
+		if (leftPromptOpen && openSessionIds.has(previousActiveSessionId)) {
+			promptOpenSessions.add(previousActiveSessionId);
+		} else {
+			promptOpenSessions.delete(previousActiveSessionId);
+		}
+		if (activeSessionId && promptOpenSessions.has(activeSessionId)) {
+			toolsController?.open('prompt');
+		} else if (leftPromptOpen) {
+			toolsController?.close();
+		}
 	}
 };
 
