@@ -1048,6 +1048,17 @@
 		filter: drop-shadow(0 1px 1px rgba(0,0,0,0.25));
 	}
 
+	/* Icon-only mode: badge leaves the top-right corner (which the frame's
+	   overflow:hidden clips anyway) for lower-center of the circle. Centered
+	   via margin, not transform, so the scale pulse stays intact. */
+	.agent-session-attention-badge {
+		top: auto;
+		right: auto;
+		bottom: 3px;
+		left: 50%;
+		margin-left: -4.5px;
+	}
+
 	.agent-session-main,
 	.agent-session-close {
 		display: none;
