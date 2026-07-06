@@ -107,12 +107,17 @@ export const createToolsController = ({
 	let activeCleanup: ToolCleanup | null = null;
 	let skillsRefreshFn: (() => void) | null = null;
 
-	const close = () => {
+	// Tools that drive the host-side read-aloud: translator reads translations,
+	// prompt mirrors/controls an in-flight read. Switching between them keeps the
+	// voice alive (see close/open); any other exit stops it.
+	const voiceTools = new Set<ToolId>(['translate', 'prompt']);
+
+	const close = (options?: { keepVoice?: boolean }) => {
 		document.removeEventListener('keydown', handleKeyDown, true);
 		const closingTool = currentTool;
 		activeCleanup?.();
 		activeCleanup = null;
-		if (closingTool === 'translate') {
+		if (closingTool && voiceTools.has(closingTool) && !options?.keepVoice) {
 			stopSpeech?.();
 		}
 		activeModal?.replaceChildren();
@@ -146,7 +151,9 @@ export const createToolsController = ({
 	};
 
 	const open = (tool: ToolId) => {
-		close();
+		// Keep the read-aloud running when swapping between voice tools (e.g.
+		// Ctrl+Space translator→prompt); a non-voice tool stops it.
+		close({ keepVoice: voiceTools.has(tool) });
 
 		const modal = document.createElement('div');
 		modal.id = modalId;

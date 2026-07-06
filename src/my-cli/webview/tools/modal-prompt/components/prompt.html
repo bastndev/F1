@@ -73,6 +73,27 @@
   <!-- FOOTER -->
   <div class="prompt-footer">
     <div class="prompt-footer-info">
+      <!-- Voice pill: shown here (in the CLI-name slot) only while a read-aloud is
+           live — switched here from the translator mid-read. Pause/resume the read
+           or stop it; stopping reverts to the CLI name. Must stay the first child
+           so the sibling rule hides the dot+name while it is visible; footer-model
+           preserves this node across its innerHTML rebuild. -->
+      <div class="prompt-voice-pill" id="promptVoicePill" hidden aria-hidden="true">
+        <button class="prompt-voice-toggle" id="promptVoiceToggle" type="button" title="Pause voice" aria-label="Pause voice">
+          <svg class="prompt-voice-play" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+            <path d="M7 4v16l13 -8z" />
+          </svg>
+          <div class="prompt-voice-spectrum" aria-hidden="true">
+            <div class="bar"></div><div class="bar"></div><div class="bar"></div>
+            <div class="bar"></div><div class="bar"></div><div class="bar"></div>
+          </div>
+        </button>
+        <button class="prompt-voice-stop" id="promptVoiceStop" type="button" title="Stop voice" aria-label="Stop voice">
+          <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+            <rect x="6" y="6" width="12" height="12" rx="2.5" />
+          </svg>
+        </button>
+      </div>
       <span class="prompt-session-dot" id="sessionDot"></span>
       <span>CLI</span>
     </div>
