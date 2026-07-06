@@ -747,6 +747,11 @@ function initPromptComposer(host: HTMLElement, context: PromptContext, hasActive
 			// Original textarea text (markers get stripped inside) — never the
 			// translated/expanded payload.
 			recordSentPrompt(boundAgentSlug, ta.value);
+			// Drop the per-session "left open" mark so a switch away mid-send can't
+			// reopen this composer empty on return.
+			if (boundSessionId) {
+				context.onPromptSent?.(boundSessionId);
+			}
 			// The draft has served its purpose.
 			if (draftKey) {
 				promptDrafts.delete(draftKey);
