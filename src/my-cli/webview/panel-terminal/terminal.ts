@@ -1222,7 +1222,7 @@ const syncState = (message: Extract<ServerMessage, { type: 'cli.state' }>) => {
 		}
 		if (activeSessionId && promptOpenSessions.has(activeSessionId)) {
 			toolsController?.open('prompt');
-		} else if (leftPromptOpen) {
+		} else if (toolsController?.isOpen()) {
 			toolsController?.close({ keepVoice: true });
 		}
 	}
