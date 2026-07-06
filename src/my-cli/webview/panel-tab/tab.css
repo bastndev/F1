@@ -811,7 +811,7 @@
 		grid-column: 2;
 		grid-row: 1;
 		align-self: center;
-		justify-self: start;
+		justify-self: start; /*TODO: end - start*/
 	}
 
 	.agent-picker {
