@@ -787,7 +787,7 @@
 
 	.agent-tab-shell {
 		display: grid;
-		grid-template-columns: minmax(0, 1fr) minmax(112px, 166px) auto;
+		grid-template-columns: auto minmax(0, 1fr) minmax(112px, 166px) auto;
 		grid-template-rows: 1fr;
 		align-items: center;
 		gap: 7px;
@@ -802,8 +802,20 @@
 		display: contents;
 	}
 
-	.agent-picker {
+	.agent-session-list {
+		grid-column: 1;
+		grid-row: 1;
+	}
+
+	#cli-voice-pill {
 		grid-column: 2;
+		grid-row: 1;
+		align-self: center;
+		justify-self: start;
+	}
+
+	.agent-picker {
+		grid-column: 3;
 		grid-row: 1;
 		flex: 0 1 auto;
 	}
@@ -815,7 +827,7 @@
 	}
 
 	.agent-header-actions {
-		grid-column: 3;
+		grid-column: 4;
 		grid-row: 1;
 		gap: 4px;
 		margin-left: 0;
@@ -843,8 +855,6 @@
 	}
 
 	.agent-session-list {
-		grid-column: 1;
-		grid-row: 1;
 		min-height: 34px;
 		display: flex;
 		flex-direction: row;

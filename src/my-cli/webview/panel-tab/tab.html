@@ -1,6 +1,25 @@
 <div class="layout-left">
 	<div class="agent-tab-shell">
 		<div class="agent-tab-header">
+			<!-- Read-aloud "now playing" mirrored into the always-visible CLI bar:
+			     pause/resume/stop a live voice without an open modal. Shown only
+			     while a read is live; fed from voice.state in terminal.ts. -->
+			<div id="cli-voice-pill" class="cli-voice-pill" hidden aria-hidden="true">
+				<button id="cli-voice-toggle" class="cli-voice-toggle" type="button" title="Pause voice" aria-label="Pause voice">
+					<svg class="cli-voice-play" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+						<path d="M7 4v16l13 -8z" />
+					</svg>
+					<div class="cli-voice-spectrum" aria-hidden="true">
+						<div class="bar"></div><div class="bar"></div><div class="bar"></div>
+						<div class="bar"></div><div class="bar"></div><div class="bar"></div>
+					</div>
+				</button>
+				<button id="cli-voice-stop" class="cli-voice-stop" type="button" title="Stop voice" aria-label="Stop voice">
+					<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+						<rect x="6" y="6" width="12" height="12" rx="2.5" />
+					</svg>
+				</button>
+			</div>
 			<div class="agent-picker">
 				<button
 					id="cli-agent-button"
@@ -19,25 +38,6 @@
 				<div id="cli-agent-menu" class="agent-picker-menu" role="listbox" aria-label="CLI agent" hidden></div>
 			</div>
 			<div class="agent-header-actions">
-				<!-- Read-aloud "now playing" mirrored into the always-visible CLI bar:
-				     pause/resume/stop a live voice without an open modal. Shown only
-				     while a read is live; fed from voice.state in terminal.ts. -->
-				<div id="cli-voice-pill" class="cli-voice-pill" hidden aria-hidden="true">
-					<button id="cli-voice-toggle" class="cli-voice-toggle" type="button" title="Pause voice" aria-label="Pause voice">
-						<svg class="cli-voice-play" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-							<path d="M7 4v16l13 -8z" />
-						</svg>
-						<div class="cli-voice-spectrum" aria-hidden="true">
-							<div class="bar"></div><div class="bar"></div><div class="bar"></div>
-							<div class="bar"></div><div class="bar"></div><div class="bar"></div>
-						</div>
-					</button>
-					<button id="cli-voice-stop" class="cli-voice-stop" type="button" title="Stop voice" aria-label="Stop voice">
-						<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-							<rect x="6" y="6" width="12" height="12" rx="2.5" />
-						</svg>
-					</button>
-				</div>
 				<button
 					id="cli-tools-button"
 					class="agent-tools-button"
