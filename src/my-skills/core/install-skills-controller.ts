@@ -8,8 +8,8 @@
  */
 import * as vscode from 'vscode';
 import { fetchAllTimeSkillsPage, fetchFlameSkills, fetchOfficialSkillsForOwner, fetchOfficialSkillSources, fetchTrending24hSkills, searchMarketplaceSkills } from '../screens/install-skill/core/marketplace';
-import { installMarketplaceSkill } from '../screens/install-skill/core/installer';
-import type { InstallMarketplaceSkill, InstallSkillInstallMessage, InstallSkillsSearchRequestMessage, OfficialSkillSource, SkillsLockFile } from '../screens/install-skill/core/types';
+import { cancelInstallMarketplaceSkill, installMarketplaceSkill } from '../screens/install-skill/core/installer';
+import type { InstallMarketplaceSkill, InstallSkillCancelMessage, InstallSkillInstallMessage, InstallSkillsSearchRequestMessage, OfficialSkillSource, SkillsLockFile } from '../screens/install-skill/core/types';
 import { FLAME_SKILL_SOURCE } from '../screens/install-skill/ui/panels/trending-skill/flame/data/flame-skills';
 import { AsyncListSection } from './install-state';
 
@@ -48,6 +48,7 @@ export class InstallSkillsController {
 	private _loadingOfficialOwners = new Set<string>();
 	private _officialOwnerErrors = new Map<string, string | null>();
 	private _installedMarketplaceSkillIds = new Set<string>();
+	private readonly _activeInstallControllers = new Map<string, AbortController>();
 
 	constructor(private readonly _host: InstallSkillsHost) { }
 
@@ -319,13 +320,32 @@ export class InstallSkillsController {
 			return;
 		}
 
+		if (this._activeInstallControllers.has(skill.id)) {
+			return;
+		}
+
+		const controller = new AbortController();
+		this._activeInstallControllers.set(skill.id, controller);
+
 		await this._host.postMessage({
 			type: 'installSkill.status',
 			id: skill.id,
 			status: 'installing',
 		});
 
-		const didInstall = await installMarketplaceSkill(skill);
+		const didInstall = await installMarketplaceSkill(skill, controller.signal);
+
+		this._activeInstallControllers.delete(skill.id);
+
+		if (!didInstall && controller.signal.aborted) {
+			await this._host.postMessage({
+				type: 'installSkill.status',
+				id: skill.id,
+				status: 'idle',
+			});
+			return;
+		}
+
 		if (didInstall) {
 			this._installedMarketplaceSkillIds.add(skill.skillId);
 			this._installSkills = filterInstallableSkills(this._installSkills, this._installedMarketplaceSkillIds);
@@ -353,6 +373,12 @@ export class InstallSkillsController {
 			await Promise.all(Array.from(this._officialSkillsByOwner.keys(), owner => this._sendOfficialSkillsUpdate(owner)));
 			await this._host.onSkillInstalled();
 		}
+	}
+
+	public cancelInstallSkill(message: InstallSkillCancelMessage): void {
+		this._activeInstallControllers.get(message.id)?.abort();
+		this._activeInstallControllers.delete(message.id);
+		cancelInstallMarketplaceSkill(message.id);
 	}
 
 	private _findMarketplaceSkill(id: string): InstallMarketplaceSkill | undefined {

@@ -1,7 +1,7 @@
 import { InstallListRenderer } from './shared/install-list-renderer';
 import { getSkillCollection, removeSkillFromCollections, setSkillCollection } from './shared/skill-store';
 import { initRefine } from './refine/refine';
-import type { InstallMarketplaceSkill, InstallStatus } from './panels/trending-skill/install-item';
+import { resolveInstallButtonAction, type InstallMarketplaceSkill, type InstallStatus } from './panels/trending-skill/install-item';
 
 interface VsCodeApi {
 	postMessage(message: unknown): void;
@@ -113,18 +113,18 @@ export function initInstallPanel(vscodeApi: VsCodeApi): () => void {
 
 	allList?.addEventListener('click', event => {
 		const button = (event.target as HTMLElement | null)?.closest<HTMLButtonElement>('.install-btn[data-install-id]');
-		if (!button || button.disabled) {
-			return;
-		}
-
-		const id = button.dataset.installId;
-		if (!id) {
-			return;
-		}
-
-		installStatuses.set(id, 'installing');
-		allTimeRenderer?.updateItem(id);
-		vscodeApi.postMessage({ type: 'installSkill.install', id });
+		resolveInstallButtonAction(button, {
+			onInstall: id => {
+				installStatuses.set(id, 'installing');
+				allTimeRenderer?.updateItem(id);
+				vscodeApi.postMessage({ type: 'installSkill.install', id });
+			},
+			onCancel: id => {
+				installStatuses.set(id, 'cancelling');
+				allTimeRenderer?.updateItem(id);
+				vscodeApi.postMessage({ type: 'installSkill.cancel', id });
+			},
+		});
 	});
 
 	window.addEventListener('message', event => {

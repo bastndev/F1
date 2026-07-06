@@ -47,6 +47,7 @@ import {
 	isOfficialSourcesRequestMessage,
 	isOfficialSkillsRequestMessage,
 	isInstallSkillInstallMessage,
+	isInstallSkillCancelMessage,
 	isCreateSkillChatCreateMessage,
 	type CreateSkillSearchRequestMessage,
 	type CreateSkillRootInstructionCreateMessage,
@@ -197,6 +198,9 @@ export class MySkillsViewProvider implements vscode.WebviewViewProvider {
 			}
 			if (isInstallSkillInstallMessage(message)) {
 				void this._install.installSkill(message);
+			}
+			if (isInstallSkillCancelMessage(message)) {
+				void this._install.cancelInstallSkill(message);
 			}
 		});
 

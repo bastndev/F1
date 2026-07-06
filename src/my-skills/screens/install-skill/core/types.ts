@@ -113,6 +113,11 @@ export interface InstallSkillInstallMessage {
 	target?: InstallSkillTarget;
 }
 
+export interface InstallSkillCancelMessage {
+	type: 'installSkill.cancel';
+	id: string;
+}
+
 export interface InstallSkillStatusMessage {
 	type: 'installSkill.status';
 	id: string;

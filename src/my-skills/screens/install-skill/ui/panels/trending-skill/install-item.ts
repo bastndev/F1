@@ -6,7 +6,7 @@ export interface InstallMarketplaceSkill {
 	source: string;
 }
 
-export type InstallStatus = 'idle' | 'installing';
+export type InstallStatus = 'idle' | 'installing' | 'cancelling';
 
 interface InstallItemOptions {
 	variant?: 'default' | 'flame';
@@ -18,8 +18,9 @@ export function createInstallItem(
 	status: InstallStatus,
 	options: InstallItemOptions = {},
 ): HTMLLIElement {
-	const isBusy = status === 'installing';
-	const buttonLabel = isBusy ? 'Installing' : 'Install';
+	const isBusy = status === 'installing' || status === 'cancelling';
+	const isCancelling = status === 'cancelling';
+	const buttonLabel = isBusy ? 'Cancel' : 'Install';
 
 	const item = document.createElement('li');
 	item.className = [
@@ -58,18 +59,53 @@ export function createInstallItem(
 	}
 
 	const button = document.createElement('button');
-	button.className = isBusy ? 'install-btn install-btn--busy' : 'install-btn';
+	button.className = [
+		'install-btn',
+		isBusy ? 'install-btn--busy' : '',
+		isBusy ? 'install-btn--cancel' : '',
+	].filter(Boolean).join(' ');
 	button.type = 'button';
 	button.dataset.installId = skill.id;
-	button.ariaLabel = `${buttonLabel} ${skill.name}`;
-	button.disabled = isBusy;
-	button.textContent = buttonLabel;
+	button.dataset.installStatus = status;
+	button.ariaLabel = isBusy ? `Cancel installation of ${skill.name}` : `Install ${skill.name}`;
+	button.disabled = isCancelling;
+	if (isBusy) {
+		button.append(createSpinner(), document.createTextNode(buttonLabel));
+	} else {
+		button.textContent = buttonLabel;
+	}
 
 	info.append(name, source);
 	meta.append(downloads, button);
 	item.append(rank, info, meta);
 
 	return item;
+}
+
+export function resolveInstallButtonAction(
+	button: HTMLButtonElement | null | undefined,
+	handlers: {
+		onInstall: (id: string) => void;
+		onCancel: (id: string) => void;
+	},
+): void {
+	if (!button || button.disabled || !button.dataset.installId) {
+		return;
+	}
+
+	const id = button.dataset.installId;
+	const status = button.dataset.installStatus as InstallStatus;
+
+	if (status === 'installing') {
+		handlers.onCancel(id);
+		return;
+	}
+
+	if (status === 'cancelling') {
+		return;
+	}
+
+	handlers.onInstall(id);
 }
 
 function createFlameMark(): HTMLSpanElement {
@@ -94,6 +130,28 @@ function createDownloadIcon(): SVGSVGElement {
 	path.setAttribute('stroke-linecap', 'round');
 	path.setAttribute('stroke-linejoin', 'round');
 	svg.append(path);
+
+	return svg;
+}
+
+function createSpinner(): SVGSVGElement {
+	const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+	svg.classList.add('install-spinner');
+	svg.setAttribute('viewBox', '0 0 16 16');
+	svg.setAttribute('aria-hidden', 'true');
+	svg.setAttribute('focusable', 'false');
+
+	const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+	circle.setAttribute('cx', '8');
+	circle.setAttribute('cy', '8');
+	circle.setAttribute('r', '6');
+	circle.setAttribute('fill', 'none');
+	circle.setAttribute('stroke', 'currentColor');
+	circle.setAttribute('stroke-width', '2');
+	circle.setAttribute('stroke-dasharray', '28');
+	circle.setAttribute('stroke-dashoffset', '8');
+	circle.setAttribute('stroke-linecap', 'round');
+	svg.append(circle);
 
 	return svg;
 }

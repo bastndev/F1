@@ -1,6 +1,6 @@
 import { InstallListRenderer } from '../shared/install-list-renderer';
 import { mergeSkillResults, onSkillStoreUpdate, removeSkillFromCollections, searchCachedSkills } from '../shared/skill-store';
-import type { InstallMarketplaceSkill, InstallStatus } from '../panels/trending-skill/install-item';
+import { resolveInstallButtonAction, type InstallMarketplaceSkill, type InstallStatus } from '../panels/trending-skill/install-item';
 
 interface VsCodeApi {
 	postMessage(message: unknown): void;
@@ -61,14 +61,18 @@ export function initSearchPanel(api: VsCodeApi): void {
 
 	resultsContainer.addEventListener('click', event => {
 		const button = (event.target as HTMLElement | null)?.closest<HTMLButtonElement>('.install-btn[data-install-id]');
-		if (!button || button.disabled || !button.dataset.installId) {
-			return;
-		}
-
-		const id = button.dataset.installId;
-		installStatuses.set(id, 'installing');
-		renderer?.updateItem(id);
-		vscodeApi?.postMessage({ type: 'installSkill.install', id });
+		resolveInstallButtonAction(button, {
+			onInstall: id => {
+				installStatuses.set(id, 'installing');
+				renderer?.updateItem(id);
+				vscodeApi?.postMessage({ type: 'installSkill.install', id });
+			},
+			onCancel: id => {
+				installStatuses.set(id, 'cancelling');
+				renderer?.updateItem(id);
+				vscodeApi?.postMessage({ type: 'installSkill.cancel', id });
+			},
+		});
 	});
 
 	window.addEventListener('message', event => {

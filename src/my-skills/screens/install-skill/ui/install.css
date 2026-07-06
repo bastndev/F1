@@ -658,6 +658,59 @@
 	animation: install-busy-shine 1.8s linear infinite;
 }
 
+.install-btn--cancel {
+	background: color-mix(in srgb, var(--vscode-errorForeground, #f85149) 15%, transparent);
+	color: var(--vscode-errorForeground, #f85149);
+	border-color: color-mix(in srgb, var(--vscode-errorForeground, #f85149) 35%, transparent);
+	opacity: 1;
+}
+
+.install-btn--cancel:not(.install-btn--busy):hover {
+	background: color-mix(in srgb, var(--vscode-errorForeground, #f85149) 28%, transparent);
+	border-color: color-mix(in srgb, var(--vscode-errorForeground, #f85149) 60%, transparent);
+}
+
+.install-btn--cancel.install-btn--busy {
+	background:
+		linear-gradient(
+			110deg,
+			color-mix(in srgb, var(--vscode-errorForeground, #f85149) 72%, transparent) 0%,
+			var(--vscode-errorForeground, #f85149) 36%,
+			color-mix(in srgb, var(--vscode-button-foreground, #ffffff) 86%, var(--vscode-errorForeground, #f85149)) 50%,
+			var(--vscode-errorForeground, #f85149) 64%,
+			color-mix(in srgb, var(--vscode-errorForeground, #f85149) 72%, transparent) 100%
+		);
+	background-size: 300% 100%;
+	background-position: 150% 0;
+	-webkit-background-clip: text;
+	background-clip: text;
+	color: transparent;
+	animation: install-busy-shine 1.8s linear infinite;
+}
+
+.install-spinner {
+	flex: 0 0 auto;
+	width: 12px;
+	height: 12px;
+	margin-right: 5px;
+	color: var(--install-accent);
+	animation: install-spinner-rotate 1s linear infinite;
+}
+
+.install-btn--cancel .install-spinner {
+	color: var(--vscode-errorForeground, #f85149);
+}
+
+@keyframes install-spinner-rotate {
+	from {
+		transform: rotate(0deg);
+	}
+
+	to {
+		transform: rotate(360deg);
+	}
+}
+
 .install-btn:focus-visible {
 	outline: 1px solid var(--install-accent);
 	outline-offset: 2px;
@@ -766,6 +819,14 @@
 	.install-btn--busy {
 		animation: none;
 		color: var(--install-accent);
+	}
+
+	.install-btn--cancel.install-btn--busy {
+		color: var(--vscode-errorForeground, #f85149);
+	}
+
+	.install-spinner {
+		animation: none;
 	}
 
 	.install-skeleton-row,
