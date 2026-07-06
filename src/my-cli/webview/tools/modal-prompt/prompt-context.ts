@@ -31,6 +31,9 @@ export type PromptContext = {
 	 *  has read it (marker seen) or a host-side hard cap fires. false = no session. */
 	injectRules?: (text: string, marker: string) => Promise<boolean>;
 	registerSkillsRefresh?: (refresh: () => void) => void;
+	/** Composer finished a send for this session — clear its persisted "left open"
+	 *  mark so a switch-away mid-send can't reopen an empty composer on return. */
+	onPromptSent?: (sessionId: string) => void;
 	// Control a host-side read-aloud that may still be playing when this modal
 	// opens (switched here from the translator mid-read). No speakText: prompt
 	// only pauses/resumes/stops an existing read, never starts one.

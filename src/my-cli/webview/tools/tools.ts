@@ -40,6 +40,8 @@ export type ToolContext = {
 	/** Type a one-shot rules prompt into the active CLI (see PromptContext.injectRules). */
 	injectRules?: (text: string, marker: string) => Promise<boolean>;
 	registerSkillsRefresh?: (refresh: () => void) => void;
+	/** Composer finished a send (see PromptContext.onPromptSent). */
+	onPromptSent?: (sessionId: string) => void;
 	speakText?: (text: string, options?: { chunks?: string[]; lang?: string }) => void;
 	appendSpeech?: (chunks: string[], options?: { final?: boolean; lang?: string; reset?: boolean }) => void;
 	checkVoiceReady?: (lang: string) => Promise<boolean>;
@@ -94,6 +96,7 @@ export const createToolsController = ({
 	openCreateSkill,
 	requestSpellcheck,
 	injectRules,
+	onPromptSent,
 	speakText,
 	appendSpeech,
 	checkVoiceReady,
@@ -228,6 +231,7 @@ export const createToolsController = ({
 			requestSpellcheck,
 			injectRules,
 			registerSkillsRefresh: (fn) => { skillsRefreshFn = fn; },
+			onPromptSent,
 			speakText,
 			appendSpeech,
 			checkVoiceReady,

@@ -492,6 +492,9 @@ const toolsController = layoutRight
 					// focus-in on submit (the modal steals focus → copilot drops \r).
 					? injectRulesRpc.request(activeSessionId, text, marker, terminals.get(activeSessionId)?.terminal.modes.sendFocusMode ?? false)
 					: Promise.resolve(false),
+			// A sent composer must not count as "left open" — else returning to a
+			// session whose send fired mid-switch reopens an empty composer.
+			onPromptSent: (sessionId: string) => { promptOpenSessions.delete(sessionId); },
 			speakText,
 			appendSpeech,
 			checkVoiceReady: (lang: string) => voiceReadyRpc.request(lang),
