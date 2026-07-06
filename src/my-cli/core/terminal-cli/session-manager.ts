@@ -24,6 +24,9 @@ type CliSession = Omit<CliSessionSnapshot, 'buffer'> & {
 	closing?: boolean;
 	/** Set on submit; cleared when the response settles (drives Voice Finish). */
 	awaitingResponse?: boolean;
+	/** Webview saw a pending prompt on this session's screen — suppresses the
+	 *  finish cue (the CLI is waiting on the user, not "done"). */
+	awaitingInput?: boolean;
 	/** Quiet-period timer that decides the response is done. */
 	responseSettleTimer?: ReturnType<typeof setTimeout>;
 	/** One-shot: fires when the response after a host-sent prompt settles (Smart cleanup). */
@@ -144,6 +147,11 @@ export class CliSessionManager implements vscode.Disposable {
 	public detach() {
 		this.webview = undefined;
 		this.sessionsKnownToWebview.clear();
+		// Webview owns prompt detection; with it torn down the flag is stale —
+		// reset so the finish cue behaves normally while the panel is hidden.
+		for (const session of this.sessions.values()) {
+			session.awaitingInput = false;
+		}
 	}
 
 	/**
@@ -333,6 +341,9 @@ export class CliSessionManager implements vscode.Disposable {
 			if (
 				this.voiceFinishEnabled
 				&& !this.finishSoundSuppressed
+				// A pending on-screen prompt means the CLI is waiting on the user,
+				// not finished — the webview owns that cue (confirmation.wav).
+				&& !session.awaitingInput
 				&& session.status === 'running'
 				&& !session.closing
 			) {
@@ -519,6 +530,13 @@ export class CliSessionManager implements vscode.Disposable {
 					this.voiceFinishLang = message.lang;
 				}
 				break;
+			case 'cli.awaitingInput': {
+				const session = message.sessionId ? this.sessions.get(message.sessionId) : undefined;
+				if (session) {
+					session.awaitingInput = message.awaiting === true;
+				}
+				break;
+			}
 		}
 
 		return undefined;

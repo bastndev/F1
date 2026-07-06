@@ -3,7 +3,7 @@ import { Terminal } from '@xterm/xterm';
 import { createTabController, readVoiceFinishPreference, type CliAgentIcon } from '../panel-tab/tab';
 import { getStoredPromptLang } from '../tools/modal-prompt/language-select';
 import { hasTranslatableContent } from '../tools/modal-translator/terminal-text';
-import { prunePromptDrafts, markRulesInjectedForSession, getRulesSoundUri } from '../tools/modal-prompt/prompt';
+import { prunePromptDrafts, markRulesInjectedForSession, getRulesSoundUri, getConfirmationSoundUri } from '../tools/modal-prompt/prompt';
 import { createCliCreateMessage } from '../../shared/agent-launch-guard';
 import { getAgentSlug as resolveAgentSlug, getCliAgent } from '../../shared/agents';
 import { isLynxPanelNavChord } from '../../../shared/keymaps/lynx-keymap/index';
@@ -837,7 +837,7 @@ const createTerminalView = (session: CliSession) => {
 		replayingScrollback = true;
 		terminal.write(session.buffer, () => {
 			replayingScrollback = false;
-			checkAttention(session.id);
+			checkAttention(session.id, { silent: true });
 		});
 	}
 	terminal.onData((data) => {
@@ -1014,28 +1014,61 @@ const renderTabs = () => {
 	tabController.render(summaries, activeSessionId);
 };
 
-const checkAttention = (sessionId: string) => {
-	const view = terminals.get(sessionId);
-	const session = sessions.get(sessionId);
-	if (!view || !session || session.status !== 'running') {
-		if (attentionSessionIds.delete(sessionId)) {
-			renderTabs();
-		}
+// Confirmation cue: ring once when a session's screen first shows a pending
+// prompt. Gated by the Voice Finish toggle (the shared master switch for CLI
+// audio) and a short per-session cooldown, so a TUI redraw that momentarily
+// drops and repaints the prompt can't double-ring.
+const confirmationSoundCooldownMs = 2000;
+const lastConfirmationSoundAt = new Map<string, number>();
+
+const playConfirmationSound = (sessionId: string) => {
+	if (!readVoiceFinishPreference()) {
 		return;
 	}
-
-	const isAwaiting = isAwaitingUserInput(readTerminalScreenText(view));
-	const wasAwaiting = attentionSessionIds.has(sessionId);
-	if (isAwaiting === wasAwaiting) {
+	const now = Date.now();
+	if (now - (lastConfirmationSoundAt.get(sessionId) ?? 0) < confirmationSoundCooldownMs) {
 		return;
 	}
+	const uri = getConfirmationSoundUri();
+	if (!uri) {
+		return;
+	}
+	lastConfirmationSoundAt.set(sessionId, now);
+	const audio = new Audio(uri);
+	audio.volume = 0.5;
+	audio.play().catch(() => { /* ignore autoplay / load errors */ });
+};
 
-	if (isAwaiting) {
+// Single funnel for the awaiting-input state: updates the local set, tells the
+// host (so it suppresses the finish cue for a pending prompt), rings the cue on
+// the false→true edge, and repaints the tabs — edge-guarded so each transition
+// acts exactly once.
+const setSessionAwaiting = (sessionId: string, awaiting: boolean, ring = true) => {
+	if (attentionSessionIds.has(sessionId) === awaiting) {
+		return;
+	}
+	if (awaiting) {
 		attentionSessionIds.add(sessionId);
 	} else {
 		attentionSessionIds.delete(sessionId);
 	}
+	vscode.postMessage({ type: 'cli.awaitingInput', sessionId, awaiting });
+	if (awaiting && ring) {
+		playConfirmationSound(sessionId);
+	}
 	renderTabs();
+};
+
+// silent = re-scanning restored scrollback on a panel rebuild, not live output:
+// sync the badge + host flag but don't ring an already-standing prompt again.
+const checkAttention = (sessionId: string, options?: { silent?: boolean }) => {
+	const view = terminals.get(sessionId);
+	const session = sessions.get(sessionId);
+	if (!view || !session || session.status !== 'running') {
+		setSessionAwaiting(sessionId, false);
+		return;
+	}
+	setSessionAwaiting(sessionId, isAwaitingUserInput(readTerminalScreenText(view)), !options?.silent);
 };
 
 const syncState = (message: Extract<ServerMessage, { type: 'cli.state' }>) => {
@@ -1071,6 +1104,11 @@ const syncState = (message: Extract<ServerMessage, { type: 'cli.state' }>) => {
 	for (const sessionId of [...attentionSessionIds]) {
 		if (!openSessionIds.has(sessionId)) {
 			attentionSessionIds.delete(sessionId);
+		}
+	}
+	for (const sessionId of [...lastConfirmationSoundAt.keys()]) {
+		if (!openSessionIds.has(sessionId)) {
+			lastConfirmationSoundAt.delete(sessionId);
 		}
 	}
 	prunePromptDrafts(openSessionIds);
