@@ -26,6 +26,8 @@ export type ToolContext = {
 	requestUsage?: () => Promise<CliUsageSnapshot>;
 	dismissUsageView?: () => void;
 	sendToActiveSession?: (text: string, options?: { paste?: boolean; submit?: boolean }) => void;
+	/** Deliver to a specific CLI by id (see PromptContext.sendToSession). */
+	sendToSession?: (sessionId: string, text: string, options?: { paste?: boolean; submit?: boolean }) => void;
 	/** Whether the active CLI is mid-task and would corrupt its input if a command were injected now. */
 	isCliBusy?: () => boolean;
 	translatePrompt?: (request: PromptTranslateRequest) => Promise<PromptTranslateResult>;
@@ -82,6 +84,7 @@ export const createToolsController = ({
 	requestUsage,
 	dismissUsageView,
 	sendToActiveSession,
+	sendToSession,
 	isCliBusy,
 	translatePrompt,
 	getTerminalSelection,
@@ -195,8 +198,17 @@ export const createToolsController = ({
 			event.stopPropagation();
 		});
 
+		// A mount can outlive its modal: a translated send may finish after the
+		// user switched CLIs and this modal was closed/replaced. Its close() must
+		// then be a no-op, not tear down whatever modal is showing now.
+		const closeOwnModal = () => {
+			if (activeModal === modal) {
+				close();
+			}
+		};
+
 		const cleanup = toolMounts[tool](host, {
-			close,
+			close: closeOwnModal,
 			getActiveSessionId,
 			getActiveSessionCreatedAt,
 			getActiveModelName,
@@ -205,6 +217,7 @@ export const createToolsController = ({
 			requestUsage,
 			dismissUsageView,
 			sendToActiveSession,
+			sendToSession,
 			isCliBusy,
 			translatePrompt,
 			getTerminalSelection,

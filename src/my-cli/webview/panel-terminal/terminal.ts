@@ -369,11 +369,11 @@ const openTranslatorFromTerminal = (sessionId: string) => {
 	toolsController.open('translate');
 };
 
-const sendToActiveSession = (text: string, options?: { paste?: boolean; submit?: boolean }) => {
-	if (!activeSessionId) {
-		return;
-	}
-	const sessionId = activeSessionId;
+// Deliver text to a specific CLI, addressed by session id — not "whoever is
+// active now". The prompt composer pins its send to the session it opened for
+// (see sendToActiveSession for the live-active variant), so translation/image
+// awaits plus a Tab switch mid-send can never reroute the prompt to another CLI.
+const sendToSession = (sessionId: string, text: string, options?: { paste?: boolean; submit?: boolean }) => {
 	const session = sessions.get(sessionId);
 	if (session?.status !== 'running') {
 		return;
@@ -440,6 +440,14 @@ const sendToActiveSession = (text: string, options?: { paste?: boolean; submit?:
 	}
 };
 
+// Live-active variant: footer-chip chords and other terminal actions that
+// legitimately target whichever CLI is focused right now.
+const sendToActiveSession = (text: string, options?: { paste?: boolean; submit?: boolean }) => {
+	if (activeSessionId) {
+		sendToSession(activeSessionId, text, options);
+	}
+};
+
 const toolsController = layoutRight
 	? createToolsController({
 			container: layoutRight,
@@ -470,6 +478,7 @@ const toolsController = layoutRight
 			requestUsage: usageTracker.request,
 			dismissUsageView: usageTracker.dismiss,
 			sendToActiveSession,
+			sendToSession,
 			isCliBusy: () => isActiveCliBusy(),
 			translatePrompt,
 			preparePromptWithAttachments,
@@ -1006,6 +1015,12 @@ const updateAgentTheme = () => {
 // already recorded by the time the user tabs away from it.
 const attentionSessionIds = new Set<string>();
 
+// Per-CLI prompt-composer open state: the sessions the user left the modal open
+// in. The overlay itself is single, but its open/closed state is snapshotted and
+// restored per CLI on switch (see syncState), so leaving the composer open in one
+// CLI and returning finds it open again — a CLI never opened stays closed.
+const promptOpenSessions = new Set<string>();
+
 const renderTabs = () => {
 	const summaries = [...sessions.values()].map((session) => ({
 		...session,
@@ -1072,6 +1087,7 @@ const checkAttention = (sessionId: string, options?: { silent?: boolean }) => {
 };
 
 const syncState = (message: Extract<ServerMessage, { type: 'cli.state' }>) => {
+	const previousActiveSessionId = activeSessionId;
 	activeSessionId = message.activeSessionId;
 	tabController.setAgents(message.agents);
 	const previousSessions = new Map(sessions);
@@ -1117,6 +1133,11 @@ const syncState = (message: Extract<ServerMessage, { type: 'cli.state' }>) => {
 			openFooterPickers.delete(sessionId);
 		}
 	}
+	for (const sessionId of [...promptOpenSessions]) {
+		if (!openSessionIds.has(sessionId)) {
+			promptOpenSessions.delete(sessionId);
+		}
+	}
 
 	// If a session entered error/exited state before producing output, don't leave skeleton hanging
 	for (const [sessionId, session] of sessions) {
@@ -1127,6 +1148,27 @@ const syncState = (message: Extract<ServerMessage, { type: 'cli.state' }>) => {
 
 	renderTabs();
 	setActiveTerminal();
+
+	// Per-CLI composer state. The prompt modal is a single overlay, but each CLI
+	// remembers whether the user left it open (its draft is already keyed by
+	// session). On a switch, snapshot the CLI we're leaving from the live overlay,
+	// then restore the one we're entering: re-mount it (with its own draft) if it
+	// was left open there, otherwise close it. Independent per CLI — a CLI never
+	// opened stays closed. In-flight sends are pinned, so they still land. Other
+	// tool modals are transient and not tracked here.
+	if (previousActiveSessionId !== undefined && previousActiveSessionId !== activeSessionId) {
+		const leftPromptOpen = toolsController?.getOpenTool() === 'prompt';
+		if (leftPromptOpen && openSessionIds.has(previousActiveSessionId)) {
+			promptOpenSessions.add(previousActiveSessionId);
+		} else {
+			promptOpenSessions.delete(previousActiveSessionId);
+		}
+		if (activeSessionId && promptOpenSessions.has(activeSessionId)) {
+			toolsController?.open('prompt');
+		} else if (leftPromptOpen) {
+			toolsController?.close();
+		}
+	}
 };
 
 const handleOutput = (message: Extract<ServerMessage, { type: 'cli.output' }>) => {
