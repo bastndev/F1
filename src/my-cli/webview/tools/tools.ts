@@ -56,7 +56,7 @@ export type ToolContext = {
 
 type ToolCleanup = () => void;
 type ToolMount = (host: HTMLElement, context: ToolContext) => void | ToolCleanup;
-export type ToolsControllerOptions = { container: HTMLElement } & Omit<ToolContext, 'close'>;
+export type ToolsControllerOptions = { container: HTMLElement; onToolChange?: (tool: ToolId | null) => void } & Omit<ToolContext, 'close'>;
 
 const modalId = 'cli-tools-modal';
 
@@ -106,7 +106,8 @@ export const createToolsController = ({
 	queryVoiceState,
 	onVoiceState,
 	refocusTerminal,
-	refocusCli
+	refocusCli,
+	onToolChange
 }: ToolsControllerOptions) => {
 	let activeModal: HTMLElement | null = null;
 	let currentTool: ToolId | null = null;
@@ -131,6 +132,8 @@ export const createToolsController = ({
 		activeModal = null;
 		currentTool = null;
 		skillsRefreshFn = null;
+		
+		onToolChange?.(null);
 
 		// Return focus using the host-provided function (uses real Terminal.focus()
 		// on the xterm instance so input works and no visible focus ring appears
@@ -268,6 +271,7 @@ export const createToolsController = ({
 		document.addEventListener('keydown', handleKeyDown, true);
 		activeModal = modal;
 		currentTool = tool;
+		onToolChange?.(tool);
 	};
 
 	const toggle = (tool: ToolId) => {

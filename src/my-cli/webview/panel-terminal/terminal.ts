@@ -348,11 +348,10 @@ const headerVoice = (() => {
 	}
 
 	let state: VoiceState = 'idle';
-	const apply = (next: VoiceState) => {
-		state = next;
-		// Header pill intentionally hidden for now; keep state sync alive so a
-		// future flip just removes this override.
-		const active = false;
+	const apply = (next?: VoiceState) => {
+		if (next) state = next;
+		// Show the pill when voice is active but the translator modal is closed
+		const active = state !== 'idle' && toolsController?.getOpenTool() !== 'translate';
 		pill.hidden = !active;
 		pill.setAttribute('aria-hidden', active ? 'false' : 'true');
 		pill.classList.toggle('is-speaking', next === 'speaking');
@@ -575,6 +574,9 @@ const toolsController = layoutRight
 				const activePane = document.querySelector<HTMLElement>('.cli-terminal-pane.is-active');
 				activePane?.focus();
 			},
+			onToolChange: () => {
+				headerVoice?.apply();
+			},
 			refocusCli: () => {
 				// Ask the extension host to focus the CLI Hub view and then refocus
 				// the terminal. This is needed after Alt+number shortcuts because VS Code
@@ -610,7 +612,7 @@ const tabController = createTabController({
 	onSwitch: (sessionId) => vscode.postMessage({ type: 'cli.switch', sessionId }),
 	onClose: (sessionId) => vscode.postMessage({ type: 'cli.close', sessionId }),
 	onDismissToolModal: () => {
-		toolsController?.close();
+		toolsController?.close({ keepVoice: true });
 	},
 	onOpenTool: (tool) => {
 		toolsController?.toggle(tool);
@@ -1220,7 +1222,7 @@ const syncState = (message: Extract<ServerMessage, { type: 'cli.state' }>) => {
 		if (activeSessionId && promptOpenSessions.has(activeSessionId)) {
 			toolsController?.open('prompt');
 		} else if (leftPromptOpen) {
-			toolsController?.close();
+			toolsController?.close({ keepVoice: true });
 		}
 	}
 };
@@ -1374,7 +1376,7 @@ window.addEventListener('message', (event: MessageEvent<ServerMessage>) => {
 		// user returns. Dismiss it on hide. The Prompt modal is deliberately left
 		// alone so an in-progress draft survives the round-trip.
 		if (toolsController?.getOpenTool() === 'translate') {
-			toolsController.close();
+			toolsController.close({ keepVoice: true });
 		}
 		return;
 	}
