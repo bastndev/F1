@@ -335,6 +335,55 @@ const onVoiceState = (listener: (state: VoiceState, message?: string, progress?:
 	};
 };
 
+// "Now playing" voice control mirrored into the always-visible CLI header bar, so
+// a read-aloud can be paused/stopped without an open modal. Fed straight from the
+// broadcast voice.state (see the message handler) — independent of the modal pills,
+// which register through onVoiceState above. Same visual/logic as the prompt pill.
+const headerVoice = (() => {
+	const pill = document.getElementById('cli-voice-pill');
+	const toggleBtn = document.getElementById('cli-voice-toggle') as HTMLButtonElement | null;
+	const stopBtn = document.getElementById('cli-voice-stop') as HTMLButtonElement | null;
+	if (!pill || !toggleBtn || !stopBtn) {
+		return undefined;
+	}
+
+	let state: VoiceState = 'idle';
+	const apply = (next: VoiceState) => {
+		state = next;
+		const active = next === 'speaking' || next === 'paused' || next === 'preparing';
+		pill.hidden = !active;
+		pill.setAttribute('aria-hidden', active ? 'false' : 'true');
+		pill.classList.toggle('is-speaking', next === 'speaking');
+		pill.classList.toggle('is-paused', next === 'paused');
+		pill.classList.toggle('is-preparing', next === 'preparing');
+		toggleBtn.disabled = next === 'preparing';
+		const label = next === 'preparing' ? 'Preparing voice…' : next === 'paused' ? 'Resume voice' : 'Pause voice';
+		toggleBtn.title = label;
+		toggleBtn.setAttribute('aria-label', label);
+	};
+
+	toggleBtn.addEventListener('click', () => {
+		if (state === 'speaking') {
+			pauseSpeech();
+		} else if (state === 'paused') {
+			resumeSpeech();
+		}
+	});
+	stopBtn.addEventListener('click', () => {
+		if (state === 'speaking' || state === 'paused') {
+			stopSpeech();
+		}
+	});
+
+	return { apply };
+})();
+
+// Sync now in case a read is already playing when this webview (re)builds — there's
+// no retainContextWhenHidden, so a panel switch remounts us mid-read.
+if (headerVoice) {
+	queryVoiceState();
+}
+
 const openPromptFromTerminal = (sessionId: string) => {
 	if (!isPromptFilterEnabled || !toolsController) {
 		return;
@@ -1222,6 +1271,7 @@ window.addEventListener('message', (event: MessageEvent<ServerMessage>) => {
 
 	if (message.type === 'voice.state') {
 		voiceStateListener?.(message.state, message.message, message.progress);
+		headerVoice?.apply(message.state);
 		return;
 	}
 
