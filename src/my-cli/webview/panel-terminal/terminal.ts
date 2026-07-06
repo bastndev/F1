@@ -350,8 +350,9 @@ const headerVoice = (() => {
 	let state: VoiceState = 'idle';
 	const apply = (next?: VoiceState) => {
 		if (next) state = next;
-		// Show the pill when voice is active but the translator modal is closed
-		const active = state !== 'idle' && toolsController?.getOpenTool() !== 'translate';
+		const openTool = toolsController?.getOpenTool();
+		// Show the pill when voice is active but voice modals (translator/prompt) are closed
+		const active = state !== 'idle' && openTool !== 'translate' && openTool !== 'prompt';
 		pill.hidden = !active;
 		pill.setAttribute('aria-hidden', active ? 'false' : 'true');
 		pill.classList.toggle('is-speaking', state === 'speaking');
