@@ -787,7 +787,7 @@
 
 	.agent-tab-shell {
 		display: grid;
-		grid-template-columns: minmax(0, 1fr) minmax(112px, 166px) auto;
+		grid-template-columns: auto minmax(0, 1fr) minmax(112px, 166px) auto;
 		grid-template-rows: 1fr;
 		align-items: center;
 		gap: 7px;
@@ -802,8 +802,20 @@
 		display: contents;
 	}
 
-	.agent-picker {
+	.agent-session-list {
+		grid-column: 1;
+		grid-row: 1;
+	}
+
+	#cli-voice-pill {
 		grid-column: 2;
+		grid-row: 1;
+		align-self: center;
+		justify-self: start; /*TODO: end - start*/
+	}
+
+	.agent-picker {
+		grid-column: 3;
 		grid-row: 1;
 		flex: 0 1 auto;
 	}
@@ -815,7 +827,7 @@
 	}
 
 	.agent-header-actions {
-		grid-column: 3;
+		grid-column: 4;
 		grid-row: 1;
 		gap: 4px;
 		margin-left: 0;
@@ -843,8 +855,6 @@
 	}
 
 	.agent-session-list {
-		grid-column: 1;
-		grid-row: 1;
 		min-height: 34px;
 		display: flex;
 		flex-direction: row;
@@ -1071,5 +1081,137 @@
 	.agent-session-main,
 	.agent-session-close {
 		display: none;
+	}
+}
+
+/* ── Header voice pill — the read-aloud "now playing" control mirrored into the
+   always-visible CLI bar so a voice can be paused/stopped without an open modal.
+   Same green treatment as the modal pills; only shown while a read is live.
+   Keyframes are cliv-* (not the modal's pv-*) so the two stylesheets don't clash. */
+.cli-voice-pill {
+	display: inline-flex;
+	align-items: center;
+	gap: 3px;
+	padding: 2px 4px;
+	border-radius: 999px;
+	background: color-mix(in srgb, #5DCAA5 13%, transparent);
+	border: 0.5px solid color-mix(in srgb, #5DCAA5 30%, transparent);
+}
+.cli-voice-pill[hidden] {
+	display: none;
+}
+
+.cli-voice-toggle,
+.cli-voice-stop {
+	position: relative;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	padding: 0;
+	border: none;
+	background: transparent;
+	cursor: pointer;
+	color: #5DCAA5;
+}
+.cli-voice-toggle {
+	width: 30px;
+	height: 20px;
+}
+.cli-voice-toggle:disabled {
+	cursor: default;
+}
+.cli-voice-stop {
+	width: 18px;
+	height: 18px;
+	border-radius: 6px;
+	color: color-mix(in srgb, #5DCAA5 70%, var(--vscode-foreground));
+	transition: background 0.15s ease, color 0.15s ease;
+}
+.cli-voice-stop:hover {
+	background: color-mix(in srgb, #f87171 24%, transparent);
+	color: #f87171;
+}
+
+/* Play glyph only while paused; spectrum only while speaking. */
+.cli-voice-play {
+	position: absolute;
+	inset: 0;
+	margin: auto;
+	display: none;
+}
+.cli-voice-pill.is-paused .cli-voice-play {
+	display: block;
+}
+
+.cli-voice-spectrum {
+	position: absolute;
+	inset: 0;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 2px;
+	opacity: 0;
+	transition: opacity 0.2s ease;
+	pointer-events: none;
+}
+.cli-voice-pill.is-speaking .cli-voice-spectrum {
+	opacity: 1;
+}
+.cli-voice-pill.is-preparing .cli-voice-spectrum {
+	opacity: 0.85;
+}
+
+.cli-voice-spectrum .bar {
+	width: 2.5px;
+	border-radius: 999px;
+	background: linear-gradient(180deg, #eafff6 0%, #5DCAA5 60%, #3fa583 100%);
+	opacity: 0.9;
+}
+.cli-voice-spectrum .bar:nth-child(1) { height: 5px; }
+.cli-voice-spectrum .bar:nth-child(2) { height: 12px; }
+.cli-voice-spectrum .bar:nth-child(3) { height: 16px; }
+.cli-voice-spectrum .bar:nth-child(4) { height: 9px; }
+.cli-voice-spectrum .bar:nth-child(5) { height: 14px; }
+.cli-voice-spectrum .bar:nth-child(6) { height: 7px; }
+
+.cli-voice-pill.is-speaking .bar:nth-child(1) { animation: cliv-low  520ms ease-in-out -120ms infinite alternate; }
+.cli-voice-pill.is-speaking .bar:nth-child(2) { animation: cliv-mid  370ms ease-in-out -240ms infinite alternate; }
+.cli-voice-pill.is-speaking .bar:nth-child(3) { animation: cliv-high 430ms ease-in-out  -60ms infinite alternate; }
+.cli-voice-pill.is-speaking .bar:nth-child(4) { animation: cliv-mid  480ms ease-in-out -330ms infinite alternate; }
+.cli-voice-pill.is-speaking .bar:nth-child(5) { animation: cliv-high 340ms ease-in-out -180ms infinite alternate; }
+.cli-voice-pill.is-speaking .bar:nth-child(6) { animation: cliv-low  410ms ease-in-out -280ms infinite alternate; }
+
+/* Preparing / buffering — keep the meter moving but grey, so a gap reads as
+   "loading" instead of a frozen bar. */
+.cli-voice-pill.is-preparing .bar {
+	background: linear-gradient(180deg, #d3dbd8 0%, #8b948f 60%, #69716d 100%);
+}
+.cli-voice-pill.is-preparing .bar:nth-child(1) { animation: cliv-low  660ms ease-in-out -120ms infinite alternate; }
+.cli-voice-pill.is-preparing .bar:nth-child(2) { animation: cliv-mid  520ms ease-in-out -240ms infinite alternate; }
+.cli-voice-pill.is-preparing .bar:nth-child(3) { animation: cliv-high 580ms ease-in-out  -60ms infinite alternate; }
+.cli-voice-pill.is-preparing .bar:nth-child(4) { animation: cliv-mid  620ms ease-in-out -330ms infinite alternate; }
+.cli-voice-pill.is-preparing .bar:nth-child(5) { animation: cliv-high 480ms ease-in-out -180ms infinite alternate; }
+.cli-voice-pill.is-preparing .bar:nth-child(6) { animation: cliv-low  560ms ease-in-out -280ms infinite alternate; }
+
+@keyframes cliv-low {
+	0%   { height: 3px;  opacity: 0.55; }
+	60%  { height: 9px; }
+	100% { height: 12px; opacity: 0.95; }
+}
+@keyframes cliv-mid {
+	0%   { height: 4px;  opacity: 0.6; }
+	45%  { height: 13px; }
+	100% { height: 16px; opacity: 1; }
+}
+@keyframes cliv-high {
+	0%   { height: 5px;  opacity: 0.65; }
+	55%  { height: 12px; }
+	100% { height: 19px; opacity: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.cli-voice-pill.is-speaking .bar,
+	.cli-voice-pill.is-preparing .bar {
+		animation: none !important;
 	}
 }

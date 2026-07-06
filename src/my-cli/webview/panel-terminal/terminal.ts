@@ -335,6 +335,57 @@ const onVoiceState = (listener: (state: VoiceState, message?: string, progress?:
 	};
 };
 
+// "Now playing" voice control mirrored into the always-visible CLI header bar, so
+// a read-aloud can be paused/stopped without an open modal. Fed straight from the
+// broadcast voice.state (see the message handler) — independent of the modal pills,
+// which register through onVoiceState above. Same visual/logic as the prompt pill.
+const headerVoice = (() => {
+	const pill = document.getElementById('cli-voice-pill');
+	const toggleBtn = document.getElementById('cli-voice-toggle') as HTMLButtonElement | null;
+	const stopBtn = document.getElementById('cli-voice-stop') as HTMLButtonElement | null;
+	if (!pill || !toggleBtn || !stopBtn) {
+		return undefined;
+	}
+
+	let state: VoiceState = 'idle';
+	const apply = (next?: VoiceState) => {
+		if (next) {state = next;}
+		const openTool = toolsController?.getOpenTool();
+		// Show the pill when voice is active but voice modals (translator/prompt) are closed
+		const active = state !== 'idle' && openTool !== 'translate' && openTool !== 'prompt';
+		pill.hidden = !active;
+		pill.setAttribute('aria-hidden', active ? 'false' : 'true');
+		pill.classList.toggle('is-speaking', state === 'speaking');
+		pill.classList.toggle('is-paused', state === 'paused');
+		pill.classList.toggle('is-preparing', state === 'preparing');
+		toggleBtn.disabled = state === 'preparing';
+		const label = state === 'preparing' ? 'Preparing voice…' : state === 'paused' ? 'Resume voice' : 'Pause voice';
+		toggleBtn.title = label;
+		toggleBtn.setAttribute('aria-label', label);
+	};
+
+	toggleBtn.addEventListener('click', () => {
+		if (state === 'speaking') {
+			pauseSpeech();
+		} else if (state === 'paused') {
+			resumeSpeech();
+		}
+	});
+	stopBtn.addEventListener('click', () => {
+		if (state === 'speaking' || state === 'paused') {
+			stopSpeech();
+		}
+	});
+
+	return { apply };
+})();
+
+// Sync now in case a read is already playing when this webview (re)builds — there's
+// no retainContextWhenHidden, so a panel switch remounts us mid-read.
+if (headerVoice) {
+	queryVoiceState();
+}
+
 const openPromptFromTerminal = (sessionId: string) => {
 	if (!isPromptFilterEnabled || !toolsController) {
 		return;
@@ -524,6 +575,9 @@ const toolsController = layoutRight
 				const activePane = document.querySelector<HTMLElement>('.cli-terminal-pane.is-active');
 				activePane?.focus();
 			},
+			onToolChange: () => {
+				headerVoice?.apply();
+			},
 			refocusCli: () => {
 				// Ask the extension host to focus the CLI Hub view and then refocus
 				// the terminal. This is needed after Alt+number shortcuts because VS Code
@@ -559,7 +613,7 @@ const tabController = createTabController({
 	onSwitch: (sessionId) => vscode.postMessage({ type: 'cli.switch', sessionId }),
 	onClose: (sessionId) => vscode.postMessage({ type: 'cli.close', sessionId }),
 	onDismissToolModal: () => {
-		toolsController?.close();
+		toolsController?.close({ keepVoice: true });
 	},
 	onOpenTool: (tool) => {
 		toolsController?.toggle(tool);
@@ -1168,8 +1222,8 @@ const syncState = (message: Extract<ServerMessage, { type: 'cli.state' }>) => {
 		}
 		if (activeSessionId && promptOpenSessions.has(activeSessionId)) {
 			toolsController?.open('prompt');
-		} else if (leftPromptOpen) {
-			toolsController?.close();
+		} else if (toolsController?.isOpen()) {
+			toolsController?.close({ keepVoice: true });
 		}
 	}
 };
@@ -1222,6 +1276,7 @@ window.addEventListener('message', (event: MessageEvent<ServerMessage>) => {
 
 	if (message.type === 'voice.state') {
 		voiceStateListener?.(message.state, message.message, message.progress);
+		headerVoice?.apply(message.state);
 		return;
 	}
 
@@ -1322,7 +1377,7 @@ window.addEventListener('message', (event: MessageEvent<ServerMessage>) => {
 		// user returns. Dismiss it on hide. The Prompt modal is deliberately left
 		// alone so an in-progress draft survives the round-trip.
 		if (toolsController?.getOpenTool() === 'translate') {
-			toolsController.close();
+			toolsController.close({ keepVoice: true });
 		}
 		return;
 	}
@@ -1332,8 +1387,10 @@ window.addEventListener('message', (event: MessageEvent<ServerMessage>) => {
 	}
 });
 
+let resizeTimer: ReturnType<typeof setTimeout>;
 const resizeObserver = new ResizeObserver(() => {
-	fitTerminal();
+	clearTimeout(resizeTimer);
+	resizeTimer = setTimeout(() => fitTerminal(), 50);
 });
 resizeObserver.observe(terminalStack);
 
