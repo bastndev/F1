@@ -669,15 +669,10 @@
 	animation: attention-pulse 1.6s ease-in-out infinite;
 }
 
-.agent-session-item.needs-input .agent-session-attention-badge {
-	display: block;
-}
-
-/* Needs-input is the stronger signal — supersede the plain unread dot so a
-   blocked CLI shows only the pulsing badge, not two competing amber dots. */
-.agent-session-item.needs-input .agent-session-dot {
-	display: none;
-}
+/* Normal mode places the needs-input signal next to the name (see the
+   .needs-input .agent-session-dot rule below). The icon-corner badge is used
+   only in the icon-only responsive layout, so its show rule lives in that
+   media query. */
 
 @keyframes attention-pulse {
 	0%, 100% { transform: scale(1); opacity: 1; }
@@ -718,6 +713,14 @@
    are kept intact; only the visual is suppressed. Restore with display:block. */
 .agent-session-item.has-unread .agent-session-dot {
 	display: none;
+}
+
+/* Needs-input reuses the name-adjacent dot in normal mode (amber + pulse).
+   Placed after the has-unread rule so it wins when both classes are present. */
+.agent-session-item.needs-input .agent-session-dot {
+	display: block;
+	opacity: 1;
+	animation: attention-pulse 1.6s ease-in-out infinite;
 }
 
 .agent-session-project,
@@ -1049,9 +1052,14 @@
 		filter: drop-shadow(0 1px 1px rgba(0,0,0,0.25));
 	}
 
-	/* Icon-only mode: badge leaves the top-right corner (which the frame's
-	   overflow:hidden clips anyway) for lower-center of the circle. Centered
-	   via margin, not transform, so the scale pulse stays intact. */
+	/* Icon-only mode: the needs-input badge lives on the icon here (normal mode
+	   puts it by the name instead). Leaves the top-right corner (which the
+	   frame's overflow:hidden clips anyway) for lower-center of the circle.
+	   Centered via margin, not transform, so the scale pulse stays intact. */
+	.agent-session-item.needs-input .agent-session-attention-badge {
+		display: block;
+	}
+
 	.agent-session-attention-badge {
 		top: auto;
 		right: auto;
