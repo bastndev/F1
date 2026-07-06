@@ -58,7 +58,7 @@ export const PROTECTED_TERMS = new Set<string>([
 	'return', 'throw', 'try', 'catch', 'finally', 'switch', 'case', 'break',
 
 	// Local technical terms that should not be over-corrected by the dictionary.
-	'autocorrect', 'typo', 'lynxjs', 'testear', 'codigo', 'prompt', 'code', 'bug', 'palito', 'mouse', 'click', 'harry', 'potter', 'ctrl','enter' , 'alt', 'skills', 'skill', '.agents', 'agents','prompts', 'refactorizacion', 'tokens','toggle', 'claude' , 'fixnow','package','feedback','emoji','minimalista','assets',
+	'autocorrect', 'typo', 'lynxjs', 'testear', 'codigo', 'prompt', 'code', 'bug', 'palito', 'mouse', 'click', 'harry', 'potter', 'ctrl','enter' , 'alt', 'skills', 'skill', '.agents', 'agents','prompts', 'refactorizacion', 'tokens','toggle', 'claude' , 'fixnow','package','feedback','emoji','minimalista','assets','tab','execute',
 ]);
 
 export function isProtectedTerm(word: string): boolean {
