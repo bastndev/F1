@@ -369,11 +369,11 @@ const openTranslatorFromTerminal = (sessionId: string) => {
 	toolsController.open('translate');
 };
 
-const sendToActiveSession = (text: string, options?: { paste?: boolean; submit?: boolean }) => {
-	if (!activeSessionId) {
-		return;
-	}
-	const sessionId = activeSessionId;
+// Deliver text to a specific CLI, addressed by session id — not "whoever is
+// active now". The prompt composer pins its send to the session it opened for
+// (see sendToActiveSession for the live-active variant), so translation/image
+// awaits plus a Tab switch mid-send can never reroute the prompt to another CLI.
+const sendToSession = (sessionId: string, text: string, options?: { paste?: boolean; submit?: boolean }) => {
 	const session = sessions.get(sessionId);
 	if (session?.status !== 'running') {
 		return;
@@ -440,6 +440,14 @@ const sendToActiveSession = (text: string, options?: { paste?: boolean; submit?:
 	}
 };
 
+// Live-active variant: footer-chip chords and other terminal actions that
+// legitimately target whichever CLI is focused right now.
+const sendToActiveSession = (text: string, options?: { paste?: boolean; submit?: boolean }) => {
+	if (activeSessionId) {
+		sendToSession(activeSessionId, text, options);
+	}
+};
+
 const toolsController = layoutRight
 	? createToolsController({
 			container: layoutRight,
@@ -470,6 +478,7 @@ const toolsController = layoutRight
 			requestUsage: usageTracker.request,
 			dismissUsageView: usageTracker.dismiss,
 			sendToActiveSession,
+			sendToSession,
 			isCliBusy: () => isActiveCliBusy(),
 			translatePrompt,
 			preparePromptWithAttachments,
@@ -1072,6 +1081,7 @@ const checkAttention = (sessionId: string, options?: { silent?: boolean }) => {
 };
 
 const syncState = (message: Extract<ServerMessage, { type: 'cli.state' }>) => {
+	const previousActiveSessionId = activeSessionId;
 	activeSessionId = message.activeSessionId;
 	tabController.setAgents(message.agents);
 	const previousSessions = new Map(sessions);
@@ -1127,6 +1137,19 @@ const syncState = (message: Extract<ServerMessage, { type: 'cli.state' }>) => {
 
 	renderTabs();
 	setActiveTerminal();
+
+	// A composer is bound to the CLI it opened for (its draft + pinned send
+	// target). If the active CLI just changed under an open composer, close it so
+	// the view matches the CLI underneath; reopening on the new CLI loads that
+	// CLI's own draft. Any in-flight send already pinned its target, so it lands
+	// correctly even though the composer is gone.
+	if (
+		previousActiveSessionId !== undefined
+		&& previousActiveSessionId !== activeSessionId
+		&& toolsController?.getOpenTool() === 'prompt'
+	) {
+		toolsController?.close();
+	}
 };
 
 const handleOutput = (message: Extract<ServerMessage, { type: 'cli.output' }>) => {

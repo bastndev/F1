@@ -429,6 +429,14 @@ function initPromptComposer(host: HTMLElement, context: PromptContext, hasActive
 	const draftKey = context.getActiveSessionId?.();
 	const savedDraft = draftKey ? promptDrafts.get(draftKey) : undefined;
 
+	// This composer is pinned to the CLI it opened for. Sends target this id (not
+	// the live active session), and agent-derived context is frozen here too, so a
+	// CLI switch mid-send (Tab during translation) can neither reroute the prompt
+	// nor mis-tag its history / skill routing.
+	const boundSessionId = draftKey;
+	const boundAgentSlug = getActiveAgentSlug();
+	const boundIsClaude = isClaudeSession();
+
 	// Image attachments state (survives modal close via the session draft)
 	const imageAttachments: ImageAttachment[] = savedDraft?.imageAttachments ?? [];
 	let nextImageAttachmentId = savedDraft?.nextImageAttachmentId ?? 1;
@@ -647,7 +655,7 @@ function initPromptComposer(host: HTMLElement, context: PromptContext, hasActive
 		// with each SKILL.md route resolved for the active CLI (.claude/skills
 		// for Claude, .agents/skills for the rest). Done post-translation —
 		// the generated text is already English — and before paste expansion.
-		textToSend = expandSkillsToken(textToSend, selectedSkills, isClaudeSession());
+		textToSend = expandSkillsToken(textToSend, selectedSkills, boundIsClaude);
 
 		// Collapsed pastes leave the textarea as markers; the CLI gets the
 		// original verbatim content (never lowercased, never translated).
@@ -663,7 +671,7 @@ function initPromptComposer(host: HTMLElement, context: PromptContext, hasActive
 		// carries the preamble once per session. See prompt-mode.buildPlanText.
 		let planSessionForMark: string | undefined;
 		if (promptMode === 'plan') {
-			const sid = ctx.getActiveSessionId?.();
+			const sid = boundSessionId;
 			const routeOnly = hasRouteMention(ta.value) && stripPromptTokens(ta.value).trim().length === 0;
 			const firstInSession = !sid || !planPreambleSentSessions.has(sid);
 			textToSend = buildPlanText(textToSend, { routeOnly, firstInSession });
@@ -699,8 +707,13 @@ function initPromptComposer(host: HTMLElement, context: PromptContext, hasActive
 		try {
 			result = processPrompt(textToSend, {
 				close: shouldDelayClose ? () => window.setTimeout(closeAfterSend, routePromptCloseDelayMs) : closeAfterSend,
-				sendToActiveSession: ctx.sendToActiveSession,
-				getActiveSessionId: ctx.getActiveSessionId,
+				// Pin delivery to this composer's own session, never the live active
+				// one, so a CLI switch during the awaits above can't reroute the send.
+				sendToActiveSession: (payload, options) =>
+					boundSessionId && ctx.sendToSession
+						? ctx.sendToSession(boundSessionId, payload, options)
+						: ctx.sendToActiveSession?.(payload, options),
+				getActiveSessionId: () => boundSessionId,
 			});
 		} catch (err) {
 			console.error('[MySkills] processPrompt threw:', err);
@@ -733,7 +746,7 @@ function initPromptComposer(host: HTMLElement, context: PromptContext, hasActive
 			}
 			// Original textarea text (markers get stripped inside) — never the
 			// translated/expanded payload.
-			recordSentPrompt(getActiveAgentSlug(), ta.value);
+			recordSentPrompt(boundAgentSlug, ta.value);
 			// The draft has served its purpose.
 			if (draftKey) {
 				promptDrafts.delete(draftKey);
@@ -953,7 +966,7 @@ function initPromptComposer(host: HTMLElement, context: PromptContext, hasActive
 	});
 
 	// ArrowUp in an empty textarea recalls previously sent prompts (per CLI).
-	initPromptHistory(textarea, getActiveAgentSlug);
+	initPromptHistory(textarea, () => boundAgentSlug);
 
 	// Plain click a collapsed-paste marker → peek/edit popover; hover an
 	// [Image #N] marker → thumbnail preview.

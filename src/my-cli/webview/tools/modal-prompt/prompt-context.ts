@@ -15,6 +15,10 @@ export type PromptContext = {
 	getActiveModelName?: () => string | undefined;
 	getActiveSessionBuffer?: () => string | undefined;
 	sendToActiveSession?: (text: string, options?: { paste?: boolean; submit?: boolean }) => void;
+	/** Deliver to a specific CLI by id, regardless of which is active now. The
+	 *  composer pins its send to the session it opened for, so a mid-send switch
+	 *  (Tab during translation) can't reroute the prompt to another CLI. */
+	sendToSession?: (sessionId: string, text: string, options?: { paste?: boolean; submit?: boolean }) => void;
 	/** Whether the active CLI is mid-task and would corrupt its input if a command were injected now. */
 	isCliBusy?: () => boolean;
 	translatePrompt?: (request: PromptTranslateRequest) => Promise<PromptTranslateResult>;
