@@ -1,4 +1,4 @@
-import type { InstallMarketplaceSkill, InstallStatus } from '../install-item';
+import { resolveInstallButtonAction, type InstallMarketplaceSkill, type InstallStatus } from '../install-item';
 import { InstallListRenderer } from '../../../shared/install-list-renderer';
 import { removeSkillFromCollections, setSkillCollection } from '../../../shared/skill-store';
 
@@ -45,14 +45,18 @@ export function initTrendingFlamePanel(api: VsCodeApi): void {
 		const target = event.target as HTMLElement | null;
 		const button = target?.closest<HTMLButtonElement>('.install-btn[data-install-id]');
 		if (button) {
-			if (button.disabled || !button.dataset.installId) {
-				return;
-			}
-
-			const id = button.dataset.installId;
-			installStatuses.set(id, 'installing');
-			renderer?.updateItem(id);
-			vscodeApi?.postMessage({ type: 'installSkill.install', id });
+			resolveInstallButtonAction(button, {
+				onInstall: id => {
+					installStatuses.set(id, 'installing');
+					renderer?.updateItem(id);
+					vscodeApi?.postMessage({ type: 'installSkill.install', id });
+				},
+				onCancel: id => {
+					installStatuses.set(id, 'cancelling');
+					renderer?.updateItem(id);
+					vscodeApi?.postMessage({ type: 'installSkill.cancel', id });
+				},
+			});
 			return;
 		}
 
@@ -83,8 +87,8 @@ export function initTrendingFlamePanel(api: VsCodeApi): void {
 		}
 
 		if (message.type === 'installSkill.status' && typeof message.id === 'string' && typeof message.status === 'string') {
-			if (message.status === 'installing') {
-				installStatuses.set(message.id, 'installing');
+			if (message.status === 'installing' || message.status === 'downloading') {
+				installStatuses.set(message.id, message.status);
 			} else {
 				installStatuses.delete(message.id);
 			}

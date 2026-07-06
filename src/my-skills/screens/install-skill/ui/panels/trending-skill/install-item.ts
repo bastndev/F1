@@ -6,7 +6,7 @@ export interface InstallMarketplaceSkill {
 	source: string;
 }
 
-export type InstallStatus = 'idle' | 'installing';
+export type InstallStatus = 'idle' | 'installing' | 'downloading' | 'cancelling';
 
 interface InstallItemOptions {
 	variant?: 'default' | 'flame';
@@ -18,8 +18,12 @@ export function createInstallItem(
 	status: InstallStatus,
 	options: InstallItemOptions = {},
 ): HTMLLIElement {
-	const isBusy = status === 'installing';
-	const buttonLabel = isBusy ? 'Installing' : 'Install';
+	const isPrompting = status === 'installing';
+	const isDownloading = status === 'downloading';
+	const isCancelling = status === 'cancelling';
+	const isBusy = isPrompting || isDownloading || isCancelling;
+	const defaultLabel = isDownloading ? 'Installing' : (isBusy ? 'Cancel' : 'Install');
+	const hoverLabel = isBusy ? 'Cancel' : 'Install';
 
 	const item = document.createElement('li');
 	item.className = [
@@ -58,18 +62,58 @@ export function createInstallItem(
 	}
 
 	const button = document.createElement('button');
-	button.className = isBusy ? 'install-btn install-btn--busy' : 'install-btn';
+	button.className = [
+		'install-btn',
+		isBusy ? 'install-btn--busy' : '',
+		(isPrompting || isCancelling) ? 'install-btn--cancel' : '',
+		isDownloading ? 'install-btn--downloading' : '',
+	].filter(Boolean).join(' ');
 	button.type = 'button';
 	button.dataset.installId = skill.id;
-	button.ariaLabel = `${buttonLabel} ${skill.name}`;
-	button.disabled = isBusy;
-	button.textContent = buttonLabel;
+	button.dataset.installStatus = status;
+	button.ariaLabel = isBusy ? `Cancel installation of ${skill.name}` : `Install ${skill.name}`;
+	button.disabled = isCancelling;
+	button.append(createButtonText(defaultLabel, 'install-btn-text'), createButtonText(hoverLabel, 'install-btn-hover-text'));
 
 	info.append(name, source);
 	meta.append(downloads, button);
 	item.append(rank, info, meta);
 
 	return item;
+}
+
+export function resolveInstallButtonAction(
+	button: HTMLButtonElement | null | undefined,
+	handlers: {
+		onInstall: (id: string) => void;
+		onCancel: (id: string) => void;
+	},
+): void {
+	if (!button || button.disabled || !button.dataset.installId) {
+		return;
+	}
+
+	const id = button.dataset.installId;
+	const status = button.dataset.installStatus as InstallStatus;
+
+	if (status === 'installing' || status === 'downloading') {
+		handlers.onCancel(id);
+		return;
+	}
+
+	if (status === 'cancelling') {
+		return;
+	}
+
+	handlers.onInstall(id);
+}
+
+function createButtonText(label: string, className: string): HTMLSpanElement {
+	const span = document.createElement('span');
+	span.className = className;
+	span.textContent = label;
+	span.setAttribute('aria-hidden', 'true');
+	return span;
 }
 
 function createFlameMark(): HTMLSpanElement {

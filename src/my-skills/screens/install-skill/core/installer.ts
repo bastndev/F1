@@ -1,6 +1,8 @@
 import * as vscode from 'vscode';
-import { spawn } from 'child_process';
+import { spawn, type ChildProcess } from 'child_process';
 import type { InstallMarketplaceSkill, InstallSkillTarget } from './types';
+
+const activeInstalls = new Map<string, ChildProcess>();
 
 interface InstallChoice extends vscode.QuickPickItem {
 	target: InstallSkillTarget;
@@ -14,22 +16,43 @@ const MARKETPLACE_SKILL_ID_PATTERN = /^[A-Za-z0-9_.-]+(?:\/[A-Za-z0-9_.-]+)*$/;
 // Every other source stays opt-out (telemetry disabled).
 const TELEMETRY_REPORTING_OWNERS = new Set(['bastndev']);
 
-export async function installMarketplaceSkill(skill: InstallMarketplaceSkill): Promise<boolean> {
+export async function installMarketplaceSkill(
+	skill: InstallMarketplaceSkill,
+	signal?: AbortSignal,
+	onDownloadStart?: () => void,
+): Promise<boolean> {
+	if (signal?.aborted) {
+		return false;
+	}
+
 	if (!isSafeMarketplaceSkillReference(skill)) {
-		void vscode.window.showErrorMessage(vscode.l10n.t('[My Skills] Install failed: invalid marketplace skill reference.'));
+		if (!signal?.aborted) {
+			void vscode.window.showErrorMessage(vscode.l10n.t('[My Skills] Install failed: invalid marketplace skill reference.'));
+		}
 		return false;
 	}
 
-	const choice = await pickInstallTarget(skill);
-	if (!choice) {
+	const choice = await pickInstallTarget(skill, signal);
+	if (!choice || signal?.aborted) {
 		return false;
 	}
 
-	return runSkillsInstall(skill, choice);
+	return runSkillsInstall(skill, choice, signal, onDownloadStart);
 }
 
-async function pickInstallTarget(skill: InstallMarketplaceSkill): Promise<InstallChoice | undefined> {
-	const choices: InstallChoice[] = [
+export function cancelInstallMarketplaceSkill(id: string): void {
+	const child = activeInstalls.get(id);
+	if (child) {
+		killProcessTree(child);
+		activeInstalls.delete(id);
+	}
+}
+
+async function pickInstallTarget(skill: InstallMarketplaceSkill, signal?: AbortSignal): Promise<InstallChoice | undefined> {
+	const quickPick = vscode.window.createQuickPick<InstallChoice>();
+	quickPick.title = `Install ${skill.name}`;
+	quickPick.placeholder = 'Choose where to install this skill';
+	quickPick.items = [
 		{
 			label: 'Recommended',
 			description: '.agents/skills',
@@ -46,16 +69,48 @@ async function pickInstallTarget(skill: InstallMarketplaceSkill): Promise<Instal
 		},
 	];
 
-	return vscode.window.showQuickPick(choices, {
-		title: `Install ${skill.name}`,
-		placeHolder: 'Choose where to install this skill',
+	return new Promise(resolve => {
+		let resolved = false;
+
+		const finish = (value: InstallChoice | undefined) => {
+			if (resolved) {
+				return;
+			}
+			resolved = true;
+			signal?.removeEventListener('abort', onAbort);
+			quickPick.dispose();
+			resolve(value);
+		};
+
+		const onAbort = () => {
+			quickPick.hide();
+		};
+
+		if (signal?.aborted) {
+			finish(undefined);
+			return;
+		}
+
+		signal?.addEventListener('abort', onAbort, { once: true });
+
+		quickPick.onDidAccept(() => {
+			finish(quickPick.selectedItems[0]);
+		});
+
+		quickPick.onDidHide(() => {
+			finish(signal?.aborted ? undefined : quickPick.selectedItems[0]);
+		});
+
+		quickPick.show();
 	});
 }
 
-async function runSkillsInstall(skill: InstallMarketplaceSkill, choice: InstallChoice): Promise<boolean> {
+async function runSkillsInstall(skill: InstallMarketplaceSkill, choice: InstallChoice, signal?: AbortSignal, onDownloadStart?: () => void): Promise<boolean> {
 	const workspaceRoot = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath;
 	if (!workspaceRoot) {
-		void vscode.window.showWarningMessage(vscode.l10n.t('[My Skills] Open a workspace before installing project skills.'));
+		if (!signal?.aborted) {
+			void vscode.window.showWarningMessage(vscode.l10n.t('[My Skills] Open a workspace before installing project skills.'));
+		}
 		return false;
 	}
 
@@ -90,19 +145,47 @@ async function runSkillsInstall(skill: InstallMarketplaceSkill, choice: InstallC
 		},
 		() => {
 			return new Promise<boolean>(resolve => {
-				const child = spawn('npx', args, { cwd: workspaceRoot, shell: false, env });
+				if (signal?.aborted) {
+					resolve(false);
+					return;
+				}
+
+				onDownloadStart?.();
+
+				const child = spawn('npx', args, { cwd: workspaceRoot, shell: false, env, detached: true, windowsHide: true });
+				activeInstalls.set(skill.id, child);
 				let stderr = '';
+
+				const cleanup = () => {
+					signal?.removeEventListener('abort', onAbort);
+					activeInstalls.delete(skill.id);
+				};
+
+				const onAbort = () => {
+					killProcessTree(child);
+				};
+
+				signal?.addEventListener('abort', onAbort, { once: true });
 
 				child.stderr?.on('data', data => {
 					stderr += data.toString();
 				});
 
 				child.on('error', error => {
-					void vscode.window.showErrorMessage(vscode.l10n.t('[My Skills] Install failed: {0}', error.message));
+					cleanup();
+					if (!signal?.aborted) {
+						void vscode.window.showErrorMessage(vscode.l10n.t('[My Skills] Install failed: {0}', error.message));
+					}
 					resolve(false);
 				});
 
 				child.on('close', code => {
+					cleanup();
+					if (child.killed || signal?.aborted) {
+						resolve(false);
+						return;
+					}
+
 					if (code === 0) {
 						void vscode.window.showInformationMessage(vscode.l10n.t('Skill [{0}] installed ✅', skill.name));
 						resolve(true);
@@ -120,6 +203,42 @@ async function runSkillsInstall(skill: InstallMarketplaceSkill, choice: InstallC
 			});
 		},
 	);
+}
+
+function killProcessTree(child: ChildProcess): void {
+	const pid = child.pid;
+	if (!pid) {
+		child.kill();
+		return;
+	}
+
+	if (process.platform === 'win32') {
+		try {
+			spawn('taskkill', ['/T', '/F', '/PID', String(pid)], { windowsHide: true, detached: true });
+		} catch {
+			child.kill();
+		}
+		return;
+	}
+
+	try {
+		process.kill(-pid, 'SIGTERM');
+	} catch {
+		// Ignore: process may have already exited.
+	}
+
+	// If the process tree ignored SIGTERM, force-kill it after a short grace period.
+	setTimeout(() => {
+		try {
+			process.kill(-pid, 'SIGKILL');
+		} catch {
+			try {
+				child.kill('SIGKILL');
+			} catch {
+				// Ignore: process has already exited.
+			}
+		}
+	}, 2000);
 }
 
 function isSafeMarketplaceSkillReference(skill: InstallMarketplaceSkill): boolean {

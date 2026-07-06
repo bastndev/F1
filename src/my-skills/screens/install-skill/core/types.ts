@@ -113,10 +113,15 @@ export interface InstallSkillInstallMessage {
 	target?: InstallSkillTarget;
 }
 
+export interface InstallSkillCancelMessage {
+	type: 'installSkill.cancel';
+	id: string;
+}
+
 export interface InstallSkillStatusMessage {
 	type: 'installSkill.status';
 	id: string;
-	status: 'idle' | 'installing' | 'installed' | 'failed';
+	status: 'idle' | 'installing' | 'downloading' | 'installed' | 'failed';
 }
 
 export interface RawAllTimeSkill {

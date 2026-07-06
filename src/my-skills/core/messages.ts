@@ -288,6 +288,15 @@ export function isInstallSkillInstallMessage(value: unknown): value is InstallSk
 	return typeof message.id === 'string';
 }
 
+export function isInstallSkillCancelMessage(value: unknown): value is { type: 'installSkill.cancel', id: string } {
+	if (!isWebviewMessage(value) || value.type !== 'installSkill.cancel') {
+		return false;
+	}
+
+	const message = value as { id?: unknown };
+	return typeof message.id === 'string';
+}
+
 export function isCreateSkillChatCreateMessage(value: unknown): value is CreateSkillChatCreateMessage {
 	return isWebviewMessage(value)
 		&& value.type === 'createSkill.chat.create'
