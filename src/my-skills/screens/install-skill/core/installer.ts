@@ -16,7 +16,11 @@ const MARKETPLACE_SKILL_ID_PATTERN = /^[A-Za-z0-9_.-]+(?:\/[A-Za-z0-9_.-]+)*$/;
 // Every other source stays opt-out (telemetry disabled).
 const TELEMETRY_REPORTING_OWNERS = new Set(['bastndev']);
 
-export async function installMarketplaceSkill(skill: InstallMarketplaceSkill, signal?: AbortSignal): Promise<boolean> {
+export async function installMarketplaceSkill(
+	skill: InstallMarketplaceSkill,
+	signal?: AbortSignal,
+	onDownloadStart?: () => void,
+): Promise<boolean> {
 	if (signal?.aborted) {
 		return false;
 	}
@@ -33,7 +37,7 @@ export async function installMarketplaceSkill(skill: InstallMarketplaceSkill, si
 		return false;
 	}
 
-	return runSkillsInstall(skill, choice, signal);
+	return runSkillsInstall(skill, choice, signal, onDownloadStart);
 }
 
 export function cancelInstallMarketplaceSkill(id: string): void {
@@ -101,7 +105,7 @@ async function pickInstallTarget(skill: InstallMarketplaceSkill, signal?: AbortS
 	});
 }
 
-async function runSkillsInstall(skill: InstallMarketplaceSkill, choice: InstallChoice, signal?: AbortSignal): Promise<boolean> {
+async function runSkillsInstall(skill: InstallMarketplaceSkill, choice: InstallChoice, signal?: AbortSignal, onDownloadStart?: () => void): Promise<boolean> {
 	const workspaceRoot = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath;
 	if (!workspaceRoot) {
 		if (!signal?.aborted) {
@@ -145,6 +149,8 @@ async function runSkillsInstall(skill: InstallMarketplaceSkill, choice: InstallC
 					resolve(false);
 					return;
 				}
+
+				onDownloadStart?.();
 
 				const child = spawn('npx', args, { cwd: workspaceRoot, shell: false, env });
 				activeInstalls.set(skill.id, child);

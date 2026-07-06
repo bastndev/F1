@@ -333,7 +333,13 @@ export class InstallSkillsController {
 			status: 'installing',
 		});
 
-		const didInstall = await installMarketplaceSkill(skill, controller.signal);
+		const didInstall = await installMarketplaceSkill(skill, controller.signal, () => {
+			void this._host.postMessage({
+				type: 'installSkill.status',
+				id: skill.id,
+				status: 'downloading',
+			});
+		});
 
 		this._activeInstallControllers.delete(skill.id);
 

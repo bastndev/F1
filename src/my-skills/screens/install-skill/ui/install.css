@@ -688,6 +688,48 @@
 	animation: install-busy-shine 1.8s linear infinite;
 }
 
+.install-btn-text,
+.install-btn-hover-text {
+	pointer-events: none;
+}
+
+.install-btn-hover-text {
+	display: none;
+}
+
+.install-btn--downloading:hover .install-btn-text,
+.install-btn--downloading:focus-visible .install-btn-text,
+.install-btn--downloading:active .install-btn-text {
+	display: none;
+}
+
+.install-btn--downloading:hover .install-btn-hover-text,
+.install-btn--downloading:focus-visible .install-btn-hover-text,
+.install-btn--downloading:active .install-btn-hover-text {
+	display: inline;
+}
+
+.install-btn--downloading:hover,
+.install-btn--downloading:focus-visible,
+.install-btn--downloading:active {
+	background:
+		linear-gradient(
+			110deg,
+			color-mix(in srgb, var(--vscode-errorForeground, #f85149) 72%, transparent) 0%,
+			var(--vscode-errorForeground, #f85149) 36%,
+			color-mix(in srgb, var(--vscode-button-foreground, #ffffff) 86%, var(--vscode-errorForeground, #f85149)) 50%,
+			var(--vscode-errorForeground, #f85149) 64%,
+			color-mix(in srgb, var(--vscode-errorForeground, #f85149) 72%, transparent) 100%
+		);
+	background-size: 300% 100%;
+	background-position: 150% 0;
+	border-color: color-mix(in srgb, var(--vscode-errorForeground, #f85149) 60%, transparent);
+	-webkit-background-clip: text;
+	background-clip: text;
+	color: transparent;
+	animation: install-busy-shine 1.8s linear infinite;
+}
+
 .install-btn:focus-visible {
 	outline: 1px solid var(--install-accent);
 	outline-offset: 2px;
@@ -798,7 +840,10 @@
 		color: var(--install-accent);
 	}
 
-	.install-btn--cancel.install-btn--busy {
+	.install-btn--cancel.install-btn--busy,
+	.install-btn--downloading:hover,
+	.install-btn--downloading:focus-visible,
+	.install-btn--downloading:active {
 		color: var(--vscode-errorForeground, #f85149);
 	}
 

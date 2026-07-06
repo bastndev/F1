@@ -69,8 +69,8 @@ export function initTrending24hPanel(api: VsCodeApi): void {
 		}
 
 		if (message.type === 'installSkill.status' && typeof message.id === 'string' && typeof message.status === 'string') {
-			if (message.status === 'installing') {
-				installStatuses.set(message.id, 'installing');
+			if (message.status === 'installing' || message.status === 'downloading') {
+				installStatuses.set(message.id, message.status);
 			} else {
 				installStatuses.delete(message.id);
 			}
