@@ -38,7 +38,16 @@ export class MyCliViewProvider implements vscode.WebviewViewProvider, vscode.Dis
 	private activePromptTranslation?: AbortController;
 	private _activeWebview?: vscode.Webview;
 	private _tutorialPanel?: vscode.WebviewPanel;
-	private voiceController?: VoiceController;
+	// One controller for the extension's lifetime. Playback runs host-side and
+	// deliberately survives webview rebuilds (the view is not retained), so the
+	// session state must not live on a per-resolve instance — pause/stop/resync
+	// from a rebuilt webview have to reach the read that is still playing. The
+	// webview is read live on every post; while the panel is hidden the post is
+	// simply dropped and the next mount resyncs via voice.query.
+	private readonly voiceController = new VoiceController(
+		(msg) => this._activeWebview?.postMessage(msg),
+		() => this._extensionContext,
+	);
 
 	constructor(
 		private readonly _extensionUri: vscode.Uri,
@@ -61,10 +70,6 @@ export class MyCliViewProvider implements vscode.WebviewViewProvider, vscode.Dis
 		};
 
 		webviewView.webview.html = await this._getHtmlForWebview(webviewView.webview);
-		this.voiceController = new VoiceController(
-			(msg) => webviewView.webview.postMessage(msg),
-			() => this._extensionContext,
-		);
 		// VS Code hides a webview view by layout (display:none on the iframe) while
 		// keeping the window "visible", so the Page Visibility API inside the webview
 		// never fires on a panel switch. retainContextWhenHidden then leaves xterm's
@@ -167,37 +172,37 @@ export class MyCliViewProvider implements vscode.WebviewViewProvider, vscode.Dis
 			}
 
 			if (message.type === 'voice.speak') {
-				await this.voiceController?.handleSpeak(message);
+				await this.voiceController.handleSpeak(message);
 				return;
 			}
 
 			if (message.type === 'voice.append') {
-				await this.voiceController?.handleAppend(message);
+				await this.voiceController.handleAppend(message);
 				return;
 			}
 
 			if (message.type === 'voice.pause') {
-				await this.voiceController?.handlePause();
+				await this.voiceController.handlePause();
 				return;
 			}
 
 			if (message.type === 'voice.resume') {
-				await this.voiceController?.handleResume();
+				await this.voiceController.handleResume();
 				return;
 			}
 
 			if (message.type === 'voice.stop') {
-				await this.voiceController?.handleStop();
+				await this.voiceController.handleStop();
 				return;
 			}
 
 			if (message.type === 'voice.query') {
-				await this.voiceController?.handleQueryState();
+				await this.voiceController.handleQueryState();
 				return;
 			}
 
 			if (message.type === 'voice.checkReady') {
-				await this.voiceController?.handleCheckReady(message);
+				await this.voiceController.handleCheckReady(message);
 				return;
 			}
 
@@ -366,7 +371,7 @@ export class MyCliViewProvider implements vscode.WebviewViewProvider, vscode.Dis
 	public dispose() {
 		this._tutorialPanel?.dispose();
 		this.activePromptTranslation?.abort();
-		this.voiceController?.dispose();
+		this.voiceController.dispose();
 		this.sessionManager.dispose();
 	}
 
