@@ -89,7 +89,7 @@ export const getAgentWebviewHtml = (
 		getWebviewAssetUriString(webview, extensionUri, 'styles', 'skeleton', 'start-cli.css')
 	];
 	const scriptUri = getWebviewAssetUriString(webview, extensionUri, 'terminal.js');
-	const soundUri = getWebviewAssetUriString(webview, extensionUri, 'tools', 'modal-prompt', 'assets', 'sound', 'latigo.wav');
+	const soundUri = getWebviewAssetUriString(webview, extensionUri, 'assets', 'sound', 'latigo.wav');
 	const agentIcons = cliAgents.map((agent) => ({
 		label: agent.label,
 		icon: getWebviewAssetUriString(webview, extensionUri, 'assets', 'icons-cli', agent.iconFile),
