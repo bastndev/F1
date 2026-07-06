@@ -43,7 +43,7 @@ export async function installMarketplaceSkill(
 export function cancelInstallMarketplaceSkill(id: string): void {
 	const child = activeInstalls.get(id);
 	if (child) {
-		child.kill();
+		killProcessTree(child);
 		activeInstalls.delete(id);
 	}
 }
@@ -152,7 +152,7 @@ async function runSkillsInstall(skill: InstallMarketplaceSkill, choice: InstallC
 
 				onDownloadStart?.();
 
-				const child = spawn('npx', args, { cwd: workspaceRoot, shell: false, env });
+				const child = spawn('npx', args, { cwd: workspaceRoot, shell: false, env, detached: true, windowsHide: true });
 				activeInstalls.set(skill.id, child);
 				let stderr = '';
 
@@ -162,7 +162,7 @@ async function runSkillsInstall(skill: InstallMarketplaceSkill, choice: InstallC
 				};
 
 				const onAbort = () => {
-					child.kill();
+					killProcessTree(child);
 				};
 
 				signal?.addEventListener('abort', onAbort, { once: true });
@@ -203,6 +203,42 @@ async function runSkillsInstall(skill: InstallMarketplaceSkill, choice: InstallC
 			});
 		},
 	);
+}
+
+function killProcessTree(child: ChildProcess): void {
+	const pid = child.pid;
+	if (!pid) {
+		child.kill();
+		return;
+	}
+
+	if (process.platform === 'win32') {
+		try {
+			spawn('taskkill', ['/T', '/F', '/PID', String(pid)], { windowsHide: true, detached: true });
+		} catch {
+			child.kill();
+		}
+		return;
+	}
+
+	try {
+		process.kill(-pid, 'SIGTERM');
+	} catch {
+		// Ignore: process may have already exited.
+	}
+
+	// If the process tree ignored SIGTERM, force-kill it after a short grace period.
+	setTimeout(() => {
+		try {
+			process.kill(-pid, 'SIGKILL');
+		} catch {
+			try {
+				child.kill('SIGKILL');
+			} catch {
+				// Ignore: process has already exited.
+			}
+		}
+	}, 2000);
 }
 
 function isSafeMarketplaceSkillReference(skill: InstallMarketplaceSkill): boolean {
