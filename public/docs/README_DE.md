@@ -63,8 +63,8 @@ F1 verwandelt VS Code in ein Zentrum für AI-Coding-Agenten. Öffne **Claude Cod
 | Prompt ausführen                          | `⌘ + Enter`         | `Ctrl + Enter`         | `Ctrl + Enter`         | ㅤㅤ✅    |
 | Ohne Übersetzung ausführen               | `⌘ + Shift + Enter` | `Ctrl + Shift + Enter` | `Ctrl + Shift + Enter` | ㅤㅤ✅    |
 | Modell-Auswahl (öffnen/schließen) - [3]  | `Alt + 1`           | `Alt + 1`              | `Alt + 1`              | ㅤㅤ✅    |
-| Sitzung fortsetzen (öffnen/schließen) - [3] | `Alt + 2`        | `Alt + 2`              | `Alt + 2`              | ㅤㅤ✅    |
-| Nutzung / Status - [3]                   | `Alt + 3`           | `Alt + 3`              | `Alt + 3`              | ㅤㅤ✅    |
+| Nutzung / Status - [3]                  | `Alt + 2`           | `Alt + 2`              | `Alt + 2`              | ㅤㅤ✅    |
+| Sitzung fortsetzen (öffnen/schließen) - [3]     | `Alt + 3`           | `Alt + 3`              | `Alt + 3`              | ㅤㅤ✅    |
 | Prompt PRO-Modus                         | `Alt + 4`           | `Alt + 4`              | `Alt + 4`              | ㅤㅤ✅    |
 | Prompt PLAN-Modus | `Alt + 5` | `Alt + 5` | `Alt + 5` | ㅤㅤ✅ |
 | -                                     | -                   | -                      | -                      |           |
@@ -93,12 +93,13 @@ F1 verwandelt VS Code in ein Zentrum für AI-Coding-Agenten. Öffne **Claude Cod
 - Starte mehrere AI-Coding-CLIs nebeneinander in eingebetteten [xterm.js](https://xtermjs.org/)-Terminals.
 - Fuzzy-Suche-Launcher zur Agentenauswahl; drücke **F1**, um direkt zum Panel zu springen.
 - Integrierte Werkzeuge neben jeder Sitzung:
-  - **Prompt** — Rich-Text-Editor mit `@`-Datei-Erwähnungen, Bild-Einfügung, Skill-Chips, Live-Rechtschreibmarkierung, Prompt-Verlauf (`↑`), **PRO / PLAN**-Modi und Quelle→Englisch-Übersetzung vor dem Senden.
+  -   - **Prompt** — Rich-Text-Editor mit `@`-Datei-Erwähnungen, Bild-Einfügung, Skill-Chips, Live-Rechtschreibmarkierung, Prompt-Verlauf (`↑`), **PRO / PLAN**-Modi und Quelle→Englisch-Übersetzung vor dem Senden; jede CLI-Sitzung behält ihren eigenen Entwurf und den offenen/geschlossenen Zustand.
   - **Translator** — Übersetze jede Terminal-Auswahl inline, mit einem automatischen Modus, der die Antwort laut vorliest, während der Rest noch übersetzt wird.
   - **Use** — CLI-spezifische Nutzung-/Status-Ansicht.
   - **Keymaps** — Tastaturkürzel-Referenz.
   - **Commands** — durchsuchbare, CLI-spezifische Palette der Slash-Befehle des aktiven Agenten.
-- **Voice** — Antworten laut vorlesen, plus optionaler „Ding"-Ton, wenn ein Agent fertig ist, während deine Aufmerksamkeit woanders ist.
+- - **Voice** — Antworten laut vorlesen, plus ein "Ding", wenn ein Agent fertig ist, und ein deutliches Bestätigungssignal, wenn eine CLI auf eine Entscheidung wartet (Genehmigung, ja/nein, Auswahl).
+- - **Needs-input badge** — ein pulsierender Punkt neben dem Tab-Namen (ein nur-Symbol-Abzeichen im kompakten Layout) markiert Hintergrundsitzungen, die auf dich warten.
 
 ### 🧩 My Skills
 
