@@ -1,6 +1,6 @@
 # 🏗️ F1 — Architecture
 
-A VS Code extension that turns the editor into a hub for AI coding agents. Ships **3 features**: a **CLI Hub** (9 agents + custom), a **Skills** marketplace, and a **My Memory** project-context engine — wired together by a webview/host split and a single keystroke (`F1`).
+A VS Code extension that turns the editor into a hub for AI coding agents. Ships **3 surface features**: a **CLI Hub** (9 agents + custom), a **Skills** marketplace, and a **My Plus** engine — the latter bundles **My Memory** (project context) and **Smart + Skills** (automatic CLI priming). Everything is wired together by a webview/host split and a single keystroke (`F1`).
 
 ---
 
@@ -10,7 +10,7 @@ A VS Code extension that turns the editor into a hub for AI coding agents. Ships
 F1/
 ├── .vscode/                             # Editor workspace settings
 ├── src/
-│   ├── extension.ts                     # Extension entry — wires the 3 features
+│   ├── extension.ts                     # Extension entry — wires CLI Hub + Skills
 │   │
 │   ├── my-cli/                          # 🖥️ Feature 1 — CLI Hub
 │   │   ├── core/                        # Host-side (Node)
@@ -19,9 +19,24 @@ F1/
 │   │   │   ├── translation/             # Source→EN bridge (calls fixnow)
 │   │   │   ├── spellcheck/              # Per-language dictionary host
 │   │   │   ├── voice/                   # Read-aloud + "ding" finish cue (WAVs)
-│   │   │   ├── attachments/             # @-file mentions, image paste
-│   │   │   └── launcher-html.ts         # Inlines launcher HTML/CSS
+│   │   │   ├── attachments/             # @-file mentions host prep
+│   │   │   ├── launcher-html.ts         # Inlines launcher HTML/CSS
+│   │   │   ├── webview-assets.ts        # CLI webview asset helpers
+│   │   │   ├── webview-html.ts          # Terminal panel HTML assembly
+│   │   │   └── workspace.ts             # Workspace-state helpers
+│   │   ├── shared/                      # DOM- and vscode-free types & helpers
+│   │   │   ├── prompt/                  # Prompt processing, attachments, languages
+│   │   │   ├── rules/                   # Built-in rules content
+│   │   │   ├── translation/             # HTML entities for translator
+│   │   │   ├── voice/                   # WAV assets + voice types
+│   │   │   ├── agents.ts                # The 9 CLI registry
+│   │   │   ├── agent-launch-guard.ts    # Launch validation / policies
+│   │   │   ├── model-detect.ts          # Model-name detection
+│   │   │   ├── protocol.ts              # Host↔webview message contracts
+│   │   │   └── ui-strings.ts            # Shared UI copy
 │   │   ├── webview/                     # Browser-side bundles (xterm.js UI)
+│   │   │   ├── assets/icons-cli/        # Per-agent SVG icons
+│   │   │   ├── styles/                  # Global CSS + skeleton themes
 │   │   │   ├── panel-terminal/          # xterm.js + xterm-addon-fit
 │   │   │   ├── panel-tab/               # Session list + Alt+/Alt− affordances
 │   │   │   ├── launcher/                # Fuzzy-search agent picker
@@ -31,40 +46,59 @@ F1/
 │   │   │       ├── modal-use/           # Per-CLI usage / status view
 │   │   │       ├── modal-keymaps/       # Shortcut reference
 │   │   │       └── modal-commands/      # Slash-command palette (per CLI)
-│   │   └── shared/                      # DOM- and vscode-free types & helpers
-│   │       ├── agents.ts                # The 9 CLI registry
-│   │       └── prompt/languages.ts      # Prompt-picker language table
+│   │   └── my-cli.ts                    # Public façade (only host exports)
 │   │
 │   ├── my-skills/                       # 🧩 Feature 2 — Skills
-│   │   ├── core/main.ts                 # Webview view provider
+│   │   ├── core/                        # Host-side provider + orchestration
+│   │   │   ├── main.ts                  # WebviewViewProvider
+│   │   │   ├── install-skills-controller.ts
+│   │   │   ├── install-state.ts
+│   │   │   ├── messages.ts
+│   │   │   └── skills-webview-html.ts
 │   │   ├── screens/
 │   │   │   ├── install-skill/           # Marketplace install (skills.sh + npx)
 │   │   │   ├── create-skill/            # AGENTS.md / CLAUDE.md / DESIGN.md gens
+│   │   │   │   ├── core/                # Generators + workspace inspection
+│   │   │   │   └── ui/                  # Chat create / chat search / shared shell
 │   │   │   └── local-skill/             # On-disk + saved-skill library
 │   │   ├── view/                        # Browser bundle (dist/webview.js)
-│   │   └── assets/                      # Webview-only CSS/SVG
+│   │   ├── assets/                      # Webview-only images + SVG
+│   │   └── my-skills.ts                 # Public façade (only host exports)
 │   │
-│   ├── my-memory/                       # 🧠 Feature 3 — My Memory
-│   │   ├── my-memory.ts                 # Public façade (enable/disable/rebuild)
-│   │   ├── core/                        # graphify install + sync orchestration
-│   │   ├── tier1-map/                   # File-tree map (.f1/map.json)
-│   │   ├── tier2-graph/                 # Symbol graph (.f1/graph.json)
-│   │   └── hook/                        # Commit-hook spec (built then shelved)
+│   ├── my-plus/                         # ➕ Feature 3 — My Plus (Memory + Smart)
+│   │   ├── my-memory/                   # 🧠 Project-context engine
+│   │   │   ├── core/                    # Config, paths, atomic writes, service
+│   │   │   └── tier1-map/               # File-tree map (.f1/map.json)
+│   │   ├── my-smart/                    # Smart + Skills priming
+│   │   │   ├── core/                    # Smart service + skill helpers
+│   │   │   ├── webview/                 # Smart skeleton overlay
+│   │   │   └── assets/skills/default/   # Built-in default skill asset
+│   │   ├── shared/
+│   │   │   └── instruction-builder.ts   # Shared prompt builder
+│   │   └── plus.ts                      # Public barrel
 │   │
 │   ├── shared/                          # Cross-feature helpers
 │   │   ├── tutorial/                    # In-editor tutorials (HTML+CSS+TS)
 │   │   │   ├── t-cli/                   # CLI Hub walkthrough
 │   │   │   └── t-skill/                 # Skills walkthrough
 │   │   ├── keymaps/                     # Shared keymap utilities
-│   │   └── assets/
+│   │   │   └── lynx-keymap/             # Lynx Keymap install prompt
+│   │   ├── tips/                        # Tip snippets
+│   │   └── assets/                      # Logo + tutorial images
+│   │
 │   └── __test__/                        # Unit tests
+│       ├── my-cli.test.ts
+│       ├── my-memory.test.ts
+│       ├── my-skills.test.ts
+│       ├── my-smart.test.ts
+│       └── smart-rules.test.ts
 │
 ├── l10n/                                # 🌐 Runtime i18n bundles (vscode.l10n)
 │   └── bundle.l10n.{ar,de,es,fr,hi,ja,ko,pt-br,ru,vi,zh-cn}.json
 │
 ├── public/                              # Marketing & docs (excluded from VSIX)
 │   ├── banner.webp
-│   ├── doc/                             # Translated READMEs (11 languages)
+│   ├── docs/                            # Translated READMEs (11 languages)
 │   └── github/                          # Marketplace assets
 │
 ├── dist/                                # esbuild output (gitignored)
@@ -77,9 +111,12 @@ F1/
 ├── bun.lock                             # Bun lockfile (the project compiles with bun)
 ├── AGENTS.md                            # Build commands & shared conventions
 ├── CLAUDE.md                            # Claude-specific workflow notes
+├── NOTES.md                             # Internal notes
 ├── README.md
 ├── CHANGELOG.md
 ├── CONTRIBUTING.md / CODE_OF_CONDUCT.md
+├── vsc-extension-quickstart.md          # VS Code extension quickstart
+├── .prettierignore
 ├── LICENSE                              # MIT
 └── icon.png
 ```
@@ -92,7 +129,7 @@ F1/
 | :- | :------ | :----------- |
 | 1 | **CLI Hub** (`my-cli/`) | Runs every AI agent in an embedded xterm.js terminal. One panel, many sessions. |
 | 2 | **My Skills** (`my-skills/`) | Marketplace + local library for reusable skill files (`AGENTS.md`, `CLAUDE.md`, `DESIGN.md`). |
-| 3 | **My Memory** (`my-memory/`) | Builds a committed `.f1/` project context so every CLI starts with shared knowledge — cheaper tokens, faster onboarding. |
+| 3 | **My Plus** (`my-plus/`) | Project-context engine. `my-memory/` builds `.f1/` maps; `my-smart/` primes CLI launches with cheap context. |
 
 ---
 
@@ -120,23 +157,25 @@ Each agent has its own slash-command fragment in `webview/tools/modal-commands/c
 VS Code extensions have two execution contexts: the **host** (Node, has `vscode` API) and the **webview** (browser sandbox, has `acquireVsCodeApi()`). F1 keeps them sharply separated.
 
 ```text
-                    ┌────────────────────────────────────────┐
-                    │            extension.ts (host)         │
-                    └──┬──────────────┬───────────────────┬──┘
-                       │              │                   │
-              ┌────────▼───────┐ ┌────▼──────┐ ┌──────────▼──────────┐
-              │  my-cli/core   │ │ my-skills │ │     my-memory       │
-              │ (view + PTY)   │ │  /core    │ │ (graphify, .f1/ )   │
-              └────────┬───────┘ └────┬──────┘ └─────────────────────┘
-                       │              │
-                       │              │  postMessage
-                       ▼              ▼
-              ┌────────────────────────────────────┐
-              │   webviews (browser bundles)       │
-              │   xterm.js · tools · launcher      │
-              └────────────────────────────────────┘
+                     ┌────────────────────────────────────────┐
+                     │            extension.ts (host)         │
+                     └──┬──────────────┬───────────────────┬──┘
+                        │              │                   │
+               ┌────────▼───────┐ ┌────▼──────┐ ┌──────────▼──────────┐
+               │  my-cli/core   │ │ my-skills │ │      my-plus        │
+               │ (view + PTY)   │ │  /core    │ │ (memory + smart)    │
+               └────────┬───────┘ └────┬──────┘ └─────────────────────┘
+                        │              │
+                        │              │  postMessage
+                        ▼              ▼
+               ┌────────────────────────────────────┐
+               │   webviews (browser bundles)       │
+               │   xterm.js · tools · launcher      │
+               │   skills · create-skill · tutorials│
+               └────────────────────────────────────┘
 
   src/my-cli/shared/  →  imported by BOTH sides — must stay vscode-free
+  src/my-plus/shared/ →  imported by memory + smart — must stay vscode-free
 ```
 
 > [!IMPORTANT]
@@ -158,7 +197,8 @@ VS Code extensions have two execution contexts: the **host** (Node, has `vscode`
 | `launcher/index.ts` | browser | `dist/…` | Agent picker |
 | `my-skills/view/index.ts` | browser | `dist/webview.js` | Skills panel UI |
 | `create-skill/ui/index.ts` | browser | `dist/create-skill.js` | Create-skill flow |
-| `tutorial/t-cli/support.ts` | browser | `dist/cli-tutorial.js` | Tutorial webview |
+| `tutorial/t-cli/support.ts` | browser | `dist/cli-tutorial.js` | CLI tutorial webview |
+| `tutorial/t-skill/support.ts` | browser | `dist/create-skill-support.js` | Skills tutorial webview |
 | `pty-host.ts` | node (separate process) | `dist/my-cli/core/pty-host.js` | Avoids `node-pty` segfault under Electron |
 
 > [!WARNING]
@@ -183,12 +223,23 @@ The `"l10n": "./l10n"` field in `package.json` tells VS Code where to find the b
 
 ## 🧠 My Memory in 4 Steps
 
-1. User toggles **Memory** on for the workspace (persisted in `workspaceState`).
-2. `my-memory/core` installs the local **graphify** engine (one-time, per machine).
-3. `tier1-map/` writes `.f1/map.json` (file tree) · `tier2-graph/` writes `.f1/graph.json` (symbol graph).
-4. Instruction files (`AGENTS.md` / `CLAUDE.md`) are pointed at `.f1/` so any agent reads it first — saving tokens on every launch.
+1. `MemoryService` is enabled (standalone toggle or forced on by Smart mode).
+2. `tier1-map/` scans the workspace and writes `.f1/map.json` (cheap structural tree).
+3. `sync-instructions.ts` keeps the launching CLI's instruction file pointed at `.f1/`.
+4. The agent starts with project context already loaded — saving tokens on every launch.
 
-Staleness is detected by comparing the workspace's **git tree-SHA** with the one stored in `.f1/`. The brain button colors itself accordingly (blue · stale · red = broken).
+Staleness is detected by comparing the workspace's **git tree-SHA** with the one stored in `.f1/`. The older graphify-based symbol graph and brain-button UI were removed; only the fast Tier-1 map remains.
+
+---
+
+## 🧠 Smart + Skills
+
+`SmartService` reuses `MemoryService` to:
+
+1. Build the `.f1/` project map and write `.f1/smart-rules.md`.
+2. Read the latest `graphify-out/GRAPH_REPORT.md` (when available) for symbol-level context.
+3. Assemble a single priming prompt and type it into the CLI so the agent itself says **"i am ready for work ✅"**.
+4. Clean up generated files after the agent's first reply settles.
 
 ---
 
