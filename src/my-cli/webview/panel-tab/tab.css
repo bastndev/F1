@@ -714,9 +714,10 @@
 	opacity: 0;
 }
 
+/* Old unread dot hidden for now (per request) — DOM element + has-unread class
+   are kept intact; only the visual is suppressed. Restore with display:block. */
 .agent-session-item.has-unread .agent-session-dot {
-	display: block;
-	opacity: 1;
+	display: none;
 }
 
 .agent-session-project,
