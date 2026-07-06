@@ -26,6 +26,7 @@ Following VS Code best practices, F1 uses semantic versioning for all releases.
 ---
 ## [2.1.1] - 2026-07-06
 - **Better**: filter chat
+- **REFACTOR**: .pe 
 
 ---
 ## [2.1.0] - 2026-07-03
