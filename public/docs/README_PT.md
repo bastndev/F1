@@ -63,8 +63,8 @@ O F1 transforma o VS Code em um hub para agentes de programação com IA. Abra *
 | Executar prompt                        | `⌘ + Enter`         | `Ctrl + Enter`         | `Ctrl + Enter`         | ㅤㅤ✅    |
 | Executar sem traduzir                 | `⌘ + Shift + Enter` | `Ctrl + Shift + Enter` | `Ctrl + Shift + Enter` | ㅤㅤ✅    |
 | Seletor de modelo (abrir/fechar) - [3] | `Alt + 1`           | `Alt + 1`              | `Alt + 1`              | ㅤㅤ✅    |
-| Retomar sessão (abrir/fechar) - [3]   | `Alt + 2`           | `Alt + 2`              | `Alt + 2`              | ㅤㅤ✅    |
-| Uso / status - [3]                    | `Alt + 3`           | `Alt + 3`              | `Alt + 3`              | ㅤㅤ✅    |
+| Uso / status - [3]                    | `Alt + 2`           | `Alt + 2`              | `Alt + 2`              | ㅤㅤ✅    |
+| Retomar sessão (abrir/fechar) - [3]   | `Alt + 3`           | `Alt + 3`              | `Alt + 3`              | ㅤㅤ✅    |
 | Modo PRO do prompt                    | `Alt + 4`           | `Alt + 4`              | `Alt + 4`              | ㅤㅤ✅    |
 | Modo PLAN do prompt | `Alt + 5` | `Alt + 5` | `Alt + 5` | ㅤㅤ✅ |
 | -                                     | -                   | -                      | -                      |           |
@@ -93,12 +93,13 @@ O F1 transforma o VS Code em um hub para agentes de programação com IA. Abra *
 - Execute vários CLIs de programação com IA lado a lado em terminais [xterm.js](https://xtermjs.org/) embutidos.
 - Launcher com busca difusa para escolher um agente; pressione **F1** para ir direto ao painel.
 - Ferramentas integradas em cada sessão:
-  - **Prompt** — editor avançado com menções `@`-arquivo, colagem de imagens, chips de skill, marcação ortográfica em tempo real, histórico de prompts (`↑`), modos **PRO / PLAN** e tradução fonte→inglês antes de enviar.
+  -   - **Prompt** — editor avançado com menções `@`-arquivo, colagem de imagens, chips de skill, marcação ortográfica em tempo real, histórico de prompts (`↑`), modos **PRO / PLAN** e tradução fonte→inglês antes de enviar; cada sessão CLI mantém seu próprio rascunho e estado aberto/fechado.
   - **Tradutor** — traduz qualquer seleção do terminal inline, com um modo automático que lê a resposta em voz alta enquanto o resto ainda está sendo traduzido.
   - **Uso** — visualização de uso/status por CLI.
   - **Keymaps** — referência de atalhos de teclado.
   - **Comandos** — paleta pesquisável, por CLI, dos comandos de barra do agente ativo.
-- **Voz** — lê respostas em voz alta, além de um "ding" opcional quando um agente termina enquanto sua atenção está em outro lugar.
+- - **Voz** — lê respostas em voz alta, além de um "ding" quando um agente termina e um sinal de confirmação distinto quando um CLI está aguardando uma decisão (aprovação, sim/não, escolha).
+- - **Needs-input badge** — um ponto pulsante ao lado do nome da aba (um selo apenas de ícone no layout compacto) sinaliza qualquer sessão em segundo plano que está esperando por você.
 
 ### 🧩 My Skills
 

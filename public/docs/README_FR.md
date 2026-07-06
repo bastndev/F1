@@ -63,8 +63,8 @@ F1 transforme VS Code en un centre pour les agents de codage IA. Ouvrez **Claude
 | Exécuter le prompt                     | `⌘ + Enter`         | `Ctrl + Enter`         | `Ctrl + Enter`         | ㅤㅤ✅    |
 | Exécuter sans traduire               | `⌘ + Shift + Enter` | `Ctrl + Shift + Enter` | `Ctrl + Shift + Enter` | ㅤㅤ✅    |
 | Sélecteur de modèle (ouvrir/fermer) - [3] | `Alt + 1`       | `Alt + 1`              | `Alt + 1`              | ㅤㅤ✅    |
-| Reprendre la session (ouvrir/fermer) - [3] | `Alt + 2`      | `Alt + 2`              | `Alt + 2`              | ㅤㅤ✅    |
-| Utilisation / statut - [3]            | `Alt + 3`           | `Alt + 3`              | `Alt + 3`              | ㅤㅤ✅    |
+| Utilisation / état - [3]               | `Alt + 2`           | `Alt + 2`              | `Alt + 2`              | ㅤㅤ✅    |
+| Reprendre la session (ouvrir/fermer) - [3] | `Alt + 3`           | `Alt + 3`              | `Alt + 3`              | ㅤㅤ✅    |
 | Mode PROMPT PRO                       | `Alt + 4`           | `Alt + 4`              | `Alt + 4`              | ㅤㅤ✅    |
 | Mode PROMPT PLAN | `Alt + 5` | `Alt + 5` | `Alt + 5` | ㅤㅤ✅ |
 | -                                     | -                   | -                      | -                      |           |
@@ -93,12 +93,13 @@ F1 transforme VS Code en un centre pour les agents de codage IA. Ouvrez **Claude
 - Exécutez plusieurs CLI de codage AI côte à côte dans des terminaux [xterm.js](https://xtermjs.org/) intégrés.
 - Lanceur de recherche floue pour choisir un agent ; appuyez sur **F1** pour accéder directement au panneau.
 - Outils intégrés disponibles dans chaque session :
-  - **Prompt** — éditeur riche avec mentions de fichiers `@`, collage d'images, puces de compétences, marquage d'orthographe en direct, historique des prompts (`↑`), modes **PRO / PLAN**, et traduction source→anglais avant l'envoi.
+  -   - **Prompt** — éditeur riche avec mentions de fichiers `@`, collage d'images, puces de compétences, marquage d'orthographe en direct, historique des prompts (`↑`), modes **PRO / PLAN**, et traduction source→anglais avant l'envoi ; chaque session CLI conserve son propre brouillon et son état ouvert/fermé.
   - **Traducteur** — traduit n'importe quelle sélection du terminal en ligne, avec un mode automatique qui lit la réponse à voix haute pendant que le reste est encore en cours de traduction.
   - **Utilisation** — vue d'utilisation / statut par CLI.
   - **Keymaps** — référence des raccourcis clavier.
   - **Commands** — palette consultable des slash-commands de l'agent actif, par CLI.
-- **Voix** — lit les réponses à voix haute, avec un « ding » optionnel lorsqu'un agent termine alors que votre attention est ailleurs.
+- - **Voix** — lit les réponses à voix haute, plus un « ding » lorsqu'un agent termine et un signal de confirmation distinct lorsqu'un CLI attend une décision (approbation, oui/non, choix).
+- - **Needs-input badge** — un point pulsant à côté du nom de l'onglet (un badge à icône uniquement dans la disposition compacte) signale toute session en arrière-plan qui vous attend.
 
 ### 🧩 My Skills
 

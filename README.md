@@ -93,12 +93,13 @@ F1 turns VS Code into a hub for AI coding agents. Open **Claude Code, Codex, Cop
 - Run multiple AI coding CLIs side by side in embedded [xterm.js](https://xtermjs.org/) terminals.
 - Fuzzy-search launcher to pick an agent; press **F1** to jump straight to the panel.
 - Built-in tools alongside every session:
-  - **Prompt** — rich editor with `@`-file mentions, image paste, skill chips, live spell‑marking, prompt history (`↑`), **PRO / PLAN** modes, and source→English translation before sending.
+  - **Prompt** — rich editor with `@`-file mentions, image paste, skill chips, live spell‑marking, prompt history (`↑`), **PRO / PLAN** modes, and source→English translation before sending; each CLI session keeps its own draft and open/closed state.
   - **Translator** — translate any terminal selection inline, with an auto mode that reads the answer aloud while the rest is still translating.
   - **Use** — per‑CLI usage / status view.
   - **Keymaps** — keyboard‑shortcut reference.
   - **Commands** — searchable, per-CLI palette of the active agent's slash-commands.
-- **Voice** — read replies aloud, plus an optional "ding" when an agent finishes while your attention is elsewhere.
+- **Voice** — read replies aloud, plus a "ding" when an agent finishes and a distinct confirmation cue when a CLI is waiting on a decision (approval, y/n, choice).
+- **Needs-input badge** — a pulsing dot next to the tab's name (an icon-only badge in the compact layout) flags any background session that's waiting on you.
 
 ### 🧩 My Skills
 

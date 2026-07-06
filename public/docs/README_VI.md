@@ -63,8 +63,8 @@ F1 biến VS Code thành trung tâm cho các agent lập trình AI. Mở **Claud
 | Thực thi prompt                       | `⌘ + Enter`         | `Ctrl + Enter`         | `Ctrl + Enter`         | ㅤㅤ✅    |
 | Thực thi không dịch                   | `⌘ + Shift + Enter` | `Ctrl + Shift + Enter` | `Ctrl + Shift + Enter` | ㅤㅤ✅    |
 | Bộ chọn model (mở/đóng) - [3]        | `Alt + 1`           | `Alt + 1`              | `Alt + 1`              | ㅤㅤ✅    |
-| Tiếp tục phiên (mở/đóng) - [3]       | `Alt + 2`           | `Alt + 2`              | `Alt + 2`              | ㅤㅤ✅    |
-| Sử dụng / trạng thái - [3]            | `Alt + 3`           | `Alt + 3`              | `Alt + 3`              | ㅤㅤ✅    |
+| Sử dụng / trạng thái - [3]            | `Alt + 2`           | `Alt + 2`              | `Alt + 2`              | ㅤㅤ✅    |
+| Tiếp tục phiên (mở/đóng) - [3]       | `Alt + 3`           | `Alt + 3`              | `Alt + 3`              | ㅤㅤ✅    |
 | Chế độ PRO Prompt                     | `Alt + 4`           | `Alt + 4`              | `Alt + 4`              | ㅤㅤ✅    |
 | Chế độ PLAN Prompt | `Alt + 5` | `Alt + 5` | `Alt + 5` | ㅤㅤ✅ |
 | -                                     | -                   | -                      | -                      |           |
@@ -93,12 +93,13 @@ F1 biến VS Code thành trung tâm cho các agent lập trình AI. Mở **Claud
 - Chạy nhiều CLI lập trình AI song song trong các terminal [xterm.js](https://xtermjs.org/) nhúng.
 - Trình khởi chạy tìm kiếm mờ để chọn agent; nhấn **F1** để nhảy thẳng đến bảng điều khiển.
 - Công cụ đi kèm sẵn có trong mỗi phiên:
-  - **Prompt** — trình soạn thảo phong phú với đề cập file `@`, dán hình ảnh, chip skill, đánh dấu chính tả thời gian thực, lịch sử prompt (`↑`), các chế độ **PRO / PLAN**, và dịch nguồn→English trước khi gửi.
+  -   - **Prompt** — trình soạn thảo phong phú với đề cập file `@`, dán hình ảnh, chip skill, đánh dấu chính tả thời gian thực, lịch sử prompt (`↑`), các chế độ **PRO / PLAN**, và dịch nguồn→English trước khi gửi; mỗi phiên CLI giữ bản nháp riêng và trạng thái mở/đóng.
   - **Dịch thuật** — dịch bất kỳ lựa chọn terminal nào trực tiếp, với chế độ tự động đọc to câu trả lời trong khi phần còn lại đang dịch.
   - **Sử dụng** — chế độ xem sử dụng / trạng thái theo từng CLI.
   - **Bảng phím tắt** — tham khảo phím tắt bàn phím.
   - **Lệnh** — bảng lệnh có thể tìm kiếm, theo từng CLI, của các lệnh gạch chéo của agent đang hoạt động.
-- **Giọng nói** — đọc to câu trả lời, cộng thêm âm "ding" tùy chọn khi agent hoàn thành trong khi sự chú ý của bạn đang ở nơi khác.
+- - **Giọng nói** — đọc to câu trả lời, cộng thêm âm "ding" khi agent hoàn thành và một tín hiệu xác nhận riêng biệt khi CLI đang chờ quyết định (phê duyệt, có/không, lựa chọn).
+- - **Needs-input badge** — một dấu chấm nhấp nháy bên cạnh tên tab (huy hiệu chỉ biểu tượng trong bố cục gọn) đánh dấu bất kỳ phiên nền nào đang chờ bạn.
 
 ### 🧩 My Skills
 

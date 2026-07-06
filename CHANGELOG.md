@@ -26,7 +26,9 @@ Following VS Code best practices, F1 uses semantic versioning for all releases.
 ---
 ## [2.1.0] - 2026-07-03
 - **Better**: Chat  , Translator
+- **Better**: Prompt composer now remembers open/closed state and draft per CLI when switching sessions
 - **fix**: 🐞 spelling correction
+- **fix**: 🐞 prompt sometimes sent to the wrong CLI when switching sessions mid-translate
 - **Refactor**:  @modal-prompt & @modal-translator
 - **TEST**: 🧪 
 
