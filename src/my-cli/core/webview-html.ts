@@ -24,6 +24,7 @@ type MyCliWebviewOptions = {
 	workspacePath: string;
 	agentIcons: string;
 	soundUri: string;
+	confirmationSoundUri: string;
 };
 
 type PanelFile = {
@@ -89,7 +90,8 @@ export const getAgentWebviewHtml = (
 		getWebviewAssetUriString(webview, extensionUri, 'styles', 'skeleton', 'start-cli.css')
 	];
 	const scriptUri = getWebviewAssetUriString(webview, extensionUri, 'terminal.js');
-	const soundUri = getWebviewAssetUriString(webview, extensionUri, 'tools', 'modal-prompt', 'assets', 'sound', 'latigo.wav');
+	const soundUri = getWebviewAssetUriString(webview, extensionUri, 'assets', 'sound', 'latigo.wav');
+	const confirmationSoundUri = getWebviewAssetUriString(webview, extensionUri, 'assets', 'sound', 'confirmation.wav');
 	const agentIcons = cliAgents.map((agent) => ({
 		label: agent.label,
 		icon: getWebviewAssetUriString(webview, extensionUri, 'assets', 'icons-cli', agent.iconFile),
@@ -112,7 +114,8 @@ export const getAgentWebviewHtml = (
 		selectedAgent,
 		workspacePath: getWorkspaceDisplayPath(),
 		agentIcons: serializeJsonForHtmlScript(agentIcons),
-		soundUri
+		soundUri,
+		confirmationSoundUri
 	});
 };
 
@@ -148,7 +151,7 @@ function getMyCliWebviewHtml(options: MyCliWebviewOptions) {
 			${options.agentIcons}
 		</script>
 		<script id="cli-sounds" type="application/json" nonce="${options.nonce}">
-			${serializeJsonForHtmlScript({ rules: options.soundUri })}
+			${serializeJsonForHtmlScript({ rules: options.soundUri, confirmation: options.confirmationSoundUri })}
 		</script>
 		<script nonce="${options.nonce}" src="${escapeHtml(options.scriptUri)}"></script>
 	</body>

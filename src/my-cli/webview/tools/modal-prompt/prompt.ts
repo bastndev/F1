@@ -119,18 +119,23 @@ export const markRulesInjectedForSession = (sessionId: string) => {
 	activeRulesController?.setDone();
 };
 
-/** Read the rules sound URI injected by the host into the webview HTML. */
-export const getRulesSoundUri = (): string | undefined => {
+const readCliSoundUri = (key: 'rules' | 'confirmation'): string | undefined => {
 	const el = document.getElementById('cli-sounds');
 	if (!el) {
 		return undefined;
 	}
 	try {
-		return JSON.parse(el.textContent || '{}').rules as string | undefined;
+		return JSON.parse(el.textContent || '{}')[key] as string | undefined;
 	} catch {
 		return undefined;
 	}
 };
+
+/** Read the rules sound URI injected by the host into the webview HTML. */
+export const getRulesSoundUri = (): string | undefined => readCliSoundUri('rules');
+
+/** Read the needs-input confirmation cue URI injected into the webview HTML. */
+export const getConfirmationSoundUri = (): string | undefined => readCliSoundUri('confirmation');
 
 /** Drop drafts + rules-injected marks whose session is gone; the terminal calls
  *  this on every state sync. */
