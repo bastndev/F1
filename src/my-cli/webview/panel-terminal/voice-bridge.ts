@@ -34,6 +34,7 @@ export const createVoiceBridge = (deps: VoiceBridgeDeps) => {
 
 	const stopSpeech = () => {
 		deps.post({ type: 'voice.stop' });
+		notifyState('idle');
 	};
 
 	const pauseSpeech = () => {
