@@ -3,12 +3,12 @@ import { initCategorySelection } from '../../chat-create/category/category';
 import { initNamePrompt } from '../../chat-create/modal/skill-modal';
 import { initSearchMode } from '../../chat-search/search';
 import { initCreateDock } from '../dock/chat-dock';
+import { createCreateLoading } from './create-loading';
+import { createSearchBloom } from './search-bloom';
 import type { CreateSkillChatSubmitDetail, CreateSkillMode, CreateSkillTarget } from '../types';
 type CreateInstructionRootFileName = 'AGENTS.md' | 'CLAUDE.md';
 type CreateRootFilesStatus = Record<string, boolean>;
 type CreateFlowStep = 'description' | 'category' | 'done';
-type SearchBloomDot = { x: number; y: number; normDist: number };
-type SearchBloomDotGrid = { width: number; height: number; dots: SearchBloomDot[] };
 
 declare global {
 	interface Window {
@@ -110,22 +110,11 @@ templateButtons.forEach(btn => {
 const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
 const canTrackPointer = window.matchMedia('(pointer: fine)');
 const createRootFileMinimumLoadingMs = 1200;
-const searchBloomDotSpacing = 12;
-const searchBloomDotRadius = 1;
-const searchBloomDurationMs = 1950;
-const searchBloomBand = 0.28;
 
 let activeMode: CreateSkillMode = 'create';
 let activeCreateTarget: CreateSkillTarget | undefined;
 let createChatState: 'idle' | 'cleaning' | 'open' = 'idle';
 let createChatCleanTimer: number | undefined;
-let bloomRaf: number | undefined;
-let bloomCanvas: HTMLCanvasElement | undefined;
-let bloomPromise: Promise<void> | undefined;
-let resolveBloom: (() => void) | undefined;
-let shouldRepeatSearchBloom = false;
-let isSearchBloomLoopRunning = false;
-let searchBloomDotGrid: SearchBloomDotGrid | undefined;
 let hasCompletedSearch = false;
 let didRequestSearchPrefetch = false;
 let skipNextCreateChatOpen = false;
@@ -135,8 +124,6 @@ let confirmedCreateDescription: string | undefined;
 let confirmedCreateCategory: string | undefined;
 let activeCategoryLabel: string | null = null;
 let currentCreateRootFilesStatus: CreateRootFilesStatus = window.mySkillsCreateRootFiles ?? {};
-let isCreateLoadingActive = false;
-let createLoadingStepTimer: number | undefined;
 
 type CreateSkillTemplate = 'base' | 'fast' | 'ai';
 let activeCreateTemplate: CreateSkillTemplate = 'fast';
@@ -158,7 +145,7 @@ const createDock = initCreateDock({
 	onBack: closeCreateChatScreen,
 	onBeforeSubmit: mode => {
 		if (mode === 'search') {
-			shouldRepeatSearchBloom = false;
+			searchBloom?.stopRepeating();
 		}
 	},
 	onCreateSubmit: handleCreateFlowSubmit,
@@ -166,9 +153,23 @@ const createDock = initCreateDock({
 	onSearchInput: () => {
 		hasCompletedSearch = false;
 		requestCreateSearchPrefetch();
-		requestSearchTypingBloom();
+		searchBloom?.requestTypingBloom();
 	},
 	onToggleMode: toggleCreateSearchMode,
+});
+
+// Search-mode canvas wave — owns its RAF/canvas/visibility pause (search-bloom.ts).
+const searchBloom = createSurface
+	? createSearchBloom({
+		surface: createSurface,
+		hasInputValue: () => createDock.hasSearchInputValue(),
+	})
+	: undefined;
+
+// Create-flow loading checklist — owns the step timers + screen DOM (create-loading.ts).
+const createLoading = createCreateLoading({
+	setInputDisabled: disabled => createDock.setInputDisabled(disabled),
+	onComplete: () => completeCreateFlow(),
 });
 
 interface CreateRootFileCreateDetail {
@@ -184,33 +185,6 @@ interface CreateRootFileStatusDetail {
 interface CreateSkillResultDetail {
 	success: boolean;
 	message?: string;
-}
-
-/** Returns the [r, g, b] of the search accent. */
-function getSearchAccentRgb(): [number, number, number] {
-	return [46, 160, 67]; // #2ea043
-}
-
-function stopBloom() {
-	if (bloomRaf !== undefined) {
-		cancelAnimationFrame(bloomRaf);
-		bloomRaf = undefined;
-	}
-
-	bloomCanvas?.remove();
-	bloomCanvas = undefined;
-	resolveBloom?.();
-	resolveBloom = undefined;
-	bloomPromise = undefined;
-}
-
-function completeBloom() {
-	bloomCanvas?.remove();
-	bloomCanvas = undefined;
-	bloomRaf = undefined;
-	resolveBloom?.();
-	resolveBloom = undefined;
-	bloomPromise = undefined;
 }
 
 function openCreateChatScreen(target?: CreateSkillTarget, focusChat = false) {
@@ -279,11 +253,7 @@ function closeCreateChatScreen() {
 		window.clearTimeout(createChatCleanTimer);
 		createChatCleanTimer = undefined;
 	}
-	if (createLoadingStepTimer !== undefined) {
-		window.clearTimeout(createLoadingStepTimer);
-		createLoadingStepTimer = undefined;
-	}
-	isCreateLoadingActive = false;
+	createLoading.cancel();
 	createChatState = 'idle';
 	activeCreateTarget = undefined;
 	confirmedCreateSkillName = undefined;
@@ -491,7 +461,7 @@ function isCreateRootFileStatusDetail(value: unknown): value is CreateRootFileSt
 
 function syncMode() {
 	if (activeMode !== 'search') {
-		shouldRepeatSearchBloom = false;
+		searchBloom?.stopRepeating();
 	}
 
 	if (activeMode !== 'create') {
@@ -515,40 +485,6 @@ function syncMode() {
 	});
 }
 
-function hasSearchInputValue(): boolean {
-	return createDock.hasSearchInputValue();
-}
-
-async function playSearchTypingBloomLoop() {
-	if (isSearchBloomLoopRunning) {
-		return;
-	}
-
-	isSearchBloomLoopRunning = true;
-	try {
-		while (shouldRepeatSearchBloom && hasSearchInputValue()) {
-			if (bloomPromise) {
-				await bloomPromise;
-			} else {
-				await playSearchEnterTransition();
-			}
-		}
-	} finally {
-		isSearchBloomLoopRunning = false;
-	}
-}
-
-function requestSearchTypingBloom() {
-	if (!hasSearchInputValue() || prefersReducedMotion.matches) {
-		shouldRepeatSearchBloom = false;
-		return;
-	}
-
-	shouldRepeatSearchBloom = true;
-
-	void playSearchTypingBloomLoop();
-}
-
 function requestCreateSearchPrefetch() {
 	if (didRequestSearchPrefetch) {
 		return;
@@ -556,124 +492,6 @@ function requestCreateSearchPrefetch() {
 
 	didRequestSearchPrefetch = true;
 	window.dispatchEvent(new CustomEvent('createSkill.search.prefetch'));
-}
-
-function playSearchEnterTransition(): Promise<void> {
-	if (!createSurface || prefersReducedMotion.matches) {
-		return Promise.resolve();
-	}
-
-	stopBloom();
-	bloomPromise = new Promise(resolve => {
-		resolveBloom = resolve;
-	});
-
-	// Canvas covers the full surface, sits behind content (z-index 0)
-	const canvas = document.createElement('canvas');
-	canvas.className = 'create-search-bloom-canvas';
-	canvas.style.cssText = [
-		'position:absolute',
-		'inset:0',
-		'width:100%',
-		'height:100%',
-		'pointer-events:none',
-		'z-index:0',
-	].join(';');
-	createSurface.appendChild(canvas);
-	bloomCanvas = canvas;
-
-	const W = createSurface.offsetWidth;
-	const H = createSurface.offsetHeight;
-	canvas.width = W;
-	canvas.height = H;
-
-	const ctx = canvas.getContext('2d');
-	if (!ctx) {
-		stopBloom();
-		return Promise.resolve();
-	}
-
-	const [r, g, b] = getSearchAccentRgb();
-	const dots = getSearchBloomDots(W, H);
-
-	const startTime = performance.now();
-
-	function frame(now: number) {
-		const p = Math.min((now - startTime) / searchBloomDurationMs, 1);
-		ctx!.clearRect(0, 0, W, H);
-
-		// Wave front advances with a sqrt ease (fast start, slows near end)
-		const waveFront = Math.pow(p, 0.5);
-		const waveTrail = Math.max(0, waveFront - searchBloomBand);
-
-		for (const d of dots) {
-			const { normDist } = d;
-
-			// Not yet reached by wave front → invisible
-			if (waveFront < normDist) {
-				continue;
-			}
-
-			let alpha: number;
-
-			if (waveTrail < normDist) {
-				// Inside the active wave band: peak at band center using a sine arch
-				const bandPos = (waveFront - normDist) / searchBloomBand;
-				alpha = Math.sin(bandPos * Math.PI) * 0.82;
-			} else {
-				// Behind the trail: fading echo
-				const trailFade = (waveTrail - normDist) / (waveTrail + 0.001);
-				alpha = 0.18 * (1 - Math.min(trailFade, 1));
-			}
-
-			// Global fade-out as animation progresses
-			alpha *= (1 - p * 0.62);
-
-			if (alpha < 0.01) {
-				continue;
-			}
-
-			ctx!.beginPath();
-			ctx!.arc(d.x, d.y, searchBloomDotRadius, 0, Math.PI * 2);
-			ctx!.fillStyle = `rgba(${r},${g},${b},${alpha.toFixed(3)})`;
-			ctx!.fill();
-		}
-
-		if (p < 1) {
-			bloomRaf = requestAnimationFrame(frame);
-		} else {
-			completeBloom();
-		}
-	}
-
-	bloomRaf = requestAnimationFrame(frame);
-	return bloomPromise;
-}
-
-function getSearchBloomDots(width: number, height: number): SearchBloomDot[] {
-	if (searchBloomDotGrid?.width === width && searchBloomDotGrid.height === height) {
-		return searchBloomDotGrid.dots;
-	}
-
-	const originX = width / 2;
-	const originY = height + 12;
-	const maxDist = Math.hypot(width, height + 12);
-	const offX = (width % searchBloomDotSpacing) / 2;
-	const offY = (height % searchBloomDotSpacing) / 2;
-	const dots: SearchBloomDot[] = [];
-
-	for (let x = offX; x < width; x += searchBloomDotSpacing) {
-		for (let y = offY; y < height; y += searchBloomDotSpacing) {
-			dots.push({
-				x,
-				y,
-				normDist: Math.hypot(x - originX, y - originY) / maxDist,
-			});
-		}
-	}
-
-	searchBloomDotGrid = { width, height, dots };
-	return dots;
 }
 
 if (createSurface && canTrackPointer.matches && !prefersReducedMotion.matches) {
@@ -714,23 +532,6 @@ if (createSurface && canTrackPointer.matches && !prefersReducedMotion.matches) {
 if (createSurface && !prefersReducedMotion.matches) {
 	createSurface.classList.add('is-welcome');
 	window.setTimeout(() => createSurface.classList.remove('is-welcome'), 1400);
-}
-
-let isSurfaceVisible = true;
-if (createSurface) {
-	const observer = new IntersectionObserver((entries) => {
-		for (const entry of entries) {
-			isSurfaceVisible = entry.isIntersecting;
-			if (!isSurfaceVisible) {
-				if (bloomRaf !== undefined) {
-					stopBloom();
-				}
-			} else if (shouldRepeatSearchBloom && hasSearchInputValue()) {
-				requestSearchTypingBloom();
-			}
-		}
-	});
-	observer.observe(createSurface);
 }
 
 createRootFileButtons.forEach(button => {
@@ -841,7 +642,7 @@ window.addEventListener('createSkill.skillName.confirm', event => {
 		syncConfirmedCreateName();
 		syncCreateFlowStatus();
 		syncMode();
-		beginCreateHostWait();
+		createLoading.beginHostWait();
 		pendingCreateTemplate = 'base';
 		window.dispatchEvent(new CustomEvent('createSkill.chat.create', {
 			detail: {
@@ -900,7 +701,7 @@ function toggleCreateSearchMode() {
 	syncMode();
 
 	if (shouldPlaySearchEnter) {
-		void playSearchEnterTransition();
+		void searchBloom?.playEnterTransition();
 		createDock.focusInput();
 	}
 
@@ -989,138 +790,20 @@ window.addEventListener('createSkill.search.state', event => {
 	}
 });
 
-function getCreateLoadingElements(): { loadingScreen: HTMLElement; steps: HTMLElement[] } | undefined {
-	const loadingScreen = document.querySelector('[data-create-loading-screen]') as HTMLElement | null;
-	if (!loadingScreen) {
-		return undefined;
-	}
-
-	return {
-		loadingScreen,
-		steps: Array.from(loadingScreen.querySelectorAll<HTMLElement>('[data-loading-step]')),
-	};
-}
-
-function resetCreateLoadingScreen(): void {
-	const loading = getCreateLoadingElements();
-	if (!loading) {
-		return;
-	}
-
-	loading.loadingScreen.hidden = true;
-	loading.steps.forEach(step => {
-		step.classList.remove('is-active', 'is-done');
-	});
-}
-
-function beginCreateHostWait(): void {
-	createDock.setInputDisabled(true);
-	if (createLoadingStepTimer !== undefined) {
-		window.clearTimeout(createLoadingStepTimer);
-		createLoadingStepTimer = undefined;
-	}
-	isCreateLoadingActive = false;
-
-	const loading = getCreateLoadingElements();
-	if (!loading) {
-		return;
-	}
-
-	loading.loadingScreen.hidden = false;
-	loading.steps.forEach(step => {
-		step.classList.remove('is-active', 'is-done');
-	});
-	loading.steps[0]?.classList.add('is-active');
-}
-
-function finishCreateSuccessAnimation(): void {
-	if (!isCreateLoadingActive) {
-		return;
-	}
-
-	isCreateLoadingActive = false;
-	if (createLoadingStepTimer !== undefined) {
-		window.clearTimeout(createLoadingStepTimer);
-		createLoadingStepTimer = undefined;
-	}
-
-	completeCreateFlow();
-}
-
 function completeCreateFlow(): void {
 	window.dispatchEvent(new CustomEvent('createSkill.flow.complete'));
-	resetCreateLoadingScreen();
+	createLoading.resetScreen();
 	closeCreateChatScreen();
 }
 
 function showCreateError(message: string | undefined): void {
-	if (createLoadingStepTimer !== undefined) {
-		window.clearTimeout(createLoadingStepTimer);
-		createLoadingStepTimer = undefined;
-	}
-	isCreateLoadingActive = false;
-	resetCreateLoadingScreen();
+	createLoading.cancel();
+	createLoading.resetScreen();
 	createDock.setInputDisabled(false);
 	syncCreateFlowStatus();
 	if (createFlowDescription) {
 		createFlowDescription.textContent = message ?? 'Could not create this skill';
 	}
-}
-
-function startCreateSuccessAnimation(): void {
-	const loading = getCreateLoadingElements();
-	if (!loading) {
-		completeCreateFlow();
-		return;
-	}
-
-	if (createLoadingStepTimer !== undefined) {
-		window.clearTimeout(createLoadingStepTimer);
-	}
-
-	isCreateLoadingActive = true;
-	createDock.setInputDisabled(true);
-	const loadingScreen = loading.loadingScreen;
-	const steps = loading.steps;
-	loadingScreen.hidden = false;
-	if (!steps.some(step => step.classList.contains('is-active') || step.classList.contains('is-done'))) {
-		steps[0]?.classList.add('is-active');
-	}
-
-	let stepIndex = getNextCreateLoadingStepIndex(steps);
-
-	function advanceStep() {
-		if (stepIndex > 0) {
-			const prevStep = steps[stepIndex - 1];
-			if (prevStep) {
-				prevStep.classList.remove('is-active');
-				prevStep.classList.add('is-done');
-			}
-		}
-
-		if (stepIndex < steps.length) {
-			const currentStep = steps[stepIndex];
-			if (currentStep) {
-				currentStep.classList.add('is-active');
-			}
-			stepIndex++;
-			createLoadingStepTimer = window.setTimeout(advanceStep, 700);
-		} else {
-			createLoadingStepTimer = window.setTimeout(finishCreateSuccessAnimation, 400);
-		}
-	}
-
-	advanceStep();
-}
-
-function getNextCreateLoadingStepIndex(steps: HTMLElement[]): number {
-	const activeIndex = steps.findIndex(step => step.classList.contains('is-active'));
-	if (activeIndex >= 0) {
-		return activeIndex + 1;
-	}
-
-	const doneCount = steps.filter(step => step.classList.contains('is-done')).length;
-	return Math.min(doneCount, steps.length);
 }
 
 window.addEventListener('createSkill.chat.submit', event => {
@@ -1134,7 +817,7 @@ window.addEventListener('createSkill.chat.submit', event => {
 	}
 
 	if ((pendingCreateTemplate ?? activeCreateTemplate) === 'fast') {
-		beginCreateHostWait();
+		createLoading.beginHostWait();
 	}
 });
 
@@ -1153,7 +836,7 @@ window.addEventListener('createSkillResult', event => {
 
 	if (detail.success) {
 		if (completedTemplate === 'fast') {
-			startCreateSuccessAnimation();
+			createLoading.startSuccessAnimation();
 			return;
 		}
 
