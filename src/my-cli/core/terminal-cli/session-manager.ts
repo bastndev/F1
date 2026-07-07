@@ -372,6 +372,13 @@ export class CliSessionManager implements vscode.Disposable {
 		if (!this.voiceFinishEnabled || session.status !== 'running' || session.closing) {
 			return;
 		}
+		// User is watching this exact session (panel visible + window focused +
+		// active tab) — the prompt is on-screen, e.g. a self-opened /model
+		// picker, so stay silent. Other tab/panel/app still rings, and the
+		// reminder interval retries after focus leaves.
+		if (this.finishSoundSuppressed && session.id === this.activeSessionId) {
+			return;
+		}
 		const now = Date.now();
 		if (now - (session.lastConfirmationRingAt ?? 0) < confirmationRingCooldownMs) {
 			return;
