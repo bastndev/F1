@@ -24,8 +24,10 @@ Following VS Code best practices, F1 uses semantic versioning for all releases.
 <!-- --- -->
 
 ---
-## [2.1.2] - 2026-07-07
+## [2.1.3] - 2026-07-07
 - **Better**: chat .txt
+- **Better**: Audio notification-confirmation
+- **Better**: rules
 
 
 ---
