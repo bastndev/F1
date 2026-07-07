@@ -2,7 +2,8 @@
  * Usage agent registry: resolves an active CLI label to its agent kind /
  * command, and dispatches raw output to the matching per-agent parser.
  * CLIs that aren't one of the four supported here fall through to the
- * unsupported path (see unsupported.ts).
+ * unsupported path: no command is resolved, nothing is injected, and the
+ * modal renders its "Not available yet" card.
  */
 import type { CliUsageSnapshot } from '../../tools';
 import type { ParsedUsage, UsageAgentKind } from '../usage-types';

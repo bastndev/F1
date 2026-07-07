@@ -5,23 +5,21 @@ import { getStoredPromptLang } from '../tools/modal-prompt/language-select';
 import { hasTranslatableContent } from '../tools/modal-translator/terminal-text';
 import { prunePromptDrafts, markRulesInjectedForSession, getRulesSoundUri, getConfirmationSoundUri } from '../tools/modal-prompt/prompt';
 import { createCliCreateMessage } from '../../shared/agent-launch-guard';
-import { getAgentSlug as resolveAgentSlug, getCliAgent } from '../../shared/agents';
+import { getAgentSlug as resolveAgentSlug } from '../../shared/agents';
 import { isLynxPanelNavChord } from '../../../shared/keymaps/lynx-keymap/index';
-import { matchesShortcut } from '../../../shared/keymaps/cli';
-import { getUsageCommandLabel, isUsageAgentBusy, isUsageViewInline } from '../tools/modal-use/agents';
 import { readTerminalScreenText } from './usage-tracker';
 import { isAwaitingUserInput } from './awaiting-input';
 import { createToolsController } from '../tools/tools';
 import { createUsageTracker } from './usage-tracker';
 import { detectModelName } from '../../shared/model-detect';
-import { createRpcChannel } from './host-rpc';
+import { createHostRpcChannels } from './rpc-channels';
+import { createVoiceBridge } from './voice-bridge';
+import { createFooterPickers } from './footer-pickers';
 import { createBootSkeletons } from './boot-skeleton';
 import { createSmartSkeleton, type SmartSkeletonController } from '../../../my-plus/my-smart/webview/smart-skeleton';
 import { createCopyToTranslateWatcher } from './copy-to-translate';
 import { getTerminalFontFamily, getTerminalTheme } from './terminal-theme';
 import { adaptRouteMentionsForKiro } from './kiro-send';
-import type { ImageAttachment, PromptTranslateRequest, PromptTranslateResult, FileMentionEntry, SpellIssue, WorkspaceSkill } from '../../shared/prompt';
-import type { VoiceProgress, VoiceState } from '../../shared/voice/voice-types';
 import type {
 	CliSessionSnapshot,
 	HostToWebviewMessage,
@@ -210,181 +208,19 @@ const usageTracker = createUsageTracker({
 });
 
 // ── Host round-trips ─────────────────────────────────────────────────
-// One RPC channel per request/response message pair; see host-rpc.ts.
-
-// Generous ceiling: long selections fan out into many sequential
-// provider requests on the host (450-byte chunks on MyMemory).
-const promptTranslateRpc = createRpcChannel<[PromptTranslateRequest], PromptTranslateResult>({
-	prefix: 'prompt-translate',
-	timeoutMs: 60000,
-	onTimeout: { rejectMessage: 'Translation timed out.' },
-	send: (id, request) => vscode.postMessage({
-		type: 'prompt.translate',
-		id,
-		text: request.text,
-		from: request.from,
-		to: request.to,
-	})
-});
-
-const translatePrompt = (request: PromptTranslateRequest): Promise<PromptTranslateResult> => {
-	return promptTranslateRpc.request(request);
-};
-
-const promptPrepareRpc = createRpcChannel<[string, ImageAttachment[]], string>({
-	prefix: 'prompt-prepare',
-	timeoutMs: 30000,
-	onTimeout: { rejectMessage: 'Image attachment prepare timed out.' },
-	send: (id, text, attachments) => vscode.postMessage({ type: 'prompt.prepare', id, text, attachments })
-});
-
-const preparePromptWithAttachments = (text: string, attachments: ImageAttachment[]): Promise<string> => {
-	if (!attachments || attachments.length === 0) {
-		// No images — just return original (caller can still send)
-		return Promise.resolve(text);
-	}
-
-	return promptPrepareRpc.request(text, attachments);
-};
-
-const workspaceFilesRpc = createRpcChannel<[], FileMentionEntry[]>({
-	prefix: 'ws-files',
-	timeoutMs: 5000,
-	onTimeout: { resolveWith: [] },
-	send: (id) => vscode.postMessage({ type: 'workspace.listFiles', id })
-});
-
-const workspaceSkillsRpc = createRpcChannel<[], WorkspaceSkill[]>({
-	prefix: 'ws-skills',
-	timeoutMs: 5000,
-	onTimeout: { resolveWith: [] },
-	send: (id) => vscode.postMessage({ type: 'workspace.listSkills', id })
-});
-
-const clipboardReadRpc = createRpcChannel<[], string>({
-	prefix: 'clipboard-read',
-	timeoutMs: 3000,
-	onTimeout: { resolveWith: '' },
-	send: (id) => vscode.postMessage({ type: 'clipboard.read', id })
-});
-
-const spellcheckRpc = createRpcChannel<[string, string, boolean], SpellIssue[]>({
-	prefix: 'spell',
-	timeoutMs: 5000,
-	onTimeout: { resolveWith: [] },
-	send: (id, text, lang, strict) => vscode.postMessage({ type: 'prompt.spellcheck', id, text, lang, strict })
-});
-
-// One-shot rules injection: the host types the rules prompt into the CLI and
-// answers when the agent has read it (or its own hard cap fires). The timeout
-// sits above that host cap so the modal always unblocks; a miss resolves false.
-const injectRulesRpc = createRpcChannel<[string, string, string, boolean], boolean>({
-	prefix: 'inject-rules',
-	timeoutMs: 70000,
-	onTimeout: { resolveWith: false },
-	send: (id, sessionId, text, marker, focusReporting) => vscode.postMessage({ type: 'prompt.injectRules', id, sessionId, text, marker, focusReporting })
-});
+// One RPC channel per request/response message pair. The channel definitions
+// and the translate/prepare wrappers live in rpc-channels.ts (host-rpc.ts has
+// the mechanism); the message handler below resolves each channel.
+const rpc = createHostRpcChannels(message => vscode.postMessage(message));
 
 // Voice playback runs in the extension host (Piper TTS, shared with the ATM
-// extension). The webview fires commands and mirrors broadcast state.
-let voiceStateListener: ((state: VoiceState, message?: string, progress?: VoiceProgress) => void) | undefined;
-
-const speakText = (text: string, options?: { chunks?: string[]; lang?: string }) => {
-	vscode.postMessage({ type: 'voice.speak', text, chunks: options?.chunks, lang: options?.lang });
-};
-
-// Streaming companion to speakText: queue more chunks onto the running voice
-// session (the Translator feeds blocks as they finish translating). `final`
-// marks the last batch so the host can wind the session down.
-const appendSpeech = (chunks: string[], options?: { final?: boolean; lang?: string; reset?: boolean }) => {
-	vscode.postMessage({ type: 'voice.append', chunks, lang: options?.lang, final: options?.final, reset: options?.reset });
-};
-
-// Ask the host whether the voice for a language is already downloaded, so the
-// Listen button can show a "download" affordance before the first click.
-const voiceReadyRpc = createRpcChannel<[string], boolean>({
-	prefix: 'voice-ready',
-	timeoutMs: 5000,
-	// On no answer assume ready — don't show a download prompt we're unsure about.
-	onTimeout: { resolveWith: true },
-	send: (id, lang) => vscode.postMessage({ type: 'voice.checkReady', id, lang })
+// extension). The command senders + the header "now playing" pill live in
+// voice-bridge.ts; broadcast voice.state is fed in via voice.notifyState below.
+const voice = createVoiceBridge({
+	post: message => vscode.postMessage(message),
+	// Read lazily on each apply — the tools controller is created further down.
+	getOpenTool: () => toolsController?.getOpenTool() ?? null
 });
-
-const stopSpeech = () => {
-	vscode.postMessage({ type: 'voice.stop' });
-};
-
-const pauseSpeech = () => {
-	vscode.postMessage({ type: 'voice.pause' });
-};
-
-const resumeSpeech = () => {
-	vscode.postMessage({ type: 'voice.resume' });
-};
-
-const queryVoiceState = () => {
-	vscode.postMessage({ type: 'voice.query' });
-};
-
-const onVoiceState = (listener: (state: VoiceState, message?: string, progress?: VoiceProgress) => void) => {
-	voiceStateListener = listener;
-	return () => {
-		if (voiceStateListener === listener) {
-			voiceStateListener = undefined;
-		}
-	};
-};
-
-// "Now playing" voice control mirrored into the always-visible CLI header bar, so
-// a read-aloud can be paused/stopped without an open modal. Fed straight from the
-// broadcast voice.state (see the message handler) — independent of the modal pills,
-// which register through onVoiceState above. Same visual/logic as the prompt pill.
-const headerVoice = (() => {
-	const pill = document.getElementById('cli-voice-pill');
-	const toggleBtn = document.getElementById('cli-voice-toggle') as HTMLButtonElement | null;
-	const stopBtn = document.getElementById('cli-voice-stop') as HTMLButtonElement | null;
-	if (!pill || !toggleBtn || !stopBtn) {
-		return undefined;
-	}
-
-	let state: VoiceState = 'idle';
-	const apply = (next?: VoiceState) => {
-		if (next) {state = next;}
-		const openTool = toolsController?.getOpenTool();
-		// Show the pill when voice is active but voice modals (translator/prompt) are closed
-		const active = state !== 'idle' && openTool !== 'translate' && openTool !== 'prompt';
-		pill.hidden = !active;
-		pill.setAttribute('aria-hidden', active ? 'false' : 'true');
-		pill.classList.toggle('is-speaking', state === 'speaking');
-		pill.classList.toggle('is-paused', state === 'paused');
-		pill.classList.toggle('is-preparing', state === 'preparing');
-		toggleBtn.disabled = state === 'preparing';
-		const label = state === 'preparing' ? 'Preparing voice…' : state === 'paused' ? 'Resume voice' : 'Pause voice';
-		toggleBtn.title = label;
-		toggleBtn.setAttribute('aria-label', label);
-	};
-
-	toggleBtn.addEventListener('click', () => {
-		if (state === 'speaking') {
-			pauseSpeech();
-		} else if (state === 'paused') {
-			resumeSpeech();
-		}
-	});
-	stopBtn.addEventListener('click', () => {
-		if (state === 'speaking' || state === 'paused') {
-			stopSpeech();
-		}
-	});
-
-	return { apply };
-})();
-
-// Sync now in case a read is already playing when this webview (re)builds — there's
-// no retainContextWhenHidden, so a panel switch remounts us mid-read.
-if (headerVoice) {
-	queryVoiceState();
-}
 
 const openPromptFromTerminal = (sessionId: string) => {
 	if (!isPromptFilterEnabled || !toolsController) {
@@ -430,7 +266,7 @@ const sendToSession = (sessionId: string, text: string, options?: { paste?: bool
 		return;
 	}
 	if (options?.submit) {
-		trackPickerCommand(sessionId, session.label, text);
+		footerPickers.trackPickerCommand(sessionId, session.label, text);
 	}
 	const view = terminals.get(sessionId);
 	const agentSlug = getAgentSlug(session.label);
@@ -530,30 +366,30 @@ const toolsController = layoutRight
 			dismissUsageView: usageTracker.dismiss,
 			sendToActiveSession,
 			sendToSession,
-			isCliBusy: () => isActiveCliBusy(),
-			translatePrompt,
-			preparePromptWithAttachments,
-			requestWorkspaceFiles: () => workspaceFilesRpc.request(),
-			requestWorkspaceSkills: () => workspaceSkillsRpc.request(),
+			isCliBusy: () => footerPickers.isActiveCliBusy(),
+			translatePrompt: rpc.translatePrompt,
+			preparePromptWithAttachments: rpc.preparePromptWithAttachments,
+			requestWorkspaceFiles: () => rpc.workspaceFiles.request(),
+			requestWorkspaceSkills: () => rpc.workspaceSkills.request(),
 			openCreateSkill: () => vscode.postMessage({ type: 'mySkills.openCreate' }),
-			requestSpellcheck: (text: string, lang: string, strict: boolean) => spellcheckRpc.request(text, lang, strict),
+			requestSpellcheck: (text: string, lang: string, strict: boolean) => rpc.spellcheck.request(text, lang, strict),
 			injectRules: (text: string, marker: string) =>
 				activeSessionId
 					// Pass the live DECSET 1004 state so the host knows to prefix a
 					// focus-in on submit (the modal steals focus → copilot drops \r).
-					? injectRulesRpc.request(activeSessionId, text, marker, terminals.get(activeSessionId)?.terminal.modes.sendFocusMode ?? false)
+					? rpc.injectRules.request(activeSessionId, text, marker, terminals.get(activeSessionId)?.terminal.modes.sendFocusMode ?? false)
 					: Promise.resolve(false),
 			// A sent composer must not count as "left open" — else returning to a
 			// session whose send fired mid-switch reopens an empty composer.
 			onPromptSent: (sessionId: string) => { promptOpenSessions.delete(sessionId); },
-			speakText,
-			appendSpeech,
-			checkVoiceReady: (lang: string) => voiceReadyRpc.request(lang),
-			pauseSpeech,
-			resumeSpeech,
-			stopSpeech,
-			queryVoiceState,
-			onVoiceState,
+			speakText: voice.speakText,
+			appendSpeech: voice.appendSpeech,
+			checkVoiceReady: (lang: string) => rpc.voiceReady.request(lang),
+			pauseSpeech: voice.pauseSpeech,
+			resumeSpeech: voice.resumeSpeech,
+			stopSpeech: voice.stopSpeech,
+			queryVoiceState: voice.queryVoiceState,
+			onVoiceState: voice.onVoiceState,
 			getTerminalSelection: () => {
 				const view = activeSessionId ? terminals.get(activeSessionId) : undefined;
 				const selection = view?.terminal.hasSelection() ? view.terminal.getSelection() : '';
@@ -576,7 +412,7 @@ const toolsController = layoutRight
 				activePane?.focus();
 			},
 			onToolChange: () => {
-				headerVoice?.apply();
+				voice.applyHeader();
 			},
 			refocusCli: () => {
 				// Ask the extension host to focus the CLI Hub view and then refocus
@@ -589,7 +425,7 @@ const toolsController = layoutRight
 
 const copyToTranslate = createCopyToTranslateWatcher({
 	pollIntervalMs: clipboardPollIntervalMs,
-	readClipboard: () => clipboardReadRpc.request(),
+	readClipboard: () => rpc.clipboardRead.request(),
 	isEnabled: () => isPromptFilterEnabled && !!toolsController,
 	getActiveSessionId: () => activeSessionId,
 	isActiveSessionRunning: () => {
@@ -629,134 +465,23 @@ const tabController = createTabController({
 });
 
 // ── Footer chip shortcuts, terminal-wide ────────────────────────────
-// Alt+1/2/3 (model / resume / usage) work directly on the focused CLI, not
-// just inside the prompt modal — same injection the modal footer chips use.
-// Skipped while any tool modal is open: the prompt modal binds its own
-// copies to click the visible chips, and the other modals own their keys.
-// The same chord pressed again closes the picker it opened (Esc), and a
-// different chord swaps pickers. We can't *see* the TUI picker, so this is
-// tracked state: set on injection, cleared by Esc/Enter in the terminal,
-// any other submitted send, and session close.
-
-type FooterShortcutKind = 'model' | 'resume' | 'usage';
-
-const openFooterPickers = new Map<string, FooterShortcutKind>();
-const pickerSwapDelayMs = 200;
-
-const resolveFooterCommand = (label: string, kind: FooterShortcutKind): string | undefined => {
-	const agent = getCliAgent(label);
-	if (kind === 'model') {
-		return agent?.modelCommand;
-	}
-	if (kind === 'resume') {
-		return agent?.resumeCommand;
-	}
-	// Usage differs per CLI (/usage vs /status) and some CLIs have none.
-	const usageCommand = getUsageCommandLabel(label);
-	return usageCommand === 'not configured' ? undefined : usageCommand;
-};
-
-// Runs on every submitted send (chords, modal chips, even a hand-typed
-// "/model" from the prompt modal): a send matching a picker command marks
-// that picker open; anything else clears the entry — after a real prompt
-// lands, no picker can still be up.
-const trackPickerCommand = (sessionId: string, label: string, text: string) => {
-	const stripped = text.startsWith('\x15') ? text.slice(1) : text;
-	let kind: FooterShortcutKind | undefined;
-	if (stripped === resolveFooterCommand(label, 'model')) {
-		kind = 'model';
-	} else if (stripped === resolveFooterCommand(label, 'resume')) {
-		kind = 'resume';
-	} else if (stripped === resolveFooterCommand(label, 'usage')) {
-		// Inline usage views (Codex /status prints into the transcript) have no
-		// overlay to close, so they are never tracked as open.
-		kind = isUsageViewInline(label) ? undefined : 'usage';
-	}
-	if (kind) {
-		openFooterPickers.set(sessionId, kind);
-	} else {
-		openFooterPickers.delete(sessionId);
-	}
-};
-
-const postEscapeToSession = (sessionId: string) => {
-	const view = terminals.get(sessionId);
-	const data = view?.terminal.modes.sendFocusMode ? '\x1b[I\x1b' : '\x1b';
-	vscode.postMessage({ type: 'cli.input', sessionId, data });
-};
-
-const injectFooterCommand = (kind: FooterShortcutKind) => {
-	const session = activeSessionId ? sessions.get(activeSessionId) : undefined;
-	if (session?.status !== 'running') {
-		return;
-	}
-	const command = resolveFooterCommand(session.label, kind);
-	if (!command) {
-		return;
-	}
-	if (getAgentSlug(session.label) === 'cursor') {
-		// Cursor's TUI drops raw chunked input: bracketed paste, no Ctrl+U.
-		sendToActiveSession(command, { paste: true, submit: true });
-	} else {
-		// \x15 is Ctrl+U: wipe the current input line so partially typed text
-		// is not concatenated with the command.
-		sendToActiveSession(`\x15${command}`, { submit: true });
-	}
-};
-
-// Whether the active CLI is mid-task and would corrupt its input if a command
-// were injected right now (idle-only CLIs: Kiro/Antigravity/Codex). Same
-// guard modal-use applies before injecting /usage.
-const isActiveCliBusy = (): boolean => {
-	const session = activeSessionId ? sessions.get(activeSessionId) : undefined;
-	if (!session) {
-		return false;
-	}
-	return isUsageAgentBusy(session.label, readTerminalScreenText(terminals.get(session.id)));
-};
-
-const handleFooterShortcutKey = (event: KeyboardEvent): boolean => {
-	if (event.type !== 'keydown' || event.repeat) {
-		return false;
-	}
-	if (toolsController?.isOpen()) {
-		return false;
-	}
-	const kind = matchesShortcut(event, 'promptFooterModel') ? 'model'
-		: matchesShortcut(event, 'promptFooterResume') ? 'resume'
-		: matchesShortcut(event, 'promptFooterUsage') ? 'usage'
-		: undefined;
-	if (!kind) {
-		return false;
-	}
-	const session = activeSessionId ? sessions.get(activeSessionId) : undefined;
-	if (session?.status !== 'running' || !resolveFooterCommand(session.label, kind)) {
-		return false;
-	}
-	event.preventDefault();
-	event.stopPropagation();
-
-	const openKind = openFooterPickers.get(session.id);
-	if (openKind) {
-		// A picker we opened is still up: same chord closes it, a different
-		// chord closes it and opens the requested one once the Esc has landed.
-		postEscapeToSession(session.id);
-		openFooterPickers.delete(session.id);
-		if (openKind !== kind) {
-			window.setTimeout(() => injectFooterCommand(kind), pickerSwapDelayMs);
-		}
-	} else if (!isActiveCliBusy()) {
-		injectFooterCommand(kind);
-	}
-	// The CLI's picker needs terminal focus for arrow-key navigation.
-	terminals.get(session.id)?.terminal.focus();
-	return true;
-};
+// Alt+1/2/3 (model / resume / usage) chords + the tracked TUI-picker state
+// live in footer-pickers.ts; wired here to live session/terminal state. Also
+// consulted by sendToSession (trackPickerCommand), handleTerminalKey
+// (noteTerminalKey) and the tools controller (isCliBusy).
+const footerPickers = createFooterPickers({
+	post: message => vscode.postMessage(message),
+	getActiveSessionId: () => activeSessionId,
+	getSession: sessionId => sessions.get(sessionId),
+	getView: sessionId => terminals.get(sessionId),
+	isToolModalOpen: () => toolsController?.isOpen() ?? false,
+	sendToActiveSession
+});
 
 // Catch the chords when focus sits elsewhere in the panel (tabs, buttons);
 // the xterm path below handles them while the terminal itself is focused.
 document.addEventListener('keydown', (event) => {
-	handleFooterShortcutKey(event);
+	footerPickers.handleShortcutKey(event);
 });
 
 const isOpenCodeSession = (sessionId: string): boolean => {
@@ -772,11 +497,9 @@ const isCtrlZ = (event: KeyboardEvent): boolean =>
 	&& event.key.toLowerCase() === 'z';
 
 const handleTerminalKey = (event: KeyboardEvent, sessionId: string) => {
-	// Esc dismisses a TUI picker, Enter selects from it — either way the
-	// picker a footer chord opened is gone now. Observe only, never consume.
-	if (event.type === 'keydown' && (event.key === 'Escape' || event.key === 'Enter')) {
-		openFooterPickers.delete(sessionId);
-	}
+	// Terminal Esc/Enter closes any tracked TUI picker (observe only — the
+	// tracked-picker state machine lives in footer-pickers.ts).
+	footerPickers.noteTerminalKey(event, sessionId);
 
 	if (isOpenCodeSession(sessionId) && isCtrlZ(event)) {
 		event.preventDefault();
@@ -784,7 +507,7 @@ const handleTerminalKey = (event: KeyboardEvent, sessionId: string) => {
 		return false;
 	}
 
-	if (handleFooterShortcutKey(event)) {
+	if (footerPickers.handleShortcutKey(event)) {
 		return false;
 	}
 
@@ -829,7 +552,6 @@ const bootSkeletons = createBootSkeletons({
 // Smart + Skills launch overlay. Shown once for the initial Smart session while
 // it boots; revealed on its first output, which also tells the host to clean up.
 let smartOverlay: SmartSkeletonController | undefined;
-let smartDone = false;
 
 const createTerminalView = (session: CliSession) => {
 	const existingView = terminals.get(session.id);
@@ -972,10 +694,6 @@ const createTerminalView = (session: CliSession) => {
 	// never replays on return. Gate on running so an instant exit/error doesn't flash it.
 	if (session.awaitingFirstOutput && session.status === 'running') {
 		if (session.smart) {
-			// Reset the one-shot latch for each new Smart session so a panel-created
-			// Smart CLI also gets the skeleton (the launcher only fires once, but the
-			// in-panel "+" path can start further Smart sessions afterwards).
-			smartDone = false;
 			smartOverlay?.dismiss();
 			smartOverlay = createSmartSkeleton(document.body, {
 				onCancel: () => vscode.postMessage({ type: 'smart.cancel', sessionId: session.id })
@@ -1185,11 +903,7 @@ const syncState = (message: Extract<ServerMessage, { type: 'cli.state' }>) => {
 		}
 	}
 	prunePromptDrafts(openSessionIds);
-	for (const sessionId of [...openFooterPickers.keys()]) {
-		if (!openSessionIds.has(sessionId)) {
-			openFooterPickers.delete(sessionId);
-		}
-	}
+	footerPickers.pruneClosedSessions(openSessionIds);
 	for (const sessionId of [...promptOpenSessions]) {
 		if (!openSessionIds.has(sessionId)) {
 			promptOpenSessions.delete(sessionId);
@@ -1266,7 +980,7 @@ window.addEventListener('message', (event: MessageEvent<ServerMessage>) => {
 	}
 
 	if (message.type === 'prompt.translated') {
-		promptTranslateRpc.resolve(message.id, {
+		rpc.promptTranslate.resolve(message.id, {
 			text: message.text,
 			provider: message.provider,
 			fromCache: message.fromCache,
@@ -1275,43 +989,42 @@ window.addEventListener('message', (event: MessageEvent<ServerMessage>) => {
 	}
 
 	if (message.type === 'voice.state') {
-		voiceStateListener?.(message.state, message.message, message.progress);
-		headerVoice?.apply(message.state);
+		voice.notifyState(message.state, message.message, message.progress);
 		return;
 	}
 
 	if (message.type === 'voice.ready') {
-		voiceReadyRpc.resolve(message.id, message.ready);
+		rpc.voiceReady.resolve(message.id, message.ready);
 		return;
 	}
 
 	if (message.type === 'clipboard.text') {
-		clipboardReadRpc.resolve(message.id, message.text);
+		rpc.clipboardRead.resolve(message.id, message.text);
 		return;
 	}
 
 	if (message.type === 'prompt.translationError') {
-		promptTranslateRpc.reject(message.id, new Error(message.message));
+		rpc.promptTranslate.reject(message.id, new Error(message.message));
 		return;
 	}
 
 	if (message.type === 'prompt.prepared') {
-		promptPrepareRpc.resolve(message.id, message.text);
+		rpc.promptPrepare.resolve(message.id, message.text);
 		return;
 	}
 
 	if (message.type === 'prompt.prepareError') {
-		promptPrepareRpc.reject(message.id, new Error(message.message));
+		rpc.promptPrepare.reject(message.id, new Error(message.message));
 		return;
 	}
 
 	if (message.type === 'prompt.spellResult') {
-		spellcheckRpc.resolve(message.id, message.issues);
+		rpc.spellcheck.resolve(message.id, message.issues);
 		return;
 	}
 
 	if (message.type === 'prompt.rulesInjected') {
-		injectRulesRpc.resolve(message.id, message.ok);
+		rpc.injectRules.resolve(message.id, message.ok);
 		return;
 	}
 
@@ -1339,12 +1052,12 @@ window.addEventListener('message', (event: MessageEvent<ServerMessage>) => {
 	}
 
 	if (message.type === 'workspace.files') {
-		workspaceFilesRpc.resolve(message.id, message.files);
+		rpc.workspaceFiles.resolve(message.id, message.files);
 		return;
 	}
 
 	if (message.type === 'workspace.skills') {
-		workspaceSkillsRpc.resolve(message.id, message.skills);
+		rpc.workspaceSkills.resolve(message.id, message.skills);
 		return;
 	}
 
@@ -1354,7 +1067,6 @@ window.addEventListener('message', (event: MessageEvent<ServerMessage>) => {
 	}
 
 	if (message.type === 'smart.dismiss') {
-		smartDone = true;
 		smartOverlay?.dismiss();
 		smartOverlay = undefined;
 		return;
