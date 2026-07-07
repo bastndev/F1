@@ -61,6 +61,25 @@ const getPlayerCommand = (wavPath: string): { command: string; args: string[] } 
 	}
 };
 
+/** Fire-and-forget WAV playback via the platform player; all failures are
+ *  swallowed. Shared by the finish cue and the confirmation cue. */
+export function playWavFile(wavPath: string): void {
+	const player = getPlayerCommand(wavPath);
+	if (!player) {
+		return;
+	}
+
+	try {
+		const proc = spawn(player.command, player.args, { stdio: 'ignore', windowsHide: true });
+		proc.on('error', () => {
+			/* no audio tooling on this box — silently skip */
+		});
+		proc.unref();
+	} catch {
+		/* spawn unavailable — ignore */
+	}
+}
+
 /**
  * Play the finish cue for `lang`. Best-effort and non-blocking: unknown
  * languages fall back to English, a missing file or absent player is ignored.
@@ -76,19 +95,6 @@ export function playFinishSound(lang: string): void {
 		return;
 	}
 
-	const player = getPlayerCommand(wavPath);
-	if (!player) {
-		return;
-	}
-
 	lastPlayedAt = now;
-	try {
-		const proc = spawn(player.command, player.args, { stdio: 'ignore', windowsHide: true });
-		proc.on('error', () => {
-			/* no audio tooling on this box — silently skip */
-		});
-		proc.unref();
-	} catch {
-		/* spawn unavailable — ignore */
-	}
+	playWavFile(wavPath);
 }

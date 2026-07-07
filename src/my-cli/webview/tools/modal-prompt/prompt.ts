@@ -120,7 +120,7 @@ export const markRulesInjectedForSession = (sessionId: string) => {
 	activeRulesController?.setDone();
 };
 
-const readCliSoundUri = (key: 'rules' | 'confirmation'): string | undefined => {
+const readCliSoundUri = (key: 'rules'): string | undefined => {
 	const el = document.getElementById('cli-sounds');
 	if (!el) {
 		return undefined;
@@ -132,11 +132,9 @@ const readCliSoundUri = (key: 'rules' | 'confirmation'): string | undefined => {
 	}
 };
 
-/** Read the rules sound URI injected by the host into the webview HTML. */
+/** Read the rules sound URI injected by the host into the webview HTML.
+ *  (The confirmation cue moved host-side: core/voice/confirmation-sound.ts.) */
 export const getRulesSoundUri = (): string | undefined => readCliSoundUri('rules');
-
-/** Read the needs-input confirmation cue URI injected into the webview HTML. */
-export const getConfirmationSoundUri = (): string | undefined => readCliSoundUri('confirmation');
 
 /** Drop drafts + rules-injected marks whose session is gone; the terminal calls
  *  this on every state sync. */

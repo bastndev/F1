@@ -86,7 +86,7 @@ const agentMenuMarkers: Record<string, MenuMarkerPair> = {
 
 // OSC, CSI, and bare escape sequences — terminal buffers are full of them and
 // they can split a model id ("gpt-\x1b[1m5.1") or hide one inside a title.
-const stripAnsi = (value: string): string =>
+export const stripAnsi = (value: string): string =>
 	value
 		.replace(/\x1b\][^\x07\x1b]*(?:\x07|\x1b\\)?/g, '')
 		.replace(/\x1b\[[0-9;?]*[ -/]*[@-~]/g, '')

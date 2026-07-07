@@ -65,7 +65,8 @@ export type WebviewToHostMessage =
 	| { type: 'cli.close'; sessionId: string }
 	| { type: 'smart.cancel'; sessionId: string }
 	| { type: 'cli.voiceFinish'; enabled: boolean; lang: string }
-	| { type: 'cli.awaitingInput'; sessionId: string; awaiting: boolean }
+	// silent: state sync only (scrollback rescan) — host must not ring the cue.
+	| { type: 'cli.awaitingInput'; sessionId: string; awaiting: boolean; silent?: boolean }
 	| { type: 'prompt.translate'; id: string; text: string; from: string; to: string }
 	| { type: 'prompt.prepare'; id: string; text: string; attachments: ImageAttachment[] }
 	| { type: 'prompt.spellcheck'; id: string; text: string; lang: string; strict: boolean }
@@ -141,6 +142,7 @@ export type InboundWebviewMessage = {
 	overwrite?: boolean;
 	enabled?: boolean;
 	awaiting?: boolean;
+	silent?: boolean;
 	restore?: boolean;
 	extensionId?: string;
 };

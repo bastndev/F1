@@ -3,12 +3,12 @@ import { Terminal } from '@xterm/xterm';
 import { createTabController, readVoiceFinishPreference, type CliAgentIcon } from '../panel-tab/tab';
 import { getStoredPromptLang } from '../tools/modal-prompt/language-select';
 import { hasTranslatableContent } from '../tools/modal-translator/terminal-text';
-import { prunePromptDrafts, markRulesInjectedForSession, getRulesSoundUri, getConfirmationSoundUri } from '../tools/modal-prompt/prompt';
+import { prunePromptDrafts, markRulesInjectedForSession, getRulesSoundUri } from '../tools/modal-prompt/prompt';
 import { createCliCreateMessage } from '../../shared/agent-launch-guard';
 import { getAgentSlug as resolveAgentSlug } from '../../shared/agents';
 import { isLynxPanelNavChord } from '../../../shared/keymaps/lynx-keymap/index';
 import { readTerminalScreenText } from './usage-tracker';
-import { isAwaitingUserInput } from './awaiting-input';
+import { isAwaitingUserInput } from '../../shared/awaiting-input';
 import { createToolsController } from '../tools/tools';
 import { createUsageTracker } from './usage-tracker';
 import { detectModelName } from '../../shared/model-detect';
@@ -804,35 +804,11 @@ const renderTabs = () => {
 	tabController.render(summaries, activeSessionId);
 };
 
-// Confirmation cue: ring once when a session's screen first shows a pending
-// prompt. Gated by the Voice Finish toggle (the shared master switch for CLI
-// audio) and a short per-session cooldown, so a TUI redraw that momentarily
-// drops and repaints the prompt can't double-ring.
-const confirmationSoundCooldownMs = 2000;
-const lastConfirmationSoundAt = new Map<string, number>();
-
-const playConfirmationSound = (sessionId: string) => {
-	if (!readVoiceFinishPreference()) {
-		return;
-	}
-	const now = Date.now();
-	if (now - (lastConfirmationSoundAt.get(sessionId) ?? 0) < confirmationSoundCooldownMs) {
-		return;
-	}
-	const uri = getConfirmationSoundUri();
-	if (!uri) {
-		return;
-	}
-	lastConfirmationSoundAt.set(sessionId, now);
-	const audio = new Audio(uri);
-	audio.volume = 0.5;
-	audio.play().catch(() => { /* ignore autoplay / load errors */ });
-};
-
 // Single funnel for the awaiting-input state: updates the local set, tells the
-// host (so it suppresses the finish cue for a pending prompt), rings the cue on
-// the false→true edge, and repaints the tabs — edge-guarded so each transition
-// acts exactly once.
+// host, and repaints the tabs — edge-guarded so each transition posts exactly
+// once. The host owns the confirmation cue (ring + unanswered reminders) so it
+// keeps working after this webview is torn down; silent marks a scrollback
+// rescan whose standing prompt must not re-ring.
 const setSessionAwaiting = (sessionId: string, awaiting: boolean, ring = true) => {
 	if (attentionSessionIds.has(sessionId) === awaiting) {
 		return;
@@ -842,10 +818,7 @@ const setSessionAwaiting = (sessionId: string, awaiting: boolean, ring = true) =
 	} else {
 		attentionSessionIds.delete(sessionId);
 	}
-	vscode.postMessage({ type: 'cli.awaitingInput', sessionId, awaiting });
-	if (awaiting && ring) {
-		playConfirmationSound(sessionId);
-	}
+	vscode.postMessage({ type: 'cli.awaitingInput', sessionId, awaiting, silent: !ring });
 	renderTabs();
 };
 
@@ -895,11 +868,6 @@ const syncState = (message: Extract<ServerMessage, { type: 'cli.state' }>) => {
 	for (const sessionId of [...attentionSessionIds]) {
 		if (!openSessionIds.has(sessionId)) {
 			attentionSessionIds.delete(sessionId);
-		}
-	}
-	for (const sessionId of [...lastConfirmationSoundAt.keys()]) {
-		if (!openSessionIds.has(sessionId)) {
-			lastConfirmationSoundAt.delete(sessionId);
 		}
 	}
 	prunePromptDrafts(openSessionIds);
