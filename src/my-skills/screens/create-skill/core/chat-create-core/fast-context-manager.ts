@@ -1,5 +1,5 @@
 import { searchMarketplaceSkills } from '../../../install-skill/core/marketplace';
-import * as https from 'https';
+import { httpGet } from '../../../../core/https';
 import { getProjectAnalysis } from '../shared/project-analyzer';
 import { buildCanonicalSearchQuery, buildProjectTechnologyQuery } from './data/categories';
 
@@ -112,36 +112,19 @@ async function fetchBackgroundSkill(query: string) {
 	}
 }
 
-function tryFetchRaw(url: string): Promise<string | null> {
-	return new Promise((resolve) => {
-		const req = https.get(url, { headers: { 'User-Agent': 'MySkillsExtension/0.1' }, timeout: FETCH_TIMEOUT_MS }, (res) => {
-			if (res.statusCode === 200) {
-				let data = '';
-				let receivedBytes = 0;
-				res.on('data', chunk => {
-					receivedBytes += Buffer.byteLength(chunk);
-					if (receivedBytes > MAX_REFERENCE_MARKDOWN_BYTES) {
-						req.destroy();
-						resolve(null);
-						return;
-					}
-
-					data += chunk;
-				});
-				res.on('end', () => resolve(data));
-			} else {
-				// Consume response data to free up memory
-				res.resume();
-				resolve(null);
-			}
+async function tryFetchRaw(url: string): Promise<string | null> {
+	// Best-effort probe of a candidate raw URL: any failure (guessed branch 404,
+	// timeout, oversized file) resolves null, never throws — the create flow must
+	// not stall on a background prefetch. The short timeout and byte cap ride the
+	// shared helper's options.
+	try {
+		return await httpGet(url, 'text/plain, */*', {
+			timeoutMs: FETCH_TIMEOUT_MS,
+			maxBytes: MAX_REFERENCE_MARKDOWN_BYTES,
 		});
-
-		req.on('timeout', () => {
-			req.destroy();
-			resolve(null);
-		});
-		req.on('error', () => resolve(null));
-	});
+	} catch {
+		return null;
+	}
 }
 
 export async function waitForPendingBackgroundFetches(timeoutMs: number = 2000): Promise<void> {
