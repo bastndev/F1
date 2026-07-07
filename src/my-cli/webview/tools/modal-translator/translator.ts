@@ -7,6 +7,7 @@ import { translateEnTo } from './browser-terminal-translator';
 import { renderMarkdownLite } from './markdown-lite';
 import { segmentTerminalSelection, isMarkdownStructuredLine, emojiRunSource, hasTranslatableContent } from './terminal-text';
 import { getCachedTranslation, setCachedTranslation, getCachedParagraph, setCachedParagraph } from './translator-cache';
+import { buildInlineLoading, buildSkeleton, createStreamRenderer, getGrowSettleMs } from './stream-render';
 import { matchesShortcut } from '../../../../shared/keymaps/cli';
 import { getStoredPromptLang } from '../modal-prompt/language-select';
 import { getPromptLanguage } from '../../../shared/prompt';
@@ -216,7 +217,7 @@ function initializeTranslator(host: HTMLElement, context: ToolContext) {
 	};
 	goBtn?.addEventListener('click', activateGo);
 
-	// Plays the CSS entrance exactly when real content first lands (beginStream /
+	// Plays the CSS entrance exactly when real content first lands (stream start /
 	// revealText), instead of a blind timer that races the network — a cache hit
 	// would otherwise wait out a delay that already elapsed, and a slow stream
 	// would pop the button in over empty space.
@@ -458,16 +459,10 @@ function initializeTranslator(host: HTMLElement, context: ToolContext) {
 			setStatus('translating…');
 		}
 
-		// Accumulated result (for the Copy button + the exact-selection cache)
-		// and the progressive-stream state. Translated blocks are staged in a
-		// small buffer and flushed as a cohesive chunk, so the skeleton stays
-		// visible until there is enough content for a smooth, premium reveal
-		// rather than content dribbling in one block at a time.
-		const renderedParts: string[] = [];
-		const copyParts: string[] = [];
+		// Result accumulation and the staged-block reveal live in the per-run
+		// stream renderer created below (see stream-render.ts).
 		let provider: string | undefined;
 		let codeCount = 0;
-		let streamStarted = false;
 
 		// Voice pipeline (auto mode): read each finished unit aloud while the rest
 		// of the answer is still translating, instead of waiting for the whole
@@ -538,130 +533,19 @@ function initializeTranslator(host: HTMLElement, context: ToolContext) {
 		const streamVoice = autoTranslate && typeof context.appendSpeech === 'function';
 		const voicePipeline = streamVoice ? createVoiceStreamPipeline() : undefined;
 
-		// The body height is animated to fit the content as blocks land, so the
-		// modal grows smoothly with the translation instead of sitting skeleton-
-		// sized until the very end. maxBodyHeight caps the grow at the panel's
-		// spare room; past it the body scrolls (restored when the grow settles).
-		let maxBodyHeight = Number.POSITIVE_INFINITY;
-		let growScheduled = false;
-
-		const applyBodyHeight = () => {
-			if (bodyEl) {
-				bodyEl.style.height = `${Math.min(bodyEl.scrollHeight, maxBodyHeight)}px`;
-			}
-		};
-
-		// Coalesce the per-block height writes into one per frame — several short
-		// blocks (scores, labels) can land in the same tick.
-		const scheduleGrow = () => {
-			if (growScheduled) {
-				return;
-			}
-			growScheduled = true;
-			requestAnimationFrame(() => {
-				growScheduled = false;
-				if (isMounted) {
-					applyBodyHeight();
-				}
-			});
-		};
-
-		// First block: drop the skeleton, switch the field to rendered mode, pin a
-		// small "more on the way" indicator that subsequent blocks insert in front
-		// of, and arm the smooth grow (measuring the panel's spare room first).
-		const beginStream = () => {
-			streamStarted = true;
-			textEl.replaceChildren();
-			textEl.classList.remove('placeholder');
-			textEl.classList.add('is-rendered');
-			markGoReady();
-			textEl.append(buildStreamIndicator());
-			if (bodyEl && modalEl) {
-				const available = modalEl.parentElement?.clientHeight ?? 0;
-				const chrome = modalEl.offsetHeight - bodyEl.offsetHeight;
-				maxBodyHeight = available > 0 ? Math.max(0, available - chrome) : Number.POSITIVE_INFINITY;
-				bodyEl.style.maxHeight = `${maxBodyHeight}px`;
-				bodyEl.classList.add('is-streaming-grow');
-			}
-		};
-
-		// Instead of revealing every translated block the instant it lands, we stage
-		// blocks in a short buffer and flush them as a cohesive chunk. The skeleton
-		// stays visible while buffering, then a batch of blocks crossfades in with a
-		// staggered reveal — a much cleaner, premium feel than content dribbling in.
-		// Keep the batch small so blocks arrive a couple at a time and each gets room
-		// to settle, rather than four popping in at once (which read as "hard").
-		const maxStagedBlocks = 2;
-		const stageRevealDelayMs = 420;
-		const stagedBlocks: { markdown: string; copy: string }[] = [];
-		let stageFlushTimer: ReturnType<typeof setTimeout> | undefined;
-
-		const flushStagedBlocks = () => {
-			if (stageFlushTimer) {
-				clearTimeout(stageFlushTimer);
-				stageFlushTimer = undefined;
-			}
-			if (!stagedBlocks.length) {
-				return;
-			}
-			if (!isCurrentTranslation()) {
-				stagedBlocks.length = 0;
-				return;
-			}
-			if (!streamStarted) {
-				beginStream();
-			}
-			if (!isCurrentTranslation()) {
-				stagedBlocks.length = 0;
-				return;
-			}
-
-			const blocksToEmit = stagedBlocks.splice(0);
-			const indicator = textEl.querySelector('.translator-streaming');
-			const fragment = document.createDocumentFragment();
-			const insertedElements: HTMLElement[] = [];
-			let staggerIndex = 0;
-
-			for (const { markdown, copy } of blocksToEmit) {
-				renderedParts.push(markdown);
-				copyParts.push(copy);
-				const template = document.createElement('template');
-				template.innerHTML = renderMarkdownLite(markdown);
-				for (const node of Array.from(template.content.childNodes)) {
-					if (node instanceof HTMLElement) {
-						node.classList.add('is-block-in');
-						node.style.animationDelay = `${staggerIndex * 110}ms`;
-						node.addEventListener('animationend', () => {
-							node.classList.remove('is-block-in');
-							node.style.animationDelay = '';
-						}, { once: true });
-						insertedElements.push(node);
-						staggerIndex += 1;
-					}
-					fragment.appendChild(node);
-				}
-			}
-			textEl.insertBefore(fragment, indicator);
-			scheduleGrow();
+		// Staged-block reveal + smooth body grow for this run (stream-render.ts).
+		const stream = createStreamRenderer({
+			textEl,
+			bodyEl,
+			modalEl,
+			isCurrent: isCurrentTranslation,
+			isMounted: () => isMounted,
+			// First real content landed — the Go affordance's entrance plays now.
+			onStreamStart: markGoReady,
 			// Feed the rendered blocks to the voice stream so reading can begin
 			// before the rest of the answer finishes translating.
-			voicePipeline?.feed(insertedElements);
-		};
-
-		const stageBlock = (markdown: string, copy: string) => {
-			if (!isCurrentTranslation()) {
-				return;
-			}
-			stagedBlocks.push({ markdown, copy });
-			if (stagedBlocks.length >= maxStagedBlocks) {
-				flushStagedBlocks();
-			} else if (!stageFlushTimer) {
-				stageFlushTimer = setTimeout(() => {
-					stageFlushTimer = undefined;
-					flushStagedBlocks();
-				}, stageRevealDelayMs);
-			}
-		};
+			onBlocksInserted: elements => voicePipeline?.feed(elements),
+		});
 
 		try {
 			// Split the selection into translatable prose and verbatim frames
@@ -678,20 +562,20 @@ function initializeTranslator(host: HTMLElement, context: ToolContext) {
 				}
 
 				if (segment.kind === 'diagram') {
-					stageBlock(`\`\`\`tree\n${segment.content}\n\`\`\``, segment.content);
+					stream.stageBlock(`\`\`\`tree\n${segment.content}\n\`\`\``, segment.content);
 					continue;
 				}
 
 				if (segment.kind === 'command') {
 					// Shell commands stay verbatim — shown as a command card, never
 					// sent to translation (which turns `bun lint` into word soup).
-					stageBlock(`\`\`\`cmd\n${segment.content}\n\`\`\``, segment.content);
+					stream.stageBlock(`\`\`\`cmd\n${segment.content}\n\`\`\``, segment.content);
 					continue;
 				}
 
 				if (segment.kind === 'code') {
 					codeCount += 1;
-					stageBlock(`[[code-here:${codeCount}]]`, `[code here #${codeCount}]`);
+					stream.stageBlock(`[[code-here:${codeCount}]]`, `[code here #${codeCount}]`);
 					continue;
 				}
 
@@ -720,7 +604,7 @@ function initializeTranslator(host: HTMLElement, context: ToolContext) {
 						const result = await translateSelection(block);
 						provider ??= result.provider;
 						const value = result.text || block;
-						stageBlock(value, value);
+						stream.stageBlock(value, value);
 						if (value.trim()) {
 							cacheParagraphPairs(targetLang, block, value);
 						}
@@ -752,7 +636,7 @@ function initializeTranslator(host: HTMLElement, context: ToolContext) {
 						provider ??= result.provider;
 						translatedContent = result.text || parsed.content;
 					}
-					stageBlock(`${parsed.marker}${translatedContent}`, `${parsed.marker}${translatedContent}`);
+					stream.stageBlock(`${parsed.marker}${translatedContent}`, `${parsed.marker}${translatedContent}`);
 				}
 				await flushPlainRun();
 			}
@@ -762,15 +646,15 @@ function initializeTranslator(host: HTMLElement, context: ToolContext) {
 			}
 
 			// Flush any final staged blocks before settling the UI.
-			flushStagedBlocks();
+			stream.flush();
 
-			const renderedMarkdown = renderedParts.join('\n\n');
-			copyText = copyParts.join('\n\n');
-			if (streamStarted) {
+			const renderedMarkdown = stream.renderedMarkdown();
+			copyText = stream.copyText();
+			if (stream.hasStarted()) {
 				// Streaming already drew the result; retire the indicator and grow
 				// one last time to the final content height.
-				textEl.querySelector('.translator-streaming')?.remove();
-				applyBodyHeight();
+				stream.removeIndicator();
+				stream.applyBodyHeight();
 			} else {
 				// Nothing emitted (empty translation) — show the plain result.
 				revealText(textEl, renderedMarkdown);
@@ -796,12 +680,12 @@ function initializeTranslator(host: HTMLElement, context: ToolContext) {
 			// Surface any blocks that were translated but still buffered when the
 			// error happened, so the user isn't left with an empty or pure-skeleton
 			// view for no reason.
-			flushStagedBlocks();
-			textEl.querySelector('.translator-streaming')?.remove();
-			if (streamStarted && renderedParts.length) {
+			stream.flush();
+			stream.removeIndicator();
+			if (stream.hasStarted() && stream.hasRenderedBlocks()) {
 				// Keep whatever already streamed in — the user can still read and
 				// copy the translated portion; only the status flags the failure.
-				copyText = copyParts.join('\n\n');
+				copyText = stream.copyText();
 			} else {
 				// Failed before anything showed — fall back to the source text so
 				// copying/listening still makes sense.
@@ -819,10 +703,7 @@ function initializeTranslator(host: HTMLElement, context: ToolContext) {
 			if (generation !== translationGeneration) {
 				return;
 			}
-			if (stageFlushTimer) {
-				clearTimeout(stageFlushTimer);
-				stageFlushTimer = undefined;
-			}
+			stream.cancelPendingFlush();
 			// Re-arm the manual button: the terminal selection can change while the
 			// panel stays open, and failed attempts may be transient (rate limit,
 			// network) — either way another run must stay possible.
@@ -831,7 +712,7 @@ function initializeTranslator(host: HTMLElement, context: ToolContext) {
 			}
 			modalEl.classList.remove('is-translating');
 			if (bodyEl) {
-				if (streamStarted) {
+				if (stream.hasStarted()) {
 					// Let the final grow finish animating, then drop the explicit
 					// height (now equal to the content, so no jump) and re-enable
 					// scrolling for results taller than the panel.
@@ -1171,16 +1052,6 @@ function extractTextToTranslate(context: ToolContext): string {
 	return hasTranslatableContent(text) ? text : '';
 }
 
-// How long to wait before dropping the body's explicit height after a grow.
-// Must outlast the .is-streaming-grow height transition — read it live from
-// the element so CSS can change the duration without silently breaking this
-// (a settle that fires mid-transition snaps the modal). +40ms of slack covers
-// frame scheduling; reduced motion (transition: none) settles almost at once.
-function getGrowSettleMs(body: HTMLElement): number {
-	const seconds = Number.parseFloat(getComputedStyle(body).transitionDuration) || 0;
-	return seconds * 1000 + 40;
-}
-
 // Split prose into trimmed, non-empty paragraphs on blank lines. Shared by the
 // populate (after a block translates) and the reuse lookup so their keys line up.
 function splitIntoParagraphs(text: string): string[] {
@@ -1348,126 +1219,6 @@ function splitForStreaming(text: string): string[] {
 	flushListRun();
 
 	return blocks;
-}
-
-// Compact "still translating" affordance below the streamed blocks — the
-// skeleton's typing dots (› ···). Rendered with zero layout height (absolute,
-// in the body's bottom padding; see .translator-streaming) so removing it at
-// the end of the stream never shrinks the modal.
-function buildStreamIndicator(): HTMLElement {
-	const wrap = document.createElement('div');
-	wrap.className = 'translator-streaming';
-	wrap.setAttribute('aria-hidden', 'true');
-
-	const typing = document.createElement('div');
-	typing.className = 't-skel-typing';
-
-	const sym = document.createElement('span');
-	sym.className = 't-skel-sym';
-	sym.textContent = '›';
-	typing.append(sym);
-
-	const dots = document.createElement('span');
-	dots.className = 't-skel-dots';
-	for (let i = 0; i < 3; i += 1) {
-		const dot = document.createElement('span');
-		dot.className = 't-skel-dot';
-		dots.append(dot);
-	}
-	typing.append(dots);
-	wrap.append(typing);
-
-	return wrap;
-}
-
-// Minimal inline loading indicator for short selections — just the typing
-// dots (› ···) with no skeleton box, no shimmer lines, no scan beam. Sits
-// where the result will appear, barely taller than the text itself, so a
-// one-line selection gets a loading state with no empty space and no jump.
-function buildInlineLoading(): HTMLElement {
-	const wrap = document.createElement('div');
-	wrap.className = 'translator-inline-loading';
-	wrap.setAttribute('aria-hidden', 'true');
-
-	const typing = document.createElement('div');
-	typing.className = 't-skel-typing';
-
-	const sym = document.createElement('span');
-	sym.className = 't-skel-sym';
-	sym.textContent = '›';
-	typing.append(sym);
-
-	const dots = document.createElement('span');
-	dots.className = 't-skel-dots';
-	for (let i = 0; i < 3; i += 1) {
-		const dot = document.createElement('span');
-		dot.className = 't-skel-dot';
-		dots.append(dot);
-	}
-	typing.append(dots);
-	wrap.append(typing);
-
-	return wrap;
-}
-
-function buildSkeleton(availableHeight: number, lineHint?: number): HTMLElement {
-	const wrap = document.createElement('div');
-	wrap.className = 'translator-skeleton';
-	wrap.setAttribute('aria-hidden', 'true');
-
-	// The skeleton sizes to the locked loading box so the scan beam covers it,
-	// but the shimmer lines + typing dots pack tightly at the top (see CSS:
-	// .t-skel-lines is flex: 0 0 auto) — so a small selection gets a minimal
-	// cluster with no gap, not a tall stretched placeholder. The body keeps its
-	// resting 16px top/bottom padding through loading (so the result never
-	// shifts when it lands), so subtract 32.
-	const contentHeight = Math.max(26, Math.min(200, availableHeight - 32));
-	wrap.style.height = `${contentHeight}px`;
-
-	const scan = document.createElement('div');
-	scan.className = 't-skel-scan';
-	wrap.append(scan);
-
-	const lines = document.createElement('div');
-	lines.className = 't-skel-lines';
-	wrap.append(lines);
-
-	// Scale the shimmer line count to the source text so a one-line selection
-	// gets a minimal skeleton (a single line + the typing dots) and a long
-	// selection gets a fuller one. The hint is clamped, then capped by what the
-	// box can hold.
-	const pattern = ['full', 'full', 'long', 'full', 'med', 'full', 'long'];
-	const hinted = lineHint && lineHint > 0 ? Math.min(8, lineHint) : 2;
-	const lineCount = Math.min(hinted, Math.max(1, Math.floor((contentHeight - 22) / 16)));
-
-	for (let i = 0; i < lineCount; i += 1) {
-		const line = document.createElement('div');
-		line.className = `t-skel-line ${pattern[i % pattern.length]}`;
-		if (i > 0 && i % 3 === 0) {
-			line.classList.add('t-skel-gap');
-		}
-		lines.append(line);
-	}
-
-	const typing = document.createElement('div');
-	typing.className = 't-skel-typing';
-
-	const sym = document.createElement('span');
-	sym.className = 't-skel-sym';
-	sym.textContent = '›';
-	typing.append(sym);
-
-	const dots = document.createElement('span');
-	dots.className = 't-skel-dots';
-	for (let i = 0; i < 3; i += 1) {
-		const dot = document.createElement('span');
-		dot.className = 't-skel-dot';
-		dots.append(dot);
-	}
-	typing.append(dots);
-	wrap.append(typing);
-
-	return wrap;
 }
 
 function revealText(textEl: HTMLElement, value: string): void {

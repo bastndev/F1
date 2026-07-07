@@ -38,11 +38,17 @@ F1/
 │   │   │   ├── assets/icons-cli/        # Per-agent SVG icons
 │   │   │   ├── styles/                  # Global CSS + skeleton themes
 │   │   │   ├── panel-terminal/          # xterm.js + xterm-addon-fit
+│   │   │   │   ├── terminal.ts          # Message loop + session/terminal views
+│   │   │   │   ├── rpc-channels.ts      # Host round-trip channels (translate/prepare/spellcheck/…)
+│   │   │   │   ├── voice-bridge.ts      # Voice commands + header "now playing" pill
+│   │   │   │   ├── footer-pickers.ts    # Alt+1/2/3 chords + tracked TUI-picker state
+│   │   │   │   └── usage-tracker.ts     # /usage or /status capture per session
 │   │   │   ├── panel-tab/               # Session list + Alt+/Alt− affordances
 │   │   │   ├── launcher/                # Fuzzy-search agent picker
 │   │   │   └── tools/                   # Right-side tools dock
 │   │   │       ├── modal-prompt/        # Composer + 5-lang picker + spellcheck
 │   │   │       ├── modal-translator/    # Terminal-selection translator
+│   │   │       │   └── stream-render.ts # Staged-block reveal + loading skeletons
 │   │   │       ├── modal-use/           # Per-CLI usage / status view
 │   │   │       ├── modal-keymaps/       # Shortcut reference
 │   │   │       └── modal-commands/      # Slash-command palette (per CLI)
@@ -53,15 +59,20 @@ F1/
 │   │   │   ├── main.ts                  # WebviewViewProvider
 │   │   │   ├── install-skills-controller.ts
 │   │   │   ├── install-state.ts
+│   │   │   ├── https.ts                 # Shared hardened HTTPS GET (redirects, gzip, byte caps)
 │   │   │   ├── messages.ts
 │   │   │   └── skills-webview-html.ts
 │   │   ├── screens/
 │   │   │   ├── install-skill/           # Marketplace install (skills.sh + npx)
+│   │   │   │   └── core/skills-lock.ts  # Reconciled skills-lock.json read (drops deleted-folder entries)
 │   │   │   ├── create-skill/            # AGENTS.md / CLAUDE.md / DESIGN.md gens
 │   │   │   │   ├── core/                # Generators + workspace inspection
 │   │   │   │   └── ui/                  # Chat create / chat search / shared shell
+│   │   │   │       └── shared/shell/    # search-bloom.ts (canvas wave) + create-loading.ts (stepper)
 │   │   │   └── local-skill/             # On-disk + saved-skill library
 │   │   ├── view/                        # Browser bundle (dist/webview.js)
+│   │   │   ├── index.ts                 # Tab switching + typed event bridge to the host
+│   │   │   └── events.ts                # Typed createSkill.* window-event contract
 │   │   ├── assets/                      # Webview-only images + SVG
 │   │   └── my-skills.ts                 # Public façade (only host exports)
 │   │

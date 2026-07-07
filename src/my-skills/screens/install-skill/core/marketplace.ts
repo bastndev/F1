@@ -1,5 +1,4 @@
-import * as https from 'https';
-import * as zlib from 'zlib';
+import { httpGet, httpGetJson } from '../../../core/https';
 import type { InstallMarketplaceSkill, OfficialSkillSource, RawAllTimeSkill } from './types';
 
 const ALL_TIME_ENDPOINT = 'https://skills.sh/api/skills/all-time/0';
@@ -15,7 +14,6 @@ const OFFICIAL_CURATED_ENDPOINTS = [
 	'https://skills.sh/api/v1/skills/curated',
 	'https://skills.sh/api/skills/curated',
 ];
-const REQUEST_TIMEOUT_MS = 12000;
 const SOURCE_FETCH_CONCURRENCY = 6;
 const DEFAULT_SKILLS_PAGE_SIZE = 200;
 const MAX_SEARCH_QUERY_LENGTH = 160;
@@ -782,96 +780,3 @@ async function mapWithConcurrency<T, R>(
 	return results;
 }
 
-function httpGetJson<T>(url: string, headers: Record<string, string> = {}): Promise<T> {
-	return httpGet(url, 'application/json', headers).then(response => JSON.parse(response) as T);
-}
-
-function httpGet(url: string, accept: string, headers: Record<string, string> = {}, redirectCount = 0): Promise<string> {
-	return new Promise((resolve, reject) => {
-		const request = https.get(
-			url,
-			{
-				headers: {
-					'User-Agent': 'MySkillsExtension/0.1',
-					Accept: accept,
-					'Accept-Encoding': 'gzip, deflate, br',
-					...headers,
-				},
-				timeout: REQUEST_TIMEOUT_MS,
-			},
-			response => {
-				if (
-					response.statusCode
-					&& response.statusCode >= 300
-					&& response.statusCode < 400
-					&& response.headers.location
-				) {
-					const redirectUrl = resolveAllowedRedirectUrl(url, response.headers.location);
-					response.resume();
-					if (!redirectUrl) {
-						reject(new Error('Blocked unsafe redirect'));
-						return;
-					}
-					if (redirectCount >= 5) {
-						reject(new Error('Too many redirects'));
-						return;
-					}
-
-					httpGet(redirectUrl, accept, headers, redirectCount + 1).then(resolve).catch(reject);
-					return;
-				}
-
-				if (response.statusCode && response.statusCode !== 200) {
-					reject(new Error(`HTTP ${response.statusCode}`));
-					return;
-				}
-
-				const encoding = String(response.headers['content-encoding'] ?? '').toLowerCase();
-				let stream: NodeJS.ReadableStream = response;
-
-				if (encoding.includes('gzip')) {
-					stream = response.pipe(zlib.createGunzip());
-				} else if (encoding.includes('br')) {
-					stream = response.pipe(zlib.createBrotliDecompress());
-				} else if (encoding.includes('deflate')) {
-					stream = response.pipe(zlib.createInflate());
-				}
-
-				let data = '';
-				stream.on('data', chunk => {
-					data += chunk.toString();
-				});
-				stream.on('end', () => resolve(data));
-				stream.on('error', reject);
-			},
-		);
-
-		request.on('timeout', () => {
-			request.destroy(new Error('Request timed out'));
-		});
-		request.on('error', reject);
-	});
-}
-
-function resolveAllowedRedirectUrl(currentUrl: string, location: string): string | undefined {
-	try {
-		const current = new URL(currentUrl);
-		const next = new URL(location, current);
-		if (next.protocol !== 'https:' || !isAllowedRedirectHost(current.hostname, next.hostname)) {
-			return undefined;
-		}
-
-		return next.toString();
-	} catch {
-		return undefined;
-	}
-}
-
-function isAllowedRedirectHost(currentHost: string, nextHost: string): boolean {
-	if (nextHost === currentHost) {
-		return true;
-	}
-
-	const skillsHosts = new Set(['skills.sh', 'www.skills.sh']);
-	return skillsHosts.has(currentHost) && skillsHosts.has(nextHost);
-}

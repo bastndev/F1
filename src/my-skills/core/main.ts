@@ -1,7 +1,7 @@
-import * as https from 'https';
 import * as os from 'os';
 import * as path from 'path';
 import * as vscode from 'vscode';
+import { httpGet } from './https';
 import { FLAME_SKILL_REPO_URL } from '../screens/install-skill/ui/panels/trending-skill/flame/data/flame-skills';
 import { InstallSkillsController } from './install-skills-controller';
 import { ROOT_SKILL_FILE_NAMES, ROOT_SKILL_FOLDER_WATCH_PATTERNS, deleteWorkspaceRootSkill, getWorkspaceRootSkills, setWorkspaceRootSkillEnabled } from '../screens/local-skill/core/local-skills';
@@ -653,7 +653,7 @@ export class MySkillsViewProvider implements vscode.WebviewViewProvider {
 
 		let rawContent: string;
 		try {
-			rawContent = await fetchUrl(readmeUrl);
+			rawContent = await httpGet(readmeUrl, 'text/plain, */*');
 		} catch {
 			void vscode.env.openExternal(vscode.Uri.parse(FLAME_SKILL_REPO_URL));
 			return;
@@ -779,30 +779,3 @@ function isMarketplaceFolderSkillId(skillId: string): boolean {
 	return skillId.startsWith('.agents/skills/') || skillId.startsWith('.claude/skills/');
 }
 
-function fetchUrl(url: string): Promise<string> {
-	return new Promise((resolve, reject) => {
-		const req = https.get(url, { timeout: 10000 }, response => {
-			if (response.statusCode && response.statusCode >= 300 && response.statusCode < 400 && response.headers.location) {
-				response.resume();
-				fetchUrl(response.headers.location).then(resolve).catch(reject);
-				return;
-			}
-
-			if (response.statusCode !== 200) {
-				response.resume();
-				reject(new Error(`HTTP ${response.statusCode}`));
-				return;
-			}
-
-			let data = '';
-			response.on('data', chunk => { data += chunk.toString(); });
-			response.on('end', () => resolve(data));
-			response.on('error', reject);
-		});
-		req.on('error', reject);
-		req.on('timeout', () => {
-			req.destroy();
-			reject(new Error('Request timed out'));
-		});
-	});
-}

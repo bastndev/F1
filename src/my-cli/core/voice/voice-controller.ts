@@ -12,7 +12,9 @@ import { normalizeVoiceChunks, type ActiveVoiceSession } from './voice-chunks';
 import type { VoiceProgress, VoiceState } from '../../shared/voice/voice-types';
 import type { InboundWebviewMessage } from '../../shared/protocol';
 
-export type VoicePostMessage = (message: Record<string, unknown>) => Thenable<boolean> | Promise<void>;
+/** Posting may no-op (void) while no webview is attached — playback keeps
+ *  running host-side and the webview resyncs via voice.query on its next mount. */
+export type VoicePostMessage = (message: Record<string, unknown>) => Thenable<boolean> | Promise<void> | void;
 
 export class VoiceController {
 	private activeSession?: ActiveVoiceSession;

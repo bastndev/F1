@@ -9,7 +9,8 @@
 import * as vscode from 'vscode';
 import { fetchAllTimeSkillsPage, fetchFlameSkills, fetchOfficialSkillsForOwner, fetchOfficialSkillSources, fetchTrending24hSkills, searchMarketplaceSkills } from '../screens/install-skill/core/marketplace';
 import { cancelInstallMarketplaceSkill, installMarketplaceSkill } from '../screens/install-skill/core/installer';
-import type { InstallMarketplaceSkill, InstallSkillCancelMessage, InstallSkillInstallMessage, InstallSkillsSearchRequestMessage, OfficialSkillSource, SkillsLockFile } from '../screens/install-skill/core/types';
+import { readInstalledSkillsLockEntries } from '../screens/install-skill/core/skills-lock';
+import type { InstallMarketplaceSkill, InstallSkillCancelMessage, InstallSkillInstallMessage, InstallSkillsSearchRequestMessage, OfficialSkillSource } from '../screens/install-skill/core/types';
 import { FLAME_SKILL_SOURCE } from '../screens/install-skill/ui/panels/trending-skill/flame/data/flame-skills';
 import { AsyncListSection } from './install-state';
 
@@ -403,14 +404,11 @@ async function getInstalledMarketplaceSkillIds(): Promise<Set<string>> {
 		return new Set();
 	}
 
-	try {
-		const lockUri = vscode.Uri.joinPath(workspaceFolder.uri, 'skills-lock.json');
-		const content = Buffer.from(await vscode.workspace.fs.readFile(lockUri)).toString('utf8');
-		const parsed = JSON.parse(content) as SkillsLockFile;
-		return new Set(Object.keys(parsed.skills ?? {}));
-	} catch {
-		return new Set();
-	}
+	// Reconciled read: entries whose skill folder was deleted by hand don't
+	// count, so the marketplace offers those skills again instead of hiding
+	// them behind a stale lock entry forever.
+	const entries = await readInstalledSkillsLockEntries(workspaceFolder.uri);
+	return new Set(entries.map(entry => entry.name));
 }
 
 function filterInstallableSkills(
