@@ -936,8 +936,9 @@
   background: transparent;
   border: none;
   border-radius: 0;
-  /* force own compositing layer */
-  transform: translateZ(0);
+  /* No transform/translateZ layer promotion here: an isolated compositing
+     layer can keep displaying a stale raster while the textarea's caret moves,
+     misaligning caret and text (seen in VS Code/Kiro webviews). */
 }
 
 .prompt-textarea {

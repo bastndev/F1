@@ -905,8 +905,13 @@ function initPromptComposer(host: HTMLElement, context: PromptContext, hasActive
 		remapSpellIssues(spellTextSnapshot, textarea.value);
 		spellTextSnapshot = textarea.value;
 		if (highlight && textareaWrap) {
-			// use raf to ensure update happens after value commit and to help layer paint
-			requestAnimationFrame(renderHighlight);
+			// Synchronous on purpose: the caret is painted by the textarea, the text
+			// by the overlay, so both must repaint in the same frame. A deferred
+			// (rAF) repaint let the caret run a frame or more ahead of the text on
+			// busy compositors (VS Code/Kiro webviews), parking it visibly "behind"
+			// the typed letters. 'input' fires after the value commit, so rendering
+			// now is safe.
+			renderHighlight();
 		}
 		scheduleSpellcheck();
 	};
