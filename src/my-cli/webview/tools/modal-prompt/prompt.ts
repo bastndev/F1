@@ -76,6 +76,7 @@ const ensureStyles = () => {
 const promptCharLimit = 5000;
 const promptCharWarn = 3500;
 const promptCharDanger = 4500;
+const promptCharShow = 3220;
 const routePromptCloseDelayMs = 1200;
 
 const hasRouteMention = (text: string) => /(^|\s)@\S+/.test(text);
@@ -1118,13 +1119,16 @@ function updateCharCount(host: HTMLElement, textarea: HTMLTextAreaElement) {
 	counter.textContent = `${current}/${promptCharLimit}`;
 
 	// Remove previous states
-	counter.classList.remove('warn', 'danger');
+	counter.classList.remove('show', 'warn', 'danger');
 
 	if (current >= promptCharDanger) {
 		// red + shake
-		counter.classList.add('danger');
+		counter.classList.add('show', 'danger');
 	} else if (current >= promptCharWarn) {
 		// yellow warning
-		counter.classList.add('warn');
+		counter.classList.add('show', 'warn');
+	} else if (current >= promptCharShow) {
+		// default grey
+		counter.classList.add('show');
 	}
 }

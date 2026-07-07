@@ -1141,10 +1141,13 @@
   font-size: 10px;
   font-family: 'JetBrains Mono', monospace;
   color: var(--vscode-descriptionForeground);
-  opacity: 0.6;
+  opacity: 0;
   pointer-events: none;
   z-index: 2;
   transition: color 0.3s ease, opacity 0.3s ease;
+}
+.prompt-char-count.show {
+  opacity: 0.6;
 }
 .prompt-char-count.warn {
   color: #e5a030;
