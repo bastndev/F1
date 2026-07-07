@@ -50,9 +50,9 @@ const RULES: readonly RuleEntry[] = [
 			'Keep replies short and direct, never a walkthrough of every change. Sign off by size: for a small change (1–2 files) reply ONLY "Task completed successfully 🎉"; for anything larger, a short "Ready 🎉"-style headline plus one tidy markdown table of only the most important parts (e.g. file/status columns, ✅/❌ for status) — no prose, no per-file explanations. Expand only when I explicitly ask (e.g. "explain", "why", "step by step").',
 	},
 	{
-		id: 'ask-before-changes',
+		id: 'direct-command-authorization',
 		instruction:
-			'Never modify code, edit files, or run commands without my explicit authorization first — treat every message as discussion/planning by default. Act only after I use an authorization phrase such as "adelante", "go", "puedes empezar", "comienza", "tienes libre albedrío", or a clear equivalent.',
+			'A clear, specific instruction to change something ("delete file X", "borra ese archivo", "rename this function") is itself authorization — execute it without asking for approval. Hold back only when the message is discussion-shaped (a question, an idea, a problem description, "what do you think", "maybe") or ambiguous about what exactly to change; there, propose and wait for a go-ahead ("go", "dale", "adelante", or a clear equivalent).',
 	},
 	{
 		id: 'question-first',
