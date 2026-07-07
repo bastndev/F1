@@ -5,6 +5,8 @@ import * as vscode from 'vscode';
 import { cliAgents, getCliAgent } from '../../shared/agents';
 import { ensureCliInstalled } from './installation';
 import { playFinishSound } from '../voice/finish-sound';
+import { playConfirmationSound } from '../voice/confirmation-sound';
+import { isRawOutputAwaitingInput } from '../../shared/awaiting-input';
 import type {
 	CliSessionSnapshot,
 	CustomCliLaunch,
@@ -24,9 +26,16 @@ type CliSession = Omit<CliSessionSnapshot, 'buffer'> & {
 	closing?: boolean;
 	/** Set on submit; cleared when the response settles (drives Voice Finish). */
 	awaitingResponse?: boolean;
-	/** Webview saw a pending prompt on this session's screen — suppresses the
-	 *  finish cue (the CLI is waiting on the user, not "done"). */
+	/** A pending prompt is standing (webview screen scan while attached, raw
+	 *  output scan while detached). Suppresses the finish cue and drives the
+	 *  confirmation cue + its unanswered-prompt reminders. */
 	awaitingInput?: boolean;
+	/** Raw output since the user's last keystroke — host-side prompt scan
+	 *  window, only consulted while the webview is torn down. */
+	promptScanTail?: string;
+	/** Re-rings the confirmation cue while the prompt stays unanswered. */
+	confirmationReminderTimer?: ReturnType<typeof setInterval>;
+	lastConfirmationRingAt?: number;
 	/** Quiet-period timer that decides the response is done. */
 	responseSettleTimer?: ReturnType<typeof setTimeout>;
 	/** One-shot: fires when the response after a host-sent prompt settles (Smart cleanup). */
@@ -48,6 +57,14 @@ const responseSettleMs = 1500;
 // After the CLI's first output, how long it must stay quiet before we treat it as
 // "booted and waiting for input" — the moment the Smart auto-prompt is typed in.
 const bootIdleMs = 1200;
+
+// Confirmation cue policy: ring on the prompt's appearance, then remind while
+// it stays unanswered — the user may be in another app thinking the CLI is
+// still working. Cooldown absorbs TUI redraw flicker double-edges.
+const confirmationReminderMs = 45000;
+const confirmationRingCooldownMs = 2000;
+// Cap for promptScanTail — roughly one TUI frame repaint worth of raw output.
+const promptScanTailLength = 4000;
 
 // Gap between typing the auto-prompt and sending the Enter that submits it. TUI
 // CLIs (opencode, kilocode, copilot…) read a fast "text\r" burst as a single
@@ -138,6 +155,12 @@ export class CliSessionManager implements vscode.Disposable {
 	public attach(webview: vscode.Webview) {
 		this.webview = webview;
 		this.sessionsKnownToWebview.clear();
+		// Webview screen scan becomes authoritative again. Drop host-derived
+		// awaiting state: the webview's silent rescan re-posts true for prompts
+		// still standing, but its edge guard never posts an initial false.
+		for (const session of this.sessions.values()) {
+			this.setAwaitingInput(session, false, true);
+		}
 	}
 
 	public onBeforeSessionCreate(hook: SessionBeforeCreateHook) {
@@ -147,11 +170,9 @@ export class CliSessionManager implements vscode.Disposable {
 	public detach() {
 		this.webview = undefined;
 		this.sessionsKnownToWebview.clear();
-		// Webview owns prompt detection; with it torn down the flag is stale —
-		// reset so the finish cue behaves normally while the panel is hidden.
-		for (const session of this.sessions.values()) {
-			session.awaitingInput = false;
-		}
+		// Keep awaitingInput: a standing prompt must keep reminding while the
+		// panel is gone. appendSessionOutput's raw scan owns updates from here
+		// (both directions), so the flag can't go stale while output flows.
 	}
 
 	/**
@@ -291,6 +312,7 @@ export class CliSessionManager implements vscode.Disposable {
 			const exitCode = message.exitCode ?? 0;
 			session.status = 'exited';
 			session.exitCode = exitCode;
+			this.setAwaitingInput(session, false, true);
 			session.idleResolve?.();
 			session.idleResolve = undefined;
 			this.appendSessionOutput(session, `\r\n\x1b[90mCLI Hub: ${session.label} exited with code ${exitCode}\x1b[0m\r\n`);
@@ -320,6 +342,60 @@ export class CliSessionManager implements vscode.Disposable {
 
 		this.postMessage({ type: 'cli.output', sessionId: session.id, data });
 		this.scheduleResponseSettle(session);
+
+		session.promptScanTail = ((session.promptScanTail ?? '') + data).slice(-promptScanTailLength);
+		// Webview torn down → its screen scan is gone; detect prompts from the
+		// raw stream instead. While attached the webview report is authoritative
+		// (it sees the rendered viewport, so answered prompts clear reliably).
+		if (!this.webview && session.status === 'running' && !session.closing) {
+			this.setAwaitingInput(session, isRawOutputAwaitingInput(session.promptScanTail), false);
+		}
+	}
+
+	/** Single funnel for awaitingInput: edge-guarded ring + reminder lifecycle. */
+	private setAwaitingInput(session: CliSession, awaiting: boolean, silent: boolean) {
+		if ((session.awaitingInput === true) === awaiting) {
+			return;
+		}
+		session.awaitingInput = awaiting;
+		if (awaiting) {
+			if (!silent) {
+				this.ringConfirmation(session);
+			}
+			this.startConfirmationReminder(session);
+		} else {
+			this.stopConfirmationReminder(session);
+		}
+	}
+
+	private ringConfirmation(session: CliSession) {
+		if (!this.voiceFinishEnabled || session.status !== 'running' || session.closing) {
+			return;
+		}
+		const now = Date.now();
+		if (now - (session.lastConfirmationRingAt ?? 0) < confirmationRingCooldownMs) {
+			return;
+		}
+		session.lastConfirmationRingAt = now;
+		playConfirmationSound();
+	}
+
+	private startConfirmationReminder(session: CliSession) {
+		if (session.confirmationReminderTimer) {
+			return;
+		}
+		session.confirmationReminderTimer = setInterval(() => {
+			if (session.awaitingInput) {
+				this.ringConfirmation(session);
+			}
+		}, confirmationReminderMs);
+	}
+
+	private stopConfirmationReminder(session: CliSession) {
+		if (session.confirmationReminderTimer) {
+			clearInterval(session.confirmationReminderTimer);
+			session.confirmationReminderTimer = undefined;
+		}
 	}
 
 	// While a response is in flight, restart a quiet-period timer on every output
@@ -342,7 +418,7 @@ export class CliSessionManager implements vscode.Disposable {
 				this.voiceFinishEnabled
 				&& !this.finishSoundSuppressed
 				// A pending on-screen prompt means the CLI is waiting on the user,
-				// not finished — the webview owns that cue (confirmation.wav).
+				// not finished — the confirmation cue owns that state.
 				&& !session.awaitingInput
 				&& session.status === 'running'
 				&& !session.closing
@@ -490,6 +566,7 @@ export class CliSessionManager implements vscode.Disposable {
 		}
 
 		session.status = 'error';
+		this.setAwaitingInput(session, false, true);
 		session.idleResolve?.();
 		session.idleResolve = undefined;
 		this.appendSessionOutput(session, `\r\n\x1b[31m${message}\x1b[0m\r\n`);
@@ -533,7 +610,7 @@ export class CliSessionManager implements vscode.Disposable {
 			case 'cli.awaitingInput': {
 				const session = message.sessionId ? this.sessions.get(message.sessionId) : undefined;
 				if (session) {
-					session.awaitingInput = message.awaiting === true;
+					this.setAwaitingInput(session, message.awaiting === true, message.silent === true);
 				}
 				break;
 			}
@@ -584,6 +661,15 @@ export class CliSessionManager implements vscode.Disposable {
 		// keystrokes (no Enter) don't arm it, so idle redraws never ding.
 		if (data.includes('\r') || data.includes('\n')) {
 			session.awaitingResponse = true;
+		}
+
+		// Any keystroke = user saw the prompt: fresh scan window, and push the
+		// next reminder out a full interval (webview clears the state itself
+		// once the prompt redraws away).
+		session.promptScanTail = '';
+		if (session.confirmationReminderTimer) {
+			this.stopConfirmationReminder(session);
+			this.startConfirmationReminder(session);
 		}
 
 		this.sendPtyHostCommand(session, { type: 'input', data });
@@ -646,6 +732,8 @@ export class CliSessionManager implements vscode.Disposable {
 
 	private disposeSession(session: CliSession) {
 		session.closing = true;
+		this.stopConfirmationReminder(session);
+		session.awaitingInput = false;
 
 		if (session.responseSettleTimer) {
 			clearTimeout(session.responseSettleTimer);
