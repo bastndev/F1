@@ -24,7 +24,7 @@ Following VS Code best practices, F1 uses semantic versioning for all releases.
 <!-- --- -->
 
 ---
-## [2.1.1] - 2026-07-06
+## [2.1.1] - 2026-07-07
 - **Add**: Button cancel in "install-skill"
 - **Better**: filter chat
 - **REFACTOR**: .pe 
