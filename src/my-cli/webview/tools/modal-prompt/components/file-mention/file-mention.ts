@@ -111,20 +111,20 @@ export function mountFileMentionPicker(
 
 		// Place the *bottom* of the dropdown a few px above the top of the textarea,
 		// relative to the portal (so it can live high up in the modal overlay).
-		const left = taRect.left - portalRect.left;
+		const dropdownWidth = dropdown.offsetWidth || 320;
+		const left = (taRect.left - portalRect.left) + (taRect.width - dropdownWidth) / 2;
 		let finalTop = taRect.top - portalRect.top - h - 6;
 		if (finalTop < 12) {
 			finalTop = 12;
 		}
 
-		// Clamp left so the dropdown doesn't overflow the right edge of the portal
-		// (helps when the input is near the right of the card and 320px width would
-		// otherwise hang too far "de costado").
 		let finalLeft = left;
-		const dropdownWidth = dropdown.offsetWidth || 320;
 		const maxLeft = Math.max(0, portalRect.width - dropdownWidth - 12);
 		if (finalLeft > maxLeft) {
 			finalLeft = maxLeft;
+		}
+		if (finalLeft < 12) {
+			finalLeft = 12;
 		}
 
 		Object.assign(dropdown.style, {
