@@ -5,7 +5,8 @@ import { initSearchMode } from '../../chat-search/search';
 import { initCreateDock } from '../dock/chat-dock';
 import { createCreateLoading } from './create-loading';
 import { createSearchBloom } from './search-bloom';
-import type { CreateSkillChatSubmitDetail, CreateSkillMode, CreateSkillTarget } from '../types';
+import { emitSkillsEvent, onSkillsEvent } from '../../../../../view/events';
+import type { CreateSkillMode, CreateSkillTarget } from '../types';
 type CreateInstructionRootFileName = 'AGENTS.md' | 'CLAUDE.md';
 type CreateRootFilesStatus = Record<string, boolean>;
 type CreateFlowStep = 'description' | 'category' | 'done';
@@ -95,14 +96,15 @@ templateButtons.forEach(btn => {
 
 			// Phase 3: Trigger the creation process automatically
 			pendingCreateTemplate = 'base';
-			window.dispatchEvent(new CustomEvent('createSkill.chat.create', {
-				detail: {
-					name: confirmedCreateSkillName,
+			const name = confirmedCreateSkillName;
+			if (name) {
+				emitSkillsEvent('createSkill.chat.create', {
+					name,
 					query: '',
 					target: activeCreateTarget ?? 'agents',
 					template: 'base',
-				}
-			}));
+				});
+			}
 		}
 	});
 });
@@ -172,10 +174,6 @@ const createLoading = createCreateLoading({
 	onComplete: () => completeCreateFlow(),
 });
 
-interface CreateRootFileCreateDetail {
-	fileName: CreateInstructionRootFileName;
-}
-
 interface CreateRootFileStatusDetail {
 	fileName: CreateInstructionRootFileName;
 	status: 'writing' | 'created' | 'error';
@@ -221,9 +219,7 @@ function openCreateChatScreen(target?: CreateSkillTarget, focusChat = false) {
 			syncMode();
 
 			// Phase 2: after cards are gone, open the name modal
-			window.dispatchEvent(new CustomEvent('createSkill.namePrompt.open', {
-				detail: { target: activeCreateTarget, template: activeCreateTemplate },
-			}));
+			emitSkillsEvent('createSkill.namePrompt.open', { target: activeCreateTarget, template: activeCreateTemplate });
 		}, 500);
 	} else {
 		if (confirmedCreateSkillName) {
@@ -239,9 +235,7 @@ function openCreateChatScreen(target?: CreateSkillTarget, focusChat = false) {
 			skipNextCreateChatOpen = false;
 			return;
 		}
-		window.dispatchEvent(new CustomEvent('createSkill.namePrompt.open', {
-			detail: { target: activeCreateTarget, template: activeCreateTemplate },
-		}));
+		emitSkillsEvent('createSkill.namePrompt.open', { target: activeCreateTarget, template: activeCreateTemplate });
 		syncMode();
 	}
 }
@@ -267,7 +261,7 @@ function closeCreateChatScreen() {
 	syncConfirmedCreateName();
 	syncCreateFlowStatus();
 	syncMode();
-	window.dispatchEvent(new CustomEvent('createSkill.category.reset'));
+	emitSkillsEvent('createSkill.category.reset');
 }
 
 function setActiveCreateTemplate(template: CreateSkillTemplate): void {
@@ -336,7 +330,8 @@ function syncCreateFlowStatus() {
 }
 
 function handleCreateFlowSubmit(query: string): boolean {
-	if (!confirmedCreateSkillName) {
+	const name = confirmedCreateSkillName;
+	if (!name) {
 		return false;
 	}
 
@@ -353,14 +348,12 @@ function handleCreateFlowSubmit(query: string): boolean {
 	const finalQuery = categoryPrefix ? `${categoryPrefix}\n\n${query}` : query;
 
 	pendingCreateTemplate = activeCreateTemplate;
-	window.dispatchEvent(new CustomEvent('createSkill.chat.create', {
-		detail: {
-			name: confirmedCreateSkillName,
-			query: finalQuery,
-			target: activeCreateTarget ?? 'agents',
-			template: activeCreateTemplate,
-		}
-	}));
+	emitSkillsEvent('createSkill.chat.create', {
+		name,
+		query: finalQuery,
+		target: activeCreateTarget ?? 'agents',
+		template: activeCreateTemplate,
+	});
 
 	// closeCreateChatScreen() is called by the loading screen handler after all steps complete
 
@@ -435,7 +428,7 @@ function finishCreateRootFile(fileName: CreateInstructionRootFileName, status: C
 		if (status === 'error') {
 			pending.button.title = message ?? `Could not create ${fileName}`;
 		} else {
-			window.dispatchEvent(new CustomEvent('createSkill.rootFiles.request'));
+			emitSkillsEvent('createSkill.rootFiles.request');
 		}
 	}, delay);
 }
@@ -491,7 +484,7 @@ function requestCreateSearchPrefetch() {
 	}
 
 	didRequestSearchPrefetch = true;
-	window.dispatchEvent(new CustomEvent('createSkill.search.prefetch'));
+	emitSkillsEvent('createSkill.search.prefetch');
 }
 
 if (createSurface && canTrackPointer.matches && !prefersReducedMotion.matches) {
@@ -543,9 +536,7 @@ createRootFileButtons.forEach(button => {
 			}
 
 			beginCreateRootFile(button, fileName);
-			window.dispatchEvent(new CustomEvent<CreateRootFileCreateDetail>('createSkill.rootFile.create', {
-				detail: { fileName },
-			}));
+			emitSkillsEvent('createSkill.rootFile.create', { fileName });
 			return;
 		}
 
@@ -557,7 +548,7 @@ createRootFileButtons.forEach(button => {
 		createChatState = 'idle';
 		activeMode = 'design';
 		syncMode();
-		window.dispatchEvent(new CustomEvent('createSkill.design.open'));
+		emitSkillsEvent('createSkill.design.open');
 	});
 });
 
@@ -567,20 +558,18 @@ createFlowEditButtons.forEach(button => {
 		const cardType = card?.dataset.createFlowCard;
 
 		if (cardType === 'name' && confirmedCreateSkillName) {
-			window.dispatchEvent(new CustomEvent('createSkill.namePrompt.open', {
-				detail: {
-					target: activeCreateTarget,
-					initialValue: confirmedCreateSkillName,
-					template: activeCreateTemplate,
-				},
-			}));
+			emitSkillsEvent('createSkill.namePrompt.open', {
+				target: activeCreateTarget,
+				initialValue: confirmedCreateSkillName,
+				template: activeCreateTemplate,
+			});
 		} else if (cardType === 'category' && confirmedCreateCategory) {
 			confirmedCreateCategory = undefined;
 			activeCategoryLabel = null;
 			activeCreateFlowStep = 'category';
 			syncCreateFlowStatus();
 			createDock.sync(activeMode, activeCreateTarget);
-			window.dispatchEvent(new CustomEvent('createSkill.category.reset'));
+			emitSkillsEvent('createSkill.category.reset');
 		} else if (cardType === 'description' && confirmedCreateDescription) {
 			activeCreateFlowStep = 'description';
 			syncCreateFlowStatus();
@@ -591,7 +580,7 @@ createFlowEditButtons.forEach(button => {
 });
 
 designBackButton?.addEventListener('click', () => {
-	const wasHandled = !window.dispatchEvent(new CustomEvent('createSkill.design.back', { cancelable: true }));
+	const wasHandled = !emitSkillsEvent('createSkill.design.back', undefined, { cancelable: true });
 	if (wasHandled) {
 		return;
 	}
@@ -602,23 +591,22 @@ designBackButton?.addEventListener('click', () => {
 	syncMode();
 });
 
-window.addEventListener('createSkill.design.reset', () => {
+onSkillsEvent('createSkill.design.reset', () => {
 	createDock.saveActiveValue(activeMode);
 	createChatState = 'idle';
 	activeMode = 'create';
 	syncMode();
 });
 
-window.addEventListener('createSkill.namePrompt.open', () => {
+onSkillsEvent('createSkill.namePrompt.open', () => {
 	createSurface?.classList.add('is-name-prompt-open');
 });
 
-window.addEventListener('createSkill.skillName.confirm', event => {
+onSkillsEvent('createSkill.skillName.confirm', detail => {
 	createSurface?.classList.remove('is-name-prompt-open');
 
 	let selectedTemplate: CreateSkillTemplate = 'fast';
-	if (event instanceof CustomEvent && event.detail && typeof event.detail === 'object') {
-		const detail = event.detail as { name?: unknown; target?: unknown; template?: unknown };
+	if (detail && typeof detail === 'object') {
 		if (typeof detail.name === 'string' && detail.name.trim()) {
 			confirmedCreateSkillName = detail.name.trim();
 		}
@@ -644,14 +632,15 @@ window.addEventListener('createSkill.skillName.confirm', event => {
 		syncMode();
 		createLoading.beginHostWait();
 		pendingCreateTemplate = 'base';
-		window.dispatchEvent(new CustomEvent('createSkill.chat.create', {
-			detail: {
-				name: confirmedCreateSkillName,
+		const name = confirmedCreateSkillName;
+		if (name) {
+			emitSkillsEvent('createSkill.chat.create', {
+				name,
 				query: '',
 				target: activeCreateTarget ?? 'agents',
 				template: 'base',
-			},
-		}));
+			});
+		}
 		return;
 	}
 
@@ -668,7 +657,7 @@ window.addEventListener('createSkill.skillName.confirm', event => {
 	}, 260);
 });
 
-window.addEventListener('createSkill.namePrompt.cancel', () => {
+onSkillsEvent('createSkill.namePrompt.cancel', () => {
 	createSurface?.classList.remove('is-name-prompt-open');
 	createDock.setInputDisabled(false);
 
@@ -681,14 +670,12 @@ window.addEventListener('createSkill.namePrompt.cancel', () => {
 	closeCreateChatScreen();
 });
 
-window.addEventListener('createSkill.design.edit', () => {
+onSkillsEvent('createSkill.design.edit', () => {
 	createDock.saveActiveValue(activeMode);
 	closeCreateChatScreen();
 	activeMode = 'design';
 	syncMode();
-	window.dispatchEvent(new CustomEvent('createSkill.design.open', {
-		detail: { overwrite: true },
-	}));
+	emitSkillsEvent('createSkill.design.open', { overwrite: true });
 });
 
 function toggleCreateSearchMode() {
@@ -719,25 +706,21 @@ syncCreateFlowStatus();
 syncMode();
 
 // Handle top-level category selection to change flow text dynamically
-window.addEventListener('createSkill.category.mainSelected', event => {
-	if (!(event instanceof CustomEvent) || !event.detail) {
+onSkillsEvent('createSkill.category.mainSelected', detail => {
+	if (!detail?.categoryLabel) {
 		return;
 	}
 
-	const detail = event.detail as { categoryId?: string; categoryLabel?: string };
-	if (detail.categoryLabel) {
-		activeCategoryLabel = detail.categoryLabel;
-		syncCreateFlowStatus();
-	}
+	activeCategoryLabel = detail.categoryLabel;
+	syncCreateFlowStatus();
 });
 
 // Handle category selection
-window.addEventListener('createSkill.category.selected', event => {
-	if (!(event instanceof CustomEvent) || !event.detail || typeof event.detail !== 'object') {
+onSkillsEvent('createSkill.category.selected', detail => {
+	if (!detail || typeof detail !== 'object') {
 		return;
 	}
 
-	const detail = event.detail as { categoryId?: unknown; subcategoryId?: unknown };
 	if (typeof detail.categoryId === 'string') {
 		confirmedCreateCategory = typeof detail.subcategoryId === 'string'
 			? `${detail.categoryId}/${detail.subcategoryId}`
@@ -750,18 +733,18 @@ window.addEventListener('createSkill.category.selected', event => {
 	}
 });
 
-window.addEventListener('createSkill.rootFiles.update', event => {
-	if (event instanceof CustomEvent && event.detail && typeof event.detail === 'object') {
-		syncCreateRootFileButtons(event.detail as CreateRootFilesStatus);
+onSkillsEvent('createSkill.rootFiles.update', detail => {
+	if (detail && typeof detail === 'object') {
+		syncCreateRootFileButtons(detail);
 	}
 });
 
-window.addEventListener('createSkill.rootFile.status', event => {
-	if (!(event instanceof CustomEvent) || !isCreateRootFileStatusDetail(event.detail)) {
+onSkillsEvent('createSkill.rootFile.status', eventDetail => {
+	if (!isCreateRootFileStatusDetail(eventDetail)) {
 		return;
 	}
 
-	const detail = event.detail;
+	const detail = eventDetail;
 	const button = createRootFileButtons.find(candidate => candidate.dataset.createRootFile === detail.fileName);
 	if (detail.status === 'writing') {
 		if (button && !pendingCreateRootFiles.has(detail.fileName)) {
@@ -777,21 +760,16 @@ if (window.mySkillsCreateRootFiles) {
 	syncCreateRootFileButtons(window.mySkillsCreateRootFiles);
 }
 
-window.dispatchEvent(new CustomEvent('createSkill.rootFiles.request'));
+emitSkillsEvent('createSkill.rootFiles.request');
 
-window.addEventListener('createSkill.search.state', event => {
-	if (!(event instanceof CustomEvent) || !event.detail || typeof event.detail !== 'object') {
-		return;
-	}
-
-	const detail = event.detail as { hasCompletedSearch?: unknown };
-	if (typeof detail.hasCompletedSearch === 'boolean') {
+onSkillsEvent('createSkill.search.state', detail => {
+	if (typeof detail?.hasCompletedSearch === 'boolean') {
 		hasCompletedSearch = detail.hasCompletedSearch;
 	}
 });
 
 function completeCreateFlow(): void {
-	window.dispatchEvent(new CustomEvent('createSkill.flow.complete'));
+	emitSkillsEvent('createSkill.flow.complete');
 	createLoading.resetScreen();
 	closeCreateChatScreen();
 }
@@ -806,12 +784,11 @@ function showCreateError(message: string | undefined): void {
 	}
 }
 
-window.addEventListener('createSkill.chat.submit', event => {
-	if (!(event instanceof CustomEvent) || !event.detail) {
+onSkillsEvent('createSkill.chat.submit', detail => {
+	if (!detail) {
 		return;
 	}
 
-	const detail = event.detail as CreateSkillChatSubmitDetail;
 	if (detail.mode !== 'create') {
 		return;
 	}
@@ -821,12 +798,11 @@ window.addEventListener('createSkill.chat.submit', event => {
 	}
 });
 
-window.addEventListener('createSkillResult', event => {
-	if (!(event instanceof CustomEvent) || !event.detail || typeof event.detail !== 'object') {
+onSkillsEvent('createSkillResult', detail => {
+	if (!detail || typeof detail !== 'object') {
 		return;
 	}
 
-	const detail = event.detail as { success?: unknown; message?: unknown };
 	if (typeof detail.success !== 'boolean') {
 		return;
 	}

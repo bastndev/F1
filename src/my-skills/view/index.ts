@@ -4,13 +4,11 @@ import { initOfficialPanel } from '../screens/install-skill/ui/panels/official-s
 import { initTrendingPanel } from '../screens/install-skill/ui/panels/trending-skill/trending';
 import { initSearchPanel } from '../screens/install-skill/ui/search-sh/search-sh';
 import { initLocalPanel } from '../screens/local-skill/ui/local';
+import { emitSkillsEvent, onSkillsEvent, type CreateSkillEventMap, type CreateRootFilesStatus } from './events';
 
 type WebviewState = {
 	activeTab?: string;
 };
-
-type CreateRootFilesStatus = Record<string, boolean>;
-type CreateInstructionRootFileName = 'AGENTS.md' | 'CLAUDE.md';
 
 interface LocalSkill {
 	id: string;
@@ -20,28 +18,6 @@ interface LocalSkill {
 export interface CreateSkillExistingFoldersDetail {
 	agents: string[];
 	claude: string[];
-}
-
-interface CreateSkillSearchRequestDetail {
-	query: string;
-	requestId: number;
-	limit?: number;
-}
-
-interface CreateSkillDesignCreateDetail {
-	selection: {
-		colorId?: string;
-		typographyId?: string;
-		styleId?: string;
-		skipColor?: boolean;
-		skipTypography?: boolean;
-		skipStyle?: boolean;
-	};
-	overwrite?: boolean;
-}
-
-interface CreateSkillRootFileCreateDetail {
-	fileName: CreateInstructionRootFileName;
 }
 
 declare global {
@@ -175,34 +151,26 @@ window.addEventListener('message', event => {
 		switchToTab(message.target);
 	}
 	if (message.type === 'createSkill.rootFiles.update' && message.files && typeof message.files === 'object') {
-		window.mySkillsCreateRootFiles = message.files as CreateRootFilesStatus;
-		window.dispatchEvent(new CustomEvent<CreateRootFilesStatus>('createSkill.rootFiles.update', {
-			detail: window.mySkillsCreateRootFiles,
-		}));
+		const files = message.files as CreateRootFilesStatus;
+		window.mySkillsCreateRootFiles = files;
+		emitSkillsEvent('createSkill.rootFiles.update', files);
 	}
 	if (message.type === 'createSkill.rootFile.status') {
-		window.dispatchEvent(new CustomEvent('createSkill.rootFile.status', {
-			detail: message,
-		}));
+		// Host messages cross untyped; the one cast lives here at the boundary.
+		emitSkillsEvent('createSkill.rootFile.status', message as CreateSkillEventMap['createSkill.rootFile.status']);
 	}
 	if (message.type === 'createSkill.search.update') {
-		window.dispatchEvent(new CustomEvent('createSkill.search.update', {
-			detail: message,
-		}));
+		emitSkillsEvent('createSkill.search.update', message as Record<string, unknown>);
 	}
 	if (message.type === 'createSkill.design.status') {
-		window.dispatchEvent(new CustomEvent('createSkill.design.status', {
-			detail: message,
-		}));
+		emitSkillsEvent('createSkill.design.status', message as Record<string, unknown>);
 	}
 	if (message.type === 'createSkill.design.returnToLocal') {
 		switchToTab('local-panel');
-		window.dispatchEvent(new CustomEvent('createSkill.design.reset'));
+		emitSkillsEvent('createSkill.design.reset');
 	}
 	if (message.type === 'createSkillResult') {
-		window.dispatchEvent(new CustomEvent('createSkillResult', {
-			detail: message,
-		}));
+		emitSkillsEvent('createSkillResult', message as CreateSkillEventMap['createSkillResult']);
 	}
 	if (message.type === 'localSkills.update' && Array.isArray(message.skills)) {
 		const skills = message.skills as LocalSkill[];
@@ -226,55 +194,55 @@ window.addEventListener('message', event => {
 				}
 			}
 		}
-		window.dispatchEvent(new CustomEvent<CreateSkillExistingFoldersDetail>('createSkill.folders.sync', { detail }));
+		emitSkillsEvent('createSkill.folders.sync', detail);
 	}
 });
 
-window.addEventListener('createSkill.flow.complete', () => {
+onSkillsEvent('createSkill.flow.complete', () => {
 	switchToTab('local-panel');
 });
 
-window.addEventListener('createSkill.chat.typing', event => {
-	if (!(event instanceof CustomEvent) || !event.detail?.query) {
+onSkillsEvent('createSkill.chat.typing', detail => {
+	if (!detail?.query) {
 		return;
 	}
 
 	vscodeApi.postMessage({
 		type: 'createSkill.chat.typing',
-		query: event.detail.query,
+		query: detail.query,
 	});
 });
 
-window.addEventListener('createSkill.search.typing', event => {
-	if (!(event instanceof CustomEvent) || !event.detail?.query) {
+onSkillsEvent('createSkill.search.typing', detail => {
+	if (!detail?.query) {
 		return;
 	}
 
 	vscodeApi.postMessage({
 		type: 'createSkill.search.typing',
-		query: event.detail.query,
+		query: detail.query,
 	});
 });
 
-window.addEventListener('createSkill.skillName.confirm', event => {
-	if (!(event instanceof CustomEvent) || !event.detail?.name) {
+onSkillsEvent('createSkill.skillName.confirm', detail => {
+	if (!detail?.name) {
 		return;
 	}
 
 	vscodeApi.postMessage({
 		type: 'createSkill.fast.nameConfirmed',
-		name: event.detail.name,
+		name: detail.name,
 	});
 });
 
-window.addEventListener('createSkill.category.selected', event => {
-	if (!(event instanceof CustomEvent) || !event.detail?.categoryId) {
+onSkillsEvent('createSkill.category.selected', detail => {
+	if (!detail?.categoryId) {
 		return;
 	}
 
 	vscodeApi.postMessage({
 		type: 'createSkill.fast.techsSelected',
-		categories: [event.detail.categoryId, event.detail.subcategoryId].filter(Boolean),
+		categories: [detail.categoryId, detail.subcategoryId].filter(Boolean),
 	});
 });
 
@@ -282,67 +250,66 @@ createSupportButton?.addEventListener('click', () => {
 	vscodeApi.postMessage({ type: 'createSkill.openSupport' });
 });
 
-window.addEventListener('createSkill.rootFiles.request', () => {
+onSkillsEvent('createSkill.rootFiles.request', () => {
 	vscodeApi.postMessage({ type: 'createSkill.rootFiles.request' });
 });
 
-window.addEventListener('createSkill.rootFile.create', event => {
-	if (!(event instanceof CustomEvent) || !isCreateSkillRootFileCreateDetail(event.detail)) {
+onSkillsEvent('createSkill.rootFile.create', detail => {
+	if (!isCreateSkillRootFileCreateDetail(detail)) {
 		return;
 	}
 
 	vscodeApi.postMessage({
 		type: 'createSkill.rootFile.create',
-		fileName: event.detail.fileName,
+		fileName: detail.fileName,
 	});
 });
 
-window.addEventListener('createSkill.search.request', event => {
-	if (!(event instanceof CustomEvent) || !isCreateSkillSearchRequestDetail(event.detail)) {
+onSkillsEvent('createSkill.search.request', detail => {
+	if (!isCreateSkillSearchRequestDetail(detail)) {
 		return;
 	}
 
 	vscodeApi.postMessage({
 		type: 'createSkill.search.request',
-		query: event.detail.query,
-		requestId: event.detail.requestId,
-		limit: event.detail.limit,
+		query: detail.query,
+		requestId: detail.requestId,
+		limit: detail.limit,
 	});
 });
 
-window.addEventListener('createSkill.search.prefetch', () => {
+onSkillsEvent('createSkill.search.prefetch', () => {
 	vscodeApi.postMessage({ type: 'createSkill.search.prefetch' });
 });
 
-window.addEventListener('createSkill.design.create', event => {
-	if (!(event instanceof CustomEvent) || !isCreateSkillDesignCreateDetail(event.detail)) {
+onSkillsEvent('createSkill.design.create', detail => {
+	if (!isCreateSkillDesignCreateDetail(detail)) {
 		return;
 	}
 
 	vscodeApi.postMessage({
 		type: 'createSkill.design.create',
-		selection: event.detail.selection,
-		overwrite: event.detail.overwrite,
+		selection: detail.selection,
+		overwrite: detail.overwrite,
 	});
 });
 
-window.addEventListener('createSkill.install.request', event => {
-	if (!(event instanceof CustomEvent) || typeof event.detail?.id !== 'string') {
+onSkillsEvent('createSkill.install.request', detail => {
+	if (typeof detail?.id !== 'string') {
 		return;
 	}
 
 	vscodeApi.postMessage({
 		type: 'installSkill.install',
-		id: event.detail.id,
+		id: detail.id,
 	});
 });
 
-window.addEventListener('createSkill.chat.create', event => {
-	if (!(event instanceof CustomEvent) || !event.detail) {
+onSkillsEvent('createSkill.chat.create', detail => {
+	if (!detail) {
 		return;
 	}
 
-	const detail = event.detail as { name?: unknown; query?: unknown; target?: unknown; template?: unknown };
 	if (typeof detail.name === 'string' && typeof detail.query === 'string' && (detail.target === 'agents' || detail.target === 'claude') && typeof detail.template === 'string') {
 		vscodeApi.postMessage({
 			type: 'createSkill.chat.create',
@@ -355,7 +322,7 @@ window.addEventListener('createSkill.chat.create', event => {
 });
 
 
-function isCreateSkillSearchRequestDetail(value: unknown): value is CreateSkillSearchRequestDetail {
+function isCreateSkillSearchRequestDetail(value: unknown): value is CreateSkillEventMap['createSkill.search.request'] {
 	if (!value || typeof value !== 'object') {
 		return false;
 	}
@@ -366,7 +333,7 @@ function isCreateSkillSearchRequestDetail(value: unknown): value is CreateSkillS
 		&& (detail.limit === undefined || typeof detail.limit === 'number');
 }
 
-function isCreateSkillRootFileCreateDetail(value: unknown): value is CreateSkillRootFileCreateDetail {
+function isCreateSkillRootFileCreateDetail(value: unknown): value is CreateSkillEventMap['createSkill.rootFile.create'] {
 	if (!value || typeof value !== 'object') {
 		return false;
 	}
@@ -375,7 +342,7 @@ function isCreateSkillRootFileCreateDetail(value: unknown): value is CreateSkill
 	return detail.fileName === 'AGENTS.md' || detail.fileName === 'CLAUDE.md';
 }
 
-function isCreateSkillDesignCreateDetail(value: unknown): value is CreateSkillDesignCreateDetail {
+function isCreateSkillDesignCreateDetail(value: unknown): value is CreateSkillEventMap['createSkill.design.create'] {
 	if (!value || typeof value !== 'object') {
 		return false;
 	}
