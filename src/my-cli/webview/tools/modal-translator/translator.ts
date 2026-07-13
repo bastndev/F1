@@ -172,7 +172,7 @@ export const mountTranslatorPanel = (host: HTMLElement, context: ToolContext) =>
 		if (!closeBtn) {
 			return;
 		}
-		closeBtn.textContent = isAltPressed ? '−' : 'esc';
+		closeBtn.textContent = isAltPressed ? '——' : 'esc';
 		closeBtn.title = isAltPressed ? 'Minimize' : 'Close (Esc)';
 		closeBtn.setAttribute('aria-label', isAltPressed ? 'Minimize' : 'Close');
 	};
