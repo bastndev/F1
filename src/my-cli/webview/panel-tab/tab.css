@@ -1174,12 +1174,12 @@
 	margin: auto;
 	display: none;
 }
-.cli-voice-pill.is-speaking .cli-voice-toggle:hover .cli-voice-pause,
-.cli-voice-pill.is-speaking .cli-voice-toggle:focus-visible .cli-voice-pause {
+.cli-voice-pill.is-speaking:not(.is-alt-held) .cli-voice-toggle:hover .cli-voice-pause,
+.cli-voice-pill.is-speaking:not(.is-alt-held) .cli-voice-toggle:focus-visible .cli-voice-pause {
 	display: block;
 }
-.cli-voice-pill.is-speaking .cli-voice-toggle:hover .cli-voice-spectrum,
-.cli-voice-pill.is-speaking .cli-voice-toggle:focus-visible .cli-voice-spectrum {
+.cli-voice-pill.is-speaking:not(.is-alt-held) .cli-voice-toggle:hover .cli-voice-spectrum,
+.cli-voice-pill.is-speaking:not(.is-alt-held) .cli-voice-toggle:focus-visible .cli-voice-spectrum {
 	opacity: 0;
 }
 

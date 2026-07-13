@@ -102,6 +102,17 @@ export const createVoiceBridge = (deps: VoiceBridgeDeps) => {
 				stopSpeech();
 			}
 		});
+		document.addEventListener('keydown', (event) => {
+			if (event.key === 'Alt') {
+				pill.classList.add('is-alt-held');
+			}
+		});
+		document.addEventListener('keyup', (event) => {
+			if (event.key === 'Alt') {
+				pill.classList.remove('is-alt-held');
+			}
+		});
+		window.addEventListener('blur', () => pill.classList.remove('is-alt-held'));
 		pill.addEventListener('click', (event) => {
 			if (!event.altKey || event.button !== 0) {
 				return;
