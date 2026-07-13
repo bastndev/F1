@@ -101,7 +101,7 @@ const renderBusyUsage = (host: HTMLElement, animate = false) => {
 	renderUsageMessage(
 		host,
 		'<coding />',
-		'This CLI is working — press Refresh once the task finishes.',
+		'The AI is working — press Refresh once the task finishes.',
 		{ empty: true, working: true, animate }
 	);
 };
