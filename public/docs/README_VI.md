@@ -94,16 +94,16 @@ F1 biến VS Code thành trung tâm cho các agent lập trình AI. Mở **Claud
 - Trình khởi chạy tìm kiếm mờ để chọn agent; nhấn **F1** để nhảy thẳng đến bảng điều khiển.
 - Công cụ đi kèm sẵn có trong mỗi phiên:
   -   - **Prompt** — trình soạn thảo phong phú với đề cập file `@`, dán hình ảnh, chip skill, đánh dấu chính tả thời gian thực, lịch sử prompt (`↑`), các chế độ **PRO / PLAN**, và dịch nguồn→English trước khi gửi; mỗi phiên CLI giữ bản nháp riêng và trạng thái mở/đóng.
-  - **Dịch thuật** — dịch bất kỳ lựa chọn terminal nào trực tiếp, với chế độ tự động đọc to câu trả lời trong khi phần còn lại đang dịch.
+  - **Trình dịch** — dịch bất kỳ vùng chọn nào trong terminal ngay tại chỗ, với chế độ tự động đọc to câu trả lời trong khi phần còn lại vẫn đang được dịch; thu nhỏ để giữ điều khiển phát lại trong tiêu đề CLI.
   - **Sử dụng** — chế độ xem sử dụng / trạng thái theo từng CLI.
   - **Bảng phím tắt** — tham khảo phím tắt bàn phím.
   - **Lệnh** — bảng lệnh có thể tìm kiếm, theo từng CLI, của các lệnh gạch chéo của agent đang hoạt động.
-- - **Giọng nói** — đọc to câu trả lời, cộng thêm âm "ding" khi agent hoàn thành và một tín hiệu xác nhận riêng biệt khi CLI đang chờ quyết định (phê duyệt, có/không, lựa chọn).
+- **Giọng nói** — đọc to các câu trả lời với điều khiển tạm dừng, tiếp tục và dừng liên tục, cộng với âm thanh "ding" khi một tác nhân hoàn thành và tín hiệu xác nhận riêng biệt khi CLI đang chờ quyết định (phê duyệt, c/k, lựa chọn).
 - - **Needs-input badge** — một dấu chấm nhấp nháy bên cạnh tên tab (huy hiệu chỉ biểu tượng trong bố cục gọn) đánh dấu bất kỳ phiên nền nào đang chờ bạn.
 
 ### 🧩 My Skills
 
-- Cài đặt skill từ marketplace — **All‑time**, **Trending (24h)**, **🔥 Flame**, và **Official**.
+- Cài đặt kỹ năng từ marketplace — nguồn **All‑time**, **Trending (24h)**, **🔥 Flame** và **Official** — với tải xuống có thể hủy và tiến trình cài đặt.
 - Tạo skill với trình tạo hướng dẫn cho `AGENTS.md`, `CLAUDE.md`, và `DESIGN.md`, cùng template nhanh theo danh mục.
 - Quản lý skill địa phương và đã lưu theo từng workspace.
 

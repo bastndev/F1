@@ -94,16 +94,16 @@ F1 transforme VS Code en un centre pour les agents de codage IA. Ouvrez **Claude
 - Lanceur de recherche floue pour choisir un agent ; appuyez sur **F1** pour accéder directement au panneau.
 - Outils intégrés disponibles dans chaque session :
   -   - **Prompt** — éditeur riche avec mentions de fichiers `@`, collage d'images, puces de compétences, marquage d'orthographe en direct, historique des prompts (`↑`), modes **PRO / PLAN**, et traduction source→anglais avant l'envoi ; chaque session CLI conserve son propre brouillon et son état ouvert/fermé.
-  - **Traducteur** — traduit n'importe quelle sélection du terminal en ligne, avec un mode automatique qui lit la réponse à voix haute pendant que le reste est encore en cours de traduction.
+  - **Traducteur** — traduit toute sélection du terminal en ligne, avec un mode automatique qui lit la réponse à voix haute pendant que le reste est encore en cours de traduction ; réduisez-le pour conserver les commandes de lecture dans l'en-tête du CLI.
   - **Utilisation** — vue d'utilisation / statut par CLI.
   - **Keymaps** — référence des raccourcis clavier.
   - **Commands** — palette consultable des slash-commands de l'agent actif, par CLI.
-- - **Voix** — lit les réponses à voix haute, plus un « ding » lorsqu'un agent termine et un signal de confirmation distinct lorsqu'un CLI attend une décision (approbation, oui/non, choix).
+- **Voix** — lit les réponses à voix haute avec des commandes persistantes de pause, de reprise et d'arrêt, plus un « ding » quand un agent termine et une confirmation sonore distincte quand un CLI attend une décision (approbation, o/n, choix).
 - - **Needs-input badge** — un point pulsant à côté du nom de l'onglet (un badge à icône uniquement dans la disposition compacte) signale toute session en arrière-plan qui vous attend.
 
 ### 🧩 My Skills
 
-- Installez des skills depuis le marketplace — sources **Tout temps**, **En vogue (24h)**, **🔥 Flame** et **Officielles**.
+- Installez des compétences depuis le marketplace — sources **All‑time**, **Trending (24h)**, **🔥 Flame** et **Official** — avec téléchargement annulable et progression d'installation.
 - Créez des skills avec des générateurs guidés pour `AGENTS.md`, `CLAUDE.md` et `DESIGN.md`, ainsi que des modèles rapides par catégorie.
 - Gérez les skills locaux et sauvegardés par espace de travail.
 
