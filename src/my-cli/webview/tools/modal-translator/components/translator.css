@@ -191,6 +191,9 @@
   text-transform: lowercase;
   opacity: 0.6;
   transition: all 0.15s;
+  width: 34px;
+  text-align: center;
+  box-sizing: border-box;
 }
 .translator-close-btn:hover {
   opacity: 1;
