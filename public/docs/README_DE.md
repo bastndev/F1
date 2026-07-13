@@ -94,16 +94,16 @@ F1 verwandelt VS Code in ein Zentrum für AI-Coding-Agenten. Öffne **Claude Cod
 - Fuzzy-Suche-Launcher zur Agentenauswahl; drücke **F1**, um direkt zum Panel zu springen.
 - Integrierte Werkzeuge neben jeder Sitzung:
   -   - **Prompt** — Rich-Text-Editor mit `@`-Datei-Erwähnungen, Bild-Einfügung, Skill-Chips, Live-Rechtschreibmarkierung, Prompt-Verlauf (`↑`), **PRO / PLAN**-Modi und Quelle→Englisch-Übersetzung vor dem Senden; jede CLI-Sitzung behält ihren eigenen Entwurf und den offenen/geschlossenen Zustand.
-  - **Translator** — Übersetze jede Terminal-Auswahl inline, mit einem automatischen Modus, der die Antwort laut vorliest, während der Rest noch übersetzt wird.
+  - **Übersetzer** — übersetze jede Terminalauswahl direkt inline, mit einem Auto-Modus der die Antwort vorliest, während der Rest noch übersetzt wird; verkleinern, um Wiedergabesteuerung im CLI-Header zu behalten.
   - **Use** — CLI-spezifische Nutzung-/Status-Ansicht.
   - **Keymaps** — Tastaturkürzel-Referenz.
   - **Commands** — durchsuchbare, CLI-spezifische Palette der Slash-Befehle des aktiven Agenten.
-- - **Voice** — Antworten laut vorlesen, plus ein "Ding", wenn ein Agent fertig ist, und ein deutliches Bestätigungssignal, wenn eine CLI auf eine Entscheidung wartet (Genehmigung, ja/nein, Auswahl).
+- **Stimme** — lese Antworten laut vor mit dauerhaften Pause-, Fortsetzen- und Stopp-Steuerelementen, plus einem "Ding" wenn ein Agent fertig ist und einem deutlichen Bestätigungston wenn ein CLI auf eine Entscheidung wartet (Genehmigung, j/n, Auswahl).
 - - **Needs-input badge** — ein pulsierender Punkt neben dem Tab-Namen (ein nur-Symbol-Abzeichen im kompakten Layout) markiert Hintergrundsitzungen, die auf dich warten.
 
 ### 🧩 My Skills
 
-- Installiere Skills aus dem Marketplace — **All-time**, **Trending (24h)**, **🔥 Flame** und **Official**-Quellen.
+- Installiere Skills aus dem Marketplace — **All‑time**, **Trending (24h)**, **🔥 Flame** und **Offizielle** Quellen — mit abbrechbarem Download und Installationsfortschritt.
 - Erstelle Skills mit geführten Generatoren für `AGENTS.md`, `CLAUDE.md` und `DESIGN.md`, plus schnelle Vorlagen nach Kategorie.
 - Verwalte lokale und gespeicherte Skills pro Workspace.
 

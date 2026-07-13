@@ -971,6 +971,31 @@
 		cursor: pointer;
 	}
 
+	.agent-session-list.is-alt-close-mode .agent-session-item.is-active .agent-session-icon-frame {
+		border-color: color-mix(in srgb, #ef4444 58%, var(--vscode-sideBar-background));
+		background: color-mix(in srgb, #ef4444 12%, var(--vscode-input-background, rgba(128, 128, 128, 0.08)));
+	}
+
+	.agent-session-list.is-alt-close-mode .agent-session-item.is-active .agent-session-icon-image {
+		opacity: 0.28;
+		transform: scale(0.82);
+	}
+
+	.agent-session-list.is-alt-close-mode .agent-session-item.is-active .agent-session-icon-frame::before {
+		content: 'x';
+		position: absolute;
+		inset: 0;
+		z-index: 3;
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		color: #fecaca;
+		font-size: 18px;
+		font-weight: 700;
+		line-height: 1;
+		text-shadow: 0 1px 4px rgba(0, 0, 0, 0.42);
+	}
+
 	.agent-session-list.is-alt-close-mode .agent-session-item:hover .agent-session-icon-frame {
 		border-color: #ef4444;
 		background: color-mix(in srgb, #ef4444 20%, var(--vscode-input-background, rgba(128, 128, 128, 0.08)));
@@ -1141,6 +1166,21 @@
 }
 .cli-voice-pill.is-paused .cli-voice-play {
 	display: block;
+}
+
+.cli-voice-pause {
+	position: absolute;
+	inset: 0;
+	margin: auto;
+	display: none;
+}
+.cli-voice-pill.is-speaking:not(.is-alt-held) .cli-voice-toggle:hover .cli-voice-pause,
+.cli-voice-pill.is-speaking:not(.is-alt-held) .cli-voice-toggle:focus-visible .cli-voice-pause {
+	display: block;
+}
+.cli-voice-pill.is-speaking:not(.is-alt-held) .cli-voice-toggle:hover .cli-voice-spectrum,
+.cli-voice-pill.is-speaking:not(.is-alt-held) .cli-voice-toggle:focus-visible .cli-voice-spectrum {
+	opacity: 0;
 }
 
 .cli-voice-spectrum {

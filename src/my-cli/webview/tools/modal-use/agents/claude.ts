@@ -1,9 +1,13 @@
 /**
- * Claude usage adapter — command: /usage · policy: always (tolerates a
- * usage request in any session state).
+ * Claude usage adapter — command: /usage · policy: idle-only.
  */
 import { stripAnsi, parsePercent, formatPercent } from '../usage-utils';
 import type { ParsedUsage } from '../usage-types';
+
+// Claude can show /usage mid-task, but it interrupts the active run visually and
+// may steal focus from the current response. Treat thinking screens as busy.
+export const isClaudeBusy = (screenText: string): boolean =>
+	/(?:✻\s*)?thinking(?:…|\.{3})|esc to interrupt/i.test(screenText);
 
 const getSection = (text: string, start: RegExp, end: RegExp) => {
 	const startMatch = start.exec(text);

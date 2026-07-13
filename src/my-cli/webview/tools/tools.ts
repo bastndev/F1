@@ -18,6 +18,7 @@ export type CliUsageSnapshot = {
 
 export type ToolContext = {
 	close: () => void;
+	minimize: () => void;
 	getActiveSessionId?: () => string | undefined;
 	getActiveSessionCreatedAt?: () => number | undefined;
 	getActiveModelName?: () => string | undefined;
@@ -49,6 +50,7 @@ export type ToolContext = {
 	resumeSpeech?: () => void;
 	stopSpeech?: () => void;
 	queryVoiceState?: () => void;
+	getVoiceSnapshot?: () => { state: VoiceState; progress?: VoiceProgress };
 	onVoiceState?: (listener: (state: VoiceState, message?: string, progress?: VoiceProgress) => void) => () => void;
 	refocusTerminal?: () => void;
 	refocusCli?: () => void;
@@ -56,7 +58,7 @@ export type ToolContext = {
 
 type ToolCleanup = () => void;
 type ToolMount = (host: HTMLElement, context: ToolContext) => void | ToolCleanup;
-export type ToolsControllerOptions = { container: HTMLElement; onToolChange?: (tool: ToolId | null) => void } & Omit<ToolContext, 'close'>;
+export type ToolsControllerOptions = { container: HTMLElement; onToolChange?: (tool: ToolId | null) => void } & Omit<ToolContext, 'close' | 'minimize'>;
 
 const modalId = 'cli-tools-modal';
 
@@ -104,6 +106,7 @@ export const createToolsController = ({
 	resumeSpeech,
 	stopSpeech,
 	queryVoiceState,
+	getVoiceSnapshot,
 	onVoiceState,
 	refocusTerminal,
 	refocusCli,
@@ -212,9 +215,15 @@ export const createToolsController = ({
 				close();
 			}
 		};
+		const minimizeOwnModal = () => {
+			if (activeModal === modal) {
+				close({ keepVoice: true });
+			}
+		};
 
 		const cleanup = toolMounts[tool](host, {
 			close: closeOwnModal,
+			minimize: minimizeOwnModal,
 			getActiveSessionId,
 			getActiveSessionCreatedAt,
 			getActiveModelName,
@@ -242,6 +251,7 @@ export const createToolsController = ({
 			resumeSpeech,
 			stopSpeech,
 			queryVoiceState,
+			getVoiceSnapshot,
 			onVoiceState,
 			refocusTerminal,
 			refocusCli

@@ -8,7 +8,7 @@
 import type { CliUsageSnapshot } from '../../tools';
 import type { ParsedUsage, UsageAgentKind } from '../usage-types';
 import { isAntigravityBusy, parseAntigravityUsage } from './antigravity';
-import { parseClaudeUsage } from './claude';
+import { isClaudeBusy, parseClaudeUsage } from './claude';
 import { codexUsageIsInline, isCodexBusy, parseCodexUsage } from './codex';
 import { isKiroBusy, parseKiroUsage } from './kiro';
 
@@ -18,10 +18,13 @@ import { isKiroBusy, parseKiroUsage } from './kiro';
 export const USAGE_BUSY_ERROR = 'usage-busy';
 
 // Whether the active CLI can't accept its usage command right now because it
-// is mid-task. Only "idle-only" agents (currently Kiro) report busy; every
-// other CLI is always ready, so this returns false for them.
+// is mid-task. Usage commands are guarded per supported agent to avoid
+// interrupting an active response.
 export const isUsageAgentBusy = (agentLabel: string, screenText: string): boolean => {
 	const kind = getUsageAgentKind(agentLabel);
+	if (kind === 'claude') {
+		return isClaudeBusy(screenText);
+	}
 	if (kind === 'kiro') {
 		return isKiroBusy(screenText);
 	}

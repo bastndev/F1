@@ -167,11 +167,52 @@ export const mountTranslatorPanel = (host: HTMLElement, context: ToolContext) =>
 	host.replaceChildren(template.content.cloneNode(true));
 
 	const closeBtn = host.querySelector<HTMLButtonElement>('#closeTranslatorBtn');
-	if (closeBtn) {
-		closeBtn.addEventListener('click', () => context.close());
-	}
+	let isAltPressed = false;
+	const updateCloseAction = () => {
+		if (!closeBtn) {
+			return;
+		}
+		closeBtn.textContent = isAltPressed ? '——' : 'esc';
+		closeBtn.title = isAltPressed ? 'Minimize' : 'Close (Esc)';
+		closeBtn.setAttribute('aria-label', isAltPressed ? 'Minimize' : 'Close');
+	};
+	const handleAltDown = (event: KeyboardEvent) => {
+		if (event.key === 'Alt') {
+			isAltPressed = true;
+			updateCloseAction();
+		}
+	};
+	const handleAltUp = (event: KeyboardEvent) => {
+		if (event.key === 'Alt') {
+			isAltPressed = false;
+			updateCloseAction();
+		}
+	};
+	const resetAlt = () => {
+		isAltPressed = false;
+		updateCloseAction();
+	};
+	const handleCloseClick = (event: MouseEvent) => {
+		if (event.altKey || isAltPressed) {
+			context.minimize();
+			return;
+		}
+		context.close();
+	};
 
-	return initializeTranslator(host, context);
+	closeBtn?.addEventListener('click', handleCloseClick);
+	document.addEventListener('keydown', handleAltDown);
+	document.addEventListener('keyup', handleAltUp);
+	window.addEventListener('blur', resetAlt);
+
+	const disposeTranslator = initializeTranslator(host, context);
+	return () => {
+		closeBtn?.removeEventListener('click', handleCloseClick);
+		document.removeEventListener('keydown', handleAltDown);
+		document.removeEventListener('keyup', handleAltUp);
+		window.removeEventListener('blur', resetAlt);
+		disposeTranslator?.();
+	};
 };
 
 function initializeTranslator(host: HTMLElement, context: ToolContext) {
@@ -301,6 +342,18 @@ function initializeTranslator(host: HTMLElement, context: ToolContext) {
 	// Memoize voice chunks against the rendered HTML so Listen doesn't rebuild
 	// the same chunk list every time.
 	let voiceChunksSource = '';
+	const rebuildVoiceChunksIfNeeded = () => {
+		if (!textEl) {
+			return;
+		}
+		const source = textEl.innerHTML;
+		if (activeVoiceChunks.length > 0 && voiceChunksSource === source) {
+			return;
+		}
+		voiceChunksSource = source;
+		clearVoiceHighlights(activeVoiceChunks);
+		activeVoiceChunks = buildVoiceChunks(textEl);
+	};
 
 	// Auto-read: when "auto" is on, start reading as soon as a translation is
 	// shown (no Listen press). Wired once the voice control is set up below; the
@@ -322,16 +375,19 @@ function initializeTranslator(host: HTMLElement, context: ToolContext) {
 		if (speakBtn) {
 			speakBtn.disabled = false;
 		}
+		context.queryVoiceState?.();
 	};
 
-	const performTranslation = async () => {
+	const performTranslation = async (options: { preserveVoice?: boolean } = {}) => {
 		// A new translation replaces whatever was being read aloud; stop the old
 		// playback so a new answer doesn't talk over the previous one.
-		context.stopSpeech?.();
+		if (!options.preserveVoice) {
+			context.stopSpeech?.();
+		}
 		// Cancel any pending voice scroll from a previous read.
 		cancelVoiceScroll();
 		// A new translation re-arms auto-read (the previous result was its own).
-		autoReadConsumed = false;
+		autoReadConsumed = options.preserveVoice === true;
 		// Invalidate any cached voice chunks — the rendered text is about to change.
 		voiceChunksSource = '';
 		// Bump the generation so any previous in-flight translation knows it was
@@ -530,7 +586,7 @@ function initializeTranslator(host: HTMLElement, context: ToolContext) {
 		// Stream the reading only in auto mode (and only if the host supports it).
 		// reset:true on the first append supersedes any prior playback, so a quick
 		// re-translate can't splice a new answer onto the old one.
-		const streamVoice = autoTranslate && typeof context.appendSpeech === 'function';
+		const streamVoice = autoTranslate && !options.preserveVoice && typeof context.appendSpeech === 'function';
 		const voicePipeline = streamVoice ? createVoiceStreamPipeline() : undefined;
 
 		// Staged-block reveal + smooth body grow for this run (stream-render.ts).
@@ -813,6 +869,10 @@ function initializeTranslator(host: HTMLElement, context: ToolContext) {
 	const autoToggle = host.querySelector<HTMLButtonElement>('#autoTranslateToggle');
 	const autoStorageKey = 'f1-translator-auto';
 	let autoTranslate = localStorage.getItem(autoStorageKey) === '1';
+	const initialVoiceSnapshot = context.getVoiceSnapshot?.();
+	const preserveExistingVoice = initialVoiceSnapshot?.state === 'speaking'
+		|| initialVoiceSnapshot?.state === 'paused'
+		|| initialVoiceSnapshot?.state === 'preparing';
 
 	const applyAutoState = () => {
 		autoToggle?.setAttribute('aria-pressed', String(autoTranslate));
@@ -824,7 +884,7 @@ function initializeTranslator(host: HTMLElement, context: ToolContext) {
 
 	// Opening already in auto mode with source text present → translate now.
 	if (autoTranslate && extracted) {
-		void performTranslation();
+		void performTranslation({ preserveVoice: preserveExistingVoice });
 	}
 
 	autoToggle?.addEventListener('click', () => {
@@ -910,6 +970,9 @@ function initializeTranslator(host: HTMLElement, context: ToolContext) {
 			}
 
 			if ((isPreparingVoice || isSpeaking || isPaused) && progress) {
+				if (hasResult) {
+					rebuildVoiceChunksIfNeeded();
+				}
 				setActiveVoiceChunk(activeVoiceChunks, progress.chunkIndex);
 				if (progress.chunkCount > 1) {
 					const progressLabel = `voice ${progress.chunkIndex + 1}/${progress.chunkCount}`;
@@ -930,6 +993,9 @@ function initializeTranslator(host: HTMLElement, context: ToolContext) {
 		};
 
 		disposeVoiceState = context.onVoiceState?.(applyVoiceState);
+		if (initialVoiceSnapshot) {
+			applyVoiceState(initialVoiceSnapshot.state, undefined, initialVoiceSnapshot.progress);
+		}
 		// Playback may still be running from a previous open — resync.
 		context.queryVoiceState?.();
 
@@ -944,19 +1010,6 @@ function initializeTranslator(host: HTMLElement, context: ToolContext) {
 		// pause if speaking, otherwise start reading the current translation. The
 		// preparing / no-result guards let the keyboard path respect the same
 		// constraints the disabled button already enforces for clicks.
-		const rebuildVoiceChunksIfNeeded = () => {
-			if (!textEl) {
-				return;
-			}
-			const source = textEl.innerHTML;
-			if (activeVoiceChunks.length > 0 && voiceChunksSource === source) {
-				return;
-			}
-			voiceChunksSource = source;
-			clearVoiceHighlights(activeVoiceChunks);
-			activeVoiceChunks = buildVoiceChunks(textEl);
-		};
-
 		const toggleSpeak = () => {
 			if (isPreparingVoice) {
 				return;

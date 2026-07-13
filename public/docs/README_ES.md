@@ -94,16 +94,16 @@ F1 convierte VS Code en un centro para agentes de programación con IA. Abre **C
 - Lanzador de búsqueda difusa para seleccionar un agente; presiona **F1** para saltar directamente al panel.
 - Herramientas integradas junto a cada sesión:
   -   - **Prompt** — editor avanzado con menciones de archivos con `@`, pegado de imágenes, chips de skills, marcado ortográfico en vivo, historial de prompts (`↑`), modos **PRO / PLAN** y traducción de origen→inglés antes de enviar; cada sesión CLI mantiene su propio borrador y estado abierto/cerrado.
-  - **Translator** — traduce cualquier selección del terminal en línea, con un modo automático que lee la respuesta en voz alta mientras el resto sigue traduciéndose.
+  - **Traductor** — traduce cualquier selección del terminal en línea, con un modo automático que lee la respuesta en voz alta mientras el resto sigue traduciendo; minimízalo para mantener los controles de reproducción en el encabezado del CLI.
   - **Use** — vista de uso/estado por CLI.
   - **Keymaps** — referencia de atajos de teclado.
   - **Commands** — paleta buscable de comandos con barra del agente activo, por CLI.
-- - **Voice** — lee las respuestas en voz alta, más un "ding" cuando un agente termina y una señal de confirmación distinta cuando una CLI espera una decisión (aprobación, sí/no, elección).
+- **Voz** — lee respuestas en voz alta con controles persistentes de pausa, reanudar y detener, más un "ding" cuando un agente termina y una señal de confirmación diferenciada cuando un CLI espera una decisión (aprobación, s/n, elección).
 - - **Needs-input badge** — un punto pulsante junto al nombre de la pestaña (una insignia solo de icono en el diseño compacto) marca cualquier sesión en segundo plano que te está esperando.
 
 ### 🧩 My Skills
 
-- Instala skills del marketplace — fuentes **All-time**, **Trending (24h)**, **🔥 Flame** y **Official**.
+- Instala habilidades del marketplace — fuentes **All‑time**, **Trending (24h)**, **🔥 Flame** y **Official** — con descarga cancelable y progreso de instalación.
 - Crea skills con generadores guiados para `AGENTS.md`, `CLAUDE.md` y `DESIGN.md`, más plantillas rápidas por categoría.
 - Administra skills locales y guardadas por espacio de trabajo.
 

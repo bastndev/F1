@@ -47,6 +47,7 @@ function createAgentsMarkdown(context: AgentsClaudeWorkspaceContext): string {
 		isStaticSite ? [] : createTestingAndLaunchSection(context),
 		...createInstructionFilesSection(context),
 		createConventionsSection(context),
+		createCommentStyleSection(),
 		createCaveatsSection(context),
 		createUnusedFilesSection(context),
 		...createBoundariesSection(context),
@@ -88,6 +89,7 @@ function createClaudeMarkdown(context: AgentsClaudeWorkspaceContext): string {
 		isStaticSite ? [] : createRuntimeAssetsSection(context),
 		isStaticSite ? [] : createTestingAndLaunchSection(context),
 		createConventionsSection(context),
+		createCommentStyleSection(),
 		createCaveatsSection(context),
 		createUnusedFilesSection(context),
 		...createBoundariesSection(context),
@@ -504,6 +506,17 @@ function createConventionsSection(context: AgentsClaudeWorkspaceContext): string
 		'## Key Conventions',
 		'',
 		...lines,
+		'',
+	];
+}
+
+function createCommentStyleSection(): string[] {
+	return [
+		'## Comment style',
+		'',
+		'- Never place comments on the first two lines of a source file; start with imports or declarations.',
+		'- Prefer concise section headings such as `// ── Constants ──` or a three-line banner for major sections so files remain easy to scan.',
+		'- Use JSDoc blocks only when an API, intent, edge case, or constraint needs explanation; do not restate the code.',
 		'',
 	];
 }

@@ -94,16 +94,16 @@ O F1 transforma o VS Code em um hub para agentes de programação com IA. Abra *
 - Launcher com busca difusa para escolher um agente; pressione **F1** para ir direto ao painel.
 - Ferramentas integradas em cada sessão:
   -   - **Prompt** — editor avançado com menções `@`-arquivo, colagem de imagens, chips de skill, marcação ortográfica em tempo real, histórico de prompts (`↑`), modos **PRO / PLAN** e tradução fonte→inglês antes de enviar; cada sessão CLI mantém seu próprio rascunho e estado aberto/fechado.
-  - **Tradutor** — traduz qualquer seleção do terminal inline, com um modo automático que lê a resposta em voz alta enquanto o resto ainda está sendo traduzido.
+  - **Tradutor** — traduz qualquer seleção do terminal de forma inline, com um modo automático que lê a resposta em voz alta enquanto o restante ainda está sendo traduzido; minimize-o para manter os controles de reprodução no cabeçalho do CLI.
   - **Uso** — visualização de uso/status por CLI.
   - **Keymaps** — referência de atalhos de teclado.
   - **Comandos** — paleta pesquisável, por CLI, dos comandos de barra do agente ativo.
-- - **Voz** — lê respostas em voz alta, além de um "ding" quando um agente termina e um sinal de confirmação distinto quando um CLI está aguardando uma decisão (aprovação, sim/não, escolha).
+- **Voz** — lê respostas em voz alta com controles persistentes de pausa, retomar e parar, mais um "ding" quando um agente termina e um sinal de confirmação distinto quando um CLI aguarda uma decisão (aprovação, s/n, escolha).
 - - **Needs-input badge** — um ponto pulsante ao lado do nome da aba (um selo apenas de ícone no layout compacto) sinaliza qualquer sessão em segundo plano que está esperando por você.
 
 ### 🧩 My Skills
 
-- Instale skills da marketplace — fontes **Todos os tempos**, **Em alta (24h)**, **🔥 Flame** e **Oficiais**.
+- Instale habilidades do marketplace — fontes **All‑time**, **Trending (24h)**, **🔥 Flame** e **Official** — com download cancelável e progresso de instalação.
 - Crie skills com geradores guiados para `AGENTS.md`, `CLAUDE.md` e `DESIGN.md`, além de templates rápidos por categoria.
 - Gerencie skills locais e salvas por workspace.
 

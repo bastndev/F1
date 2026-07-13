@@ -1,4 +1,4 @@
 {
   "displayName": "F1 [AI] composer",
-  "description": "一体化 AI CLI 中心：一个快捷键即可启动、切换和管理 Claude Code、Codex、Copilot、Cursor、Kiro、Kilo Code、OpenCode、Grok、Antigravity 或任何自定义编码智能体——在您的 IDE 中并排运行。通过 @-文件引用、图片、自动翻译和语音功能编写更好的提示词。安装智能体技能、追踪使用情况，并为每个 CLI 预加载项目记忆，让它从一开始就了解您的代码库。"
+  "description": "AI 编程所需的一切：CLI 中心、技能、内存，以及更多... 雨"
 }

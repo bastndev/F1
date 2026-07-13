@@ -219,7 +219,8 @@ const rpc = createHostRpcChannels(message => vscode.postMessage(message));
 const voice = createVoiceBridge({
 	post: message => vscode.postMessage(message),
 	// Read lazily on each apply — the tools controller is created further down.
-	getOpenTool: () => toolsController?.getOpenTool() ?? null
+	getOpenTool: () => toolsController?.getOpenTool() ?? null,
+	openTranslator: () => toolsController?.open('translate')
 });
 
 const openPromptFromTerminal = (sessionId: string) => {
@@ -389,6 +390,7 @@ const toolsController = layoutRight
 			resumeSpeech: voice.resumeSpeech,
 			stopSpeech: voice.stopSpeech,
 			queryVoiceState: voice.queryVoiceState,
+			getVoiceSnapshot: voice.getSnapshot,
 			onVoiceState: voice.onVoiceState,
 			getTerminalSelection: () => {
 				const view = activeSessionId ? terminals.get(activeSessionId) : undefined;
