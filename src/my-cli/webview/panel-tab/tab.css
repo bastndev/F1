@@ -1168,6 +1168,21 @@
 	display: block;
 }
 
+.cli-voice-pause {
+	position: absolute;
+	inset: 0;
+	margin: auto;
+	display: none;
+}
+.cli-voice-pill.is-speaking .cli-voice-toggle:hover .cli-voice-pause,
+.cli-voice-pill.is-speaking .cli-voice-toggle:focus-visible .cli-voice-pause {
+	display: block;
+}
+.cli-voice-pill.is-speaking .cli-voice-toggle:hover .cli-voice-spectrum,
+.cli-voice-pill.is-speaking .cli-voice-toggle:focus-visible .cli-voice-spectrum {
+	opacity: 0;
+}
+
 .cli-voice-spectrum {
 	position: absolute;
 	inset: 0;
