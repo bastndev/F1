@@ -1,4 +1,4 @@
 {
   "displayName": "F1 [AI] composer",
-  "description": "オールインワン AI CLI ハブ：ホットキー1つで Claude Code、Codex、Copilot、Cursor、Kiro、Kilo Code、OpenCode、Grok、Antigravity、またはカスタムコーディングエージェントを起動・切替・管理 — IDE 内で並べて使用可能。@-ファイル参照、画像、自動翻訳、音声を活用してより良いプロンプトを作成。エージェントスキルをインストールし、使用状況を追跡し、すべての CLI にプロジェクトのメモリを事前に読み込ませて、最初からコードベースを把握した状態で開始。"
+  "description": "AIコーディングに必要なすべて：CLIハブ、スキル、メモリ、そしてさらに... 雨"
 }
