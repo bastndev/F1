@@ -50,6 +50,7 @@ export type ToolContext = {
 	resumeSpeech?: () => void;
 	stopSpeech?: () => void;
 	queryVoiceState?: () => void;
+	getVoiceSnapshot?: () => { state: VoiceState; progress?: VoiceProgress };
 	onVoiceState?: (listener: (state: VoiceState, message?: string, progress?: VoiceProgress) => void) => () => void;
 	refocusTerminal?: () => void;
 	refocusCli?: () => void;
@@ -105,6 +106,7 @@ export const createToolsController = ({
 	resumeSpeech,
 	stopSpeech,
 	queryVoiceState,
+	getVoiceSnapshot,
 	onVoiceState,
 	refocusTerminal,
 	refocusCli,
@@ -249,6 +251,7 @@ export const createToolsController = ({
 			resumeSpeech,
 			stopSpeech,
 			queryVoiceState,
+			getVoiceSnapshot,
 			onVoiceState,
 			refocusTerminal,
 			refocusCli

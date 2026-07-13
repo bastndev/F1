@@ -14,12 +14,15 @@ export interface VoiceBridgeDeps {
 	post(message: WebviewToHostMessage): void;
 	/** Which tool modal is open right now — the header pill hides while the voice modals own the controls. */
 	getOpenTool(): ToolId | null;
+	openTranslator(): void;
 }
 
 export type VoiceBridge = ReturnType<typeof createVoiceBridge>;
 
 export const createVoiceBridge = (deps: VoiceBridgeDeps) => {
 	let voiceStateListener: ((state: VoiceState, message?: string, progress?: VoiceProgress) => void) | undefined;
+	let currentState: VoiceState = 'idle';
+	let currentProgress: VoiceProgress | undefined;
 
 	const speakText = (text: string, options?: { chunks?: string[]; lang?: string }) => {
 		deps.post({ type: 'voice.speak', text, chunks: options?.chunks, lang: options?.lang });
@@ -99,6 +102,14 @@ export const createVoiceBridge = (deps: VoiceBridgeDeps) => {
 				stopSpeech();
 			}
 		});
+		pill.addEventListener('click', (event) => {
+			if (!event.altKey || event.button !== 0) {
+				return;
+			}
+			event.preventDefault();
+			event.stopPropagation();
+			deps.openTranslator();
+		}, true);
 
 		return { apply };
 	})();
@@ -111,9 +122,13 @@ export const createVoiceBridge = (deps: VoiceBridgeDeps) => {
 
 	/** Broadcast voice.state from the host: fan out to the modal listener + header pill. */
 	const notifyState = (state: VoiceState, message?: string, progress?: VoiceProgress) => {
+		currentState = state;
+		currentProgress = progress;
 		voiceStateListener?.(state, message, progress);
 		headerVoice?.apply(state);
 	};
+
+	const getSnapshot = () => ({ state: currentState, progress: currentProgress });
 
 	/** Re-evaluate the header pill's visibility (e.g. after a tool modal opens/closes). */
 	const applyHeader = () => {
@@ -129,6 +144,7 @@ export const createVoiceBridge = (deps: VoiceBridgeDeps) => {
 		queryVoiceState,
 		onVoiceState,
 		notifyState,
+		getSnapshot,
 		applyHeader
 	};
 };
