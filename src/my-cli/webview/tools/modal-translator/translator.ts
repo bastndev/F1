@@ -167,11 +167,52 @@ export const mountTranslatorPanel = (host: HTMLElement, context: ToolContext) =>
 	host.replaceChildren(template.content.cloneNode(true));
 
 	const closeBtn = host.querySelector<HTMLButtonElement>('#closeTranslatorBtn');
-	if (closeBtn) {
-		closeBtn.addEventListener('click', () => context.close());
-	}
+	let isAltPressed = false;
+	const updateCloseAction = () => {
+		if (!closeBtn) {
+			return;
+		}
+		closeBtn.textContent = isAltPressed ? '−' : 'esc';
+		closeBtn.title = isAltPressed ? 'Minimize' : 'Close (Esc)';
+		closeBtn.setAttribute('aria-label', isAltPressed ? 'Minimize' : 'Close');
+	};
+	const handleAltDown = (event: KeyboardEvent) => {
+		if (event.key === 'Alt') {
+			isAltPressed = true;
+			updateCloseAction();
+		}
+	};
+	const handleAltUp = (event: KeyboardEvent) => {
+		if (event.key === 'Alt') {
+			isAltPressed = false;
+			updateCloseAction();
+		}
+	};
+	const resetAlt = () => {
+		isAltPressed = false;
+		updateCloseAction();
+	};
+	const handleCloseClick = (event: MouseEvent) => {
+		if (event.altKey || isAltPressed) {
+			context.minimize();
+			return;
+		}
+		context.close();
+	};
 
-	return initializeTranslator(host, context);
+	closeBtn?.addEventListener('click', handleCloseClick);
+	document.addEventListener('keydown', handleAltDown);
+	document.addEventListener('keyup', handleAltUp);
+	window.addEventListener('blur', resetAlt);
+
+	const disposeTranslator = initializeTranslator(host, context);
+	return () => {
+		closeBtn?.removeEventListener('click', handleCloseClick);
+		document.removeEventListener('keydown', handleAltDown);
+		document.removeEventListener('keyup', handleAltUp);
+		window.removeEventListener('blur', resetAlt);
+		disposeTranslator?.();
+	};
 };
 
 function initializeTranslator(host: HTMLElement, context: ToolContext) {
