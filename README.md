@@ -78,6 +78,8 @@ F1 turns VS Code into a hub for AI coding agents. Open **Claude Code, Codex, Cop
 
 ## 🚀 Getting started
 
+CLI Hub requires a standalone Node.js executable available in the editor's `PATH`, in addition to the agents you want to run. After installing or changing Node, restart the editor. For a custom Node location, set `CLIHUB_NODE_PATH` to the executable before starting the editor.
+
 1. Press **`F1`** to open the **CLI Hub** panel.
 2. Pick an agent from the launcher (or **Custom CLI** to run your own command).
 3. Open **My Skills** from the activity bar (**`Ctrl+3`**) to install or create skills.

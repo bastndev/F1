@@ -415,6 +415,9 @@ export class MyCliViewProvider implements vscode.WebviewViewProvider, vscode.Dis
 	 */
 	private async _autoInjectRules(sessionId: string) {
 		await this.sessionManager.waitForFirstIdle(sessionId);
+		if (!this.sessionManager.isRunning(sessionId)) {
+			return;
+		}
 
 		const text = buildRulesPrompt();
 		const marker = RULES_MARKER;
@@ -450,9 +453,23 @@ export class MyCliViewProvider implements vscode.WebviewViewProvider, vscode.Dis
 		const isCancelled = () => record?.cancelled === true;
 
 		// Wait until the graph is built AND the CLI is booted + idle.
-		const [hasGraph] = await Promise.all([graphReady, this.sessionManager.waitForFirstIdle(sessionId)]);
+		const cliReady = this.sessionManager.waitForFirstIdle(sessionId).then(() => {
+			if (!this.sessionManager.isRunning(sessionId)) {
+				record?.graphController.abort();
+			}
+		});
+		const [hasGraph] = await Promise.all([graphReady, cliReady]);
 		if (isCancelled()) {
 			return; // cancelled while booting — _cancelSmartSession owns the teardown
+		}
+		if (!this.sessionManager.isRunning(sessionId)) {
+			record?.graphController.abort();
+			this._smartSessions.delete(sessionId);
+			if (this._smartSessions.size === 0) {
+				this.smartService.cleanup(root);
+				void this._activeWebview?.postMessage({ type: 'smart.dismiss' });
+			}
+			return;
 		}
 
 		// Write the rules, then type one prompt so the agent reads the rules + graph.

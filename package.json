@@ -2,7 +2,7 @@
   "name": "f1",
   "displayName": "%displayName%",
   "description": "%description%",
-  "version": "2.2.0",
+  "version": "2.2.1",
   "publisher": "bastndev",
   "license": "MIT",
   "engines": {
@@ -71,11 +71,9 @@
   "sponsor": {
     "url": "https://github.com/sponsors/bastndev"
   },
-
   "l10n": "./l10n",
   "activationEvents": [],
   "main": "./dist/extension.js",
-
   "contributes": {
     "commands": [
       {
@@ -157,13 +155,15 @@
     }
   },
   "scripts": {
-    "vscode:prepublish": "npm run compile",
-    "compile": "npm run check-types && npm run lint && node esbuild.js",
+    "vscode:prepublish": "bun run compile && bun run check-native && bun run test:terminal",
+    "compile": "bun run check-types && bun run lint && node esbuild.js",
     "watch": "npm-run-all -p watch:*",
     "watch:esbuild": "node esbuild.js --watch",
     "watch:tsc": "tsc --noEmit --watch --project tsconfig.json",
     "check-types": "tsc --noEmit",
-    "lint": "eslint src"
+    "lint": "eslint src",
+    "check-native": "node scripts/check-native.cjs",
+    "test:terminal": "node --test scripts/terminal-runtime.test.cjs"
   },
   "devDependencies": {
     "@types/node": "26.1.1",
@@ -173,7 +173,7 @@
     "esbuild": "^0.25.0",
     "eslint": "^9.21.0",
     "npm-run-all": "^4.1.5",
-    "typescript": "^7.0.2",
+    "typescript": "6.0.3",
     "typescript-eslint": "^8.32.1"
   },
   "dependencies": {

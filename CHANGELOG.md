@@ -24,6 +24,13 @@ Following VS Code best practices, F1 uses semantic versioning for all releases.
 <!-- --- -->
 
 ---
+## [2.2.1] - 2026-10-26
+- **Fix**: Stop terminal IPC traffic and timers after a failed or disconnected PTY host, preventing repeated channel-closed errors.
+- **Fix**: Show the original native loader failure and the Node runtime used by CLI Hub.
+- **Build**: Verify native terminal input/output and reject Linux binaries linked to a build machine's `libnode.so` before packaging.
+- **Build**: Pin TypeScript to a version supported by typescript-eslint so release validation completes.
+
+---
 ## [2.2.0] - 2026-07-13
 - **Correction**: And better chat 
 

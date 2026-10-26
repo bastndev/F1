@@ -40,6 +40,9 @@ public/**
 .prettierignore
 bun.lock
 esbuild.js
+scripts/**
+NATIVE_RELEASE.md
+.github/**
 **/eslint.config.mjs
 **/tsconfig.json
 
