@@ -4,6 +4,7 @@ import {
     clamp,
     hash3,
     KOI_NODES,
+    TAU,
     smoothstep,
     type Box,
     type Koi,
@@ -14,6 +15,9 @@ export type Rgb = [number, number, number];
 
 // How visible a koi stays while it swims under page content.
 const DIM_UNDER_CONTENT = 0.08;
+const RIPPLE_LIFE = 2.2;
+const MAX_RIPPLES = 3;
+type Ripple = { x: number; y: number; born: number };
 
 interface Palette {
     /** Page background, which tiles are mixed toward. */
@@ -182,6 +186,7 @@ export class KoiRenderer {
     private occupied = new Uint32Array(0);
     private occupiedCount = 0;
     private sortedKoi: Koi[] = [];
+    private ripples: Ripple[] = [];
 
     private spine = new Float32Array(KOI_NODES * 2);
     private arc = new Float32Array(KOI_NODES);
@@ -210,6 +215,15 @@ export class KoiRenderer {
     setTheme(isLight: boolean, background: Rgb) {
         this.palette = { ...(isLight ? LIGHT : DARK), bg: background };
         this.styles.clear();
+    }
+
+    addRipple(x: number, y: number, time: number) {
+        if (this.ripples.length === MAX_RIPPLES) { this.ripples.shift(); }
+        this.ripples.push({ x, y, born: time });
+    }
+
+    clearRipples() {
+        this.ripples.length = 0;
     }
 
     resize(width: number, height: number, dpr: number) {
@@ -278,9 +292,43 @@ export class KoiRenderer {
         ctx.textAlign = "center";
         ctx.textBaseline = "middle";
 
+        this.drawRipples(world.time);
         this.drawCells();
         ctx.globalAlpha = 1;
         if (this.styles.size > 2048) { this.styles.clear(); }
+    }
+
+    /** Sample only each ring's circumference; no water grid or extra animation loop. */
+    private drawRipples(time: number) {
+        if (this.ripples.length === 0) { return; }
+        const { ctx, cols, rows, cw, ch, cellGlyph, cellDim } = this;
+        ctx.fillStyle = this.style(packRgb(this.palette.white));
+        let alive = 0;
+        for (const ripple of this.ripples) {
+            const age = time - ripple.born;
+            if (age >= RIPPLE_LIFE) { continue; }
+            this.ripples[alive++] = ripple;
+            const fade = (1 - age / RIPPLE_LIFE) ** 2;
+            for (let ring = 0; ring < 2; ring++) {
+                const ringAge = age - ring * 0.18;
+                if (ringAge <= 0) { continue; }
+                const radius = ringAge * 90;
+                const alpha = fade * (ring === 0 ? 0.5 : 0.28);
+                if (alpha < 0.01) { continue; }
+                const samples = clamp(Math.ceil(TAU * radius / cw), 12, 128);
+                for (let n = 0; n < samples; n++) {
+                    const angle = n / samples * TAU;
+                    const c = Math.floor((ripple.x + Math.cos(angle) * radius) / cw);
+                    const r = Math.floor((ripple.y + Math.sin(angle) * radius) / ch);
+                    if (c < 0 || r < 0 || c >= cols || r >= rows) { continue; }
+                    const i = r * cols + c;
+                    if (cellGlyph[i]) { continue; }
+                    ctx.globalAlpha = alpha * cellDim[i];
+                    ctx.fillText(ring === 0 ? "o" : ".", c * cw + cw / 2, r * ch + ch / 2 + 1);
+                }
+            }
+        }
+        this.ripples.length = alive;
     }
 
     private style(rgb: number) {

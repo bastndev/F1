@@ -24,6 +24,7 @@ class LauncherBackground {
 	private width = 0;
 	private height = 0;
 	private dpr = 0;
+	private lastRippleTime = -Infinity;
 
 	constructor(private readonly canvas: HTMLCanvasElement, private readonly foreground: HTMLElement) {
 		this.renderer = new KoiRenderer(canvas);
@@ -36,6 +37,7 @@ class LauncherBackground {
 		window.addEventListener('message', this.onHostMessage);
 		window.addEventListener('pagehide', this.destroy);
 		window.addEventListener('resize', this.invalidateLayout);
+		window.addEventListener('click', this.onEmptyClick, { passive: true });
 		this.updateTheme();
 	}
 
@@ -88,6 +90,9 @@ class LauncherBackground {
 	private schedule = () => {
 		cancelAnimationFrame(this.raf);
 		this.raf = 0;
+		if (!this.hostVisible || document.hidden || this.highContrast || this.reducedMotion.matches) {
+			this.renderer.clearRipples();
+		}
 		if (this.disposed || !this.hostVisible || document.hidden || this.highContrast) { return; }
 		this.accumulator = 0;
 		this.previousFrame = performance.now();
@@ -126,6 +131,22 @@ class LauncherBackground {
 		this.schedule();
 	};
 
+	private onEmptyClick = (event: MouseEvent) => {
+		if (this.disposed || !this.hostVisible || document.hidden || this.highContrast || this.reducedMotion.matches
+			|| event.button !== 0 || event.detail === 0 || event.defaultPrevented || window.getSelection()?.toString()) { return; }
+		// The dispatch path survives controls being replaced during their own click handlers.
+		if (event.composedPath().some(element => element === this.foreground
+			|| element instanceof Element && element.matches('a, button, input, textarea, select, label, [role="button"], [contenteditable], .workspace-path'))) { return; }
+		const now = performance.now();
+		if (now - this.lastRippleTime < 120) { return; }
+		const bounds = this.canvas.getBoundingClientRect();
+		const x = event.clientX - bounds.left;
+		const y = event.clientY - bounds.top;
+		if (x < 0 || y < 0 || x >= bounds.width || y >= bounds.height) { return; }
+		this.lastRippleTime = now;
+		this.renderer.addRipple(x, y, this.world.time);
+	};
+
 	private destroy = () => {
 		this.disposed = true;
 		cancelAnimationFrame(this.raf);
@@ -136,6 +157,7 @@ class LauncherBackground {
 		window.removeEventListener('message', this.onHostMessage);
 		window.removeEventListener('pagehide', this.destroy);
 		window.removeEventListener('resize', this.invalidateLayout);
+		window.removeEventListener('click', this.onEmptyClick);
 	};
 }
 
