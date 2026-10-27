@@ -25,6 +25,8 @@ interface Palette {
     white: Rgb;
     red: Rgb;
     black: Rgb;
+    gray: Rgb;
+    yellow: Rgb;
     fin: Rgb;
     eye: Rgb;
     alpha: number;
@@ -43,6 +45,8 @@ const DARK: Palette = {
     white: [236, 228, 218],
     red: [232, 96, 56],
     black: [92, 90, 108],
+    gray: [172, 182, 193],
+    yellow: [244, 198, 55],
     fin: [214, 206, 198],
     eye: [20, 20, 26],
     alpha: 0.8,
@@ -65,6 +69,8 @@ const LIGHT: Palette = {
     white: [112, 108, 104],
     red: [204, 62, 28],
     black: [36, 33, 40],
+    gray: [88, 101, 117],
+    yellow: [204, 154, 28],
     fin: [138, 132, 126],
     eye: [24, 22, 26],
     alpha: 0.9,
@@ -397,6 +403,11 @@ export class KoiRenderer {
     /** Skin colour for a body point, from the koi's own markings pinned to body coordinates. */
     private skin(k: Koi, s: number, v: number, across: number): Rgb {
         const p = this.palette;
+        if (k.variety === "gray-yellow") {
+            // Two body-anchored gold markings keep this variant inexpensive to shade.
+            const gold = (s > 0.06 && s < 0.28 && across < 0.85) || (s > 0.44 && s < 0.66 && across < 0.7);
+            return gold ? p.yellow : p.gray;
+        }
         const vn = v / k.length;
         // Belly edges and the tail stalk stay white on every variety, which frames the markings.
         if (across > 0.9 || s > 0.74) { return p.white; }
@@ -421,6 +432,7 @@ export class KoiRenderer {
         const { spine, arc, cw, ch, cols, rows, cellGlyph, cellColor, cellAlpha, cellTile, cellTileAlpha, palette } =
             this;
         const L = k.length;
+        const fin = k.variety === "gray-yellow" ? palette.gray : palette.fin;
         const nodes = k.nodes;
         // The body only undulates while the tail is beating; coasting koi hold almost straight.
         const swim = 0.2 + 1.1 * k.beat;
@@ -541,14 +553,14 @@ export class KoiRenderer {
                 const solid = centerHit && coverage >= 0.6;
 
                 let glyph = " ";
-                let rgb: Rgb = palette.fin;
+                let rgb: Rgb = fin;
                 let alpha = dim;
                 let tile: Rgb | null = null;
                 let tileAlpha = 0;
                 if (flag === FLAG_BARBEL) {
                     // Drawn along the whisker: forward from the mouth and angled out to its side.
                     glyph = lineGlyph(-tx - side * ty * 0.7, -ty + side * tx * 0.7);
-                    rgb = shade(mix(palette.bg, palette.fin, 0.9), palette.ink + 0.3);
+                    rgb = shade(mix(palette.bg, fin, 0.9), palette.ink + 0.3);
                 } else if (flag === FLAG_EYE && solid) {
                     tile = mix(palette.bg, palette.eye, 0.85);
                     tileAlpha = dim;
@@ -556,7 +568,7 @@ export class KoiRenderer {
                     rgb = mix(palette.bg, palette.white, 0.9);
                 } else if (flag === FLAG_FIN) {
                     // Fins are a pale veil of tiles flecked with dots, so they never compete with the body.
-                    tile = mix(palette.bg, palette.fin, 0.55);
+                    tile = mix(palette.bg, fin, 0.55);
                     tileAlpha = dim * 0.45 * coverage;
                     if (key % 2 === 0) {
                         glyph = ".";

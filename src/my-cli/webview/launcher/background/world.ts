@@ -26,7 +26,7 @@ export function hash3(x: number, y: number, z: number) {
 }
 
 export type Box = { left: number; top: number; right: number; bottom: number };
-type Variety = 'kohaku' | 'sanke' | 'tancho';
+type Variety = 'kohaku' | 'sanke' | 'tancho' | 'gray-yellow';
 
 export interface Koi {
 	id: number;
@@ -59,7 +59,7 @@ export class World {
 		const previousHeight = this.height;
 		this.width = width;
 		this.height = height;
-		const count = clamp(Math.round(width * height / 300000), 2, 5);
+		const count = 3;
 		const baseLength = clamp(Math.min(width, height) * 0.46, 125, 340);
 		for (const fish of this.koi) {
 			// Preserve the school through panel resizes, including its body proportions.
@@ -77,10 +77,10 @@ export class World {
 		while (this.koi.length < count) {
 			const id = this.koi.length + 1;
 			const length = baseLength * this.size(id);
-			const heading = rand(0, TAU);
+			const heading = id === 3 ? rand(-0.25, 0.25) : rand(0, TAU);
 			// Start around the perimeter, leaving the launcher readable from the first frame.
-			const x = width * (id % 2 ? rand(0.08, 0.26) : rand(0.74, 0.92));
-			const y = height * (id % 2 ? rand(0.12, 0.32) : rand(0.68, 0.88));
+			const x = width * (id === 3 ? rand(0.55, 0.75) : id % 2 ? rand(0.08, 0.26) : rand(0.74, 0.92));
+			const y = height * (id === 3 ? rand(0.1, 0.18) : id % 2 ? rand(0.12, 0.32) : rand(0.68, 0.88));
 			const nodes = new Float32Array(KOI_NODES * 2);
 			for (let n = 0; n < KOI_NODES; n++) {
 				const distance = length * n / (KOI_NODES - 1);
@@ -88,7 +88,7 @@ export class World {
 				nodes[n * 2 + 1] = y - Math.sin(heading) * distance;
 			}
 			this.koi.push({
-				id, variety: id % 3 === 0 ? 'tancho' : id % 2 ? 'kohaku' : 'sanke', length, nodes,
+				id, variety: id === 3 ? 'gray-yellow' : id % 2 ? 'kohaku' : 'sanke', length, nodes,
 				heading, speed: 20, phase: rand(0, TAU), turn: 0, wander: 0,
 				depth: rand(0.6, 1), depthTarget: rand(0.6, 1), nextDive: this.time + rand(6, 18),
 				beat: 0.5, burstUntil: this.time + 1, nextBurst: this.time + rand(2, 4), finPhase: rand(0, TAU)
@@ -102,6 +102,8 @@ export class World {
 	}
 
 	private size(id: number) {
+		if (id === 2) { return 0.95; }
+		if (id === 3) { return 0.5; }
 		return 0.72 + hash3(id, 1, 5) * 0.28;
 	}
 
