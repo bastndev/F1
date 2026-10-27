@@ -89,6 +89,41 @@ body {
 }
 
 /* CLI Hub */
+.launcher-background {
+	position: fixed;
+	inset: 0;
+	z-index: 0;
+	overflow: hidden;
+	pointer-events: none;
+	contain: strict;
+	background-image:
+		linear-gradient(color-mix(in srgb, var(--text-color) 3%, transparent) 1px, transparent 1px),
+		linear-gradient(90deg, color-mix(in srgb, var(--text-color) 3%, transparent) 1px, transparent 1px);
+	background-size: 10px 12px;
+}
+
+.launcher-background canvas {
+	display: block;
+	width: 100%;
+	height: 100%;
+	opacity: 0.72;
+}
+
+#launcher-view {
+	position: relative;
+	z-index: 1;
+}
+
+.launcher-background ~ .cli-tutorial-button,
+.launcher-background ~ .workspace-path {
+	z-index: 1;
+}
+
+.vscode-high-contrast .launcher-background,
+.vscode-high-contrast-light .launcher-background {
+	display: none;
+}
+
 .container {
 	display: flex;
 	flex-direction: column;

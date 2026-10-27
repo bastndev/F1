@@ -23,6 +23,8 @@ type CliSession = Omit<CliSessionSnapshot, 'buffer'> & {
 	cols: number;
 	rows: number;
 	started?: boolean;
+	pendingResize?: boolean;
+	startupTimer?: ReturnType<typeof setTimeout>;
 	closing?: boolean;
 	/** Set on submit; cleared when the response settles (drives Voice Finish). */
 	awaitingResponse?: boolean;
@@ -48,6 +50,7 @@ type CliSession = Omit<CliSessionSnapshot, 'buffer'> & {
 type MyCliMessageResult = 'closed-last-session' | undefined;
 
 const maxBufferLength = 240000;
+const ptyStartupTimeoutMs = 10000;
 
 // How long the CLI output must stay quiet after a submission before we call the
 // response "finished". TUI CLIs stream spinner frames while thinking, so this
@@ -253,13 +256,17 @@ export class CliSessionManager implements vscode.Disposable {
 	}
 
 	private startPtyHost(session: CliSession, command: string, args: string[]) {
-		const host = childProcess.spawn(process.env.CLIHUB_NODE_PATH || 'node', [getPtyHostPath()], {
+		const runtime = process.env.CLIHUB_NODE_PATH || 'node';
+		const host = childProcess.spawn(runtime, [getPtyHostPath()], {
 			cwd: session.cwd,
 			env: getProcessEnv(),
 			stdio: ['ignore', 'pipe', 'pipe', 'ipc']
 		});
 
 		session.process = host;
+		session.startupTimer = setTimeout(() => {
+			this.markSessionError(session, `The terminal engine did not become ready within 10 seconds (runtime: ${runtime}). Check Node.js and the F1 installation, then restart your editor.`);
+		}, ptyStartupTimeoutMs);
 		host.stdout?.on('data', (chunk) => {
 			this.appendSessionOutput(session, chunk.toString());
 		});
@@ -270,7 +277,10 @@ export class CliSessionManager implements vscode.Disposable {
 			this.handleInboundPtyHostEvent(session, message);
 		});
 		host.on('error', (error) => {
-			this.markSessionError(session, `Could not start PTY host: ${error.message}`);
+			this.markSessionError(session, `Could not start terminal runtime "${runtime}": ${error.message}. Check Node.js in the editor's PATH or set CLIHUB_NODE_PATH to its executable, then restart your editor.`);
+		});
+		host.on('disconnect', () => {
+			this.markSessionError(session, 'The terminal engine disconnected unexpectedly. Close this session and start a new one.');
 		});
 		host.on('exit', (code, signal) => {
 			if (!this.sessions.has(session.id) || session.closing) {
@@ -294,12 +304,19 @@ export class CliSessionManager implements vscode.Disposable {
 	}
 
 	private handleInboundPtyHostEvent(session: CliSession, message: InboundPtyHostEvent) {
-		if (!this.sessions.has(session.id)) {
+		if (!this.sessions.has(session.id) || session.status !== 'running' || session.closing) {
 			return;
 		}
 
 		if (message.type === 'ready') {
 			session.started = true;
+			clearTimeout(session.startupTimer);
+			session.startupTimer = undefined;
+			// A webview may resize while the native module is still loading.
+			if (session.pendingResize) {
+				session.pendingResize = false;
+				this.sendPtyHostCommand(session, { type: 'resize', cols: session.cols, rows: session.rows });
+			}
 			return;
 		}
 
@@ -310,13 +327,13 @@ export class CliSessionManager implements vscode.Disposable {
 
 		if (message.type === 'exit') {
 			const exitCode = message.exitCode ?? 0;
+			const onResponseDone = session.onResponseDone;
 			session.status = 'exited';
 			session.exitCode = exitCode;
-			this.setAwaitingInput(session, false, true);
-			session.idleResolve?.();
-			session.idleResolve = undefined;
+			this.clearSessionActivity(session);
 			this.appendSessionOutput(session, `\r\n\x1b[90mCLI Hub: ${session.label} exited with code ${exitCode}\x1b[0m\r\n`);
 			this.postState();
+			onResponseDone?.();
 			return;
 		}
 
@@ -467,9 +484,16 @@ export class CliSessionManager implements vscode.Disposable {
 				return;
 			}
 			let settled = false;
+			let fallbackTimer: ReturnType<typeof setTimeout> | undefined;
 			const done = () => {
 				if (!settled) {
 					settled = true;
+					clearTimeout(fallbackTimer);
+					if (session.idleResolve === done) {
+						session.idleResolve = undefined;
+						clearTimeout(session.idleTimer);
+						session.idleTimer = undefined;
+					}
 					resolve();
 				}
 			};
@@ -477,7 +501,7 @@ export class CliSessionManager implements vscode.Disposable {
 			if (!session.awaitingFirstOutput) {
 				this.armIdle(session);
 			}
-			setTimeout(done, 20000);
+			fallbackTimer = setTimeout(done, 20000);
 		});
 	}
 
@@ -567,15 +591,35 @@ export class CliSessionManager implements vscode.Disposable {
 		return !!session && session.buffer.includes(needle);
 	}
 
+	private clearSessionActivity(session: CliSession) {
+		clearTimeout(session.startupTimer);
+		clearTimeout(session.idleTimer);
+		clearTimeout(session.responseSettleTimer);
+		session.startupTimer = undefined;
+		session.idleTimer = undefined;
+		session.responseSettleTimer = undefined;
+		session.started = false;
+		session.pendingResize = false;
+		session.awaitingResponse = false;
+		session.onResponseDone = undefined;
+		this.setAwaitingInput(session, false, true);
+		this.stopConfirmationReminder(session);
+		session.idleResolve?.();
+		session.idleResolve = undefined;
+	}
+
 	private markSessionError(session: CliSession, message: string) {
-		if (!this.sessions.has(session.id)) {
+		if (!this.sessions.has(session.id) || session.status !== 'running' || session.closing) {
 			return;
 		}
 
 		session.status = 'error';
-		this.setAwaitingInput(session, false, true);
-		session.idleResolve?.();
-		session.idleResolve = undefined;
+		this.clearSessionActivity(session);
+		try {
+			session.process?.kill();
+		} catch {
+			// A failed engine may already be gone or inaccessible.
+		}
 		this.appendSessionOutput(session, `\r\n\x1b[31m${message}\x1b[0m\r\n`);
 		this.postState();
 	}
@@ -616,7 +660,7 @@ export class CliSessionManager implements vscode.Disposable {
 				break;
 			case 'cli.awaitingInput': {
 				const session = message.sessionId ? this.sessions.get(message.sessionId) : undefined;
-				if (session) {
+				if (session && session.status === 'running' && !session.closing) {
 					this.setAwaitingInput(session, message.awaiting === true, message.silent === true);
 				}
 				break;
@@ -683,7 +727,29 @@ export class CliSessionManager implements vscode.Disposable {
 	}
 
 	private sendPtyHostCommand(session: CliSession, command: PtyHostCommand) {
-		session.process?.send?.(command);
+		const host = session.process;
+		if (!host || (command.type !== 'kill' && (session.status !== 'running' || session.closing))) {
+			return;
+		}
+		const fail = (error: Error) => {
+			this.markSessionError(session, `Could not communicate with the terminal engine: ${error.message}`);
+		};
+		if (!host.connected || host.killed || host.exitCode !== null || host.signalCode !== null) {
+			fail(new Error('The terminal engine is no longer connected.'));
+			return;
+		}
+		if (!session.started && (command.type === 'input' || command.type === 'resize')) {
+			return;
+		}
+		try {
+			host.send(command, (error: Error | null) => {
+				if (error) {
+					fail(error);
+				}
+			});
+		} catch (error) {
+			fail(error instanceof Error ? error : new Error(String(error)));
+		}
 	}
 
 	private switchSession(sessionId: string) {
@@ -712,6 +778,10 @@ export class CliSessionManager implements vscode.Disposable {
 
 		session.cols = Math.max(2, Math.floor(cols));
 		session.rows = Math.max(1, Math.floor(rows));
+		if (!session.started) {
+			session.pendingResize = true;
+			return;
+		}
 		this.sendPtyHostCommand(session, { type: 'resize', cols: session.cols, rows: session.rows });
 	}
 
@@ -739,21 +809,7 @@ export class CliSessionManager implements vscode.Disposable {
 
 	private disposeSession(session: CliSession) {
 		session.closing = true;
-		this.stopConfirmationReminder(session);
-		session.awaitingInput = false;
-
-		if (session.responseSettleTimer) {
-			clearTimeout(session.responseSettleTimer);
-			session.responseSettleTimer = undefined;
-		}
-		session.awaitingResponse = false;
-		if (session.idleTimer) {
-			clearTimeout(session.idleTimer);
-			session.idleTimer = undefined;
-		}
-		session.idleResolve?.();
-		session.idleResolve = undefined;
-		session.onResponseDone = undefined;
+		this.clearSessionActivity(session);
 
 		try {
 			this.sendPtyHostCommand(session, { type: 'kill' });

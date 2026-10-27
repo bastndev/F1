@@ -5,17 +5,13 @@
 .vscodeignore
 .yarnrc
 
-# Exclude src/ except runtime assets loaded via extensionUri — negations required or panels render blank.
+# Keep concrete runtime asset types. Negating directories would re-include their TypeScript sources in VSCE.
 src/**
-!src/shared/
-!src/shared/**/
 !src/shared/**/*.html
 !src/shared/**/*.css
 !src/shared/**/*.svg
 !src/shared/**/*.png
 !src/shared/**/*.webp
-!src/my-skills/
-!src/my-skills/**/
 !src/my-skills/**/*.html
 !src/my-skills/**/*.css
 !src/my-skills/**/*.svg
@@ -40,6 +36,9 @@ public/**
 .prettierignore
 bun.lock
 esbuild.js
+scripts/**
+NATIVE_RELEASE.md
+.github/**
 **/eslint.config.mjs
 **/tsconfig.json
 

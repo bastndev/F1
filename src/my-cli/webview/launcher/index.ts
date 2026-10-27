@@ -1,5 +1,6 @@
 import { getAgentSlug as resolveAgentSlug } from '../../shared/agents';
 import { matchAgentShortcut } from '../../../shared/keymaps/cli';
+import { mountLauncherBackground } from './background';
 
 type VsCodeApi = {
 	getState: () => unknown;
@@ -531,3 +532,5 @@ const scheduleCycle = () => {
 	}, 3800);
 };
 scheduleCycle();
+
+mountLauncherBackground();
